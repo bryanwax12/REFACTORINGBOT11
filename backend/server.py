@@ -408,7 +408,7 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await update.message.reply_text(
-        """Шаг 4/11: Штат отправителя (2 буквы)
+        """Шаг 5/13: Штат отправителя (2 буквы)
 Например: CA""",
         reply_markup=reply_markup
     )
@@ -421,7 +421,7 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await update.message.reply_text(
-        """Шаг 5/11: ZIP код отправителя
+        """Шаг 6/13: ZIP код отправителя
 Например: 94117""",
         reply_markup=reply_markup
     )
@@ -436,7 +436,7 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         """✅ Адрес отправителя сохранен
 
-Шаг 6/11: Имя получателя
+Шаг 7/13: Имя получателя
 Например: Jane Doe""",
         reply_markup=reply_markup
     )
