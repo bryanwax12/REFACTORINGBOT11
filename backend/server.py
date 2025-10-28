@@ -1508,6 +1508,122 @@ async def get_users():
     users = await db.users.find({}, {"_id": 0}).to_list(100)
     return users
 
+@api_router.get("/users/{telegram_id}/details")
+async def get_user_details(telegram_id: int):
+    try:
+        # Get user
+        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Get user orders
+        orders = await db.orders.find(
+            {"telegram_id": telegram_id},
+            {"_id": 0}
+        ).sort("created_at", -1).to_list(100)
+        
+        # Get user payments
+        payments = await db.payments.find(
+            {"telegram_id": telegram_id},
+            {"_id": 0}
+        ).sort("created_at", -1).to_list(100)
+        
+        # Get shipping labels for user orders
+        order_ids = [order['id'] for order in orders]
+        labels = await db.shipping_labels.find(
+            {"order_id": {"$in": order_ids}},
+            {"_id": 0}
+        ).to_list(100)
+        
+        # Calculate stats
+        total_orders = len(orders)
+        paid_orders = len([o for o in orders if o.get('payment_status') == 'paid'])
+        total_spent = sum([o.get('amount', 0) for o in orders if o.get('payment_status') == 'paid'])
+        
+        # Calculate rating based on activity
+        rating_score = 0
+        rating_score += paid_orders * 10  # 10 points per paid order
+        rating_score += total_spent * 0.5  # 0.5 points per dollar spent
+        
+        if paid_orders >= 10:
+            rating_level = "🏆 VIP"
+        elif paid_orders >= 5:
+            rating_level = "⭐ Gold"
+        elif paid_orders >= 2:
+            rating_level = "🥈 Silver"
+        elif paid_orders >= 1:
+            rating_level = "🥉 Bronze"
+        else:
+            rating_level = "🆕 New"
+        
+        return {
+            "user": user,
+            "orders": orders,
+            "payments": payments,
+            "labels": labels,
+            "stats": {
+                "total_orders": total_orders,
+                "paid_orders": paid_orders,
+                "pending_orders": total_orders - paid_orders,
+                "total_spent": total_spent,
+                "rating_score": rating_score,
+                "rating_level": rating_level,
+                "average_order_value": total_spent / paid_orders if paid_orders > 0 else 0
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/users/leaderboard")
+async def get_leaderboard():
+    try:
+        users = await db.users.find({}, {"_id": 0}).to_list(1000)
+        
+        leaderboard = []
+        for user in users:
+            orders = await db.orders.find(
+                {"telegram_id": user['telegram_id'], "payment_status": "paid"},
+                {"_id": 0}
+            ).to_list(100)
+            
+            total_orders = len(orders)
+            total_spent = sum([o.get('amount', 0) for o in orders])
+            
+            rating_score = 0
+            rating_score += total_orders * 10
+            rating_score += total_spent * 0.5
+            
+            if total_orders >= 10:
+                rating_level = "🏆 VIP"
+            elif total_orders >= 5:
+                rating_level = "⭐ Gold"
+            elif total_orders >= 2:
+                rating_level = "🥈 Silver"
+            elif total_orders >= 1:
+                rating_level = "🥉 Bronze"
+            else:
+                rating_level = "🆕 New"
+            
+            leaderboard.append({
+                "telegram_id": user['telegram_id'],
+                "first_name": user.get('first_name', 'Unknown'),
+                "username": user.get('username'),
+                "total_orders": total_orders,
+                "total_spent": total_spent,
+                "rating_score": rating_score,
+                "rating_level": rating_level,
+                "balance": user.get('balance', 0)
+            })
+        
+        # Sort by rating score
+        leaderboard.sort(key=lambda x: x['rating_score'], reverse=True)
+        
+        return leaderboard
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.post("/users/{telegram_id}/balance/add")
 async def add_balance(telegram_id: int, amount: float):
     try:
