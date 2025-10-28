@@ -842,6 +842,30 @@ async def startup_event():
             logger.info("Initializing Telegram Bot...")
             application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
             
+            # Conversation handler for order creation
+            order_conv_handler = ConversationHandler(
+                entry_points=[CallbackQueryHandler(new_order_start, pattern='^new_order$')],
+                states={
+                    AMOUNT: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_amount)],
+                    FROM_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_name)],
+                    FROM_ADDRESS: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_address)],
+                    FROM_CITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_city)],
+                    FROM_STATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_state)],
+                    FROM_ZIP: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_zip)],
+                    TO_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_name)],
+                    TO_ADDRESS: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_address)],
+                    TO_CITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_city)],
+                    TO_STATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_state)],
+                    TO_ZIP: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_zip)],
+                    CONFIRM: [CallbackQueryHandler(confirm_order, pattern='^(confirm_order|cancel_order)$')]
+                },
+                fallbacks=[
+                    CallbackQueryHandler(cancel_order, pattern='^cancel_order$'),
+                    CommandHandler('start', start_command)
+                ]
+            )
+            
+            application.add_handler(order_conv_handler)
             application.add_handler(CommandHandler("start", start_command))
             application.add_handler(CommandHandler("help", help_command))
             application.add_handler(CommandHandler("my_orders", my_orders_command))
