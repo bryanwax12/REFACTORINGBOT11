@@ -783,6 +783,7 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
         
         try:
             import requests
+            import asyncio
             
             data = context.user_data
             
@@ -792,22 +793,7 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
                 'Content-Type': 'application/json'
             }
             
-            # Don't use carrier_accounts parameter - let GoShippo return all available rates
-            # carrier_accounts = []
-            # try:
-            #     acc_response = requests.get('https://api.goshippo.com/carrier_accounts/', headers=headers)
-            #     if acc_response.status_code == 200:
-            #         accounts_data = acc_response.json()
-            #         if 'results' in accounts_data:
-            #             carrier_accounts = [
-            #                 acc['object_id'] for acc in accounts_data['results']
-            #                 if acc.get('active') and acc.get('test')
-            #             ]
-            #             logger.info(f"Found {len(carrier_accounts)} active carrier accounts")
-            # except Exception as e:
-            #     logger.warning(f"Could not fetch carrier accounts: {e}")
-            
-            # Create shipment to get rates
+            # Create shipment data
             shipment_data = {
                 'address_from': {
                     'name': data['from_name'],
@@ -842,26 +828,52 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
             if data.get('to_street2'):
                 shipment_data['address_to']['street2'] = data['to_street2']
             
-            # Don't add carrier_accounts - let GoShippo auto-detect
-            # if carrier_accounts:
-            #     shipment_data['carrier_accounts'] = carrier_accounts
+            # Try multiple times to get rates (UPS sometimes doesn't return on first try)
+            max_attempts = 3
+            all_rates = []
             
-            shipment_response = requests.post(
-                'https://api.goshippo.com/shipments/',
-                headers=headers,
-                json=shipment_data
-            )
+            for attempt in range(max_attempts):
+                if attempt > 0:
+                    logger.info(f"Retry attempt {attempt + 1} to get carrier rates")
+                    await asyncio.sleep(1)  # Wait 1 second between retries
+                
+                shipment_response = requests.post(
+                    'https://api.goshippo.com/shipments/',
+                    headers=headers,
+                    json=shipment_data,
+                    timeout=10
+                )
+                
+                if shipment_response.status_code == 201:
+                    shipment = shipment_response.json()
+                    rates = shipment.get('rates', [])
+                    
+                    # Log what carriers we got
+                    carriers = set([r['provider'] for r in rates])
+                    logger.info(f"Attempt {attempt + 1}: Got {len(rates)} rates from carriers: {carriers}")
+                    
+                    # Merge rates (avoid duplicates by rate_id)
+                    existing_ids = set([r['object_id'] for r in all_rates])
+                    for rate in rates:
+                        if rate['object_id'] not in existing_ids:
+                            all_rates.append(rate)
+                            existing_ids.add(rate['object_id'])
+                    
+                    # If we have UPS rates, we can stop trying
+                    if any(r['provider'] in ['UPS', 'FedEx', 'DHL'] for r in all_rates):
+                        logger.info(f"Found premium carriers, stopping retries")
+                        break
+                else:
+                    logger.error(f"Attempt {attempt + 1} failed with status {shipment_response.status_code}")
             
-            if shipment_response.status_code != 201:
-                error_msg = shipment_response.json().get('messages', [{}])[0].get('text', 'Неизвестная ошибка')
+            if not all_rates or len(all_rates) == 0:
+                error_msg = shipment_response.json().get('messages', [{}])[0].get('text', 'Неизвестная ошибка') if shipment_response.status_code != 201 else 'Нет доступных тарифов'
                 await update.message.reply_text(f"❌ Ошибка при получении тарифов:\n{error_msg}\n\nПроверьте правильность введенных адресов.")
                 return ConversationHandler.END
             
-            shipment = shipment_response.json()
-            
-            if not shipment.get('rates') or len(shipment['rates']) == 0:
-                await update.message.reply_text("❌ Не удалось получить тарифы. Возможные причины:\n• Неверный ZIP код\n• Недоступный маршрут\n• Проверьте корректность адресов")
-                return ConversationHandler.END
+            # Log final result
+            final_carriers = set([r['provider'] for r in all_rates])
+            logger.info(f"Final result: {len(all_rates)} rates from carriers: {final_carriers}")
             
             # Save rates - show up to 10 carriers with $10 markup
             markup = 10.00  # Markup in USD
@@ -875,7 +887,7 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
                     'currency': rate['currency'],
                     'days': rate.get('estimated_days')
                 }
-                for rate in shipment['rates'][:10]  # Show up to 10 rates
+                for rate in all_rates[:10]  # Show up to 10 rates
             ]
             
             # Create buttons for carrier selection
