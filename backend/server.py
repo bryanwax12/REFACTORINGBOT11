@@ -449,7 +449,7 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await update.message.reply_text(
-        """Шаг 7/11: Адрес получателя
+        """Шаг 8/13: Адрес получателя
 Например: 123 Main St.""",
         reply_markup=reply_markup
     )
@@ -458,15 +458,41 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['to_street'] = update.message.text
     
-    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+    keyboard = [
+        [InlineKeyboardButton("⏭ Пропустить", callback_data='skip_to_address2')],
+        [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
+    ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await update.message.reply_text(
-        """Шаг 8/11: Город получателя
+        """Шаг 9/13: Квартира/Офис получателя (необязательно)
+Например: Apt 12, Suite 305
+Или нажмите "Пропустить" """,
+        reply_markup=reply_markup
+    )
+    return TO_ADDRESS2
+
+async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.message:
+        context.user_data['to_street2'] = update.message.text
+    else:
+        context.user_data['to_street2'] = None
+    
+    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await (update.message or update.callback_query.message).reply_text(
+        """Шаг 10/13: Город получателя
 Например: New York""",
         reply_markup=reply_markup
     )
     return TO_CITY
+
+async def skip_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    context.user_data['to_street2'] = None
+    return await order_to_address2(update, context)
 
 async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['to_city'] = update.message.text
