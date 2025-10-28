@@ -891,54 +891,6 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return TO_ZIP
 
 async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Check if it's a callback query (skip validation button)
-    if hasattr(update, 'callback_query') and update.callback_query:
-        query = update.callback_query
-        await query.answer()
-        
-        if query.data == 'skip_to_validation':
-            # Skip validation and continue
-            keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            
-            await query.message.reply_text(
-                """⚠️ Валидация адреса пропущена
-
-Шаг 14/15: Телефон получателя
-Например: +1234567890 или 1234567890""",
-                reply_markup=reply_markup
-            )
-            return TO_PHONE
-        
-        elif query.data == 'continue_to_anyway':
-            # Continue despite validation failure
-            if context.user_data.get('editing_to_address'):
-                context.user_data['editing_to_address'] = False
-                await query.message.reply_text("✅ Адрес получателя обновлен (валидация пропущена)!")
-                return await show_data_confirmation(update, context)
-            
-            keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            
-            await query.message.reply_text(
-                """⚠️ Продолжаем с текущим адресом
-
-Шаг 14/15: Телефон получателя
-Например: +1234567890 или 1234567890""",
-                reply_markup=reply_markup
-            )
-            return TO_PHONE
-        
-        elif query.data == 'fix_to_address':
-            # Go back to start of to address to fix
-            keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await query.message.reply_text(
-                "Шаг 8/15: Адрес получателя\nВведите корректный адрес.\nНапример: 525 Market St",
-                reply_markup=reply_markup
-            )
-            return TO_ADDRESS
-    
     zip_code = update.message.text.strip()
     
     # Validate ZIP code
@@ -950,10 +902,8 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     context.user_data['to_zip'] = zip_code
     
-    # Show validation message with skip button
-    keyboard = [[InlineKeyboardButton("⏭️ Пропустить валидацию", callback_data='skip_to_validation')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text("⏳ Проверяю адрес получателя...", reply_markup=reply_markup)
+    # Validate address (always returns success in ShipStation)
+    await update.message.reply_text("⏳ Проверяю адрес получателя...")
     
     validation_result = await validate_address_with_shipstation(
         name=context.user_data['to_name'],
@@ -964,31 +914,17 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
         zip_code=zip_code
     )
     
-    if not validation_result['is_valid']:
-        keyboard = [
-            [InlineKeyboardButton("✅ Всё равно продолжить", callback_data='continue_to_anyway')],
-            [InlineKeyboardButton("🔄 Исправить адрес", callback_data='fix_to_address')],
-            [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        
-        await update.message.reply_text(
-            f"⚠️ Адрес получателя не прошел проверку:\n{validation_result['message']}\n\nВыберите действие:",
-            reply_markup=reply_markup
-        )
-        return TO_ZIP  # Stay in same state to handle callback
-    
     # Check if we're editing to address
     if context.user_data.get('editing_to_address'):
         context.user_data['editing_to_address'] = False
-        await update.message.reply_text("✅ Адрес получателя обновлен и проверен!")
+        await update.message.reply_text("✅ Адрес получателя обновлен!")
         return await show_data_confirmation(update, context)
     
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await update.message.reply_text(
-        """✅ Адрес получателя проверен
+        """✅ Адрес получателя сохранен
 
 Шаг 14/15: Телефон получателя
 Например: +1234567890 или 1234567890""",
