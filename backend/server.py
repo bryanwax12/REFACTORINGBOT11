@@ -617,6 +617,47 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return FROM_ZIP
 
 
+async def get_shipstation_carrier_ids():
+    """Get and cache ShipStation carrier IDs"""
+    global SHIPSTATION_CARRIER_IDS
+    
+    # Return cached IDs if available
+    if SHIPSTATION_CARRIER_IDS:
+        return SHIPSTATION_CARRIER_IDS
+    
+    try:
+        if not SHIPSTATION_API_KEY:
+            logger.error("ShipStation API key not configured")
+            return []
+        
+        headers = {
+            'API-Key': SHIPSTATION_API_KEY,
+            'Content-Type': 'application/json'
+        }
+        
+        response = requests.get(
+            'https://api.shipstation.com/v2/carriers',
+            headers=headers,
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            carriers = data.get('carriers', [])
+            # Extract carrier IDs from active carriers
+            carrier_ids = [c['carrier_id'] for c in carriers if c.get('carrier_id')]
+            SHIPSTATION_CARRIER_IDS = carrier_ids
+            logger.info(f"Loaded {len(carrier_ids)} ShipStation carriers: {carrier_ids}")
+            return carrier_ids
+        else:
+            logger.error(f"Failed to get carriers: {response.status_code} - {response.text}")
+            return []
+            
+    except Exception as e:
+        logger.error(f"Error getting carrier IDs: {e}")
+        return []
+
+
 async def validate_address_with_shipstation(name, street1, street2, city, state, zip_code):
     """Validate address using ShipStation API V2
     Note: ShipStation V2 does not have address validation endpoint,
