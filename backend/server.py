@@ -160,7 +160,15 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(help_text)
 
 async def my_orders_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    telegram_id = update.effective_user.id
+    # Handle both command and callback
+    if update.callback_query:
+        query = update.callback_query
+        await query.answer()
+        telegram_id = query.from_user.id
+        send_method = query.message.reply_text
+    else:
+        telegram_id = update.effective_user.id
+        send_method = update.message.reply_text
     
     orders = await db.orders.find(
         {"telegram_id": telegram_id},
@@ -168,18 +176,26 @@ async def my_orders_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ).sort("created_at", -1).limit(10).to_list(10)
     
     if not orders:
-        await update.message.reply_text("У вас пока нет заказов. Создайте первый заказ через /new_order")
+        keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await send_method("У вас пока нет заказов. Создайте первый заказ через веб-панель.", reply_markup=reply_markup)
         return
     
     message = "📦 Ваши заказы:\n\n"
     for order in orders:
-        message += f"""Заказ #{order['id'][:8]}
-Статус оплаты: {order['payment_status']}
-Статус доставки: {order['shipping_status']}
-Сумма: ${order['amount']}
+        status_emoji = "✅" if order['payment_status'] == 'paid' else "⏳"
+        ship_emoji = "📮" if order['shipping_status'] == 'label_created' else "📦"
+        
+        message += f"""{status_emoji} Заказ #{order['id'][:8]}
+💰 Оплата: {order['payment_status']}
+{ship_emoji} Доставка: {order['shipping_status']}
+💵 Сумма: ${order['amount']}
+📅 {order.get('created_at', '')[:10]}
 ---\n"""
     
-    await update.message.reply_text(message)
+    keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await send_method(message, reply_markup=reply_markup)
 
 async def track_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
