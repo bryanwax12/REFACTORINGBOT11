@@ -272,6 +272,10 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await new_order_start(update, context)
     elif query.data == 'cancel_order':
         await cancel_order(update, context)
+    elif query.data.startswith('create_label_'):
+        # Handle create label button
+        order_id = query.data.replace('create_label_', '')
+        await handle_create_label_request(update, context, order_id)
 
 async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Handle both command and callback
