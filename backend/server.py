@@ -937,7 +937,9 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
     balance = user.get('balance', 0.0)
     
     # Show payment options
-    amount = selected_rate['amount']
+    amount = selected_rate['amount']  # Amount with markup
+    original_amount = selected_rate['original_amount']  # GoShippo price
+    markup = amount - original_amount
     data = context.user_data
     
     confirmation_text = f"""✅ Выбрано: {selected_rate['carrier']} - {selected_rate['service']}
@@ -947,7 +949,12 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
 📥 До: {data['to_name']}, {data['to_city']}, {data['to_state']}
 ⚖️ Вес: {data['weight']} lb
 
-💰 Стоимость доставки: ${amount}
+💰 Стоимость:
+   Доставка: ${original_amount:.2f}
+   Сервисный сбор: ${markup:.2f}
+   ──────────────────
+   Итого: ${amount:.2f}
+
 💳 Ваш баланс: ${balance:.2f}
 
 Выберите способ оплаты:"""
