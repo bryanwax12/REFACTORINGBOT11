@@ -996,7 +996,8 @@ async def show_data_confirmation(update: Update, context: ContextTypes.DEFAULT_T
         message += f"   Квартира: {data.get('from_street2')}\n"
     message += f"   Город: {data.get('from_city')}\n"
     message += f"   Штат: {data.get('from_state')}\n"
-    message += f"   ZIP: {data.get('from_zip')}\n\n"
+    message += f"   ZIP: {data.get('from_zip')}\n"
+    message += f"   Телефон: {data.get('from_phone')}\n\n"
     
     message += "📥 ПОЛУЧАТЕЛЬ:\n"
     message += f"   Имя: {data.get('to_name')}\n"
@@ -1005,7 +1006,8 @@ async def show_data_confirmation(update: Update, context: ContextTypes.DEFAULT_T
         message += f"   Квартира: {data.get('to_street2')}\n"
     message += f"   Город: {data.get('to_city')}\n"
     message += f"   Штат: {data.get('to_state')}\n"
-    message += f"   ZIP: {data.get('to_zip')}\n\n"
+    message += f"   ZIP: {data.get('to_zip')}\n"
+    message += f"   Телефон: {data.get('to_phone')}\n\n"
     
     message += "📦 ПОСЫЛКА:\n"
     message += f"   Вес: {data.get('weight')} фунтов\n"
