@@ -1447,12 +1447,22 @@ Label PDF: {transaction.label_url}
         logger.info(f"Label created successfully for order {order_id}")
     except Exception as e:
         logger.error(f"Error creating label: {e}", exc_info=True)
+        
+        # Send polite message to user
+        user_message = """😔 К сожалению, в данный момент мы не можем сгенерировать shipping label.
+
+Ваш заказ сохранен, и оплата принята ✅
+
+Пожалуйста, свяжитесь с администратором для получения метки.
+
+Приносим извинения за неудобства!"""
+        
         if message:
-            await message.reply_text(f"❌ Ошибка при создании label: {str(e)}")
+            await message.reply_text(user_message)
         elif bot_instance:
             await bot_instance.send_message(
                 chat_id=telegram_id,
-                text=f"❌ Ошибка при создании label: {str(e)}"
+                text=user_message
             )
 
 async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
