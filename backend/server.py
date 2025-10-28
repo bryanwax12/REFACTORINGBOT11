@@ -115,9 +115,19 @@ class OrderCreate(BaseModel):
 
 # Telegram Bot Handlers
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    telegram_id = update.effective_user.id
-    username = update.effective_user.username
-    first_name = update.effective_user.first_name
+    # Handle both command and callback
+    if update.callback_query:
+        query = update.callback_query
+        await query.answer()
+        telegram_id = query.from_user.id
+        username = query.from_user.username
+        first_name = query.from_user.first_name
+        send_method = query.message.reply_text
+    else:
+        telegram_id = update.effective_user.id
+        username = update.effective_user.username
+        first_name = update.effective_user.first_name
+        send_method = update.message.reply_text
     
     existing_user = await db.users.find_one({"telegram_id": telegram_id})
     
@@ -145,7 +155,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await update.message.reply_text(welcome_message, reply_markup=reply_markup)
+    await send_method(welcome_message, reply_markup=reply_markup)
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Handle both command and callback
