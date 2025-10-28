@@ -105,6 +105,42 @@
 user_problem_statement: "Add data editing functionality to Telegram bot - allow users to review and edit their entered data (from address, to address, parcel weight) before fetching shipping rates"
 
 backend:
+  - task: "Data Confirmation Screen with Edit Button"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Implemented show_data_confirmation() function that displays summary of all entered data (from address, to address, parcel weight) with buttons: 'All correct, show rates', 'Edit data', 'Cancel'. This is shown after user enters parcel weight."
+
+  - task: "Edit Menu for Selecting What to Edit"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Implemented show_edit_menu() and handle_edit_choice() functions. When user clicks 'Edit data', they see menu with options: Edit sender address, Edit receiver address, Edit parcel weight, Back. Each option returns user to the appropriate conversation step."
+
+  - task: "Conversation Flow with Edit States"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Added CONFIRM_DATA and EDIT_MENU states to ConversationHandler. Modified order_parcel_weight() to show confirmation screen instead of immediately fetching rates. Created fetch_shipping_rates() function to handle rate fetching after user confirms data. All conversation paths properly connected."
+
   - task: "GoShippo Carrier Accounts API"
     implemented: true
     working: true
