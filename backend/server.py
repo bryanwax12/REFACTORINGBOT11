@@ -790,6 +790,11 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
         
         context.user_data['weight'] = weight
         
+        # Check if we're editing parcel weight
+        if context.user_data.get('editing_parcel'):
+            context.user_data['editing_parcel'] = False
+            await update.message.reply_text("✅ Вес посылки обновлен!")
+        
         # Show data confirmation instead of immediately fetching rates
         return await show_data_confirmation(update, context)
             
