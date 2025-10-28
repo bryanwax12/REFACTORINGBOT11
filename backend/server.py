@@ -840,11 +840,11 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
             
         except Exception as e:
             logger.error(f"Error getting rates: {e}")
-            await update.message.reply_text(f"❌ Ошибка при получении тарифов: {str(e)}")
+            await update.message.reply_text(f"❌ Ошибка при получении тарифов:\n{str(e)}\n\nПроверьте корректность адресов и попробуйте снова.")
             return ConversationHandler.END
             
     except ValueError:
-        await update.message.reply_text("❌ Неверный формат. Введите число, например: 2")
+        await update.message.reply_text("❌ Неверный формат. Введите число (например: 2 или 2.5):")
         return PARCEL_WEIGHT
 
 async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
