@@ -1,15 +1,19 @@
-from fastapi import FastAPI, APIRouter
-from dotenv import load_dotenv
-from starlette.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, APIRouter, HTTPException, status, Request
+from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
+from dotenv import load_dotenv
+from pathlib import Path
 import os
 import logging
-from pathlib import Path
-from pydantic import BaseModel, Field, ConfigDict
-from typing import List
-import uuid
+from pydantic import BaseModel, Field, ConfigDict, EmailStr
+from typing import List, Optional
 from datetime import datetime, timezone
-
+import uuid
+import shippo
+from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes, MessageHandler, filters
+import asyncio
+from aiocryptopay import AioCryptoPay, Networks
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -19,54 +23,405 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# Create the main app without a prefix
-app = FastAPI()
+# Shippo API
+SHIPPO_API_KEY = os.environ.get('SHIPPO_API_KEY', '')
+if SHIPPO_API_KEY:
+    shippo.config.api_key = SHIPPO_API_KEY
 
-# Create a router with the /api prefix
+# Telegram Bot
+TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+bot_instance = None
+if TELEGRAM_BOT_TOKEN:
+    bot_instance = Bot(token=TELEGRAM_BOT_TOKEN)
+
+# CryptoBot
+CRYPTOBOT_TOKEN = os.environ.get('CRYPTOBOT_TOKEN', '')
+crypto = None
+if CRYPTOBOT_TOKEN:
+    crypto = AioCryptoPay(token=CRYPTOBOT_TOKEN, network=Networks.MAIN_NET)
+
+app = FastAPI(title="Telegram Shipping Bot")
 api_router = APIRouter(prefix="/api")
 
-
-# Define Models
-class StatusCheck(BaseModel):
-    model_config = ConfigDict(extra="ignore")  # Ignore MongoDB's _id field
-    
+# Models
+class User(BaseModel):
+    model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    telegram_id: int
+    username: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-class StatusCheckCreate(BaseModel):
-    client_name: str
+class Address(BaseModel):
+    name: str
+    street1: str
+    street2: Optional[str] = None
+    city: str
+    state: str
+    zip: str
+    country: str = "US"
+    phone: Optional[str] = None
+    email: Optional[EmailStr] = None
 
-# Add your routes to the router instead of directly to app
+class Parcel(BaseModel):
+    length: float
+    width: float
+    height: float
+    weight: float
+    distance_unit: str = "in"
+    mass_unit: str = "lb"
+
+class ShippingLabel(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    order_id: str
+    tracking_number: Optional[str] = None
+    label_url: Optional[str] = None
+    carrier: Optional[str] = None
+    service_level: Optional[str] = None
+    amount: Optional[str] = None
+    status: str = "pending"
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class Payment(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    order_id: str
+    amount: float
+    currency: str = "USDT"
+    status: str = "pending"
+    invoice_id: Optional[int] = None
+    pay_url: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class Order(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    telegram_id: int
+    address_from: Address
+    address_to: Address
+    parcel: Parcel
+    amount: float
+    payment_status: str = "pending"
+    shipping_status: str = "pending"
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class OrderCreate(BaseModel):
+    telegram_id: int
+    address_from: Address
+    address_to: Address
+    parcel: Parcel
+    amount: float
+
+# Telegram Bot Handlers
+async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    telegram_id = update.effective_user.id
+    username = update.effective_user.username
+    first_name = update.effective_user.first_name
+    
+    existing_user = await db.users.find_one({"telegram_id": telegram_id})
+    
+    if not existing_user:
+        user = User(
+            telegram_id=telegram_id,
+            username=username,
+            first_name=first_name
+        )
+        user_dict = user.model_dump()
+        user_dict['created_at'] = user_dict['created_at'].isoformat()
+        await db.users.insert_one(user_dict)
+        
+    welcome_message = f"""Добро пожаловать, {first_name}! 🚀
+
+Я помогу вам создать shipping labels с оплатой в криптовалюте.
+
+Доступные команды:
+/new_order - Создать новый заказ
+/my_orders - Мои заказы
+/track - Отследить посылку
+/help - Помощь"""
+    
+    await update.message.reply_text(welcome_message)
+
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    help_text = """📦 Доступные команды:
+
+/start - Начать работу
+/new_order - Создать заказ на доставку
+/my_orders - Посмотреть мои заказы
+/track - Отследить посылку
+/help - Показать эту справку
+
+Для создания заказа используйте веб-панель или API."""
+    await update.message.reply_text(help_text)
+
+async def my_orders_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    telegram_id = update.effective_user.id
+    
+    orders = await db.orders.find(
+        {"telegram_id": telegram_id},
+        {"_id": 0}
+    ).sort("created_at", -1).limit(10).to_list(10)
+    
+    if not orders:
+        await update.message.reply_text("У вас пока нет заказов. Создайте первый заказ через /new_order")
+        return
+    
+    message = "📦 Ваши заказы:\n\n"
+    for order in orders:
+        message += f"""Заказ #{order['id'][:8]}
+Статус оплаты: {order['payment_status']}
+Статус доставки: {order['shipping_status']}
+Сумма: ${order['amount']}
+---\n"""
+    
+    await update.message.reply_text(message)
+
+async def track_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "Для отслеживания посылки используйте веб-панель или укажите tracking number."
+    )
+
+# API Routes
 @api_router.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "Telegram Shipping Bot API", "status": "running"}
 
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.model_dump()
-    status_obj = StatusCheck(**status_dict)
-    
-    # Convert to dict and serialize datetime to ISO string for MongoDB
-    doc = status_obj.model_dump()
-    doc['timestamp'] = doc['timestamp'].isoformat()
-    
-    _ = await db.status_checks.insert_one(doc)
-    return status_obj
+@api_router.post("/orders", response_model=dict)
+async def create_order(order_data: OrderCreate):
+    try:
+        # Check user exists
+        user = await db.users.find_one({"telegram_id": order_data.telegram_id}, {"_id": 0})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found. Please /start the bot first.")
+        
+        # Create order
+        order = Order(
+            user_id=user['id'],
+            telegram_id=order_data.telegram_id,
+            address_from=order_data.address_from,
+            address_to=order_data.address_to,
+            parcel=order_data.parcel,
+            amount=order_data.amount
+        )
+        
+        order_dict = order.model_dump()
+        order_dict['created_at'] = order_dict['created_at'].isoformat()
+        await db.orders.insert_one(order_dict)
+        
+        # Create crypto payment invoice
+        if crypto:
+            invoice = await crypto.create_invoice(
+                asset="USDT",
+                amount=order_data.amount
+            )
+            
+            payment = Payment(
+                order_id=order.id,
+                amount=order_data.amount,
+                invoice_id=invoice.invoice_id,
+                pay_url=invoice.pay_url
+            )
+            payment_dict = payment.model_dump()
+            payment_dict['created_at'] = payment_dict['created_at'].isoformat()
+            await db.payments.insert_one(payment_dict)
+            
+            # Send payment link to user
+            if bot_instance:
+                await bot_instance.send_message(
+                    chat_id=order_data.telegram_id,
+                    text=f"""✅ Заказ создан!
 
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    # Exclude MongoDB's _id field from the query results
-    status_checks = await db.status_checks.find({}, {"_id": 0}).to_list(1000)
-    
-    # Convert ISO string timestamps back to datetime objects
-    for check in status_checks:
-        if isinstance(check['timestamp'], str):
-            check['timestamp'] = datetime.fromisoformat(check['timestamp'])
-    
-    return status_checks
+💰 Оплатите {order_data.amount} USDT:
+{invoice.pay_url}
 
-# Include the router in the main app
+После оплаты мы автоматически создадим shipping label."""
+                )
+            
+            return {
+                "order_id": order.id,
+                "payment_url": invoice.pay_url,
+                "amount": order_data.amount,
+                "currency": "USDT"
+            }
+        else:
+            return {
+                "order_id": order.id,
+                "message": "Order created but payment system not configured"
+            }
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/orders", response_model=List[dict])
+async def get_orders(telegram_id: Optional[int] = None):
+    query = {"telegram_id": telegram_id} if telegram_id else {}
+    orders = await db.orders.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return orders
+
+@api_router.get("/orders/{order_id}")
+async def get_order(order_id: str):
+    order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return order
+
+@api_router.post("/shipping/create-label")
+async def create_shipping_label(order_id: str):
+    try:
+        order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+        if not order:
+            raise HTTPException(status_code=404, detail="Order not found")
+        
+        if order['payment_status'] != 'paid':
+            raise HTTPException(status_code=400, detail="Order not paid")
+        
+        if not SHIPPO_API_KEY:
+            raise HTTPException(status_code=500, detail="Shippo API not configured")
+        
+        # Create shipment
+        address_from = order['address_from']
+        address_to = order['address_to']
+        parcel = order['parcel']
+        
+        shipment = shippo.Shipment.create(
+            address_from=address_from,
+            address_to=address_to,
+            parcels=[parcel],
+            async_=False
+        )
+        
+        if not shipment.rates:
+            raise HTTPException(status_code=400, detail="No shipping rates available")
+        
+        # Select cheapest rate
+        rate = min(shipment.rates, key=lambda x: float(x['amount']))
+        
+        # Purchase label
+        transaction = shippo.Transaction.create(
+            rate=rate['object_id'],
+            label_file_type='PDF',
+            async_=False
+        )
+        
+        # Save label
+        label = ShippingLabel(
+            order_id=order_id,
+            tracking_number=transaction.tracking_number,
+            label_url=transaction.label_url,
+            carrier=rate['provider'],
+            service_level=rate['servicelevel']['name'],
+            amount=rate['amount'],
+            status='created'
+        )
+        
+        label_dict = label.model_dump()
+        label_dict['created_at'] = label_dict['created_at'].isoformat()
+        await db.shipping_labels.insert_one(label_dict)
+        
+        # Update order
+        await db.orders.update_one(
+            {"id": order_id},
+            {"$set": {"shipping_status": "label_created"}}
+        )
+        
+        # Notify user
+        if bot_instance:
+            await bot_instance.send_message(
+                chat_id=order['telegram_id'],
+                text=f"""📦 Shipping label создан!
+
+Tracking: {transaction.tracking_number}
+Carrier: {rate['provider']}
+
+Label: {transaction.label_url}"""
+            )
+        
+        return label_dict
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/shipping/track/{tracking_number}")
+async def track_shipment(tracking_number: str, carrier: str):
+    try:
+        if not SHIPPO_API_KEY:
+            raise HTTPException(status_code=500, detail="Shippo API not configured")
+        
+        tracking = shippo.Track.get_status(carrier, tracking_number)
+        
+        return {
+            "tracking_number": tracking_number,
+            "carrier": carrier,
+            "status": tracking.tracking_status.get('status', 'UNKNOWN'),
+            "tracking_history": tracking.tracking_history
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/webhooks/cryptopay")
+async def cryptopay_webhook(request: Request):
+    try:
+        body = await request.json()
+        
+        # Verify webhook signature
+        if crypto:
+            # Update payment status
+            invoice_id = body.get('payload', {}).get('invoice_id')
+            status = body.get('payload', {}).get('status')
+            
+            if status == 'paid':
+                payment = await db.payments.find_one({"invoice_id": invoice_id}, {"_id": 0})
+                if payment:
+                    # Update payment
+                    await db.payments.update_one(
+                        {"invoice_id": invoice_id},
+                        {"$set": {"status": "paid"}}
+                    )
+                    
+                    # Update order
+                    await db.orders.update_one(
+                        {"id": payment['order_id']},
+                        {"$set": {"payment_status": "paid"}}
+                    )
+                    
+                    # Auto-create shipping label
+                    try:
+                        await create_shipping_label(payment['order_id'])
+                    except Exception as e:
+                        logging.error(f"Failed to create label: {e}")
+        
+        return {"status": "ok"}
+    except Exception as e:
+        logging.error(f"Webhook error: {e}")
+        return {"status": "error"}
+
+@api_router.get("/users")
+async def get_users():
+    users = await db.users.find({}, {"_id": 0}).to_list(100)
+    return users
+
+@api_router.get("/stats")
+async def get_stats():
+    total_users = await db.users.count_documents({})
+    total_orders = await db.orders.count_documents({})
+    paid_orders = await db.orders.count_documents({"payment_status": "paid"})
+    total_revenue = await db.orders.aggregate([
+        {"$match": {"payment_status": "paid"}},
+        {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+    ]).to_list(1)
+    
+    revenue = total_revenue[0]['total'] if total_revenue else 0
+    
+    return {
+        "total_users": total_users,
+        "total_orders": total_orders,
+        "paid_orders": paid_orders,
+        "total_revenue": revenue
+    }
+
 app.include_router(api_router)
 
 app.add_middleware(
@@ -77,12 +432,30 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+@app.on_event("startup")
+async def startup_event():
+    logger.info("Starting Telegram Bot...")
+    if TELEGRAM_BOT_TOKEN:
+        application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
+        
+        application.add_handler(CommandHandler("start", start_command))
+        application.add_handler(CommandHandler("help", help_command))
+        application.add_handler(CommandHandler("my_orders", my_orders_command))
+        application.add_handler(CommandHandler("track", track_command))
+        
+        await application.initialize()
+        await application.start()
+        await application.updater.start_polling()
+        
+        logger.info("Telegram Bot started!")
+    else:
+        logger.warning("Telegram Bot Token not configured")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
