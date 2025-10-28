@@ -644,10 +644,19 @@ async def get_shipstation_carrier_ids():
         if response.status_code == 200:
             data = response.json()
             carriers = data.get('carriers', [])
-            # Extract carrier IDs from active carriers
-            carrier_ids = [c['carrier_id'] for c in carriers if c.get('carrier_id')]
+            
+            # Exclude specific carriers: GlobalPost, Stamps.com
+            excluded_carriers = ['globalpost', 'stamps_com', 'stamps']
+            
+            # Extract carrier IDs from active carriers, excluding unwanted ones
+            carrier_ids = [
+                c['carrier_id'] 
+                for c in carriers 
+                if c.get('carrier_id') and c.get('carrier_code', '').lower() not in excluded_carriers
+            ]
+            
             SHIPSTATION_CARRIER_IDS = carrier_ids
-            logger.info(f"Loaded {len(carrier_ids)} ShipStation carriers: {carrier_ids}")
+            logger.info(f"Loaded {len(carrier_ids)} ShipStation carriers (excluded: {excluded_carriers}): {carrier_ids}")
             return carrier_ids
         else:
             logger.error(f"Failed to get carriers: {response.status_code} - {response.text}")
