@@ -1281,6 +1281,42 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             if rate.get('carrier_code', '').lower() not in excluded_carriers
         ]
         
+        # Filter to keep only specific services per carrier
+        allowed_services = {
+            'ups': [
+                'ups_ground',
+                'ups_2nd_day_air',
+                'ups_next_day_air',
+                'ups_next_day_air_saver'
+            ],
+            'fedex_walleted': [
+                'fedex_ground',
+                'fedex_2day',
+                'fedex_standard_overnight',
+                'fedex_priority_overnight'
+            ],
+            'usps': [
+                'usps_ground_advantage',
+                'usps_priority_mail',
+                'usps_priority_mail_express'
+            ]
+        }
+        
+        # Apply service filter
+        filtered_rates = []
+        for rate in all_rates:
+            carrier_code = rate.get('carrier_code', '').lower()
+            service_code = rate.get('service_code', '').lower()
+            
+            if carrier_code in allowed_services:
+                if service_code in allowed_services[carrier_code]:
+                    filtered_rates.append(rate)
+            else:
+                # Keep rates from other carriers if any
+                filtered_rates.append(rate)
+        
+        all_rates = filtered_rates
+        
         if not all_rates or len(all_rates) == 0:
             keyboard = [
                 [InlineKeyboardButton("✏️ Редактировать адреса", callback_data='edit_addresses_error')],
