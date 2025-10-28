@@ -244,6 +244,53 @@ const Dashboard = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Balance Management Modal */}
+      {balanceModal.open && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" data-testid="balance-modal">
+          <Card className="w-full max-w-md mx-4">
+            <CardHeader>
+              <CardTitle>
+                {balanceModal.action === 'add' ? '💰 Add Balance' : '➖ Deduct Balance'}
+              </CardTitle>
+              <CardDescription>
+                Enter amount in USD for Telegram ID: {balanceModal.telegram_id}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="balance-amount">Amount (USD)</Label>
+                <Input
+                  id="balance-amount"
+                  type="number"
+                  step="0.01"
+                  placeholder="10.00"
+                  value={balanceAmount}
+                  onChange={(e) => setBalanceAmount(e.target.value)}
+                  data-testid="balance-amount-input"
+                  autoFocus
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={submitBalanceChange}
+                  className="flex-1"
+                  data-testid="confirm-balance-btn"
+                >
+                  {balanceModal.action === 'add' ? 'Add Balance' : 'Deduct Balance'}
+                </Button>
+                <Button 
+                  onClick={() => setBalanceModal({ open: false, telegram_id: null, action: null })}
+                  variant="outline"
+                  data-testid="cancel-balance-btn"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };
