@@ -21,6 +21,9 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [balanceModal, setBalanceModal] = useState({ open: false, telegram_id: null, action: null });
   const [balanceAmount, setBalanceAmount] = useState('');
+  const [userDetailsModal, setUserDetailsModal] = useState({ open: false, details: null });
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -28,15 +31,17 @@ const Dashboard = () => {
 
   const loadData = async () => {
     try {
-      const [statsRes, ordersRes, usersRes] = await Promise.all([
+      const [statsRes, ordersRes, usersRes, leaderboardRes] = await Promise.all([
         axios.get(`${API}/stats`),
         axios.get(`${API}/orders`),
-        axios.get(`${API}/users`)
+        axios.get(`${API}/users`),
+        axios.get(`${API}/users/leaderboard`)
       ]);
       
       setStats(statsRes.data);
       setOrders(ordersRes.data);
       setUsers(usersRes.data);
+      setLeaderboard(leaderboardRes.data);
     } catch (error) {
       toast.error("Failed to load data");
     } finally {
@@ -47,6 +52,15 @@ const Dashboard = () => {
   const handleBalanceAction = (telegram_id, action) => {
     setBalanceModal({ open: true, telegram_id, action });
     setBalanceAmount('');
+  };
+
+  const viewUserDetails = async (telegram_id) => {
+    try {
+      const response = await axios.get(`${API}/users/${telegram_id}/details`);
+      setUserDetailsModal({ open: true, details: response.data });
+    } catch (error) {
+      toast.error("Failed to load user details");
+    }
   };
 
   const submitBalanceChange = async () => {
