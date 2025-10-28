@@ -359,15 +359,19 @@ async def track_shipment(tracking_number: str, carrier: str):
         if not SHIPPO_API_KEY:
             raise HTTPException(status_code=500, detail="Shippo API not configured")
         
-        tracking = shippo.Track.get_status(carrier, tracking_number)
+        from shippo import Shippo
+        shippo_client = Shippo(api_key_header=SHIPPO_API_KEY)
+        
+        tracking = shippo_client.tracks.get_status(carrier, tracking_number)
         
         return {
             "tracking_number": tracking_number,
             "carrier": carrier,
-            "status": tracking.tracking_status.get('status', 'UNKNOWN'),
-            "tracking_history": tracking.tracking_history
+            "status": tracking.tracking_status.status if hasattr(tracking, 'tracking_status') and tracking.tracking_status else "UNKNOWN",
+            "tracking_history": tracking.tracking_history if hasattr(tracking, 'tracking_history') else []
         }
     except Exception as e:
+        logger.error(f"Error tracking shipment: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/webhooks/cryptopay")
