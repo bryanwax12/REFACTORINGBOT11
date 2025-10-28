@@ -2492,7 +2492,10 @@ async def startup_event():
                     ],
                     FROM_CITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_city)],
                     FROM_STATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_state)],
-                    FROM_ZIP: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_zip)],
+                    FROM_ZIP: [
+                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_zip),
+                        CallbackQueryHandler(order_from_zip, pattern='^(skip_from_validation|continue_from_anyway|fix_from_address)$')
+                    ],
                     FROM_PHONE: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_phone)],
                     TO_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_name)],
                     TO_ADDRESS: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_address)],
@@ -2502,7 +2505,10 @@ async def startup_event():
                     ],
                     TO_CITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_city)],
                     TO_STATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_state)],
-                    TO_ZIP: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_zip)],
+                    TO_ZIP: [
+                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_zip),
+                        CallbackQueryHandler(order_to_zip, pattern='^(skip_to_validation|continue_to_anyway|fix_to_address)$')
+                    ],
                     TO_PHONE: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_phone)],
                     PARCEL_WEIGHT: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_parcel_weight)],
                     CONFIRM_DATA: [CallbackQueryHandler(handle_data_confirmation, pattern='^(confirm_data|edit_data|cancel_order)$')],
