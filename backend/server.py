@@ -453,22 +453,28 @@ logger = logging.getLogger(__name__)
 
 @app.on_event("startup")
 async def startup_event():
-    logger.info("Starting Telegram Bot...")
-    if TELEGRAM_BOT_TOKEN:
-        application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
-        
-        application.add_handler(CommandHandler("start", start_command))
-        application.add_handler(CommandHandler("help", help_command))
-        application.add_handler(CommandHandler("my_orders", my_orders_command))
-        application.add_handler(CommandHandler("track", track_command))
-        
-        await application.initialize()
-        await application.start()
-        await application.updater.start_polling()
-        
-        logger.info("Telegram Bot started!")
+    logger.info("Starting application...")
+    if TELEGRAM_BOT_TOKEN and TELEGRAM_BOT_TOKEN != "your_telegram_bot_token_here":
+        try:
+            logger.info("Initializing Telegram Bot...")
+            application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
+            
+            application.add_handler(CommandHandler("start", start_command))
+            application.add_handler(CommandHandler("help", help_command))
+            application.add_handler(CommandHandler("my_orders", my_orders_command))
+            application.add_handler(CommandHandler("track", track_command))
+            
+            await application.initialize()
+            await application.start()
+            await application.updater.start_polling()
+            
+            logger.info("Telegram Bot started successfully!")
+        except Exception as e:
+            logger.error(f"Failed to start Telegram Bot: {e}")
+            logger.warning("Application will continue without Telegram Bot")
     else:
-        logger.warning("Telegram Bot Token not configured")
+        logger.warning("Telegram Bot Token not configured. Bot features will be disabled.")
+        logger.info("To enable Telegram Bot, add TELEGRAM_BOT_TOKEN to backend/.env")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
