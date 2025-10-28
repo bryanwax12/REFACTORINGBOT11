@@ -2262,86 +2262,100 @@ class ShippingRateRequest(BaseModel):
 async def calculate_shipping_rates(request: ShippingRateRequest):
     """Calculate shipping rates for given addresses and parcel"""
     try:
-        if not SHIPPO_API_KEY:
-            raise HTTPException(status_code=500, detail="Shippo API not configured")
+        if not SHIPSTATION_API_KEY:
+            raise HTTPException(status_code=500, detail="ShipStation API not configured")
         
         headers = {
-            'Authorization': f'ShippoToken {SHIPPO_API_KEY}',
+            'API-Key': SHIPSTATION_API_KEY,
             'Content-Type': 'application/json'
         }
         
-        # Create shipment data
-        shipment_data = {
-            'address_from': request.from_address.model_dump(),
-            'address_to': request.to_address.model_dump(),
-            'parcels': [request.parcel.model_dump()],
-            'async': False
+        # Convert addresses to ShipStation format
+        from_addr = request.from_address.model_dump()
+        to_addr = request.to_address.model_dump()
+        parcel = request.parcel.model_dump()
+        
+        # Create rate request
+        rate_request = {
+            'rate_options': {
+                'carrier_ids': []  # Empty means all available carriers
+            },
+            'shipment': {
+                'ship_from': {
+                    'name': from_addr.get('name', ''),
+                    'phone': from_addr.get('phone', ''),
+                    'address_line1': from_addr.get('street1', ''),
+                    'address_line2': from_addr.get('street2', ''),
+                    'city_locality': from_addr.get('city', ''),
+                    'state_province': from_addr.get('state', ''),
+                    'postal_code': from_addr.get('zip', ''),
+                    'country_code': from_addr.get('country', 'US')
+                },
+                'ship_to': {
+                    'name': to_addr.get('name', ''),
+                    'phone': to_addr.get('phone', ''),
+                    'address_line1': to_addr.get('street1', ''),
+                    'address_line2': to_addr.get('street2', ''),
+                    'city_locality': to_addr.get('city', ''),
+                    'state_province': to_addr.get('state', ''),
+                    'postal_code': to_addr.get('zip', ''),
+                    'country_code': to_addr.get('country', 'US'),
+                    'address_residential_indicator': 'unknown'
+                },
+                'packages': [{
+                    'weight': {
+                        'value': parcel.get('weight', 1),
+                        'unit': 'pound'
+                    },
+                    'dimensions': {
+                        'length': parcel.get('length', 5),
+                        'width': parcel.get('width', 5),
+                        'height': parcel.get('height', 5),
+                        'unit': 'inch'
+                    }
+                }]
+            }
         }
         
-        # Try multiple times to get rates (UPS sometimes doesn't return on first try)
-        max_attempts = 3
-        all_rates = []
+        response = requests.post(
+            'https://api.shipstation.com/v2/rates',
+            headers=headers,
+            json=rate_request,
+            timeout=15
+        )
         
-        for attempt in range(max_attempts):
-            if attempt > 0:
-                logger.info(f"Retry attempt {attempt + 1} to get carrier rates")
-                await asyncio.sleep(1)  # Wait 1 second between retries
-            
-            shipment_response = requests.post(
-                'https://api.goshippo.com/shipments/',
-                headers=headers,
-                json=shipment_data,
-                timeout=10
-            )
-            
-            if shipment_response.status_code == 201:
-                shipment = shipment_response.json()
-                rates = shipment.get('rates', [])
-                
-                # Log what carriers we got
-                carriers = set([r['provider'] for r in rates])
-                logger.info(f"Attempt {attempt + 1}: Got {len(rates)} rates from carriers: {carriers}")
-                
-                # Merge rates (avoid duplicates by rate_id)
-                existing_ids = set([r['object_id'] for r in all_rates])
-                for rate in rates:
-                    if rate['object_id'] not in existing_ids:
-                        all_rates.append(rate)
-                        existing_ids.add(rate['object_id'])
-                
-                # If we have UPS rates, we can stop trying
-                if any(r['provider'] in ['UPS', 'FedEx', 'DHL'] for r in all_rates):
-                    logger.info(f"Found premium carriers, stopping retries")
-                    break
-            else:
-                logger.error(f"Attempt {attempt + 1} failed with status {shipment_response.status_code}")
+        if response.status_code != 200:
+            error_data = response.json() if response.text else {}
+            error_msg = error_data.get('message', f'Status code: {response.status_code}')
+            raise HTTPException(status_code=400, detail=f"Failed to get rates: {error_msg}")
         
-        if not all_rates or len(all_rates) == 0:
-            error_msg = shipment_response.json().get('messages', [{}])[0].get('text', 'Unknown error') if shipment_response.status_code != 201 else 'No rates available'
-            raise HTTPException(status_code=400, detail=f"No shipping rates available: {error_msg}")
+        rate_response = response.json()
+        all_rates = rate_response.get('rate_response', {}).get('rates', [])
         
-        # Log final result
-        final_carriers = set([r['provider'] for r in all_rates])
-        logger.info(f"Final result: {len(all_rates)} rates from carriers: {final_carriers}")
+        if not all_rates:
+            raise HTTPException(status_code=400, detail="No shipping rates available")
         
         # Format rates for response
         formatted_rates = [
             {
-                'rate_id': rate['object_id'],
-                'carrier': rate['provider'],
-                'service': rate['servicelevel'].get('name') if isinstance(rate.get('servicelevel'), dict) else str(rate.get('servicelevel', '')),
-                'amount': float(rate['amount']),
-                'currency': rate['currency'],
-                'estimated_days': rate.get('estimated_days'),
-                'duration_terms': rate.get('duration_terms')
+                'rate_id': rate['rate_id'],
+                'carrier': rate['carrier_friendly_name'],
+                'carrier_code': rate['carrier_code'],
+                'service': rate['service_type'],
+                'service_code': rate['service_code'],
+                'amount': float(rate['shipping_amount']['amount']),
+                'currency': rate['shipping_amount']['currency'],
+                'estimated_days': rate.get('delivery_days')
             }
             for rate in all_rates
         ]
         
+        carriers = set([r['carrier'] for r in formatted_rates])
+        
         return {
             "rates": formatted_rates,
             "total_rates": len(formatted_rates),
-            "carriers": list(final_carriers)
+            "carriers": list(carriers)
         }
         
     except HTTPException:
