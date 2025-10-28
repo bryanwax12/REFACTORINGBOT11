@@ -219,7 +219,7 @@ async def my_orders_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ship_emoji = "📮" if order['shipping_status'] == 'label_created' else "📦"
         
         # Get recipient name from order data
-        recipient_name = order.get('to_address', {}).get('name', 'Не указано')
+        recipient_name = order.get('address_to', {}).get('name', 'Не указано')
         
         message += f"""{i}. {status_emoji} Заказ #{order['id'][:8]}
 👤 Получатель: {recipient_name}
