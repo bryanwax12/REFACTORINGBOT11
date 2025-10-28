@@ -1176,6 +1176,20 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         
         data = context.user_data
         
+        # Get carrier IDs
+        carrier_ids = await get_shipstation_carrier_ids()
+        if not carrier_ids:
+            keyboard = [
+                [InlineKeyboardButton("✏️ Редактировать адреса", callback_data='edit_addresses_error')],
+                [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await query.message.reply_text(
+                "❌ Ошибка: не удалось загрузить список курьеров.\n\nПожалуйста, попробуйте позже.",
+                reply_markup=reply_markup
+            )
+            return CONFIRM_DATA
+        
         headers = {
             'API-Key': SHIPSTATION_API_KEY,
             'Content-Type': 'application/json'
@@ -1184,7 +1198,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         # Create rate request for ShipStation V2
         rate_request = {
             'rate_options': {
-                'carrier_ids': []  # Empty means all available carriers
+                'carrier_ids': carrier_ids  # Use actual carrier IDs
             },
             'shipment': {
                 'ship_to': {
