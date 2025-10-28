@@ -2409,6 +2409,42 @@ async def calculate_shipping_rates(request: ShippingRateRequest):
             if rate.get('carrier_code', '').lower() not in excluded_carriers
         ]
         
+        # Filter to keep only specific services per carrier
+        allowed_services = {
+            'ups': [
+                'ups_ground',
+                'ups_2nd_day_air',
+                'ups_next_day_air',
+                'ups_next_day_air_saver'
+            ],
+            'fedex_walleted': [
+                'fedex_ground',
+                'fedex_2day',
+                'fedex_standard_overnight',
+                'fedex_priority_overnight'
+            ],
+            'usps': [
+                'usps_ground_advantage',
+                'usps_priority_mail',
+                'usps_priority_mail_express'
+            ]
+        }
+        
+        # Apply service filter
+        filtered_rates = []
+        for rate in all_rates:
+            carrier_code = rate.get('carrier_code', '').lower()
+            service_code = rate.get('service_code', '').lower()
+            
+            if carrier_code in allowed_services:
+                if service_code in allowed_services[carrier_code]:
+                    filtered_rates.append(rate)
+            else:
+                # Keep rates from other carriers if any
+                filtered_rates.append(rate)
+        
+        all_rates = filtered_rates
+        
         if not all_rates:
             raise HTTPException(status_code=400, detail="No shipping rates available")
         
