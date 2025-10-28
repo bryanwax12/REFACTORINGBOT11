@@ -1298,11 +1298,31 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         carriers = set([r['carrier_friendly_name'] for r in all_rates])
         logger.info(f"Got {len(all_rates)} rates from carriers: {carriers}")
         
-        # Save rates - show up to 10 carriers with $10 markup
+        # Balance rates across carriers - show best rates from each carrier
         markup = 10.00  # Markup in USD
         context.user_data['rates'] = []
         
-        for rate in all_rates[:10]:  # Show up to 10 rates
+        # Group rates by carrier
+        rates_by_carrier = {}
+        for rate in all_rates:
+            carrier = rate['carrier_friendly_name']
+            if carrier not in rates_by_carrier:
+                rates_by_carrier[carrier] = []
+            rates_by_carrier[carrier].append(rate)
+        
+        # Sort each carrier's rates by price and take top 5 from each
+        balanced_rates = []
+        for carrier, carrier_rates in rates_by_carrier.items():
+            # Sort by price (ascending)
+            sorted_carrier_rates = sorted(carrier_rates, key=lambda r: float(r['shipping_amount']['amount']))
+            # Take top 5 cheapest from each carrier
+            balanced_rates.extend(sorted_carrier_rates[:5])
+        
+        # Sort all balanced rates by price
+        balanced_rates = sorted(balanced_rates, key=lambda r: float(r['shipping_amount']['amount']))
+        
+        # Take top 15 overall
+        for rate in balanced_rates[:15]:
             rate_data = {
                 'rate_id': rate['rate_id'],
                 'carrier': rate['carrier_friendly_name'],
