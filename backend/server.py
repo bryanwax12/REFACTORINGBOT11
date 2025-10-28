@@ -1464,15 +1464,15 @@ Label PDF: {transaction.label_url}
 Вы оплатили: ${order['amount']:.2f}"""
             )
         logger.info(f"Label created successfully for order {order_id}")
+        return True  # Success
+        
     except Exception as e:
         logger.error(f"Error creating label: {e}", exc_info=True)
         
         # Send polite message to user
         user_message = """😔 К сожалению, в данный момент мы не можем сгенерировать shipping label.
 
-Ваш заказ сохранен, и оплата принята ✅
-
-Пожалуйста, свяжитесь с администратором для получения метки.
+Пожалуйста, свяжитесь с администратором.
 
 Приносим извинения за неудобства!"""
         
@@ -1483,6 +1483,8 @@ Label PDF: {transaction.label_url}
                 chat_id=telegram_id,
                 text=user_message
             )
+        
+        return False  # Failed
 
 async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.callback_query:
