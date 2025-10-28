@@ -265,7 +265,7 @@ async def track_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def handle_create_label_request(update: Update, context: ContextTypes.DEFAULT_TYPE, order_id: str):
-    """Handle request to create shipping label for existing paid order"""
+    """Handle request to create/recreate shipping label for existing paid order"""
     query = update.callback_query
     telegram_id = query.from_user.id
     
@@ -280,12 +280,13 @@ async def handle_create_label_request(update: Update, context: ContextTypes.DEFA
         await query.message.reply_text("❌ Заказ не оплачен. Создание лейбла невозможно.")
         return
     
-    if order['shipping_status'] == 'label_created':
-        await query.message.reply_text("✅ Лейбл уже создан для этого заказа.")
-        return
-    
     # Show confirmation message
-    await query.message.reply_text(f"""⏳ Создаю shipping label для заказа #{order_id[:8]}...
+    if order['shipping_status'] == 'label_created':
+        await query.message.reply_text(f"""⏳ Пересоздаю shipping label для заказа #{order_id[:8]}...
+    
+Это может занять несколько секунд.""")
+    else:
+        await query.message.reply_text(f"""⏳ Создаю shipping label для заказа #{order_id[:8]}...
     
 Это может занять несколько секунд.""")
     
