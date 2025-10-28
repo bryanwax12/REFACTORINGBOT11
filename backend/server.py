@@ -607,7 +607,22 @@ async def skip_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return await order_to_address2(update, context)
 
 async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['to_city'] = update.message.text
+    city = update.message.text.strip()
+    
+    # Validate city
+    if len(city) < 2:
+        await update.message.reply_text("❌ Название города слишком короткое:")
+        return TO_CITY
+    
+    if len(city) > 50:
+        await update.message.reply_text("❌ Название города слишком длинное. Максимум 50 символов:")
+        return TO_CITY
+    
+    if not all(c.isalpha() or c.isspace() or c in ".-'" for c in city):
+        await update.message.reply_text("❌ Название города содержит недопустимые символы:")
+        return TO_CITY
+    
+    context.user_data['to_city'] = city
     
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -620,7 +635,32 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return TO_STATE
 
 async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['to_state'] = update.message.text.upper()
+    state = update.message.text.strip().upper()
+    
+    # Validate state
+    if len(state) != 2:
+        await update.message.reply_text("❌ Код штата должен быть ровно 2 буквы. Например: CA, NY, TX:")
+        return TO_STATE
+    
+    if not state.isalpha():
+        await update.message.reply_text("❌ Код штата должен содержать только буквы:")
+        return TO_STATE
+    
+    # Valid US state codes
+    valid_states = {
+        'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
+        'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
+        'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
+        'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
+        'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY',
+        'DC', 'PR', 'VI', 'GU'
+    }
+    
+    if state not in valid_states:
+        await update.message.reply_text("❌ Неверный код штата. Введите корректный код (например: CA, NY, TX):")
+        return TO_STATE
+    
+    context.user_data['to_state'] = state
     
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -633,7 +673,16 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return TO_ZIP
 
 async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['to_zip'] = update.message.text
+    zip_code = update.message.text.strip()
+    
+    # Validate ZIP code
+    import re
+    # US ZIP format: 5 digits or 5-4 digits
+    if not re.match(r'^\d{5}(-\d{4})?$', zip_code):
+        await update.message.reply_text("❌ Неверный формат ZIP кода. Используйте формат: 12345 или 12345-6789:")
+        return TO_ZIP
+    
+    context.user_data['to_zip'] = zip_code
     
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
