@@ -2288,6 +2288,11 @@ async def calculate_shipping_rates(request: ShippingRateRequest):
         if not SHIPSTATION_API_KEY:
             raise HTTPException(status_code=500, detail="ShipStation API not configured")
         
+        # Get carrier IDs
+        carrier_ids = await get_shipstation_carrier_ids()
+        if not carrier_ids:
+            raise HTTPException(status_code=500, detail="Failed to load carrier information")
+        
         headers = {
             'API-Key': SHIPSTATION_API_KEY,
             'Content-Type': 'application/json'
@@ -2301,7 +2306,7 @@ async def calculate_shipping_rates(request: ShippingRateRequest):
         # Create rate request
         rate_request = {
             'rate_options': {
-                'carrier_ids': []  # Empty means all available carriers
+                'carrier_ids': carrier_ids  # Use actual carrier IDs
             },
             'shipment': {
                 'ship_from': {
