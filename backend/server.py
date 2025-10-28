@@ -450,9 +450,9 @@ async def cryptopay_webhook(request: Request):
         if crypto:
             # Update payment status
             invoice_id = body.get('payload', {}).get('invoice_id')
-            status = body.get('payload', {}).get('status')
+            payment_status = body.get('payload', {}).get('status')
             
-            if status == 'paid':
+            if payment_status == 'paid':
                 payment = await db.payments.find_one({"invoice_id": invoice_id}, {"_id": 0})
                 if payment:
                     # Update payment
