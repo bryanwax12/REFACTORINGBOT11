@@ -1885,69 +1885,23 @@ async def create_shipping_label(order_id: str):
         if order['payment_status'] != 'paid':
             raise HTTPException(status_code=400, detail="Order not paid")
         
-        if not SHIPPO_API_KEY:
-            raise HTTPException(status_code=500, detail="Shippo API not configured")
+        if not SHIPSTATION_API_KEY:
+            raise HTTPException(status_code=500, detail="ShipStation API not configured")
         
-        # Initialize shippo client
-        from shippo import Shippo
-        shippo_client = Shippo(api_key_header=SHIPPO_API_KEY)
+        # Use the main label creation function
+        result = await create_and_send_label(order_id, order['telegram_id'], None)
         
-        # Create shipment
-        address_from = order['address_from']
-        address_to = order['address_to']
-        parcel = order['parcel']
-        
-        from shippo.models import components
-        
-        shipment = shippo_client.shipments.create(
-            components.ShipmentCreateRequest(
-                address_from=components.AddressCreateRequest(**address_from),
-                address_to=components.AddressCreateRequest(**address_to),
-                parcels=[components.ParcelCreateRequest(**parcel)],
-                async_=False
-            )
-        )
-        
-        if not shipment.rates or len(shipment.rates) == 0:
-            raise HTTPException(status_code=400, detail="No shipping rates available")
-        
-        # Select cheapest rate
-        rate = min(shipment.rates, key=lambda x: float(x.amount))
-        
-        # Purchase label
-        transaction = shippo_client.transactions.create(
-            components.TransactionCreateRequest(
-                rate=rate.object_id,
-                label_file_type="PDF",
-                async_=False
-            )
-        )
-        
-        # Save label
-        label = ShippingLabel(
-            order_id=order_id,
-            tracking_number=transaction.tracking_number,
-            label_url=transaction.label_url,
-            carrier=rate.provider,
-            service_level=rate.servicelevel.name if hasattr(rate.servicelevel, 'name') else str(rate.servicelevel),
-            amount=str(rate.amount),
-            status='created'
-        )
-        
-        label_dict = label.model_dump()
-        label_dict['created_at'] = label_dict['created_at'].isoformat()
-        await db.shipping_labels.insert_one(label_dict)
-        
-        # Update order
-        await db.orders.update_one(
-            {"id": order_id},
-            {"$set": {"shipping_status": "label_created"}}
-        )
-        
-        # Notify user
-        if bot_instance:
-            await bot_instance.send_message(
-                chat_id=order['telegram_id'],
+        if result:
+            # Get the created label
+            label = await db.shipping_labels.find_one({"order_id": order_id}, {"_id": 0})
+            return {
+                "order_id": order_id,
+                "tracking_number": label['tracking_number'],
+                "label_url": label['label_url'],
+                "status": "success"
+            }
+        else:
+            raise HTTPException(status_code=500, detail="Failed to create label")
                 text=f"""📦 Shipping label создан!
 
 Tracking: {transaction.tracking_number}
