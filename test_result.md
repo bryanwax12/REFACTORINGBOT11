@@ -128,6 +128,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ FIXED: Added default phone numbers (+15551234567) when not provided in both calculate_shipping_rates() API and Telegram bot fetch_shipping_rates() function. ShipStation V2 API now returns 32 rates successfully from USPS (14), UPS (7), and FedEx (11) carriers. No more 400 Bad Request errors. Rate structure includes all required fields: carrier_friendly_name, service_type, shipping_amount, delivery_days. Fix is complete and working as expected."
+        - working: true
+          agent: "main"
+          comment: "✅ ADDITIONAL UPDATE: Filtered out GlobalPost and Stamps.com carriers as requested by user. Updated get_shipstation_carrier_ids() to exclude carrier_codes: 'globalpost', 'stamps_com', 'stamps'. Added additional filtering in fetch_shipping_rates() and calculate_shipping_rates(). Now returns only USPS (14 rates), UPS (7 rates), and FedEx (10 rates) - total 31 rates. GlobalPost and Stamps.com successfully excluded."
 
 backend:
   - task: "Data Confirmation Screen with Edit Button"
