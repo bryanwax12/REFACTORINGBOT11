@@ -265,35 +265,11 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.message.reply_text(
         """📦 Создание нового заказа
 
-Шаг 1/11: Укажите сумму заказа в USDT
-Например: 25.00""",
+Шаг 1/11: Имя отправителя
+Например: John Smith""",
         reply_markup=reply_markup
     )
-    return AMOUNT
-
-async def order_amount(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    try:
-        amount = float(update.message.text)
-        if amount <= 0:
-            await update.message.reply_text("❌ Сумма должна быть больше 0. Попробуйте еще раз:")
-            return AMOUNT
-        
-        context.user_data['amount'] = amount
-        
-        keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        
-        await update.message.reply_text(
-            f"""✅ Сумма: ${amount} USDT
-
-Шаг 2/11: Имя отправителя
-Например: John Smith""",
-            reply_markup=reply_markup
-        )
-        return FROM_NAME
-    except ValueError:
-        await update.message.reply_text("❌ Неверный формат. Введите число, например: 25.00")
-        return AMOUNT
+    return FROM_NAME
 
 async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['from_name'] = update.message.text
@@ -302,7 +278,7 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await update.message.reply_text(
-        """Шаг 3/11: Адрес отправителя
+        """Шаг 2/11: Адрес отправителя
 Например: 215 Clayton St.""",
         reply_markup=reply_markup
     )
