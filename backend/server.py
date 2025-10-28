@@ -679,6 +679,44 @@ async def validate_address_with_shipstation(name, street1, street2, city, state,
         }
 
 async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Check if it's a callback query (skip validation button)
+    if hasattr(update, 'callback_query') and update.callback_query:
+        query = update.callback_query
+        await query.answer()
+        
+        if query.data == 'skip_from_validation':
+            # Skip validation and continue
+            keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            await query.message.reply_text(
+                """⚠️ Валидация адреса пропущена
+
+Шаг 7/15: Телефон отправителя
+Например: +1234567890 или 1234567890""",
+                reply_markup=reply_markup
+            )
+            return FROM_PHONE
+        
+        elif query.data == 'continue_from_anyway':
+            # Continue despite validation failure
+            if context.user_data.get('editing_from_address'):
+                context.user_data['editing_from_address'] = False
+                await query.message.reply_text("✅ Адрес отправителя обновлен (валидация пропущена)!")
+                return await show_data_confirmation(update, context)
+            
+            keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            await query.message.reply_text(
+                """⚠️ Продолжаем с текущим адресом
+
+Шаг 7/15: Телефон отправителя
+Например: +1234567890 или 1234567890""",
+                reply_markup=reply_markup
+            )
+            return FROM_PHONE
+    
     zip_code = update.message.text.strip()
     
     # Validate ZIP code
@@ -690,8 +728,10 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     context.user_data['from_zip'] = zip_code
     
-    # Validate address with GoShippo
-    await update.message.reply_text("⏳ Проверяю адрес отправителя...")
+    # Show validation message with skip button
+    keyboard = [[InlineKeyboardButton("⏭️ Пропустить валидацию", callback_data='skip_from_validation')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text("⏳ Проверяю адрес отправителя...", reply_markup=reply_markup)
     
     validation_result = await validate_address_with_shipstation(
         name=context.user_data['from_name'],
@@ -703,17 +743,18 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     
     if not validation_result['is_valid']:
-        await update.message.reply_text(
-            f"⚠️ Адрес отправителя не прошел проверку:\n{validation_result['message']}\n\nПопробуйте еще раз или нажмите /start для отмены."
-        )
-        # Go back to start of from address
-        keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+        keyboard = [
+            [InlineKeyboardButton("✅ Всё равно продолжить", callback_data='continue_from_anyway')],
+            [InlineKeyboardButton("🔄 Исправить адрес", callback_data='fix_from_address')],
+            [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
+        ]
         reply_markup = InlineKeyboardMarkup(keyboard)
+        
         await update.message.reply_text(
-            "Шаг 2/15: Адрес отправителя\nНапример: 215 Clayton St.",
+            f"⚠️ Адрес отправителя не прошел проверку:\n{validation_result['message']}\n\nВыберите действие:",
             reply_markup=reply_markup
         )
-        return FROM_ADDRESS
+        return FROM_ZIP  # Stay in same state to handle callback
     
     # Check if we're editing from address
     if context.user_data.get('editing_from_address'):
