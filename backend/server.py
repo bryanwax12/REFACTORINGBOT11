@@ -878,17 +878,25 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
             ]
             
             # Create buttons for carrier selection
+            from datetime import datetime, timedelta, timezone
+            
             message = "📦 Доступные тарифы:\n\n"
             keyboard = []
             
             for i, rate in enumerate(context.user_data['rates']):
                 days_text = f" ({rate['days']} дней)" if rate['days'] else ""
-                message += f"{i+1}. {rate['carrier']} - {rate['service']}{days_text}\n   💰 ${rate['amount']:.2f}\n\n"
                 
-                # Show carrier name with price in button
-                button_text = f"{rate['carrier']} - ${rate['amount']:.2f}"
+                # Calculate estimated delivery date
                 if rate['days']:
-                    button_text = f"{rate['carrier']} {rate['days']}д - ${rate['amount']:.2f}"
+                    delivery_date = datetime.now(timezone.utc) + timedelta(days=rate['days'])
+                    date_text = f" → {delivery_date.strftime('%d.%m')}"
+                else:
+                    date_text = ""
+                
+                message += f"{i+1}. {rate['carrier']} - {rate['service']}{days_text}{date_text}\n   💰 ${rate['amount']:.2f}\n\n"
+                
+                # Show full name in button (same as in list)
+                button_text = f"{rate['carrier']} - {rate['service']} - ${rate['amount']:.2f}"
                 
                 keyboard.append([InlineKeyboardButton(
                     button_text,
