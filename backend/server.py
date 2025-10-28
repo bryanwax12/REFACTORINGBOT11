@@ -254,6 +254,64 @@ async def track_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=reply_markup
     )
 
+
+async def handle_create_label_request(update: Update, context: ContextTypes.DEFAULT_TYPE, order_id: str):
+    """Handle request to create shipping label for existing paid order"""
+    query = update.callback_query
+    telegram_id = query.from_user.id
+    
+    # Get order details
+    order = await db.orders.find_one({"id": order_id, "telegram_id": telegram_id}, {"_id": 0})
+    
+    if not order:
+        await query.message.reply_text("❌ Заказ не найден.")
+        return
+    
+    if order['payment_status'] != 'paid':
+        await query.message.reply_text("❌ Заказ не оплачен. Создание лейбла невозможно.")
+        return
+    
+    if order['shipping_status'] == 'label_created':
+        await query.message.reply_text("✅ Лейбл уже создан для этого заказа.")
+        return
+    
+    # Show confirmation message
+    await query.message.reply_text(f"""⏳ Создаю shipping label для заказа #{order_id[:8]}...
+    
+Это может занять несколько секунд.""")
+    
+    # Try to create label
+    label_created = await create_and_send_label(order_id, telegram_id, query.message)
+    
+    if label_created:
+        # Update order payment status to paid (if it was failed before)
+        await db.orders.update_one(
+            {"id": order_id},
+            {"$set": {"payment_status": "paid"}}
+        )
+        
+        keyboard = [[
+            InlineKeyboardButton("📦 Мои заказы", callback_data='my_orders'),
+            InlineKeyboardButton("🔙 Главное меню", callback_data='start')
+        ]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await query.message.reply_text(
+            "✅ Shipping label успешно создан!",
+            reply_markup=reply_markup
+        )
+    else:
+        keyboard = [[
+            InlineKeyboardButton("📦 Мои заказы", callback_data='my_orders'),
+            InlineKeyboardButton("🔙 Главное меню", callback_data='start')
+        ]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await query.message.reply_text(
+            "❌ Не удалось создать shipping label. Пожалуйста, свяжитесь с администратором.",
+            reply_markup=reply_markup
+        )
+
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
