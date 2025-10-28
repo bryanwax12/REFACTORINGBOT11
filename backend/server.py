@@ -1062,6 +1062,10 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
     if query.data == 'edit_data':
         # Show edit menu
         return await show_edit_menu(update, context)
+    
+    if query.data == 'edit_addresses_error':
+        # Show edit menu after rate error
+        return await show_edit_menu(update, context)
 
 async def show_edit_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Show menu to select what to edit"""
