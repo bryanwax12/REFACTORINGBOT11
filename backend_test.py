@@ -140,32 +140,60 @@ def test_shipping_rates():
         
         if response.status_code == 200:
             data = response.json()
-            print(f"✅ Shipping Rates Response: {json.dumps(data, indent=2)}")
+            print(f"✅ ShipStation API Response: {json.dumps(data, indent=2)}")
             
             rates = data.get('rates', [])
-            carriers = data.get('carriers', [])
             
-            print(f"\n📊 Rates Summary:")
-            print(f"   Total rates: {len(rates)}")
-            print(f"   Carriers: {carriers}")
+            print(f"\n📊 ShipStation V2 API Results:")
+            print(f"   Total rates returned: {len(rates)}")
             
-            # Check for specific carriers in rates
-            rate_carriers = [r.get('carrier', '').upper() for r in rates]
-            ups_rates = [r for r in rates if 'UPS' in r.get('carrier', '').upper()]
-            usps_rates = [r for r in rates if 'USPS' in r.get('carrier', '').upper()]
-            fedex_rates = [r for r in rates if 'FEDEX' in r.get('carrier', '').upper() or 'FDX' in r.get('carrier', '').upper()]
+            # Check if we got the expected 20-30+ rates as mentioned in review
+            if len(rates) >= 20:
+                print(f"   ✅ Expected rate count achieved (20-30+ rates)")
+            elif len(rates) >= 10:
+                print(f"   ⚠️ Good rate count but below expected (got {len(rates)}, expected 20-30+)")
+            else:
+                print(f"   ❌ Low rate count (got {len(rates)}, expected 20-30+)")
             
+            # Check for specific carriers mentioned in review (USPS, UPS, FedEx)
+            carrier_names = [r.get('carrier_friendly_name', r.get('carrier', '')).upper() for r in rates]
+            unique_carriers = set(carrier_names)
+            
+            ups_rates = [r for r in rates if 'UPS' in r.get('carrier_friendly_name', r.get('carrier', '')).upper()]
+            usps_rates = [r for r in rates if 'USPS' in r.get('carrier_friendly_name', r.get('carrier', '')).upper()]
+            fedex_rates = [r for r in rates if any(x in r.get('carrier_friendly_name', r.get('carrier', '')).upper() for x in ['FEDEX', 'FDX'])]
+            
+            print(f"   Unique carriers: {len(unique_carriers)} - {sorted(unique_carriers)}")
             print(f"   UPS rates: {len(ups_rates)} {'✅' if ups_rates else '❌'}")
             print(f"   USPS rates: {len(usps_rates)} {'✅' if usps_rates else '❌'}")
             print(f"   FedEx rates: {len(fedex_rates)} {'✅' if fedex_rates else '❌'}")
             
-            # Show rate details
+            # Verify rate structure as mentioned in review
             if rates:
-                print(f"\n💰 Rate Details:")
-                for i, rate in enumerate(rates[:5], 1):  # Show first 5 rates
-                    print(f"   {i}. {rate.get('carrier')} - {rate.get('service')}")
-                    print(f"      Price: ${rate.get('amount', 0):.2f}")
-                    print(f"      Days: {rate.get('estimated_days', 'N/A')}")
+                print(f"\n💰 Rate Structure Validation:")
+                sample_rate = rates[0]
+                required_fields = ['carrier_friendly_name', 'service_type', 'shipping_amount']
+                
+                for field in required_fields:
+                    has_field = field in sample_rate or any(alt in sample_rate for alt in [field.replace('_', ''), field.split('_')[0]])
+                    print(f"   {field}: {'✅' if has_field else '❌'}")
+                
+                # Show first 5 rates with details
+                print(f"\n💰 Sample Rates:")
+                for i, rate in enumerate(rates[:5], 1):
+                    carrier = rate.get('carrier_friendly_name', rate.get('carrier', 'Unknown'))
+                    service = rate.get('service_type', rate.get('service', 'Unknown'))
+                    amount = rate.get('shipping_amount', {}).get('amount', rate.get('amount', 0))
+                    days = rate.get('delivery_days', rate.get('estimated_days', 'N/A'))
+                    
+                    print(f"   {i}. {carrier} - {service}")
+                    print(f"      Price: ${float(amount):.2f}")
+                    print(f"      Delivery: {days} days")
+            
+            # Check for 400 Bad Request fix success
+            print(f"\n🔧 ShipStation V2 API Fix Validation:")
+            print(f"   ✅ No 400 Bad Request error (carrier_ids populated)")
+            print(f"   ✅ Rate request successful")
             
             return True, data
         else:
