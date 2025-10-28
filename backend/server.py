@@ -1508,6 +1508,76 @@ async def get_users():
     users = await db.users.find({}, {"_id": 0}).to_list(100)
     return users
 
+@api_router.post("/users/{telegram_id}/balance/add")
+async def add_balance(telegram_id: int, amount: float):
+    try:
+        if amount <= 0:
+            raise HTTPException(status_code=400, detail="Amount must be positive")
+        
+        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Add balance
+        new_balance = user.get('balance', 0) + amount
+        await db.users.update_one(
+            {"telegram_id": telegram_id},
+            {"$set": {"balance": new_balance}}
+        )
+        
+        # Notify user via Telegram
+        if bot_instance:
+            await bot_instance.send_message(
+                chat_id=telegram_id,
+                text=f"""💰 Баланс пополнен администратором!
+
+Зачислено: ${amount:.2f}
+Новый баланс: ${new_balance:.2f}"""
+            )
+        
+        return {"success": True, "new_balance": new_balance, "added": amount}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/users/{telegram_id}/balance/deduct")
+async def deduct_balance(telegram_id: int, amount: float):
+    try:
+        if amount <= 0:
+            raise HTTPException(status_code=400, detail="Amount must be positive")
+        
+        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        current_balance = user.get('balance', 0)
+        if current_balance < amount:
+            raise HTTPException(status_code=400, detail="Insufficient balance")
+        
+        # Deduct balance
+        new_balance = current_balance - amount
+        await db.users.update_one(
+            {"telegram_id": telegram_id},
+            {"$set": {"balance": new_balance}}
+        )
+        
+        # Notify user via Telegram
+        if bot_instance:
+            await bot_instance.send_message(
+                chat_id=telegram_id,
+                text=f"""⚠️ Баланс изменен администратором!
+
+Списано: ${amount:.2f}
+Новый баланс: ${new_balance:.2f}"""
+            )
+        
+        return {"success": True, "new_balance": new_balance, "deducted": amount}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/stats")
 async def get_stats():
     total_users = await db.users.count_documents({})
