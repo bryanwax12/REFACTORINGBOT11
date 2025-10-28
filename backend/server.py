@@ -1700,7 +1700,8 @@ async def create_order_in_db(user, data, selected_rate, amount):
             city=data['from_city'],
             state=data['from_state'],
             zip=data['from_zip'],
-            country="US"
+            country="US",
+            phone=data.get('from_phone', '')
         ),
         address_to=Address(
             name=data['to_name'],
@@ -1709,7 +1710,8 @@ async def create_order_in_db(user, data, selected_rate, amount):
             city=data['to_city'],
             state=data['to_state'],
             zip=data['to_zip'],
-            country="US"
+            country="US",
+            phone=data.get('to_phone', '')
         ),
         parcel=Parcel(
             length=5,
@@ -1726,6 +1728,7 @@ async def create_order_in_db(user, data, selected_rate, amount):
     order_dict['created_at'] = order_dict['created_at'].isoformat()
     order_dict['selected_carrier'] = selected_rate['carrier']
     order_dict['selected_service'] = selected_rate['service']
+    order_dict['selected_service_code'] = selected_rate.get('service_code', '')  # Add service_code
     order_dict['rate_id'] = selected_rate['rate_id']
     order_dict['original_amount'] = selected_rate['original_amount']  # Store original GoShippo price
     order_dict['markup'] = amount - selected_rate['original_amount']  # Store markup amount
