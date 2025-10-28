@@ -234,6 +234,14 @@ const Dashboard = () => {
                         <div className="flex gap-2">
                           <Button 
                             size="sm" 
+                            variant="ghost"
+                            data-testid={`view-details-${user.telegram_id}`}
+                            onClick={() => viewUserDetails(user.telegram_id)}
+                          >
+                            👁️ Details
+                          </Button>
+                          <Button 
+                            size="sm" 
                             variant="outline"
                             data-testid={`add-balance-${user.telegram_id}`}
                             onClick={() => handleBalanceAction(user.telegram_id, 'add')}
