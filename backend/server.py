@@ -1189,15 +1189,34 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             error_data = response.json() if response.text else {}
             error_msg = error_data.get('message', f'Status code: {response.status_code}')
             logger.error(f"ShipStation rate request failed: {error_msg}")
-            await query.message.reply_text(f"❌ Ошибка при получении тарифов:\n{error_msg}\n\nПроверьте правильность введенных адресов.")
-            return ConversationHandler.END
+            
+            keyboard = [
+                [InlineKeyboardButton("✏️ Редактировать адреса", callback_data='edit_addresses_error')],
+                [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            await query.message.reply_text(
+                f"❌ Ошибка при получении тарифов:\n{error_msg}\n\nПроверьте правильность введенных адресов.",
+                reply_markup=reply_markup
+            )
+            return CONFIRM_DATA  # Stay to handle callback
         
         rate_response = response.json()
         all_rates = rate_response.get('rate_response', {}).get('rates', [])
         
         if not all_rates or len(all_rates) == 0:
-            await query.message.reply_text(f"❌ Нет доступных тарифов для данного направления.\n\nПроверьте правильность введенных адресов.")
-            return ConversationHandler.END
+            keyboard = [
+                [InlineKeyboardButton("✏️ Редактировать адреса", callback_data='edit_addresses_error')],
+                [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            await query.message.reply_text(
+                f"❌ Нет доступных тарифов для данного направления.\n\nПроверьте правильность введенных адресов.",
+                reply_markup=reply_markup
+            )
+            return CONFIRM_DATA  # Stay to handle callback
         
         # Log carriers
         carriers = set([r['carrier_friendly_name'] for r in all_rates])
