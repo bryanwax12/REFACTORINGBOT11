@@ -942,6 +942,32 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await cancel_order(update, context)
         return ConversationHandler.END
     
+    # Handle refresh carriers
+    if query.data == 'refresh_carriers':
+        await query.message.reply_text("⏳ Обновляю список курьерских служб...")
+        
+        # Re-fetch rates by calling the weight handler with stored weight
+        weight = context.user_data.get('weight')
+        if not weight:
+            await query.message.reply_text("❌ Ошибка: вес посылки не найден. Начните заново.")
+            return ConversationHandler.END
+        
+        # Create a fake update with weight message
+        class FakeMessage:
+            def __init__(self, text):
+                self.text = str(weight)
+            
+            async def reply_text(self, *args, **kwargs):
+                return await query.message.reply_text(*args, **kwargs)
+        
+        fake_update = type('obj', (object,), {
+            'message': FakeMessage(str(weight)),
+            'callback_query': query
+        })()
+        
+        # Re-run the weight handler to get fresh rates
+        return await order_parcel_weight(fake_update, context)
+    
     # Get selected carrier index
     carrier_idx = int(query.data.split('_')[-1])
     selected_rate = context.user_data['rates'][carrier_idx]
