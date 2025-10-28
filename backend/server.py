@@ -2209,19 +2209,19 @@ async def deduct_balance(telegram_id: int, amount: float):
 
 @api_router.get("/carriers")
 async def get_carriers():
-    """Get list of active carrier accounts from GoShippo"""
+    """Get list of active carrier accounts from ShipStation"""
     try:
-        if not SHIPPO_API_KEY:
-            raise HTTPException(status_code=500, detail="Shippo API not configured")
+        if not SHIPSTATION_API_KEY:
+            raise HTTPException(status_code=500, detail="ShipStation API not configured")
         
         headers = {
-            'Authorization': f'ShippoToken {SHIPPO_API_KEY}',
+            'API-Key': SHIPSTATION_API_KEY,
             'Content-Type': 'application/json'
         }
         
         # Get carrier accounts
         response = requests.get(
-            'https://api.goshippo.com/carrier_accounts/',
+            'https://api.shipstation.com/v2/carriers',
             headers=headers,
             timeout=10
         )
@@ -2229,18 +2229,19 @@ async def get_carriers():
         if response.status_code != 200:
             raise HTTPException(status_code=response.status_code, detail="Failed to fetch carriers")
         
-        carriers = response.json()
+        carriers_data = response.json()
+        carriers = carriers_data.get('carriers', [])
         
-        # Filter active carriers
+        # Format carriers
         active_carriers = [
             {
-                "carrier": carrier.get('carrier'),
-                "account_id": carrier.get('object_id'),
-                "active": carrier.get('active', False),
-                "test": carrier.get('test', True)
+                "carrier": carrier.get('friendly_name'),
+                "carrier_code": carrier.get('carrier_code'),
+                "account_id": carrier.get('carrier_id'),
+                "active": not carrier.get('disabled_by_billing_plan', False),
+                "services": len(carrier.get('services', []))
             }
-            for carrier in carriers.get('results', [])
-            if carrier.get('active', False)
+            for carrier in carriers
         ]
         
         return {
