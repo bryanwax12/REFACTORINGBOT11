@@ -1164,7 +1164,7 @@ async def create_order_in_db(user, data, selected_rate, amount):
             distance_unit="in",
             mass_unit="lb"
         ),
-        amount=amount
+        amount=amount  # This is the amount with markup that user pays
     )
     
     order_dict = order.model_dump()
@@ -1172,6 +1172,8 @@ async def create_order_in_db(user, data, selected_rate, amount):
     order_dict['selected_carrier'] = selected_rate['carrier']
     order_dict['selected_service'] = selected_rate['service']
     order_dict['rate_id'] = selected_rate['rate_id']
+    order_dict['original_amount'] = selected_rate['original_amount']  # Store original GoShippo price
+    order_dict['markup'] = amount - selected_rate['original_amount']  # Store markup amount
     await db.orders.insert_one(order_dict)
     
     return order_dict
