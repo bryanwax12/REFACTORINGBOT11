@@ -904,6 +904,15 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
                     callback_data=f'select_carrier_{i}'
                 )])
             
+            # Add info message
+            message += "💡 Не нашли нужную доставку? Попробуйте обновить список\n"
+            
+            # Add refresh and cancel buttons
+            keyboard.append([
+                InlineKeyboardButton("🔄 Обновить список", callback_data='refresh_carriers'),
+                InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')
+            ])
+            
             if len(context.user_data['rates']) == 1:
                 message += "\n⚠️ В Test mode доступен только USPS.\n"
                 message += "Для FedEx, UPS, DHL нужно:\n"
