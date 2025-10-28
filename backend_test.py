@@ -186,9 +186,134 @@ def check_backend_logs():
     except Exception as e:
         print(f"❌ Error checking logs: {e}")
 
+def test_telegram_bot_infrastructure():
+    """Test Telegram bot backend infrastructure"""
+    print("\n🔍 Testing Telegram Bot Infrastructure...")
+    
+    try:
+        # Check if bot is initialized and running
+        log_result = os.popen("tail -n 100 /var/log/supervisor/backend.err.log | grep -i 'telegram'").read()
+        
+        # Look for successful bot initialization
+        bot_started = "Telegram Bot started successfully!" in log_result
+        bot_connected = "Application started" in log_result
+        
+        print(f"   Bot initialization: {'✅' if bot_started else '❌'}")
+        print(f"   Bot connection: {'✅' if bot_connected else '❌'}")
+        
+        # Check for any errors
+        error_patterns = ["error", "failed", "exception"]
+        has_errors = any(pattern.lower() in log_result.lower() for pattern in error_patterns)
+        
+        if has_errors:
+            print(f"   ⚠️ Potential errors found in logs")
+            # Show relevant error lines
+            error_lines = [line for line in log_result.split('\n') 
+                          if any(pattern.lower() in line.lower() for pattern in error_patterns)]
+            for line in error_lines[-3:]:  # Show last 3 error lines
+                if line.strip():
+                    print(f"      {line.strip()}")
+        else:
+            print(f"   ✅ No errors found in bot logs")
+        
+        return bot_started and bot_connected and not has_errors
+        
+    except Exception as e:
+        print(f"❌ Error checking Telegram bot infrastructure: {e}")
+        return False
+
+def test_conversation_handler_functions():
+    """Test that conversation handler functions are properly defined"""
+    print("\n🔍 Testing Conversation Handler Functions...")
+    
+    try:
+        # Read the server.py file to check for required functions
+        with open('/app/backend/server.py', 'r') as f:
+            server_code = f.read()
+        
+        # Functions that should be implemented for data editing functionality
+        required_functions = [
+            'show_data_confirmation',
+            'show_edit_menu', 
+            'handle_edit_choice',
+            'handle_data_confirmation',
+            'fetch_shipping_rates'
+        ]
+        
+        # Conversation states that should be defined
+        required_states = [
+            'CONFIRM_DATA',
+            'EDIT_MENU'
+        ]
+        
+        function_results = {}
+        for func in required_functions:
+            # Check if function is defined
+            pattern = rf'async def {func}\('
+            found = bool(re.search(pattern, server_code))
+            function_results[func] = found
+            print(f"   Function {func}: {'✅' if found else '❌'}")
+        
+        state_results = {}
+        for state in required_states:
+            # Check if state is defined
+            found = state in server_code
+            state_results[state] = found
+            print(f"   State {state}: {'✅' if found else '❌'}")
+        
+        # Check ConversationHandler setup
+        conv_handler_found = 'ConversationHandler' in server_code
+        print(f"   ConversationHandler setup: {'✅' if conv_handler_found else '❌'}")
+        
+        all_functions_found = all(function_results.values())
+        all_states_found = all(state_results.values())
+        
+        return all_functions_found and all_states_found and conv_handler_found
+        
+    except Exception as e:
+        print(f"❌ Error checking conversation handler functions: {e}")
+        return False
+
+def test_telegram_bot_token():
+    """Test if Telegram bot token is valid"""
+    print("\n🔍 Testing Telegram Bot Token...")
+    
+    try:
+        # Load bot token from environment
+        load_dotenv('/app/backend/.env')
+        bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')
+        
+        if not bot_token:
+            print("❌ Bot token not found in environment")
+            return False
+        
+        print(f"   Bot token found: ✅")
+        
+        # Test token by calling Telegram API directly
+        response = requests.get(f"https://api.telegram.org/bot{bot_token}/getMe", timeout=10)
+        
+        if response.status_code == 200:
+            bot_info = response.json()
+            if bot_info.get('ok'):
+                bot_data = bot_info.get('result', {})
+                print(f"   Bot name: {bot_data.get('first_name', 'Unknown')}")
+                print(f"   Bot username: @{bot_data.get('username', 'Unknown')}")
+                print(f"   Token validation: ✅")
+                return True
+            else:
+                print(f"❌ Invalid bot token response: {bot_info}")
+                return False
+        else:
+            print(f"❌ Failed to validate bot token: {response.status_code}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Error testing bot token: {e}")
+        return False
+
 def main():
     """Run all tests"""
-    print("🚀 Starting GoShippo Integration Tests")
+    print("🚀 Starting Telegram Bot Backend Tests")
     print("=" * 60)
     
     # Test results
@@ -197,13 +322,22 @@ def main():
     # 1. Test API Health
     results['api_health'] = test_api_health()
     
-    # 2. Test Carriers
+    # 2. Test Telegram Bot Infrastructure
+    results['telegram_infrastructure'] = test_telegram_bot_infrastructure()
+    
+    # 3. Test Conversation Handler Functions
+    results['conversation_handlers'] = test_conversation_handler_functions()
+    
+    # 4. Test Telegram Bot Token
+    results['bot_token'] = test_telegram_bot_token()
+    
+    # 5. Test Carriers (supporting functionality)
     results['carriers'], carriers_data = test_carriers()
     
-    # 3. Test Shipping Rates
+    # 6. Test Shipping Rates (supporting functionality)
     results['shipping_rates'], rates_data = test_shipping_rates()
     
-    # 4. Check Backend Logs
+    # 7. Check Backend Logs
     check_backend_logs()
     
     # Summary
@@ -220,28 +354,33 @@ def main():
     overall_status = "✅ ALL TESTS PASSED" if all_passed else "❌ SOME TESTS FAILED"
     print(f"\nOverall Result: {overall_status}")
     
-    # Specific findings for GoShippo
-    print("\n🎯 GoShippo Integration Status:")
-    if results.get('carriers') and carriers_data:
-        active_carriers = [c for c in carriers_data.get('carriers', []) if c.get('active', False)]
-        if active_carriers:
-            print(f"   ✅ {len(active_carriers)} active carrier accounts found")
-        else:
-            print(f"   ❌ No active carrier accounts found")
+    # Specific findings for Telegram Bot
+    print("\n🎯 Telegram Bot Status:")
+    if results.get('telegram_infrastructure'):
+        print(f"   ✅ Telegram bot is running and connected")
+    else:
+        print(f"   ❌ Telegram bot infrastructure issues detected")
     
-    if results.get('shipping_rates') and rates_data:
-        rates = rates_data.get('rates', [])
-        carriers = rates_data.get('carriers', [])
-        if rates:
-            print(f"   ✅ {len(rates)} shipping rates returned from {len(carriers)} carriers")
-            # Check for UPS specifically (main concern from review request)
-            ups_found = any('UPS' in str(carrier).upper() for carrier in carriers)
-            if ups_found:
-                print(f"   ✅ UPS rates are now working in LIVE mode!")
-            else:
-                print(f"   ⚠️ UPS rates not found - may need carrier account setup")
-        else:
-            print(f"   ❌ No shipping rates returned")
+    if results.get('conversation_handlers'):
+        print(f"   ✅ All conversation handler functions are implemented")
+    else:
+        print(f"   ❌ Missing conversation handler functions")
+    
+    if results.get('bot_token'):
+        print(f"   ✅ Bot token is valid and working")
+    else:
+        print(f"   ❌ Bot token validation failed")
+    
+    # Note about manual testing requirement
+    print("\n⚠️  IMPORTANT NOTE:")
+    print("   The data editing functionality requires MANUAL TESTING through Telegram interface.")
+    print("   This automated test only verifies the backend infrastructure.")
+    print("   To test the actual conversation flow:")
+    print("   1. Open Telegram and find the bot")
+    print("   2. Send /start command")
+    print("   3. Click '📦 Новый заказ' button")
+    print("   4. Follow the complete order creation flow")
+    print("   5. Test the data confirmation and editing features")
     
     return all_passed
 
