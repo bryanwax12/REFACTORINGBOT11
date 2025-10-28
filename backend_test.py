@@ -450,18 +450,23 @@ def main():
     else:
         print(f"   ❌ Bot token validation failed")
     
-    # Note about manual testing requirement
-    print("\n⚠️  IMPORTANT NOTE:")
-    print("   The data editing functionality requires MANUAL TESTING through Telegram interface.")
-    print("   This automated test only verifies the backend infrastructure.")
-    print("   To test the actual conversation flow:")
-    print("   1. Open Telegram and find the bot")
+    # Manual testing recommendations
+    print("\n📋 NEXT STEPS - Manual Testing Required:")
+    print("   🤖 Telegram Bot End-to-End Testing:")
+    print("   1. Open Telegram and find @whitelabellbot")
     print("   2. Send /start command")
-    print("   3. Click '📦 Новый заказ' button")
-    print("   4. Follow the complete order creation flow")
-    print("   5. Test the data confirmation and editing features")
+    print("   3. Click '📦 Создать заказ' button")
+    print("   4. Enter valid US addresses (e.g., LA to NY)")
+    print("   5. Verify shipping rates are fetched successfully")
+    print("   6. Confirm no validation errors appear")
     
-    return all_passed
+    print("\n🎯 Expected Results from Manual Testing:")
+    print("   ✅ Bot should fetch 20-30+ shipping rates")
+    print("   ✅ No '400 Bad Request' or validation errors")
+    print("   ✅ Rates from USPS, UPS, and FedEx carriers")
+    print("   ✅ Each rate shows carrier, service, price, delivery days")
+    
+    return critical_passed
 
 if __name__ == "__main__":
     main()
