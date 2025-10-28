@@ -679,21 +679,19 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     if balance >= amount:
         keyboard.append([InlineKeyboardButton(
-            f"💳 Оплатить с баланса (${balance:.2f})",
+            f"💳 С баланса (${balance:.2f})",
             callback_data='pay_from_balance'
         )])
     
     keyboard.append([InlineKeyboardButton(
-        f"💰 Оплатить криптой (${amount})",
+        f"💰 Криптой (${amount})",
         callback_data='pay_with_crypto'
     )])
     
-    keyboard.append([InlineKeyboardButton(
-        "💵 Пополнить баланс",
-        callback_data='top_up_balance'
-    )])
-    
-    keyboard.append([InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')])
+    keyboard.append([
+        InlineKeyboardButton("💵 Пополнить", callback_data='top_up_balance'),
+        InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')
+    ])
     
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.message.reply_text(confirmation_text, reply_markup=reply_markup)
