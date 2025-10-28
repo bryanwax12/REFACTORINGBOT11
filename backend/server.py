@@ -365,15 +365,41 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['from_street'] = update.message.text
     
-    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+    keyboard = [
+        [InlineKeyboardButton("⏭ Пропустить", callback_data='skip_from_address2')],
+        [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
+    ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await update.message.reply_text(
-        """Шаг 3/11: Город отправителя
+        """Шаг 3/13: Квартира/Офис отправителя (необязательно)
+Например: Apt 5, Suite 201
+Или нажмите "Пропустить" """,
+        reply_markup=reply_markup
+    )
+    return FROM_ADDRESS2
+
+async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.message:
+        context.user_data['from_street2'] = update.message.text
+    else:
+        context.user_data['from_street2'] = None
+    
+    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await (update.message or update.callback_query.message).reply_text(
+        """Шаг 4/13: Город отправителя
 Например: San Francisco""",
         reply_markup=reply_markup
     )
     return FROM_CITY
+
+async def skip_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    context.user_data['from_street2'] = None
+    return await order_from_address2(update, context)
 
 async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['from_city'] = update.message.text
