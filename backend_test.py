@@ -395,32 +395,58 @@ def main():
     
     # Summary
     print("\n" + "=" * 60)
-    print("📊 TEST SUMMARY")
+    print("📊 SHIPSTATION V2 API FIX TEST SUMMARY")
     print("=" * 60)
     
-    for test_name, passed in results.items():
+    # Priority order for ShipStation fix
+    priority_tests = ['api_health', 'carrier_ids', 'shipstation_rates', 'telegram_infrastructure']
+    other_tests = [k for k in results.keys() if k not in priority_tests]
+    
+    print("🎯 CRITICAL TESTS (ShipStation Fix):")
+    for test_name in priority_tests:
+        if test_name in results:
+            passed = results[test_name]
+            status = "✅ PASS" if passed else "❌ FAIL"
+            print(f"   {test_name.replace('_', ' ').title()}: {status}")
+    
+    print("\n📋 SUPPORTING TESTS:")
+    for test_name in other_tests:
+        passed = results[test_name]
         status = "✅ PASS" if passed else "❌ FAIL"
-        print(f"{test_name.replace('_', ' ').title()}: {status}")
+        print(f"   {test_name.replace('_', ' ').title()}: {status}")
     
     # Overall result
+    critical_passed = all(results.get(test, False) for test in priority_tests if test in results)
     all_passed = all(results.values())
-    overall_status = "✅ ALL TESTS PASSED" if all_passed else "❌ SOME TESTS FAILED"
-    print(f"\nOverall Result: {overall_status}")
     
-    # Specific findings for Telegram Bot
-    print("\n🎯 Telegram Bot Status:")
+    print(f"\n🎯 ShipStation Fix Status: {'✅ SUCCESS' if critical_passed else '❌ FAILED'}")
+    print(f"📊 Overall Result: {'✅ ALL TESTS PASSED' if all_passed else '❌ SOME TESTS FAILED'}")
+    
+    # Specific findings for ShipStation Fix
+    print("\n🔧 ShipStation V2 API Fix Analysis:")
+    if results.get('shipstation_rates'):
+        print(f"   ✅ Rate calculation working - No 400 Bad Request")
+        print(f"   ✅ Carrier IDs properly populated in rate_options")
+        if rates_data and len(rates_data.get('rates', [])) >= 20:
+            print(f"   ✅ Expected rate count achieved (20-30+ rates)")
+        elif rates_data and len(rates_data.get('rates', [])) >= 10:
+            print(f"   ⚠️ Moderate rate count (consider checking carrier configuration)")
+        else:
+            print(f"   ❌ Low rate count - may indicate carrier configuration issues")
+    else:
+        print(f"   ❌ Rate calculation failed - Fix may not be working properly")
+        print(f"   🔍 Check: get_shipstation_carrier_ids() function")
+        print(f"   🔍 Check: rate_options.carrier_ids population")
+    
+    # Telegram Bot Status
+    print("\n🤖 Telegram Bot Integration:")
     if results.get('telegram_infrastructure'):
-        print(f"   ✅ Telegram bot is running and connected")
+        print(f"   ✅ Bot is running and ready for end-to-end testing")
     else:
-        print(f"   ❌ Telegram bot infrastructure issues detected")
-    
-    if results.get('conversation_handlers'):
-        print(f"   ✅ All conversation handler functions are implemented")
-    else:
-        print(f"   ❌ Missing conversation handler functions")
+        print(f"   ❌ Bot infrastructure issues detected")
     
     if results.get('bot_token'):
-        print(f"   ✅ Bot token is valid and working")
+        print(f"   ✅ Bot token valid (@whitelabellbot)")
     else:
         print(f"   ❌ Bot token validation failed")
     
