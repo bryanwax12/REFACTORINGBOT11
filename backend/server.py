@@ -229,15 +229,10 @@ async def my_orders_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 📅 {order.get('created_at', '')[:10]}
 """
         
-        # Add button for all paid orders to create/recreate label
-        if order['payment_status'] == 'paid':
-            if order['shipping_status'] == 'label_created':
-                button_text = f"🔄 Пересоздать лейбл для #{order['id'][:8]} ({recipient_name})"
-            else:
-                button_text = f"🏷️ Создать лейбл для #{order['id'][:8]} ({recipient_name})"
-            
+        # Add button ONLY for orders with label already created (to recreate)
+        if order['payment_status'] == 'paid' and order['shipping_status'] == 'label_created':
             keyboard.append([InlineKeyboardButton(
-                button_text, 
+                f"🔄 Пересоздать лейбл для #{order['id'][:8]} ({recipient_name})", 
                 callback_data=f"create_label_{order['id']}"
             )])
         
