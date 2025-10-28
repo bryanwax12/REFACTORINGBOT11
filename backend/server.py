@@ -244,6 +244,8 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await start_command(update, context)
     elif query.data == 'my_orders':
         await my_orders_command(update, context)
+    elif query.data == 'my_balance':
+        await my_balance_command(update, context)
     elif query.data == 'track':
         await track_command(update, context)
     elif query.data == 'help':
@@ -252,6 +254,81 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await new_order_start(update, context)
     elif query.data == 'cancel_order':
         await cancel_order(update, context)
+
+async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Handle both command and callback
+    if update.callback_query:
+        query = update.callback_query
+        await query.answer()
+        telegram_id = query.from_user.id
+        send_method = query.message.reply_text
+    else:
+        telegram_id = update.effective_user.id
+        send_method = update.message.reply_text
+    
+    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    balance = user.get('balance', 0.0) if user else 0.0
+    
+    message = f"""💳 Ваш баланс: ${balance:.2f}
+
+Вы можете использовать баланс для оплаты заказов.
+
+Хотите пополнить баланс?"""
+    
+    keyboard = [
+        [InlineKeyboardButton("💵 Пополнить на $10", callback_data='topup_10')],
+        [InlineKeyboardButton("💵 Пополнить на $25", callback_data='topup_25')],
+        [InlineKeyboardButton("💵 Пополнить на $50", callback_data='topup_50')],
+        [InlineKeyboardButton("💵 Пополнить на $100", callback_data='topup_100')],
+        [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await send_method(message, reply_markup=reply_markup)
+
+async def handle_topup(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    
+    topup_amount = float(query.data.split('_')[1])
+    telegram_id = query.from_user.id
+    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    
+    if crypto:
+        invoice = await crypto.create_invoice(
+            asset="USDT",
+            amount=topup_amount
+        )
+        
+        pay_url = getattr(invoice, 'bot_invoice_url', None) or getattr(invoice, 'mini_app_invoice_url', None)
+        
+        # Save top-up payment
+        payment = Payment(
+            order_id=f"topup_{user['id']}",
+            amount=topup_amount,
+            invoice_id=invoice.invoice_id,
+            pay_url=pay_url,
+            currency="USDT",
+            status="pending"
+        )
+        payment_dict = payment.model_dump()
+        payment_dict['created_at'] = payment_dict['created_at'].isoformat()
+        payment_dict['telegram_id'] = telegram_id
+        payment_dict['type'] = 'topup'
+        await db.payments.insert_one(payment_dict)
+        
+        keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await query.message.reply_text(
+            f"""💵 Пополнение баланса
+
+💰 Оплатите ${topup_amount} USDT:
+{pay_url}
+
+После оплаты баланс будет пополнен автоматически.""",
+            reply_markup=reply_markup
+        )
 
 # Conversation states for order creation
 FROM_NAME, FROM_ADDRESS, FROM_CITY, FROM_STATE, FROM_ZIP, TO_NAME, TO_ADDRESS, TO_CITY, TO_STATE, TO_ZIP, PARCEL_WEIGHT, SELECT_CARRIER, PAYMENT_METHOD = range(13)
