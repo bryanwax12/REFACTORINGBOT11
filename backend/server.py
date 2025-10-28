@@ -1753,7 +1753,7 @@ async def create_and_send_label(order_id, telegram_id, message):
             'shipment': {
                 'ship_to': {
                     'name': order['address_to']['name'],
-                    'phone': order['address_to'].get('phone', ''),
+                    'phone': order['address_to'].get('phone') or '+15551234567',  # Default phone if empty
                     'address_line1': order['address_to']['street1'],
                     'address_line2': order['address_to'].get('street2', ''),
                     'city_locality': order['address_to']['city'],
@@ -1763,7 +1763,7 @@ async def create_and_send_label(order_id, telegram_id, message):
                 },
                 'ship_from': {
                     'name': order['address_from']['name'],
-                    'phone': order['address_from'].get('phone', ''),
+                    'phone': order['address_from'].get('phone') or '+15551234567',  # Default phone if empty
                     'address_line1': order['address_from']['street1'],
                     'address_line2': order['address_from'].get('street2', ''),
                     'city_locality': order['address_from']['city'],
@@ -1782,7 +1782,8 @@ async def create_and_send_label(order_id, telegram_id, message):
                         'height': order['parcel'].get('height', 5),
                         'unit': 'inch'
                     }
-                }]
+                }],
+                'service_code': order.get('selected_service_code', order.get('service_code', ''))  # Add service_code
             },
             'rate_id': order['rate_id']
         }
