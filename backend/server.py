@@ -1109,7 +1109,6 @@ async def startup_event():
             order_conv_handler = ConversationHandler(
                 entry_points=[CallbackQueryHandler(new_order_start, pattern='^new_order$')],
                 states={
-                    AMOUNT: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_amount)],
                     FROM_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_name)],
                     FROM_ADDRESS: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_address)],
                     FROM_CITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_city)],
@@ -1120,7 +1119,9 @@ async def startup_event():
                     TO_CITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_city)],
                     TO_STATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_state)],
                     TO_ZIP: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_zip)],
-                    CONFIRM: [CallbackQueryHandler(confirm_order, pattern='^(confirm_order|cancel_order)$')]
+                    PARCEL_WEIGHT: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_parcel_weight)],
+                    SELECT_CARRIER: [CallbackQueryHandler(select_carrier, pattern='^(select_carrier_|cancel_order)')],
+                    PAYMENT_METHOD: [CallbackQueryHandler(process_payment, pattern='^(pay_from_balance|pay_with_crypto|top_up_balance|topup_|cancel_order)')]
                 },
                 fallbacks=[
                     CallbackQueryHandler(cancel_order, pattern='^cancel_order$'),
