@@ -178,20 +178,20 @@ backend:
           comment: "✅ Live GoShippo API key (shippo_live_209ad7f3458c4b61611048ac3d68b0c6120d0914) is working correctly. Successfully authenticating with GoShippo API and returning live carrier rates. Previous UPS issue in test mode is resolved - UPS rates are now available in live mode."
 
 metadata:
-  created_by: "testing_agent"
-  version: "1.0"
-  test_sequence: 1
+  created_by: "main_agent"
+  version: "1.1"
+  test_sequence: 2
   run_ui: false
 
 test_plan:
   current_focus:
-    - "GoShippo Carrier Accounts API"
-    - "GoShippo Shipping Rate Calculation API"
-    - "GoShippo Live API Key Integration"
+    - "Data Confirmation Screen with Edit Button"
+    - "Edit Menu for Selecting What to Edit"
+    - "Conversation Flow with Edit States"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
-    - agent: "testing"
-      message: "Completed comprehensive testing of GoShippo integration with LIVE API key. All tests passed successfully. UPS rates are now working in live mode as requested. Created and tested new API endpoints /api/carriers and /api/calculate-shipping. Backend logs show successful rate retrieval with retry logic working properly. No errors found in integration."
+    - agent: "main"
+      message: "Implemented data editing functionality in Telegram bot. Users can now review all entered data (sender/receiver addresses, parcel weight) before fetching shipping rates. Added edit menu that allows selective editing of specific fields. Ready for testing the complete order creation flow with edit functionality."
