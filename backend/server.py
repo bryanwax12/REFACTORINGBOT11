@@ -202,6 +202,19 @@ async def track_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Для отслеживания посылки используйте веб-панель или укажите tracking number."
     )
 
+async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    
+    if query.data == 'start':
+        await start_command(update, context)
+    elif query.data == 'my_orders':
+        await my_orders_command(update, context)
+    elif query.data == 'track':
+        await track_command(update, context)
+    elif query.data == 'help':
+        await help_command(update, context)
+
 # API Routes
 @api_router.get("/")
 async def root():
