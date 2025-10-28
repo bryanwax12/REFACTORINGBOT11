@@ -193,13 +193,14 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus:
-    - "Data Confirmation Screen with Edit Button"
-    - "Edit Menu for Selecting What to Edit"
-    - "Conversation Flow with Edit States"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
+  manual_testing_required:
+    - "Data Confirmation Screen with Edit Button - Telegram bot conversation flow"
+    - "Edit Menu for Selecting What to Edit - Telegram bot conversation flow"  
+    - "Conversation Flow with Edit States - Telegram bot conversation flow"
 
 agent_communication:
     - agent: "main"
