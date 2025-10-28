@@ -19,6 +19,8 @@ const Dashboard = () => {
   const [orders, setOrders] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [balanceModal, setBalanceModal] = useState({ open: false, telegram_id: null, action: null });
+  const [balanceAmount, setBalanceAmount] = useState('');
 
   useEffect(() => {
     loadData();
@@ -39,6 +41,42 @@ const Dashboard = () => {
       toast.error("Failed to load data");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleBalanceAction = (telegram_id, action) => {
+    setBalanceModal({ open: true, telegram_id, action });
+    setBalanceAmount('');
+  };
+
+  const submitBalanceChange = async () => {
+    const amount = parseFloat(balanceAmount);
+    
+    if (!amount || amount <= 0) {
+      toast.error("Please enter a valid amount");
+      return;
+    }
+
+    try {
+      const endpoint = balanceModal.action === 'add' ? 'add' : 'deduct';
+      const response = await axios.post(
+        `${API}/users/${balanceModal.telegram_id}/balance/${endpoint}`,
+        null,
+        { params: { amount } }
+      );
+      
+      toast.success(
+        balanceModal.action === 'add' 
+          ? `Added $${amount} to balance` 
+          : `Deducted $${amount} from balance`
+      );
+      
+      // Reload data
+      loadData();
+      setBalanceModal({ open: false, telegram_id: null, action: null });
+      setBalanceAmount('');
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Failed to update balance");
     }
   };
 
