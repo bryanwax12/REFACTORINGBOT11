@@ -467,7 +467,32 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return FROM_STATE
 
 async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['from_state'] = update.message.text.upper()
+    state = update.message.text.strip().upper()
+    
+    # Validate state
+    if len(state) != 2:
+        await update.message.reply_text("❌ Код штата должен быть ровно 2 буквы. Например: CA, NY, TX:")
+        return FROM_STATE
+    
+    if not state.isalpha():
+        await update.message.reply_text("❌ Код штата должен содержать только буквы:")
+        return FROM_STATE
+    
+    # Valid US state codes
+    valid_states = {
+        'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
+        'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
+        'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
+        'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
+        'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY',
+        'DC', 'PR', 'VI', 'GU'
+    }
+    
+    if state not in valid_states:
+        await update.message.reply_text("❌ Неверный код штата. Введите корректный код (например: CA, NY, TX):")
+        return FROM_STATE
+    
+    context.user_data['from_state'] = state
     
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
