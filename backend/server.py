@@ -2354,7 +2354,10 @@ async def startup_event():
                     FROM_CITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_city)],
                     FROM_STATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_state)],
                     FROM_ZIP: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_zip)],
-                    FROM_PHONE: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_phone)],
+                    FROM_PHONE: [
+                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_phone),
+                        CallbackQueryHandler(order_from_phone, pattern='^skip_from_phone$')
+                    ],
                     TO_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_name)],
                     TO_ADDRESS: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_address)],
                     TO_ADDRESS2: [
@@ -2364,7 +2367,10 @@ async def startup_event():
                     TO_CITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_city)],
                     TO_STATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_state)],
                     TO_ZIP: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_zip)],
-                    TO_PHONE: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_phone)],
+                    TO_PHONE: [
+                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_phone),
+                        CallbackQueryHandler(order_to_phone, pattern='^skip_to_phone$')
+                    ],
                     PARCEL_WEIGHT: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_parcel_weight)],
                     CONFIRM_DATA: [CallbackQueryHandler(handle_data_confirmation, pattern='^(confirm_data|edit_data|cancel_order)$')],
                     EDIT_MENU: [CallbackQueryHandler(handle_edit_choice, pattern='^(edit_from_address|edit_to_address|edit_parcel|back_to_confirmation)$')],
