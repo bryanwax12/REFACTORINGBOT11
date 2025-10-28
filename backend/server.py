@@ -924,6 +924,25 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return TO_PHONE
 
 async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Check if it's a callback query (skip phone button)
+    if hasattr(update, 'callback_query') and update.callback_query:
+        query = update.callback_query
+        await query.answer()
+        
+        if query.data == 'skip_to_phone':
+            # Skip phone - set empty or default value
+            context.user_data['to_phone'] = ''
+            
+            keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            await query.message.reply_text(
+                """Шаг 15/15: Вес посылки в фунтах (lb)
+Например: 2""",
+                reply_markup=reply_markup
+            )
+            return PARCEL_WEIGHT
+    
     phone = update.message.text.strip()
     
     # Validate phone format
