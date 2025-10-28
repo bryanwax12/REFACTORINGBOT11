@@ -1274,6 +1274,13 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         rate_response = response.json()
         all_rates = rate_response.get('rate_response', {}).get('rates', [])
         
+        # Filter out GlobalPost and Stamps.com rates
+        excluded_carriers = ['globalpost', 'stamps_com', 'stamps.com']
+        all_rates = [
+            rate for rate in all_rates 
+            if rate.get('carrier_code', '').lower() not in excluded_carriers
+        ]
+        
         if not all_rates or len(all_rates) == 0:
             keyboard = [
                 [InlineKeyboardButton("✏️ Редактировать адреса", callback_data='edit_addresses_error')],
