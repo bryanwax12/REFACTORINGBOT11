@@ -1145,10 +1145,7 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
 📥 До: {data['to_name']}, {data['to_city']}, {data['to_state']}
 ⚖️ Вес: {data['weight']} lb
 
-💰 Стоимость:
-   Доставка: ${original_amount:.2f}
-   ──────────────────
-   Итого: ${amount:.2f}
+💰 Стоимость: ${amount:.2f}
 
 💳 Ваш баланс: ${balance:.2f}
 
