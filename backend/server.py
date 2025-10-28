@@ -25,8 +25,6 @@ db = client[os.environ['DB_NAME']]
 
 # Shippo API
 SHIPPO_API_KEY = os.environ.get('SHIPPO_API_KEY', '')
-if SHIPPO_API_KEY:
-    shippo.config.api_key = SHIPPO_API_KEY
 
 # Telegram Bot
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
