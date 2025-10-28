@@ -538,6 +538,70 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     return FROM_ZIP
 
+
+async def validate_address_with_shippo(name, street1, street2, city, state, zip_code):
+    """Validate address using GoShippo API"""
+    try:
+        headers = {
+            'Authorization': f'ShippoToken {SHIPPO_API_KEY}',
+            'Content-Type': 'application/json'
+        }
+        
+        address_data = {
+            'name': name,
+            'street1': street1,
+            'city': city,
+            'state': state,
+            'zip': zip_code,
+            'country': 'US',
+            'validate': True
+        }
+        
+        if street2:
+            address_data['street2'] = street2
+        
+        response = requests.post(
+            'https://api.goshippo.com/addresses/',
+            headers=headers,
+            json=address_data,
+            timeout=10
+        )
+        
+        if response.status_code == 201:
+            result = response.json()
+            validation = result.get('validation_results', {})
+            is_valid = validation.get('is_valid', False)
+            
+            if is_valid:
+                return {
+                    'is_valid': True,
+                    'message': 'Адрес проверен успешно'
+                }
+            else:
+                # Get error messages
+                messages = validation.get('messages', [])
+                error_text = '; '.join([msg.get('text', '') for msg in messages if msg.get('type') == 'error'])
+                if not error_text:
+                    error_text = 'Адрес не найден или неполный'
+                
+                return {
+                    'is_valid': False,
+                    'message': error_text
+                }
+        else:
+            logger.error(f"Address validation failed: {response.status_code} - {response.text}")
+            return {
+                'is_valid': True,  # Fallback to allow order if validation API fails
+                'message': 'Проверка недоступна, продолжаем'
+            }
+            
+    except Exception as e:
+        logger.error(f"Error validating address: {e}")
+        return {
+            'is_valid': True,  # Fallback to allow order if validation fails
+            'message': 'Проверка недоступна, продолжаем'
+        }
+
 async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     zip_code = update.message.text.strip()
     
