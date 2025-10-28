@@ -559,43 +559,62 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
         
         try:
             from shippo import Shippo
-            from shippo.models import components
+            from shippo.models import components, operations
             
             shippo_client = Shippo(api_key_header=SHIPPO_API_KEY)
             data = context.user_data
             
-            # Create shipment to get rates
-            shipment = shippo_client.shipments.create(
-                components.ShipmentCreateRequest(
-                    address_from=components.AddressCreateRequest(
-                        name=data['from_name'],
-                        street1=data['from_street'],
-                        street2=data.get('from_street2'),
-                        city=data['from_city'],
-                        state=data['from_state'],
-                        zip=data['from_zip'],
-                        country="US"
-                    ),
-                    address_to=components.AddressCreateRequest(
-                        name=data['to_name'],
-                        street1=data['to_street'],
-                        street2=data.get('to_street2'),
-                        city=data['to_city'],
-                        state=data['to_state'],
-                        zip=data['to_zip'],
-                        country="US"
-                    ),
-                    parcels=[components.ParcelCreateRequest(
-                        length=5,
-                        width=5,
-                        height=5,
-                        weight=weight,
-                        distance_unit="in",
-                        mass_unit="lb"
-                    )],
-                    async_=False
+            # Get all carrier accounts
+            carrier_accounts = []
+            try:
+                accounts_response = shippo_client.carrier_accounts.list(
+                    operations.ListCarrierAccountsRequest()
                 )
+                if hasattr(accounts_response, 'carrier_accounts'):
+                    carrier_accounts = [
+                        acc.object_id for acc in accounts_response.carrier_accounts 
+                        if acc.active and acc.test
+                    ]
+                    logger.info(f"Found {len(carrier_accounts)} active carrier accounts")
+            except Exception as e:
+                logger.warning(f"Could not fetch carrier accounts: {e}")
+            
+            # Create shipment to get rates
+            shipment_request = components.ShipmentCreateRequest(
+                address_from=components.AddressCreateRequest(
+                    name=data['from_name'],
+                    street1=data['from_street'],
+                    street2=data.get('from_street2'),
+                    city=data['from_city'],
+                    state=data['from_state'],
+                    zip=data['from_zip'],
+                    country="US"
+                ),
+                address_to=components.AddressCreateRequest(
+                    name=data['to_name'],
+                    street1=data['to_street'],
+                    street2=data.get('to_street2'),
+                    city=data['to_city'],
+                    state=data['to_state'],
+                    zip=data['to_zip'],
+                    country="US"
+                ),
+                parcels=[components.ParcelCreateRequest(
+                    length=5,
+                    width=5,
+                    height=5,
+                    weight=weight,
+                    distance_unit="in",
+                    mass_unit="lb"
+                )],
+                async_=False
             )
+            
+            # Add carrier accounts if available
+            if carrier_accounts:
+                shipment_request.carrier_accounts = carrier_accounts
+            
+            shipment = shippo_client.shipments.create(shipment_request)
             
             if not shipment.rates or len(shipment.rates) == 0:
                 await update.message.reply_text("❌ Не удалось получить тарифы. Проверьте адреса.")
