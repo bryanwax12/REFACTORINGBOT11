@@ -27,6 +27,9 @@ db = client[os.environ['DB_NAME']]
 SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY', '')
 SHIPSTATION_CARRIER_IDS = []  # Cache for carrier IDs
 
+# Admin notifications
+ADMIN_TELEGRAM_ID = os.environ.get('ADMIN_TELEGRAM_ID', '')
+
 # Telegram Bot
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
 bot_instance = None
