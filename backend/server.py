@@ -2311,7 +2311,7 @@ async def calculate_shipping_rates(request: ShippingRateRequest):
             'shipment': {
                 'ship_from': {
                     'name': from_addr.get('name', ''),
-                    'phone': from_addr.get('phone', ''),
+                    'phone': from_addr.get('phone') or '+15551234567',  # Default phone if not provided
                     'address_line1': from_addr.get('street1', ''),
                     'address_line2': from_addr.get('street2', ''),
                     'city_locality': from_addr.get('city', ''),
@@ -2321,7 +2321,7 @@ async def calculate_shipping_rates(request: ShippingRateRequest):
                 },
                 'ship_to': {
                     'name': to_addr.get('name', ''),
-                    'phone': to_addr.get('phone', ''),
+                    'phone': to_addr.get('phone') or '+15551234567',  # Default phone if not provided
                     'address_line1': to_addr.get('street1', ''),
                     'address_line2': to_addr.get('street2', ''),
                     'city_locality': to_addr.get('city', ''),
