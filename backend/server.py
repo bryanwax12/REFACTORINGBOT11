@@ -253,7 +253,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await cancel_order(update, context)
 
 # Conversation states for order creation
-AMOUNT, FROM_NAME, FROM_ADDRESS, FROM_CITY, FROM_STATE, FROM_ZIP, TO_NAME, TO_ADDRESS, TO_CITY, TO_STATE, TO_ZIP, CONFIRM = range(12)
+FROM_NAME, FROM_ADDRESS, FROM_CITY, FROM_STATE, FROM_ZIP, TO_NAME, TO_ADDRESS, TO_CITY, TO_STATE, TO_ZIP, PARCEL_WEIGHT, SELECT_CARRIER, PAYMENT_METHOD = range(13)
 
 async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
