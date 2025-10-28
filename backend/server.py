@@ -898,9 +898,7 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await update.message.reply_text(
-        """✅ Адрес получателя сохранен
-
-Шаг 14/15: Телефон получателя
+        """Шаг 14/15: Телефон получателя
 Например: +1234567890 или 1234567890""",
         reply_markup=reply_markup
     )
