@@ -331,7 +331,7 @@ async def handle_topup(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
 # Conversation states for order creation
-FROM_NAME, FROM_ADDRESS, FROM_CITY, FROM_STATE, FROM_ZIP, TO_NAME, TO_ADDRESS, TO_CITY, TO_STATE, TO_ZIP, PARCEL_WEIGHT, SELECT_CARRIER, PAYMENT_METHOD = range(13)
+FROM_NAME, FROM_ADDRESS, FROM_ADDRESS2, FROM_CITY, FROM_STATE, FROM_ZIP, TO_NAME, TO_ADDRESS, TO_ADDRESS2, TO_CITY, TO_STATE, TO_ZIP, PARCEL_WEIGHT, SELECT_CARRIER, PAYMENT_METHOD = range(15)
 
 async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
