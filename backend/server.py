@@ -792,19 +792,20 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
                 'Content-Type': 'application/json'
             }
             
-            carrier_accounts = []
-            try:
-                acc_response = requests.get('https://api.goshippo.com/carrier_accounts/', headers=headers)
-                if acc_response.status_code == 200:
-                    accounts_data = acc_response.json()
-                    if 'results' in accounts_data:
-                        carrier_accounts = [
-                            acc['object_id'] for acc in accounts_data['results']
-                            if acc.get('active') and acc.get('test')
-                        ]
-                        logger.info(f"Found {len(carrier_accounts)} active carrier accounts")
-            except Exception as e:
-                logger.warning(f"Could not fetch carrier accounts: {e}")
+            # Don't use carrier_accounts parameter - let GoShippo return all available rates
+            # carrier_accounts = []
+            # try:
+            #     acc_response = requests.get('https://api.goshippo.com/carrier_accounts/', headers=headers)
+            #     if acc_response.status_code == 200:
+            #         accounts_data = acc_response.json()
+            #         if 'results' in accounts_data:
+            #             carrier_accounts = [
+            #                 acc['object_id'] for acc in accounts_data['results']
+            #                 if acc.get('active') and acc.get('test')
+            #             ]
+            #             logger.info(f"Found {len(carrier_accounts)} active carrier accounts")
+            # except Exception as e:
+            #     logger.warning(f"Could not fetch carrier accounts: {e}")
             
             # Create shipment to get rates
             shipment_data = {
