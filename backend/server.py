@@ -560,6 +560,7 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
                     address_from=components.AddressCreateRequest(
                         name=data['from_name'],
                         street1=data['from_street'],
+                        street2=data.get('from_street2'),
                         city=data['from_city'],
                         state=data['from_state'],
                         zip=data['from_zip'],
@@ -568,6 +569,7 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
                     address_to=components.AddressCreateRequest(
                         name=data['to_name'],
                         street1=data['to_street'],
+                        street2=data.get('to_street2'),
                         city=data['to_city'],
                         state=data['to_state'],
                         zip=data['to_zip'],
@@ -589,7 +591,7 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
                 await update.message.reply_text("❌ Не удалось получить тарифы. Проверьте адреса.")
                 return ConversationHandler.END
             
-            # Save rates
+            # Save rates - show up to 10 carriers
             context.user_data['rates'] = [
                 {
                     'rate_id': rate.object_id,
@@ -599,7 +601,7 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
                     'currency': rate.currency,
                     'days': rate.estimated_days
                 }
-                for rate in shipment.rates[:5]  # Show top 5 rates
+                for rate in shipment.rates[:10]  # Show up to 10 rates
             ]
             
             # Create buttons for carrier selection
