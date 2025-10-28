@@ -1033,6 +1033,16 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 reply_markup=reply_markup
             )
             return TO_PHONE
+        
+        elif query.data == 'fix_to_address':
+            # Go back to start of to address to fix
+            keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await query.message.reply_text(
+                "Шаг 8/15: Адрес получателя\nВведите корректный адрес.\nНапример: 525 Market St",
+                reply_markup=reply_markup
+            )
+            return TO_ADDRESS
     
     zip_code = update.message.text.strip()
     
