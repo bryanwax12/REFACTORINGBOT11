@@ -2316,6 +2316,139 @@ async def cryptopay_webhook(request: Request):
         logger.error(f"Webhook error: {e}")
         return {"status": "error"}
 
+@api_router.post("/webhooks/nowpayments")
+async def nowpayments_webhook(request: Request):
+    """Handle NOWPayments IPN notifications"""
+    try:
+        # Read raw body for signature verification
+        body = await request.body()
+        body_str = body.decode()
+        
+        # Get signature header
+        signature_header = request.headers.get("x-nowpayments-sig")
+        if not signature_header:
+            logger.warning("Missing NOWPayments signature header")
+            return {"status": "error", "message": "Missing signature"}
+        
+        # Verify signature using HMAC-SHA512
+        import hmac
+        import hashlib
+        
+        computed_signature = hmac.new(
+            NOWPAYMENTS_IPN_SECRET.encode(),
+            body_str.encode(),
+            hashlib.sha512
+        ).hexdigest()
+        
+        # Use constant-time comparison
+        if not hmac.compare_digest(computed_signature, signature_header):
+            logger.warning(f"Invalid NOWPayments signature from {request.client.host}")
+            return {"status": "error", "message": "Invalid signature"}
+        
+        # Parse payload
+        import json
+        payload = json.loads(body_str)
+        
+        payment_id = payload.get("payment_id")
+        payment_status = payload.get("payment_status")
+        order_id = payload.get("order_id")
+        actually_paid = payload.get("actually_paid")
+        
+        logger.info(f"NOWPayments webhook: payment_id={payment_id}, status={payment_status}, order={order_id}")
+        
+        # Update payment record
+        await db.nowpayments.update_one(
+            {"payment_id": payment_id},
+            {
+                "$set": {
+                    "payment_status": payment_status,
+                    "actually_paid": actually_paid,
+                    "updated_at": datetime.now(timezone.utc).isoformat()
+                }
+            }
+        )
+        
+        # Handle payment completion
+        if payment_status == "finished":
+            # Update order status
+            await db.orders.update_one(
+                {"id": order_id},
+                {"$set": {"payment_status": "paid"}}
+            )
+            
+            # Get order and telegram_id
+            order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+            if order:
+                telegram_id = order.get("telegram_id")
+                
+                # Notify admin
+                await notify_admin_error(
+                    user_info={"telegram_id": telegram_id, "username": "N/A", "first_name": "User"},
+                    error_type="✅ Payment Received (NOWPayments)",
+                    error_details=f"Order: {order_id}\nAmount: {actually_paid}\nCurrency: {payload.get('pay_currency')}",
+                    order_id=order_id
+                )
+                
+                # Auto-create shipping label
+                try:
+                    label_created = await create_and_send_label(order_id, telegram_id, None)
+                    
+                    if label_created:
+                        # Notify user
+                        if bot_instance:
+                            await bot_instance.send_message(
+                                chat_id=telegram_id,
+                                text=f"""✅ Оплата получена!
+
+💰 Получено: {actually_paid} {payload.get('pay_currency')}
+📦 Order ID: {order_id}
+
+🎉 Shipping label создан и отправлен вам!"""
+                            )
+                    else:
+                        # Label creation failed - notify user
+                        if bot_instance:
+                            await bot_instance.send_message(
+                                chat_id=telegram_id,
+                                text=f"""✅ Оплата получена!
+
+💰 Получено: {actually_paid} {payload.get('pay_currency')}
+
+⚠️ Не удалось создать shipping label. Администратор уже уведомлен и свяжется с вами."""
+                            )
+                        
+                except Exception as e:
+                    logger.error(f"Failed to create label for order {order_id}: {e}")
+                    
+                    # Notify admin about label creation failure
+                    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+                    if user:
+                        await notify_admin_error(
+                            user_info=user,
+                            error_type="Label Creation Failed After Payment",
+                            error_details=str(e),
+                            order_id=order_id
+                        )
+        
+        elif payment_status == "failed":
+            # Notify about failed payment
+            order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+            if order and bot_instance:
+                await bot_instance.send_message(
+                    chat_id=order.get("telegram_id"),
+                    text=f"""❌ Оплата не прошла
+
+Order ID: {order_id}
+
+Пожалуйста, попробуйте снова или свяжитесь с администратором."""
+                )
+        
+        return {"status": "ok"}
+        
+    except Exception as e:
+        logger.error(f"NOWPayments webhook error: {e}")
+        return {"status": "error", "message": str(e)}
+
 @api_router.get("/users")
 async def get_users():
     users = await db.users.find({}, {"_id": 0}).to_list(100)
