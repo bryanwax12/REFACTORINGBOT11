@@ -282,10 +282,14 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
 Хотите пополнить баланс?"""
     
     keyboard = [
-        [InlineKeyboardButton("💵 Пополнить на $10", callback_data='topup_10')],
-        [InlineKeyboardButton("💵 Пополнить на $25", callback_data='topup_25')],
-        [InlineKeyboardButton("💵 Пополнить на $50", callback_data='topup_50')],
-        [InlineKeyboardButton("💵 Пополнить на $100", callback_data='topup_100')],
+        [
+            InlineKeyboardButton("💵 $10", callback_data='topup_10'),
+            InlineKeyboardButton("💵 $25", callback_data='topup_25')
+        ],
+        [
+            InlineKeyboardButton("💵 $50", callback_data='topup_50'),
+            InlineKeyboardButton("💵 $100", callback_data='topup_100')
+        ],
         [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
