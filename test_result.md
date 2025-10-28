@@ -111,7 +111,7 @@ backend:
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "critical"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: false
           agent: "user"
@@ -122,6 +122,12 @@ backend:
         - working: true
           agent: "main"
           comment: "✅ API endpoint /api/calculate-shipping tested successfully - returns 31 rates from multiple carriers (USPS, UPS, FedEx). Backend is ready for Telegram bot testing."
+        - working: false
+          agent: "testing"
+          comment: "❌ CRITICAL ISSUE FOUND: ShipStation V2 API returning 400 Bad Request due to missing phone numbers. Error: 'phone' should not be empty. The carrier_ids fix was correct, but phone field validation was missing."
+        - working: true
+          agent: "testing"
+          comment: "✅ FIXED: Added default phone numbers (+15551234567) when not provided in both calculate_shipping_rates() API and Telegram bot fetch_shipping_rates() function. ShipStation V2 API now returns 32 rates successfully from USPS (14), UPS (7), and FedEx (11) carriers. No more 400 Bad Request errors. Rate structure includes all required fields: carrier_friendly_name, service_type, shipping_amount, delivery_days. Fix is complete and working as expected."
 
 backend:
   - task: "Data Confirmation Screen with Edit Button"
