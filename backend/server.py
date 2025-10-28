@@ -1147,7 +1147,6 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 💰 Стоимость:
    Доставка: ${original_amount:.2f}
-   Сервисный сбор: ${markup:.2f}
    ──────────────────
    Итого: ${amount:.2f}
 
