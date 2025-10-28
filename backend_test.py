@@ -364,8 +364,9 @@ def test_telegram_bot_token():
         return False
 
 def main():
-    """Run all tests"""
-    print("🚀 Starting Telegram Bot Backend Tests")
+    """Run all tests - Focus on ShipStation V2 API Fix"""
+    print("🚀 Testing ShipStation V2 API Integration Fix")
+    print("🎯 Focus: Carrier IDs and Rate Request Fix")
     print("=" * 60)
     
     # Test results
@@ -374,20 +375,20 @@ def main():
     # 1. Test API Health
     results['api_health'] = test_api_health()
     
-    # 2. Test Telegram Bot Infrastructure
+    # 2. Test ShipStation Carrier IDs (NEW - Critical for fix)
+    results['carrier_ids'] = test_shipstation_carrier_ids()
+    
+    # 3. Test ShipStation V2 API Rate Calculation (UPDATED - Main fix)
+    results['shipstation_rates'], rates_data = test_shipping_rates()
+    
+    # 4. Test Telegram Bot Infrastructure
     results['telegram_infrastructure'] = test_telegram_bot_infrastructure()
     
-    # 3. Test Conversation Handler Functions
+    # 5. Test Conversation Handler Functions
     results['conversation_handlers'] = test_conversation_handler_functions()
     
-    # 4. Test Telegram Bot Token
+    # 6. Test Telegram Bot Token
     results['bot_token'] = test_telegram_bot_token()
-    
-    # 5. Test Carriers (supporting functionality)
-    results['carriers'], carriers_data = test_carriers()
-    
-    # 6. Test Shipping Rates (supporting functionality)
-    results['shipping_rates'], rates_data = test_shipping_rates()
     
     # 7. Check Backend Logs
     check_backend_logs()
