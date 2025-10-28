@@ -920,7 +920,6 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
                 message += "• Settings → Carriers\n"
                 message += "• Добавить carrier accounts\n\n"
             
-            keyboard.append([InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')])
             reply_markup = InlineKeyboardMarkup(keyboard)
             
             await update.message.reply_text(message, reply_markup=reply_markup)
