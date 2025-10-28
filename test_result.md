@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test GoShippo integration with LIVE API key to verify UPS, USPS, and FedEx carrier rates are now working"
+user_problem_statement: "Add data editing functionality to Telegram bot - allow users to review and edit their entered data (from address, to address, parcel weight) before fetching shipping rates"
 
 backend:
   - task: "GoShippo Carrier Accounts API"
