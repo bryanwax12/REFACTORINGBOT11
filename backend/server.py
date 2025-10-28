@@ -842,9 +842,9 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
             if data.get('to_street2'):
                 shipment_data['address_to']['street2'] = data['to_street2']
             
-            # Add carrier accounts if available
-            if carrier_accounts:
-                shipment_data['carrier_accounts'] = carrier_accounts
+            # Don't add carrier_accounts - let GoShippo auto-detect
+            # if carrier_accounts:
+            #     shipment_data['carrier_accounts'] = carrier_accounts
             
             shipment_response = requests.post(
                 'https://api.goshippo.com/shipments/',
