@@ -1285,19 +1285,21 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         allowed_services = {
             'ups': [
                 'ups_ground',
+                'ups_3_day_select',  # 3-day delivery
                 'ups_2nd_day_air',
                 'ups_next_day_air',
                 'ups_next_day_air_saver'
             ],
             'fedex_walleted': [
                 'fedex_ground',
+                'fedex_economy',  # FedEx Express Saver - 3-day delivery
                 'fedex_2day',
                 'fedex_standard_overnight',
                 'fedex_priority_overnight'
             ],
             'usps': [
                 'usps_ground_advantage',
-                'usps_priority_mail',
+                'usps_priority_mail',  # Already includes 2-3 day delivery
                 'usps_priority_mail_express'
             ]
         }
@@ -2413,19 +2415,21 @@ async def calculate_shipping_rates(request: ShippingRateRequest):
         allowed_services = {
             'ups': [
                 'ups_ground',
+                'ups_3_day_select',  # 3-day delivery
                 'ups_2nd_day_air',
                 'ups_next_day_air',
                 'ups_next_day_air_saver'
             ],
             'fedex_walleted': [
                 'fedex_ground',
+                'fedex_economy',  # FedEx Express Saver - 3-day delivery
                 'fedex_2day',
                 'fedex_standard_overnight',
                 'fedex_priority_overnight'
             ],
             'usps': [
                 'usps_ground_advantage',
-                'usps_priority_mail',
+                'usps_priority_mail',  # Already includes 2-3 day delivery
                 'usps_priority_mail_express'
             ]
         }
