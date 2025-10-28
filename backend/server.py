@@ -246,6 +246,321 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await track_command(update, context)
     elif query.data == 'help':
         await help_command(update, context)
+    elif query.data == 'new_order':
+        await new_order_start(update, context)
+    elif query.data == 'cancel_order':
+        await cancel_order(update, context)
+
+# Conversation states for order creation
+AMOUNT, FROM_NAME, FROM_ADDRESS, FROM_CITY, FROM_STATE, FROM_ZIP, TO_NAME, TO_ADDRESS, TO_CITY, TO_STATE, TO_ZIP, CONFIRM = range(12)
+
+async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    
+    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await query.message.reply_text(
+        """📦 Создание нового заказа
+
+Шаг 1/11: Укажите сумму заказа в USDT
+Например: 25.00""",
+        reply_markup=reply_markup
+    )
+    return AMOUNT
+
+async def order_amount(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    try:
+        amount = float(update.message.text)
+        if amount <= 0:
+            await update.message.reply_text("❌ Сумма должна быть больше 0. Попробуйте еще раз:")
+            return AMOUNT
+        
+        context.user_data['amount'] = amount
+        
+        keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await update.message.reply_text(
+            f"""✅ Сумма: ${amount} USDT
+
+Шаг 2/11: Имя отправителя
+Например: John Smith""",
+            reply_markup=reply_markup
+        )
+        return FROM_NAME
+    except ValueError:
+        await update.message.reply_text("❌ Неверный формат. Введите число, например: 25.00")
+        return AMOUNT
+
+async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['from_name'] = update.message.text
+    
+    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await update.message.reply_text(
+        """Шаг 3/11: Адрес отправителя
+Например: 215 Clayton St.""",
+        reply_markup=reply_markup
+    )
+    return FROM_ADDRESS
+
+async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['from_street'] = update.message.text
+    
+    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await update.message.reply_text(
+        """Шаг 4/11: Город отправителя
+Например: San Francisco""",
+        reply_markup=reply_markup
+    )
+    return FROM_CITY
+
+async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['from_city'] = update.message.text
+    
+    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await update.message.reply_text(
+        """Шаг 5/11: Штат отправителя (2 буквы)
+Например: CA""",
+        reply_markup=reply_markup
+    )
+    return FROM_STATE
+
+async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['from_state'] = update.message.text.upper()
+    
+    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await update.message.reply_text(
+        """Шаг 6/11: ZIP код отправителя
+Например: 94117""",
+        reply_markup=reply_markup
+    )
+    return FROM_ZIP
+
+async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['from_zip'] = update.message.text
+    
+    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await update.message.reply_text(
+        """✅ Адрес отправителя сохранен
+
+Шаг 7/11: Имя получателя
+Например: Jane Doe""",
+        reply_markup=reply_markup
+    )
+    return TO_NAME
+
+async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['to_name'] = update.message.text
+    
+    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await update.message.reply_text(
+        """Шаг 8/11: Адрес получателя
+Например: 123 Main St.""",
+        reply_markup=reply_markup
+    )
+    return TO_ADDRESS
+
+async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['to_street'] = update.message.text
+    
+    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await update.message.reply_text(
+        """Шаг 9/11: Город получателя
+Например: New York""",
+        reply_markup=reply_markup
+    )
+    return TO_CITY
+
+async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['to_city'] = update.message.text
+    
+    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await update.message.reply_text(
+        """Шаг 10/11: Штат получателя (2 буквы)
+Например: NY""",
+        reply_markup=reply_markup
+    )
+    return TO_STATE
+
+async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['to_state'] = update.message.text.upper()
+    
+    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await update.message.reply_text(
+        """Шаг 11/11: ZIP код получателя
+Например: 10007""",
+        reply_markup=reply_markup
+    )
+    return TO_ZIP
+
+async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['to_zip'] = update.message.text
+    
+    # Show confirmation
+    data = context.user_data
+    confirmation_text = f"""📦 Проверьте данные заказа:
+
+💰 Сумма: ${data['amount']} USDT
+
+📤 Отправитель:
+{data['from_name']}
+{data['from_street']}
+{data['from_city']}, {data['from_state']} {data['from_zip']}
+
+📥 Получатель:
+{data['to_name']}
+{data['to_street']}
+{data['to_city']}, {data['to_state']} {data['to_zip']}
+
+📦 Посылка: 5x5x5 дюймов, 2 фунта (стандарт)
+
+Всё верно?"""
+    
+    keyboard = [
+        [InlineKeyboardButton("✅ Создать заказ", callback_data='confirm_order')],
+        [InlineKeyboardButton("❌ Отменить", callback_data='cancel_order')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await update.message.reply_text(confirmation_text, reply_markup=reply_markup)
+    return CONFIRM
+
+async def confirm_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    
+    if query.data == 'cancel_order':
+        await cancel_order(update, context)
+        return ConversationHandler.END
+    
+    # Create order
+    try:
+        data = context.user_data
+        telegram_id = query.from_user.id
+        
+        # Check user exists
+        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        
+        # Create order
+        order = Order(
+            user_id=user['id'],
+            telegram_id=telegram_id,
+            address_from=Address(
+                name=data['from_name'],
+                street1=data['from_street'],
+                city=data['from_city'],
+                state=data['from_state'],
+                zip=data['from_zip'],
+                country="US"
+            ),
+            address_to=Address(
+                name=data['to_name'],
+                street1=data['to_street'],
+                city=data['to_city'],
+                state=data['to_state'],
+                zip=data['to_zip'],
+                country="US"
+            ),
+            parcel=Parcel(
+                length=5,
+                width=5,
+                height=5,
+                weight=2,
+                distance_unit="in",
+                mass_unit="lb"
+            ),
+            amount=data['amount']
+        )
+        
+        order_dict = order.model_dump()
+        order_dict['created_at'] = order_dict['created_at'].isoformat()
+        await db.orders.insert_one(order_dict)
+        
+        # Create crypto payment invoice
+        if crypto:
+            invoice = await crypto.create_invoice(
+                asset="USDT",
+                amount=data['amount']
+            )
+            
+            pay_url = getattr(invoice, 'bot_invoice_url', None) or getattr(invoice, 'mini_app_invoice_url', None)
+            
+            payment = Payment(
+                order_id=order.id,
+                amount=data['amount'],
+                invoice_id=invoice.invoice_id,
+                pay_url=pay_url
+            )
+            payment_dict = payment.model_dump()
+            payment_dict['created_at'] = payment_dict['created_at'].isoformat()
+            await db.payments.insert_one(payment_dict)
+            
+            # Send payment link
+            keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            await query.message.reply_text(
+                f"""✅ Заказ создан!
+
+💰 Оплатите {data['amount']} USDT:
+{pay_url}
+
+После оплаты мы автоматически создадим shipping label и отправим вам tracking number.""",
+                reply_markup=reply_markup
+            )
+        else:
+            keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            await query.message.reply_text(
+                "✅ Заказ создан, но система оплаты не настроена.",
+                reply_markup=reply_markup
+            )
+        
+        # Clear user data
+        context.user_data.clear()
+        return ConversationHandler.END
+        
+    except Exception as e:
+        logger.error(f"Error creating order: {e}")
+        await query.message.reply_text(f"❌ Ошибка при создании заказа: {str(e)}")
+        return ConversationHandler.END
+
+async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.callback_query:
+        query = update.callback_query
+        await query.answer()
+        send_method = query.message.reply_text
+    else:
+        send_method = update.message.reply_text
+    
+    context.user_data.clear()
+    
+    keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await send_method("❌ Создание заказа отменено.", reply_markup=reply_markup)
+    return ConversationHandler.END
 
 # API Routes
 @api_router.get("/")
