@@ -1203,7 +1203,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             'shipment': {
                 'ship_to': {
                     'name': data['to_name'],
-                    'phone': data.get('to_phone', ''),
+                    'phone': data.get('to_phone') or '+15551234567',  # Default phone if not provided
                     'address_line1': data['to_street'],
                     'address_line2': data.get('to_street2', ''),
                     'city_locality': data['to_city'],
@@ -1214,7 +1214,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
                 },
                 'ship_from': {
                     'name': data['from_name'],
-                    'phone': data.get('from_phone', ''),
+                    'phone': data.get('from_phone') or '+15551234567',  # Default phone if not provided
                     'address_line1': data['from_street'],
                     'address_line2': data.get('from_street2', ''),
                     'city_locality': data['from_city'],
