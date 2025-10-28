@@ -505,7 +505,16 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return FROM_ZIP
 
 async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['from_zip'] = update.message.text
+    zip_code = update.message.text.strip()
+    
+    # Validate ZIP code
+    import re
+    # US ZIP format: 5 digits or 5-4 digits
+    if not re.match(r'^\d{5}(-\d{4})?$', zip_code):
+        await update.message.reply_text("❌ Неверный формат ZIP кода. Используйте формат: 12345 или 12345-6789:")
+        return FROM_ZIP
+    
+    context.user_data['from_zip'] = zip_code
     
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
