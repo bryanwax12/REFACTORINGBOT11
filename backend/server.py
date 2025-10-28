@@ -903,7 +903,6 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
                     callback_data=f'select_carrier_{i}'
                 )])
             
-            message += f"\n💡 Цена включает доставку + сервисный сбор ${markup:.2f}\n"
             if len(context.user_data['rates']) == 1:
                 message += "\n⚠️ В Test mode доступен только USPS.\n"
                 message += "Для FedEx, UPS, DHL нужно:\n"
