@@ -529,7 +529,22 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return TO_NAME
 
 async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['to_name'] = update.message.text
+    name = update.message.text.strip()
+    
+    # Validate name
+    if len(name) < 2:
+        await update.message.reply_text("❌ Имя слишком короткое. Введите полное имя (минимум 2 символа):")
+        return TO_NAME
+    
+    if len(name) > 50:
+        await update.message.reply_text("❌ Имя слишком длинное. Максимум 50 символов:")
+        return TO_NAME
+    
+    if not all(c.isalpha() or c.isspace() or c in ".-'" for c in name):
+        await update.message.reply_text("❌ Имя содержит недопустимые символы. Используйте только буквы:")
+        return TO_NAME
+    
+    context.user_data['to_name'] = name
     
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -542,7 +557,18 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return TO_ADDRESS
 
 async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['to_street'] = update.message.text
+    address = update.message.text.strip()
+    
+    # Validate address
+    if len(address) < 3:
+        await update.message.reply_text("❌ Адрес слишком короткий. Введите полный адрес:")
+        return TO_ADDRESS
+    
+    if len(address) > 100:
+        await update.message.reply_text("❌ Адрес слишком длинный. Максимум 100 символов:")
+        return TO_ADDRESS
+    
+    context.user_data['to_street'] = address
     
     keyboard = [
         [InlineKeyboardButton("⏭ Пропустить", callback_data='skip_to_address2')],
