@@ -266,7 +266,157 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="leaderboard" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>User Leaderboard</CardTitle>
+              <CardDescription>Top users ranked by activity and spending</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {leaderboard.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No data yet</p>
+              ) : (
+                <div className="space-y-4">
+                  {leaderboard.map((user, index) => (
+                    <div key={user.telegram_id} className="flex items-center gap-4 border-b pb-4 last:border-0" data-testid="leaderboard-item">
+                      <div className="text-2xl font-bold text-muted-foreground w-8">
+                        {index + 1}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{user.first_name}</p>
+                          <Badge variant="outline">{user.rating_level}</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">@{user.username || 'no_username'}</p>
+                      </div>
+                      <div className="text-right space-y-1">
+                        <p className="text-sm font-semibold">{user.rating_score.toFixed(0)} points</p>
+                        <p className="text-xs text-muted-foreground">{user.total_orders} orders • ${user.total_spent.toFixed(2)}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
+
+      {/* User Details Modal */}
+      {userDetailsModal.open && userDetailsModal.details && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" data-testid="user-details-modal">
+          <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    {userDetailsModal.details.user.first_name} 
+                    <Badge variant="outline">{userDetailsModal.details.stats.rating_level}</Badge>
+                  </CardTitle>
+                  <CardDescription>
+                    @{userDetailsModal.details.user.username || 'no_username'} • ID: {userDetailsModal.details.user.telegram_id}
+                  </CardDescription>
+                </div>
+                <Button 
+                  onClick={() => setUserDetailsModal({ open: false, details: null })}
+                  variant="ghost"
+                  size="sm"
+                  data-testid="close-details-btn"
+                >
+                  ✕
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* User Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-2xl font-bold">{userDetailsModal.details.stats.total_orders}</div>
+                    <p className="text-xs text-muted-foreground">Total Orders</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-2xl font-bold">{userDetailsModal.details.stats.paid_orders}</div>
+                    <p className="text-xs text-muted-foreground">Paid Orders</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-2xl font-bold">${userDetailsModal.details.stats.total_spent.toFixed(2)}</div>
+                    <p className="text-xs text-muted-foreground">Total Spent</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-2xl font-bold">${userDetailsModal.details.stats.average_order_value.toFixed(2)}</div>
+                    <p className="text-xs text-muted-foreground">Avg Order</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Orders History */}
+              <div>
+                <h3 className="font-semibold mb-4">Orders History</h3>
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {userDetailsModal.details.orders.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-4">No orders yet</p>
+                  ) : (
+                    userDetailsModal.details.orders.map((order) => (
+                      <div key={order.id} className="border rounded-lg p-4 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Order #{order.id.substring(0, 8)}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {new Date(order.created_at).toLocaleString()}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold">${order.amount}</p>
+                            <div className="flex gap-2 mt-1">
+                              <Badge variant={order.payment_status === 'paid' ? 'default' : 'secondary'}>
+                                {order.payment_status}
+                              </Badge>
+                              <Badge variant="outline">{order.shipping_status}</Badge>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <p className="font-medium">From:</p>
+                            <p className="text-muted-foreground">
+                              {order.address_from.name}<br />
+                              {order.address_from.street1}
+                              {order.address_from.street2 && <>, {order.address_from.street2}</>}<br />
+                              {order.address_from.city}, {order.address_from.state} {order.address_from.zip}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="font-medium">To:</p>
+                            <p className="text-muted-foreground">
+                              {order.address_to.name}<br />
+                              {order.address_to.street1}
+                              {order.address_to.street2 && <>, {order.address_to.street2}</>}<br />
+                              {order.address_to.city}, {order.address_to.state} {order.address_to.zip}
+                            </p>
+                          </div>
+                        </div>
+                        {order.selected_carrier && (
+                          <p className="text-sm">
+                            <span className="font-medium">Carrier:</span> {order.selected_carrier} - {order.selected_service}
+                          </p>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Balance Management Modal */}
       {balanceModal.open && (
