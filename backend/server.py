@@ -871,6 +871,7 @@ async def handle_edit_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return await show_data_confirmation(update, context)
     
     if query.data == 'edit_from_address':
+        context.user_data['editing_from_address'] = True
         keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await query.message.reply_text(
@@ -880,6 +881,7 @@ async def handle_edit_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return FROM_NAME
     
     if query.data == 'edit_to_address':
+        context.user_data['editing_to_address'] = True
         keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await query.message.reply_text(
@@ -889,10 +891,14 @@ async def handle_edit_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return TO_NAME
     
     if query.data == 'edit_parcel':
+        context.user_data['editing_parcel'] = True
         keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await query.message.reply_text(
             "📦 Редактирование посылки\n\nВведите вес посылки в фунтах:\nНапример: 5 или 2.5",
+            reply_markup=reply_markup
+        )
+        return PARCEL_WEIGHT
             reply_markup=reply_markup
         )
         return PARCEL_WEIGHT
