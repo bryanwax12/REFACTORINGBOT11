@@ -785,6 +785,289 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
         await update.message.reply_text("❌ Неверный формат. Введите число (например: 2 или 2.5):")
         return PARCEL_WEIGHT
 
+
+async def show_data_confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Show summary of entered data with edit option"""
+    data = context.user_data
+    
+    # Format the summary message
+    message = "📋 Проверьте введенные данные:\n\n"
+    message += "📤 ОТПРАВИТЕЛЬ:\n"
+    message += f"   Имя: {data.get('from_name')}\n"
+    message += f"   Адрес: {data.get('from_street')}\n"
+    if data.get('from_street2'):
+        message += f"   Квартира: {data.get('from_street2')}\n"
+    message += f"   Город: {data.get('from_city')}\n"
+    message += f"   Штат: {data.get('from_state')}\n"
+    message += f"   ZIP: {data.get('from_zip')}\n\n"
+    
+    message += "📥 ПОЛУЧАТЕЛЬ:\n"
+    message += f"   Имя: {data.get('to_name')}\n"
+    message += f"   Адрес: {data.get('to_street')}\n"
+    if data.get('to_street2'):
+        message += f"   Квартира: {data.get('to_street2')}\n"
+    message += f"   Город: {data.get('to_city')}\n"
+    message += f"   Штат: {data.get('to_state')}\n"
+    message += f"   ZIP: {data.get('to_zip')}\n\n"
+    
+    message += "📦 ПОСЫЛКА:\n"
+    message += f"   Вес: {data.get('weight')} фунтов\n"
+    
+    keyboard = [
+        [InlineKeyboardButton("✅ Всё верно, показать тарифы", callback_data='confirm_data')],
+        [InlineKeyboardButton("✏️ Редактировать данные", callback_data='edit_data')],
+        [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    # Check if it's a message or callback query
+    if hasattr(update, 'callback_query') and update.callback_query:
+        await update.callback_query.message.reply_text(message, reply_markup=reply_markup)
+    else:
+        await update.message.reply_text(message, reply_markup=reply_markup)
+    
+    return CONFIRM_DATA
+
+async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle user's choice on data confirmation"""
+    query = update.callback_query
+    await query.answer()
+    
+    if query.data == 'cancel_order':
+        await cancel_order(update, context)
+        return ConversationHandler.END
+    
+    if query.data == 'confirm_data':
+        # User confirmed data, proceed to fetch rates
+        return await fetch_shipping_rates(update, context)
+    
+    if query.data == 'edit_data':
+        # Show edit menu
+        return await show_edit_menu(update, context)
+
+async def show_edit_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Show menu to select what to edit"""
+    query = update.callback_query
+    
+    message = "✏️ Что вы хотите изменить?"
+    
+    keyboard = [
+        [InlineKeyboardButton("📤 Адрес отправителя", callback_data='edit_from_address')],
+        [InlineKeyboardButton("📥 Адрес получателя", callback_data='edit_to_address')],
+        [InlineKeyboardButton("📦 Вес посылки", callback_data='edit_parcel')],
+        [InlineKeyboardButton("⬅️ Назад", callback_data='back_to_confirmation')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await query.message.reply_text(message, reply_markup=reply_markup)
+    return EDIT_MENU
+
+async def handle_edit_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle user's choice of what to edit"""
+    query = update.callback_query
+    await query.answer()
+    
+    if query.data == 'back_to_confirmation':
+        return await show_data_confirmation(update, context)
+    
+    if query.data == 'edit_from_address':
+        keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.message.reply_text(
+            "📤 Редактирование адреса отправителя\n\nШаг 1/6: Имя отправителя\nНапример: John Smith",
+            reply_markup=reply_markup
+        )
+        return FROM_NAME
+    
+    if query.data == 'edit_to_address':
+        keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.message.reply_text(
+            "📥 Редактирование адреса получателя\n\nШаг 1/6: Имя получателя\nНапример: Jane Doe",
+            reply_markup=reply_markup
+        )
+        return TO_NAME
+    
+    if query.data == 'edit_parcel':
+        keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.message.reply_text(
+            "📦 Редактирование посылки\n\nВведите вес посылки в фунтах:\nНапример: 5 или 2.5",
+            reply_markup=reply_markup
+        )
+        return PARCEL_WEIGHT
+
+async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Fetch shipping rates from GoShippo"""
+    query = update.callback_query
+    
+    await query.message.reply_text("⏳ Получаю доступные курьерские службы и тарифы...")
+    
+    try:
+        import requests
+        import asyncio
+        
+        data = context.user_data
+        
+        # Get all carrier accounts using REST API
+        headers = {
+            'Authorization': f'ShippoToken {SHIPPO_API_KEY}',
+            'Content-Type': 'application/json'
+        }
+        
+        # Create shipment data
+        shipment_data = {
+            'address_from': {
+                'name': data['from_name'],
+                'street1': data['from_street'],
+                'city': data['from_city'],
+                'state': data['from_state'],
+                'zip': data['from_zip'],
+                'country': 'US'
+            },
+            'address_to': {
+                'name': data['to_name'],
+                'street1': data['to_street'],
+                'city': data['to_city'],
+                'state': data['to_state'],
+                'zip': data['to_zip'],
+                'country': 'US'
+            },
+            'parcels': [{
+                'length': 5,
+                'width': 5,
+                'height': 5,
+                'weight': data['weight'],
+                'distance_unit': 'in',
+                'mass_unit': 'lb'
+            }],
+            'async': False
+        }
+        
+        # Add optional street2
+        if data.get('from_street2'):
+            shipment_data['address_from']['street2'] = data['from_street2']
+        if data.get('to_street2'):
+            shipment_data['address_to']['street2'] = data['to_street2']
+        
+        # Try multiple times to get rates (UPS sometimes doesn't return on first try)
+        max_attempts = 3
+        all_rates = []
+        
+        for attempt in range(max_attempts):
+            if attempt > 0:
+                logger.info(f"Retry attempt {attempt + 1} to get carrier rates")
+                await asyncio.sleep(1)  # Wait 1 second between retries
+            
+            shipment_response = requests.post(
+                'https://api.goshippo.com/shipments/',
+                headers=headers,
+                json=shipment_data,
+                timeout=10
+            )
+            
+            if shipment_response.status_code == 201:
+                shipment = shipment_response.json()
+                rates = shipment.get('rates', [])
+                
+                # Log what carriers we got
+                carriers = set([r['provider'] for r in rates])
+                logger.info(f"Attempt {attempt + 1}: Got {len(rates)} rates from carriers: {carriers}")
+                
+                # Merge rates (avoid duplicates by rate_id)
+                existing_ids = set([r['object_id'] for r in all_rates])
+                for rate in rates:
+                    if rate['object_id'] not in existing_ids:
+                        all_rates.append(rate)
+                        existing_ids.add(rate['object_id'])
+                
+                # If we have UPS rates, we can stop trying
+                if any(r['provider'] in ['UPS', 'FedEx', 'DHL'] for r in all_rates):
+                    logger.info(f"Found premium carriers, stopping retries")
+                    break
+            else:
+                logger.error(f"Attempt {attempt + 1} failed with status {shipment_response.status_code}")
+        
+        if not all_rates or len(all_rates) == 0:
+            error_msg = shipment_response.json().get('messages', [{}])[0].get('text', 'Неизвестная ошибка') if shipment_response.status_code != 201 else 'Нет доступных тарифов'
+            await query.message.reply_text(f"❌ Ошибка при получении тарифов:\n{error_msg}\n\nПроверьте правильность введенных адресов.")
+            return ConversationHandler.END
+        
+        # Log final result
+        final_carriers = set([r['provider'] for r in all_rates])
+        logger.info(f"Final result: {len(all_rates)} rates from carriers: {final_carriers}")
+        
+        # Save rates - show up to 10 carriers with $10 markup
+        markup = 10.00  # Markup in USD
+        context.user_data['rates'] = [
+            {
+                'rate_id': rate['object_id'],
+                'carrier': rate['provider'],
+                'service': rate['servicelevel'].get('name') if isinstance(rate.get('servicelevel'), dict) else str(rate.get('servicelevel', '')),
+                'original_amount': float(rate['amount']),  # Original price from GoShippo
+                'amount': float(rate['amount']) + markup,  # Price shown to user (with markup)
+                'currency': rate['currency'],
+                'days': rate.get('estimated_days')
+            }
+            for rate in all_rates[:10]  # Show up to 10 rates
+        ]
+        
+        # Create buttons for carrier selection
+        from datetime import datetime, timedelta, timezone
+        
+        # Count unique carriers
+        unique_carriers = set([r['carrier'] for r in context.user_data['rates']])
+        carriers_text = ", ".join(sorted(unique_carriers))
+        
+        message = f"📦 Найдено {len(context.user_data['rates'])} тарифов от {len(unique_carriers)} курьеров ({carriers_text}):\n\n"
+        keyboard = []
+        
+        for i, rate in enumerate(context.user_data['rates']):
+            days_text = f" ({rate['days']} дней)" if rate['days'] else ""
+            
+            # Calculate estimated delivery date
+            if rate['days']:
+                delivery_date = datetime.now(timezone.utc) + timedelta(days=rate['days'])
+                date_text = f" → {delivery_date.strftime('%d.%m')}"
+            else:
+                date_text = ""
+            
+            message += f"{i+1}. {rate['carrier']} - {rate['service']}{days_text}{date_text}\n   💰 ${rate['amount']:.2f}\n\n"
+            
+            # Show full name in button (same as in list)
+            button_text = f"{rate['carrier']} - {rate['service']} - ${rate['amount']:.2f}"
+            
+            keyboard.append([InlineKeyboardButton(
+                button_text,
+                callback_data=f'select_carrier_{i}'
+            )])
+        
+        # Add info message
+        message += "💡 Не нашли нужную доставку? Попробуйте обновить список\n"
+        
+        # Add refresh and cancel buttons
+        keyboard.append([
+            InlineKeyboardButton("🔄 Обновить список", callback_data='refresh_carriers'),
+            InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')
+        ])
+        
+        if len(context.user_data['rates']) == 1:
+            message += "\n⚠️ В Test mode доступен только USPS.\n"
+            message += "Для FedEx, UPS, DHL нужно:\n"
+            message += "• Войти на apps.goshippo.com\n"
+            message += "• Settings → Carriers\n"
+            message += "• Добавить carrier accounts\n\n"
+        
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await query.message.reply_text(message, reply_markup=reply_markup)
+        return SELECT_CARRIER
+        
+    except Exception as e:
+        logger.error(f"Error getting rates: {e}")
+        await query.message.reply_text(f"❌ Ошибка при получении тарифов:\n{str(e)}\n\nПроверьте корректность адресов и попробуйте снова.")
+        return ConversationHandler.END
+
 async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
