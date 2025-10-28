@@ -10,7 +10,6 @@ from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional
 from datetime import datetime, timezone
 import uuid
-import shippo
 from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes, MessageHandler, filters, ConversationHandler
 import asyncio
@@ -24,7 +23,7 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# Shippo API
+# ShipStation API
 SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY', '')
 
 # Telegram Bot
