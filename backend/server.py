@@ -1767,6 +1767,148 @@ async def deduct_balance(telegram_id: int, amount: float):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.get("/carriers")
+async def get_carriers():
+    """Get list of active carrier accounts from GoShippo"""
+    try:
+        if not SHIPPO_API_KEY:
+            raise HTTPException(status_code=500, detail="Shippo API not configured")
+        
+        headers = {
+            'Authorization': f'ShippoToken {SHIPPO_API_KEY}',
+            'Content-Type': 'application/json'
+        }
+        
+        # Get carrier accounts
+        response = requests.get(
+            'https://api.goshippo.com/carrier_accounts/',
+            headers=headers,
+            timeout=10
+        )
+        
+        if response.status_code != 200:
+            raise HTTPException(status_code=response.status_code, detail="Failed to fetch carriers")
+        
+        carriers = response.json()
+        
+        # Filter active carriers
+        active_carriers = [
+            {
+                "carrier": carrier.get('carrier'),
+                "account_id": carrier.get('object_id'),
+                "active": carrier.get('active', False),
+                "test": carrier.get('test', True)
+            }
+            for carrier in carriers.get('results', [])
+            if carrier.get('active', False)
+        ]
+        
+        return {
+            "carriers": active_carriers,
+            "total": len(active_carriers)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error fetching carriers: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+class ShippingRateRequest(BaseModel):
+    from_address: Address
+    to_address: Address
+    parcel: Parcel
+
+@api_router.post("/calculate-shipping")
+async def calculate_shipping_rates(request: ShippingRateRequest):
+    """Calculate shipping rates for given addresses and parcel"""
+    try:
+        if not SHIPPO_API_KEY:
+            raise HTTPException(status_code=500, detail="Shippo API not configured")
+        
+        headers = {
+            'Authorization': f'ShippoToken {SHIPPO_API_KEY}',
+            'Content-Type': 'application/json'
+        }
+        
+        # Create shipment data
+        shipment_data = {
+            'address_from': request.from_address.model_dump(),
+            'address_to': request.to_address.model_dump(),
+            'parcels': [request.parcel.model_dump()],
+            'async': False
+        }
+        
+        # Try multiple times to get rates (UPS sometimes doesn't return on first try)
+        max_attempts = 3
+        all_rates = []
+        
+        for attempt in range(max_attempts):
+            if attempt > 0:
+                logger.info(f"Retry attempt {attempt + 1} to get carrier rates")
+                await asyncio.sleep(1)  # Wait 1 second between retries
+            
+            shipment_response = requests.post(
+                'https://api.goshippo.com/shipments/',
+                headers=headers,
+                json=shipment_data,
+                timeout=10
+            )
+            
+            if shipment_response.status_code == 201:
+                shipment = shipment_response.json()
+                rates = shipment.get('rates', [])
+                
+                # Log what carriers we got
+                carriers = set([r['provider'] for r in rates])
+                logger.info(f"Attempt {attempt + 1}: Got {len(rates)} rates from carriers: {carriers}")
+                
+                # Merge rates (avoid duplicates by rate_id)
+                existing_ids = set([r['object_id'] for r in all_rates])
+                for rate in rates:
+                    if rate['object_id'] not in existing_ids:
+                        all_rates.append(rate)
+                        existing_ids.add(rate['object_id'])
+                
+                # If we have UPS rates, we can stop trying
+                if any(r['provider'] in ['UPS', 'FedEx', 'DHL'] for r in all_rates):
+                    logger.info(f"Found premium carriers, stopping retries")
+                    break
+            else:
+                logger.error(f"Attempt {attempt + 1} failed with status {shipment_response.status_code}")
+        
+        if not all_rates or len(all_rates) == 0:
+            error_msg = shipment_response.json().get('messages', [{}])[0].get('text', 'Unknown error') if shipment_response.status_code != 201 else 'No rates available'
+            raise HTTPException(status_code=400, detail=f"No shipping rates available: {error_msg}")
+        
+        # Log final result
+        final_carriers = set([r['provider'] for r in all_rates])
+        logger.info(f"Final result: {len(all_rates)} rates from carriers: {final_carriers}")
+        
+        # Format rates for response
+        formatted_rates = [
+            {
+                'rate_id': rate['object_id'],
+                'carrier': rate['provider'],
+                'service': rate['servicelevel'].get('name') if isinstance(rate.get('servicelevel'), dict) else str(rate.get('servicelevel', '')),
+                'amount': float(rate['amount']),
+                'currency': rate['currency'],
+                'estimated_days': rate.get('estimated_days'),
+                'duration_terms': rate.get('duration_terms')
+            }
+            for rate in all_rates
+        ]
+        
+        return {
+            "rates": formatted_rates,
+            "total_rates": len(formatted_rates),
+            "carriers": list(final_carriers)
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error calculating shipping rates: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/stats")
 async def get_stats():
     total_users = await db.users.count_documents({})
