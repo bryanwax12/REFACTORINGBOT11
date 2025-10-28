@@ -447,6 +447,11 @@ async def skip_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE)
 async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     city = update.message.text.strip()
     
+    # Check for Cyrillic or non-Latin characters
+    if any(ord(c) >= 0x0400 and ord(c) <= 0x04FF for c in city):
+        await update.message.reply_text("❌ Используйте только английские буквы (латиницу). Пример: San Francisco")
+        return FROM_CITY
+    
     # Validate city
     if len(city) < 2:
         await update.message.reply_text("❌ Название города слишком короткое:")
@@ -456,8 +461,9 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ Название города слишком длинное. Максимум 50 символов:")
         return FROM_CITY
     
-    if not all(c.isalpha() or c.isspace() or c in ".-'" for c in city):
-        await update.message.reply_text("❌ Название города содержит недопустимые символы:")
+    # Only Latin letters, spaces, dots, hyphens, apostrophes
+    if not all((ord(c) < 128 and (c.isalpha() or c.isspace() or c in ".-'")) for c in city):
+        await update.message.reply_text("❌ Используйте только английские буквы. Разрешены: буквы, пробелы, дефисы, точки")
         return FROM_CITY
     
     context.user_data['from_city'] = city
