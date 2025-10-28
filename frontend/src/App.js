@@ -161,6 +161,7 @@ const Dashboard = () => {
         <TabsList>
           <TabsTrigger value="orders" data-testid="tab-orders">Orders</TabsTrigger>
           <TabsTrigger value="users" data-testid="tab-users">Users</TabsTrigger>
+          <TabsTrigger value="leaderboard" data-testid="tab-leaderboard">Leaderboard</TabsTrigger>
         </TabsList>
 
         <TabsContent value="orders" className="space-y-4">
