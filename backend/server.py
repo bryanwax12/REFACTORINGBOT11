@@ -1385,12 +1385,15 @@ async def create_and_send_label(order_id, telegram_id, message):
     try:
         order = await db.orders.find_one({"id": order_id}, {"_id": 0})
         
+        logger.info(f"Creating label for order {order_id}")
+        
         from shippo import Shippo
         from shippo.models import components
         
         shippo_client = Shippo(api_key_header=SHIPPO_API_KEY)
         
         # Purchase label with saved rate_id
+        logger.info(f"Purchasing label with rate_id: {order['rate_id']}")
         transaction = shippo_client.transactions.create(
             components.TransactionCreateRequest(
                 rate=order['rate_id'],
@@ -1398,6 +1401,16 @@ async def create_and_send_label(order_id, telegram_id, message):
                 async_=False
             )
         )
+        
+        logger.info(f"Transaction response: status={transaction.status}, tracking={transaction.tracking_number}, label_url={transaction.label_url}")
+        
+        # Check transaction status
+        if transaction.status != 'SUCCESS':
+            error_msg = f"Transaction failed with status: {transaction.status}"
+            if hasattr(transaction, 'messages') and transaction.messages:
+                error_msg += f". Messages: {transaction.messages}"
+            logger.error(error_msg)
+            raise Exception(error_msg)
         
         # Save label
         label = ShippingLabel(
@@ -1435,10 +1448,16 @@ Label PDF: {transaction.label_url}
 
 Вы оплатили: ${order['amount']:.2f}"""
             )
+        logger.info(f"Label created successfully for order {order_id}")
     except Exception as e:
-        logger.error(f"Error creating label: {e}")
+        logger.error(f"Error creating label: {e}", exc_info=True)
         if message:
             await message.reply_text(f"❌ Ошибка при создании label: {str(e)}")
+        elif bot_instance:
+            await bot_instance.send_message(
+                chat_id=telegram_id,
+                text=f"❌ Ошибка при создании label: {str(e)}"
+            )
 
 async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.callback_query:
