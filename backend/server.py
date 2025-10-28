@@ -1902,15 +1902,6 @@ async def create_shipping_label(order_id: str):
             }
         else:
             raise HTTPException(status_code=500, detail="Failed to create label")
-                text=f"""📦 Shipping label создан!
-
-Tracking: {transaction.tracking_number}
-Carrier: {rate.provider}
-
-Label: {transaction.label_url}"""
-            )
-        
-        return label_dict
         
     except Exception as e:
         logger.error(f"Error creating label: {e}")
