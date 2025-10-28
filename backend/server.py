@@ -550,19 +550,77 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     context.user_data['from_zip'] = zip_code
     
+    # Validate address with GoShippo
+    await update.message.reply_text("⏳ Проверяю адрес отправителя...")
+    
+    validation_result = await validate_address_with_shippo(
+        name=context.user_data['from_name'],
+        street1=context.user_data['from_street'],
+        street2=context.user_data.get('from_street2'),
+        city=context.user_data['from_city'],
+        state=context.user_data['from_state'],
+        zip_code=zip_code
+    )
+    
+    if not validation_result['is_valid']:
+        await update.message.reply_text(
+            f"⚠️ Адрес отправителя не прошел проверку:\n{validation_result['message']}\n\nПопробуйте еще раз или нажмите /start для отмены."
+        )
+        # Go back to start of from address
+        keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text(
+            "Шаг 2/15: Адрес отправителя\nНапример: 215 Clayton St.",
+            reply_markup=reply_markup
+        )
+        return FROM_ADDRESS
+    
     # Check if we're editing from address
     if context.user_data.get('editing_from_address'):
         context.user_data['editing_from_address'] = False
-        await update.message.reply_text("✅ Адрес отправителя обновлен!")
+        await update.message.reply_text("✅ Адрес отправителя обновлен и проверен!")
         return await show_data_confirmation(update, context)
     
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await update.message.reply_text(
-        """✅ Адрес отправителя сохранен
+        """✅ Адрес отправителя проверен
 
-Шаг 7/13: Имя получателя
+Шаг 7/15: Телефон отправителя
+Например: +1234567890 или 1234567890""",
+        reply_markup=reply_markup
+    )
+    return FROM_PHONE
+
+async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    phone = update.message.text.strip()
+    
+    # Validate phone format
+    import re
+    # Remove all non-digit characters
+    digits_only = re.sub(r'\D', '', phone)
+    
+    # Check if it's a valid US phone number (10 or 11 digits)
+    if len(digits_only) < 10 or len(digits_only) > 11:
+        await update.message.reply_text("❌ Неверный формат телефона. Введите 10 цифр (например: 1234567890):")
+        return FROM_PHONE
+    
+    # Format phone number
+    if len(digits_only) == 11 and digits_only[0] == '1':
+        formatted_phone = f"+{digits_only}"
+    elif len(digits_only) == 10:
+        formatted_phone = f"+1{digits_only}"
+    else:
+        formatted_phone = f"+{digits_only}"
+    
+    context.user_data['from_phone'] = formatted_phone
+    
+    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await update.message.reply_text(
+        """Шаг 8/15: Имя получателя
 Например: Jane Doe""",
         reply_markup=reply_markup
     )
