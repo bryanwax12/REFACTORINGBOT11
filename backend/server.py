@@ -1346,12 +1346,8 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
                 callback_data=f'select_carrier_{i}'
             )])
         
-        # Add info message
-        message += "💡 Не нашли нужную доставку? Попробуйте обновить список\n"
-        
-        # Add refresh and cancel buttons
+        # Add cancel button
         keyboard.append([
-            InlineKeyboardButton("🔄 Обновить список", callback_data='refresh_carriers'),
             InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')
         ])
         
