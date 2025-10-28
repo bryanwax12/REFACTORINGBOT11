@@ -617,55 +617,54 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return FROM_ZIP
 
 
-async def validate_address_with_shippo(name, street1, street2, city, state, zip_code):
-    """Validate address using GoShippo API"""
+async def validate_address_with_shipstation(name, street1, street2, city, state, zip_code):
+    """Validate address using ShipStation API V2"""
     try:
         headers = {
-            'Authorization': f'ShippoToken {SHIPPO_API_KEY}',
+            'API-Key': SHIPSTATION_API_KEY,
             'Content-Type': 'application/json'
         }
         
         address_data = {
             'name': name,
-            'street1': street1,
-            'city': city,
-            'state': state,
-            'zip': zip_code,
-            'country': 'US',
-            'validate': True
+            'address_line1': street1,
+            'city_locality': city,
+            'state_province': state,
+            'postal_code': zip_code,
+            'country_code': 'US'
         }
         
         if street2:
-            address_data['street2'] = street2
+            address_data['address_line2'] = street2
         
         response = requests.post(
-            'https://api.goshippo.com/addresses/',
+            'https://api.shipstation.com/v2/addresses/validate',
             headers=headers,
-            json=address_data,
+            json=[address_data],  # ShipStation expects array
             timeout=10
         )
         
-        if response.status_code == 201:
+        if response.status_code == 200:
             result = response.json()
-            validation = result.get('validation_results', {})
-            is_valid = validation.get('is_valid', False)
-            
-            if is_valid:
-                return {
-                    'is_valid': True,
-                    'message': 'Адрес проверен успешно'
-                }
-            else:
-                # Get error messages
-                messages = validation.get('messages', [])
-                error_text = '; '.join([msg.get('text', '') for msg in messages if msg.get('type') == 'error'])
-                if not error_text:
-                    error_text = 'Адрес не найден или неполный'
+            if result and len(result) > 0:
+                validation = result[0]
                 
-                return {
-                    'is_valid': False,
-                    'message': error_text
-                }
+                # ShipStation returns status: verified, unverified, warning
+                if validation.get('status') == 'verified':
+                    return {
+                        'is_valid': True,
+                        'message': 'Адрес проверен успешно'
+                    }
+                else:
+                    messages = validation.get('messages', [])
+                    error_text = '; '.join([msg.get('message', '') for msg in messages])
+                    if not error_text:
+                        error_text = 'Адрес не найден или неполный'
+                    
+                    return {
+                        'is_valid': False,
+                        'message': error_text
+                    }
         else:
             logger.error(f"Address validation failed: {response.status_code} - {response.text}")
             return {
