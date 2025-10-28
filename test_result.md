@@ -212,17 +212,14 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "ShipStation V2 API Rate Request Fix"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
   manual_testing_required:
-    - "Data Confirmation Screen with Edit Button - Telegram bot conversation flow"
-    - "Edit Menu for Selecting What to Edit - Telegram bot conversation flow"  
-    - "Conversation Flow with Edit States - Telegram bot conversation flow"
+    - "ShipStation V2 API Rate Request Fix - Test via Telegram bot by creating new order with valid US addresses"
 
 agent_communication:
     - agent: "main"
-      message: "Implemented data editing functionality in Telegram bot. Users can now review all entered data (sender/receiver addresses, parcel weight) before fetching shipping rates. Added edit menu that allows selective editing of specific fields. Ready for testing the complete order creation flow with edit functionality."
-    - agent: "testing"
-      message: "✅ BACKEND INFRASTRUCTURE TESTING COMPLETE: All Telegram bot backend components are working perfectly. Bot is running (@whitelabellbot), connected to Telegram API, and all conversation handler functions are properly implemented. Supporting APIs (carriers: 5 active, shipping rates: 11 rates from UPS/USPS) are working excellently. ⚠️ CRITICAL: The data editing functionality is Telegram bot conversation flow - cannot be tested through automated backend tests. REQUIRES MANUAL TESTING through Telegram interface to verify: 1) Data confirmation screen display, 2) Edit menu functionality, 3) Button interactions, 4) State transitions, 5) Data persistence across edit cycles. All backend infrastructure is ready for manual testing."
+      message: "Fixed critical ShipStation API issue. The problem was that rate_options.carrier_ids cannot be empty array - ShipStation V2 requires actual carrier IDs. Implemented carrier ID caching and updated all rate request functions. API endpoint tested successfully with 31 rates returned. Ready for Telegram bot end-to-end testing - please test order creation flow with valid addresses to confirm rates are fetched correctly."
