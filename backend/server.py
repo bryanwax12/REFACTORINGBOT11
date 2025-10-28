@@ -25,7 +25,7 @@ client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
 # Shippo API
-SHIPPO_API_KEY = os.environ.get('SHIPPO_API_KEY', '')
+SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY', '')
 
 # Telegram Bot
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
