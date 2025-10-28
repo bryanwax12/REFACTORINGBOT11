@@ -716,6 +716,16 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 reply_markup=reply_markup
             )
             return FROM_PHONE
+        
+        elif query.data == 'fix_from_address':
+            # Go back to start of from address to fix
+            keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await query.message.reply_text(
+                "Шаг 2/15: Адрес отправителя\nВведите корректный адрес.\nНапример: 215 Clayton St",
+                reply_markup=reply_markup
+            )
+            return FROM_ADDRESS
     
     zip_code = update.message.text.strip()
     
