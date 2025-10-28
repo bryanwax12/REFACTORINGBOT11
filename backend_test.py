@@ -197,10 +197,16 @@ def test_shipping_rates():
             
             return True, data
         else:
-            print(f"❌ Shipping rates test failed: {response.status_code}")
+            print(f"❌ ShipStation API test failed: {response.status_code}")
             try:
                 error_data = response.json()
                 print(f"   Error: {error_data}")
+                
+                # Check for specific 400 Bad Request that was fixed
+                if response.status_code == 400:
+                    print(f"   🚨 400 Bad Request detected - This indicates the fix may not be working!")
+                    print(f"   🔍 Check if carrier_ids are being properly populated in rate_options")
+                    
             except:
                 print(f"   Error: {response.text}")
             return False, None
