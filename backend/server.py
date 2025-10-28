@@ -862,13 +862,15 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
                 await update.message.reply_text("❌ Не удалось получить тарифы. Возможные причины:\n• Неверный ZIP код\n• Недоступный маршрут\n• Проверьте корректность адресов")
                 return ConversationHandler.END
             
-            # Save rates - show up to 10 carriers
+            # Save rates - show up to 10 carriers with $10 markup
+            markup = 10.00  # Markup in USD
             context.user_data['rates'] = [
                 {
                     'rate_id': rate['object_id'],
                     'carrier': rate['provider'],
                     'service': rate['servicelevel'].get('name') if isinstance(rate.get('servicelevel'), dict) else str(rate.get('servicelevel', '')),
-                    'amount': float(rate['amount']),
+                    'original_amount': float(rate['amount']),  # Original price from GoShippo
+                    'amount': float(rate['amount']) + markup,  # Price shown to user (with markup)
                     'currency': rate['currency'],
                     'days': rate.get('estimated_days')
                 }
@@ -881,18 +883,19 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
             
             for i, rate in enumerate(context.user_data['rates']):
                 days_text = f" ({rate['days']} дней)" if rate['days'] else ""
-                message += f"{i+1}. {rate['carrier']} - {rate['service']}{days_text}\n   💰 ${rate['amount']}\n\n"
+                message += f"{i+1}. {rate['carrier']} - {rate['service']}{days_text}\n   💰 ${rate['amount']:.2f}\n\n"
                 
                 # Show carrier name with price in button
-                button_text = f"{rate['carrier']} - ${rate['amount']}"
+                button_text = f"{rate['carrier']} - ${rate['amount']:.2f}"
                 if rate['days']:
-                    button_text = f"{rate['carrier']} {rate['days']}д - ${rate['amount']}"
+                    button_text = f"{rate['carrier']} {rate['days']}д - ${rate['amount']:.2f}"
                 
                 keyboard.append([InlineKeyboardButton(
                     button_text,
                     callback_data=f'select_carrier_{i}'
                 )])
             
+            message += f"\n💡 Цена включает доставку + сервисный сбор ${markup:.2f}\n"
             if len(context.user_data['rates']) == 1:
                 message += "\n⚠️ В Test mode доступен только USPS.\n"
                 message += "Для FedEx, UPS, DHL нужно:\n"
