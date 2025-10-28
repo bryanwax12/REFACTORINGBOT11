@@ -1642,36 +1642,83 @@ async def create_and_send_label(order_id, telegram_id, message):
         
         logger.info(f"Creating label for order {order_id}")
         
-        from shippo import Shippo
-        from shippo.models import components
+        import requests
         
-        shippo_client = Shippo(api_key_header=SHIPPO_API_KEY)
+        headers = {
+            'API-Key': SHIPSTATION_API_KEY,
+            'Content-Type': 'application/json'
+        }
         
-        # Purchase label with saved rate_id
+        # Create label request for ShipStation V2
+        label_request = {
+            'label_layout': 'letter',
+            'label_format': 'pdf',
+            'shipment': {
+                'ship_to': {
+                    'name': order['address_to']['name'],
+                    'phone': order['address_to'].get('phone', ''),
+                    'address_line1': order['address_to']['street1'],
+                    'address_line2': order['address_to'].get('street2', ''),
+                    'city_locality': order['address_to']['city'],
+                    'state_province': order['address_to']['state'],
+                    'postal_code': order['address_to']['zip'],
+                    'country_code': order['address_to'].get('country', 'US')
+                },
+                'ship_from': {
+                    'name': order['address_from']['name'],
+                    'phone': order['address_from'].get('phone', ''),
+                    'address_line1': order['address_from']['street1'],
+                    'address_line2': order['address_from'].get('street2', ''),
+                    'city_locality': order['address_from']['city'],
+                    'state_province': order['address_from']['state'],
+                    'postal_code': order['address_from']['zip'],
+                    'country_code': order['address_from'].get('country', 'US')
+                },
+                'packages': [{
+                    'weight': {
+                        'value': order['parcel']['weight'],
+                        'unit': 'pound'
+                    },
+                    'dimensions': {
+                        'length': order['parcel'].get('length', 5),
+                        'width': order['parcel'].get('width', 5),
+                        'height': order['parcel'].get('height', 5),
+                        'unit': 'inch'
+                    }
+                }]
+            },
+            'rate_id': order['rate_id']
+        }
+        
         logger.info(f"Purchasing label with rate_id: {order['rate_id']}")
-        transaction = shippo_client.transactions.create(
-            components.TransactionCreateRequest(
-                rate=order['rate_id'],
-                label_file_type="PDF",
-                async_=False
-            )
+        
+        response = requests.post(
+            'https://api.shipstation.com/v2/labels',
+            headers=headers,
+            json=label_request,
+            timeout=30
         )
         
-        logger.info(f"Transaction response: status={transaction.status}, tracking={transaction.tracking_number}, label_url={transaction.label_url}")
-        
-        # Check transaction status
-        if transaction.status != 'SUCCESS':
-            error_msg = f"Transaction failed with status: {transaction.status}"
-            if hasattr(transaction, 'messages') and transaction.messages:
-                error_msg += f". Messages: {transaction.messages}"
-            logger.error(error_msg)
+        if response.status_code != 201:
+            error_data = response.json() if response.text else {}
+            error_msg = error_data.get('message', f'Status code: {response.status_code}')
+            logger.error(f"Label creation failed: {error_msg}")
+            logger.error(f"Response: {response.text}")
             raise Exception(error_msg)
+        
+        label_response = response.json()
+        
+        # Extract label data
+        tracking_number = label_response.get('tracking_number', '')
+        label_download_url = label_response.get('label_download', {}).get('pdf', '')
+        
+        logger.info(f"Label created: tracking={tracking_number}, label_url={label_download_url}")
         
         # Save label
         label = ShippingLabel(
             order_id=order_id,
-            tracking_number=transaction.tracking_number,
-            label_url=transaction.label_url,
+            tracking_number=tracking_number,
+            label_url=label_download_url,
             carrier=order['selected_carrier'],
             service_level=order['selected_service'],
             amount=str(order['amount']),  # User paid amount (with markup)
@@ -1680,7 +1727,7 @@ async def create_and_send_label(order_id, telegram_id, message):
         
         label_dict = label.model_dump()
         label_dict['created_at'] = label_dict['created_at'].isoformat()
-        label_dict['original_amount'] = order.get('original_amount')  # GoShippo price
+        label_dict['original_amount'] = order.get('original_amount')  # ShipStation price
         await db.shipping_labels.insert_one(label_dict)
         
         # Update order
@@ -1695,11 +1742,11 @@ async def create_and_send_label(order_id, telegram_id, message):
                 chat_id=telegram_id,
                 text=f"""📦 Shipping label создан!
 
-Tracking: {transaction.tracking_number}
+Tracking: {tracking_number}
 Carrier: {order['selected_carrier']}
 Service: {order['selected_service']}
 
-Label PDF: {transaction.label_url}
+Label PDF: {label_download_url}
 
 Вы оплатили: ${order['amount']:.2f}"""
             )
