@@ -1197,33 +1197,52 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # Create order
             order = await create_order_in_db(user, data, selected_rate, amount)
             
-            # Deduct from balance
-            new_balance = user['balance'] - amount
-            await db.users.update_one(
-                {"telegram_id": telegram_id},
-                {"$set": {"balance": new_balance}}
-            )
+            # Try to create shipping label first
+            label_created = await create_and_send_label(order['id'], telegram_id, query.message)
             
-            # Update order as paid
-            await db.orders.update_one(
-                {"id": order['id']},
-                {"$set": {"payment_status": "paid"}}
-            )
-            
-            # Create shipping label
-            await create_and_send_label(order['id'], telegram_id, query.message)
-            
-            keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            
-            await query.message.reply_text(
-                f"""✅ Заказ оплачен с баланса!
+            if label_created:
+                # Only deduct balance if label was created successfully
+                new_balance = user['balance'] - amount
+                await db.users.update_one(
+                    {"telegram_id": telegram_id},
+                    {"$set": {"balance": new_balance}}
+                )
+                
+                # Update order as paid
+                await db.orders.update_one(
+                    {"id": order['id']},
+                    {"$set": {"payment_status": "paid"}}
+                )
+                
+                keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                
+                await query.message.reply_text(
+                    f"""✅ Заказ оплачен с баланса!
 💳 Списано: ${amount}
 💰 Новый баланс: ${new_balance:.2f}
 
-Создаю shipping label...""",
-                reply_markup=reply_markup
-            )
+Shipping label создан успешно!""",
+                    reply_markup=reply_markup
+                )
+            else:
+                # Label creation failed - don't charge user
+                await db.orders.update_one(
+                    {"id": order['id']},
+                    {"$set": {"payment_status": "failed", "shipping_status": "failed"}}
+                )
+                
+                keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                
+                await query.message.reply_text(
+                    """❌ Не удалось создать shipping label.
+                    
+Оплата не списана. Ваш баланс не изменился.
+
+Пожалуйста, свяжитесь с администратором.""",
+                    reply_markup=reply_markup
+                )
             
         elif query.data == 'pay_with_crypto':
             # Create order
