@@ -208,8 +208,19 @@ async def my_orders_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await send_method(message, reply_markup=reply_markup)
 
 async def track_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "Для отслеживания посылки используйте веб-панель или укажите tracking number."
+    # Handle both command and callback
+    if update.callback_query:
+        query = update.callback_query
+        await query.answer()
+        send_method = query.message.reply_text
+    else:
+        send_method = update.message.reply_text
+    
+    keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await send_method(
+        "Для отслеживания посылки используйте веб-панель или укажите tracking number.",
+        reply_markup=reply_markup
     )
 
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
