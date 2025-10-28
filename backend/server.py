@@ -211,14 +211,18 @@ async def my_orders_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await send_method("У вас пока нет заказов. Создайте первый заказ через /start → 📦 Новый заказ.", reply_markup=reply_markup)
         return
     
-    message = "📦 Ваши заказы:\n\n"
+    message = "📦 Ваши последние заказы:\n\n"
     keyboard = []
     
-    for order in orders:
+    for i, order in enumerate(orders, 1):
         status_emoji = "✅" if order['payment_status'] == 'paid' else "⏳"
         ship_emoji = "📮" if order['shipping_status'] == 'label_created' else "📦"
         
-        message += f"""{status_emoji} Заказ #{order['id'][:8]}
+        # Get recipient name from order data
+        recipient_name = order.get('to_address', {}).get('name', 'Не указано')
+        
+        message += f"""{i}. {status_emoji} Заказ #{order['id'][:8]}
+👤 Получатель: {recipient_name}
 💰 Оплата: {order['payment_status']}
 {ship_emoji} Доставка: {order['shipping_status']}
 💵 Сумма: ${order['amount']}
@@ -228,7 +232,7 @@ async def my_orders_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Add button to create label if order is paid but label not created
         if order['payment_status'] == 'paid' and order['shipping_status'] != 'label_created':
             keyboard.append([InlineKeyboardButton(
-                f"🏷️ Создать лейбл #{order['id'][:8]}", 
+                f"🏷️ Создать лейбл для #{order['id'][:8]} ({recipient_name})", 
                 callback_data=f"create_label_{order['id']}"
             )])
         
