@@ -439,7 +439,22 @@ async def skip_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE)
     return await order_from_address2(update, context)
 
 async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['from_city'] = update.message.text
+    city = update.message.text.strip()
+    
+    # Validate city
+    if len(city) < 2:
+        await update.message.reply_text("❌ Название города слишком короткое:")
+        return FROM_CITY
+    
+    if len(city) > 50:
+        await update.message.reply_text("❌ Название города слишком длинное. Максимум 50 символов:")
+        return FROM_CITY
+    
+    if not all(c.isalpha() or c.isspace() or c in ".-'" for c in city):
+        await update.message.reply_text("❌ Название города содержит недопустимые символы:")
+        return FROM_CITY
+    
+    context.user_data['from_city'] = city
     
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
