@@ -893,7 +893,11 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
             # Create buttons for carrier selection
             from datetime import datetime, timedelta, timezone
             
-            message = "📦 Доступные тарифы:\n\n"
+            # Count unique carriers
+            unique_carriers = set([r['carrier'] for r in context.user_data['rates']])
+            carriers_text = ", ".join(sorted(unique_carriers))
+            
+            message = f"📦 Найдено {len(context.user_data['rates'])} тарифов от {len(unique_carriers)} курьеров ({carriers_text}):\n\n"
             keyboard = []
             
             for i, rate in enumerate(context.user_data['rates']):
