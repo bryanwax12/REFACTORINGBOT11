@@ -434,7 +434,19 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message:
-        context.user_data['from_street2'] = update.message.text
+        address2 = update.message.text.strip()
+        
+        # Check for Cyrillic or non-Latin characters
+        if any(ord(c) >= 0x0400 and ord(c) <= 0x04FF for c in address2):
+            await update.message.reply_text("❌ Используйте только английские буквы (латиницу). Пример: Apt 5, Suite 201")
+            return FROM_ADDRESS2
+        
+        # Only Latin letters, numbers, spaces, and common address symbols
+        if not all((ord(c) < 128 and (c.isalnum() or c.isspace() or c in ".-',#/")) for c in address2):
+            await update.message.reply_text("❌ Используйте только английские буквы и цифры. Разрешены: буквы, цифры, пробелы, дефисы, точки, запятые")
+            return FROM_ADDRESS2
+        
+        context.user_data['from_street2'] = address2
     else:
         context.user_data['from_street2'] = None
     
