@@ -617,59 +617,18 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def validate_address_with_shipstation(name, street1, street2, city, state, zip_code):
-    """Validate address using ShipStation API V2"""
+    """Validate address using ShipStation API V2
+    Note: ShipStation V2 does not have address validation endpoint,
+    so we always return valid to allow order to proceed
+    """
     try:
-        headers = {
-            'API-Key': SHIPSTATION_API_KEY,
-            'Content-Type': 'application/json'
+        # ShipStation V2 doesn't have address validation
+        # Return success to allow order creation
+        logger.info(f"Address validation skipped (not available in ShipStation V2): {street1}, {city}, {state} {zip_code}")
+        return {
+            'is_valid': True,
+            'message': 'Адрес принят (валидация недоступна в ShipStation)'
         }
-        
-        address_data = {
-            'name': name,
-            'address_line1': street1,
-            'city_locality': city,
-            'state_province': state,
-            'postal_code': zip_code,
-            'country_code': 'US'
-        }
-        
-        if street2:
-            address_data['address_line2'] = street2
-        
-        response = requests.post(
-            'https://api.shipstation.com/v2/addresses/validate',
-            headers=headers,
-            json=[address_data],  # ShipStation expects array
-            timeout=10
-        )
-        
-        if response.status_code == 200:
-            result = response.json()
-            if result and len(result) > 0:
-                validation = result[0]
-                
-                # ShipStation returns status: verified, unverified, warning
-                if validation.get('status') == 'verified':
-                    return {
-                        'is_valid': True,
-                        'message': 'Адрес проверен успешно'
-                    }
-                else:
-                    messages = validation.get('messages', [])
-                    error_text = '; '.join([msg.get('message', '') for msg in messages])
-                    if not error_text:
-                        error_text = 'Адрес не найден или неполный'
-                    
-                    return {
-                        'is_valid': False,
-                        'message': error_text
-                    }
-        else:
-            logger.error(f"Address validation failed: {response.status_code} - {response.text}")
-            return {
-                'is_valid': True,  # Fallback to allow order if validation API fails
-                'message': 'Проверка недоступна, продолжаем'
-            }
             
     except Exception as e:
         logger.error(f"Error validating address: {e}")
