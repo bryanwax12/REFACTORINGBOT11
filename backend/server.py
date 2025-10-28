@@ -694,7 +694,7 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Validate address with GoShippo
     await update.message.reply_text("⏳ Проверяю адрес отправителя...")
     
-    validation_result = await validate_address_with_shippo(
+    validation_result = await validate_address_with_shipstation(
         name=context.user_data['from_name'],
         street1=context.user_data['from_street'],
         street2=context.user_data.get('from_street2'),
@@ -960,7 +960,7 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Validate address with GoShippo
     await update.message.reply_text("⏳ Проверяю адрес получателя...")
     
-    validation_result = await validate_address_with_shippo(
+    validation_result = await validate_address_with_shipstation(
         name=context.user_data['to_name'],
         street1=context.user_data['to_street'],
         street2=context.user_data.get('to_street2'),
