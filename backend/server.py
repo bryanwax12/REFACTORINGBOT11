@@ -537,6 +537,11 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     name = update.message.text.strip()
     
+    # Check for Cyrillic or non-Latin characters
+    if any(ord(c) >= 0x0400 and ord(c) <= 0x04FF for c in name):
+        await update.message.reply_text("❌ Используйте только английские буквы (латиницу). Пример: John Smith")
+        return TO_NAME
+    
     # Validate name
     if len(name) < 2:
         await update.message.reply_text("❌ Имя слишком короткое. Введите полное имя (минимум 2 символа):")
@@ -546,8 +551,9 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ Имя слишком длинное. Максимум 50 символов:")
         return TO_NAME
     
-    if not all(c.isalpha() or c.isspace() or c in ".-'" for c in name):
-        await update.message.reply_text("❌ Имя содержит недопустимые символы. Используйте только буквы:")
+    # Only Latin letters, spaces, dots, hyphens, apostrophes
+    if not all((ord(c) < 128 and (c.isalpha() or c.isspace() or c in ".-'")) for c in name):
+        await update.message.reply_text("❌ Используйте только английские буквы. Разрешены: буквы, пробелы, дефисы, точки")
         return TO_NAME
     
     context.user_data['to_name'] = name
