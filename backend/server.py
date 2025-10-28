@@ -1482,6 +1482,16 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
+        # Notify admin about rate fetch error
+        telegram_id = query.from_user.id
+        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        if user:
+            await notify_admin_error(
+                user_info=user,
+                error_type="Rate Fetch Failed",
+                error_details=f"Exception: {str(e)}\n\nAddresses:\nFrom: {data.get('from_city')}, {data.get('from_state')}\nTo: {data.get('to_city')}, {data.get('to_state')}"
+            )
+        
         await query.message.reply_text(
             f"❌ Ошибка при получении тарифов:\n{str(e)}\n\nПроверьте корректность адресов и попробуйте снова.",
             reply_markup=reply_markup
