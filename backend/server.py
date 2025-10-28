@@ -1906,6 +1906,16 @@ Label PDF: {label_download_url}
     except Exception as e:
         logger.error(f"Error creating label: {e}", exc_info=True)
         
+        # Notify admin about error
+        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        if user:
+            await notify_admin_error(
+                user_info=user,
+                error_type="Label Creation Exception",
+                error_details=str(e),
+                order_id=order_id
+            )
+        
         # Send polite message to user
         user_message = """😔 К сожалению, в данный момент мы не можем сгенерировать shipping label.
 
