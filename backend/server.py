@@ -558,79 +558,96 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
         await update.message.reply_text("⏳ Получаю доступные курьерские службы и тарифы...")
         
         try:
-            from shippo import Shippo
-            from shippo.models import components, operations
+            import requests
             
-            shippo_client = Shippo(api_key_header=SHIPPO_API_KEY)
             data = context.user_data
             
-            # Get all carrier accounts
+            # Get all carrier accounts using REST API
+            headers = {
+                'Authorization': f'ShippoToken {SHIPPO_API_KEY}',
+                'Content-Type': 'application/json'
+            }
+            
             carrier_accounts = []
             try:
-                accounts_response = shippo_client.carrier_accounts.list(
-                    operations.ListCarrierAccountsRequest()
-                )
-                if hasattr(accounts_response, 'carrier_accounts'):
-                    carrier_accounts = [
-                        acc.object_id for acc in accounts_response.carrier_accounts 
-                        if acc.active and acc.test
-                    ]
-                    logger.info(f"Found {len(carrier_accounts)} active carrier accounts")
+                acc_response = requests.get('https://api.goshippo.com/carrier_accounts/', headers=headers)
+                if acc_response.status_code == 200:
+                    accounts_data = acc_response.json()
+                    if 'results' in accounts_data:
+                        carrier_accounts = [
+                            acc['object_id'] for acc in accounts_data['results']
+                            if acc.get('active') and acc.get('test')
+                        ]
+                        logger.info(f"Found {len(carrier_accounts)} active carrier accounts")
             except Exception as e:
                 logger.warning(f"Could not fetch carrier accounts: {e}")
             
             # Create shipment to get rates
-            shipment_request = components.ShipmentCreateRequest(
-                address_from=components.AddressCreateRequest(
-                    name=data['from_name'],
-                    street1=data['from_street'],
-                    street2=data.get('from_street2'),
-                    city=data['from_city'],
-                    state=data['from_state'],
-                    zip=data['from_zip'],
-                    country="US"
-                ),
-                address_to=components.AddressCreateRequest(
-                    name=data['to_name'],
-                    street1=data['to_street'],
-                    street2=data.get('to_street2'),
-                    city=data['to_city'],
-                    state=data['to_state'],
-                    zip=data['to_zip'],
-                    country="US"
-                ),
-                parcels=[components.ParcelCreateRequest(
-                    length=5,
-                    width=5,
-                    height=5,
-                    weight=weight,
-                    distance_unit="in",
-                    mass_unit="lb"
-                )],
-                async_=False
-            )
+            shipment_data = {
+                'address_from': {
+                    'name': data['from_name'],
+                    'street1': data['from_street'],
+                    'city': data['from_city'],
+                    'state': data['from_state'],
+                    'zip': data['from_zip'],
+                    'country': 'US'
+                },
+                'address_to': {
+                    'name': data['to_name'],
+                    'street1': data['to_street'],
+                    'city': data['to_city'],
+                    'state': data['to_state'],
+                    'zip': data['to_zip'],
+                    'country': 'US'
+                },
+                'parcels': [{
+                    'length': 5,
+                    'width': 5,
+                    'height': 5,
+                    'weight': weight,
+                    'distance_unit': 'in',
+                    'mass_unit': 'lb'
+                }],
+                'async': False
+            }
+            
+            # Add optional street2
+            if data.get('from_street2'):
+                shipment_data['address_from']['street2'] = data['from_street2']
+            if data.get('to_street2'):
+                shipment_data['address_to']['street2'] = data['to_street2']
             
             # Add carrier accounts if available
             if carrier_accounts:
-                shipment_request.carrier_accounts = carrier_accounts
+                shipment_data['carrier_accounts'] = carrier_accounts
             
-            shipment = shippo_client.shipments.create(shipment_request)
+            shipment_response = requests.post(
+                'https://api.goshippo.com/shipments/',
+                headers=headers,
+                json=shipment_data
+            )
             
-            if not shipment.rates or len(shipment.rates) == 0:
+            if shipment_response.status_code != 201:
+                await update.message.reply_text(f"❌ Ошибка при получении тарифов: {shipment_response.text}")
+                return ConversationHandler.END
+            
+            shipment = shipment_response.json()
+            
+            if not shipment.get('rates') or len(shipment['rates']) == 0:
                 await update.message.reply_text("❌ Не удалось получить тарифы. Проверьте адреса.")
                 return ConversationHandler.END
             
             # Save rates - show up to 10 carriers
             context.user_data['rates'] = [
                 {
-                    'rate_id': rate.object_id,
-                    'carrier': rate.provider,
-                    'service': rate.servicelevel.name if hasattr(rate.servicelevel, 'name') else str(rate.servicelevel),
-                    'amount': float(rate.amount),
-                    'currency': rate.currency,
-                    'days': rate.estimated_days
+                    'rate_id': rate['object_id'],
+                    'carrier': rate['provider'],
+                    'service': rate['servicelevel'].get('name') if isinstance(rate.get('servicelevel'), dict) else str(rate.get('servicelevel', '')),
+                    'amount': float(rate['amount']),
+                    'currency': rate['currency'],
+                    'days': rate.get('estimated_days')
                 }
-                for rate in shipment.rates[:10]  # Show up to 10 rates
+                for rate in shipment['rates'][:10]  # Show up to 10 rates
             ]
             
             # Create buttons for carrier selection
