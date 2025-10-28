@@ -790,10 +790,14 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
         elif query.data == 'top_up_balance':
             # Create top-up invoice
             keyboard = [
-                [InlineKeyboardButton("$10", callback_data='topup_10')],
-                [InlineKeyboardButton("$25", callback_data='topup_25')],
-                [InlineKeyboardButton("$50", callback_data='topup_50')],
-                [InlineKeyboardButton("$100", callback_data='topup_100')],
+                [
+                    InlineKeyboardButton("$10", callback_data='topup_10'),
+                    InlineKeyboardButton("$25", callback_data='topup_25')
+                ],
+                [
+                    InlineKeyboardButton("$50", callback_data='topup_50'),
+                    InlineKeyboardButton("$100", callback_data='topup_100')
+                ],
                 [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
