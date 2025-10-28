@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
-Backend Test Suite for GoShippo Integration
-Tests the LIVE GoShippo API integration for UPS, USPS, and FedEx carriers
+Backend Test Suite for Telegram Shipping Bot
+Tests the backend infrastructure supporting Telegram bot functionality
 """
 
 import requests
 import json
 import os
+import re
 from dotenv import load_dotenv
 
 # Load environment variables
