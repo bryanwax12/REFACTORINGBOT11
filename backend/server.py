@@ -149,7 +149,8 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Create keyboard with buttons
     keyboard = [
-        [InlineKeyboardButton("📦 Мои заказы", callback_data='my_orders')],
+        [InlineKeyboardButton("📦 Создать заказ", callback_data='new_order')],
+        [InlineKeyboardButton("📋 Мои заказы", callback_data='my_orders')],
         [InlineKeyboardButton("🔍 Отследить посылку", callback_data='track')],
         [InlineKeyboardButton("❓ Помощь", callback_data='help')]
     ]
