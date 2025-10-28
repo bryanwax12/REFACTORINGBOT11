@@ -1210,12 +1210,13 @@ async def create_and_send_label(order_id, telegram_id, message):
             label_url=transaction.label_url,
             carrier=order['selected_carrier'],
             service_level=order['selected_service'],
-            amount=str(order['amount']),
+            amount=str(order['amount']),  # User paid amount (with markup)
             status='created'
         )
         
         label_dict = label.model_dump()
         label_dict['created_at'] = label_dict['created_at'].isoformat()
+        label_dict['original_amount'] = order.get('original_amount')  # GoShippo price
         await db.shipping_labels.insert_one(label_dict)
         
         # Update order
@@ -1234,7 +1235,9 @@ Tracking: {transaction.tracking_number}
 Carrier: {order['selected_carrier']}
 Service: {order['selected_service']}
 
-Label PDF: {transaction.label_url}"""
+Label PDF: {transaction.label_url}
+
+Вы оплатили: ${order['amount']:.2f}"""
             )
     except Exception as e:
         logger.error(f"Error creating label: {e}")
