@@ -890,18 +890,6 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     context.user_data['to_zip'] = zip_code
     
-    # Validate address (always returns success in ShipStation)
-    await update.message.reply_text("⏳ Проверяю адрес получателя...")
-    
-    validation_result = await validate_address_with_shipstation(
-        name=context.user_data['to_name'],
-        street1=context.user_data['to_street'],
-        street2=context.user_data.get('to_street2'),
-        city=context.user_data['to_city'],
-        state=context.user_data['to_state'],
-        zip_code=zip_code
-    )
-    
     # Check if we're editing to address
     if context.user_data.get('editing_to_address'):
         context.user_data['editing_to_address'] = False
