@@ -1125,7 +1125,8 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
                 'city': data['from_city'],
                 'state': data['from_state'],
                 'zip': data['from_zip'],
-                'country': 'US'
+                'country': 'US',
+                'phone': data.get('from_phone', '')
             },
             'address_to': {
                 'name': data['to_name'],
@@ -1133,7 +1134,8 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
                 'city': data['to_city'],
                 'state': data['to_state'],
                 'zip': data['to_zip'],
-                'country': 'US'
+                'country': 'US',
+                'phone': data.get('to_phone', '')
             },
             'parcels': [{
                 'length': 5,
