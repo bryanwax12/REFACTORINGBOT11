@@ -499,6 +499,7 @@ async def startup_event():
             application.add_handler(CommandHandler("help", help_command))
             application.add_handler(CommandHandler("my_orders", my_orders_command))
             application.add_handler(CommandHandler("track", track_command))
+            application.add_handler(CallbackQueryHandler(button_callback))
             
             await application.initialize()
             await application.start()
