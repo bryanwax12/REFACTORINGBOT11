@@ -148,16 +148,26 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(welcome_message, reply_markup=reply_markup)
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Handle both command and callback
+    if update.callback_query:
+        query = update.callback_query
+        await query.answer()
+        send_method = query.message.reply_text
+    else:
+        send_method = update.message.reply_text
+    
     help_text = """📦 Доступные команды:
 
 /start - Начать работу
-/new_order - Создать заказ на доставку
 /my_orders - Посмотреть мои заказы
 /track - Отследить посылку
 /help - Показать эту справку
 
 Для создания заказа используйте веб-панель или API."""
-    await update.message.reply_text(help_text)
+    
+    keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await send_method(help_text, reply_markup=reply_markup)
 
 async def my_orders_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Handle both command and callback
