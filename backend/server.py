@@ -1377,12 +1377,12 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         # Create buttons for carrier selection
         from datetime import datetime, timedelta, timezone
         
-        # Carrier logos/icons
+        # Carrier logos/icons - фирменные цвета
         carrier_icons = {
-            'UPS': '📦 UPS',
-            'USPS': '✉️ USPS',
-            'FedEx One Balance': '🚚 FedEx',
-            'FedEx': '🚚 FedEx'
+            'UPS': '🟫 UPS',  # Коричневый - фирменный цвет UPS
+            'USPS': '🟦 USPS',  # Синий - фирменный цвет USPS
+            'FedEx One Balance': '🟪 FedEx',  # Фиолетовый - фирменный цвет FedEx
+            'FedEx': '🟪 FedEx'
         }
         
         # Group rates by carrier for display
