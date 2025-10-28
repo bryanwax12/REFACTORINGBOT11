@@ -1271,11 +1271,19 @@ async def startup_event():
                 states={
                     FROM_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_name)],
                     FROM_ADDRESS: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_address)],
+                    FROM_ADDRESS2: [
+                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_address2),
+                        CallbackQueryHandler(skip_from_address2, pattern='^skip_from_address2$')
+                    ],
                     FROM_CITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_city)],
                     FROM_STATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_state)],
                     FROM_ZIP: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_zip)],
                     TO_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_name)],
                     TO_ADDRESS: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_address)],
+                    TO_ADDRESS2: [
+                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_address2),
+                        CallbackQueryHandler(skip_to_address2, pattern='^skip_to_address2$')
+                    ],
                     TO_CITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_city)],
                     TO_STATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_state)],
                     TO_ZIP: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_zip)],
