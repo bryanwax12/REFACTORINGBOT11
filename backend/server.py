@@ -1728,6 +1728,82 @@ Shipping label создан успешно!""",
             )
             return PAYMENT_METHOD
                 
+        elif query.data.startswith('crypto_'):
+            # Handle cryptocurrency selection
+            crypto_currency = query.data.replace('crypto_', '').upper()
+            
+            # Create order
+            order = await create_order_in_db(user, data, selected_rate, amount)
+            
+            try:
+                # Create NOWPayments payment
+                payment_data = await create_nowpayments_payment(
+                    price_amount=amount,
+                    pay_currency=crypto_currency,
+                    order_id=order['id'],
+                    order_description=f"Shipping Label - Order {order['id']}"
+                )
+                
+                # Store payment record
+                payment_record = {
+                    "order_id": order['id'],
+                    "payment_id": payment_data.get("payment_id"),
+                    "pay_address": payment_data.get("pay_address"),
+                    "pay_amount": payment_data.get("pay_amount"),
+                    "pay_currency": crypto_currency,
+                    "price_amount": amount,
+                    "price_currency": "USD",
+                    "status": "waiting",
+                    "payment_status": payment_data.get("payment_status", "waiting"),
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.nowpayments.insert_one(payment_record)
+                
+                # Get payment URL and QR code if available
+                pay_address = payment_data.get("pay_address")
+                pay_amount = payment_data.get("pay_amount", "pending")
+                
+                keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                
+                message = f"""✅ Заказ создан!
+
+💰 <b>Оплата {crypto_currency}</b>
+
+<b>Адрес для оплаты:</b>
+<code>{pay_address}</code>
+
+<b>Сумма:</b> {pay_amount} {crypto_currency}
+<b>Сумма в USD:</b> ${amount}
+
+⏰ После получения оплаты мы автоматически создадим shipping label и отправим его вам.
+
+💡 <i>Отправьте точную сумму на указанный адрес</i>"""
+                
+                await query.message.reply_text(
+                    message,
+                    reply_markup=reply_markup,
+                    parse_mode='HTML'
+                )
+                
+            except Exception as e:
+                logger.error(f"NOWPayments payment creation failed: {e}")
+                
+                # Notify admin
+                if user:
+                    await notify_admin_error(
+                        user_info=user,
+                        error_type="NOWPayments Payment Creation Failed",
+                        error_details=str(e),
+                        order_id=order['id']
+                    )
+                
+                await query.message.reply_text(
+                    "❌ Не удалось создать платеж. Пожалуйста, попробуйте позже или свяжитесь с администратором."
+                )
+            
+            return ConversationHandler.END
+                
         elif query.data == 'top_up_balance':
             # Create top-up invoice
             keyboard = [
