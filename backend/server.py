@@ -1842,6 +1842,18 @@ async def create_and_send_label(order_id, telegram_id, message):
             error_msg = error_data.get('message', f'Status code: {response.status_code}')
             logger.error(f"Label creation failed: {error_msg}")
             logger.error(f"Response: {response.text}")
+            
+            # Notify admin about label creation error
+            user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+            if user:
+                error_details = f"ShipStation API Error:\n{response.text[:500]}"
+                await notify_admin_error(
+                    user_info=user,
+                    error_type="Label Creation Failed",
+                    error_details=error_details,
+                    order_id=order_id
+                )
+            
             raise Exception(error_msg)
         
         label_response = response.json()
