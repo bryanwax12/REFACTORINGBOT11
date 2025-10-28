@@ -1401,9 +1401,9 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         
         # Display rates grouped by carrier
         for carrier in sorted(rates_by_carrier_display.keys()):
-            # Add carrier header with icon
+            # Add carrier header with icon (bold text for carrier name)
             carrier_icon = carrier_icons.get(carrier, '📦')
-            message += f"{'='*30}\n{carrier_icon}\n{'='*30}\n\n"
+            message += f"{'='*30}\n<b>{carrier_icon}</b>\n{'='*30}\n\n"
             
             rates = rates_by_carrier_display[carrier]
             for idx, rate in rates:
@@ -1433,7 +1433,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         
         reply_markup = InlineKeyboardMarkup(keyboard)
         
-        await query.message.reply_text(message, reply_markup=reply_markup)
+        await query.message.reply_text(message, reply_markup=reply_markup, parse_mode='HTML')
         return SELECT_CARRIER
         
     except Exception as e:
