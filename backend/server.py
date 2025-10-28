@@ -1356,10 +1356,10 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             # Take top 5 cheapest from each carrier
             balanced_rates.extend(sorted_carrier_rates[:5])
         
-        # Sort all balanced rates by price
-        balanced_rates = sorted(balanced_rates, key=lambda r: float(r['shipping_amount']['amount']))
+        # Sort all balanced rates by carrier, then by price
+        balanced_rates = sorted(balanced_rates, key=lambda r: (r['carrier_friendly_name'], float(r['shipping_amount']['amount'])))
         
-        # Take top 15 overall
+        # Take top 15 overall but maintain carrier grouping
         for rate in balanced_rates[:15]:
             rate_data = {
                 'rate_id': rate['rate_id'],
@@ -1377,32 +1377,54 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         # Create buttons for carrier selection
         from datetime import datetime, timedelta, timezone
         
+        # Carrier logos/icons
+        carrier_icons = {
+            'UPS': '📦 UPS',
+            'USPS': '✉️ USPS',
+            'FedEx One Balance': '🚚 FedEx',
+            'FedEx': '🚚 FedEx'
+        }
+        
+        # Group rates by carrier for display
+        rates_by_carrier_display = {}
+        for i, rate in enumerate(context.user_data['rates']):
+            carrier = rate['carrier']
+            if carrier not in rates_by_carrier_display:
+                rates_by_carrier_display[carrier] = []
+            rates_by_carrier_display[carrier].append((i, rate))
+        
         # Count unique carriers
         unique_carriers = set([r['carrier'] for r in context.user_data['rates']])
-        carriers_text = ", ".join(sorted(unique_carriers))
         
-        message = f"📦 Найдено {len(context.user_data['rates'])} тарифов от {len(unique_carriers)} курьеров ({carriers_text}):\n\n"
+        message = f"📦 Найдено {len(context.user_data['rates'])} тарифов от {len(unique_carriers)} курьеров:\n\n"
         keyboard = []
         
-        for i, rate in enumerate(context.user_data['rates']):
-            days_text = f" ({rate['days']} дней)" if rate['days'] else ""
+        # Display rates grouped by carrier
+        for carrier in sorted(rates_by_carrier_display.keys()):
+            # Add carrier header with icon
+            carrier_icon = carrier_icons.get(carrier, '📦')
+            message += f"{'='*30}\n{carrier_icon}\n{'='*30}\n\n"
             
-            # Calculate estimated delivery date
-            if rate['days']:
-                delivery_date = datetime.now(timezone.utc) + timedelta(days=rate['days'])
-                date_text = f" → {delivery_date.strftime('%d.%m')}"
-            else:
-                date_text = ""
-            
-            message += f"{i+1}. {rate['carrier']} - {rate['service']}{days_text}{date_text}\n   💰 ${rate['amount']:.2f}\n\n"
-            
-            # Show full name in button (same as in list)
-            button_text = f"{rate['carrier']} - {rate['service']} - ${rate['amount']:.2f}"
-            
-            keyboard.append([InlineKeyboardButton(
-                button_text,
-                callback_data=f'select_carrier_{i}'
-            )])
+            rates = rates_by_carrier_display[carrier]
+            for idx, rate in rates:
+                days_text = f" ({rate['days']} дней)" if rate['days'] else ""
+                
+                # Calculate estimated delivery date
+                if rate['days']:
+                    delivery_date = datetime.now(timezone.utc) + timedelta(days=rate['days'])
+                    date_text = f" → {delivery_date.strftime('%d.%m')}"
+                else:
+                    date_text = ""
+                
+                message += f"• {rate['service']}{days_text}{date_text}\n  💰 ${rate['amount']:.2f}\n\n"
+                
+                # Show full name in button (same as in list)
+                button_text = f"{carrier_icon} - {rate['service']} - ${rate['amount']:.2f}"
+                
+                keyboard.append([InlineKeyboardButton(
+                    button_text,
+                    callback_data=f'select_carrier_{idx}'
+                )])
         
         # Add cancel button
         keyboard.append([
