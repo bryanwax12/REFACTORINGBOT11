@@ -1418,8 +1418,8 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
                 
                 message += f"• {rate['service']}{days_text}{date_text}\n  💰 ${rate['amount']:.2f}\n\n"
                 
-                # Show full name in button (same as in list)
-                button_text = f"{carrier_icon} - {rate['service']} - ${rate['amount']:.2f}"
+                # Show full name in button (without icon)
+                button_text = f"{carrier} - {rate['service']} - ${rate['amount']:.2f}"
                 
                 keyboard.append([InlineKeyboardButton(
                     button_text,
