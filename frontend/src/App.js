@@ -162,14 +162,41 @@ const Dashboard = () => {
                 <div className="space-y-4">
                   {users.map((user) => (
                     <div key={user.id} className="flex items-center justify-between border-b pb-4 last:border-0" data-testid="user-item">
-                      <div>
+                      <div className="flex-1">
                         <p className="font-medium">{user.first_name || 'Unknown'}</p>
                         <p className="text-sm text-muted-foreground">@{user.username || 'no_username'}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(user.created_at).toLocaleDateString()}
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Telegram ID: {user.telegram_id}
                         </p>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <p className="text-sm font-semibold text-emerald-600">
+                            Balance: ${(user.balance || 0).toFixed(2)}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(user.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            data-testid={`add-balance-${user.telegram_id}`}
+                            onClick={() => handleBalanceAction(user.telegram_id, 'add')}
+                          >
+                            💰 Add
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            data-testid={`deduct-balance-${user.telegram_id}`}
+                            onClick={() => handleBalanceAction(user.telegram_id, 'deduct')}
+                            disabled={(user.balance || 0) === 0}
+                          >
+                            ➖ Deduct
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ))}
