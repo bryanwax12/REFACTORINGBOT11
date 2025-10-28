@@ -916,9 +916,6 @@ async def handle_edit_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
             reply_markup=reply_markup
         )
         return PARCEL_WEIGHT
-            reply_markup=reply_markup
-        )
-        return PARCEL_WEIGHT
 
 async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Fetch shipping rates from GoShippo"""
