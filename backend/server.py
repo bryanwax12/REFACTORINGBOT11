@@ -1919,20 +1919,36 @@ Label: {transaction.label_url}"""
 @api_router.get("/shipping/track/{tracking_number}")
 async def track_shipment(tracking_number: str, carrier: str):
     try:
-        if not SHIPPO_API_KEY:
-            raise HTTPException(status_code=500, detail="Shippo API not configured")
+        if not SHIPSTATION_API_KEY:
+            raise HTTPException(status_code=500, detail="ShipStation API not configured")
         
-        from shippo import Shippo
-        shippo_client = Shippo(api_key_header=SHIPPO_API_KEY)
-        
-        tracking = shippo_client.tracks.get_status(carrier, tracking_number)
-        
-        return {
-            "tracking_number": tracking_number,
-            "carrier": carrier,
-            "status": tracking.tracking_status.status if hasattr(tracking, 'tracking_status') and tracking.tracking_status else "UNKNOWN",
-            "tracking_history": tracking.tracking_history if hasattr(tracking, 'tracking_history') else []
+        headers = {
+            'API-Key': SHIPSTATION_API_KEY,
+            'Content-Type': 'application/json'
         }
+        
+        # ShipStation V2 tracking endpoint
+        response = requests.get(
+            f'https://api.shipstation.com/v2/tracking?tracking_number={tracking_number}&carrier_code={carrier}',
+            headers=headers,
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            tracking_data = response.json()
+            return {
+                "tracking_number": tracking_number,
+                "carrier": carrier,
+                "status": tracking_data.get('status', 'UNKNOWN'),
+                "tracking_history": tracking_data.get('events', [])
+            }
+        else:
+            return {
+                "tracking_number": tracking_number,
+                "carrier": carrier,
+                "status": "UNKNOWN",
+                "message": "Tracking information not available"
+            }
     except Exception as e:
         logger.error(f"Error tracking shipment: {e}")
         raise HTTPException(status_code=500, detail=str(e))
