@@ -389,7 +389,18 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return FROM_ADDRESS
 
 async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['from_street'] = update.message.text
+    address = update.message.text.strip()
+    
+    # Validate address
+    if len(address) < 3:
+        await update.message.reply_text("❌ Адрес слишком короткий. Введите полный адрес:")
+        return FROM_ADDRESS
+    
+    if len(address) > 100:
+        await update.message.reply_text("❌ Адрес слишком длинный. Максимум 100 символов:")
+        return FROM_ADDRESS
+    
+    context.user_data['from_street'] = address
     
     keyboard = [
         [InlineKeyboardButton("⏭ Пропустить", callback_data='skip_from_address2')],
