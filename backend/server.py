@@ -666,6 +666,25 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return FROM_PHONE
 
 async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Check if it's a callback query (skip phone button)
+    if hasattr(update, 'callback_query') and update.callback_query:
+        query = update.callback_query
+        await query.answer()
+        
+        if query.data == 'skip_from_phone':
+            # Skip phone - set empty or default value
+            context.user_data['from_phone'] = ''
+            
+            keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            await query.message.reply_text(
+                """Шаг 8/15: Имя получателя
+Например: Jane Doe""",
+                reply_markup=reply_markup
+            )
+            return TO_NAME
+    
     phone = update.message.text.strip()
     
     # Validate phone format
