@@ -615,16 +615,29 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
             ]
             
             # Create buttons for carrier selection
-            message = "📦 Выберите курьерскую службу:\n\n"
+            message = "📦 Доступные тарифы:\n\n"
             keyboard = []
             
             for i, rate in enumerate(context.user_data['rates']):
                 days_text = f" ({rate['days']} дней)" if rate['days'] else ""
                 message += f"{i+1}. {rate['carrier']} - {rate['service']}{days_text}\n   💰 ${rate['amount']}\n\n"
+                
+                # Show carrier name with price in button
+                button_text = f"{rate['carrier']} - ${rate['amount']}"
+                if rate['days']:
+                    button_text = f"{rate['carrier']} {rate['days']}д - ${rate['amount']}"
+                
                 keyboard.append([InlineKeyboardButton(
-                    f"{rate['carrier']} - ${rate['amount']}",
+                    button_text,
                     callback_data=f'select_carrier_{i}'
                 )])
+            
+            if len(context.user_data['rates']) == 1:
+                message += "\n⚠️ В Test mode доступен только USPS.\n"
+                message += "Для FedEx, UPS, DHL нужно:\n"
+                message += "• Войти на apps.goshippo.com\n"
+                message += "• Settings → Carriers\n"
+                message += "• Добавить carrier accounts\n\n"
             
             keyboard.append([InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')])
             reply_markup = InlineKeyboardMarkup(keyboard)
