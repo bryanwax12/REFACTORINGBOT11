@@ -550,6 +550,12 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     context.user_data['from_zip'] = zip_code
     
+    # Check if we're editing from address
+    if context.user_data.get('editing_from_address'):
+        context.user_data['editing_from_address'] = False
+        await update.message.reply_text("✅ Адрес отправителя обновлен!")
+        return await show_data_confirmation(update, context)
+    
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
