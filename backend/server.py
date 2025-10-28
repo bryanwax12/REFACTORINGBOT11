@@ -1700,42 +1700,33 @@ Shipping label создан успешно!""",
                 )
             
         elif query.data == 'pay_with_crypto':
-            # Create order
-            order = await create_order_in_db(user, data, selected_rate, amount)
+            # Show cryptocurrency selection
+            keyboard = [
+                [
+                    InlineKeyboardButton("₿ Bitcoin (BTC)", callback_data='crypto_btc'),
+                    InlineKeyboardButton("Ξ Ethereum (ETH)", callback_data='crypto_eth')
+                ],
+                [
+                    InlineKeyboardButton("₮ USDT (Tether)", callback_data='crypto_usdt'),
+                    InlineKeyboardButton("Ł Litecoin (LTC)", callback_data='crypto_ltc')
+                ],
+                [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
             
-            # Create crypto invoice
-            if crypto:
-                invoice = await crypto.create_invoice(
-                    asset="USDT",
-                    amount=amount
-                )
-                
-                pay_url = getattr(invoice, 'bot_invoice_url', None) or getattr(invoice, 'mini_app_invoice_url', None)
-                
-                payment = Payment(
-                    order_id=order['id'],
-                    amount=amount,
-                    invoice_id=invoice.invoice_id,
-                    pay_url=pay_url
-                )
-                payment_dict = payment.model_dump()
-                payment_dict['created_at'] = payment_dict['created_at'].isoformat()
-                await db.payments.insert_one(payment_dict)
-                
-                keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-                
-                await query.message.reply_text(
-                    f"""✅ Заказ создан!
+            await query.message.reply_text(
+                f"""💰 Выберите криптовалюту для оплаты:
 
-💰 Оплатите ${amount} USDT:
-{pay_url}
+💵 Сумма: ${amount}
 
-После оплаты мы автоматически создадим shipping label.""",
-                    reply_markup=reply_markup
-                )
-            else:
-                await query.message.reply_text("❌ Система оплаты не настроена.")
+Доступные криптовалюты:
+• Bitcoin (BTC)
+• Ethereum (ETH)  
+• USDT (Tether)
+• Litecoin (LTC)""",
+                reply_markup=reply_markup
+            )
+            return PAYMENT_METHOD
                 
         elif query.data == 'top_up_balance':
             # Create top-up invoice
