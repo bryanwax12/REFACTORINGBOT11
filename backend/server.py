@@ -361,7 +361,22 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return FROM_NAME
 
 async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['from_name'] = update.message.text
+    name = update.message.text.strip()
+    
+    # Validate name
+    if len(name) < 2:
+        await update.message.reply_text("❌ Имя слишком короткое. Введите полное имя (минимум 2 символа):")
+        return FROM_NAME
+    
+    if len(name) > 50:
+        await update.message.reply_text("❌ Имя слишком длинное. Максимум 50 символов:")
+        return FROM_NAME
+    
+    if not all(c.isalpha() or c.isspace() or c in ".-'" for c in name):
+        await update.message.reply_text("❌ Имя содержит недопустимые символы. Используйте только буквы:")
+        return FROM_NAME
+    
+    context.user_data['from_name'] = name
     
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
