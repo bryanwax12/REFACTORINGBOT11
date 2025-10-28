@@ -345,7 +345,7 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await update.message.reply_text(
-        """Шаг 8/11: Адрес получателя
+        """Шаг 7/11: Адрес получателя
 Например: 123 Main St.""",
         reply_markup=reply_markup
     )
@@ -358,7 +358,7 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await update.message.reply_text(
-        """Шаг 9/11: Город получателя
+        """Шаг 8/11: Город получателя
 Например: New York""",
         reply_markup=reply_markup
     )
@@ -371,7 +371,7 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await update.message.reply_text(
-        """Шаг 10/11: Штат получателя (2 буквы)
+        """Шаг 9/11: Штат получателя (2 буквы)
 Например: NY""",
         reply_markup=reply_markup
     )
@@ -384,7 +384,7 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await update.message.reply_text(
-        """Шаг 11/11: ZIP код получателя
+        """Шаг 10/11: ZIP код получателя
 Например: 10007""",
         reply_markup=reply_markup
     )
@@ -393,36 +393,113 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['to_zip'] = update.message.text
     
-    # Show confirmation
-    data = context.user_data
-    confirmation_text = f"""📦 Проверьте данные заказа:
-
-💰 Сумма: ${data['amount']} USDT
-
-📤 Отправитель:
-{data['from_name']}
-{data['from_street']}
-{data['from_city']}, {data['from_state']} {data['from_zip']}
-
-📥 Получатель:
-{data['to_name']}
-{data['to_street']}
-{data['to_city']}, {data['to_state']} {data['to_zip']}
-
-📦 Посылка: 5x5x5 дюймов, 2 фунта (стандарт)
-
-Всё верно?"""
-    
-    keyboard = [
-        [InlineKeyboardButton("✅ Создать заказ", callback_data='confirm_order')],
-        [InlineKeyboardButton("❌ Отменить", callback_data='cancel_order')]
-    ]
+    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await update.message.reply_text(confirmation_text, reply_markup=reply_markup)
-    return CONFIRM
+    await update.message.reply_text(
+        """✅ Адрес получателя сохранен
 
-async def confirm_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
+Шаг 11/11: Вес посылки в фунтах (lb)
+Например: 2""",
+        reply_markup=reply_markup
+    )
+    return PARCEL_WEIGHT
+
+async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    try:
+        weight = float(update.message.text)
+        if weight <= 0:
+            await update.message.reply_text("❌ Вес должен быть больше 0. Попробуйте еще раз:")
+            return PARCEL_WEIGHT
+        
+        context.user_data['weight'] = weight
+        
+        # Get shipping rates from GoShippo
+        await update.message.reply_text("⏳ Получаю доступные курьерские службы и тарифы...")
+        
+        try:
+            from shippo import Shippo
+            from shippo.models import components
+            
+            shippo_client = Shippo(api_key_header=SHIPPO_API_KEY)
+            data = context.user_data
+            
+            # Create shipment to get rates
+            shipment = shippo_client.shipments.create(
+                components.ShipmentCreateRequest(
+                    address_from=components.AddressCreateRequest(
+                        name=data['from_name'],
+                        street1=data['from_street'],
+                        city=data['from_city'],
+                        state=data['from_state'],
+                        zip=data['from_zip'],
+                        country="US"
+                    ),
+                    address_to=components.AddressCreateRequest(
+                        name=data['to_name'],
+                        street1=data['to_street'],
+                        city=data['to_city'],
+                        state=data['to_state'],
+                        zip=data['to_zip'],
+                        country="US"
+                    ),
+                    parcels=[components.ParcelCreateRequest(
+                        length=5,
+                        width=5,
+                        height=5,
+                        weight=weight,
+                        distance_unit="in",
+                        mass_unit="lb"
+                    )],
+                    async_=False
+                )
+            )
+            
+            if not shipment.rates or len(shipment.rates) == 0:
+                await update.message.reply_text("❌ Не удалось получить тарифы. Проверьте адреса.")
+                return ConversationHandler.END
+            
+            # Save rates
+            context.user_data['rates'] = [
+                {
+                    'rate_id': rate.object_id,
+                    'carrier': rate.provider,
+                    'service': rate.servicelevel.name if hasattr(rate.servicelevel, 'name') else str(rate.servicelevel),
+                    'amount': float(rate.amount),
+                    'currency': rate.currency,
+                    'days': rate.estimated_days
+                }
+                for rate in shipment.rates[:5]  # Show top 5 rates
+            ]
+            
+            # Create buttons for carrier selection
+            message = "📦 Выберите курьерскую службу:\n\n"
+            keyboard = []
+            
+            for i, rate in enumerate(context.user_data['rates']):
+                days_text = f" ({rate['days']} дней)" if rate['days'] else ""
+                message += f"{i+1}. {rate['carrier']} - {rate['service']}{days_text}\n   💰 ${rate['amount']}\n\n"
+                keyboard.append([InlineKeyboardButton(
+                    f"{rate['carrier']} - ${rate['amount']}",
+                    callback_data=f'select_carrier_{i}'
+                )])
+            
+            keyboard.append([InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')])
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            await update.message.reply_text(message, reply_markup=reply_markup)
+            return SELECT_CARRIER
+            
+        except Exception as e:
+            logger.error(f"Error getting rates: {e}")
+            await update.message.reply_text(f"❌ Ошибка при получении тарифов: {str(e)}")
+            return ConversationHandler.END
+            
+    except ValueError:
+        await update.message.reply_text("❌ Неверный формат. Введите число, например: 2")
+        return PARCEL_WEIGHT
+
+async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     
@@ -430,98 +507,307 @@ async def confirm_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await cancel_order(update, context)
         return ConversationHandler.END
     
-    # Create order
+    # Get selected carrier index
+    carrier_idx = int(query.data.split('_')[-1])
+    selected_rate = context.user_data['rates'][carrier_idx]
+    context.user_data['selected_rate'] = selected_rate
+    
+    # Get user balance
+    telegram_id = query.from_user.id
+    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    balance = user.get('balance', 0.0)
+    
+    # Show payment options
+    amount = selected_rate['amount']
+    data = context.user_data
+    
+    confirmation_text = f"""✅ Выбрано: {selected_rate['carrier']} - {selected_rate['service']}
+
+📦 Детали заказа:
+📤 От: {data['from_name']}, {data['from_city']}, {data['from_state']}
+📥 До: {data['to_name']}, {data['to_city']}, {data['to_state']}
+⚖️ Вес: {data['weight']} lb
+
+💰 Стоимость доставки: ${amount}
+💳 Ваш баланс: ${balance:.2f}
+
+Выберите способ оплаты:"""
+    
+    keyboard = []
+    
+    if balance >= amount:
+        keyboard.append([InlineKeyboardButton(
+            f"💳 Оплатить с баланса (${balance:.2f})",
+            callback_data='pay_from_balance'
+        )])
+    
+    keyboard.append([InlineKeyboardButton(
+        f"💰 Оплатить криптой (${amount})",
+        callback_data='pay_with_crypto'
+    )])
+    
+    keyboard.append([InlineKeyboardButton(
+        "💵 Пополнить баланс",
+        callback_data='top_up_balance'
+    )])
+    
+    keyboard.append([InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')])
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await query.message.reply_text(confirmation_text, reply_markup=reply_markup)
+    return PAYMENT_METHOD
+
+async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    
+    if query.data == 'cancel_order':
+        await cancel_order(update, context)
+        return ConversationHandler.END
+    
+    telegram_id = query.from_user.id
+    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    data = context.user_data
+    selected_rate = data['selected_rate']
+    amount = selected_rate['amount']
+    
     try:
-        data = context.user_data
-        telegram_id = query.from_user.id
-        
-        # Check user exists
-        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
-        
-        # Create order
-        order = Order(
-            user_id=user['id'],
-            telegram_id=telegram_id,
-            address_from=Address(
-                name=data['from_name'],
-                street1=data['from_street'],
-                city=data['from_city'],
-                state=data['from_state'],
-                zip=data['from_zip'],
-                country="US"
-            ),
-            address_to=Address(
-                name=data['to_name'],
-                street1=data['to_street'],
-                city=data['to_city'],
-                state=data['to_state'],
-                zip=data['to_zip'],
-                country="US"
-            ),
-            parcel=Parcel(
-                length=5,
-                width=5,
-                height=5,
-                weight=2,
-                distance_unit="in",
-                mass_unit="lb"
-            ),
-            amount=data['amount']
-        )
-        
-        order_dict = order.model_dump()
-        order_dict['created_at'] = order_dict['created_at'].isoformat()
-        await db.orders.insert_one(order_dict)
-        
-        # Create crypto payment invoice
-        if crypto:
-            invoice = await crypto.create_invoice(
-                asset="USDT",
-                amount=data['amount']
+        if query.data == 'pay_from_balance':
+            # Pay from balance
+            if user.get('balance', 0) < amount:
+                await query.message.reply_text("❌ Недостаточно средств на балансе.")
+                return ConversationHandler.END
+            
+            # Create order
+            order = await create_order_in_db(user, data, selected_rate, amount)
+            
+            # Deduct from balance
+            new_balance = user['balance'] - amount
+            await db.users.update_one(
+                {"telegram_id": telegram_id},
+                {"$set": {"balance": new_balance}}
             )
             
-            pay_url = getattr(invoice, 'bot_invoice_url', None) or getattr(invoice, 'mini_app_invoice_url', None)
-            
-            payment = Payment(
-                order_id=order.id,
-                amount=data['amount'],
-                invoice_id=invoice.invoice_id,
-                pay_url=pay_url
+            # Update order as paid
+            await db.orders.update_one(
+                {"id": order['id']},
+                {"$set": {"payment_status": "paid"}}
             )
-            payment_dict = payment.model_dump()
-            payment_dict['created_at'] = payment_dict['created_at'].isoformat()
-            await db.payments.insert_one(payment_dict)
             
-            # Send payment link
+            # Create shipping label
+            await create_and_send_label(order['id'], telegram_id, query.message)
+            
             keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
             await query.message.reply_text(
-                f"""✅ Заказ создан!
+                f"""✅ Заказ оплачен с баланса!
+💳 Списано: ${amount}
+💰 Новый баланс: ${new_balance:.2f}
 
-💰 Оплатите {data['amount']} USDT:
+Создаю shipping label...""",
+                reply_markup=reply_markup
+            )
+            
+        elif query.data == 'pay_with_crypto':
+            # Create order
+            order = await create_order_in_db(user, data, selected_rate, amount)
+            
+            # Create crypto invoice
+            if crypto:
+                invoice = await crypto.create_invoice(
+                    asset="USDT",
+                    amount=amount
+                )
+                
+                pay_url = getattr(invoice, 'bot_invoice_url', None) or getattr(invoice, 'mini_app_invoice_url', None)
+                
+                payment = Payment(
+                    order_id=order['id'],
+                    amount=amount,
+                    invoice_id=invoice.invoice_id,
+                    pay_url=pay_url
+                )
+                payment_dict = payment.model_dump()
+                payment_dict['created_at'] = payment_dict['created_at'].isoformat()
+                await db.payments.insert_one(payment_dict)
+                
+                keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                
+                await query.message.reply_text(
+                    f"""✅ Заказ создан!
+
+💰 Оплатите ${amount} USDT:
 {pay_url}
 
-После оплаты мы автоматически создадим shipping label и отправим вам tracking number.""",
-                reply_markup=reply_markup
-            )
-        else:
-            keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+После оплаты мы автоматически создадим shipping label.""",
+                    reply_markup=reply_markup
+                )
+            else:
+                await query.message.reply_text("❌ Система оплаты не настроена.")
+                
+        elif query.data == 'top_up_balance':
+            # Create top-up invoice
+            keyboard = [
+                [InlineKeyboardButton("$10", callback_data='topup_10')],
+                [InlineKeyboardButton("$25", callback_data='topup_25')],
+                [InlineKeyboardButton("$50", callback_data='topup_50')],
+                [InlineKeyboardButton("$100", callback_data='topup_100')],
+                [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
+            ]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
             await query.message.reply_text(
-                "✅ Заказ создан, но система оплаты не настроена.",
+                "💵 Выберите сумму пополнения:",
                 reply_markup=reply_markup
             )
+            # Stay in same state to handle top-up
+            return PAYMENT_METHOD
+            
+        # Handle top-up amounts
+        elif query.data.startswith('topup_'):
+            topup_amount = float(query.data.split('_')[1])
+            
+            if crypto:
+                invoice = await crypto.create_invoice(
+                    asset="USDT",
+                    amount=topup_amount
+                )
+                
+                pay_url = getattr(invoice, 'bot_invoice_url', None) or getattr(invoice, 'mini_app_invoice_url', None)
+                
+                # Save top-up payment
+                payment = Payment(
+                    order_id=f"topup_{user['id']}",
+                    amount=topup_amount,
+                    invoice_id=invoice.invoice_id,
+                    pay_url=pay_url,
+                    currency="USDT",
+                    status="pending"
+                )
+                payment_dict = payment.model_dump()
+                payment_dict['created_at'] = payment_dict['created_at'].isoformat()
+                payment_dict['telegram_id'] = telegram_id
+                payment_dict['type'] = 'topup'
+                await db.payments.insert_one(payment_dict)
+                
+                keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                
+                await query.message.reply_text(
+                    f"""💵 Пополнение баланса
+
+💰 Оплатите ${topup_amount} USDT:
+{pay_url}
+
+После оплаты баланс будет пополнен автоматически.""",
+                    reply_markup=reply_markup
+                )
         
-        # Clear user data
         context.user_data.clear()
         return ConversationHandler.END
         
     except Exception as e:
-        logger.error(f"Error creating order: {e}")
-        await query.message.reply_text(f"❌ Ошибка при создании заказа: {str(e)}")
+        logger.error(f"Payment error: {e}")
+        await query.message.reply_text(f"❌ Ошибка при оплате: {str(e)}")
         return ConversationHandler.END
+
+async def create_order_in_db(user, data, selected_rate, amount):
+    order = Order(
+        user_id=user['id'],
+        telegram_id=user['telegram_id'],
+        address_from=Address(
+            name=data['from_name'],
+            street1=data['from_street'],
+            city=data['from_city'],
+            state=data['from_state'],
+            zip=data['from_zip'],
+            country="US"
+        ),
+        address_to=Address(
+            name=data['to_name'],
+            street1=data['to_street'],
+            city=data['to_city'],
+            state=data['to_state'],
+            zip=data['to_zip'],
+            country="US"
+        ),
+        parcel=Parcel(
+            length=5,
+            width=5,
+            height=5,
+            weight=data['weight'],
+            distance_unit="in",
+            mass_unit="lb"
+        ),
+        amount=amount
+    )
+    
+    order_dict = order.model_dump()
+    order_dict['created_at'] = order_dict['created_at'].isoformat()
+    order_dict['selected_carrier'] = selected_rate['carrier']
+    order_dict['selected_service'] = selected_rate['service']
+    order_dict['rate_id'] = selected_rate['rate_id']
+    await db.orders.insert_one(order_dict)
+    
+    return order_dict
+
+async def create_and_send_label(order_id, telegram_id, message):
+    try:
+        order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+        
+        from shippo import Shippo
+        from shippo.models import components
+        
+        shippo_client = Shippo(api_key_header=SHIPPO_API_KEY)
+        
+        # Purchase label with saved rate_id
+        transaction = shippo_client.transactions.create(
+            components.TransactionCreateRequest(
+                rate=order['rate_id'],
+                label_file_type="PDF",
+                async_=False
+            )
+        )
+        
+        # Save label
+        label = ShippingLabel(
+            order_id=order_id,
+            tracking_number=transaction.tracking_number,
+            label_url=transaction.label_url,
+            carrier=order['selected_carrier'],
+            service_level=order['selected_service'],
+            amount=str(order['amount']),
+            status='created'
+        )
+        
+        label_dict = label.model_dump()
+        label_dict['created_at'] = label_dict['created_at'].isoformat()
+        await db.shipping_labels.insert_one(label_dict)
+        
+        # Update order
+        await db.orders.update_one(
+            {"id": order_id},
+            {"$set": {"shipping_status": "label_created"}}
+        )
+        
+        # Send label to user
+        if bot_instance:
+            await bot_instance.send_message(
+                chat_id=telegram_id,
+                text=f"""📦 Shipping label создан!
+
+Tracking: {transaction.tracking_number}
+Carrier: {order['selected_carrier']}
+Service: {order['selected_service']}
+
+Label PDF: {transaction.label_url}"""
+            )
+    except Exception as e:
+        logger.error(f"Error creating label: {e}")
+        if message:
+            await message.reply_text(f"❌ Ошибка при создании label: {str(e)}")
 
 async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.callback_query:
