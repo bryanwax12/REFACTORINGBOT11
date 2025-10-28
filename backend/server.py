@@ -208,10 +208,12 @@ async def my_orders_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not orders:
         keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await send_method("У вас пока нет заказов. Создайте первый заказ через веб-панель.", reply_markup=reply_markup)
+        await send_method("У вас пока нет заказов. Создайте первый заказ через /start → 📦 Новый заказ.", reply_markup=reply_markup)
         return
     
     message = "📦 Ваши заказы:\n\n"
+    keyboard = []
+    
     for order in orders:
         status_emoji = "✅" if order['payment_status'] == 'paid' else "⏳"
         ship_emoji = "📮" if order['shipping_status'] == 'label_created' else "📦"
@@ -221,9 +223,18 @@ async def my_orders_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 {ship_emoji} Доставка: {order['shipping_status']}
 💵 Сумма: ${order['amount']}
 📅 {order.get('created_at', '')[:10]}
----\n"""
+"""
+        
+        # Add button to create label if order is paid but label not created
+        if order['payment_status'] == 'paid' and order['shipping_status'] != 'label_created':
+            keyboard.append([InlineKeyboardButton(
+                f"🏷️ Создать лейбл #{order['id'][:8]}", 
+                callback_data=f"create_label_{order['id']}"
+            )])
+        
+        message += "---\n"
     
-    keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+    keyboard.append([InlineKeyboardButton("🔙 Главное меню", callback_data='start')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     await send_method(message, reply_markup=reply_markup)
 
