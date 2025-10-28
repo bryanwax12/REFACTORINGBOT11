@@ -1040,21 +1040,47 @@ async def cryptopay_webhook(request: Request):
                         {"$set": {"status": "paid"}}
                     )
                     
-                    # Update order
-                    await db.orders.update_one(
-                        {"id": payment['order_id']},
-                        {"$set": {"payment_status": "paid"}}
-                    )
-                    
-                    # Auto-create shipping label
-                    try:
-                        await create_shipping_label(payment['order_id'])
-                    except Exception as e:
-                        logging.error(f"Failed to create label: {e}")
+                    # Check if it's a top-up
+                    if payment.get('type') == 'topup':
+                        # Add to balance
+                        telegram_id = payment.get('telegram_id')
+                        amount = payment.get('amount', 0)
+                        
+                        await db.users.update_one(
+                            {"telegram_id": telegram_id},
+                            {"$inc": {"balance": amount}}
+                        )
+                        
+                        # Notify user
+                        if bot_instance:
+                            user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+                            new_balance = user.get('balance', 0)
+                            
+                            await bot_instance.send_message(
+                                chat_id=telegram_id,
+                                text=f"""✅ Баланс пополнен!
+
+💰 Зачислено: ${amount}
+💳 Новый баланс: ${new_balance:.2f}"""
+                            )
+                    else:
+                        # Regular order payment
+                        # Update order
+                        await db.orders.update_one(
+                            {"id": payment['order_id']},
+                            {"$set": {"payment_status": "paid"}}
+                        )
+                        
+                        # Auto-create shipping label
+                        try:
+                            order = await db.orders.find_one({"id": payment['order_id']}, {"_id": 0})
+                            await create_and_send_label(payment['order_id'], order['telegram_id'], None)
+                        except Exception as e:
+                            logger.error(f"Failed to create label: {e}")
         
         return {"status": "ok"}
     except Exception as e:
-        logging.error(f"Webhook error: {e}")
+        logger.error(f"Webhook error: {e}")
         return {"status": "error"}
 
 @api_router.get("/users")
