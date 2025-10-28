@@ -135,13 +135,17 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 Я помогу вам создать shipping labels с оплатой в криптовалюте.
 
-Доступные команды:
-/new_order - Создать новый заказ
-/my_orders - Мои заказы
-/track - Отследить посылку
-/help - Помощь"""
+Выберите действие:"""
     
-    await update.message.reply_text(welcome_message)
+    # Create keyboard with buttons
+    keyboard = [
+        [InlineKeyboardButton("📦 Мои заказы", callback_data='my_orders')],
+        [InlineKeyboardButton("🔍 Отследить посылку", callback_data='track')],
+        [InlineKeyboardButton("❓ Помощь", callback_data='help')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await update.message.reply_text(welcome_message, reply_markup=reply_markup)
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     help_text = """📦 Доступные команды:
