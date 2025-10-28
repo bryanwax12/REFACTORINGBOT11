@@ -698,9 +698,14 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
-        weight = float(update.message.text)
+        weight = float(update.message.text.strip())
+        
         if weight <= 0:
             await update.message.reply_text("❌ Вес должен быть больше 0. Попробуйте еще раз:")
+            return PARCEL_WEIGHT
+        
+        if weight > 150:
+            await update.message.reply_text("❌ Вес слишком большой. Максимум 150 фунтов. Попробуйте еще раз:")
             return PARCEL_WEIGHT
         
         context.user_data['weight'] = weight
@@ -779,13 +784,14 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
             )
             
             if shipment_response.status_code != 201:
-                await update.message.reply_text(f"❌ Ошибка при получении тарифов: {shipment_response.text}")
+                error_msg = shipment_response.json().get('messages', [{}])[0].get('text', 'Неизвестная ошибка')
+                await update.message.reply_text(f"❌ Ошибка при получении тарифов:\n{error_msg}\n\nПроверьте правильность введенных адресов.")
                 return ConversationHandler.END
             
             shipment = shipment_response.json()
             
             if not shipment.get('rates') or len(shipment['rates']) == 0:
-                await update.message.reply_text("❌ Не удалось получить тарифы. Проверьте адреса.")
+                await update.message.reply_text("❌ Не удалось получить тарифы. Возможные причины:\n• Неверный ZIP код\n• Недоступный маршрут\n• Проверьте корректность адресов")
                 return ConversationHandler.END
             
             # Save rates - show up to 10 carriers
