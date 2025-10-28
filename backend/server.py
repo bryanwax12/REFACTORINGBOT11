@@ -1177,7 +1177,7 @@ async def handle_edit_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return PARCEL_WEIGHT
 
 async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Fetch shipping rates from GoShippo"""
+    """Fetch shipping rates from ShipStation"""
     query = update.callback_query
     
     await query.message.reply_text("⏳ Получаю доступные курьерские службы и тарифы...")
@@ -1188,110 +1188,96 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         
         data = context.user_data
         
-        # Get all carrier accounts using REST API
         headers = {
-            'Authorization': f'ShippoToken {SHIPPO_API_KEY}',
+            'API-Key': SHIPSTATION_API_KEY,
             'Content-Type': 'application/json'
         }
         
-        # Create shipment data
-        shipment_data = {
-            'address_from': {
-                'name': data['from_name'],
-                'street1': data['from_street'],
-                'city': data['from_city'],
-                'state': data['from_state'],
-                'zip': data['from_zip'],
-                'country': 'US',
-                'phone': data.get('from_phone', '')
+        # Create rate request for ShipStation V2
+        rate_request = {
+            'rate_options': {
+                'carrier_ids': []  # Empty means all available carriers
             },
-            'address_to': {
-                'name': data['to_name'],
-                'street1': data['to_street'],
-                'city': data['to_city'],
-                'state': data['to_state'],
-                'zip': data['to_zip'],
-                'country': 'US',
-                'phone': data.get('to_phone', '')
-            },
-            'parcels': [{
-                'length': 5,
-                'width': 5,
-                'height': 5,
-                'weight': data['weight'],
-                'distance_unit': 'in',
-                'mass_unit': 'lb'
-            }],
-            'async': False
+            'shipment': {
+                'ship_to': {
+                    'name': data['to_name'],
+                    'phone': data.get('to_phone', ''),
+                    'address_line1': data['to_street'],
+                    'address_line2': data.get('to_street2', ''),
+                    'city_locality': data['to_city'],
+                    'state_province': data['to_state'],
+                    'postal_code': data['to_zip'],
+                    'country_code': 'US',
+                    'address_residential_indicator': 'unknown'
+                },
+                'ship_from': {
+                    'name': data['from_name'],
+                    'phone': data.get('from_phone', ''),
+                    'address_line1': data['from_street'],
+                    'address_line2': data.get('from_street2', ''),
+                    'city_locality': data['from_city'],
+                    'state_province': data['from_state'],
+                    'postal_code': data['from_zip'],
+                    'country_code': 'US'
+                },
+                'packages': [{
+                    'weight': {
+                        'value': data['weight'],
+                        'unit': 'pound'
+                    },
+                    'dimensions': {
+                        'length': 5,
+                        'width': 5,
+                        'height': 5,
+                        'unit': 'inch'
+                    }
+                }]
+            }
         }
         
-        # Add optional street2
-        if data.get('from_street2'):
-            shipment_data['address_from']['street2'] = data['from_street2']
-        if data.get('to_street2'):
-            shipment_data['address_to']['street2'] = data['to_street2']
+        # Get rates from ShipStation
+        response = requests.post(
+            'https://api.shipstation.com/v2/rates',
+            headers=headers,
+            json=rate_request,
+            timeout=15
+        )
         
-        # Try multiple times to get rates (UPS sometimes doesn't return on first try)
-        max_attempts = 3
-        all_rates = []
-        
-        for attempt in range(max_attempts):
-            if attempt > 0:
-                logger.info(f"Retry attempt {attempt + 1} to get carrier rates")
-                await asyncio.sleep(1)  # Wait 1 second between retries
-            
-            shipment_response = requests.post(
-                'https://api.goshippo.com/shipments/',
-                headers=headers,
-                json=shipment_data,
-                timeout=10
-            )
-            
-            if shipment_response.status_code == 201:
-                shipment = shipment_response.json()
-                rates = shipment.get('rates', [])
-                
-                # Log what carriers we got
-                carriers = set([r['provider'] for r in rates])
-                logger.info(f"Attempt {attempt + 1}: Got {len(rates)} rates from carriers: {carriers}")
-                
-                # Merge rates (avoid duplicates by rate_id)
-                existing_ids = set([r['object_id'] for r in all_rates])
-                for rate in rates:
-                    if rate['object_id'] not in existing_ids:
-                        all_rates.append(rate)
-                        existing_ids.add(rate['object_id'])
-                
-                # If we have UPS rates, we can stop trying
-                if any(r['provider'] in ['UPS', 'FedEx', 'DHL'] for r in all_rates):
-                    logger.info(f"Found premium carriers, stopping retries")
-                    break
-            else:
-                logger.error(f"Attempt {attempt + 1} failed with status {shipment_response.status_code}")
-        
-        if not all_rates or len(all_rates) == 0:
-            error_msg = shipment_response.json().get('messages', [{}])[0].get('text', 'Неизвестная ошибка') if shipment_response.status_code != 201 else 'Нет доступных тарифов'
+        if response.status_code != 200:
+            error_data = response.json() if response.text else {}
+            error_msg = error_data.get('message', f'Status code: {response.status_code}')
+            logger.error(f"ShipStation rate request failed: {error_msg}")
             await query.message.reply_text(f"❌ Ошибка при получении тарифов:\n{error_msg}\n\nПроверьте правильность введенных адресов.")
             return ConversationHandler.END
         
-        # Log final result
-        final_carriers = set([r['provider'] for r in all_rates])
-        logger.info(f"Final result: {len(all_rates)} rates from carriers: {final_carriers}")
+        rate_response = response.json()
+        all_rates = rate_response.get('rate_response', {}).get('rates', [])
+        
+        if not all_rates or len(all_rates) == 0:
+            await query.message.reply_text(f"❌ Нет доступных тарифов для данного направления.\n\nПроверьте правильность введенных адресов.")
+            return ConversationHandler.END
+        
+        # Log carriers
+        carriers = set([r['carrier_friendly_name'] for r in all_rates])
+        logger.info(f"Got {len(all_rates)} rates from carriers: {carriers}")
         
         # Save rates - show up to 10 carriers with $10 markup
         markup = 10.00  # Markup in USD
-        context.user_data['rates'] = [
-            {
-                'rate_id': rate['object_id'],
-                'carrier': rate['provider'],
-                'service': rate['servicelevel'].get('name') if isinstance(rate.get('servicelevel'), dict) else str(rate.get('servicelevel', '')),
-                'original_amount': float(rate['amount']),  # Original price from GoShippo
-                'amount': float(rate['amount']) + markup,  # Price shown to user (with markup)
-                'currency': rate['currency'],
-                'days': rate.get('estimated_days')
+        context.user_data['rates'] = []
+        
+        for rate in all_rates[:10]:  # Show up to 10 rates
+            rate_data = {
+                'rate_id': rate['rate_id'],
+                'carrier': rate['carrier_friendly_name'],
+                'carrier_code': rate['carrier_code'],
+                'service': rate['service_type'],
+                'service_code': rate['service_code'],
+                'original_amount': float(rate['shipping_amount']['amount']),
+                'amount': float(rate['shipping_amount']['amount']) + markup,
+                'currency': rate['shipping_amount']['currency'],
+                'days': rate.get('delivery_days')
             }
-            for rate in all_rates[:10]  # Show up to 10 rates
-        ]
+            context.user_data['rates'].append(rate_data)
         
         # Create buttons for carrier selection
         from datetime import datetime, timedelta, timezone
@@ -1332,20 +1318,13 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')
         ])
         
-        if len(context.user_data['rates']) == 1:
-            message += "\n⚠️ В Test mode доступен только USPS.\n"
-            message += "Для FedEx, UPS, DHL нужно:\n"
-            message += "• Войти на apps.goshippo.com\n"
-            message += "• Settings → Carriers\n"
-            message += "• Добавить carrier accounts\n\n"
-        
         reply_markup = InlineKeyboardMarkup(keyboard)
         
         await query.message.reply_text(message, reply_markup=reply_markup)
         return SELECT_CARRIER
         
     except Exception as e:
-        logger.error(f"Error getting rates: {e}")
+        logger.error(f"Error getting rates: {e}", exc_info=True)
         await query.message.reply_text(f"❌ Ошибка при получении тарифов:\n{str(e)}\n\nПроверьте корректность адресов и попробуйте снова.")
         return ConversationHandler.END
 
