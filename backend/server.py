@@ -587,6 +587,11 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     address = update.message.text.strip()
     
+    # Check for Cyrillic or non-Latin characters
+    if any(ord(c) >= 0x0400 and ord(c) <= 0x04FF for c in address):
+        await update.message.reply_text("❌ Используйте только английские буквы (латиницу). Пример: 123 Main St")
+        return TO_ADDRESS
+    
     # Validate address
     if len(address) < 3:
         await update.message.reply_text("❌ Адрес слишком короткий. Введите полный адрес:")
@@ -594,6 +599,11 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     if len(address) > 100:
         await update.message.reply_text("❌ Адрес слишком длинный. Максимум 100 символов:")
+        return TO_ADDRESS
+    
+    # Only Latin letters, numbers, spaces, and common address symbols
+    if not all((ord(c) < 128 and (c.isalnum() or c.isspace() or c in ".-',#/")) for c in address):
+        await update.message.reply_text("❌ Используйте только английские буквы и цифры. Разрешены: буквы, цифры, пробелы, дефисы, точки, запятые")
         return TO_ADDRESS
     
     context.user_data['to_street'] = address
