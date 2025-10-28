@@ -1817,7 +1817,7 @@ async def startup_event():
                     TO_STATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_state)],
                     TO_ZIP: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_zip)],
                     PARCEL_WEIGHT: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_parcel_weight)],
-                    SELECT_CARRIER: [CallbackQueryHandler(select_carrier, pattern='^(select_carrier_|cancel_order)')],
+                    SELECT_CARRIER: [CallbackQueryHandler(select_carrier, pattern='^(select_carrier_|refresh_carriers|cancel_order)')],
                     PAYMENT_METHOD: [CallbackQueryHandler(process_payment, pattern='^(pay_from_balance|pay_with_crypto|top_up_balance|topup_|cancel_order)')]
                 },
                 fallbacks=[
