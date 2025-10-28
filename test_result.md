@@ -102,7 +102,26 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Add data editing functionality to Telegram bot - allow users to review and edit their entered data (from address, to address, parcel weight) before fetching shipping rates"
+user_problem_statement: "Fix ShipStation address validation 400 Bad Request error - users reported that even with valid addresses, the system shows validation errors when trying to get shipping rates"
+
+backend:
+  - task: "ShipStation V2 API Rate Request Fix"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "User reported: When entering valid addresses in Telegram bot, system shows validation error and cannot fetch shipping rates. Issue traced to 400 Bad Request from ShipStation API."
+        - working: "NA"
+          agent: "main"
+          comment: "Root cause identified: ShipStation V2 API requires 'carrier_ids' array in rate_options to be populated with actual carrier IDs, cannot be empty. Created get_shipstation_carrier_ids() function to fetch and cache carrier IDs. Updated fetch_shipping_rates() and calculate_shipping_rates() API endpoint to use actual carrier IDs. Direct API test successful - returning 31 rates from USPS, UPS, and FedEx."
+        - working: true
+          agent: "main"
+          comment: "✅ API endpoint /api/calculate-shipping tested successfully - returns 31 rates from multiple carriers (USPS, UPS, FedEx). Backend is ready for Telegram bot testing."
 
 backend:
   - task: "Data Confirmation Screen with Edit Button"
