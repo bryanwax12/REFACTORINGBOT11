@@ -279,29 +279,39 @@ async def create_shipping_label(order_id: str):
         if not SHIPPO_API_KEY:
             raise HTTPException(status_code=500, detail="Shippo API not configured")
         
+        # Initialize shippo client
+        from shippo import Shippo
+        shippo_client = Shippo(api_key_header=SHIPPO_API_KEY)
+        
         # Create shipment
         address_from = order['address_from']
         address_to = order['address_to']
         parcel = order['parcel']
         
-        shipment = shippo.Shipment.create(
-            address_from=address_from,
-            address_to=address_to,
-            parcels=[parcel],
-            async_=False
+        from shippo.models import components
+        
+        shipment = shippo_client.shipments.create(
+            components.ShipmentCreateRequest(
+                address_from=components.AddressCreateRequest(**address_from),
+                address_to=components.AddressCreateRequest(**address_to),
+                parcels=[components.ParcelCreateRequest(**parcel)],
+                async_=False
+            )
         )
         
-        if not shipment.rates:
+        if not shipment.rates or len(shipment.rates) == 0:
             raise HTTPException(status_code=400, detail="No shipping rates available")
         
         # Select cheapest rate
-        rate = min(shipment.rates, key=lambda x: float(x['amount']))
+        rate = min(shipment.rates, key=lambda x: float(x.amount))
         
         # Purchase label
-        transaction = shippo.Transaction.create(
-            rate=rate['object_id'],
-            label_file_type='PDF',
-            async_=False
+        transaction = shippo_client.transactions.create(
+            components.TransactionCreateRequest(
+                rate=rate.object_id,
+                label_file_type="PDF",
+                async_=False
+            )
         )
         
         # Save label
@@ -309,9 +319,9 @@ async def create_shipping_label(order_id: str):
             order_id=order_id,
             tracking_number=transaction.tracking_number,
             label_url=transaction.label_url,
-            carrier=rate['provider'],
-            service_level=rate['servicelevel']['name'],
-            amount=rate['amount'],
+            carrier=rate.provider,
+            service_level=rate.servicelevel.name if hasattr(rate.servicelevel, 'name') else str(rate.servicelevel),
+            amount=str(rate.amount),
             status='created'
         )
         
@@ -332,7 +342,7 @@ async def create_shipping_label(order_id: str):
                 text=f"""📦 Shipping label создан!
 
 Tracking: {transaction.tracking_number}
-Carrier: {rate['provider']}
+Carrier: {rate.provider}
 
 Label: {transaction.label_url}"""
             )
@@ -340,6 +350,7 @@ Label: {transaction.label_url}"""
         return label_dict
         
     except Exception as e:
+        logger.error(f"Error creating label: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/shipping/track/{tracking_number}")
