@@ -2732,6 +2732,31 @@ async def export_orders_csv(
 async def get_orders(telegram_id: Optional[int] = None):
     query = {"telegram_id": telegram_id} if telegram_id else {}
     orders = await db.orders.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
+    
+    # Enrich with user info and tracking
+    for order in orders:
+        # Get label info
+        label = await db.shipping_labels.find_one({"order_id": order['id']}, {"_id": 0})
+        if label:
+            order['tracking_number'] = label.get('tracking_number', '')
+            order['label_url'] = label.get('label_url', '')
+            order['carrier'] = label.get('carrier', '')
+            order['label_id'] = label.get('label_id', '')
+        else:
+            order['tracking_number'] = ''
+            order['label_url'] = ''
+            order['carrier'] = ''
+            order['label_id'] = ''
+        
+        # Get user info
+        user = await db.users.find_one({"telegram_id": order['telegram_id']}, {"_id": 0})
+        if user:
+            order['user_name'] = user.get('first_name', 'Unknown')
+            order['user_username'] = user.get('username', '')
+        else:
+            order['user_name'] = 'Unknown'
+            order['user_username'] = ''
+    
     return orders
 
 @api_router.get("/orders/{order_id}")
