@@ -1042,10 +1042,10 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Например: +1234567890 или 1234567890""",
         reply_markup=reply_markup
     )
+    context.user_data['last_state'] = TO_PHONE  # Save state for next step
     return TO_PHONE
 
 async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['last_state'] = TO_PHONE  # Save state for cancel return
     # Check if it's a callback query (skip phone button)
     if hasattr(update, 'callback_query') and update.callback_query:
         query = update.callback_query
