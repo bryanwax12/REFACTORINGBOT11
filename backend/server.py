@@ -768,6 +768,7 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Например: +1234567890 или 1234567890""",
         reply_markup=reply_markup
     )
+    context.user_data['last_state'] = FROM_PHONE  # Save state for next step
     return FROM_PHONE
 
 async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
