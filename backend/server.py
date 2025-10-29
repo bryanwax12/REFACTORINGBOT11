@@ -824,7 +824,7 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await update.message.reply_text(
-        """Шаг 8/15: Имя получателя
+        """Шаг 8/13: Имя получателя
 Например: Jane Doe""",
         reply_markup=reply_markup
     )
