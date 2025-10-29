@@ -979,6 +979,7 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return TO_STATE
 
 async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['last_state'] = TO_STATE  # Save state for cancel return
     state = update.message.text.strip().upper()
     
     # Validate state
