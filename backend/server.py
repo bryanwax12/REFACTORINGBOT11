@@ -1171,6 +1171,7 @@ async def show_data_confirmation(update: Update, context: ContextTypes.DEFAULT_T
     else:
         await update.message.reply_text(message, reply_markup=reply_markup)
     
+    context.user_data['last_state'] = CONFIRM_DATA  # Save state for cancel return
     return CONFIRM_DATA
 
 async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
