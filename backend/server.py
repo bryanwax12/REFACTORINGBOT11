@@ -2108,7 +2108,8 @@ async def create_and_send_label(order_id, telegram_id, message):
             timeout=30
         )
         
-        if response.status_code != 201:
+        # ShipStation API returns 200 or 201 for success
+        if response.status_code not in [200, 201]:
             error_data = response.json() if response.text else {}
             error_msg = error_data.get('message', f'Status code: {response.status_code}')
             logger.error(f"Label creation failed: {error_msg}")
