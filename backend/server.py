@@ -594,6 +594,7 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Например: CA""",
         reply_markup=reply_markup
     )
+    context.user_data['last_state'] = FROM_STATE  # Save state for next step
     return FROM_STATE
 
 async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
