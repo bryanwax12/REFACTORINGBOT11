@@ -334,12 +334,112 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      <Tabs defaultValue="orders" className="space-y-6">
+      <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
+          <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
           <TabsTrigger value="orders" data-testid="tab-orders">Orders</TabsTrigger>
           <TabsTrigger value="users" data-testid="tab-users">Users</TabsTrigger>
-          <TabsTrigger value="leaderboard" data-testid="tab-leaderboard">Leaderboard</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="overview" className="space-y-4">
+          {/* Expense Tracking Card */}
+          <Card className="border-2 border-red-200 bg-red-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-red-600" />
+                💰 ShipStation Expenses (Real Costs)
+              </CardTitle>
+              <CardDescription>Money spent on labels (without $10 profit)</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div className="bg-white p-4 rounded-lg border border-red-200">
+                  <p className="text-sm text-muted-foreground">Total Spent (All Time)</p>
+                  <p className="text-3xl font-bold text-red-600">
+                    ${expenseStats?.total_expense?.toFixed(2) || '0.00'}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {expenseStats?.labels_count || 0} labels created
+                  </p>
+                </div>
+                
+                <div className="bg-white p-4 rounded-lg border border-orange-200">
+                  <p className="text-sm text-muted-foreground">Today's Expenses</p>
+                  <p className="text-3xl font-bold text-orange-600">
+                    ${expenseStats?.today_expense?.toFixed(2) || '0.00'}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {expenseStats?.today_labels || 0} labels today
+                  </p>
+                </div>
+                
+                <div className="bg-white p-4 rounded-lg border border-blue-200">
+                  <p className="text-sm text-muted-foreground">Avg Cost per Label</p>
+                  <p className="text-3xl font-bold text-blue-600">
+                    ${expenseStats?.labels_count > 0 
+                      ? (expenseStats.total_expense / expenseStats.labels_count).toFixed(2) 
+                      : '0.00'}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Average shipping cost
+                  </p>
+                </div>
+              </div>
+
+              {/* Date Filter */}
+              <div className="flex gap-4 items-end bg-white p-4 rounded-lg border">
+                <div className="flex-1 space-y-2">
+                  <Label htmlFor="date-from">From Date</Label>
+                  <Input
+                    id="date-from"
+                    type="date"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                  />
+                </div>
+                <div className="flex-1 space-y-2">
+                  <Label htmlFor="date-to">To Date</Label>
+                  <Input
+                    id="date-to"
+                    type="date"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
+                  />
+                </div>
+                <Button onClick={loadExpenseStats}>
+                  <Search className="h-4 w-4 mr-2" />
+                  Filter
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setDateFrom('');
+                    setDateTo('');
+                    loadData();
+                  }}
+                >
+                  Reset
+                </Button>
+              </div>
+
+              {(dateFrom || dateTo) && (
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-sm font-medium text-blue-900">
+                    📅 Filtered Period: 
+                    {dateFrom && ` From ${new Date(dateFrom).toLocaleDateString()}`}
+                    {dateTo && ` To ${new Date(dateTo).toLocaleDateString()}`}
+                  </p>
+                  <p className="text-xs text-blue-700 mt-1">
+                    Total spent in this period: ${expenseStats?.total_expense?.toFixed(2) || '0.00'} 
+                    ({expenseStats?.labels_count || 0} labels)
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Regular Stats Cards */}
+        </TabsContent>
 
         <TabsContent value="orders" className="space-y-4">
           {/* Search and Filters */}
