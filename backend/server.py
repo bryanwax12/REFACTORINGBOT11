@@ -2865,7 +2865,7 @@ async def startup_event():
                     PARCEL_WEIGHT: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_parcel_weight)],
                     CONFIRM_DATA: [CallbackQueryHandler(handle_data_confirmation, pattern='^(confirm_data|edit_data|edit_addresses_error|cancel_order)$')],
                     EDIT_MENU: [CallbackQueryHandler(handle_edit_choice, pattern='^(edit_from_address|edit_to_address|edit_parcel|back_to_confirmation)$')],
-                    SELECT_CARRIER: [CallbackQueryHandler(select_carrier, pattern='^(select_carrier_|cancel_order)')],
+                    SELECT_CARRIER: [CallbackQueryHandler(select_carrier, pattern='^(select_carrier_|return_to_order|confirm_cancel|cancel_order)')],
                     PAYMENT_METHOD: [CallbackQueryHandler(process_payment, pattern='^(pay_from_balance|pay_with_crypto|top_up_balance|back_to_rates|return_to_order|confirm_cancel|cancel_order)')],
                     TOPUP_AMOUNT: [
                         MessageHandler(filters.TEXT & ~filters.COMMAND, handle_topup_amount),
