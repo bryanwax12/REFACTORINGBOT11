@@ -502,6 +502,9 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     name = update.message.text.strip()
     
+    # Sanitize input
+    name = sanitize_string(name, max_length=50)
+    
     # Check for Cyrillic or non-Latin characters
     if any(ord(c) >= 0x0400 and ord(c) <= 0x04FF for c in name):
         await update.message.reply_text("❌ Используйте только английские буквы (латиницу). Пример: John Smith")
@@ -522,6 +525,14 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return FROM_NAME
     
     context.user_data['from_name'] = name
+    
+    # Log action
+    await SecurityLogger.log_action(
+        "order_input",
+        update.effective_user.id,
+        {"field": "from_name", "length": len(name)},
+        "success"
+    )
     
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
