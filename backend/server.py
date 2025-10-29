@@ -905,6 +905,7 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Или нажмите "Пропустить" """,
         reply_markup=reply_markup
     )
+    context.user_data['last_state'] = TO_ADDRESS2  # Save state for next step
     return TO_ADDRESS2
 
 async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
