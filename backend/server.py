@@ -474,6 +474,7 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Например: 215 Clayton St.""",
         reply_markup=reply_markup
     )
+    context.user_data['last_state'] = FROM_ADDRESS  # Save state for next step
     return FROM_ADDRESS
 
 async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
