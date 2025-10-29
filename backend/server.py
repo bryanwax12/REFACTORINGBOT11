@@ -2771,7 +2771,10 @@ async def startup_event():
                     EDIT_MENU: [CallbackQueryHandler(handle_edit_choice, pattern='^(edit_from_address|edit_to_address|edit_parcel|back_to_confirmation)$')],
                     SELECT_CARRIER: [CallbackQueryHandler(select_carrier, pattern='^(select_carrier_|cancel_order)')],
                     PAYMENT_METHOD: [CallbackQueryHandler(process_payment, pattern='^(pay_from_balance|pay_with_crypto|top_up_balance|cancel_order)')],
-                    TOPUP_AMOUNT: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_topup_amount)]
+                    TOPUP_AMOUNT: [
+                        MessageHandler(filters.TEXT & ~filters.COMMAND, handle_topup_amount),
+                        CallbackQueryHandler(handle_topup_crypto_selection, pattern='^(topup_crypto_|cancel_order)')
+                    ]
                 },
                 fallbacks=[
                     CallbackQueryHandler(cancel_order, pattern='^cancel_order$'),
