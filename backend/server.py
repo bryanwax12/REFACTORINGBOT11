@@ -563,7 +563,6 @@ async def skip_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE)
     return await order_from_address2(update, context)
 
 async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['last_state'] = FROM_CITY  # Save state for cancel return
     city = update.message.text.strip()
     
     # Check for Cyrillic or non-Latin characters
