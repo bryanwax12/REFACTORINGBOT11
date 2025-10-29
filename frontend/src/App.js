@@ -28,6 +28,7 @@ const Dashboard = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [refundModal, setRefundModal] = useState({ open: false, order: null });
   const [refundReason, setRefundReason] = useState('');
+  const [trackingModal, setTrackingModal] = useState({ open: false, tracking: null, loading: false });
 
   useEffect(() => {
     loadData();
