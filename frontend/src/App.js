@@ -124,12 +124,31 @@ const Dashboard = () => {
     toast.success('Copied to clipboard');
   };
 
-  const downloadLabel = (labelUrl) => {
-    if (!labelUrl) {
-      toast.error('Label URL not available');
+  const downloadLabel = async (order) => {
+    if (!order.label_id) {
+      toast.error('Label not available');
       return;
     }
-    window.open(labelUrl, '_blank');
+    
+    try {
+      // Download via backend proxy
+      const response = await axios.get(`${API}/labels/${order.label_id}/download`, {
+        responseType: 'blob'
+      });
+      
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `label_${order.id.substring(0, 8)}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      
+      toast.success('Label downloaded');
+    } catch (error) {
+      toast.error('Failed to download label');
+    }
   };
 
   const fetchTrackingStatus = async (trackingNumber, carrier) => {
