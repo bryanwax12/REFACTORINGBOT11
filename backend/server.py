@@ -1096,10 +1096,10 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Например: 2""",
         reply_markup=reply_markup
     )
+    context.user_data['last_state'] = PARCEL_WEIGHT  # Save state for next step
     return PARCEL_WEIGHT
 
 async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['last_state'] = PARCEL_WEIGHT  # Save state for cancel return
     try:
         weight = float(update.message.text.strip())
         
