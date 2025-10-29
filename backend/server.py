@@ -1312,21 +1312,15 @@ async def skip_address_validation(update: Update, context: ContextTypes.DEFAULT_
     query = update.callback_query
     await query.answer()
     
+    # Set flag to skip validation
+    context.user_data['skip_address_validation'] = True
+    
     await query.message.reply_text("⚠️ Пропускаю валидацию адреса...\n⏳ Получаю доступные курьерские службы и тарифы...")
     
-    # Continue with the rest of fetch_shipping_rates logic (without validation)
-    try:
-        import requests
-        import asyncio
-        
-        data = context.user_data
-        
-        headers = {
-            'API-Key': SHIPSTATION_API_KEY,
-            'Content-Type': 'application/json'
-        }
-        
-        # Get carrier IDs
+    # Call fetch_shipping_rates which will now skip validation
+    return await fetch_shipping_rates(update, context)
+
+async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Fetch shipping rates from ShipStation"""
     query = update.callback_query
     
