@@ -861,6 +861,7 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return TO_ADDRESS
 
 async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['last_state'] = TO_ADDRESS  # Save state for cancel return
     address = update.message.text.strip()
     
     # Check for Cyrillic or non-Latin characters
