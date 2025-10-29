@@ -2150,8 +2150,16 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.message.reply_text("Продолжаем оформление заказа...")
         return FROM_NAME
     
-    # Handle optional fields with Skip button
-    if last_state == FROM_ADDRESS2:
+    # Restore exact screen with instructions for each state
+    if last_state == FROM_NAME:
+        await query.message.reply_text("Шаг 1/13: Имя отправителя\n\nНапример: Ivan Petrov")
+        return FROM_NAME
+    
+    elif last_state == FROM_ADDRESS:
+        await query.message.reply_text("Шаг 2/13: Адрес отправителя\n\nВведите улицу и номер дома\nНапример: 215 Clayton St")
+        return FROM_ADDRESS
+    
+    elif last_state == FROM_ADDRESS2:
         keyboard = [
             [InlineKeyboardButton("⏭ Пропустить", callback_data='skip_from_address2')],
             [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
