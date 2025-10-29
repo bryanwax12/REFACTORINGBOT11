@@ -326,6 +326,79 @@ def test_conversation_handler_functions():
         print(f"❌ Error checking conversation handler functions: {e}")
         return False
 
+def test_return_to_order_functionality():
+    """Test Return to Order functionality implementation"""
+    print("\n🔍 Testing Return to Order Functionality...")
+    
+    try:
+        # Read the server.py file to check for return to order implementation
+        with open('/app/backend/server.py', 'r') as f:
+            server_code = f.read()
+        
+        # Check if return_to_order function is implemented
+        return_to_order_found = bool(re.search(r'async def return_to_order\(', server_code))
+        print(f"   return_to_order function: {'✅' if return_to_order_found else '❌'}")
+        
+        # Check if cancel_order function is implemented
+        cancel_order_found = bool(re.search(r'async def cancel_order\(', server_code))
+        print(f"   cancel_order function: {'✅' if cancel_order_found else '❌'}")
+        
+        # Check if last_state is being saved in all state handlers
+        state_handlers = [
+            'order_from_name', 'order_from_address', 'order_from_city', 
+            'order_from_state', 'order_from_zip', 'order_from_phone',
+            'order_to_name', 'order_to_address', 'order_to_city',
+            'order_to_state', 'order_to_zip', 'order_to_phone', 
+            'order_parcel_weight'
+        ]
+        
+        last_state_tracking = {}
+        for handler in state_handlers:
+            # Check if handler saves last_state
+            pattern = rf'async def {handler}\(.*?\n.*?context\.user_data\[\'last_state\'\]'
+            found = bool(re.search(pattern, server_code, re.DOTALL))
+            last_state_tracking[handler] = found
+            print(f"   {handler} saves last_state: {'✅' if found else '❌'}")
+        
+        # Check if return_to_order handles all states properly
+        states_to_check = [
+            'FROM_NAME', 'FROM_ADDRESS', 'FROM_CITY', 'FROM_STATE', 'FROM_ZIP', 'FROM_PHONE',
+            'TO_NAME', 'TO_ADDRESS', 'TO_CITY', 'TO_STATE', 'TO_ZIP', 'TO_PHONE', 
+            'PARCEL_WEIGHT'
+        ]
+        
+        state_handling = {}
+        for state in states_to_check:
+            # Check if return_to_order handles this state
+            pattern = rf'last_state == {state}'
+            found = bool(re.search(pattern, server_code))
+            state_handling[state] = found
+            print(f"   return_to_order handles {state}: {'✅' if found else '❌'}")
+        
+        # Check for cancel button with return to order option
+        cancel_button_found = 'Вернуться к заказу' in server_code and 'return_to_order' in server_code
+        print(f"   Cancel with return option: {'✅' if cancel_button_found else '❌'}")
+        
+        # Check ConversationHandler includes return_to_order callbacks
+        conv_handler_callbacks = server_code.count('return_to_order')
+        print(f"   ConversationHandler callbacks: {conv_handler_callbacks} {'✅' if conv_handler_callbacks >= 10 else '❌'}")
+        
+        # Overall assessment
+        all_handlers_track_state = all(last_state_tracking.values())
+        all_states_handled = all(state_handling.values())
+        
+        print(f"\n📊 Return to Order Implementation Summary:")
+        print(f"   All handlers save last_state: {'✅' if all_handlers_track_state else '❌'}")
+        print(f"   All states handled in return: {'✅' if all_states_handled else '❌'}")
+        print(f"   Core functions implemented: {'✅' if return_to_order_found and cancel_order_found else '❌'}")
+        
+        return (return_to_order_found and cancel_order_found and 
+                all_handlers_track_state and all_states_handled and cancel_button_found)
+        
+    except Exception as e:
+        print(f"❌ Error checking return to order functionality: {e}")
+        return False
+
 def test_telegram_bot_token():
     """Test if Telegram bot token is valid"""
     print("\n🔍 Testing Telegram Bot Token...")
