@@ -216,11 +216,11 @@ backend:
 
   - task: "Return to Order - Save and Restore Last State"
     implemented: true
-    working: true
+    working: "NA"
     file: "/app/backend/server.py"
     stuck_count: 1
     priority: "critical"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         - working: false
           agent: "user"
@@ -240,6 +240,12 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ CRITICAL FIX VERIFIED: Comprehensive testing confirms the fix is correctly implemented. (1) ✅ Removed duplicate last_state assignments from end of order_from_address() and order_to_address() functions, (2) ✅ Each handler sets last_state ONCE at beginning only (order_from_address sets FROM_ADDRESS, order_to_address sets TO_ADDRESS), (3) ✅ return_to_order correctly handles FROM_ADDRESS and TO_ADDRESS states with proper prompts, (4) ✅ Address validation allows alphanumeric characters (digits allowed for '215 Clayton St'), (5) ✅ ShipStation V2 API working (22 rates from USPS, UPS, FedEx). The root cause has been eliminated - users should no longer get name validation errors when entering addresses after returning to order. Backend infrastructure ready for manual testing via @whitelabellbot."
+        - working: false
+          agent: "user"
+          comment: "❌ ISSUE PERSISTS: On step 4 (Город отправителя / FROM_CITY), after clicking 'Вернуться к заказу', bot shows step 3 (Квартира/Офис / FROM_ADDRESS2) instead of step 4. This confirms the fix was incomplete - only 5 out of 13 functions were corrected."
+        - working: "NA"
+          agent: "main"
+          comment: "🔧 COMPLETE FIX APPLIED: Moved last_state assignment from BEGINNING to END in ALL 13 state handler functions: (1) order_from_name → last_state = FROM_ADDRESS at end, (2) order_from_address → last_state = FROM_ADDRESS2 at end, (3) order_from_city → last_state = FROM_STATE at end, (4) order_from_state → last_state = FROM_ZIP at end, (5) order_from_zip → last_state = FROM_PHONE at end, (6) order_from_phone → last_state = TO_NAME at end (2 returns), (7) order_to_name → last_state = TO_ADDRESS at end, (8) order_to_address → last_state = TO_ADDRESS2 at end, (9) order_to_city → last_state = TO_STATE at end, (10) order_to_state → last_state = TO_ZIP at end, (11) order_to_zip → last_state = TO_PHONE at end, (12) order_to_phone → last_state = PARCEL_WEIGHT at end (2 returns), (13) order_parcel_weight → last_state = CONFIRM_DATA at end. Now last_state correctly reflects the screen user SEES, not the state being processed. Ready for comprehensive testing."
 
 metadata:
   created_by: "main_agent"
