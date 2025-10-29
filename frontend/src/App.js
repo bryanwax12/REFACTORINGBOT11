@@ -24,6 +24,10 @@ const Dashboard = () => {
   const [userDetailsModal, setUserDetailsModal] = useState({ open: false, details: null });
   const [leaderboard, setLeaderboard] = useState([]);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [refundModal, setRefundModal] = useState({ open: false, order: null });
+  const [refundReason, setRefundReason] = useState('');
 
   useEffect(() => {
     loadData();
