@@ -743,7 +743,6 @@ async def notify_admin_error(user_info: dict, error_type: str, error_details: st
         logger.error(f"Failed to send admin notification: {e}")
 
 async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['last_state'] = FROM_ZIP  # Save state for cancel return
     zip_code = update.message.text.strip()
     
     # Validate ZIP code
