@@ -1311,13 +1311,94 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
     """Fetch shipping rates from ShipStation"""
     query = update.callback_query
     
-    await query.message.reply_text("⏳ Получаю доступные курьерские службы и тарифы...")
+    await query.message.reply_text("⏳ Проверяю адреса...")
     
     try:
         import requests
         import asyncio
         
         data = context.user_data
+        
+        # Validate addresses first using ShipStation API
+        headers = {
+            'API-Key': SHIPSTATION_API_KEY,
+            'Content-Type': 'application/json'
+        }
+        
+        # Validate FROM address
+        from_address_payload = [{
+            'name': data['from_name'],
+            'phone': data.get('from_phone') or '+15551234567',
+            'address_line1': data['from_street'],
+            'address_line2': data.get('from_street2', ''),
+            'city_locality': data['from_city'],
+            'state_province': data['from_state'],
+            'postal_code': data['from_zip'],
+            'country_code': 'US'
+        }]
+        
+        from_validation_response = await asyncio.to_thread(
+            requests.post,
+            'https://api.shipstation.com/v2/addresses/validate',
+            headers=headers,
+            json=from_address_payload,
+            timeout=10
+        )
+        
+        if from_validation_response.status_code != 200:
+            keyboard = [
+                [InlineKeyboardButton("✏️ Редактировать адрес отправителя", callback_data='edit_from_address')],
+                [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await query.message.reply_text(
+                "❌ Ошибка валидации адреса отправителя!\n\n"
+                "Адрес не может быть проверен. Пожалуйста, исправьте:\n"
+                f"• Город: {data['from_city']}\n"
+                f"• Штат: {data['from_state']}\n"
+                f"• ZIP: {data['from_zip']}",
+                reply_markup=reply_markup
+            )
+            return CONFIRM_DATA
+        
+        # Validate TO address
+        to_address_payload = [{
+            'name': data['to_name'],
+            'phone': data.get('to_phone') or '+15551234567',
+            'address_line1': data['to_street'],
+            'address_line2': data.get('to_street2', ''),
+            'city_locality': data['to_city'],
+            'state_province': data['to_state'],
+            'postal_code': data['to_zip'],
+            'country_code': 'US'
+        }]
+        
+        to_validation_response = await asyncio.to_thread(
+            requests.post,
+            'https://api.shipstation.com/v2/addresses/validate',
+            headers=headers,
+            json=to_address_payload,
+            timeout=10
+        )
+        
+        if to_validation_response.status_code != 200:
+            keyboard = [
+                [InlineKeyboardButton("✏️ Редактировать адрес получателя", callback_data='edit_to_address')],
+                [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await query.message.reply_text(
+                "❌ Ошибка валидации адреса получателя!\n\n"
+                "Адрес не может быть проверен. Пожалуйста, исправьте:\n"
+                f"• Город: {data['to_city']}\n"
+                f"• Штат: {data['to_state']}\n"
+                f"• ZIP: {data['to_zip']}",
+                reply_markup=reply_markup
+            )
+            return CONFIRM_DATA
+        
+        # Both addresses validated successfully
+        await query.message.reply_text("✅ Адреса проверены\n⏳ Получаю доступные курьерские службы и тарифы...")
         
         # Get carrier IDs
         carrier_ids = await get_shipstation_carrier_ids()
