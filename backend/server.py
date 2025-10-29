@@ -822,10 +822,10 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Например: Jane Doe""",
         reply_markup=reply_markup
     )
+    context.user_data['last_state'] = TO_NAME  # Save state for next step
     return TO_NAME
 
 async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['last_state'] = TO_NAME  # Save state for cancel return
     name = update.message.text.strip()
     
     # Check for Cyrillic or non-Latin characters
