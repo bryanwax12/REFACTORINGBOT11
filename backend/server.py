@@ -2074,27 +2074,21 @@ async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.callback_query:
         query = update.callback_query
         await query.answer()
-        send_method = query.message.reply_text
-    else:
-        send_method = update.message.reply_text
     
-    # Save current state to allow return
-    current_state = context.user_data.get('current_state', 'unknown')
-    
+    # Don't save current_state - it's already saved in last_state
     keyboard = [
         [InlineKeyboardButton("↩️ Вернуться к заказу", callback_data='return_to_order')],
         [InlineKeyboardButton("✅ Да, отменить заказ", callback_data='confirm_cancel')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await send_method(
+    await query.message.reply_text(
         "⚠️ Вы уверены, что хотите отменить создание заказа?\n\nВсе введённые данные будут потеряны.",
         reply_markup=reply_markup
     )
     
-    # Don't clear user_data yet - keep it in case they return
-    # Don't end conversation yet
-    return context.user_data.get('last_state', PAYMENT_METHOD)  # Return to last state
+    # Return the state we were in before cancel
+    return context.user_data.get('last_state', PAYMENT_METHOD)
 
 async def confirm_cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Confirm order cancellation"""
