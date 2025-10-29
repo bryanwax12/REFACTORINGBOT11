@@ -356,8 +356,8 @@ const Dashboard = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {orders.map((order) => (
-                        <tr key={order.id} className="border-b last:border-0 hover:bg-muted/50" data-testid="order-row">
+                      {orders.map((order, idx) => (
+                        <tr key={`${order.id}-${order.label_id || idx}`} className="border-b last:border-0 hover:bg-muted/50" data-testid="order-row">
                           <td className="py-3">
                             <div className="text-xs">
                               <div className="font-medium">{order.user_name || 'Unknown'}</div>
@@ -384,14 +384,23 @@ const Dashboard = () => {
                           <td className="py-3">
                             {order.tracking_number ? (
                               <div className="flex items-center gap-2">
-                                <span className="font-mono text-xs">{order.tracking_number}</span>
-                                <button
-                                  onClick={() => copyToClipboard(order.tracking_number)}
-                                  className="text-muted-foreground hover:text-foreground"
-                                  title="Copy Tracking #"
-                                >
-                                  <Copy className="h-3 w-3" />
-                                </button>
+                                <div>
+                                  <div className="flex items-center gap-1">
+                                    <span className="font-mono text-xs">{order.tracking_number}</span>
+                                    <button
+                                      onClick={() => copyToClipboard(order.tracking_number)}
+                                      className="text-muted-foreground hover:text-foreground"
+                                      title="Copy Tracking #"
+                                    >
+                                      <Copy className="h-3 w-3" />
+                                    </button>
+                                  </div>
+                                  {order.label_created_at && (
+                                    <div className="text-xs text-muted-foreground">
+                                      Created: {new Date(order.label_created_at).toLocaleString()}
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             ) : (
                               <span className="text-muted-foreground text-xs">-</span>
