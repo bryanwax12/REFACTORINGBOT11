@@ -1543,7 +1543,10 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"💳 Оплатить с баланса (${balance:.2f})",
             callback_data='pay_from_balance'
         )])
-        keyboard.append([InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')])
+        keyboard.append([
+            InlineKeyboardButton("◀️ Назад к тарифам", callback_data='back_to_rates'),
+            InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')
+        ])
     else:
         # Недостаточно денег - показываем кнопку пополнения
         shortage = amount - balance
@@ -1552,7 +1555,10 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"💵 Пополнить баланс",
             callback_data='top_up_balance'
         )])
-        keyboard.append([InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')])
+        keyboard.append([
+            InlineKeyboardButton("◀️ Назад к тарифам", callback_data='back_to_rates'),
+            InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')
+        ])
     
     reply_markup = InlineKeyboardMarkup(keyboard)
     await query.message.reply_text(confirmation_text, reply_markup=reply_markup)
