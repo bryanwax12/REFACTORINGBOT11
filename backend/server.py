@@ -1210,6 +1210,7 @@ async def show_edit_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await query.message.reply_text(message, reply_markup=reply_markup)
+    context.user_data['last_state'] = EDIT_MENU  # Save state for cancel return
     return EDIT_MENU
 
 async def handle_edit_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
