@@ -31,6 +31,9 @@ const Dashboard = () => {
   const [trackingModal, setTrackingModal] = useState({ open: false, tracking: null, loading: false });
   const [discountModal, setDiscountModal] = useState({ open: false, user: null });
   const [discountValue, setDiscountValue] = useState('');
+  const [expenseStats, setExpenseStats] = useState(null);
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
 
   useEffect(() => {
     loadData();
