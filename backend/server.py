@@ -1684,46 +1684,6 @@ Shipping label создан успешно!""",
                 reply_markup=reply_markup
             )
             return TOPUP_AMOUNT
-            
-        # Handle top-up amounts
-        elif query.data.startswith('topup_'):
-            topup_amount = float(query.data.split('_')[1])
-            
-            if crypto:
-                invoice = await crypto.create_invoice(
-                    asset="USDT",
-                    amount=topup_amount
-                )
-                
-                pay_url = getattr(invoice, 'bot_invoice_url', None) or getattr(invoice, 'mini_app_invoice_url', None)
-                
-                # Save top-up payment
-                payment = Payment(
-                    order_id=f"topup_{user['id']}",
-                    amount=topup_amount,
-                    invoice_id=invoice.invoice_id,
-                    pay_url=pay_url,
-                    currency="USDT",
-                    status="pending"
-                )
-                payment_dict = payment.model_dump()
-                payment_dict['created_at'] = payment_dict['created_at'].isoformat()
-                payment_dict['telegram_id'] = telegram_id
-                payment_dict['type'] = 'topup'
-                await db.payments.insert_one(payment_dict)
-                
-                keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-                
-                await query.message.reply_text(
-                    f"""💵 Пополнение баланса
-
-💰 Оплатите ${topup_amount} USDT:
-{pay_url}
-
-После оплаты баланс будет пополнен автоматически.""",
-                    reply_markup=reply_markup
-                )
         
         context.user_data.clear()
         return ConversationHandler.END
