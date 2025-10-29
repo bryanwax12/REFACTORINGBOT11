@@ -27,6 +27,9 @@ db = client[os.environ['DB_NAME']]
 SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY', '')
 SHIPSTATION_CARRIER_IDS = []  # Cache for carrier IDs
 
+# Admin API Key for protecting endpoints
+ADMIN_API_KEY = os.environ.get('ADMIN_API_KEY', '')
+
 # Admin notifications
 ADMIN_TELEGRAM_ID = os.environ.get('ADMIN_TELEGRAM_ID', '')
 
