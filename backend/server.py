@@ -469,7 +469,7 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await update.message.reply_text(
-        """Шаг 2/11: Адрес отправителя
+        """Шаг 2/13: Адрес отправителя
 Например: 215 Clayton St.""",
         reply_markup=reply_markup
     )
