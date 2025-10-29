@@ -1227,6 +1227,7 @@ async def handle_edit_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
             "📤 Редактирование адреса отправителя\n\nШаг 1/6: Имя отправителя\nНапример: John Smith",
             reply_markup=reply_markup
         )
+        context.user_data['last_state'] = FROM_NAME  # Save state for cancel return
         return FROM_NAME
     
     if query.data == 'edit_to_address':
