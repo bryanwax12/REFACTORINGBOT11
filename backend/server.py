@@ -48,6 +48,119 @@ if CRYPTOBOT_TOKEN:
 app = FastAPI(title="Telegram Shipping Bot")
 api_router = APIRouter(prefix="/api")
 
+# ==================== SECURITY ====================
+
+# Input Sanitization
+import re
+import html
+
+def sanitize_string(text: str, max_length: int = 200) -> str:
+    """Sanitize input string to prevent injection attacks"""
+    if not text:
+        return ""
+    
+    # Remove null bytes
+    text = text.replace('\x00', '')
+    
+    # Escape HTML
+    text = html.escape(text)
+    
+    # Remove potentially dangerous characters
+    text = re.sub(r'[<>"\']', '', text)
+    
+    # Limit length
+    if len(text) > max_length:
+        text = text[:max_length]
+    
+    return text.strip()
+
+def sanitize_address(address: str) -> str:
+    """Sanitize address fields"""
+    if not address:
+        return ""
+    # Allow letters, numbers, spaces, common punctuation, & symbol
+    sanitized = re.sub(r'[^a-zA-Z0-9\s\.,\-#&/]', '', address)
+    return sanitized[:200].strip()
+
+def sanitize_phone(phone: str) -> str:
+    """Sanitize phone number"""
+    if not phone:
+        return ""
+    # Allow only digits, +, -, (, ), spaces
+    sanitized = re.sub(r'[^\d\+\-\(\)\s]', '', phone)
+    return sanitized[:20].strip()
+
+# Security Logging
+class SecurityLogger:
+    @staticmethod
+    async def log_action(action: str, user_id: Optional[int], details: dict, status: str = "success"):
+        """Log security-relevant actions"""
+        try:
+            log_entry = {
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "action": action,
+                "user_id": user_id,
+                "details": details,
+                "status": status
+            }
+            
+            # Log to MongoDB
+            await db.security_logs.insert_one(log_entry)
+            
+            # Also log to file for critical actions
+            if status == "failure" or action in ["refund", "balance_change", "discount_set"]:
+                logging.warning(f"SECURITY: {action} - User: {user_id} - Status: {status} - Details: {details}")
+                
+        except Exception as e:
+            logging.error(f"Failed to log security action: {e}")
+
+# Admin API Key Dependency
+from fastapi import Header, HTTPException
+
+async def verify_admin_key(x_api_key: Optional[str] = Header(None)):
+    """Verify admin API key for protected endpoints"""
+    if not ADMIN_API_KEY:
+        # If no admin key is set, allow access (for development)
+        logging.warning("ADMIN_API_KEY not set - admin endpoints are unprotected!")
+        return True
+    
+    if not x_api_key:
+        raise HTTPException(status_code=401, detail="API key required")
+    
+    if x_api_key != ADMIN_API_KEY:
+        # Log failed authentication
+        await SecurityLogger.log_action(
+            "admin_auth_failed",
+            None,
+            {"provided_key": x_api_key[:10] + "..."},
+            "failure"
+        )
+        raise HTTPException(status_code=403, detail="Invalid API key")
+    
+    return True
+
+# Request logging middleware
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    """Log all requests for security monitoring"""
+    start_time = datetime.now(timezone.utc)
+    
+    # Log request
+    if request.url.path.startswith("/api/"):
+        logging.info(f"REQUEST: {request.method} {request.url.path} - IP: {request.client.host}")
+    
+    response = await call_next(request)
+    
+    # Log response time
+    duration = (datetime.now(timezone.utc) - start_time).total_seconds()
+    if duration > 5:  # Log slow requests
+        logging.warning(f"SLOW REQUEST: {request.method} {request.url.path} - Duration: {duration}s")
+    
+    return response
+
+# ==================== END SECURITY ====================
+
+
 # Models
 class User(BaseModel):
     model_config = ConfigDict(extra="ignore")
