@@ -2862,6 +2862,53 @@ async def track_shipment(tracking_number: str, carrier: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@api_router.get("/labels/{label_id}/download")
+async def download_label(label_id: str):
+    """
+    Proxy endpoint to download label PDF from ShipStation with authentication
+    """
+    try:
+        if not SHIPSTATION_API_KEY:
+            raise HTTPException(status_code=500, detail="ShipStation API not configured")
+        
+        # Find label in database
+        label = await db.shipping_labels.find_one({"label_id": label_id}, {"_id": 0})
+        if not label:
+            raise HTTPException(status_code=404, detail="Label not found")
+        
+        label_url = label.get('label_url')
+        if not label_url:
+            raise HTTPException(status_code=404, detail="Label URL not available")
+        
+        headers = {
+            'API-Key': SHIPSTATION_API_KEY
+        }
+        
+        # Download label from ShipStation
+        response = requests.get(label_url, headers=headers, timeout=30)
+        
+        if response.status_code == 200:
+            from fastapi.responses import Response
+            
+            # Return PDF with proper headers
+            return Response(
+                content=response.content,
+                media_type="application/pdf",
+                headers={
+                    "Content-Disposition": f"attachment; filename=label_{label_id}.pdf"
+                }
+            )
+        else:
+            logger.error(f"Failed to download label: {response.status_code}")
+            raise HTTPException(status_code=502, detail="Failed to download label from ShipStation")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error downloading label: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @api_router.post("/orders/{order_id}/refund")
 async def refund_order(order_id: str, refund_reason: Optional[str] = None):
     """
