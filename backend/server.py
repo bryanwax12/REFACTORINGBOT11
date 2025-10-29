@@ -27,11 +27,6 @@ db = client[os.environ['DB_NAME']]
 SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY', '')
 SHIPSTATION_CARRIER_IDS = []  # Cache for carrier IDs
 
-# NOWPayments API
-NOWPAYMENTS_API_KEY = os.environ.get('NOWPAYMENTS_API_KEY', '')
-NOWPAYMENTS_IPN_SECRET = os.environ.get('NOWPAYMENTS_IPN_SECRET', '')
-NOWPAYMENTS_API_URL = "https://api.nowpayments.io/v1"
-
 # Admin notifications
 ADMIN_TELEGRAM_ID = os.environ.get('ADMIN_TELEGRAM_ID', '')
 
