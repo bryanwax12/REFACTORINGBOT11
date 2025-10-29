@@ -477,7 +477,6 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return FROM_ADDRESS
 
 async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['last_state'] = FROM_ADDRESS  # Save state for cancel return
     address = update.message.text.strip()
     
     # Debug logging
