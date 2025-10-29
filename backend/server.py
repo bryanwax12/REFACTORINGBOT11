@@ -1363,6 +1363,9 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             timeout=10
         )
         
+        logger.info(f"FROM address validation: status={from_validation_response.status_code}")
+        logger.info(f"FROM address validation response: {from_validation_response.text}")
+        
         if from_validation_response.status_code != 200:
             keyboard = [
                 [InlineKeyboardButton("✏️ Редактировать адрес отправителя", callback_data='edit_from_address')],
