@@ -1605,6 +1605,7 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Save discount info in context for later use
     context.user_data['user_discount'] = user_discount
     context.user_data['discount_amount'] = discount_amount
+    context.user_data['final_amount'] = amount  # Save final amount after discount
     
     data = context.user_data
     
