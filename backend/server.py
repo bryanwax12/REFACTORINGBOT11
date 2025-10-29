@@ -442,7 +442,6 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return FROM_NAME
 
 async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['last_state'] = FROM_NAME  # Save state for cancel return
     name = update.message.text.strip()
     
     # Check for Cyrillic or non-Latin characters
