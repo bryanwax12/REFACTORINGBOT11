@@ -685,22 +685,19 @@ def main():
     # 1. Test API Health
     results['api_health'] = test_api_health()
     
-    # 2. Test Telegram Bot Infrastructure
+    # 2. Test NEW Admin Panel Endpoints (Main Focus)
+    results['admin_search_orders'] = test_admin_search_orders()
+    results['admin_refund_order'] = test_admin_refund_order()
+    results['admin_export_csv'] = test_admin_export_csv()
+    
+    # 3. Test Supporting Infrastructure
     results['telegram_infrastructure'] = test_telegram_bot_infrastructure()
-    
-    # 3. Test Telegram Bot Token
     results['bot_token'] = test_telegram_bot_token()
-    
-    # 4. Test Conversation Handler Functions
     results['conversation_handlers'] = test_conversation_handler_functions()
-    
-    # 5. Test Return to Order Functionality (NEW - Main focus)
     results['return_to_order'] = test_return_to_order_functionality()
-    
-    # 6. Test ShipStation V2 API Rate Calculation (Supporting)
     results['shipstation_rates'], rates_data = test_shipping_rates()
     
-    # 7. Check Backend Logs
+    # 4. Check Backend Logs
     check_backend_logs()
     
     # Summary
