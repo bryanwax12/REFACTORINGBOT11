@@ -2657,9 +2657,14 @@ async def search_orders(
         
         # Enrich with tracking numbers and user info
         for order in orders:
-            # Get label info
-            label = await db.shipping_labels.find_one({"order_id": order['id']}, {"_id": 0})
-            if label:
+            # Get LATEST label info (in case of multiple labels per order)
+            labels = await db.shipping_labels.find(
+                {"order_id": order['id']},
+                {"_id": 0}
+            ).sort("created_at", -1).limit(1).to_list(1)
+            
+            if labels:
+                label = labels[0]
                 order['tracking_number'] = label.get('tracking_number', '')
                 order['label_url'] = label.get('label_url', '')
                 order['carrier'] = label.get('carrier', '')
