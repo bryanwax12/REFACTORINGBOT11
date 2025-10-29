@@ -13,6 +13,10 @@ import { Package, DollarSign, Users, TrendingUp, Send, MapPin, Box, Search, Down
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+const ADMIN_API_KEY = process.env.REACT_APP_ADMIN_API_KEY;
+
+// Axios default headers with API key
+axios.defaults.headers.common['X-API-Key'] = ADMIN_API_KEY;
 
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
