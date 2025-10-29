@@ -435,10 +435,11 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.message.reply_text(
         """📦 Создание нового заказа
 
-Шаг 1/11: Имя отправителя
+Шаг 1/13: Имя отправителя
 Например: John Smith""",
         reply_markup=reply_markup
     )
+    context.user_data['last_state'] = FROM_NAME  # Save state for cancel return
     return FROM_NAME
 
 async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
