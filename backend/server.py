@@ -1418,11 +1418,18 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
                 reply_markup=reply_markup
             )
             return CONFIRM_DATA
+            
+            # Both addresses validated successfully
+            await query.message.reply_text("✅ Адреса проверены\n⏳ Получаю доступные курьерские службы и тарифы...")
         
-        # Both addresses validated successfully
-        await query.message.reply_text("✅ Адреса проверены\n⏳ Получаю доступные курьерские службы и тарифы...")
+        # Clear skip flag
+        context.user_data.pop('skip_address_validation', None)
         
         # Get carrier IDs
+        headers = {
+            'API-Key': SHIPSTATION_API_KEY,
+            'Content-Type': 'application/json'
+        }
         carrier_ids = await get_shipstation_carrier_ids()
         if not carrier_ids:
             keyboard = [
