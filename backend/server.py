@@ -913,12 +913,21 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await update.message.reply_text(
-        """Шаг 9/13: Квартира/Офис получателя (необязательно)
+    # Check if we're in editing mode
+    if context.user_data.get('editing_to_address'):
+        await update.message.reply_text(
+            """Шаг 3/6: Квартира/Офис получателя (необязательно)
 Например: Apt 12, Suite 305
 Или нажмите "Пропустить" """,
-        reply_markup=reply_markup
-    )
+            reply_markup=reply_markup
+        )
+    else:
+        await update.message.reply_text(
+            """Шаг 9/13: Квартира/Офис получателя (необязательно)
+Например: Apt 12, Suite 305
+Или нажмите "Пропустить" """,
+            reply_markup=reply_markup
+        )
     context.user_data['last_state'] = TO_ADDRESS2  # Save state for next step
     return TO_ADDRESS2
 
