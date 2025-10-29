@@ -1108,7 +1108,7 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup = InlineKeyboardMarkup(keyboard)
             
             await query.message.reply_text(
-                """Шаг 15/15: Вес посылки в фунтах (lb)
+                """Вес посылки в фунтах (lb)
 Например: 2""",
                 reply_markup=reply_markup
             )
