@@ -2107,23 +2107,31 @@ async def confirm_cancel_order(update: Update, context: ContextTypes.DEFAULT_TYP
     return ConversationHandler.END
 
 async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Return to order after cancel button"""
+    """Return to order after cancel button - restore exact screen"""
     query = update.callback_query
-    await query.answer("Возвращаемся к заказу...")
+    await query.answer()
     
-    # Get last state and data from context
+    # Get the state we were in when cancel was pressed
     last_state = context.user_data.get('last_state', PAYMENT_METHOD)
-    data = context.user_data
-    selected_rate = data.get('selected_rate')
     
-    # Always show payment screen with current data
-    if selected_rate:
-        telegram_id = query.from_user.id
-        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
-        balance = user.get('balance', 0)
-        amount = selected_rate['amount']
+    # Restore the exact screen based on state
+    if last_state == SELECT_CARRIER:
+        # Return to carrier selection - show rates list again
+        await query.message.reply_text("Возвращаемся к выбору тарифа...")
+        return await fetch_shipping_rates(update, context)
+    
+    elif last_state == PAYMENT_METHOD:
+        # Return to payment screen
+        data = context.user_data
+        selected_rate = data.get('selected_rate')
         
-        confirmation_text = f"""✅ Выбрано: {selected_rate['carrier']} - {selected_rate['service']}
+        if selected_rate:
+            telegram_id = query.from_user.id
+            user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+            balance = user.get('balance', 0)
+            amount = selected_rate['amount']
+            
+            confirmation_text = f"""✅ Выбрано: {selected_rate['carrier']} - {selected_rate['service']}
 
 📦 Детали заказа:
 📤 От: {data['from_name']}, {data['from_city']}, {data['from_state']}
@@ -2134,38 +2142,61 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 💳 Ваш баланс: ${balance:.2f}
 """
-        
-        keyboard = []
-        
-        if balance >= amount:
-            confirmation_text += "\n✅ У вас достаточно средств на балансе!"
-            keyboard.append([InlineKeyboardButton(
-                f"💳 Оплатить с баланса (${balance:.2f})",
-                callback_data='pay_from_balance'
-            )])
-            keyboard.append([
-                InlineKeyboardButton("◀️ Назад к тарифам", callback_data='back_to_rates'),
-                InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')
-            ])
+            
+            keyboard = []
+            
+            if balance >= amount:
+                confirmation_text += "\n✅ У вас достаточно средств на балансе!"
+                keyboard.append([InlineKeyboardButton(
+                    f"💳 Оплатить с баланса (${balance:.2f})",
+                    callback_data='pay_from_balance'
+                )])
+                keyboard.append([
+                    InlineKeyboardButton("◀️ Назад к тарифам", callback_data='back_to_rates'),
+                    InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')
+                ])
+            else:
+                shortage = amount - balance
+                confirmation_text += f"\n⚠️ Недостаточно средств. Необходимо: ${shortage:.2f}"
+                keyboard.append([InlineKeyboardButton(
+                    f"💵 Пополнить баланс",
+                    callback_data='top_up_balance'
+                )])
+                keyboard.append([
+                    InlineKeyboardButton("◀️ Назад к тарифам", callback_data='back_to_rates'),
+                    InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')
+                ])
+            
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await query.message.reply_text(confirmation_text, reply_markup=reply_markup)
+            return PAYMENT_METHOD
         else:
-            shortage = amount - balance
-            confirmation_text += f"\n⚠️ Недостаточно средств. Необходимо: ${shortage:.2f}"
-            keyboard.append([InlineKeyboardButton(
-                f"💵 Пополнить баланс",
-                callback_data='top_up_balance'
-            )])
-            keyboard.append([
-                InlineKeyboardButton("◀️ Назад к тарифам", callback_data='back_to_rates'),
-                InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')
-            ])
-        
+            # No selected rate - return to rates
+            await query.message.reply_text("Выбираем тариф...")
+            return await fetch_shipping_rates(update, context)
+    
+    elif last_state == TOPUP_AMOUNT:
+        # Return to top-up amount input
+        keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await query.message.reply_text(confirmation_text, reply_markup=reply_markup)
-        return PAYMENT_METHOD
+        
+        await query.message.reply_text(
+            """💵 Пополнение баланса
+
+Введите сумму пополнения в долларах США (USD):
+
+Например: 50
+
+Минимальная сумма: $5
+Максимальная сумма: $1000""",
+            reply_markup=reply_markup
+        )
+        return TOPUP_AMOUNT
+    
     else:
-        # No selected rate - return to rate selection
-        await query.message.reply_text("Выбираем тариф заново...")
-        return await fetch_shipping_rates(update, context)
+        # Default fallback - go to payment
+        await query.message.reply_text("Возвращаемся к оформлению...")
+        return PAYMENT_METHOD
 
 # API Routes
 @api_router.get("/")
