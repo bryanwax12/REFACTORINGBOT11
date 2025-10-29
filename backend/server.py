@@ -2155,6 +2155,10 @@ async def create_and_send_label(order_id, telegram_id, message):
         tracking_number = label_response.get('tracking_number', '')
         label_download_url = label_response.get('label_download', {}).get('pdf', '')
         
+        # Ensure .pdf extension is present
+        if label_download_url and not label_download_url.endswith('.pdf'):
+            label_download_url = label_download_url + '.pdf'
+        
         logger.info(f"Label created: label_id={label_id}, tracking={tracking_number}, label_url={label_download_url}")
         
         # Save label
