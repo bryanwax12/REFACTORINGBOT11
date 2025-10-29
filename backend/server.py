@@ -1723,7 +1723,7 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
         # Save amount in context
         context.user_data['topup_amount'] = topup_amount
         
-        # Show cryptocurrency selection
+        # Show cryptocurrency selection (only BTC, ETH, USDT, LTC)
         keyboard = [
             [
                 InlineKeyboardButton("₿ Bitcoin (BTC)", callback_data='topup_crypto_btc'),
@@ -1731,15 +1731,7 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
             ],
             [
                 InlineKeyboardButton("₮ USDT (Tether)", callback_data='topup_crypto_usdt'),
-                InlineKeyboardButton("💎 TON", callback_data='topup_crypto_ton')
-            ],
-            [
-                InlineKeyboardButton("Ł Litecoin (LTC)", callback_data='topup_crypto_ltc'),
-                InlineKeyboardButton("💰 USDC", callback_data='topup_crypto_usdc')
-            ],
-            [
-                InlineKeyboardButton("🟡 BNB", callback_data='topup_crypto_bnb'),
-                InlineKeyboardButton("🔴 TRX", callback_data='topup_crypto_trx')
+                InlineKeyboardButton("Ł Litecoin (LTC)", callback_data='topup_crypto_ltc')
             ],
             [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
         ]
@@ -1754,11 +1746,7 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
 • Bitcoin (BTC)
 • Ethereum (ETH)  
 • USDT (Tether)
-• TON
-• Litecoin (LTC)
-• USDC
-• BNB (Binance Coin)
-• TRX (Tron)""",
+• Litecoin (LTC)""",
             reply_markup=reply_markup
         )
         return TOPUP_AMOUNT  # Stay in same state to handle crypto selection
