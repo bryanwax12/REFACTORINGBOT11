@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast, Toaster } from "sonner";
-import { Package, DollarSign, Users, TrendingUp, Send, MapPin, Box } from "lucide-react";
+import { Package, DollarSign, Users, TrendingUp, Send, MapPin, Box, Search, Download, RefreshCw, FileText, Copy, ExternalLink } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
