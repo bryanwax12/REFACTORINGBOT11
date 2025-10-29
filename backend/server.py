@@ -867,7 +867,7 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     else:
         await update.message.reply_text(
-            """Шаг 8/13: Адрес получателя
+            """Шаг 9/13: Адрес получателя
 Например: 123 Main St.""",
             reply_markup=reply_markup
         )
