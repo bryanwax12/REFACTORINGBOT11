@@ -1684,7 +1684,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
     data = context.user_data
     selected_rate = data['selected_rate']
-    amount = selected_rate['amount']
+    amount = context.user_data.get('final_amount', selected_rate['amount'])  # Use discounted amount
     
     # Get user discount (should be already calculated and stored in context)
     user_discount = context.user_data.get('user_discount', 0)
