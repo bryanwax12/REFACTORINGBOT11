@@ -1689,7 +1689,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 return ConversationHandler.END
             
             # Create order
-            order = await create_order_in_db(user, data, selected_rate, amount)
+            order = await create_order_in_db(user, data, selected_rate, amount, user_discount, discount_amount)
             
             # Try to create shipping label first
             label_created = await create_and_send_label(order['id'], telegram_id, query.message)
@@ -1740,7 +1740,7 @@ Shipping label создан успешно!""",
             
         elif query.data == 'pay_with_crypto':
             # Create order
-            order = await create_order_in_db(user, data, selected_rate, amount)
+            order = await create_order_in_db(user, data, selected_rate, amount, user_discount, discount_amount)
             
             # Create crypto invoice
             if crypto:
