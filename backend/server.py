@@ -1768,6 +1768,91 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
         await update.message.reply_text(f"❌ Ошибка: {str(e)}")
         return ConversationHandler.END
 
+async def handle_topup_crypto_selection(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle cryptocurrency selection for top-up"""
+    query = update.callback_query
+    await query.answer()
+    
+    if query.data == 'cancel_order':
+        await cancel_order(update, context)
+        return ConversationHandler.END
+    
+    try:
+        # Extract cryptocurrency from callback data
+        crypto_asset = query.data.replace('topup_crypto_', '').upper()
+        topup_amount = context.user_data.get('topup_amount')
+        
+        if not topup_amount:
+            await query.message.reply_text("❌ Ошибка: сумма не найдена. Начните заново.")
+            return ConversationHandler.END
+        
+        telegram_id = query.from_user.id
+        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        
+        # Crypto names for display
+        crypto_names = {
+            'BTC': 'Bitcoin',
+            'ETH': 'Ethereum',
+            'USDT': 'USDT (Tether)',
+            'TON': 'TON',
+            'LTC': 'Litecoin',
+            'USDC': 'USDC',
+            'BNB': 'BNB (Binance Coin)',
+            'TRX': 'TRX (Tron)'
+        }
+        
+        if crypto:
+            # Create invoice with selected cryptocurrency
+            invoice = await crypto.create_invoice(
+                asset=crypto_asset,
+                amount=topup_amount
+            )
+            
+            pay_url = getattr(invoice, 'bot_invoice_url', None) or getattr(invoice, 'mini_app_invoice_url', None)
+            
+            # Save top-up payment
+            payment = Payment(
+                order_id=f"topup_{user['id']}",
+                amount=topup_amount,
+                invoice_id=invoice.invoice_id,
+                pay_url=pay_url,
+                currency=crypto_asset,
+                status="pending"
+            )
+            payment_dict = payment.model_dump()
+            payment_dict['created_at'] = payment_dict['created_at'].isoformat()
+            payment_dict['telegram_id'] = telegram_id
+            payment_dict['type'] = 'topup'
+            await db.payments.insert_one(payment_dict)
+            
+            keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            crypto_display_name = crypto_names.get(crypto_asset, crypto_asset)
+            
+            await query.message.reply_text(
+                f"""✅ Счёт на пополнение создан!
+
+💵 Сумма: ${topup_amount}
+💰 Криптовалюта: {crypto_display_name}
+
+Оплатите по ссылке:
+{pay_url}
+
+⏰ После оплаты баланс будет пополнен автоматически, и вы сможете оплатить заказ.""",
+                reply_markup=reply_markup
+            )
+        else:
+            await query.message.reply_text("❌ Система оплаты не настроена.")
+        
+        context.user_data.clear()
+        return ConversationHandler.END
+        
+    except Exception as e:
+        logger.error(f"Crypto selection handling error: {e}")
+        await query.message.reply_text(f"❌ Ошибка: {str(e)}")
+        return ConversationHandler.END
+
 async def create_order_in_db(user, data, selected_rate, amount):
     order = Order(
         user_id=user['id'],
