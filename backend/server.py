@@ -2188,19 +2188,27 @@ Label PDF: {label_download_url}
                 order_id=order_id
             )
         
-        # Send polite message to user
+        # Send polite message to user with admin contact button
         user_message = """😔 К сожалению, в данный момент мы не можем сгенерировать shipping label.
 
 Пожалуйста, свяжитесь с администратором.
 
 Приносим извинения за неудобства!"""
         
+        # Add button to contact admin
+        keyboard = []
+        if ADMIN_TELEGRAM_ID:
+            keyboard.append([InlineKeyboardButton("💬 Связаться с администратором", url=f"tg://user?id={ADMIN_TELEGRAM_ID}")])
+        keyboard.append([InlineKeyboardButton("🏠 Главное меню", callback_data='main_menu')])
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
         if message:
-            await message.reply_text(user_message)
+            await message.reply_text(user_message, reply_markup=reply_markup)
         elif bot_instance:
             await bot_instance.send_message(
                 chat_id=telegram_id,
-                text=user_message
+                text=user_message,
+                reply_markup=reply_markup
             )
         
         return False  # Failed
