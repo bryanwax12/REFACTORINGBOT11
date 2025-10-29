@@ -680,6 +680,61 @@ const Dashboard = () => {
           </Card>
         </div>
       )}
+
+      {/* Refund Modal */}
+      {refundModal.open && refundModal.order && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" data-testid="refund-modal">
+          <Card className="w-full max-w-md mx-4">
+            <CardHeader>
+              <CardTitle>🔄 Refund Order</CardTitle>
+              <CardDescription>
+                Order #{refundModal.order.id.substring(0, 8)} - ${refundModal.order.amount}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm">
+                <p className="font-medium text-yellow-900">This will:</p>
+                <ul className="list-disc list-inside text-yellow-800 mt-1">
+                  <li>Return ${refundModal.order.amount} to user balance</li>
+                  <li>Cancel shipping status</li>
+                  <li>Notify user via Telegram</li>
+                </ul>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="refund-reason">Reason (optional)</Label>
+                <Input
+                  id="refund-reason"
+                  placeholder="e.g., Customer request, Wrong address..."
+                  value={refundReason}
+                  onChange={(e) => setRefundReason(e.target.value)}
+                  data-testid="refund-reason-input"
+                />
+              </div>
+              
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleRefund}
+                  className="flex-1 bg-red-600 hover:bg-red-700"
+                  data-testid="confirm-refund-btn"
+                >
+                  Confirm Refund
+                </Button>
+                <Button 
+                  onClick={() => {
+                    setRefundModal({ open: false, order: null });
+                    setRefundReason('');
+                  }}
+                  variant="outline"
+                  data-testid="cancel-refund-btn"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };
