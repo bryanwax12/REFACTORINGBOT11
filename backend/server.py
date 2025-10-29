@@ -2045,13 +2045,14 @@ async def create_and_send_label(order_id, telegram_id, message):
                 },
                 'ship_from': {
                     'name': order['address_from']['name'],
-                    'phone': order['address_from'].get('phone') or '+15551234567',  # Default phone if empty
+                    'phone': order['address_from'].get('phone') or '+15551234567',
                     'address_line1': order['address_from']['street1'],
                     'address_line2': order['address_from'].get('street2', ''),
                     'city_locality': order['address_from']['city'],
                     'state_province': order['address_from']['state'],
                     'postal_code': order['address_from']['zip'],
-                    'country_code': order['address_from'].get('country', 'US')
+                    'country_code': order['address_from'].get('country', 'US'),
+                    'address_residential_indicator': 'yes'  # Mark as residential to avoid company name
                 },
                 'packages': [{
                     'weight': {
