@@ -496,10 +496,18 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return FROM_ADDRESS
     
     # Only Latin letters, numbers, spaces, and common address symbols
-    invalid_chars = [c for c in address if not (ord(c) < 128 and (c.isalnum() or c.isspace() or c in ".-',#/"))]
+    invalid_chars = [c for c in address if not (ord(c) < 128 and (c.isalnum() or c.isspace() or c in ".-',#/&"))]
     if invalid_chars:
+        invalid_display = ', '.join([f"'{c}'" for c in set(invalid_chars)])
         logger.warning(f"Invalid characters in address: {invalid_chars} (ords: {[ord(c) for c in invalid_chars]})")
-        await update.message.reply_text("❌ Используйте только английские буквы и цифры. Разрешены: буквы, цифры, пробелы, дефисы, точки, запятые")
+        await update.message.reply_text(
+            f"❌ Найдены недопустимые символы: {invalid_display}\n\n"
+            f"Используйте только:\n"
+            f"• Английские буквы (A-Z, a-z)\n"
+            f"• Цифры (0-9)\n"
+            f"• Пробелы\n"
+            f"• Спецсимволы: . - , ' # / &"
+        )
         return FROM_ADDRESS
     
     context.user_data['from_street'] = address
