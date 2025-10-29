@@ -503,6 +503,7 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return FROM_ADDRESS
     
     context.user_data['from_street'] = address
+    context.user_data['last_state'] = FROM_ADDRESS2  # Save state for cancel return
     
     keyboard = [
         [InlineKeyboardButton("⏭ Пропустить", callback_data='skip_from_address2')],
