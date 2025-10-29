@@ -271,12 +271,8 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     if query.data == 'start' or query.data == 'main_menu':
         await start_command(update, context)
-    elif query.data == 'my_orders':
-        await my_orders_command(update, context)
     elif query.data == 'my_balance':
         await my_balance_command(update, context)
-    elif query.data == 'track':
-        await track_command(update, context)
     elif query.data == 'help':
         await help_command(update, context)
     elif query.data == 'new_order':
