@@ -858,11 +858,19 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await update.message.reply_text(
-        """Шаг 8/13: Адрес получателя
+    # Check if we're in editing mode
+    if context.user_data.get('editing_to_address'):
+        await update.message.reply_text(
+            """Шаг 2/6: Адрес получателя
 Например: 123 Main St.""",
-        reply_markup=reply_markup
-    )
+            reply_markup=reply_markup
+        )
+    else:
+        await update.message.reply_text(
+            """Шаг 8/13: Адрес получателя
+Например: 123 Main St.""",
+            reply_markup=reply_markup
+        )
     context.user_data['last_state'] = TO_ADDRESS  # Save state for next step
     return TO_ADDRESS
 
