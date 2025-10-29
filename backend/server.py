@@ -2800,6 +2800,9 @@ async def create_shipping_label(order_id: str):
 
 @api_router.get("/shipping/track/{tracking_number}")
 async def track_shipment(tracking_number: str, carrier: str):
+    """
+    Get detailed tracking information with progress status
+    """
     try:
         if not SHIPSTATION_API_KEY:
             raise HTTPException(status_code=500, detail="ShipStation API not configured")
@@ -2808,6 +2811,55 @@ async def track_shipment(tracking_number: str, carrier: str):
             'API-Key': SHIPSTATION_API_KEY,
             'Content-Type': 'application/json'
         }
+        
+        # ShipStation V2 tracking endpoint
+        response = requests.get(
+            f'https://api.shipstation.com/v2/tracking?tracking_number={tracking_number}&carrier_code={carrier}',
+            headers=headers,
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            tracking_data = response.json()
+            status_code = tracking_data.get('status_code', 'UNKNOWN')
+            
+            # Map status to progress percentage
+            status_map = {
+                'NY': {'name': 'Not Yet Shipped', 'progress': 0, 'color': 'gray'},
+                'IT': {'name': 'In Transit', 'progress': 50, 'color': 'blue'},
+                'DE': {'name': 'Delivered', 'progress': 100, 'color': 'green'},
+                'EX': {'name': 'Exception', 'progress': 25, 'color': 'red'},
+                'UN': {'name': 'Unknown', 'progress': 0, 'color': 'gray'},
+                'AT': {'name': 'Attempted Delivery', 'progress': 75, 'color': 'orange'},
+            }
+            
+            status_info = status_map.get(status_code, {'name': 'Unknown', 'progress': 0, 'color': 'gray'})
+            
+            return {
+                "tracking_number": tracking_number,
+                "carrier": carrier,
+                "status_code": status_code,
+                "status_name": status_info['name'],
+                "progress": status_info['progress'],
+                "progress_color": status_info['color'],
+                "estimated_delivery": tracking_data.get('estimated_delivery_date'),
+                "actual_delivery": tracking_data.get('actual_delivery_date'),
+                "tracking_events": tracking_data.get('events', [])[:5],  # Last 5 events
+                "carrier_status_description": tracking_data.get('status_description', '')
+            }
+        else:
+            return {
+                "tracking_number": tracking_number,
+                "carrier": carrier,
+                "status_code": "UN",
+                "status_name": "Unknown",
+                "progress": 0,
+                "progress_color": "gray",
+                "message": "Tracking information not available"
+            }
+    except Exception as e:
+        logger.error(f"Error tracking shipment: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
         
         # ShipStation V2 tracking endpoint
         response = requests.get(
