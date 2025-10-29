@@ -3018,9 +3018,14 @@ async def refund_order(order_id: str, refund_reason: Optional[str] = None):
 {void_status_text}
 Причина: {refund_reason or 'Возврат администратором'}"""
                 
+                # Add main menu button
+                keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                
                 await bot_instance.send_message(
                     chat_id=order['telegram_id'],
-                    text=message
+                    text=message,
+                    reply_markup=reply_markup
                 )
             except Exception as e:
                 logger.error(f"Failed to send refund notification: {e}")
