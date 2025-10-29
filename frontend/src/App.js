@@ -41,21 +41,36 @@ const Dashboard = () => {
 
   const loadData = async () => {
     try {
-      const [statsRes, ordersRes, usersRes, leaderboardRes] = await Promise.all([
+      const [statsRes, ordersRes, usersRes, leaderboardRes, expenseRes] = await Promise.all([
         axios.get(`${API}/stats`),
         axios.get(`${API}/orders`),
         axios.get(`${API}/users`),
-        axios.get(`${API}/users/leaderboard`)
+        axios.get(`${API}/users/leaderboard`),
+        axios.get(`${API}/stats/expenses`)
       ]);
       
       setStats(statsRes.data);
       setOrders(ordersRes.data);
       setUsers(usersRes.data);
       setLeaderboard(leaderboardRes.data);
+      setExpenseStats(expenseRes.data);
     } catch (error) {
       toast.error("Failed to load data");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadExpenseStats = async () => {
+    try {
+      const params = {};
+      if (dateFrom) params.date_from = dateFrom;
+      if (dateTo) params.date_to = dateTo;
+      
+      const response = await axios.get(`${API}/stats/expenses`, { params });
+      setExpenseStats(response.data);
+    } catch (error) {
+      toast.error("Failed to load expense stats");
     }
   };
 
