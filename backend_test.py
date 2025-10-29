@@ -436,10 +436,247 @@ def test_telegram_bot_token():
         print(f"❌ Error testing bot token: {e}")
         return False
 
+def test_admin_search_orders():
+    """Test Search Orders API - GET /api/orders/search"""
+    print("\n🔍 Testing Admin Search Orders API...")
+    
+    try:
+        # Test 1: Search without parameters (get all orders)
+        print("   Test 1: Get all orders")
+        response = requests.get(f"{API_BASE}/orders/search", timeout=15)
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            print(f"   ✅ Found {len(data)} orders")
+            
+            # Check if orders have required fields and enrichment
+            if data:
+                sample_order = data[0]
+                required_fields = ['id', 'telegram_id', 'amount', 'payment_status', 'shipping_status']
+                enriched_fields = ['tracking_number', 'label_url', 'carrier']
+                
+                print(f"   📋 Order Structure Validation:")
+                for field in required_fields:
+                    has_field = field in sample_order
+                    print(f"      {field}: {'✅' if has_field else '❌'}")
+                
+                print(f"   📋 Enrichment Validation:")
+                for field in enriched_fields:
+                    has_field = field in sample_order
+                    print(f"      {field}: {'✅' if has_field else '❌'}")
+        else:
+            print(f"   ❌ Failed: {response.status_code}")
+            return False
+        
+        # Test 2: Search by payment status
+        print("   Test 2: Search by payment_status=paid")
+        response = requests.get(f"{API_BASE}/orders/search?payment_status=paid", timeout=15)
+        if response.status_code == 200:
+            paid_orders = response.json()
+            print(f"   ✅ Found {len(paid_orders)} paid orders")
+        else:
+            print(f"   ❌ Payment status filter failed: {response.status_code}")
+        
+        # Test 3: Search by shipping status
+        print("   Test 3: Search by shipping_status=pending")
+        response = requests.get(f"{API_BASE}/orders/search?shipping_status=pending", timeout=15)
+        if response.status_code == 200:
+            pending_orders = response.json()
+            print(f"   ✅ Found {len(pending_orders)} pending orders")
+        else:
+            print(f"   ❌ Shipping status filter failed: {response.status_code}")
+        
+        # Test 4: Search by order ID (if we have orders)
+        if data and len(data) > 0:
+            test_order_id = data[0]['id'][:8]  # Use first 8 chars
+            print(f"   Test 4: Search by order ID '{test_order_id}'")
+            response = requests.get(f"{API_BASE}/orders/search?query={test_order_id}", timeout=15)
+            if response.status_code == 200:
+                search_results = response.json()
+                print(f"   ✅ Found {len(search_results)} orders matching ID")
+            else:
+                print(f"   ❌ Order ID search failed: {response.status_code}")
+        
+        return True
+        
+    except Exception as e:
+        print(f"❌ Search orders test error: {e}")
+        return False
+
+def test_admin_refund_order():
+    """Test Refund Order API - POST /api/orders/{order_id}/refund"""
+    print("\n🔍 Testing Admin Refund Order API...")
+    
+    try:
+        # First, get a paid order to test refund
+        response = requests.get(f"{API_BASE}/orders/search?payment_status=paid&limit=1", timeout=15)
+        
+        if response.status_code != 200:
+            print("   ⚠️ Cannot test refund - no orders endpoint available")
+            return False
+        
+        orders = response.json()
+        if not orders:
+            print("   ⚠️ Cannot test refund - no paid orders found")
+            return True  # Not a failure, just no test data
+        
+        test_order = orders[0]
+        order_id = test_order['id']
+        
+        # Check if already refunded
+        if test_order.get('refund_status') == 'refunded':
+            print("   ⚠️ Test order already refunded - cannot test refund again")
+            return True
+        
+        print(f"   Testing refund for order: {order_id[:8]}")
+        print(f"   Order amount: ${test_order['amount']}")
+        
+        # Test 1: Refund with reason
+        refund_data = {
+            "refund_reason": "Test refund for API validation"
+        }
+        
+        response = requests.post(
+            f"{API_BASE}/orders/{order_id}/refund",
+            json=refund_data,
+            headers={'Content-Type': 'application/json'},
+            timeout=15
+        )
+        
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            refund_result = response.json()
+            print(f"   ✅ Refund successful")
+            print(f"   📋 Refund Details:")
+            print(f"      Order ID: {refund_result.get('order_id', 'N/A')}")
+            print(f"      Refund Amount: ${refund_result.get('refund_amount', 0):.2f}")
+            print(f"      New Balance: ${refund_result.get('new_balance', 0):.2f}")
+            print(f"      Status: {refund_result.get('status', 'N/A')}")
+            
+            # Verify order status was updated
+            verify_response = requests.get(f"{API_BASE}/orders/search?query={order_id}", timeout=15)
+            if verify_response.status_code == 200:
+                updated_orders = verify_response.json()
+                if updated_orders:
+                    updated_order = updated_orders[0]
+                    refund_status = updated_order.get('refund_status')
+                    shipping_status = updated_order.get('shipping_status')
+                    print(f"   ✅ Order status updated:")
+                    print(f"      Refund Status: {refund_status}")
+                    print(f"      Shipping Status: {shipping_status}")
+            
+            return True
+        elif response.status_code == 400:
+            error_data = response.json()
+            error_detail = error_data.get('detail', 'Unknown error')
+            if 'already refunded' in error_detail:
+                print(f"   ✅ Correct error handling: {error_detail}")
+                return True
+            elif 'unpaid order' in error_detail:
+                print(f"   ✅ Correct error handling: {error_detail}")
+                return True
+            else:
+                print(f"   ❌ Unexpected 400 error: {error_detail}")
+                return False
+        elif response.status_code == 404:
+            print(f"   ❌ Order not found: {order_id}")
+            return False
+        else:
+            print(f"   ❌ Refund failed: {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"      Error: {error_data}")
+            except:
+                print(f"      Error: {response.text}")
+            return False
+        
+    except Exception as e:
+        print(f"❌ Refund order test error: {e}")
+        return False
+
+def test_admin_export_csv():
+    """Test Export Orders CSV API - GET /api/orders/export/csv"""
+    print("\n🔍 Testing Admin Export Orders CSV API...")
+    
+    try:
+        # Test 1: Export all orders
+        print("   Test 1: Export all orders")
+        response = requests.get(f"{API_BASE}/orders/export/csv", timeout=30)
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            # Check content type
+            content_type = response.headers.get('content-type', '')
+            print(f"   Content-Type: {content_type}")
+            
+            # Check Content-Disposition header
+            content_disposition = response.headers.get('content-disposition', '')
+            print(f"   Content-Disposition: {content_disposition}")
+            
+            # Verify it's CSV format
+            if 'text/csv' in content_type:
+                print(f"   ✅ Correct content type")
+            else:
+                print(f"   ⚠️ Unexpected content type: {content_type}")
+            
+            if 'attachment' in content_disposition and 'orders_export_' in content_disposition:
+                print(f"   ✅ Correct download headers")
+            else:
+                print(f"   ⚠️ Missing or incorrect download headers")
+            
+            # Check CSV content
+            csv_content = response.text
+            lines = csv_content.split('\n')
+            
+            if lines:
+                header_line = lines[0]
+                expected_headers = ['Order ID', 'Telegram ID', 'Amount', 'Payment Status', 'Shipping Status', 'Tracking Number']
+                
+                print(f"   📋 CSV Structure:")
+                print(f"      Total lines: {len(lines)}")
+                print(f"      Header: {header_line}")
+                
+                # Check if expected headers are present
+                headers_present = all(header in header_line for header in expected_headers)
+                print(f"      Required headers present: {'✅' if headers_present else '❌'}")
+                
+                # Count data rows (excluding header and empty lines)
+                data_rows = [line for line in lines[1:] if line.strip()]
+                print(f"      Data rows: {len(data_rows)}")
+            
+            print(f"   ✅ CSV export successful")
+        else:
+            print(f"   ❌ CSV export failed: {response.status_code}")
+            return False
+        
+        # Test 2: Export with payment status filter
+        print("   Test 2: Export with payment_status=paid filter")
+        response = requests.get(f"{API_BASE}/orders/export/csv?payment_status=paid", timeout=30)
+        if response.status_code == 200:
+            print(f"   ✅ Filtered export successful")
+        else:
+            print(f"   ❌ Filtered export failed: {response.status_code}")
+        
+        # Test 3: Export with shipping status filter
+        print("   Test 3: Export with shipping_status=pending filter")
+        response = requests.get(f"{API_BASE}/orders/export/csv?shipping_status=pending", timeout=30)
+        if response.status_code == 200:
+            print(f"   ✅ Shipping status filtered export successful")
+        else:
+            print(f"   ❌ Shipping status filtered export failed: {response.status_code}")
+        
+        return True
+        
+    except Exception as e:
+        print(f"❌ CSV export test error: {e}")
+        return False
+
 def main():
-    """Run all tests - Focus on Return to Order Functionality"""
-    print("🚀 Testing Telegram Bot Return to Order Functionality")
-    print("🎯 Focus: Cancel and Return to Order State Management")
+    """Run all tests - Focus on New Admin Panel API Endpoints"""
+    print("🚀 Testing New Admin Panel Backend API Endpoints")
+    print("🎯 Focus: Search Orders, Refund Orders, Export CSV")
     print("=" * 60)
     
     # Test results
