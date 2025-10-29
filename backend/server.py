@@ -1119,6 +1119,7 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
             await update.message.reply_text("✅ Вес посылки обновлен!")
         
         # Show data confirmation instead of immediately fetching rates
+        context.user_data['last_state'] = CONFIRM_DATA  # Save state for next step
         return await show_data_confirmation(update, context)
             
     except ValueError:
