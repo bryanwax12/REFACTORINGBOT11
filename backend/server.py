@@ -2802,7 +2802,7 @@ async def track_shipment(tracking_number: str, carrier: str):
 @api_router.post("/orders/{order_id}/refund")
 async def refund_order(order_id: str, refund_reason: Optional[str] = None):
     """
-    Refund an order - return money to user balance and update order status
+    Refund an order - void label on ShipStation and return money to user balance
     """
     try:
         # Find order
@@ -2817,6 +2817,46 @@ async def refund_order(order_id: str, refund_reason: Optional[str] = None):
         # Check if paid
         if order['payment_status'] != 'paid':
             raise HTTPException(status_code=400, detail="Cannot refund unpaid order")
+        
+        # Get label for voiding
+        label = await db.shipping_labels.find_one({"order_id": order_id}, {"_id": 0})
+        void_success = False
+        void_message = ""
+        
+        # Try to void label on ShipStation if label exists
+        if label and label.get('label_id') and SHIPSTATION_API_KEY:
+            try:
+                headers = {
+                    'API-Key': SHIPSTATION_API_KEY,
+                    'Content-Type': 'application/json'
+                }
+                
+                # Void label on ShipStation V2
+                void_response = requests.put(
+                    f'https://api.shipstation.com/v2/labels/{label["label_id"]}/void',
+                    headers=headers,
+                    timeout=10
+                )
+                
+                if void_response.status_code == 200:
+                    void_data = void_response.json()
+                    void_success = void_data.get('approved', False)
+                    void_message = void_data.get('message', 'Label voided successfully')
+                    
+                    # Update label status
+                    await db.shipping_labels.update_one(
+                        {"order_id": order_id},
+                        {"$set": {"status": "voided"}}
+                    )
+                    
+                    logger.info(f"Label voided: {label['label_id']}, approved={void_success}")
+                else:
+                    logger.warning(f"Failed to void label: {void_response.status_code} - {void_response.text}")
+                    void_message = "Could not void label on carrier"
+                    
+            except Exception as e:
+                logger.error(f"Error voiding label: {e}")
+                void_message = f"Error voiding label: {str(e)}"
         
         # Get user
         user = await db.users.find_one({"telegram_id": order['telegram_id']}, {"_id": 0})
@@ -2841,7 +2881,9 @@ async def refund_order(order_id: str, refund_reason: Optional[str] = None):
                     "refund_amount": refund_amount,
                     "refund_reason": refund_reason or "Admin refund",
                     "refund_date": datetime.now(timezone.utc).isoformat(),
-                    "shipping_status": "cancelled"
+                    "shipping_status": "cancelled",
+                    "void_status": "voided" if void_success else "void_failed",
+                    "void_message": void_message
                 }
             }
         )
@@ -2849,6 +2891,7 @@ async def refund_order(order_id: str, refund_reason: Optional[str] = None):
         # Notify user via Telegram
         if bot_instance:
             try:
+                void_status_text = "✅ Этикетка отменена" if void_success else "⚠️ Этикетка не отменена"
                 message = f"""💰 Возврат средств
 
 Заказ #{order_id[:8]} был отменён.
@@ -2856,6 +2899,7 @@ async def refund_order(order_id: str, refund_reason: Optional[str] = None):
 Возвращено на баланс: ${refund_amount:.2f}
 Новый баланс: ${new_balance:.2f}
 
+{void_status_text}
 Причина: {refund_reason or 'Возврат администратором'}"""
                 
                 await bot_instance.send_message(
@@ -2869,6 +2913,8 @@ async def refund_order(order_id: str, refund_reason: Optional[str] = None):
             "order_id": order_id,
             "refund_amount": refund_amount,
             "new_balance": new_balance,
+            "void_success": void_success,
+            "void_message": void_message,
             "status": "success"
         }
         
