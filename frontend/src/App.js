@@ -53,6 +53,84 @@ const Dashboard = () => {
     }
   };
 
+  const searchOrders = async () => {
+    if (!searchQuery.trim()) {
+      loadData();
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      const params = { query: searchQuery };
+      if (statusFilter !== 'all') {
+        params.payment_status = statusFilter;
+      }
+      
+      const response = await axios.get(`${API}/orders/search`, { params });
+      setOrders(response.data);
+    } catch (error) {
+      toast.error("Search failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefund = async () => {
+    if (!refundModal.order) return;
+    
+    try {
+      await axios.post(`${API}/orders/${refundModal.order.id}/refund`, null, {
+        params: { refund_reason: refundReason || 'Admin refund' }
+      });
+      
+      toast.success('Order refunded successfully');
+      setRefundModal({ open: false, order: null });
+      setRefundReason('');
+      loadData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Refund failed');
+    }
+  };
+
+  const exportToCSV = async () => {
+    try {
+      const params = {};
+      if (statusFilter !== 'all') {
+        params.payment_status = statusFilter;
+      }
+      
+      const response = await axios.get(`${API}/orders/export/csv`, {
+        params,
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `orders_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      
+      toast.success('Orders exported successfully');
+    } catch (error) {
+      toast.error('Export failed');
+    }
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    toast.success('Copied to clipboard');
+  };
+
+  const downloadLabel = (labelUrl) => {
+    if (!labelUrl) {
+      toast.error('Label URL not available');
+      return;
+    }
+    window.open(labelUrl, '_blank');
+  };
+
   const handleBalanceAction = (telegram_id, action) => {
     setBalanceModal({ open: true, telegram_id, action });
     setBalanceAmount('');
