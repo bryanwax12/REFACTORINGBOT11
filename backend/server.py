@@ -2218,12 +2218,12 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Get the state we were in when cancel was pressed
     last_state = context.user_data.get('last_state')
     
-    print(f"DEBUG return_to_order: last_state = {last_state}")
-    print(f"DEBUG return_to_order: user_data keys = {context.user_data.keys()}")
+    logger.info(f"return_to_order: last_state = {last_state}")
+    logger.info(f"return_to_order: user_data keys = {list(context.user_data.keys())}")
     
     # If no last_state - just continue
     if not last_state:
-        print("DEBUG return_to_order: No last_state found!")
+        logger.warning("return_to_order: No last_state found!")
         await query.message.reply_text("Продолжаем оформление заказа...")
         return FROM_NAME
     
