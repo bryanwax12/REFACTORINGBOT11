@@ -1503,8 +1503,13 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     
     if query.data == 'cancel_order':
-        await cancel_order(update, context)
-        return ConversationHandler.END
+        return await cancel_order(update, context)
+    
+    if query.data == 'confirm_cancel':
+        return await confirm_cancel_order(update, context)
+    
+    if query.data == 'return_to_order':
+        return await return_to_order(update, context)
     
     # Get selected carrier index
     carrier_idx = int(query.data.split('_')[-1])
