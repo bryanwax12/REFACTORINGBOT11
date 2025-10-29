@@ -246,6 +246,15 @@ backend:
         - working: "NA"
           agent: "main"
           comment: "🔧 COMPLETE FIX APPLIED: Moved last_state assignment from BEGINNING to END in ALL 13 state handler functions: (1) order_from_name → last_state = FROM_ADDRESS at end, (2) order_from_address → last_state = FROM_ADDRESS2 at end, (3) order_from_city → last_state = FROM_STATE at end, (4) order_from_state → last_state = FROM_ZIP at end, (5) order_from_zip → last_state = FROM_PHONE at end, (6) order_from_phone → last_state = TO_NAME at end (2 returns), (7) order_to_name → last_state = TO_ADDRESS at end, (8) order_to_address → last_state = TO_ADDRESS2 at end, (9) order_to_city → last_state = TO_STATE at end, (10) order_to_state → last_state = TO_ZIP at end, (11) order_to_zip → last_state = TO_PHONE at end, (12) order_to_phone → last_state = PARCEL_WEIGHT at end (2 returns), (13) order_parcel_weight → last_state = CONFIRM_DATA at end. Now last_state correctly reflects the screen user SEES, not the state being processed. Ready for comprehensive testing."
+        - working: true
+          agent: "user"
+          comment: "✅ INITIAL FUNCTIONALITY WORKING: Normal order creation flow with cancel/return now works correctly at all steps."
+        - working: false
+          agent: "user"
+          comment: "❌ NEW ISSUE IN EDIT MODE: When user clicks 'Редактировать данные' → 'Адрес отправителя', enters edit mode ('Редактирование адреса отправителя', 'Шаг 1/6: Имя отправителя'), then clicks 'Отмена' → 'Вернуться к заказу', nothing appears. The return_to_order function doesn't work in edit mode."
+        - working: "NA"
+          agent: "main"
+          comment: "🔧 EDIT MODE FIX: Added last_state assignment to ALL 3 edit mode entry points in handle_edit_choice function: (1) edit_from_address → last_state = FROM_NAME, (2) edit_to_address → last_state = TO_NAME, (3) edit_parcel → last_state = PARCEL_WEIGHT. Now when user enters edit mode and clicks cancel→return, last_state is properly set and return_to_order will show correct prompt. Ready for testing in edit mode."
 
 metadata:
   created_by: "main_agent"
