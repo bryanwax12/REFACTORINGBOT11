@@ -2126,13 +2126,51 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Get the state we were in when cancel was pressed
     last_state = context.user_data.get('last_state')
     
-    # If no last_state or early stage - just continue where we were
-    if not last_state or last_state in [FROM_NAME, FROM_ADDRESS, FROM_ADDRESS2, FROM_CITY, FROM_STATE, FROM_ZIP, FROM_PHONE, 
-                                         TO_NAME, TO_ADDRESS, TO_ADDRESS2, TO_CITY, TO_STATE, TO_ZIP, TO_PHONE, 
-                                         PARCEL_WEIGHT, CONFIRM_DATA, EDIT_MENU]:
+    # If no last_state - just continue
+    if not last_state:
+        await query.message.reply_text("Продолжаем оформление заказа...")
+        return FROM_NAME
+    
+    # Handle optional fields with Skip button
+    if last_state == FROM_ADDRESS2:
+        keyboard = [
+            [InlineKeyboardButton("⏭ Пропустить", callback_data='skip_from_address2')],
+            [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.message.reply_text(
+            """Шаг 3/13: Квартира/Офис отправителя (необязательно)
+
+Например: Apt 5, Suite 201
+
+Или нажмите "Пропустить" """,
+            reply_markup=reply_markup
+        )
+        return FROM_ADDRESS2
+    
+    if last_state == TO_ADDRESS2:
+        keyboard = [
+            [InlineKeyboardButton("⏭ Пропустить", callback_data='skip_to_address2')],
+            [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.message.reply_text(
+            """Шаг 9/13: Квартира/Офис получателя (необязательно)
+
+Например: Apt 12, Suite 305
+
+Или нажмите "Пропустить" """,
+            reply_markup=reply_markup
+        )
+        return TO_ADDRESS2
+    
+    # Other early stages without skip button
+    if last_state in [FROM_NAME, FROM_ADDRESS, FROM_CITY, FROM_STATE, FROM_ZIP, FROM_PHONE, 
+                      TO_NAME, TO_ADDRESS, TO_CITY, TO_STATE, TO_ZIP, TO_PHONE, 
+                      PARCEL_WEIGHT, CONFIRM_DATA, EDIT_MENU]:
         # Early stages - just dismiss cancel dialog and continue
         await query.message.reply_text("Продолжаем оформление заказа...")
-        return last_state if last_state else FROM_NAME
+        return last_state
     
     # Later stages - restore specific screens
     if last_state == SELECT_CARRIER:
