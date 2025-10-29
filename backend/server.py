@@ -246,7 +246,6 @@ async def handle_create_label_request(update: Update, context: ContextTypes.DEFA
         )
         
         keyboard = [[
-            InlineKeyboardButton("📦 Мои заказы", callback_data='my_orders'),
             InlineKeyboardButton("🔙 Главное меню", callback_data='start')
         ]]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -257,7 +256,6 @@ async def handle_create_label_request(update: Update, context: ContextTypes.DEFA
         )
     else:
         keyboard = [[
-            InlineKeyboardButton("📦 Мои заказы", callback_data='my_orders'),
             InlineKeyboardButton("🔙 Главное меню", callback_data='start')
         ]]
         reply_markup = InlineKeyboardMarkup(keyboard)
