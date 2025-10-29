@@ -2271,11 +2271,14 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.message.reply_text("Шаг 14/13: Вес посылки\n\nВведите вес в фунтах (lb)\nНапример: 2.5")
         return PARCEL_WEIGHT
     
-    # Other early stages
-    elif last_state in [CONFIRM_DATA, EDIT_MENU]:
-        # These will be handled by their specific logic
-        await query.message.reply_text("Продолжаем оформление заказа...")
-        return last_state
+    # Special states - show their specific screens
+    elif last_state == CONFIRM_DATA:
+        # User was on data confirmation screen
+        return await show_data_confirmation(update, context)
+    
+    elif last_state == EDIT_MENU:
+        # User was on edit menu screen
+        return await show_edit_menu(update, context)
     
     # Later stages - restore specific screens
     elif last_state == SELECT_CARRIER:
