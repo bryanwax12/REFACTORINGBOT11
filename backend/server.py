@@ -1063,6 +1063,7 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Например: 2""",
                 reply_markup=reply_markup
             )
+            context.user_data['last_state'] = PARCEL_WEIGHT  # Save state for next step
             return PARCEL_WEIGHT
     
     phone = update.message.text.strip()
