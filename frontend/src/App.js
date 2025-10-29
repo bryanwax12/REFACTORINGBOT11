@@ -545,6 +545,11 @@ const Dashboard = () => {
                           <p className="text-sm font-semibold text-emerald-600">
                             Balance: ${(user.balance || 0).toFixed(2)}
                           </p>
+                          {user.discount > 0 && (
+                            <p className="text-xs font-medium text-purple-600">
+                              🎉 Discount: {user.discount}%
+                            </p>
+                          )}
                           <p className="text-xs text-muted-foreground">
                             {new Date(user.created_at).toLocaleDateString()}
                           </p>
@@ -574,6 +579,17 @@ const Dashboard = () => {
                             disabled={(user.balance || 0) === 0}
                           >
                             ➖ Deduct
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="text-purple-600 border-purple-300 hover:bg-purple-50"
+                            onClick={() => {
+                              setDiscountModal({ open: true, user });
+                              setDiscountValue(user.discount?.toString() || '0');
+                            }}
+                          >
+                            🎁 Discount
                           </Button>
                         </div>
                       </div>
