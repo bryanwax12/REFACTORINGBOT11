@@ -789,6 +789,7 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Например: Jane Doe""",
                 reply_markup=reply_markup
             )
+            context.user_data['last_state'] = TO_NAME  # Save state for next step
             return TO_NAME
     
     phone = update.message.text.strip()
