@@ -2165,7 +2165,6 @@ Tracking: {tracking_number}
                     
                     # Send tracking info with buttons
                     keyboard = [
-                        [InlineKeyboardButton("📍 Отследить посылку", url=f"https://www.google.com/search?q={tracking_number}")],
                         [InlineKeyboardButton("🏠 Главное меню", callback_data='main_menu')]
                     ]
                     reply_markup = InlineKeyboardMarkup(keyboard)
