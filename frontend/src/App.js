@@ -132,6 +132,25 @@ const Dashboard = () => {
     window.open(labelUrl, '_blank');
   };
 
+  const fetchTrackingStatus = async (trackingNumber, carrier) => {
+    if (!trackingNumber || !carrier) {
+      toast.error('Tracking information not available');
+      return;
+    }
+    
+    setTrackingModal({ open: true, tracking: null, loading: true });
+    
+    try {
+      const response = await axios.get(`${API}/shipping/track/${trackingNumber}`, {
+        params: { carrier }
+      });
+      setTrackingModal({ open: true, tracking: response.data, loading: false });
+    } catch (error) {
+      toast.error('Failed to fetch tracking info');
+      setTrackingModal({ open: false, tracking: null, loading: false });
+    }
+  };
+
   const handleBalanceAction = (telegram_id, action) => {
     setBalanceModal({ open: true, telegram_id, action });
     setBalanceAmount('');
