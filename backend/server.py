@@ -2786,7 +2786,7 @@ async def startup_event():
                     CONFIRM_DATA: [CallbackQueryHandler(handle_data_confirmation, pattern='^(confirm_data|edit_data|edit_addresses_error|cancel_order)$')],
                     EDIT_MENU: [CallbackQueryHandler(handle_edit_choice, pattern='^(edit_from_address|edit_to_address|edit_parcel|back_to_confirmation)$')],
                     SELECT_CARRIER: [CallbackQueryHandler(select_carrier, pattern='^(select_carrier_|cancel_order)')],
-                    PAYMENT_METHOD: [CallbackQueryHandler(process_payment, pattern='^(pay_from_balance|pay_with_crypto|crypto_|top_up_balance|topup_|cancel_order)')]
+                    PAYMENT_METHOD: [CallbackQueryHandler(process_payment, pattern='^(pay_from_balance|pay_with_crypto|top_up_balance|topup_|cancel_order)')]
                 },
                 fallbacks=[
                     CallbackQueryHandler(cancel_order, pattern='^cancel_order$'),
