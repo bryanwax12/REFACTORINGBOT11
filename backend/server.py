@@ -1307,7 +1307,26 @@ async def handle_edit_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
         context.user_data['last_state'] = PARCEL_WEIGHT  # Save state for cancel return
         return PARCEL_WEIGHT
 
-async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def skip_address_validation(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Skip address validation and continue with rate fetching"""
+    query = update.callback_query
+    await query.answer()
+    
+    await query.message.reply_text("⚠️ Пропускаю валидацию адреса...\n⏳ Получаю доступные курьерские службы и тарифы...")
+    
+    # Continue with the rest of fetch_shipping_rates logic (without validation)
+    try:
+        import requests
+        import asyncio
+        
+        data = context.user_data
+        
+        headers = {
+            'API-Key': SHIPSTATION_API_KEY,
+            'Content-Type': 'application/json'
+        }
+        
+        # Get carrier IDs
     """Fetch shipping rates from ShipStation"""
     query = update.callback_query
     
