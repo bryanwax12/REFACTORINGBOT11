@@ -1386,6 +1386,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         if to_validation_response.status_code != 200:
             keyboard = [
                 [InlineKeyboardButton("✏️ Редактировать адрес получателя", callback_data='edit_to_address')],
+                [InlineKeyboardButton("✅ Продолжить в любом случае", callback_data='skip_validation')],
                 [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -1394,7 +1395,8 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
                 "Адрес не может быть проверен. Пожалуйста, исправьте:\n"
                 f"• Город: {data['to_city']}\n"
                 f"• Штат: {data['to_state']}\n"
-                f"• ZIP: {data['to_zip']}",
+                f"• ZIP: {data['to_zip']}\n\n"
+                "Если вы уверены, что адрес правильный, нажмите 'Продолжить в любом случае'",
                 reply_markup=reply_markup
             )
             return CONFIRM_DATA
