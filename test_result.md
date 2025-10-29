@@ -248,13 +248,12 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus:
-    - "Return to Order - Save and Restore Last State"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
   manual_testing_required:
-    - "Return to Order - CRITICAL FIX: Test via @whitelabellbot by starting /order, entering name, clicking cancel at 'Адрес отправителя' step, clicking 'return to order', then entering '215 Clayton St.' - should accept address without errors. Previously was incorrectly validating as name field."
+    - "Return to Order - CRITICAL FIX COMPLETED: Backend testing verified the fix is working. Manual testing via @whitelabellbot recommended to confirm end-to-end functionality: start /order, enter name, click cancel at 'Адрес отправителя' step, click 'return to order', then enter '215 Clayton St.' - should now accept address without errors."
 
 agent_communication:
     - agent: "main"
