@@ -2366,6 +2366,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Later stages - restore specific screens
     elif last_state == SELECT_CARRIER:
+        logger.info("return_to_order: Handling SELECT_CARRIER state")
         # Check if we have enough data to fetch rates
         data = context.user_data
         required_fields = ['from_name', 'from_city', 'from_state', 'from_zip', 
@@ -2377,6 +2378,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return await fetch_shipping_rates(update, context)
         else:
             # Missing data - just continue
+            logger.warning(f"return_to_order: Missing data for SELECT_CARRIER. Has: {list(data.keys())}")
             await query.message.reply_text("Продолжаем оформление заказа...")
             return last_state
     
