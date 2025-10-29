@@ -923,7 +923,7 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     else:
         await update.message.reply_text(
-            """Шаг 9/13: Квартира/Офис получателя (необязательно)
+            """Шаг 10/13: Квартира/Офис получателя (необязательно)
 Например: Apt 12, Suite 305
 Или нажмите "Пропустить" """,
             reply_markup=reply_markup
