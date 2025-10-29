@@ -1602,6 +1602,10 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
         discount_amount = amount * (user_discount / 100)
         amount = amount - discount_amount  # Apply discount to final amount
     
+    # Save discount info in context for later use
+    context.user_data['user_discount'] = user_discount
+    context.user_data['discount_amount'] = discount_amount
+    
     data = context.user_data
     
     # Build confirmation text
