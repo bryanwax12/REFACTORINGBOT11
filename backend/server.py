@@ -1214,9 +1214,6 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
     """Fetch shipping rates from ShipStation"""
     query = update.callback_query
     
-    # Save state for cancel return
-    context.user_data['last_state'] = SELECT_CARRIER
-    
     await query.message.reply_text("⏳ Получаю доступные курьерские службы и тарифы...")
     
     try:
