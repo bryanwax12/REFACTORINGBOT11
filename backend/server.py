@@ -935,6 +935,7 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Например: New York""",
         reply_markup=reply_markup
     )
+    context.user_data['last_state'] = TO_CITY  # Save state for next step
     return TO_CITY
 
 async def skip_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
