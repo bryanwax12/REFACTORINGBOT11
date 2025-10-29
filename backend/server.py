@@ -1668,26 +1668,22 @@ Shipping label создан успешно!""",
                 await query.message.reply_text("❌ Система оплаты не настроена.")
                 
         elif query.data == 'top_up_balance':
-            # Create top-up invoice
-            keyboard = [
-                [
-                    InlineKeyboardButton("$10", callback_data='topup_10'),
-                    InlineKeyboardButton("$25", callback_data='topup_25')
-                ],
-                [
-                    InlineKeyboardButton("$50", callback_data='topup_50'),
-                    InlineKeyboardButton("$100", callback_data='topup_100')
-                ],
-                [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
-            ]
+            # Request custom top-up amount
+            keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
             await query.message.reply_text(
-                "💵 Выберите сумму пополнения:",
+                """💵 Пополнение баланса
+
+Введите сумму пополнения в долларах США (USD):
+
+Например: 50 или 100.50
+
+Минимальная сумма: $5
+Максимальная сумма: $1000""",
                 reply_markup=reply_markup
             )
-            # Stay in same state to handle top-up
-            return PAYMENT_METHOD
+            return TOPUP_AMOUNT
             
         # Handle top-up amounts
         elif query.data.startswith('topup_'):
