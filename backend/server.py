@@ -1694,6 +1694,8 @@ Shipping label создан успешно!""",
                 
         elif query.data == 'top_up_balance':
             # Request custom top-up amount
+            context.user_data['last_state'] = TOPUP_AMOUNT  # Save state for cancel return
+            
             keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
