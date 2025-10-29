@@ -437,11 +437,11 @@ const Dashboard = () => {
                           </td>
                           <td className="py-3">
                             <div className="flex gap-1 justify-end">
-                              {order.label_url && (
+                              {order.label_id && (
                                 <Button
                                   size="sm"
                                   variant="ghost"
-                                  onClick={() => downloadLabel(order.label_url)}
+                                  onClick={() => downloadLabel(order)}
                                   title="Download Label"
                                 >
                                   <FileText className="h-4 w-4" />
