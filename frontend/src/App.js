@@ -400,6 +400,19 @@ const Dashboard = () => {
                               )}
                             </div>
                           </td>
+                          <td className="py-3">
+                            {order.tracking_number && order.carrier ? (
+                              <button
+                                onClick={() => fetchTrackingStatus(order.tracking_number, order.carrier)}
+                                className="text-xs text-blue-600 hover:underline flex items-center gap-1"
+                              >
+                                <ExternalLink className="h-3 w-3" />
+                                Track
+                              </button>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">-</span>
+                            )}
+                          </td>
                           <td className="py-3 text-xs text-muted-foreground">
                             {new Date(order.created_at).toLocaleDateString()}
                           </td>
@@ -415,16 +428,6 @@ const Dashboard = () => {
                                   <FileText className="h-4 w-4" />
                                 </Button>
                               )}
-                              {order.tracking_number && (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => window.open(`https://www.google.com/search?q=${order.tracking_number}`, '_blank')}
-                                  title="Track Shipment"
-                                >
-                                  <ExternalLink className="h-4 w-4" />
-                                </Button>
-                              )}
                               {order.payment_status === 'paid' && order.refund_status !== 'refunded' && (
                                 <Button
                                   size="sm"
@@ -433,7 +436,7 @@ const Dashboard = () => {
                                     setRefundModal({ open: true, order });
                                     setRefundReason('');
                                   }}
-                                  title="Refund Order"
+                                  title="Refund & Void Label"
                                   className="text-red-600 hover:text-red-700"
                                 >
                                   <RefreshCw className="h-4 w-4" />
