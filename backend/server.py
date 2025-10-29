@@ -3256,7 +3256,7 @@ async def cryptopay_webhook(request: Request):
         return {"status": "error"}
 
 @api_router.get("/users")
-async def get_users():
+async def get_users(authenticated: bool = Depends(verify_admin_key)):
     users = await db.users.find({}, {"_id": 0}).to_list(100)
     return users
 
