@@ -2222,7 +2222,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.info(f"return_to_order: user_data keys = {list(context.user_data.keys())}")
     
     # If no last_state - just continue
-    if not last_state:
+    if last_state is None:
         logger.warning("return_to_order: No last_state found!")
         await query.message.reply_text("Продолжаем оформление заказа...")
         return FROM_NAME
