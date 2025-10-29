@@ -2227,7 +2227,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await query.message.reply_text(
-            """Шаг 9/13: Квартира/Офис получателя (необязательно)
+            """Шаг 10/13: Квартира/Офис получателя (необязательно)
 
 Например: Apt 12, Suite 305
 
@@ -2237,7 +2237,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return TO_ADDRESS2
     
     elif last_state == TO_CITY:
-        await query.message.reply_text("Шаг 10/13: Город получателя\n\nНапример: New York")
+        await query.message.reply_text("Шаг 11/13: Город получателя\n\nНапример: New York")
         return TO_CITY
     
     elif last_state == TO_STATE:
