@@ -1,68 +1,58 @@
 <analysis>
-The AI engineer successfully built a full-stack Telegram bot, iteratively adding features based on user requests. Key milestones included integrating CryptoBot for payments and initially GoShippo for shipping labels. The work addressed issues like GoShippo's UPS rates by switching to a live API key and later, a complete migration from GoShippo to ShipStation. Significant effort went into enhancing the Telegram bot's user experience with multi-step order creation, data editing, phone number input, and re-labeling functionality. Troubleshooting involved resolving Telegram bot Conflict and Logged out errors, and the ongoing challenge of ShipStation address validation, which currently returns a 400 error. The last action was preparing to debug this ShipStation API issue.
+The AI engineer successfully enhanced a Telegram bot from MVP, focusing on shipping label generation and crypto payments. Initial work involved migrating from GoShippo to ShipStation V2 and refining the order creation workflow with multi-step inputs and editing capabilities. Key challenges addressed include fixing a  from ShipStation's rate API (due to missing  and phone numbers), implementing carrier filtering (excluding GlobalPost/Stamps.com, then allowing specific services like UPS Ground/2nd Day Air), and improving Telegram UI with balanced rate display, bold carrier names, and appropriate emojis. Payment logic was refined, ensuring sufficient ShipStation funds before label creation, and an admin error notification system was added. A new payment flow allowing custom top-up amounts with CryptoBot currency selection (BTC, ETH, USDT, LTC) was integrated. Extensive work went into enhancing the user journey, including a robust return to order functionality and refining address input validation to allow characters like . The immediate task involved ensuring  correctly displayed prompts for early states.
 </analysis>
 
 <product_requirements>
-The application is a Telegram bot designed for shipping label generation and crypto payments.
-Core functionalities required:
-1.  **User Authorization:** Authentication tied to Telegram ID.
-2.  **Crypto Payments:** Integration with CryptoBot, supporting USDT, BTC, TON, ETH.
-3.  **Shipping Label Creation:** Initially GoShippo, then switched to ShipStation for generating labels.
-4.  **Order Management:** Users can track and view their order history.
+The application is a Telegram bot designed for shipping label generation and crypto payments. Key features include user authentication via Telegram ID, crypto payments (initially CryptoBot, with a brief, rejected attempt at NOWPayments), and shipping label creation (migrated from GoShippo to ShipStation V2). Users can manage orders and view history.
 
-The application has been enhanced with:
-*   **Telegram Bot UI:** Pretty buttons (2x2 grid layout) for commands like , , , .
-*   **Order Creation Workflow:** Step-by-step process for order details, including automatic shipping cost calculation, carrier selection, input for street2, displaying final payment (initially with 0 markup, later removed), and estimated delivery dates.
-*   **Balance Management:** User balance system, admin panel to manually add/deduct balance.
-*   **Admin Panel:** Displays user list, orders, and leaderboard based on activity.
-*   **Input Validation:** Strict validation for user inputs (Latin characters, valid phone numbers). Address validation initially for GoShippo, later attempted with ShipStation, then disabled.
-*   **Data Review & Edit:** Users can review and edit all entered order details before proceeding to payment.
-*   **Label Re-creation:** Ability to re-create shipping labels for the last 10 paid orders from the My Orders section.
-*   **Payment Logic Refinement:** Payment is now deducted *after* successful label creation to prevent loss of funds if label generation fails.
-*   **Messaging Customization:** Removed service fee display, simplified Итого text, and added a polite message if label creation fails without deducting payment.
+The bot provides a refined user experience: pretty buttons for main commands, a step-by-step order creation workflow with automatic shipping cost calculation, carrier selection, and data review/editing. It supports balance management with an admin top-up function. Key enhancements include:
+*   **Shipping Logic**: ShipStation V2 API integration, filtering of unwanted carriers (GlobalPost, Stamps.com) and services (e.g., only specific UPS, FedEx, USPS services, including 3-day options).
+*   **UI/UX**: Balanced display of shipping rates (5 per carrier), bold carrier names, and branded emojis. Removed refresh list button.
+*   **Payment Flow**: Allows users to enter custom top-up amounts, select specific cryptocurrencies (BTC, ETH, USDT, LTC) via CryptoBot, with payment deduction occurring post-label creation.
+*   **Error Handling**: Admin Telegram notifications for critical user errors (e.g., label creation failure).
+*   **Navigation**: Back to rates button, and a refined cancel order flow with confirmation and return to order functionality that correctly restores the previous input step.
+*   **Input Validation**: Improved address validation to allow characters like '&'.
 </product_requirements>
 
 <key_technical_concepts>
--   **Full-stack Application:** React (frontend), FastAPI (backend), MongoDB (database).
--   **Telegram Bot API:** Python  library with .
--   **Crypto Payment:** CryptoBot API via .
--   **Shipping API:** ShipStation V2 API integrated using  library.
--   **Pydantic:** Data validation and serialization for FastAPI.
--   **Environment Variables:** Secure configuration for API keys and service URLs.
+- **Full-stack Application**: React (frontend), FastAPI (backend), MongoDB (database).
+- **Telegram Bot API**: Python  library with  for multi-step flows.
+- **Crypto Payment**: CryptoBot API via . NOWPayments was briefly considered but reverted.
+- **Shipping API**: ShipStation V2 API integrated using  library for rates, labels.
+- **Pydantic**: Data validation and serialization for FastAPI.
+- **Environment Variables**: Secure configuration for API keys and service URLs.
 </key_technical_concepts>
 
 <code_architecture>
 
 
 -   **/app/backend/server.py**:
-    -   **Summary of why this file is important:** This is the central Python backend application that orchestrates all functionality: Telegram bot logic, API endpoints, database operations, CryptoBot and ShipStation integrations.
+    -   **Summary of why this file is important:** This is the core Python backend, handling Telegram bot interactions, API endpoints, database, CryptoBot, and ShipStation integrations.
     -   **Summary of the changes made to this file:**
-        -   **Shipping Integration:** Migrated from GoShippo to ShipStation V2 API. This involved updating  to , removing  library imports, and rewriting , , and  functions to use ShipStation V2 API calls.  was temporarily set to always succeed due to a 404 error from ShipStation.
-        -   **Telegram Bot States:** Added , , ,  to the  states to support data review, editing, and phone number input.
-        -   **User Input Flow:** Modified  to lead to a data confirmation screen () before fetching rates. Added functions , , ,  for new states and actions.
-        -   **Error Handling & UI:** Removed explicit 0 service fee display and Итого prefix. Added a polite message for users when a shipping label cannot be generated. Incorporated Edit Addresses buttons into shipping rate error messages. Removed intermediate confirmation messages (e.g., Адрес отправителя сохранен). Added Skip buttons for phone number input.
-        -   **Payment Logic:** Refactored payment deduction in  and  to happen *only after*  successfully creates a label.  now returns /.
-        -   **Order Display:**  was updated to display the receiver's name and to include re-create label buttons for the last 10 *paid* orders (initially for all paid, then refined to only those with existing labels for re-creation).  was corrected to .
+        -   **ShipStation Integration**: Removed 's temporary bypass. Implemented  for dynamic carrier fetching. Modified  and  to use dynamic , filter out GlobalPost, Stamps.com, and specific  (UPS, FedEx, USPS including 3-day options). Ensured phone numbers and  are passed during label creation.
+        -   **Telegram Bot States & UI**: Added  and  states.  logic updated to prompt for custom top-up amounts if balance is low, leading to  and . Display of rates now grouped by carrier, using bold text and branded emojis, with 5 rates per carrier.
+        -   **Error Handling**: Implemented  to send Telegram notifications to  for critical errors (e.g., label creation, rate fetching).
+        -   **User Workflow**:  modified to offer confirmation and return to order.  enhanced to correctly restore the user to the last *input step*, dynamically generating prompts.  is now consistently saved across relevant steps.
+        -   **Input Validation**: Address validation improved to allow  symbol and provide more specific error messages for invalid characters.
+        -   **Payment Revert**: All NOWPayments integration code (functions, webhook, environment variables, ConversationHandler states) was removed, reverting to CryptoBot.
 -   **/app/backend/.env**:
-    -   **Summary of why this file is important:** Stores environment-specific variables, including API keys and database connection strings, ensuring sensitive data is not hardcoded.
-    -   **Summary of the changes made to this file:** The  was replaced with . The  was updated to a new token provided by the user to resolve a Logged out issue.
+    -   **Summary of why this file is important:** Stores environment-specific variables like API keys and database connection strings.
+    -   **Summary of the changes made to this file:** Added  (e.g., ) for error notifications.  and  were added and then removed.
 -   **/app/backend/requirements.txt**:
-    -   **Summary of why this file is important:** Manages Python package dependencies for the backend.
-    -   **Summary of the changes made to this file:** The  library was removed as GoShippo integration was replaced by ShipStation.
-
+    -   **Summary of why this file is important:** Manages Python package dependencies.
+    -   **Summary of the changes made to this file:** No explicit changes mentioned in the trajectory, but implicitly  is still used and likely  for ShipStation.
 </code_architecture>
 
 <pending_tasks>
--   Address the ShipStation address validation issue: Investigate why the ShipStation API is returning a  error on its validation endpoint, leading to validation always succeeding in the current implementation.
+-   The user reported an address error when clicking cancel then return to order, suggesting the  function still isn't fully robust in displaying correct prompts for all early states. The AI was in the process of adding remaining states for  handling after .
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer was actively working on debugging a critical issue with ShipStation's address validation. The user reported that even when valid addresses were entered, the system would still indicate an error.
-Upon inspection of the backend logs, it was identified that the ShipStation API was returning a  HTTP status code when the  function attempted to call the  endpoint.
-Previously, a temporary workaround was implemented where the  function was modified to unconditionally return a success status, effectively bypassing the problematic API call. However, this did not solve the root cause, and the user's report indicates the underlying validation failure is still present in the user experience.
-The AI's last action in the trajectory was to prepare for a direct  request to the ShipStation API's address validation endpoint to gather more specific error details. This is crucial for understanding why the API is rejecting valid addresses and providing the  status.
+Immediately before this summary request, the AI engineer was addressing an issue where an address error occurred when a user would attempt to cancel an order and then return to order. This indicated that the  function was not consistently displaying the correct, context-specific prompts for early stages of the order creation workflow (e.g., address input). Instead, it was showing a generic Continuing order processing... message, confusing the user and potentially leading to re-entering invalid data or causing validation errors.
+
+The AI identified the need to ensure that  dynamically presents the appropriate prompt message for each specific state. The last action was to extend this fix to remaining early states, with the AI stating: Теперь добавлю оставшиеся состояния после TO_ADDRESS2. This indicates the solution for correctly displaying prompts on return is *still in progress*.
 </current_work>
 
 <optional_next_step>
-Perform a direct API call to the ShipStation address validation endpoint to thoroughly debug the  error.
+Complete the implementation of dynamically restoring prompt messages in  for all remaining early states in .
 </optional_next_step>
