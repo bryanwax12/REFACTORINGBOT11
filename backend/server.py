@@ -2958,13 +2958,6 @@ async def refund_order(order_id: str, refund_reason: Optional[str] = None):
                     void_data = void_response.json()
                     void_success = void_data.get('approved', False)
                     void_message = void_data.get('message', 'Label voided successfully')
-                    
-                    # Update label status
-                    await db.shipping_labels.update_one(
-                        {"order_id": order_id},
-                        {"$set": {"status": "voided"}}
-                    )
-                    
                     logger.info(f"Label voided: {label['label_id']}, approved={void_success}")
                 else:
                     logger.warning(f"Failed to void label: {void_response.status_code} - {void_response.text}")
@@ -2973,6 +2966,13 @@ async def refund_order(order_id: str, refund_reason: Optional[str] = None):
             except Exception as e:
                 logger.error(f"Error voiding label: {e}")
                 void_message = f"Error voiding label: {str(e)}"
+        
+        # Update ALL labels for this order to "refunded" status (removes from profit calculation)
+        await db.shipping_labels.update_many(
+            {"order_id": order_id},
+            {"$set": {"status": "refunded"}}
+        )
+        logger.info(f"Updated all labels for order {order_id} to status='refunded'")
         
         # Get user
         user = await db.users.find_one({"telegram_id": order['telegram_id']}, {"_id": 0})
