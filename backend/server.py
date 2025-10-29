@@ -3006,15 +3006,29 @@ async def startup_event():
                         CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
                         CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
                     ],
-                    TO_STATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_state)],
-                    TO_ZIP: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_zip)],
+                    TO_STATE: [
+                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_state),
+                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
+                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
+                    ],
+                    TO_ZIP: [
+                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_zip),
+                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
+                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
+                    ],
                     TO_PHONE: [
                         MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_phone),
-                        CallbackQueryHandler(order_to_phone, pattern='^skip_to_phone$')
+                        CallbackQueryHandler(order_to_phone, pattern='^skip_to_phone$'),
+                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
+                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
                     ],
-                    PARCEL_WEIGHT: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_parcel_weight)],
-                    CONFIRM_DATA: [CallbackQueryHandler(handle_data_confirmation, pattern='^(confirm_data|edit_data|edit_addresses_error|cancel_order)$')],
-                    EDIT_MENU: [CallbackQueryHandler(handle_edit_choice, pattern='^(edit_from_address|edit_to_address|edit_parcel|back_to_confirmation)$')],
+                    PARCEL_WEIGHT: [
+                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_parcel_weight),
+                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
+                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
+                    ],
+                    CONFIRM_DATA: [CallbackQueryHandler(handle_data_confirmation, pattern='^(confirm_data|edit_data|edit_addresses_error|return_to_order|confirm_cancel|cancel_order)$')],
+                    EDIT_MENU: [CallbackQueryHandler(handle_edit_choice, pattern='^(edit_from_address|edit_to_address|edit_parcel|back_to_confirmation|return_to_order|confirm_cancel)$')],
                     SELECT_CARRIER: [CallbackQueryHandler(select_carrier, pattern='^(select_carrier_|return_to_order|confirm_cancel|cancel_order)')],
                     PAYMENT_METHOD: [CallbackQueryHandler(process_payment, pattern='^(pay_from_balance|pay_with_crypto|top_up_balance|back_to_rates|return_to_order|confirm_cancel|cancel_order)')],
                     TOPUP_AMOUNT: [
