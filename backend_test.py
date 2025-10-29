@@ -702,28 +702,28 @@ def main():
     
     # Summary
     print("\n" + "=" * 60)
-    print("📊 RETURN TO ORDER FUNCTIONALITY TEST SUMMARY")
+    print("📊 ADMIN PANEL API ENDPOINTS TEST SUMMARY")
     print("=" * 60)
     
-    # Priority order for Return to Order fix
-    priority_tests = ['api_health', 'telegram_infrastructure', 'bot_token', 'return_to_order']
-    other_tests = [k for k in results.keys() if k not in priority_tests]
+    # Priority order for Admin Panel API tests
+    admin_tests = ['api_health', 'admin_search_orders', 'admin_refund_order', 'admin_export_csv']
+    other_tests = [k for k in results.keys() if k not in admin_tests]
     
-    print("🎯 CRITICAL TESTS (Return to Order Fix):")
-    for test_name in priority_tests:
+    print("🎯 ADMIN PANEL API TESTS:")
+    for test_name in admin_tests:
         if test_name in results:
             passed = results[test_name]
             status = "✅ PASS" if passed else "❌ FAIL"
             print(f"   {test_name.replace('_', ' ').title()}: {status}")
     
-    print("\n📋 SUPPORTING TESTS:")
+    print("\n📋 SUPPORTING INFRASTRUCTURE TESTS:")
     for test_name in other_tests:
         passed = results[test_name]
         status = "✅ PASS" if passed else "❌ FAIL"
         print(f"   {test_name.replace('_', ' ').title()}: {status}")
     
     # Overall result
-    critical_passed = all(results.get(test, False) for test in priority_tests if test in results)
+    admin_tests_passed = all(results.get(test, False) for test in admin_tests if test in results)
     all_passed = all(results.values())
     
     print(f"\n🎯 Return to Order Fix Status: {'✅ SUCCESS' if critical_passed else '❌ FAILED'}")
