@@ -120,6 +120,25 @@ class OrderCreate(BaseModel):
 
 # Telegram Bot Handlers
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+async def test_error_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Test command to show error message with admin contact button"""
+    user_message = """😔 К сожалению, в данный момент мы не можем сгенерировать shipping label.
+
+Пожалуйста, свяжитесь с администратором.
+
+Приносим извинения за неудобства!"""
+    
+    # Add button to contact admin
+    keyboard = []
+    if ADMIN_TELEGRAM_ID:
+        keyboard.append([InlineKeyboardButton("💬 Связаться с администратором", url=f"tg://user?id={ADMIN_TELEGRAM_ID}")])
+    keyboard.append([InlineKeyboardButton("🏠 Главное меню", callback_data='main_menu')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await update.message.reply_text(user_message, reply_markup=reply_markup)
+
+async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Handle both command and callback
     if update.callback_query:
         query = update.callback_query
