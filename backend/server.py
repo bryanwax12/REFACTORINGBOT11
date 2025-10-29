@@ -1018,6 +1018,7 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return TO_ZIP
 
 async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['last_state'] = TO_ZIP  # Save state for cancel return
     zip_code = update.message.text.strip()
     
     # Validate ZIP code
