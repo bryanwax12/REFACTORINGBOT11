@@ -276,6 +276,19 @@ const Dashboard = () => {
             <p className="text-xs text-muted-foreground mt-1">Total in USDT</p>
           </CardContent>
         </Card>
+
+        <Card data-testid="stat-profit">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Profit (Markup)</CardTitle>
+            <TrendingUp className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">${stats?.total_profit?.toFixed(2) || '0.00'}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Avg markup: {stats?.avg_markup_percentage?.toFixed(1) || '0'}%
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       <Tabs defaultValue="orders" className="space-y-6">
