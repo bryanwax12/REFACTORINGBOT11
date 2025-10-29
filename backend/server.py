@@ -1957,7 +1957,7 @@ async def handle_topup_crypto_selection(update: Update, context: ContextTypes.DE
         await query.message.reply_text(f"❌ Ошибка: {str(e)}")
         return ConversationHandler.END
 
-async def create_order_in_db(user, data, selected_rate, amount):
+async def create_order_in_db(user, data, selected_rate, amount, discount_percent=0, discount_amount=0):
     order = Order(
         user_id=user['id'],
         telegram_id=user['telegram_id'],
@@ -1989,7 +1989,7 @@ async def create_order_in_db(user, data, selected_rate, amount):
             distance_unit="in",
             mass_unit="lb"
         ),
-        amount=amount  # This is the amount with markup that user pays
+        amount=amount  # This is the amount with markup (and discount applied) that user pays
     )
     
     order_dict = order.model_dump()
@@ -1999,7 +1999,9 @@ async def create_order_in_db(user, data, selected_rate, amount):
     order_dict['selected_service_code'] = selected_rate.get('service_code', '')  # Add service_code
     order_dict['rate_id'] = selected_rate['rate_id']
     order_dict['original_amount'] = selected_rate['original_amount']  # Store original GoShippo price
-    order_dict['markup'] = amount - selected_rate['original_amount']  # Store markup amount
+    order_dict['markup'] = selected_rate['amount'] - selected_rate['original_amount']  # Store markup amount before discount
+    order_dict['discount_percent'] = discount_percent  # Store discount percentage
+    order_dict['discount_amount'] = discount_amount  # Store discount amount
     await db.orders.insert_one(order_dict)
     
     return order_dict
