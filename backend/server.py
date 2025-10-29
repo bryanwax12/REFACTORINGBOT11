@@ -1681,6 +1681,10 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     selected_rate = data['selected_rate']
     amount = selected_rate['amount']
     
+    # Get user discount (should be already calculated and stored in context)
+    user_discount = context.user_data.get('user_discount', 0)
+    discount_amount = context.user_data.get('discount_amount', 0)
+    
     try:
         if query.data == 'pay_from_balance':
             # Pay from balance
