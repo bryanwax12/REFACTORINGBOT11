@@ -79,6 +79,8 @@ class ShippingLabel(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     order_id: str
+    label_id: Optional[str] = None  # ShipStation label ID for voiding
+    shipment_id: Optional[str] = None  # ShipStation shipment ID
     tracking_number: Optional[str] = None
     label_url: Optional[str] = None
     carrier: Optional[str] = None
