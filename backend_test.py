@@ -437,9 +437,9 @@ def test_telegram_bot_token():
         return False
 
 def main():
-    """Run all tests - Focus on ShipStation V2 API Fix"""
-    print("🚀 Testing ShipStation V2 API Integration Fix")
-    print("🎯 Focus: Carrier IDs and Rate Request Fix")
+    """Run all tests - Focus on Return to Order Functionality"""
+    print("🚀 Testing Telegram Bot Return to Order Functionality")
+    print("🎯 Focus: Cancel and Return to Order State Management")
     print("=" * 60)
     
     # Test results
@@ -448,20 +448,20 @@ def main():
     # 1. Test API Health
     results['api_health'] = test_api_health()
     
-    # 2. Test ShipStation Carrier IDs (NEW - Critical for fix)
-    results['carrier_ids'] = test_shipstation_carrier_ids()
-    
-    # 3. Test ShipStation V2 API Rate Calculation (UPDATED - Main fix)
-    results['shipstation_rates'], rates_data = test_shipping_rates()
-    
-    # 4. Test Telegram Bot Infrastructure
+    # 2. Test Telegram Bot Infrastructure
     results['telegram_infrastructure'] = test_telegram_bot_infrastructure()
     
-    # 5. Test Conversation Handler Functions
+    # 3. Test Telegram Bot Token
+    results['bot_token'] = test_telegram_bot_token()
+    
+    # 4. Test Conversation Handler Functions
     results['conversation_handlers'] = test_conversation_handler_functions()
     
-    # 6. Test Telegram Bot Token
-    results['bot_token'] = test_telegram_bot_token()
+    # 5. Test Return to Order Functionality (NEW - Main focus)
+    results['return_to_order'] = test_return_to_order_functionality()
+    
+    # 6. Test ShipStation V2 API Rate Calculation (Supporting)
+    results['shipstation_rates'], rates_data = test_shipping_rates()
     
     # 7. Check Backend Logs
     check_backend_logs()
