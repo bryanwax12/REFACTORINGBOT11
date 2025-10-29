@@ -773,6 +773,7 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return FROM_PHONE
 
 async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['last_state'] = FROM_PHONE  # Save state for cancel return
     # Check if it's a callback query (skip phone button)
     if hasattr(update, 'callback_query') and update.callback_query:
         query = update.callback_query
