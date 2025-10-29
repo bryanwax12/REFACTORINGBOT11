@@ -478,6 +478,9 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     address = update.message.text.strip()
     
+    # Debug logging
+    logger.info(f"Address validation: '{address}' length={len(address)} bytes={address.encode()}")
+    
     # Check for Cyrillic or non-Latin characters
     if any(ord(c) >= 0x0400 and ord(c) <= 0x04FF for c in address):
         await update.message.reply_text("❌ Используйте только английские буквы (латиницу). Пример: 215 Clayton St")
@@ -493,7 +496,9 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return FROM_ADDRESS
     
     # Only Latin letters, numbers, spaces, and common address symbols
-    if not all((ord(c) < 128 and (c.isalnum() or c.isspace() or c in ".-',#/")) for c in address):
+    invalid_chars = [c for c in address if not (ord(c) < 128 and (c.isalnum() or c.isspace() or c in ".-',#/"))]
+    if invalid_chars:
+        logger.warning(f"Invalid characters in address: {invalid_chars} (ords: {[ord(c) for c in invalid_chars]})")
         await update.message.reply_text("❌ Используйте только английские буквы и цифры. Разрешены: буквы, цифры, пробелы, дефисы, точки, запятые")
         return FROM_ADDRESS
     
