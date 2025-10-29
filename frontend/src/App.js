@@ -325,11 +325,13 @@ const Dashboard = () => {
                   <table className="w-full text-sm">
                     <thead className="border-b">
                       <tr className="text-left">
+                        <th className="pb-3 font-medium">User</th>
                         <th className="pb-3 font-medium">Order ID</th>
                         <th className="pb-3 font-medium">Tracking #</th>
                         <th className="pb-3 font-medium">Route</th>
                         <th className="pb-3 font-medium">Amount</th>
                         <th className="pb-3 font-medium">Status</th>
+                        <th className="pb-3 font-medium">Delivery</th>
                         <th className="pb-3 font-medium">Date</th>
                         <th className="pb-3 font-medium text-right">Actions</th>
                       </tr>
@@ -337,6 +339,17 @@ const Dashboard = () => {
                     <tbody>
                       {orders.map((order) => (
                         <tr key={order.id} className="border-b last:border-0 hover:bg-muted/50" data-testid="order-row">
+                          <td className="py-3">
+                            <div className="text-xs">
+                              <div className="font-medium">{order.user_name || 'Unknown'}</div>
+                              <div className="text-muted-foreground">
+                                @{order.user_username || 'no_username'}
+                              </div>
+                              <div className="text-muted-foreground">
+                                ID: {order.telegram_id}
+                              </div>
+                            </div>
+                          </td>
                           <td className="py-3">
                             <div className="flex items-center gap-2">
                               <span className="font-mono text-xs">{order.id.substring(0, 8)}</span>
