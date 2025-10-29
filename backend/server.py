@@ -1789,8 +1789,13 @@ async def handle_topup_crypto_selection(update: Update, context: ContextTypes.DE
     await query.answer()
     
     if query.data == 'cancel_order':
-        await cancel_order(update, context)
-        return ConversationHandler.END
+        return await cancel_order(update, context)
+    
+    if query.data == 'confirm_cancel':
+        return await confirm_cancel_order(update, context)
+    
+    if query.data == 'return_to_order':
+        return await return_to_order(update, context)
     
     try:
         # Extract cryptocurrency from callback data
