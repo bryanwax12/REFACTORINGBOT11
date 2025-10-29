@@ -2114,24 +2114,21 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer("Возвращаемся к заказу...")
     
-    # Get last state from context
-    last_state = context.user_data.get('last_state')
+    # Get last state and data from context
+    last_state = context.user_data.get('last_state', PAYMENT_METHOD)
+    data = context.user_data
+    selected_rate = data.get('selected_rate')
     
-    # Depending on last state, show appropriate message
-    if last_state == PAYMENT_METHOD:
-        # Show payment screen again
-        data = context.user_data
-        selected_rate = data.get('selected_rate')
+    # Always show payment screen with current data
+    if selected_rate:
+        telegram_id = query.from_user.id
+        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        balance = user.get('balance', 0)
+        amount = selected_rate['amount']
         
-        if selected_rate:
-            telegram_id = query.from_user.id
-            user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
-            balance = user.get('balance', 0)
-            amount = selected_rate['amount']
-            
-            confirmation_text = f"""✅ Выбран перевозчик:
+        confirmation_text = f"""✅ Выбрано: {selected_rate['carrier']} - {selected_rate['service']}
 
-🚚 {selected_rate['carrier']} - {selected_rate['service']}
+📦 Детали заказа:
 📤 От: {data['from_name']}, {data['from_city']}, {data['from_state']}
 📥 До: {data['to_name']}, {data['to_city']}, {data['to_state']}
 ⚖️ Вес: {data['weight']} lb
@@ -2140,42 +2137,38 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 💳 Ваш баланс: ${balance:.2f}
 """
-            
-            keyboard = []
-            
-            if balance >= amount:
-                confirmation_text += "\n✅ У вас достаточно средств на балансе!"
-                keyboard.append([InlineKeyboardButton(
-                    f"💳 Оплатить с баланса (${balance:.2f})",
-                    callback_data='pay_from_balance'
-                )])
-                keyboard.append([
-                    InlineKeyboardButton("◀️ Назад к тарифам", callback_data='back_to_rates'),
-                    InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')
-                ])
-            else:
-                shortage = amount - balance
-                confirmation_text += f"\n⚠️ Недостаточно средств. Необходимо: ${shortage:.2f}"
-                keyboard.append([InlineKeyboardButton(
-                    f"💵 Пополнить баланс",
-                    callback_data='top_up_balance'
-                )])
-                keyboard.append([
-                    InlineKeyboardButton("◀️ Назад к тарифам", callback_data='back_to_rates'),
-                    InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')
-                ])
-            
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            await query.message.reply_text(confirmation_text, reply_markup=reply_markup)
-            return PAYMENT_METHOD
-    
-    elif last_state == SELECT_CARRIER:
-        # Return to carrier selection - refresh rates
+        
+        keyboard = []
+        
+        if balance >= amount:
+            confirmation_text += "\n✅ У вас достаточно средств на балансе!"
+            keyboard.append([InlineKeyboardButton(
+                f"💳 Оплатить с баланса (${balance:.2f})",
+                callback_data='pay_from_balance'
+            )])
+            keyboard.append([
+                InlineKeyboardButton("◀️ Назад к тарифам", callback_data='back_to_rates'),
+                InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')
+            ])
+        else:
+            shortage = amount - balance
+            confirmation_text += f"\n⚠️ Недостаточно средств. Необходимо: ${shortage:.2f}"
+            keyboard.append([InlineKeyboardButton(
+                f"💵 Пополнить баланс",
+                callback_data='top_up_balance'
+            )])
+            keyboard.append([
+                InlineKeyboardButton("◀️ Назад к тарифам", callback_data='back_to_rates'),
+                InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')
+            ])
+        
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.message.reply_text(confirmation_text, reply_markup=reply_markup)
+        return PAYMENT_METHOD
+    else:
+        # No selected rate - return to rate selection
+        await query.message.reply_text("Выбираем тариф заново...")
         return await fetch_shipping_rates(update, context)
-    
-    # Default: return to payment method
-    await query.message.reply_text("Продолжаем оформление заказа...")
-    return last_state if last_state else PAYMENT_METHOD
 
 # API Routes
 @api_router.get("/")
