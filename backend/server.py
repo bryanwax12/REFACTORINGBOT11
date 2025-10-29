@@ -3511,6 +3511,8 @@ async def get_stats():
     total_users = await db.users.count_documents({})
     total_orders = await db.orders.count_documents({})
     paid_orders = await db.orders.count_documents({"payment_status": "paid"})
+    
+    # Calculate total revenue
     total_revenue = await db.orders.aggregate([
         {"$match": {"payment_status": "paid"}},
         {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
@@ -3518,11 +3520,32 @@ async def get_stats():
     
     revenue = total_revenue[0]['total'] if total_revenue else 0
     
+    # Calculate profit (markup earnings)
+    profit_pipeline = await db.orders.aggregate([
+        {"$match": {"payment_status": "paid", "original_amount": {"$exists": True}}},
+        {"$project": {
+            "profit": {"$subtract": ["$amount", "$original_amount"]}
+        }},
+        {"$group": {"_id": None, "total_profit": {"$sum": "$profit"}}}
+    ]).to_list(1)
+    
+    total_profit = profit_pipeline[0]['total_profit'] if profit_pipeline else 0
+    
+    # Calculate average markup percentage
+    avg_markup_pipeline = await db.orders.aggregate([
+        {"$match": {"payment_status": "paid", "markup": {"$exists": True}}},
+        {"$group": {"_id": None, "avg_markup": {"$avg": "$markup"}}}
+    ]).to_list(1)
+    
+    avg_markup = avg_markup_pipeline[0]['avg_markup'] if avg_markup_pipeline else 0
+    
     return {
         "total_users": total_users,
         "total_orders": total_orders,
         "paid_orders": paid_orders,
-        "total_revenue": revenue
+        "total_revenue": revenue,
+        "total_profit": total_profit,
+        "avg_markup_percentage": avg_markup
     }
 
 app.include_router(api_router)
