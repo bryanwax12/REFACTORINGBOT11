@@ -3698,7 +3698,7 @@ async def calculate_shipping_rates(request: ShippingRateRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/stats")
-async def get_stats():
+async def get_stats(authenticated: bool = Depends(verify_admin_key)):
     total_users = await db.users.count_documents({})
     total_orders = await db.orders.count_documents({})
     paid_orders = await db.orders.count_documents({"payment_status": "paid"})
