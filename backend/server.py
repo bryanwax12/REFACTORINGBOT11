@@ -1570,8 +1570,13 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     
     if query.data == 'cancel_order':
-        await cancel_order(update, context)
-        return ConversationHandler.END
+        return await cancel_order(update, context)
+    
+    if query.data == 'confirm_cancel':
+        return await confirm_cancel_order(update, context)
+    
+    if query.data == 'return_to_order':
+        return await return_to_order(update, context)
     
     # Handle back to rates
     if query.data == 'back_to_rates':
