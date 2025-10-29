@@ -1324,7 +1324,11 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
     """Fetch shipping rates from ShipStation"""
     query = update.callback_query
     
-    await query.message.reply_text("⏳ Проверяю адреса...")
+    # Check if validation should be skipped
+    skip_validation = context.user_data.get('skip_address_validation', False)
+    
+    if not skip_validation:
+        await query.message.reply_text("⏳ Проверяю адреса...")
     
     try:
         import requests
@@ -1332,13 +1336,14 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         
         data = context.user_data
         
-        # Validate addresses first using ShipStation API
-        headers = {
-            'API-Key': SHIPSTATION_API_KEY,
-            'Content-Type': 'application/json'
-        }
-        
-        # Validate FROM address
+        # Validate addresses first using ShipStation API (unless skipped)
+        if not skip_validation:
+            headers = {
+                'API-Key': SHIPSTATION_API_KEY,
+                'Content-Type': 'application/json'
+            }
+            
+            # Validate FROM address
         from_address_payload = [{
             'name': data['from_name'],
             'phone': data.get('from_phone') or '+15551234567',
