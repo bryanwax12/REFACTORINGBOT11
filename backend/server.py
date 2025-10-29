@@ -2175,6 +2175,38 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return FROM_ADDRESS2
     
+    elif last_state == FROM_CITY:
+        await query.message.reply_text("Шаг 4/13: Город отправителя\n\nНапример: Los Angeles")
+        return FROM_CITY
+    
+    elif last_state == FROM_STATE:
+        await query.message.reply_text("Шаг 5/13: Штат отправителя\n\nВведите двухбуквенный код штата\nНапример: CA, NY, TX")
+        return FROM_STATE
+    
+    elif last_state == FROM_ZIP:
+        await query.message.reply_text("Шаг 6/13: ZIP код отправителя\n\nНапример: 90001")
+        return FROM_ZIP
+    
+    elif last_state == FROM_PHONE:
+        keyboard = [
+            [InlineKeyboardButton("⏭ Пропустить", callback_data='skip_from_phone')],
+            [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.message.reply_text(
+            "Шаг 7/13: Телефон отправителя (необязательно)\n\nНапример: 5551234567\nИли нажмите 'Пропустить'",
+            reply_markup=reply_markup
+        )
+        return FROM_PHONE
+    
+    elif last_state == TO_NAME:
+        await query.message.reply_text("Шаг 8/13: Имя получателя\n\nНапример: John Smith")
+        return TO_NAME
+    
+    elif last_state == TO_ADDRESS:
+        await query.message.reply_text("Шаг 9/13: Адрес получателя\n\nВведите улицу и номер дома\nНапример: 123 Main St")
+        return TO_ADDRESS
+    
     if last_state == TO_ADDRESS2:
         keyboard = [
             [InlineKeyboardButton("⏭ Пропустить", callback_data='skip_to_address2')],
