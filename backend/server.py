@@ -2119,13 +2119,31 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     
     # Get the state we were in when cancel was pressed
-    last_state = context.user_data.get('last_state', PAYMENT_METHOD)
+    last_state = context.user_data.get('last_state')
     
-    # Restore the exact screen based on state
+    # If no last_state or early stage - just continue where we were
+    if not last_state or last_state in [FROM_NAME, FROM_ADDRESS, FROM_ADDRESS2, FROM_CITY, FROM_STATE, FROM_ZIP, FROM_PHONE, 
+                                         TO_NAME, TO_ADDRESS, TO_ADDRESS2, TO_CITY, TO_STATE, TO_ZIP, TO_PHONE, 
+                                         PARCEL_WEIGHT, CONFIRM_DATA, EDIT_MENU]:
+        # Early stages - just dismiss cancel dialog and continue
+        await query.message.reply_text("Продолжаем оформление заказа...")
+        return last_state if last_state else FROM_NAME
+    
+    # Later stages - restore specific screens
     if last_state == SELECT_CARRIER:
-        # Return to carrier selection - show rates list again
-        await query.message.reply_text("Возвращаемся к выбору тарифа...")
-        return await fetch_shipping_rates(update, context)
+        # Check if we have enough data to fetch rates
+        data = context.user_data
+        required_fields = ['from_name', 'from_city', 'from_state', 'from_zip', 
+                          'to_name', 'to_city', 'to_state', 'to_zip', 'weight']
+        
+        if all(field in data for field in required_fields):
+            # Have all data - can fetch rates
+            await query.message.reply_text("Возвращаемся к выбору тарифа...")
+            return await fetch_shipping_rates(update, context)
+        else:
+            # Missing data - just continue
+            await query.message.reply_text("Продолжаем оформление заказа...")
+            return last_state
     
     elif last_state == PAYMENT_METHOD:
         # Return to payment screen
@@ -2178,9 +2196,8 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.message.reply_text(confirmation_text, reply_markup=reply_markup)
             return PAYMENT_METHOD
         else:
-            # No selected rate - return to rates
-            await query.message.reply_text("Выбираем тариф...")
-            return await fetch_shipping_rates(update, context)
+            await query.message.reply_text("Продолжаем...")
+            return last_state
     
     elif last_state == TOPUP_AMOUNT:
         # Return to top-up amount input
@@ -2201,9 +2218,9 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return TOPUP_AMOUNT
     
     else:
-        # Default fallback - go to payment
-        await query.message.reply_text("Возвращаемся к оформлению...")
-        return PAYMENT_METHOD
+        # Default fallback
+        await query.message.reply_text("Продолжаем оформление заказа...")
+        return last_state if last_state else PAYMENT_METHOD
 
 # API Routes
 @api_router.get("/")
