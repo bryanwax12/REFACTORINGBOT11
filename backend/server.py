@@ -2223,16 +2223,42 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return TO_ADDRESS2
     
-    # Other early stages without skip button
-    if last_state in [FROM_NAME, FROM_ADDRESS, FROM_CITY, FROM_STATE, FROM_ZIP, FROM_PHONE, 
-                      TO_NAME, TO_ADDRESS, TO_CITY, TO_STATE, TO_ZIP, TO_PHONE, 
-                      PARCEL_WEIGHT, CONFIRM_DATA, EDIT_MENU]:
-        # Early stages - just dismiss cancel dialog and continue
+    elif last_state == TO_CITY:
+        await query.message.reply_text("Шаг 10/13: Город получателя\n\nНапример: New York")
+        return TO_CITY
+    
+    elif last_state == TO_STATE:
+        await query.message.reply_text("Шаг 11/13: Штат получателя\n\nВведите двухбуквенный код штата\nНапример: CA, NY, TX")
+        return TO_STATE
+    
+    elif last_state == TO_ZIP:
+        await query.message.reply_text("Шаг 12/13: ZIP код получателя\n\nНапример: 10001")
+        return TO_ZIP
+    
+    elif last_state == TO_PHONE:
+        keyboard = [
+            [InlineKeyboardButton("⏭ Пропустить", callback_data='skip_to_phone')],
+            [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.message.reply_text(
+            "Шаг 13/13: Телефон получателя (необязательно)\n\nНапример: 5559876543\nИли нажмите 'Пропустить'",
+            reply_markup=reply_markup
+        )
+        return TO_PHONE
+    
+    elif last_state == PARCEL_WEIGHT:
+        await query.message.reply_text("Шаг 14/13: Вес посылки\n\nВведите вес в фунтах (lb)\nНапример: 2.5")
+        return PARCEL_WEIGHT
+    
+    # Other early stages
+    elif last_state in [CONFIRM_DATA, EDIT_MENU]:
+        # These will be handled by their specific logic
         await query.message.reply_text("Продолжаем оформление заказа...")
         return last_state
     
     # Later stages - restore specific screens
-    if last_state == SELECT_CARRIER:
+    elif last_state == SELECT_CARRIER:
         # Check if we have enough data to fetch rates
         data = context.user_data
         required_fields = ['from_name', 'from_city', 'from_state', 'from_zip', 
