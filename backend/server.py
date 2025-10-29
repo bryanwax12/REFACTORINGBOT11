@@ -2948,26 +2948,64 @@ async def startup_event():
             order_conv_handler = ConversationHandler(
                 entry_points=[CallbackQueryHandler(new_order_start, pattern='^new_order$')],
                 states={
-                    FROM_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_name)],
-                    FROM_ADDRESS: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_address)],
+                    FROM_NAME: [
+                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_name),
+                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
+                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
+                    ],
+                    FROM_ADDRESS: [
+                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_address),
+                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
+                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
+                    ],
                     FROM_ADDRESS2: [
                         MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_address2),
-                        CallbackQueryHandler(skip_from_address2, pattern='^skip_from_address2$')
+                        CallbackQueryHandler(skip_from_address2, pattern='^skip_from_address2$'),
+                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
+                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
                     ],
-                    FROM_CITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_city)],
-                    FROM_STATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_state)],
-                    FROM_ZIP: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_zip)],
+                    FROM_CITY: [
+                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_city),
+                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
+                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
+                    ],
+                    FROM_STATE: [
+                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_state),
+                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
+                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
+                    ],
+                    FROM_ZIP: [
+                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_zip),
+                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
+                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
+                    ],
                     FROM_PHONE: [
                         MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_phone),
-                        CallbackQueryHandler(order_from_phone, pattern='^skip_from_phone$')
+                        CallbackQueryHandler(order_from_phone, pattern='^skip_from_phone$'),
+                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
+                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
                     ],
-                    TO_NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_name)],
-                    TO_ADDRESS: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_address)],
+                    TO_NAME: [
+                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_name),
+                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
+                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
+                    ],
+                    TO_ADDRESS: [
+                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_address),
+                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
+                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
+                    ],
                     TO_ADDRESS2: [
                         MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_address2),
-                        CallbackQueryHandler(skip_to_address2, pattern='^skip_to_address2$')
+                        CallbackQueryHandler(skip_to_address2, pattern='^skip_to_address2$'),
+                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
+                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
                     ],
-                    TO_CITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_city)],
+                    TO_CITY: [
+                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_city),
+                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
+                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
+                    ],
                     TO_STATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_state)],
                     TO_ZIP: [MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_zip)],
                     TO_PHONE: [
