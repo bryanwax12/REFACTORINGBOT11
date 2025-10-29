@@ -239,14 +239,12 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus:
-    - "Return to Order - Save and Restore Last State"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
   manual_testing_required:
-    - "ShipStation V2 API Rate Request Fix - Test via Telegram bot by creating new order with valid US addresses (Backend API confirmed working - 32 rates returned)"
-    - "Return to Order - Test cancel and return to order at each state to verify correct prompts"
+    - "Return to Order - MANUAL TESTING REQUIRED: Test via @whitelabellbot by starting /order, clicking cancel at various states (FROM_NAME, FROM_ADDRESS, FROM_CITY, TO_NAME, TO_ADDRESS, etc.), then clicking 'return to order' to verify correct prompts are displayed for each state. Backend infrastructure confirmed working."
 
 agent_communication:
     - agent: "main"
