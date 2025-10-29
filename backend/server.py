@@ -633,6 +633,7 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Например: 94117""",
         reply_markup=reply_markup
     )
+    context.user_data['last_state'] = FROM_ZIP  # Save state for next step
     return FROM_ZIP
 
 
