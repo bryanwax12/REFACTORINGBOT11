@@ -1572,6 +1572,11 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await cancel_order(update, context)
         return ConversationHandler.END
     
+    # Handle back to rates
+    if query.data == 'back_to_rates':
+        # Return to rate selection - call fetch_shipping_rates again
+        return await fetch_shipping_rates(update, context)
+    
     telegram_id = query.from_user.id
     user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
     data = context.user_data
