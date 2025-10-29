@@ -772,7 +772,6 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return FROM_PHONE
 
 async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['last_state'] = FROM_PHONE  # Save state for cancel return
     # Check if it's a callback query (skip phone button)
     if hasattr(update, 'callback_query') and update.callback_query:
         query = update.callback_query
@@ -822,10 +821,10 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Например: Jane Doe""",
         reply_markup=reply_markup
     )
+    context.user_data['last_state'] = TO_NAME  # Save state for next step
     return TO_NAME
 
-async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['last_state'] = TO_NAME  # Save state for cancel return
+async def order_to_name)(update: Update, context: ContextTypes.DEFAULT_TYPE):
     name = update.message.text.strip()
     
     # Check for Cyrillic or non-Latin characters
@@ -860,7 +859,6 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return TO_ADDRESS
 
 async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['last_state'] = TO_ADDRESS  # Save state for cancel return
     address = update.message.text.strip()
     
     # Check for Cyrillic or non-Latin characters
@@ -942,7 +940,6 @@ async def skip_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return await order_to_address2(update, context)
 
 async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['last_state'] = TO_CITY  # Save state for cancel return
     city = update.message.text.strip()
     
     # Check for Cyrillic or non-Latin characters
@@ -971,13 +968,13 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     await update.message.reply_text(
         """Шаг 11/13: Штат получателя (2 буквы)
-Например: NY""",
+Например: NY\"\"\",
         reply_markup=reply_markup
     )
+    context.user_data['last_state'] = TO_STATE  # Save state for next step
     return TO_STATE
 
-async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['last_state'] = TO_STATE  # Save state for cancel return
+async def order_to_state)(update: Update, context: ContextTypes.DEFAULT_TYPE):
     state = update.message.text.strip().upper()
     
     # Validate state
@@ -1010,13 +1007,13 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     await update.message.reply_text(
         """Шаг 12/13: ZIP код получателя
-Например: 10007""",
+Например: 10007\"\"\",
         reply_markup=reply_markup
     )
+    context.user_data['last_state'] = TO_ZIP  # Save state for next step
     return TO_ZIP
 
-async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['last_state'] = TO_ZIP  # Save state for cancel return
+async def order_to_zip)(update: Update, context: ContextTypes.DEFAULT_TYPE):
     zip_code = update.message.text.strip()
     
     # Validate ZIP code
@@ -1039,13 +1036,13 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     await update.message.reply_text(
         """Шаг 14/15: Телефон получателя
-Например: +1234567890 или 1234567890""",
+Например: +1234567890 или 1234567890\"\"\",
         reply_markup=reply_markup
     )
+    context.user_data['last_state'] = TO_PHONE  # Save state for next step
     return TO_PHONE
 
-async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['last_state'] = TO_PHONE  # Save state for cancel return
+async def order_to_phone)(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Check if it's a callback query (skip phone button)
     if hasattr(update, 'callback_query') and update.callback_query:
         query = update.callback_query
@@ -1060,9 +1057,10 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
             await query.message.reply_text(
                 """Шаг 15/15: Вес посылки в фунтах (lb)
-Например: 2""",
+Например: 2\"\"\",
                 reply_markup=reply_markup
             )
+            context.user_data['last_state'] = PARCEL_WEIGHT  # Save state for next step
             return PARCEL_WEIGHT
     
     phone = update.message.text.strip()
@@ -1098,7 +1096,6 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return PARCEL_WEIGHT
 
 async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['last_state'] = PARCEL_WEIGHT  # Save state for cancel return
     try:
         weight = float(update.message.text.strip())
         
@@ -1118,6 +1115,7 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
             await update.message.reply_text("✅ Вес посылки обновлен!")
         
         # Show data confirmation instead of immediately fetching rates
+        context.user_data['last_state'] = CONFIRM_DATA  # Save state for next step
         return await show_data_confirmation(update, context)
             
     except ValueError:
@@ -1553,7 +1551,6 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
     carrier_idx = int(query.data.split('_')[-1])
     selected_rate = context.user_data['rates'][carrier_idx]
     context.user_data['selected_rate'] = selected_rate
-    context.user_data['last_state'] = PAYMENT_METHOD  # Save state for cancel return
     
     # Get user balance
     telegram_id = query.from_user.id
