@@ -167,6 +167,8 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 Я помогу вам создать shipping labels с оплатой в криптовалюте.
 
+Код: 89b692be
+
 Выберите действие:"""
     
     # Create keyboard with buttons (2 buttons per row)
