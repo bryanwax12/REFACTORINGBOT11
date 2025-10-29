@@ -1249,6 +1249,7 @@ async def handle_edit_choice(update: Update, context: ContextTypes.DEFAULT_TYPE)
             "📦 Редактирование посылки\n\nВведите вес посылки в фунтах:\nНапример: 5 или 2.5",
             reply_markup=reply_markup
         )
+        context.user_data['last_state'] = PARCEL_WEIGHT  # Save state for cancel return
         return PARCEL_WEIGHT
 
 async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYPE):
