@@ -871,8 +871,17 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return TO_ADDRESS
     
     # Only Latin letters, numbers, spaces, and common address symbols
-    if not all((ord(c) < 128 and (c.isalnum() or c.isspace() or c in ".-',#/")) for c in address):
-        await update.message.reply_text("❌ Используйте только английские буквы и цифры. Разрешены: буквы, цифры, пробелы, дефисы, точки, запятые")
+    invalid_chars = [c for c in address if not (ord(c) < 128 and (c.isalnum() or c.isspace() or c in ".-',#/&"))]
+    if invalid_chars:
+        invalid_display = ', '.join([f"'{c}'" for c in set(invalid_chars)])
+        await update.message.reply_text(
+            f"❌ Найдены недопустимые символы: {invalid_display}\n\n"
+            f"Используйте только:\n"
+            f"• Английские буквы (A-Z, a-z)\n"
+            f"• Цифры (0-9)\n"
+            f"• Пробелы\n"
+            f"• Спецсимволы: . - , ' # / &"
+        )
         return TO_ADDRESS
     
     context.user_data['to_street'] = address
