@@ -2860,32 +2860,6 @@ async def track_shipment(tracking_number: str, carrier: str):
     except Exception as e:
         logger.error(f"Error tracking shipment: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-        
-        # ShipStation V2 tracking endpoint
-        response = requests.get(
-            f'https://api.shipstation.com/v2/tracking?tracking_number={tracking_number}&carrier_code={carrier}',
-            headers=headers,
-            timeout=10
-        )
-        
-        if response.status_code == 200:
-            tracking_data = response.json()
-            return {
-                "tracking_number": tracking_number,
-                "carrier": carrier,
-                "status": tracking_data.get('status', 'UNKNOWN'),
-                "tracking_history": tracking_data.get('events', [])
-            }
-        else:
-            return {
-                "tracking_number": tracking_number,
-                "carrier": carrier,
-                "status": "UNKNOWN",
-                "message": "Tracking information not available"
-            }
-    except Exception as e:
-        logger.error(f"Error tracking shipment: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
 
 
 @api_router.post("/orders/{order_id}/refund")
