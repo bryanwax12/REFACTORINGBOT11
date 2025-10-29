@@ -1,58 +1,68 @@
 <analysis>
-The AI engineer successfully enhanced a Telegram bot from MVP, focusing on shipping label generation and crypto payments. Initial work involved migrating from GoShippo to ShipStation V2 and refining the order creation workflow with multi-step inputs and editing capabilities. Key challenges addressed include fixing a  from ShipStation's rate API (due to missing  and phone numbers), implementing carrier filtering (excluding GlobalPost/Stamps.com, then allowing specific services like UPS Ground/2nd Day Air), and improving Telegram UI with balanced rate display, bold carrier names, and appropriate emojis. Payment logic was refined, ensuring sufficient ShipStation funds before label creation, and an admin error notification system was added. A new payment flow allowing custom top-up amounts with CryptoBot currency selection (BTC, ETH, USDT, LTC) was integrated. Extensive work went into enhancing the user journey, including a robust return to order functionality and refining address input validation to allow characters like . The immediate task involved ensuring  correctly displayed prompts for early states.
+The AI engineer was tasked with summarizing and continuing the development of a Telegram bot. The initial focus was on refining the existing bot, particularly addressing issues with the return to order functionality. The trajectory details a meticulous, iterative debugging process.
+
+Initially, the AI engineer identified and systematically fixed inconsistencies in  saving across various Telegram bot conversation states, which caused incorrect navigation after cancel and return to order. This involved relocating  assignments from the beginning to the end of handler functions. Subsequent issues arose from incorrect step numbering, a Python truthiness bug where  was evaluated as , and non-existent ShipStation address validation attempts.
+
+The engineer also implemented rate de-duplication for ShipStation, added a Contact Admin button to error messages, fixed a critical label creation status code error (200 OK vs. 201 Created), and integrated a Skip Validation button (later removed when ShipStation V2 address validation was found to be non-existent as a separate endpoint). Towards the end, basic  functionality was restored, CryptoBot payments were reviewed, and a new  payment gateway integration was initiated, with the playbook successfully retrieved.
 </analysis>
 
 <product_requirements>
-The application is a Telegram bot designed for shipping label generation and crypto payments. Key features include user authentication via Telegram ID, crypto payments (initially CryptoBot, with a brief, rejected attempt at NOWPayments), and shipping label creation (migrated from GoShippo to ShipStation V2). Users can manage orders and view history.
+The application is a Telegram bot designed for shipping label generation and crypto payments. It supports user authentication via Telegram ID, crypto payments (primarily CryptoBot, with a planned integration for Heleket), and shipping label creation (using ShipStation V2 API). Users can manage orders, view history, and perform various actions through a multi-step conversation flow.
 
-The bot provides a refined user experience: pretty buttons for main commands, a step-by-step order creation workflow with automatic shipping cost calculation, carrier selection, and data review/editing. It supports balance management with an admin top-up function. Key enhancements include:
-*   **Shipping Logic**: ShipStation V2 API integration, filtering of unwanted carriers (GlobalPost, Stamps.com) and services (e.g., only specific UPS, FedEx, USPS services, including 3-day options).
-*   **UI/UX**: Balanced display of shipping rates (5 per carrier), bold carrier names, and branded emojis. Removed refresh list button.
-*   **Payment Flow**: Allows users to enter custom top-up amounts, select specific cryptocurrencies (BTC, ETH, USDT, LTC) via CryptoBot, with payment deduction occurring post-label creation.
-*   **Error Handling**: Admin Telegram notifications for critical user errors (e.g., label creation failure).
-*   **Navigation**: Back to rates button, and a refined cancel order flow with confirmation and return to order functionality that correctly restores the previous input step.
-*   **Input Validation**: Improved address validation to allow characters like '&'.
+**Key features and enhancements include:**
+*   **Shipping Logic**: ShipStation V2 API integration, filtering of unwanted carriers (GlobalPost, Stamps.com) and specific services (e.g., specific UPS, FedEx, USPS services, including 3-day options). Dynamic carrier ID fetching.
+*   **UI/UX**: Balanced display of shipping rates (5 per carrier), bold carrier names, branded emojis. Refined input validation (e.g., allowing  in addresses, stricter phone number validation). Consistent and correct step numbering throughout the order creation and editing flows. De-duplication of shipping rates.
+*   **Payment Flow**: Allows users to enter custom top-up amounts, select specific cryptocurrencies (BTC, ETH, USDT, LTC) via CryptoBot. Payment deduction occurs post-label creation. Future integration of Heleket payment gateway.
+*   **Error Handling**: Admin Telegram notifications for critical user errors (e.g., label creation failure). Added Contact Administrator button on error screens.
+*   **Navigation**: Robust return to order functionality that accurately restores the user to the *correct context-specific input step* with appropriate prompts. Functioning Главное меню (Main Menu) button.
+*   **Label Creation**: Correct handling of ShipStation API responses (200 OK for label creation instead of 201 Created).
 </product_requirements>
 
 <key_technical_concepts>
-- **Full-stack Application**: React (frontend), FastAPI (backend), MongoDB (database).
-- **Telegram Bot API**: Python  library with  for multi-step flows.
-- **Crypto Payment**: CryptoBot API via . NOWPayments was briefly considered but reverted.
-- **Shipping API**: ShipStation V2 API integrated using  library for rates, labels.
-- **Pydantic**: Data validation and serialization for FastAPI.
-- **Environment Variables**: Secure configuration for API keys and service URLs.
+-   **Full-stack Application**: React (frontend), FastAPI (backend), MongoDB (database).
+-   **Telegram Bot API**: Python  library with  for multi-step flows.
+-   **Crypto Payment**: CryptoBot API via . Heleket integration is planned.
+-   **Shipping API**: ShipStation V2 API integrated using  for rates and labels.
+-   **Pydantic**: Data validation and serialization for FastAPI models.
+-   **Environment Variables**: Secure configuration for API keys and service URLs.
+-   **Logging**: Enhanced debugging and error tracking in the backend.
 </key_technical_concepts>
 
 <code_architecture>
 
 
 -   **/app/backend/server.py**:
-    -   **Summary of why this file is important:** This is the core Python backend, handling Telegram bot interactions, API endpoints, database, CryptoBot, and ShipStation integrations.
+    -   **Summary of why this file is important:** This is the core Python backend, handling Telegram bot interactions, API endpoints, database, CryptoBot, and ShipStation integrations. It defines all the conversation handlers and business logic.
     -   **Summary of the changes made to this file:**
-        -   **ShipStation Integration**: Removed 's temporary bypass. Implemented  for dynamic carrier fetching. Modified  and  to use dynamic , filter out GlobalPost, Stamps.com, and specific  (UPS, FedEx, USPS including 3-day options). Ensured phone numbers and  are passed during label creation.
-        -   **Telegram Bot States & UI**: Added  and  states.  logic updated to prompt for custom top-up amounts if balance is low, leading to  and . Display of rates now grouped by carrier, using bold text and branded emojis, with 5 rates per carrier.
-        -   **Error Handling**: Implemented  to send Telegram notifications to  for critical errors (e.g., label creation, rate fetching).
-        -   **User Workflow**:  modified to offer confirmation and return to order.  enhanced to correctly restore the user to the last *input step*, dynamically generating prompts.  is now consistently saved across relevant steps.
-        -   **Input Validation**: Address validation improved to allow  symbol and provide more specific error messages for invalid characters.
-        -   **Payment Revert**: All NOWPayments integration code (functions, webhook, environment variables, ConversationHandler states) was removed, reverting to CryptoBot.
+        -   ** Management**: Significant changes to ensure  is correctly set at the *end* of each state-handling function (e.g., , , , , , ). This fixed navigation for .
+        -   ** Function**: Corrected prompt display logic, ensuring it dynamically shows the appropriate step message. Changed  to  to correctly handle . Added specific handling for  and  states.
+        -   **Input Validation**: Stricter phone number validation (, ) to ensure numbers start with a digit or .
+        -   **Step Numbering**: Corrected inconsistent step numbering (e.g., Шаг X/Y) across various  and  functions, and in editing modes, to maintain a consistent user experience.
+        -   **ShipStation Integration**: Removed the incorrect  API call and  feature as ShipStation V2 does not support separate address validation. Changed label creation status code check from  to  in . Implemented de-duplication of shipping rates based on  in , keeping the cheapest for each service.
+        -   **Error Handling**: Added a Связаться с администратором (Contact Administrator) inline button to the error message shown when label creation fails. A temporary  command was added and then fixed.
+        -   **Navigation**: Added a handler for  callback in .
+        -   **Logging**: Replaced  statements with  for better debugging.
+        -   **Heleket Integration**: Preparation for Heleket payment gateway integration, including API research.
 -   **/app/backend/.env**:
     -   **Summary of why this file is important:** Stores environment-specific variables like API keys and database connection strings.
-    -   **Summary of the changes made to this file:** Added  (e.g., ) for error notifications.  and  were added and then removed.
+    -   **Summary of the changes made to this file:**  is used for error notifications. Heleket API keys will need to be added here upon integration.
 -   **/app/backend/requirements.txt**:
     -   **Summary of why this file is important:** Manages Python package dependencies.
-    -   **Summary of the changes made to this file:** No explicit changes mentioned in the trajectory, but implicitly  is still used and likely  for ShipStation.
+    -   **Summary of the changes made to this file:** Implied usage of , , , To use the fastapi command, please install "fastapi[standard]":
+
+	pip install "fastapi[standard]", , , , . No explicit modifications were mentioned, but logging was added (which doesn't usually require new packages unless a specific logging library is used beyond the standard  module).
 </code_architecture>
 
 <pending_tasks>
--   The user reported an address error when clicking cancel then return to order, suggesting the  function still isn't fully robust in displaying correct prompts for all early states. The AI was in the process of adding remaining states for  handling after .
+-   **Heleket Integration**: The integration playbook for Heleket was retrieved, but the actual implementation is pending. The user needs to provide API keys.
+-   **Admin Panel Label Download**: The user requested functionality to download shipping label images/PDFs from an admin panel, which has not yet been implemented.
+-   **Complete Step Numbering for FROM_** functions in editing mode: While many numbering issues were fixed, the dynamic numbering for FROM_* functions in editing mode (e.g., Шаг 1/6, Шаг 2/6) needs to be thoroughly verified and potentially implemented more robustly if current fixes are insufficient.
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer was addressing an issue where an address error occurred when a user would attempt to cancel an order and then return to order. This indicated that the  function was not consistently displaying the correct, context-specific prompts for early stages of the order creation workflow (e.g., address input). Instead, it was showing a generic Continuing order processing... message, confusing the user and potentially leading to re-entering invalid data or causing validation errors.
-
-The AI identified the need to ensure that  dynamically presents the appropriate prompt message for each specific state. The last action was to extend this fix to remaining early states, with the AI stating: Теперь добавлю оставшиеся состояния после TO_ADDRESS2. This indicates the solution for correctly displaying prompts on return is *still in progress*.
+Immediately before this summary request, the AI engineer was in the process of initiating the integration of the **Heleket** cryptocurrency payment gateway. The user explicitly requested to connect Heleket. The AI engineer performed initial research on , found their API documentation, and successfully called the  agent to obtain a detailed playbook for the integration. The last action was to confirm the playbook receipt and summarize that the API keys would be needed from the user to proceed with the implementation.
 </current_work>
 
 <optional_next_step>
-Complete the implementation of dynamically restoring prompt messages in  for all remaining early states in .
+Ask the user to provide the necessary Heleket API keys (App ID, API Key, Secret Key, Webhook Secret) to proceed with the integration.
 </optional_next_step>
