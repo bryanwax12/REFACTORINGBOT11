@@ -119,8 +119,6 @@ class OrderCreate(BaseModel):
     amount: float
 
 # Telegram Bot Handlers
-async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
 async def test_error_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Test command to show error message with admin contact button"""
     user_message = """😔 К сожалению, в данный момент мы не можем сгенерировать shipping label.
