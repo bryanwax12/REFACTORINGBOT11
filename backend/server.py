@@ -868,6 +868,7 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return TO_ADDRESS
     
     context.user_data['to_street'] = address
+    context.user_data['last_state'] = TO_ADDRESS2  # Save state for cancel return
     
     keyboard = [
         [InlineKeyboardButton("⏭ Пропустить", callback_data='skip_to_address2')],
