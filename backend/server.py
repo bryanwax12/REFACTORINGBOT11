@@ -1589,13 +1589,22 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
     telegram_id = query.from_user.id
     user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
     balance = user.get('balance', 0.0)
+    user_discount = user.get('discount', 0.0)  # Get user discount percentage
     
     # Show payment options
     amount = selected_rate['amount']  # Amount with markup
     original_amount = selected_rate['original_amount']  # GoShippo price
     markup = amount - original_amount
+    
+    # Apply discount if user has one
+    discount_amount = 0
+    if user_discount > 0:
+        discount_amount = amount * (user_discount / 100)
+        amount = amount - discount_amount  # Apply discount to final amount
+    
     data = context.user_data
     
+    # Build confirmation text
     confirmation_text = f"""✅ Выбрано: {selected_rate['carrier']} - {selected_rate['service']}
 
 📦 Детали заказа:
@@ -1603,7 +1612,17 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
 📥 До: {data['to_name']}, {data['to_city']}, {data['to_state']}
 ⚖️ Вес: {data['weight']} lb
 
-💰 Стоимость: ${amount:.2f}
+💰 Стоимость: ${selected_rate['amount']:.2f}"""
+    
+    if user_discount > 0:
+        confirmation_text += f"""
+🎉 Скидка ({user_discount}%): -${discount_amount:.2f}
+💵 Итого к оплате: ${amount:.2f}"""
+    else:
+        confirmation_text += f"""
+💵 К оплате: ${amount:.2f}"""
+    
+    confirmation_text += f"""
 
 💳 Ваш баланс: ${balance:.2f}
 """
