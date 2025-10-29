@@ -2067,13 +2067,104 @@ async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         send_method = update.message.reply_text
     
+    # Save current state to allow return
+    current_state = context.user_data.get('current_state', 'unknown')
+    
+    keyboard = [
+        [InlineKeyboardButton("↩️ Вернуться к заказу", callback_data='return_to_order')],
+        [InlineKeyboardButton("✅ Да, отменить заказ", callback_data='confirm_cancel')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await send_method(
+        "⚠️ Вы уверены, что хотите отменить создание заказа?\n\nВсе введённые данные будут потеряны.",
+        reply_markup=reply_markup
+    )
+    
+    # Don't clear user_data yet - keep it in case they return
+    # Don't end conversation yet
+    return context.user_data.get('last_state', PAYMENT_METHOD)  # Return to last state
+
+async def confirm_cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Confirm order cancellation"""
+    query = update.callback_query
+    await query.answer()
+    
     context.user_data.clear()
     
     keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await send_method("❌ Создание заказа отменено.", reply_markup=reply_markup)
+    await query.message.reply_text("❌ Создание заказа отменено.", reply_markup=reply_markup)
     return ConversationHandler.END
+
+async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Return to order after cancel button"""
+    query = update.callback_query
+    await query.answer("Возвращаемся к заказу...")
+    
+    # Get last state from context
+    last_state = context.user_data.get('last_state')
+    
+    # Depending on last state, show appropriate message
+    if last_state == PAYMENT_METHOD:
+        # Show payment screen again
+        data = context.user_data
+        selected_rate = data.get('selected_rate')
+        
+        if selected_rate:
+            telegram_id = query.from_user.id
+            user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+            balance = user.get('balance', 0)
+            amount = selected_rate['amount']
+            
+            confirmation_text = f"""✅ Выбран перевозчик:
+
+🚚 {selected_rate['carrier']} - {selected_rate['service']}
+📤 От: {data['from_name']}, {data['from_city']}, {data['from_state']}
+📥 До: {data['to_name']}, {data['to_city']}, {data['to_state']}
+⚖️ Вес: {data['weight']} lb
+
+💰 Стоимость: ${amount:.2f}
+
+💳 Ваш баланс: ${balance:.2f}
+"""
+            
+            keyboard = []
+            
+            if balance >= amount:
+                confirmation_text += "\n✅ У вас достаточно средств на балансе!"
+                keyboard.append([InlineKeyboardButton(
+                    f"💳 Оплатить с баланса (${balance:.2f})",
+                    callback_data='pay_from_balance'
+                )])
+                keyboard.append([
+                    InlineKeyboardButton("◀️ Назад к тарифам", callback_data='back_to_rates'),
+                    InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')
+                ])
+            else:
+                shortage = amount - balance
+                confirmation_text += f"\n⚠️ Недостаточно средств. Необходимо: ${shortage:.2f}"
+                keyboard.append([InlineKeyboardButton(
+                    f"💵 Пополнить баланс",
+                    callback_data='top_up_balance'
+                )])
+                keyboard.append([
+                    InlineKeyboardButton("◀️ Назад к тарифам", callback_data='back_to_rates'),
+                    InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')
+                ])
+            
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await query.message.reply_text(confirmation_text, reply_markup=reply_markup)
+            return PAYMENT_METHOD
+    
+    elif last_state == SELECT_CARRIER:
+        # Return to carrier selection - refresh rates
+        return await fetch_shipping_rates(update, context)
+    
+    # Default: return to payment method
+    await query.message.reply_text("Продолжаем оформление заказа...")
+    return last_state if last_state else PAYMENT_METHOD
 
 # API Routes
 @api_router.get("/")
