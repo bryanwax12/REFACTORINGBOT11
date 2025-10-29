@@ -341,7 +341,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     
-    if query.data == 'start':
+    if query.data == 'start' or query.data == 'main_menu':
         await start_command(update, context)
     elif query.data == 'my_orders':
         await my_orders_command(update, context)
