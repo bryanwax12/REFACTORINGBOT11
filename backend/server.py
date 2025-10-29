@@ -2559,6 +2559,157 @@ async def create_order(order_data: OrderCreate):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.get("/orders/search")
+async def search_orders(
+    query: Optional[str] = None,
+    payment_status: Optional[str] = None,
+    shipping_status: Optional[str] = None,
+    limit: int = 100
+):
+    """
+    Search orders by tracking number, order ID, or other fields
+    """
+    try:
+        search_filter = {}
+        
+        # Search by tracking number or order ID
+        if query:
+            # Get labels with matching tracking number
+            labels = await db.shipping_labels.find(
+                {"tracking_number": {"$regex": query, "$options": "i"}},
+                {"_id": 0, "order_id": 1}
+            ).to_list(100)
+            
+            matching_order_ids = [label['order_id'] for label in labels]
+            
+            # Search in orders by ID or matching tracking numbers
+            search_filter["$or"] = [
+                {"id": {"$regex": query, "$options": "i"}},
+                {"id": {"$in": matching_order_ids}}
+            ]
+        
+        # Filter by payment status
+        if payment_status:
+            search_filter["payment_status"] = payment_status
+        
+        # Filter by shipping status
+        if shipping_status:
+            search_filter["shipping_status"] = shipping_status
+        
+        # Get orders
+        orders = await db.orders.find(search_filter, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
+        
+        # Enrich with tracking numbers
+        for order in orders:
+            label = await db.shipping_labels.find_one({"order_id": order['id']}, {"_id": 0})
+            if label:
+                order['tracking_number'] = label.get('tracking_number', '')
+                order['label_url'] = label.get('label_url', '')
+                order['carrier'] = label.get('carrier', '')
+            else:
+                order['tracking_number'] = ''
+                order['label_url'] = ''
+                order['carrier'] = ''
+        
+        return orders
+    except Exception as e:
+        logger.error(f"Error searching orders: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/orders/export/csv")
+async def export_orders_csv(
+    payment_status: Optional[str] = None,
+    shipping_status: Optional[str] = None
+):
+    """
+    Export orders to CSV format
+    """
+    from fastapi.responses import StreamingResponse
+    import io
+    import csv
+    
+    try:
+        # Build query
+        query = {}
+        if payment_status:
+            query["payment_status"] = payment_status
+        if shipping_status:
+            query["shipping_status"] = shipping_status
+        
+        # Get all orders
+        orders = await db.orders.find(query, {"_id": 0}).sort("created_at", -1).to_list(1000)
+        
+        # Enrich with tracking info
+        for order in orders:
+            label = await db.shipping_labels.find_one({"order_id": order['id']}, {"_id": 0})
+            if label:
+                order['tracking_number'] = label.get('tracking_number', '')
+                order['carrier'] = label.get('carrier', '')
+            else:
+                order['tracking_number'] = ''
+                order['carrier'] = ''
+        
+        # Create CSV in memory
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
+        # Write header
+        writer.writerow([
+            'Order ID',
+            'Telegram ID',
+            'Amount',
+            'Payment Status',
+            'Shipping Status',
+            'Tracking Number',
+            'Carrier',
+            'From Name',
+            'From City',
+            'From State',
+            'From ZIP',
+            'To Name',
+            'To City',
+            'To State',
+            'To ZIP',
+            'Weight (lb)',
+            'Created At',
+            'Refund Status'
+        ])
+        
+        # Write data
+        for order in orders:
+            writer.writerow([
+                order['id'],
+                order['telegram_id'],
+                order['amount'],
+                order['payment_status'],
+                order['shipping_status'],
+                order.get('tracking_number', ''),
+                order.get('carrier', ''),
+                order['address_from']['name'],
+                order['address_from']['city'],
+                order['address_from']['state'],
+                order['address_from']['zip'],
+                order['address_to']['name'],
+                order['address_to']['city'],
+                order['address_to']['state'],
+                order['address_to']['zip'],
+                order['parcel']['weight'],
+                order['created_at'],
+                order.get('refund_status', 'none')
+            ])
+        
+        # Return CSV file
+        output.seek(0)
+        return StreamingResponse(
+            iter([output.getvalue()]),
+            media_type="text/csv",
+            headers={"Content-Disposition": f"attachment; filename=orders_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"}
+        )
+        
+    except Exception as e:
+        logger.error(f"Error exporting orders: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/orders", response_model=List[dict])
 async def get_orders(telegram_id: Optional[int] = None):
     query = {"telegram_id": telegram_id} if telegram_id else {}
