@@ -722,7 +722,7 @@ const Dashboard = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" data-testid="refund-modal">
           <Card className="w-full max-w-md mx-4">
             <CardHeader>
-              <CardTitle>🔄 Refund Order</CardTitle>
+              <CardTitle>🔄 Refund Order & Void Label</CardTitle>
               <CardDescription>
                 Order #{refundModal.order.id.substring(0, 8)} - ${refundModal.order.amount}
               </CardDescription>
@@ -731,6 +731,7 @@ const Dashboard = () => {
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm">
                 <p className="font-medium text-yellow-900">This will:</p>
                 <ul className="list-disc list-inside text-yellow-800 mt-1">
+                  <li>Void label on ShipStation (cancel shipment)</li>
                   <li>Return ${refundModal.order.amount} to user balance</li>
                   <li>Cancel shipping status</li>
                   <li>Notify user via Telegram</li>
@@ -767,6 +768,102 @@ const Dashboard = () => {
                   Cancel
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Tracking Status Modal */}
+      {trackingModal.open && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" data-testid="tracking-modal">
+          <Card className="w-full max-w-2xl mx-4">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>📦 Tracking Information</CardTitle>
+                <Button 
+                  onClick={() => setTrackingModal({ open: false, tracking: null, loading: false })}
+                  variant="ghost"
+                  size="sm"
+                >
+                  ✕
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {trackingModal.loading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
+                </div>
+              ) : trackingModal.tracking ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Tracking Number</p>
+                      <p className="font-mono text-sm font-medium">{trackingModal.tracking.tracking_number}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Carrier</p>
+                      <p className="text-sm font-medium">{trackingModal.tracking.carrier}</p>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Delivery Status</p>
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 bg-gray-200 rounded-full h-2">
+                        <div 
+                          className={`h-2 rounded-full transition-all`}
+                          style={{
+                            width: `${trackingModal.tracking.progress}%`,
+                            backgroundColor: 
+                              trackingModal.tracking.progress_color === 'green' ? '#10b981' :
+                              trackingModal.tracking.progress_color === 'blue' ? '#3b82f6' :
+                              trackingModal.tracking.progress_color === 'orange' ? '#f59e0b' :
+                              trackingModal.tracking.progress_color === 'red' ? '#ef4444' : '#9ca3af'
+                          }}
+                        />
+                      </div>
+                      <span className="text-sm font-medium">{trackingModal.tracking.progress}%</span>
+                    </div>
+                    <p className="text-sm font-medium mt-2">{trackingModal.tracking.status_name}</p>
+                    {trackingModal.tracking.carrier_status_description && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {trackingModal.tracking.carrier_status_description}
+                      </p>
+                    )}
+                  </div>
+                  
+                  {trackingModal.tracking.estimated_delivery && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Estimated Delivery</p>
+                      <p className="text-sm font-medium">
+                        {new Date(trackingModal.tracking.estimated_delivery).toLocaleDateString()}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {trackingModal.tracking.tracking_events && trackingModal.tracking.tracking_events.length > 0 && (
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Recent Events</p>
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                        {trackingModal.tracking.tracking_events.map((event, idx) => (
+                          <div key={idx} className="border-l-2 border-gray-300 pl-3 pb-2">
+                            <p className="text-xs font-medium">{event.description || event.status}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {event.city && `${event.city}, `}{event.state}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(event.occurred_at || event.datetime).toLocaleString()}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <p className="text-center text-muted-foreground py-8">No tracking data available</p>
+              )}
             </CardContent>
           </Card>
         </div>
