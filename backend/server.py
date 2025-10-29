@@ -1510,6 +1510,7 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
     carrier_idx = int(query.data.split('_')[-1])
     selected_rate = context.user_data['rates'][carrier_idx]
     context.user_data['selected_rate'] = selected_rate
+    context.user_data['last_state'] = PAYMENT_METHOD  # Save state for cancel return
     
     # Get user balance
     telegram_id = query.from_user.id
