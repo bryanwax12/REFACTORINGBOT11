@@ -468,14 +468,14 @@ def main():
     
     # Summary
     print("\n" + "=" * 60)
-    print("📊 SHIPSTATION V2 API FIX TEST SUMMARY")
+    print("📊 RETURN TO ORDER FUNCTIONALITY TEST SUMMARY")
     print("=" * 60)
     
-    # Priority order for ShipStation fix
-    priority_tests = ['api_health', 'carrier_ids', 'shipstation_rates', 'telegram_infrastructure']
+    # Priority order for Return to Order fix
+    priority_tests = ['api_health', 'telegram_infrastructure', 'bot_token', 'return_to_order']
     other_tests = [k for k in results.keys() if k not in priority_tests]
     
-    print("🎯 CRITICAL TESTS (ShipStation Fix):")
+    print("🎯 CRITICAL TESTS (Return to Order Fix):")
     for test_name in priority_tests:
         if test_name in results:
             passed = results[test_name]
@@ -492,29 +492,26 @@ def main():
     critical_passed = all(results.get(test, False) for test in priority_tests if test in results)
     all_passed = all(results.values())
     
-    print(f"\n🎯 ShipStation Fix Status: {'✅ SUCCESS' if critical_passed else '❌ FAILED'}")
+    print(f"\n🎯 Return to Order Fix Status: {'✅ SUCCESS' if critical_passed else '❌ FAILED'}")
     print(f"📊 Overall Result: {'✅ ALL TESTS PASSED' if all_passed else '❌ SOME TESTS FAILED'}")
     
-    # Specific findings for ShipStation Fix
-    print("\n🔧 ShipStation V2 API Fix Analysis:")
-    if results.get('shipstation_rates'):
-        print(f"   ✅ Rate calculation working - No 400 Bad Request")
-        print(f"   ✅ Carrier IDs properly populated in rate_options")
-        if rates_data and len(rates_data.get('rates', [])) >= 20:
-            print(f"   ✅ Expected rate count achieved (20-30+ rates)")
-        elif rates_data and len(rates_data.get('rates', [])) >= 10:
-            print(f"   ⚠️ Moderate rate count (consider checking carrier configuration)")
-        else:
-            print(f"   ❌ Low rate count - may indicate carrier configuration issues")
+    # Specific findings for Return to Order Fix
+    print("\n🔧 Return to Order Fix Analysis:")
+    if results.get('return_to_order'):
+        print(f"   ✅ last_state tracking implemented in all state handlers")
+        print(f"   ✅ return_to_order function handles all conversation states")
+        print(f"   ✅ Cancel button with return option properly configured")
+        print(f"   ✅ ConversationHandler includes return_to_order callbacks")
     else:
-        print(f"   ❌ Rate calculation failed - Fix may not be working properly")
-        print(f"   🔍 Check: get_shipstation_carrier_ids() function")
-        print(f"   🔍 Check: rate_options.carrier_ids population")
+        print(f"   ❌ Return to Order implementation issues detected")
+        print(f"   🔍 Check: last_state saving in state handler functions")
+        print(f"   🔍 Check: return_to_order function state handling")
+        print(f"   🔍 Check: ConversationHandler callback configuration")
     
     # Telegram Bot Status
     print("\n🤖 Telegram Bot Integration:")
     if results.get('telegram_infrastructure'):
-        print(f"   ✅ Bot is running and ready for end-to-end testing")
+        print(f"   ✅ Bot is running and ready for manual testing")
     else:
         print(f"   ❌ Bot infrastructure issues detected")
     
@@ -523,21 +520,36 @@ def main():
     else:
         print(f"   ❌ Bot token validation failed")
     
+    # Supporting API Status
+    if results.get('shipstation_rates'):
+        print(f"   ✅ ShipStation API working (supporting functionality)")
+    else:
+        print(f"   ⚠️ ShipStation API issues (may affect full order flow)")
+    
     # Manual testing recommendations
     print("\n📋 NEXT STEPS - Manual Testing Required:")
-    print("   🤖 Telegram Bot End-to-End Testing:")
+    print("   🤖 Telegram Bot Return to Order Testing:")
     print("   1. Open Telegram and find @whitelabellbot")
-    print("   2. Send /start command")
-    print("   3. Click '📦 Создать заказ' button")
-    print("   4. Enter valid US addresses (e.g., LA to NY)")
-    print("   5. Verify shipping rates are fetched successfully")
-    print("   6. Confirm no validation errors appear")
+    print("   2. Send /order command to start order creation")
+    print("   3. At EACH state (FROM_NAME, FROM_ADDRESS, FROM_CITY, etc.):")
+    print("      a. Click '❌ Отмена' button")
+    print("      b. Click '↩️ Вернуться к заказу' button")
+    print("      c. Verify correct prompt is displayed for that state")
+    print("      d. Continue entering data from where you left off")
+    print("   4. Test at least 5 different states (early, middle, late)")
+    print("   5. Verify no address validation errors occur")
     
     print("\n🎯 Expected Results from Manual Testing:")
-    print("   ✅ Bot should fetch 20-30+ shipping rates")
-    print("   ✅ No '400 Bad Request' or validation errors")
-    print("   ✅ Rates from USPS, UPS, and FedEx carriers")
-    print("   ✅ Each rate shows carrier, service, price, delivery days")
+    print("   ✅ Each state shows its specific prompt (e.g., 'Шаг 2/11: Адрес отправителя')")
+    print("   ✅ User can continue order seamlessly from where they left off")
+    print("   ✅ No generic messages - each state has correct instructions")
+    print("   ✅ Step numbering is correct (fixed TO_ADDRESS2 step)")
+    print("   ✅ No address validation errors when returning to order")
+    
+    print("\n⚠️ IMPORTANT NOTE:")
+    print("   This is Telegram bot conversation flow testing.")
+    print("   Backend infrastructure is verified, but actual functionality")
+    print("   requires MANUAL TESTING through @whitelabellbot interface.")
     
     return critical_passed
 
