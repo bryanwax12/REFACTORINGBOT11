@@ -3284,6 +3284,7 @@ async def startup_event():
                         CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
                     ],
                     CONFIRM_DATA: [
+                        CallbackQueryHandler(skip_address_validation, pattern='^skip_validation$'),
                         CallbackQueryHandler(handle_edit_choice, pattern='^(edit_from_address|edit_to_address)$'),
                         CallbackQueryHandler(handle_data_confirmation, pattern='^(confirm_data|edit_data|edit_addresses_error|return_to_order|confirm_cancel|cancel_order)$')
                     ],
