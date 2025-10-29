@@ -1504,8 +1504,18 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         for carrier, carrier_rates in rates_by_carrier.items():
             # Sort by price (ascending)
             sorted_carrier_rates = sorted(carrier_rates, key=lambda r: float(r['shipping_amount']['amount']))
-            # Take top 5 cheapest from each carrier
-            balanced_rates.extend(sorted_carrier_rates[:5])
+            
+            # Deduplicate by service_type - keep only cheapest for each service
+            seen_services = {}
+            deduplicated_rates = []
+            for rate in sorted_carrier_rates:
+                service_type = rate.get('service_type', '')
+                if service_type not in seen_services:
+                    seen_services[service_type] = True
+                    deduplicated_rates.append(rate)
+            
+            # Take top 5 unique services from each carrier
+            balanced_rates.extend(deduplicated_rates[:5])
         
         # Sort all balanced rates by carrier, then by price
         balanced_rates = sorted(balanced_rates, key=lambda r: (r['carrier_friendly_name'], float(r['shipping_amount']['amount'])))
