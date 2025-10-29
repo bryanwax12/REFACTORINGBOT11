@@ -2150,14 +2150,18 @@ async def create_and_send_label(order_id, telegram_id, message):
         label_response = response.json()
         
         # Extract label data
+        label_id = label_response.get('label_id', '')  # ShipStation label ID
+        shipment_id = label_response.get('shipment_id', '')  # ShipStation shipment ID
         tracking_number = label_response.get('tracking_number', '')
         label_download_url = label_response.get('label_download', {}).get('pdf', '')
         
-        logger.info(f"Label created: tracking={tracking_number}, label_url={label_download_url}")
+        logger.info(f"Label created: label_id={label_id}, tracking={tracking_number}, label_url={label_download_url}")
         
         # Save label
         label = ShippingLabel(
             order_id=order_id,
+            label_id=label_id,
+            shipment_id=shipment_id,
             tracking_number=tracking_number,
             label_url=label_download_url,
             carrier=order['selected_carrier'],
