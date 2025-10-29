@@ -3606,6 +3606,83 @@ async def get_stats():
         "total_labels": total_labels
     }
 
+@api_router.get("/stats/expenses")
+async def get_expense_stats(date_from: Optional[str] = None, date_to: Optional[str] = None):
+    """
+    Get expenses statistics (money spent on ShipStation labels)
+    """
+    try:
+        from datetime import datetime, timezone, timedelta
+        
+        # Build query for paid orders with labels
+        query = {"payment_status": "paid"}
+        
+        # Add date filter if provided
+        if date_from or date_to:
+            date_query = {}
+            if date_from:
+                date_query["$gte"] = date_from
+            if date_to:
+                # Add one day to include the end date
+                end_date = datetime.fromisoformat(date_to) + timedelta(days=1)
+                date_query["$lt"] = end_date.isoformat()
+            query["created_at"] = date_query
+        
+        # Get all paid orders with original_amount (real cost from ShipStation)
+        total_spent = await db.orders.aggregate([
+            {"$match": query},
+            {"$match": {"original_amount": {"$exists": True}}},
+            {"$group": {"_id": None, "total": {"$sum": "$original_amount"}}}
+        ]).to_list(1)
+        
+        total_expense = total_spent[0]['total'] if total_spent else 0
+        
+        # Get count of labels created (without refunded)
+        labels_query = {"status": "created"}
+        if date_from or date_to:
+            date_query = {}
+            if date_from:
+                date_query["$gte"] = date_from
+            if date_to:
+                end_date = datetime.fromisoformat(date_to) + timedelta(days=1)
+                date_query["$lt"] = end_date.isoformat()
+            labels_query["created_at"] = date_query
+        
+        labels_count = await db.shipping_labels.count_documents(labels_query)
+        
+        # Get today's expenses
+        today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+        today_query = {
+            "payment_status": "paid",
+            "original_amount": {"$exists": True},
+            "created_at": {"$gte": today_start.isoformat()}
+        }
+        
+        today_spent = await db.orders.aggregate([
+            {"$match": today_query},
+            {"$group": {"_id": None, "total": {"$sum": "$original_amount"}}}
+        ]).to_list(1)
+        
+        today_expense = today_spent[0]['total'] if today_spent else 0
+        
+        # Get today's label count
+        today_labels = await db.shipping_labels.count_documents({
+            "status": "created",
+            "created_at": {"$gte": today_start.isoformat()}
+        })
+        
+        return {
+            "total_expense": total_expense,
+            "labels_count": labels_count,
+            "today_expense": today_expense,
+            "today_labels": today_labels,
+            "date_from": date_from,
+            "date_to": date_to
+        }
+    except Exception as e:
+        logger.error(f"Error getting expense stats: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 app.include_router(api_router)
 
 app.add_middleware(
