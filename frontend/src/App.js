@@ -247,37 +247,171 @@ const Dashboard = () => {
         </TabsList>
 
         <TabsContent value="orders" className="space-y-4">
+          {/* Search and Filters */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex gap-4 items-end">
+                <div className="flex-1 space-y-2">
+                  <Label htmlFor="search">Search by Order ID or Tracking Number</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="search"
+                      placeholder="Enter Order ID or Tracking #..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && searchOrders()}
+                    />
+                    <Button onClick={searchOrders} data-testid="search-btn">
+                      <Search className="h-4 w-4 mr-2" />
+                      Search
+                    </Button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="status-filter">Payment Status</Label>
+                  <select
+                    id="status-filter"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    <option value="all">All</option>
+                    <option value="paid">Paid</option>
+                    <option value="pending">Pending</option>
+                  </select>
+                </div>
+                <Button onClick={loadData} variant="outline" data-testid="refresh-btn">
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+                <Button onClick={exportToCSV} variant="outline" data-testid="export-btn">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export CSV
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Orders Table */}
           <Card>
             <CardHeader>
-              <CardTitle>Recent Orders</CardTitle>
-              <CardDescription>All shipping orders from Telegram bot</CardDescription>
+              <CardTitle>Orders ({orders.length})</CardTitle>
+              <CardDescription>All shipping orders with tracking info</CardDescription>
             </CardHeader>
             <CardContent>
               {orders.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No orders yet</p>
+                <p className="text-center text-muted-foreground py-8">No orders found</p>
               ) : (
-                <div className="space-y-4">
-                  {orders.map((order) => (
-                    <div key={order.id} className="flex items-center justify-between border-b pb-4 last:border-0" data-testid="order-item">
-                      <div className="space-y-1">
-                        <p className="font-medium">Order #{order.id.substring(0, 8)}</p>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <MapPin className="h-3 w-3" />
-                          <span>{order.address_from.city} → {order.address_to.city}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant={order.payment_status === 'paid' ? 'default' : 'secondary'}>
-                            {order.payment_status}
-                          </Badge>
-                          <Badge variant="outline">{order.shipping_status}</Badge>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold">${order.amount}</p>
-                        <p className="text-xs text-muted-foreground">{new Date(order.created_at).toLocaleDateString()}</p>
-                      </div>
-                    </div>
-                  ))}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="border-b">
+                      <tr className="text-left">
+                        <th className="pb-3 font-medium">Order ID</th>
+                        <th className="pb-3 font-medium">Tracking #</th>
+                        <th className="pb-3 font-medium">Route</th>
+                        <th className="pb-3 font-medium">Amount</th>
+                        <th className="pb-3 font-medium">Status</th>
+                        <th className="pb-3 font-medium">Date</th>
+                        <th className="pb-3 font-medium text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {orders.map((order) => (
+                        <tr key={order.id} className="border-b last:border-0 hover:bg-muted/50" data-testid="order-row">
+                          <td className="py-3">
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono text-xs">{order.id.substring(0, 8)}</span>
+                              <button
+                                onClick={() => copyToClipboard(order.id)}
+                                className="text-muted-foreground hover:text-foreground"
+                                title="Copy Order ID"
+                              >
+                                <Copy className="h-3 w-3" />
+                              </button>
+                            </div>
+                          </td>
+                          <td className="py-3">
+                            {order.tracking_number ? (
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono text-xs">{order.tracking_number}</span>
+                                <button
+                                  onClick={() => copyToClipboard(order.tracking_number)}
+                                  className="text-muted-foreground hover:text-foreground"
+                                  title="Copy Tracking #"
+                                >
+                                  <Copy className="h-3 w-3" />
+                                </button>
+                              </div>
+                            ) : (
+                              <span className="text-muted-foreground text-xs">-</span>
+                            )}
+                          </td>
+                          <td className="py-3">
+                            <div className="text-xs">
+                              <div>{order.address_from.city}, {order.address_from.state}</div>
+                              <div className="text-muted-foreground">→ {order.address_to.city}, {order.address_to.state}</div>
+                            </div>
+                          </td>
+                          <td className="py-3 font-semibold">${order.amount}</td>
+                          <td className="py-3">
+                            <div className="flex flex-col gap-1">
+                              <Badge variant={order.payment_status === 'paid' ? 'default' : 'secondary'} className="w-fit">
+                                {order.payment_status}
+                              </Badge>
+                              <Badge variant="outline" className="w-fit text-xs">
+                                {order.shipping_status}
+                              </Badge>
+                              {order.refund_status === 'refunded' && (
+                                <Badge variant="destructive" className="w-fit text-xs">
+                                  Refunded
+                                </Badge>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3 text-xs text-muted-foreground">
+                            {new Date(order.created_at).toLocaleDateString()}
+                          </td>
+                          <td className="py-3">
+                            <div className="flex gap-1 justify-end">
+                              {order.label_url && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => downloadLabel(order.label_url)}
+                                  title="Download Label"
+                                >
+                                  <FileText className="h-4 w-4" />
+                                </Button>
+                              )}
+                              {order.tracking_number && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => window.open(`https://www.google.com/search?q=${order.tracking_number}`, '_blank')}
+                                  title="Track Shipment"
+                                >
+                                  <ExternalLink className="h-4 w-4" />
+                                </Button>
+                              )}
+                              {order.payment_status === 'paid' && order.refund_status !== 'refunded' && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => {
+                                    setRefundModal({ open: true, order });
+                                    setRefundReason('');
+                                  }}
+                                  title="Refund Order"
+                                  className="text-red-600 hover:text-red-700"
+                                >
+                                  <RefreshCw className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </CardContent>
