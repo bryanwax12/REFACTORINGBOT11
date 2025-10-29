@@ -1693,6 +1693,85 @@ Shipping label создан успешно!""",
         await query.message.reply_text(f"❌ Ошибка при оплате: {str(e)}")
         return ConversationHandler.END
 
+async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle custom top-up amount input"""
+    try:
+        amount_text = update.message.text.strip()
+        
+        # Validate amount
+        try:
+            topup_amount = float(amount_text)
+        except ValueError:
+            await update.message.reply_text(
+                "❌ Неверный формат суммы. Введите число, например: 50 или 100.50"
+            )
+            return TOPUP_AMOUNT
+        
+        # Check limits
+        if topup_amount < 5:
+            await update.message.reply_text(
+                "❌ Минимальная сумма пополнения: $5"
+            )
+            return TOPUP_AMOUNT
+        
+        if topup_amount > 1000:
+            await update.message.reply_text(
+                "❌ Максимальная сумма пополнения: $1000"
+            )
+            return TOPUP_AMOUNT
+        
+        # Create crypto invoice
+        telegram_id = update.message.from_user.id
+        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        
+        if crypto:
+            invoice = await crypto.create_invoice(
+                asset="USDT",
+                amount=topup_amount
+            )
+            
+            pay_url = getattr(invoice, 'bot_invoice_url', None) or getattr(invoice, 'mini_app_invoice_url', None)
+            
+            # Save top-up payment
+            payment = Payment(
+                order_id=f"topup_{user['id']}",
+                amount=topup_amount,
+                invoice_id=invoice.invoice_id,
+                pay_url=pay_url,
+                currency="USDT",
+                status="pending"
+            )
+            payment_dict = payment.model_dump()
+            payment_dict['created_at'] = payment_dict['created_at'].isoformat()
+            payment_dict['telegram_id'] = telegram_id
+            payment_dict['type'] = 'topup'
+            await db.payments.insert_one(payment_dict)
+            
+            keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            await update.message.reply_text(
+                f"""✅ Счёт на пополнение создан!
+
+💵 Сумма: ${topup_amount}
+
+💰 Оплатите ${topup_amount} USDT:
+{pay_url}
+
+⏰ После оплаты баланс будет пополнен автоматически, и вы сможете оплатить заказ.""",
+                reply_markup=reply_markup
+            )
+        else:
+            await update.message.reply_text("❌ Система оплаты не настроена.")
+        
+        context.user_data.clear()
+        return ConversationHandler.END
+        
+    except Exception as e:
+        logger.error(f"Top-up amount handling error: {e}")
+        await update.message.reply_text(f"❌ Ошибка: {str(e)}")
+        return ConversationHandler.END
+
 async def create_order_in_db(user, data, selected_rate, amount):
     order = Order(
         user_id=user['id'],
