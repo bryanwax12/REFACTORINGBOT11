@@ -1470,6 +1470,9 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         
         reply_markup = InlineKeyboardMarkup(keyboard)
         
+        # Save state for cancel return - only when showing rates
+        context.user_data['last_state'] = SELECT_CARRIER
+        
         await query.message.reply_text(message, reply_markup=reply_markup, parse_mode='HTML')
         return SELECT_CARRIER
         
