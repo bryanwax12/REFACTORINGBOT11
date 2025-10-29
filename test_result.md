@@ -216,11 +216,11 @@ backend:
 
   - task: "Return to Order - Save and Restore Last State"
     implemented: true
-    working: true
+    working: "NA"
     file: "/app/backend/server.py"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
+    stuck_count: 1
+    priority: "critical"
+    needs_retesting: true
     status_history:
         - working: false
           agent: "user"
@@ -231,6 +231,12 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ BACKEND INFRASTRUCTURE VERIFIED: All return to order functionality is properly implemented. Confirmed: (1) All 13 state handler functions save last_state correctly, (2) return_to_order function handles all conversation states (FROM_NAME through PARCEL_WEIGHT), (3) Cancel button with return option properly configured, (4) ConversationHandler includes 43 return_to_order callbacks, (5) Bot token valid (@whitelabellbot), (6) Supporting ShipStation API working (22 rates from USPS, UPS, FedEx). IMPORTANT: This is Telegram bot conversation flow - requires MANUAL TESTING through @whitelabellbot interface to verify actual button interactions and state restoration."
+        - working: false
+          agent: "user"
+          comment: "❌ ISSUE PERSISTS: User was on 'Шаг 2/11: Адрес отправителя' (FROM_ADDRESS), clicked cancel, clicked 'return to order', entered '215 Clayton St.' and received error: '❌ Используйте только английские буквы. Разрешены: буквы, пробелы, дефисы, точки'. This error message comes from name/city validation (not address validation), indicating wrong state is being restored."
+        - working: "NA"
+          agent: "main"
+          comment: "🔧 ROOT CAUSE IDENTIFIED: The problem was that order_from_address() and order_to_address() were OVERWRITING last_state at the END of the function (setting it to FROM_ADDRESS2/TO_ADDRESS2 after successful validation). This caused the bot to lose track of the actual state the user was in. When user returned to order, the state was incorrectly set. FIXED: Removed duplicate last_state assignment from end of order_from_address() (line 516) and order_to_address() (line 895). Now last_state is only set ONCE at the beginning of each handler function and never overwritten. Ready for retesting."
 
 metadata:
   created_by: "main_agent"
