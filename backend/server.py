@@ -1075,6 +1075,11 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     phone = update.message.text.strip()
     
+    # Check if phone starts with valid characters (+ or digit)
+    if not phone or (phone[0] not in '0123456789+'):
+        await update.message.reply_text("❌ Неверный формат телефона. Телефон должен начинаться с + или цифры\nНапример: +1234567890 или 1234567890")
+        return TO_PHONE
+    
     # Validate phone format
     import re
     # Remove all non-digit characters
