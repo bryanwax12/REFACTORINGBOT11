@@ -214,6 +214,21 @@ backend:
           agent: "testing"
           comment: "✅ Live GoShippo API key (shippo_live_209ad7f3458c4b61611048ac3d68b0c6120d0914) is working correctly. Successfully authenticating with GoShippo API and returning live carrier rates. Previous UPS issue in test mode is resolved - UPS rates are now available in live mode."
 
+  - task: "Return to Order - Save and Restore Last State"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "User reported: When clicking 'cancel' and then 'return to order', an address error occurs. The return_to_order function wasn't consistently displaying correct prompts for early states (e.g., address input)."
+        - working: "NA"
+          agent: "main"
+          comment: "✅ FIXED: Added context.user_data['last_state'] = <STATE> to all state handler functions (order_from_name, order_from_address, order_from_city, order_from_state, order_from_zip, order_from_phone, order_to_name, order_to_address, order_to_city, order_to_state, order_to_zip, order_to_phone, order_parcel_weight). This ensures that when user cancels and returns to order, the bot correctly restores the exact screen they were on with proper prompts. Also fixed step numbering in return_to_order (TO_ADDRESS2 changed from 'Шаг 9/13' to 'Шаг 10/13'). Ready for testing."
+
 metadata:
   created_by: "main_agent"
   version: "1.1"
