@@ -952,11 +952,19 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await (update.message or update.callback_query.message).reply_text(
-        """Шаг 10/13: Город получателя
+    # Check if we're in editing mode
+    if context.user_data.get('editing_to_address'):
+        await (update.message or update.callback_query.message).reply_text(
+            """Шаг 4/6: Город получателя
 Например: New York""",
-        reply_markup=reply_markup
-    )
+            reply_markup=reply_markup
+        )
+    else:
+        await (update.message or update.callback_query.message).reply_text(
+            """Шаг 11/13: Город получателя
+Например: New York""",
+            reply_markup=reply_markup
+        )
     context.user_data['last_state'] = TO_CITY  # Save state for next step
     return TO_CITY
 
