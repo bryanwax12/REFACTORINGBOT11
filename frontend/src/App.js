@@ -172,6 +172,29 @@ const Dashboard = () => {
     }
   };
 
+  const handleSetDiscount = async () => {
+    if (!discountModal.user) return;
+    
+    const discount = parseFloat(discountValue);
+    if (isNaN(discount) || discount < 0 || discount > 100) {
+      toast.error('Discount must be between 0 and 100');
+      return;
+    }
+    
+    try {
+      await axios.post(`${API}/users/${discountModal.user.telegram_id}/discount`, null, {
+        params: { discount }
+      });
+      
+      toast.success(`Discount set to ${discount}%`);
+      setDiscountModal({ open: false, user: null });
+      setDiscountValue('');
+      loadData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to set discount');
+    }
+  };
+
   const handleBalanceAction = (telegram_id, action) => {
     setBalanceModal({ open: true, telegram_id, action });
     setBalanceAmount('');
