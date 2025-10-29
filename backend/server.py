@@ -2187,9 +2187,50 @@ async def create_and_send_label(order_id, telegram_id, message):
         
         # Send label to user
         if bot_instance:
-            await bot_instance.send_message(
-                chat_id=telegram_id,
-                text=f"""📦 Shipping label создан!
+            try:
+                # Download label PDF
+                headers_download = {'API-Key': SHIPSTATION_API_KEY}
+                label_response_download = requests.get(label_download_url, headers=headers_download, timeout=30)
+                
+                if label_response_download.status_code == 200:
+                    # Send label as document
+                    message_text = f"""✅ Shipping Label создан!
+
+Order: #{order_id[:8]}
+Сумма: ${order['amount']:.2f}
+Carrier: {order['selected_carrier'].upper()}
+Service: {order['selected_service']}
+Tracking: {tracking_number}
+
+Ваша этикетка во вложении."""
+                    
+                    await bot_instance.send_document(
+                        chat_id=telegram_id,
+                        document=label_response_download.content,
+                        filename=f"label_{order_id[:8]}.pdf",
+                        caption=message_text
+                    )
+                    
+                    # Send tracking info with buttons
+                    keyboard = [
+                        [InlineKeyboardButton("📍 Отследить посылку", url=f"https://www.google.com/search?q={tracking_number}")],
+                        [InlineKeyboardButton("🏠 Главное меню", callback_data='main_menu')]
+                    ]
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+                    
+                    await bot_instance.send_message(
+                        chat_id=telegram_id,
+                        text=f"🔗 Трекинг номер:\n\n`{tracking_number}`",
+                        reply_markup=reply_markup,
+                        parse_mode='Markdown'
+                    )
+                    
+                    logger.info(f"Label PDF sent to user {telegram_id}")
+                else:
+                    # Fallback to text if PDF download fails
+                    await bot_instance.send_message(
+                        chat_id=telegram_id,
+                        text=f"""📦 Shipping label создан!
 
 Tracking: {tracking_number}
 Carrier: {order['selected_carrier']}
@@ -2198,7 +2239,12 @@ Service: {order['selected_service']}
 Label PDF: {label_download_url}
 
 Вы оплатили: ${order['amount']:.2f}"""
-            )
+                    )
+                    logger.warning(f"Could not download label PDF, sent URL instead")
+                    
+            except Exception as e:
+                logger.error(f"Error sending label to user: {e}")
+                
         logger.info(f"Label created successfully for order {order_id}")
         return True  # Success
         
