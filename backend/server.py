@@ -3299,6 +3299,50 @@ async def deduct_balance(telegram_id: int, amount: float):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+@api_router.post("/users/{telegram_id}/discount")
+async def set_user_discount(telegram_id: int, discount: float):
+    """
+    Set discount percentage for a user (e.g., 10 for 10% discount)
+    """
+    try:
+        if discount < 0 or discount > 100:
+            raise HTTPException(status_code=400, detail="Discount must be between 0 and 100")
+        
+        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Update discount
+        await db.users.update_one(
+            {"telegram_id": telegram_id},
+            {"$set": {"discount": discount}}
+        )
+        
+        # Notify user if bot is available and discount is set
+        if bot_instance and discount > 0:
+            try:
+                keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                
+                await bot_instance.send_message(
+                    chat_id=telegram_id,
+                    text=f"""🎉 Поздравляем!
+
+Вам предоставлена скидка {discount}% на все заказы!
+
+Скидка будет автоматически применена при создании следующих заказов.""",
+                    reply_markup=reply_markup
+                )
+            except Exception as e:
+                logger.error(f"Failed to notify user about discount: {e}")
+        
+        return {"success": True, "telegram_id": telegram_id, "discount": discount}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/carriers")
 async def get_carriers():
     """Get list of active carrier accounts from ShipStation"""
