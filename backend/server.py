@@ -2793,63 +2793,6 @@ async def track_shipment(tracking_number: str, carrier: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@api_router.get("/orders/search")
-async def search_orders(
-    query: Optional[str] = None,
-    payment_status: Optional[str] = None,
-    shipping_status: Optional[str] = None,
-    limit: int = 100
-):
-    """
-    Search orders by tracking number, order ID, or other fields
-    """
-    try:
-        search_filter = {}
-        
-        # Search by tracking number or order ID
-        if query:
-            # Get labels with matching tracking number
-            labels = await db.shipping_labels.find(
-                {"tracking_number": {"$regex": query, "$options": "i"}},
-                {"_id": 0, "order_id": 1}
-            ).to_list(100)
-            
-            matching_order_ids = [label['order_id'] for label in labels]
-            
-            # Search in orders by ID or matching tracking numbers
-            search_filter["$or"] = [
-                {"id": {"$regex": query, "$options": "i"}},
-                {"id": {"$in": matching_order_ids}}
-            ]
-        
-        # Filter by payment status
-        if payment_status:
-            search_filter["payment_status"] = payment_status
-        
-        # Filter by shipping status
-        if shipping_status:
-            search_filter["shipping_status"] = shipping_status
-        
-        # Get orders
-        orders = await db.orders.find(search_filter, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
-        
-        # Enrich with tracking numbers
-        for order in orders:
-            label = await db.shipping_labels.find_one({"order_id": order['id']}, {"_id": 0})
-            if label:
-                order['tracking_number'] = label.get('tracking_number', '')
-                order['label_url'] = label.get('label_url', '')
-                order['carrier'] = label.get('carrier', '')
-            else:
-                order['tracking_number'] = ''
-                order['label_url'] = ''
-                order['carrier'] = ''
-        
-        return orders
-    except Exception as e:
-        logger.error(f"Error searching orders: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
 @api_router.post("/orders/{order_id}/refund")
 async def refund_order(order_id: str, refund_reason: Optional[str] = None):
     """
