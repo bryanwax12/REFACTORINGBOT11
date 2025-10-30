@@ -2669,8 +2669,49 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return TO_PHONE
     
     elif last_state == PARCEL_WEIGHT:
-        await query.message.reply_text("Шаг 14/13: Вес посылки\n\nВведите вес в фунтах (lb)\nНапример: 2.5")
+        keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.message.reply_text(
+            "Вес посылки в фунтах (lb)\nНапример: 2",
+            reply_markup=reply_markup
+        )
         return PARCEL_WEIGHT
+    
+    elif last_state == PARCEL_LENGTH:
+        keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартные размеры", callback_data='skip_dimensions')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.message.reply_text(
+            """📏 Длина посылки в дюймах (inches)
+Например: 12
+
+Или нажмите кнопку ниже, чтобы использовать стандартные размеры (5x5x5 дюймов)""",
+            reply_markup=reply_markup
+        )
+        return PARCEL_LENGTH
+    
+    elif last_state == PARCEL_WIDTH:
+        keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартные размеры", callback_data='skip_dimensions')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.message.reply_text(
+            """📏 Ширина посылки в дюймах (inches)
+Например: 10
+
+Или нажмите кнопку ниже, чтобы использовать стандартные размеры для ширины и высоты (5x5 дюймов)""",
+            reply_markup=reply_markup
+        )
+        return PARCEL_WIDTH
+    
+    elif last_state == PARCEL_HEIGHT:
+        keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартную высоту", callback_data='skip_height')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.message.reply_text(
+            """📏 Высота посылки в дюймах (inches)
+Например: 8
+
+Или нажмите кнопку ниже, чтобы использовать стандартную высоту (5 дюймов)""",
+            reply_markup=reply_markup
+        )
+        return PARCEL_HEIGHT
     
     # Special states - show their specific screens
     elif last_state == CONFIRM_DATA:
