@@ -1276,12 +1276,12 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
         await query.answer()
         
         if query.data == 'skip_dimensions':
-            # Use default dimensions 5x5x5
-            context.user_data['length'] = 5
-            context.user_data['width'] = 5
-            context.user_data['height'] = 5
+            # Use default dimensions 10x10x10
+            context.user_data['length'] = 10
+            context.user_data['width'] = 10
+            context.user_data['height'] = 10
             
-            await query.message.reply_text("✅ Используются стандартные размеры: 5x5x5 дюймов")
+            await query.message.reply_text("✅ Используются стандартные размеры: 10x10x10 дюймов")
             
             # Show data confirmation
             context.user_data['last_state'] = CONFIRM_DATA
