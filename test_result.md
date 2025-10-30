@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Fix ShipStation address validation 400 Bad Request error - users reported that even with valid addresses, the system shows validation errors when trying to get shipping rates"
+user_problem_statement: "Add 'Contact Administrator' button in Help section of Telegram bot - user wants to add Telegram contact button for admin support in the Help menu"
 
 backend:
   - task: "ShipStation V2 API Rate Request Fix"
