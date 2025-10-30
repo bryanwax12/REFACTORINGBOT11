@@ -1285,12 +1285,10 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
         
         context.user_data['weight'] = weight
         
-        # Check if we're editing parcel weight
+        # Check if we're editing parcel weight - ask for dimensions too
         if context.user_data.get('editing_parcel'):
-            context.user_data['editing_parcel'] = False
             await update.message.reply_text("✅ Вес посылки обновлен!")
-            context.user_data['last_state'] = CONFIRM_DATA
-            return await show_data_confirmation(update, context)
+            # Don't set editing_parcel to False yet - we need to edit dimensions too
         
         # Ask for length (with skip option)
         keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартные размеры", callback_data='skip_dimensions')]]
