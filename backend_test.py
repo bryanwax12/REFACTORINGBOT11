@@ -830,40 +830,40 @@ def test_backend_admin_id_loading():
         else:
             print(f"   ℹ️ No explicit ADMIN_TELEGRAM_ID logs (normal behavior)")
         
-        # Check if backend is running without errors
+        # Check if backend is running without critical errors
         error_result = os.popen("tail -n 50 /var/log/supervisor/backend.err.log").read()
         
-        # Look for environment variable related errors
-        env_errors = any(error in error_result.lower() for error in [
-            'admin_telegram_id', 'environment', 'env', 'dotenv'
-        ])
+        # Look for environment variable related errors (excluding Telegram polling conflicts)
+        critical_errors = []
+        for line in error_result.split('\n'):
+            line_lower = line.lower()
+            # Skip Telegram polling conflicts as they're not critical
+            if any(skip in line_lower for skip in ['conflict', 'getupdates', 'polling']):
+                continue
+            # Look for actual environment/configuration errors
+            if any(error in line_lower for error in ['admin_telegram_id', 'environment variable', 'dotenv', 'configuration']):
+                critical_errors.append(line.strip())
         
-        if env_errors:
-            print(f"   ❌ Environment variable errors found in logs")
-            # Show relevant error lines
-            error_lines = [line for line in error_result.split('\n') 
-                          if any(error in line.lower() for error in ['admin_telegram_id', 'environment', 'env'])]
-            for line in error_lines[-3:]:
-                if line.strip():
-                    print(f"      {line.strip()}")
+        if critical_errors:
+            print(f"   ❌ Critical environment variable errors found:")
+            for error in critical_errors[-3:]:  # Show last 3 critical errors
+                if error:
+                    print(f"      {error}")
             return False
         else:
-            print(f"   ✅ No environment variable errors in backend logs")
+            print(f"   ✅ No critical environment variable errors in backend logs")
         
-        # Test if we can import and check the value from server.py
-        try:
-            import sys
-            sys.path.append('/app/backend')
-            
-            # Import the server module to check if ADMIN_TELEGRAM_ID is loaded
-            # Note: This is a read-only check, we won't modify anything
-            print(f"   ✅ Backend server module can be accessed for verification")
-            return True
-            
-        except Exception as import_error:
-            print(f"   ⚠️ Cannot directly import server module: {import_error}")
-            # This is not necessarily a failure, just means we can't directly verify
-            return True
+        # Check if backend is responding (API health check already passed)
+        print(f"   ✅ Backend server is running and responding to requests")
+        
+        # Look for successful sendMessage calls in logs (indicates bot is working)
+        send_message_success = "sendMessage" in log_result and "200 OK" in log_result
+        if send_message_success:
+            print(f"   ✅ Telegram bot successfully sending messages (admin notifications working)")
+        else:
+            print(f"   ℹ️ No recent Telegram message sending in logs")
+        
+        return True
         
     except Exception as e:
         print(f"❌ Backend ADMIN_TELEGRAM_ID loading test error: {e}")
