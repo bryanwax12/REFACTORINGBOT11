@@ -1418,6 +1418,11 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
             
             await query.message.reply_text("✅ Используется стандартная высота: 10 дюймов")
             
+            # If we're editing parcel, mark as complete
+            if context.user_data.get('editing_parcel'):
+                context.user_data['editing_parcel'] = False
+                await query.message.reply_text("✅ Размеры посылки обновлены!")
+            
             # Show data confirmation
             context.user_data['last_state'] = CONFIRM_DATA
             return await show_data_confirmation(update, context)
