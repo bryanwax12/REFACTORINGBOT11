@@ -312,23 +312,24 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         send_method = update.message.reply_text
     
-    help_text = """📦 Доступные команды:
+    help_text = """📦 *Доступные команды:*
 
 /start - Начать работу
 /help - Показать эту справку
 
 Для создания заказа используйте кнопку "📦 Создать заказ".
 
-Если у вас возникли вопросы или проблемы, нажмите кнопку ниже, чтобы связаться с администратором."""
+*Если у вас возникли вопросы или проблемы, нажмите кнопку ниже:*"""
     
     keyboard = []
     # Add contact administrator button if ADMIN_TELEGRAM_ID is configured
     if ADMIN_TELEGRAM_ID:
         keyboard.append([InlineKeyboardButton("💬 Связаться с администратором", url=f"tg://user?id={ADMIN_TELEGRAM_ID}")])
+    # Add main menu button on separate row at the bottom
     keyboard.append([InlineKeyboardButton("🔙 Главное меню", callback_data='start')])
     
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await send_method(help_text, reply_markup=reply_markup)
+    await send_method(help_text, reply_markup=reply_markup, parse_mode='Markdown')
 
 
 
