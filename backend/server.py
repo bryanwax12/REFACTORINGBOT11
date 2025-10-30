@@ -1247,10 +1247,22 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
         if context.user_data.get('editing_parcel'):
             context.user_data['editing_parcel'] = False
             await update.message.reply_text("✅ Вес посылки обновлен!")
+            context.user_data['last_state'] = CONFIRM_DATA
+            return await show_data_confirmation(update, context)
         
-        # Show data confirmation instead of immediately fetching rates
-        context.user_data['last_state'] = CONFIRM_DATA  # Save state for next step
-        return await show_data_confirmation(update, context)
+        # Ask for length (with skip option)
+        keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартные размеры", callback_data='skip_dimensions')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await update.message.reply_text(
+            """📏 Длина посылки в дюймах (inches)
+Например: 12
+
+Или нажмите кнопку ниже, чтобы использовать стандартные размеры (5x5x5 дюймов)""",
+            reply_markup=reply_markup
+        )
+        context.user_data['last_state'] = PARCEL_LENGTH  # Save state for next step
+        return PARCEL_LENGTH
             
     except ValueError:
         await update.message.reply_text("❌ Неверный формат. Введите число (например: 2 или 2.5):")
