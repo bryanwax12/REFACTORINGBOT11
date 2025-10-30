@@ -2343,9 +2343,9 @@ async def create_and_send_label(order_id, telegram_id, message):
                         'unit': 'pound'
                     },
                     'dimensions': {
-                        'length': order['parcel'].get('length', 5),
-                        'width': order['parcel'].get('width', 5),
-                        'height': order['parcel'].get('height', 5),
+                        'length': order['parcel'].get('length', 10),
+                        'width': order['parcel'].get('width', 10),
+                        'height': order['parcel'].get('height', 10),
                         'unit': 'inch'
                     }
                 }],
