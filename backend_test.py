@@ -1421,7 +1421,7 @@ def main():
     
     # Priority order for Help Command tests
     help_command_tests = [
-        'help_command_implementation', 'help_command_infrastructure', 'help_command_url_generation'
+        'help_command_implementation', 'help_command_infrastructure', 'help_command_url_generation', 'help_command_formatting_improvements'
     ]
     admin_notification_tests = [
         'admin_telegram_id_env', 'admin_notification_function', 'contact_admin_buttons',
