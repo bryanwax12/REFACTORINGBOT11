@@ -307,8 +307,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     keyboard_markup = ReplyKeyboardMarkup(
         permanent_keyboard,
-        resize_keyboard=True,  # Make button smaller
-        persistent=True  # Keep keyboard visible
+        resize_keyboard=True  # Make button smaller
     )
     
     await send_method(welcome_message, reply_markup=reply_markup, parse_mode='Markdown')
