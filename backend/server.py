@@ -317,9 +317,16 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 /start - Начать работу
 /help - Показать эту справку
 
-Для создания заказа используйте кнопку "📦 Создать заказ"."""
+Для создания заказа используйте кнопку "📦 Создать заказ".
+
+Если у вас возникли вопросы или проблемы, нажмите кнопку ниже, чтобы связаться с администратором."""
     
-    keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+    keyboard = []
+    # Add contact administrator button if ADMIN_TELEGRAM_ID is configured
+    if ADMIN_TELEGRAM_ID:
+        keyboard.append([InlineKeyboardButton("💬 Связаться с администратором", url=f"tg://user?id={ADMIN_TELEGRAM_ID}")])
+    keyboard.append([InlineKeyboardButton("🔙 Главное меню", callback_data='start')])
+    
     reply_markup = InlineKeyboardMarkup(keyboard)
     await send_method(help_text, reply_markup=reply_markup)
 
