@@ -287,7 +287,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 *Выберите действие:*"""
     
-    # Create inline keyboard with buttons
+    # Create keyboard with buttons
     keyboard = [
         [
             InlineKeyboardButton("📦 Создать заказ", callback_data='new_order')
@@ -301,18 +301,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    # Create permanent reply keyboard at the bottom
-    permanent_keyboard = [
-        [KeyboardButton("🏠 Главное меню")]
-    ]
-    keyboard_markup = ReplyKeyboardMarkup(
-        permanent_keyboard,
-        resize_keyboard=True  # Make button smaller
-    )
-    
     await send_method(welcome_message, reply_markup=reply_markup, parse_mode='Markdown')
-    # Send a separate message with permanent keyboard (Telegram limitation - can't combine both keyboards)
-    await send_method("Используйте кнопку ниже для быстрого доступа к меню 👇", reply_markup=keyboard_markup)
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Handle both command and callback
