@@ -312,7 +312,11 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         send_method = update.message.reply_text
     
-    help_text = """*Если у вас возникли вопросы или проблемы, нажмите кнопку ниже:*"""
+    help_text = """
+
+*Если у вас возникли вопросы или проблемы, нажмите кнопку ниже:*
+
+"""
     
     keyboard = []
     # Add contact administrator button if ADMIN_TELEGRAM_ID is configured
