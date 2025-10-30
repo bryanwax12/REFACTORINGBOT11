@@ -265,10 +265,6 @@ const Dashboard = () => {
     }
   };
 
-      console.error('Create label error:', error);
-    }
-  };
-
 
   const fetchTrackingStatus = async (trackingNumber, carrier) => {
     if (!trackingNumber || !carrier) {
