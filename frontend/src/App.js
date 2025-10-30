@@ -205,26 +205,30 @@ const Dashboard = () => {
       const from_address = {
         name: document.getElementById('from_name')?.value?.trim() || '',
         phone: document.getElementById('from_phone')?.value?.trim() || '',
-        street: document.getElementById('from_address')?.value?.trim() || '',
+        street1: document.getElementById('from_address')?.value?.trim() || '',
         city: document.getElementById('from_city')?.value?.trim() || '',
         state: document.getElementById('from_state')?.value?.trim().toUpperCase() || '',
-        zip: document.getElementById('from_zip')?.value?.trim() || ''
+        zip: document.getElementById('from_zip')?.value?.trim() || '',
+        country: 'US'
       };
       
       const to_address = {
         name: document.getElementById('to_name')?.value?.trim() || '',
         phone: document.getElementById('to_phone')?.value?.trim() || '',
-        street: document.getElementById('to_address')?.value?.trim() || '',
+        street1: document.getElementById('to_address')?.value?.trim() || '',
         city: document.getElementById('to_city')?.value?.trim() || '',
         state: document.getElementById('to_state')?.value?.trim().toUpperCase() || '',
-        zip: document.getElementById('to_zip')?.value?.trim() || ''
+        zip: document.getElementById('to_zip')?.value?.trim() || '',
+        country: 'US'
       };
       
       const parcel = {
         weight: parseFloat(document.getElementById('weight')?.value) || 0,
         length: parseFloat(document.getElementById('length')?.value) || 0,
         width: parseFloat(document.getElementById('width')?.value) || 0,
-        height: parseFloat(document.getElementById('height')?.value) || 0
+        height: parseFloat(document.getElementById('height')?.value) || 0,
+        distance_unit: 'in',
+        mass_unit: 'lb'
       };
 
       // Validate required fields - FROM ADDRESS
@@ -232,7 +236,7 @@ const Dashboard = () => {
         toast.error('Please enter sender name');
         return;
       }
-      if (!from_address.street) {
+      if (!from_address.street1) {
         toast.error('Please enter sender address');
         return;
       }
@@ -254,7 +258,7 @@ const Dashboard = () => {
         toast.error('Please enter recipient name');
         return;
       }
-      if (!to_address.street) {
+      if (!to_address.street1) {
         toast.error('Please enter recipient address');
         return;
       }
