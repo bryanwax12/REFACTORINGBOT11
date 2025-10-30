@@ -203,34 +203,81 @@ const Dashboard = () => {
     try {
       // Get form values
       const from_address = {
-        name: document.getElementById('from_name')?.value || '',
-        phone: document.getElementById('from_phone')?.value || '',
-        street: document.getElementById('from_address')?.value || '',
-        city: document.getElementById('from_city')?.value || '',
-        state: document.getElementById('from_state')?.value || '',
-        zip: document.getElementById('from_zip')?.value || ''
+        name: document.getElementById('from_name')?.value?.trim() || '',
+        phone: document.getElementById('from_phone')?.value?.trim() || '',
+        street: document.getElementById('from_address')?.value?.trim() || '',
+        city: document.getElementById('from_city')?.value?.trim() || '',
+        state: document.getElementById('from_state')?.value?.trim().toUpperCase() || '',
+        zip: document.getElementById('from_zip')?.value?.trim() || ''
       };
       
       const to_address = {
-        name: document.getElementById('to_name')?.value || '',
-        phone: document.getElementById('to_phone')?.value || '',
-        street: document.getElementById('to_address')?.value || '',
-        city: document.getElementById('to_city')?.value || '',
-        state: document.getElementById('to_state')?.value || '',
-        zip: document.getElementById('to_zip')?.value || ''
+        name: document.getElementById('to_name')?.value?.trim() || '',
+        phone: document.getElementById('to_phone')?.value?.trim() || '',
+        street: document.getElementById('to_address')?.value?.trim() || '',
+        city: document.getElementById('to_city')?.value?.trim() || '',
+        state: document.getElementById('to_state')?.value?.trim().toUpperCase() || '',
+        zip: document.getElementById('to_zip')?.value?.trim() || ''
       };
       
       const parcel = {
-        weight: parseFloat(document.getElementById('weight')?.value) || 1,
-        length: parseFloat(document.getElementById('length')?.value) || 10,
-        width: parseFloat(document.getElementById('width')?.value) || 10,
-        height: parseFloat(document.getElementById('height')?.value) || 10
+        weight: parseFloat(document.getElementById('weight')?.value) || 0,
+        length: parseFloat(document.getElementById('length')?.value) || 0,
+        width: parseFloat(document.getElementById('width')?.value) || 0,
+        height: parseFloat(document.getElementById('height')?.value) || 0
       };
 
-      // Validate required fields
-      if (!from_address.city || !from_address.state || !from_address.zip ||
-          !to_address.city || !to_address.state || !to_address.zip) {
-        toast.error('Please fill all address fields first');
+      // Validate required fields - FROM ADDRESS
+      if (!from_address.name) {
+        toast.error('Please enter sender name');
+        return;
+      }
+      if (!from_address.street) {
+        toast.error('Please enter sender address');
+        return;
+      }
+      if (!from_address.city) {
+        toast.error('Please enter sender city');
+        return;
+      }
+      if (!from_address.state || from_address.state.length !== 2) {
+        toast.error('Please enter valid sender state (2 letters)');
+        return;
+      }
+      if (!from_address.zip) {
+        toast.error('Please enter sender ZIP code');
+        return;
+      }
+
+      // Validate required fields - TO ADDRESS
+      if (!to_address.name) {
+        toast.error('Please enter recipient name');
+        return;
+      }
+      if (!to_address.street) {
+        toast.error('Please enter recipient address');
+        return;
+      }
+      if (!to_address.city) {
+        toast.error('Please enter recipient city');
+        return;
+      }
+      if (!to_address.state || to_address.state.length !== 2) {
+        toast.error('Please enter valid recipient state (2 letters)');
+        return;
+      }
+      if (!to_address.zip) {
+        toast.error('Please enter recipient ZIP code');
+        return;
+      }
+
+      // Validate parcel
+      if (parcel.weight <= 0) {
+        toast.error('Please enter valid weight');
+        return;
+      }
+      if (parcel.length <= 0 || parcel.width <= 0 || parcel.height <= 0) {
+        toast.error('Please enter valid dimensions');
         return;
       }
 
