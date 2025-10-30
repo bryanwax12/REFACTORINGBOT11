@@ -307,6 +307,21 @@ backend:
           agent: "testing"
           comment: "✅ CSV EXPORT API WORKING PERFECTLY: All functionality tested and confirmed working: (1) ✅ Proper CSV format with all required headers (Order ID, Telegram ID, Amount, Payment Status, Shipping Status, Tracking Number, Carrier, addresses, weight, dates), (2) ✅ Content-Disposition header for file download with timestamped filename, (3) ✅ Payment status filter working (payment_status=paid), (4) ✅ Shipping status filter working (shipping_status=pending), (5) ✅ Data enrichment with tracking information from shipping_labels collection, (6) ✅ Exports 7 orders with proper CSV structure. Content-Type: text/csv correctly set."
 
+  - task: "Admin Error Notification System with Updated ADMIN_TELEGRAM_ID"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Updated ADMIN_TELEGRAM_ID from 5594152712 to 7066790254 in /app/backend/.env. Backend restarted to load new value. Need to verify error notifications are sent to correct Telegram ID and Contact Administrator buttons use correct URL."
+        - working: true
+          agent: "testing"
+          comment: "✅ ADMIN ERROR NOTIFICATION SYSTEM FULLY VERIFIED: Comprehensive testing confirms all components working correctly with updated ADMIN_TELEGRAM_ID (7066790254): (1) ✅ Environment variable loaded correctly from .env file, (2) ✅ notify_admin_error function properly configured with correct parameters, HTML formatting, and error message structure, (3) ✅ Contact Administrator buttons found in test_error_message (line 250-251) and general error handler (line 2353-2354) using correct URL format tg://user?id={ADMIN_TELEGRAM_ID}, (4) ✅ Backend server loads ADMIN_TELEGRAM_ID without critical errors, (5) ✅ Telegram bot integration working with valid token (@whitelabellbot) and correct admin ID format, (6) ✅ LIVE TEST: Successfully sent test notification to admin ID 7066790254 (Message ID: 2457). All 3 integration points verified: show_error_message(), notify_admin_error(), and general error handler. Expected results achieved: ADMIN_TELEGRAM_ID='7066790254', error notifications sent to new ID, Contact Administrator buttons link to tg://user?id=7066790254."
+
 metadata:
   created_by: "main_agent"
   version: "1.1"
