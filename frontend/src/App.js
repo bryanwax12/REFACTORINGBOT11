@@ -509,6 +509,7 @@ const Dashboard = () => {
                         <th className="pb-3 font-medium">Order ID</th>
                         <th className="pb-3 font-medium">Tracking #</th>
                         <th className="pb-3 font-medium">Route</th>
+                        <th className="pb-3 font-medium">Parcel</th>
                         <th className="pb-3 font-medium">Amount</th>
                         <th className="pb-3 font-medium">Status</th>
                         <th className="pb-3 font-medium">Delivery</th>
