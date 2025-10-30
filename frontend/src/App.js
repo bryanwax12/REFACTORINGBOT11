@@ -935,35 +935,48 @@ const Dashboard = () => {
                 {/* Carrier Selection */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Shipping Service</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="carrier">Carrier *</Label>
-                      <select 
-                        id="carrier" 
-                        className="w-full border rounded-md p-2"
-                        onChange={(e) => {
-                          const carrier = e.target.value;
-                          setSelectedService('');
-                          if (carrier) {
-                            fetchShippingRates(carrier);
-                          } else {
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="carrier">Carrier *</Label>
+                        <select 
+                          id="carrier" 
+                          className="w-full border rounded-md p-2"
+                          onChange={(e) => {
+                            setSelectedService('');
                             setAvailableRates([]);
-                          }
-                        }}
-                      >
-                        <option value="">Select Carrier</option>
-                        <option value="ups">UPS</option>
-                        <option value="fedex">FedEx</option>
-                        <option value="usps">USPS</option>
-                      </select>
+                          }}
+                        >
+                          <option value="">Select Carrier</option>
+                          <option value="ups">UPS</option>
+                          <option value="fedex">FedEx</option>
+                          <option value="usps">USPS</option>
+                        </select>
+                      </div>
+                      <div>
+                        <Label>&nbsp;</Label>
+                        <Button 
+                          type="button"
+                          className="w-full"
+                          variant="outline"
+                          onClick={() => {
+                            const carrier = document.getElementById('carrier').value;
+                            if (!carrier) {
+                              toast.error('Please select a carrier first');
+                              return;
+                            }
+                            fetchShippingRates(carrier);
+                          }}
+                          disabled={loadingRates}
+                        >
+                          {loadingRates ? 'Loading...' : 'Get Rates'}
+                        </Button>
+                      </div>
                     </div>
-                    <div>
-                      <Label htmlFor="service_code">Service & Price *</Label>
-                      {loadingRates ? (
-                        <div className="w-full border rounded-md p-2 text-muted-foreground">
-                          Loading rates...
-                        </div>
-                      ) : availableRates.length > 0 ? (
+                    
+                    {availableRates.length > 0 && (
+                      <div>
+                        <Label htmlFor="service_code">Service & Price *</Label>
                         <select 
                           id="service_code" 
                           className="w-full border rounded-md p-2"
@@ -977,15 +990,11 @@ const Dashboard = () => {
                             </option>
                           ))}
                         </select>
-                      ) : (
-                        <div className="w-full border rounded-md p-2 text-muted-foreground">
-                          Select carrier to see prices
-                        </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Select carrier first to load available services with prices
+                    Fill all fields above, select carrier, then click "Get Rates" to see prices
                   </p>
                 </div>
 
