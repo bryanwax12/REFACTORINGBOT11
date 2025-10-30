@@ -281,11 +281,11 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_dict['created_at'] = user_dict['created_at'].isoformat()
         await db.users.insert_one(user_dict)
         
-    welcome_message = f"""Добро пожаловать, {first_name}! 🚀
+    welcome_message = f"""*Добро пожаловать, {first_name}! 🚀*
 
-Я помогу вам создать shipping labels.
+*Я помогу вам создать shipping labels.*
 
-Выберите действие:"""
+*Выберите действие:*"""
     
     # Create keyboard with buttons (2 buttons per row)
     keyboard = [
@@ -301,7 +301,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await send_method(welcome_message, reply_markup=reply_markup)
+    await send_method(welcome_message, reply_markup=reply_markup, parse_mode='Markdown')
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Handle both command and callback
