@@ -4157,8 +4157,6 @@ async def startup_event():
             application.add_handler(CommandHandler("help", help_command))
             application.add_handler(CommandHandler("balance", my_balance_command))
             application.add_handler(CallbackQueryHandler(handle_topup, pattern='^topup_\d+$'))
-            # Add handler for permanent "Main Menu" button
-            application.add_handler(MessageHandler(filters.Regex('^🏠 Главное меню$'), start_command))
             application.add_handler(CallbackQueryHandler(button_callback))
             
             await application.initialize()
