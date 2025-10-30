@@ -1030,6 +1030,9 @@ const Dashboard = () => {
                         loadData();
                         // Clear form
                         document.querySelectorAll('input').forEach(input => input.value = '');
+                        document.querySelectorAll('select').forEach(select => select.value = '');
+                        setAvailableRates([]);
+                        setSelectedService('');
                       })
                       .catch(error => {
                         const errorMsg = error.response?.data?.detail || 'Failed to create label';
