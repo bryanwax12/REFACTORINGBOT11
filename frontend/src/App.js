@@ -616,6 +616,18 @@ const Dashboard = () => {
                           </td>
                           <td className="py-3">
                             <div className="flex gap-1 justify-end">
+                              {/* Create Label button - for paid orders without label */}
+                              {order.payment_status === 'paid' && !order.label_id && (
+                                <Button
+                                  size="sm"
+                                  variant="default"
+                                  onClick={() => createLabelManually(order)}
+                                  title="Create Label Manually"
+                                  className="bg-blue-600 hover:bg-blue-700"
+                                >
+                                  <Send className="h-4 w-4" />
+                                </Button>
+                              )}
                               {order.label_id && (
                                 <Button
                                   size="sm"
