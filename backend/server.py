@@ -1611,9 +1611,9 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
                         'unit': 'pound'
                     },
                     'dimensions': {
-                        'length': data.get('length', 5),
-                        'width': data.get('width', 5),
-                        'height': data.get('height', 5),
+                        'length': data.get('length', 10),
+                        'width': data.get('width', 10),
+                        'height': data.get('height', 10),
                         'unit': 'inch'
                     }
                 }]
