@@ -195,6 +195,74 @@ const Dashboard = () => {
     } catch (error) {
       const errorMsg = error.response?.data?.detail || 'Failed to create label';
       toast.error(errorMsg);
+
+
+  const fetchShippingRates = async (carrierFilter = null) => {
+    try {
+      // Get form values
+      const from_address = {
+        name: document.getElementById('from_name')?.value || '',
+        phone: document.getElementById('from_phone')?.value || '',
+        street: document.getElementById('from_address')?.value || '',
+        city: document.getElementById('from_city')?.value || '',
+        state: document.getElementById('from_state')?.value || '',
+        zip: document.getElementById('from_zip')?.value || ''
+      };
+      
+      const to_address = {
+        name: document.getElementById('to_name')?.value || '',
+        phone: document.getElementById('to_phone')?.value || '',
+        street: document.getElementById('to_address')?.value || '',
+        city: document.getElementById('to_city')?.value || '',
+        state: document.getElementById('to_state')?.value || '',
+        zip: document.getElementById('to_zip')?.value || ''
+      };
+      
+      const parcel = {
+        weight: parseFloat(document.getElementById('weight')?.value) || 1,
+        length: parseFloat(document.getElementById('length')?.value) || 10,
+        width: parseFloat(document.getElementById('width')?.value) || 10,
+        height: parseFloat(document.getElementById('height')?.value) || 10
+      };
+
+      // Validate required fields
+      if (!from_address.city || !from_address.state || !from_address.zip ||
+          !to_address.city || !to_address.state || !to_address.zip) {
+        toast.error('Please fill all address fields first');
+        return;
+      }
+
+      setLoadingRates(true);
+      
+      const response = await axios.post(`${API}/calculate-shipping`, {
+        from_address,
+        to_address,
+        parcel
+      });
+
+      let rates = response.data.rates || [];
+      
+      // Filter by carrier if specified
+      if (carrierFilter) {
+        rates = rates.filter(rate => rate.carrier_code?.toLowerCase() === carrierFilter.toLowerCase());
+      }
+
+      setAvailableRates(rates);
+      
+      if (rates.length === 0) {
+        toast.error('No shipping rates available for selected carrier');
+      }
+      
+    } catch (error) {
+      const errorMsg = error.response?.data?.detail || 'Failed to fetch shipping rates';
+      toast.error(errorMsg);
+      console.error('Fetch rates error:', error);
+      setAvailableRates([]);
+    } finally {
+      setLoadingRates(false);
+    }
+  };
+
       console.error('Create label error:', error);
     }
   };
