@@ -297,6 +297,9 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ],
         [
             InlineKeyboardButton("❓ Помощь", callback_data='help')
+        ],
+        [
+            InlineKeyboardButton("📖 FAQ", callback_data='faq')
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
