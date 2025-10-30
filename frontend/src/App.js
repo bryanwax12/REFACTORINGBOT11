@@ -756,6 +756,22 @@ const Dashboard = () => {
           </Card>
         </TabsContent>
 
+
+        <TabsContent value="create-label" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Create Label Manually</CardTitle>
+              <CardDescription>Create shipping label manually when bot is not working</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">Coming soon - Manual label creation form</p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+
         <TabsContent value="leaderboard" className="space-y-4">
           <Card>
             <CardHeader>
