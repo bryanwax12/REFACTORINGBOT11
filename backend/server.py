@@ -438,6 +438,8 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await my_balance_command(update, context)
     elif query.data == 'help':
         await help_command(update, context)
+    elif query.data == 'faq':
+        await faq_command(update, context)
     elif query.data == 'new_order':
         await new_order_start(update, context)
     elif query.data == 'cancel_order':
