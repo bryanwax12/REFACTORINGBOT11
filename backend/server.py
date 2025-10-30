@@ -3496,7 +3496,7 @@ async def refund_order(order_id: str, refund_reason: Optional[str] = None):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@api_router.post("/admin/create-label/{order_id}", dependencies=[Depends(verify_api_key)])
+@api_router.post("/admin/create-label/{order_id}", dependencies=[Depends(verify_admin_key)])
 async def create_label_manually(order_id: str):
     """
     Manually create shipping label for paid order (admin function)
