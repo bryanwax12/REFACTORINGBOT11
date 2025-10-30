@@ -1244,7 +1244,12 @@ def main():
     # 1. Test API Health
     results['api_health'] = test_api_health()
     
-    # 2. Test ADMIN ERROR NOTIFICATION SYSTEM (Main Focus)
+    # 2. Test HELP COMMAND WITH CONTACT ADMINISTRATOR BUTTON (Main Focus)
+    results['help_command_implementation'] = test_help_command_implementation()
+    results['help_command_infrastructure'] = test_telegram_bot_help_infrastructure()
+    results['help_command_url_generation'] = test_help_command_url_generation()
+    
+    # 3. Test ADMIN ERROR NOTIFICATION SYSTEM (Supporting)
     results['admin_telegram_id_env'] = test_admin_telegram_id_environment()
     results['admin_notification_function'] = test_admin_notification_function()
     results['contact_admin_buttons'] = test_contact_admin_buttons()
