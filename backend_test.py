@@ -931,6 +931,71 @@ def test_telegram_bot_admin_integration():
         print(f"❌ Telegram bot admin integration test error: {e}")
         return False
 
+def test_admin_notification_sending():
+    """Test actual admin notification sending functionality"""
+    print("\n🔍 Testing Admin Notification Sending...")
+    
+    try:
+        # Load environment variables
+        load_dotenv('/app/backend/.env')
+        bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')
+        admin_id = os.environ.get('ADMIN_TELEGRAM_ID')
+        
+        if not bot_token or not admin_id:
+            print("   ❌ Bot token or admin ID not available")
+            return False
+        
+        # Test sending a notification directly to verify the admin ID works
+        test_message = """🧪 <b>ТЕСТ УВЕДОМЛЕНИЯ</b> 🧪
+
+👤 <b>Тестирование системы уведомлений:</b>
+   • ADMIN_TELEGRAM_ID: {admin_id}
+   • Время: {timestamp}
+
+✅ <b>Статус:</b> Система уведомлений работает корректно
+
+📋 <b>Детали:</b>
+Это тестовое сообщение для проверки обновленного ADMIN_TELEGRAM_ID (7066790254)"""
+        
+        from datetime import datetime
+        formatted_message = test_message.format(
+            admin_id=admin_id,
+            timestamp=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        )
+        
+        # Send test notification using Telegram API directly
+        telegram_url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+        payload = {
+            'chat_id': admin_id,
+            'text': formatted_message,
+            'parse_mode': 'HTML'
+        }
+        
+        print(f"   Sending test notification to admin ID: {admin_id}")
+        response = requests.post(telegram_url, json=payload, timeout=10)
+        
+        if response.status_code == 200:
+            result = response.json()
+            if result.get('ok'):
+                print(f"   ✅ Test notification sent successfully")
+                print(f"   Message ID: {result.get('result', {}).get('message_id', 'N/A')}")
+                return True
+            else:
+                print(f"   ❌ Telegram API error: {result.get('description', 'Unknown error')}")
+                return False
+        else:
+            print(f"   ❌ HTTP error: {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"   Error details: {error_data}")
+            except:
+                print(f"   Error text: {response.text}")
+            return False
+        
+    except Exception as e:
+        print(f"❌ Admin notification sending test error: {e}")
+        return False
+
 def main():
     """Run all tests - Focus on Admin Error Notification System"""
     print("🚀 Testing Admin Error Notification System")
