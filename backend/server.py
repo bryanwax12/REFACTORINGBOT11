@@ -2273,9 +2273,9 @@ async def create_order_in_db(user, data, selected_rate, amount, discount_percent
             phone=data.get('to_phone', '')
         ),
         parcel=Parcel(
-            length=5,
-            width=5,
-            height=5,
+            length=data.get('length', 5),
+            width=data.get('width', 5),
+            height=data.get('height', 5),
             weight=data['weight'],
             distance_unit="in",
             mass_unit="lb"
