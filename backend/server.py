@@ -1373,10 +1373,10 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
         await query.answer()
         
         if query.data == 'skip_height':
-            # Use default height 5
-            context.user_data['height'] = 5
+            # Use default height 10
+            context.user_data['height'] = 10
             
-            await query.message.reply_text("✅ Используется стандартная высота: 5 дюймов")
+            await query.message.reply_text("✅ Используется стандартная высота: 10 дюймов")
             
             # Show data confirmation
             context.user_data['last_state'] = CONFIRM_DATA
