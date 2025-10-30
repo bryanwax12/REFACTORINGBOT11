@@ -1357,17 +1357,29 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
         
         context.user_data['length'] = length
         
-        # Ask for width
-        keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартные размеры", callback_data='skip_dimensions')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
+        # Ask for width (with skip option only if weight <= 10 lb)
+        weight = context.user_data.get('weight', 0)
         
-        await update.message.reply_text(
-            """📏 Ширина посылки в дюймах (inches)
+        if weight > 10:
+            # Heavy parcel - user MUST enter dimensions
+            await update.message.reply_text(
+                """📏 Ширина посылки в дюймах (inches)
+
+Введите ширину в дюймах (например: 12):"""
+            )
+        else:
+            # Light parcel - can skip and use default dimensions
+            keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартные размеры", callback_data='skip_dimensions')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            await update.message.reply_text(
+                """📏 Ширина посылки в дюймах (inches)
 Например: 10
 
-Или нажмите кнопку ниже, чтобы использовать стандартные размеры для ширины и высоты (5x5 дюймов)""",
-            reply_markup=reply_markup
-        )
+Или нажмите кнопку ниже, чтобы использовать стандартные размеры для ширины и высоты (10x10 дюймов)""",
+                reply_markup=reply_markup
+            )
+        
         context.user_data['last_state'] = PARCEL_WIDTH
         return PARCEL_WIDTH
             
