@@ -3511,9 +3511,10 @@ async def create_label_manually(order_id: str):
         if order['payment_status'] != 'paid':
             raise HTTPException(status_code=400, detail="Order must be paid to create label")
         
-        # Check if label already exists
-        if order.get('label_id'):
-            raise HTTPException(status_code=400, detail="Label already exists for this order")
+        # If label already exists, we'll recreate it (void old one first if possible)
+        recreating = bool(order.get('label_id'))
+        if recreating:
+            logger.info(f"Recreating label for order {order_id} (old label_id: {order.get('label_id')})")
         
         # Prepare ShipStation API request
         if not SHIPSTATION_API_KEY:
