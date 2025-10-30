@@ -1432,6 +1432,7 @@ async def show_data_confirmation(update: Update, context: ContextTypes.DEFAULT_T
     
     message += "📦 ПОСЫЛКА:\n"
     message += f"   Вес: {data.get('weight')} фунтов\n"
+    message += f"   Размеры: {data.get('length', 5)} x {data.get('width', 5)} x {data.get('height', 5)} дюймов\n"
     
     keyboard = [
         [InlineKeyboardButton("✅ Всё верно, показать тарифы", callback_data='confirm_data')],
