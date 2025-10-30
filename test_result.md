@@ -337,6 +337,7 @@ test_plan:
     - "Return to Order - CRITICAL FIX COMPLETED: Backend testing verified the fix is working. Manual testing via @whitelabellbot recommended to confirm end-to-end functionality: start /order, enter name, click cancel at 'Адрес отправителя' step, click 'return to order', then enter '215 Clayton St.' - should now accept address without errors."
   completed_testing:
     - "Admin Panel Backend APIs - ALL ENDPOINTS TESTED AND WORKING: (1) Search Orders API (GET /api/orders/search) - search by order ID, tracking number, payment/shipping status filters, order enrichment ✅, (2) Refund Order API (POST /api/orders/{order_id}/refund) - refunds paid orders, updates user balance, order status, Telegram notifications ✅, (3) Export CSV API (GET /api/orders/export/csv) - proper CSV format, download headers, filters, data enrichment ✅. Fixed critical FastAPI routing conflict. All APIs ready for frontend integration."
+    - "Admin Error Notification System - COMPREHENSIVE VERIFICATION COMPLETE: Updated ADMIN_TELEGRAM_ID (7066790254) fully tested and working: (1) Environment variable loading ✅, (2) notify_admin_error function configuration ✅, (3) Contact Administrator buttons in test_error_message and general error handler ✅, (4) Backend loading without errors ✅, (5) Telegram bot integration ✅, (6) Live notification sending test successful (Message ID: 2457) ✅. All 3 integration points verified with correct URL format tg://user?id=7066790254."
 
 agent_communication:
     - agent: "main"
