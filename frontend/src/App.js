@@ -195,7 +195,9 @@ const Dashboard = () => {
     } catch (error) {
       const errorMsg = error.response?.data?.detail || 'Failed to create label';
       toast.error(errorMsg);
-
+      console.error('Create label error:', error);
+    }
+  };
 
   const fetchShippingRates = async (carrierFilter = null) => {
     try {
