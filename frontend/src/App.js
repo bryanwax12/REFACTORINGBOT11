@@ -574,6 +574,14 @@ const Dashboard = () => {
                               <div className="text-muted-foreground">→ {order.address_to.city}, {order.address_to.state}</div>
                             </div>
                           </td>
+                          <td className="py-3">
+                            <div className="text-xs">
+                              <div className="font-medium">⚖️ {order.parcel?.weight || 'N/A'} lb</div>
+                              <div className="text-muted-foreground">
+                                📦 {order.parcel?.length || 'N/A'} × {order.parcel?.width || 'N/A'} × {order.parcel?.height || 'N/A'} in
+                              </div>
+                            </div>
+                          </td>
                           <td className="py-3 font-semibold">${order.amount}</td>
                           <td className="py-3">
                             <div className="flex flex-col gap-1">
