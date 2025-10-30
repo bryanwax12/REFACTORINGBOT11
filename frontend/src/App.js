@@ -175,6 +175,28 @@ const Dashboard = () => {
     }
   };
 
+  const createLabelManually = async (order) => {
+    if (!window.confirm(`Create shipping label for Order ${order.id.substring(0, 8)}?\n\nThis will generate a label using ShipStation API.`)) {
+      return;
+    }
+
+    try {
+      toast.info('Creating label... Please wait');
+      
+      const response = await axios.post(`${API}/admin/create-label/${order.id}`);
+      
+      toast.success('Label created successfully!');
+      
+      // Reload data to show updated order
+      await loadData();
+    } catch (error) {
+      const errorMsg = error.response?.data?.detail || 'Failed to create label';
+      toast.error(errorMsg);
+      console.error('Create label error:', error);
+    }
+  };
+
+
   const fetchTrackingStatus = async (trackingNumber, carrier) => {
     if (!trackingNumber || !carrier) {
       toast.error('Tracking information not available');
