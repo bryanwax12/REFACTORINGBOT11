@@ -322,6 +322,18 @@ backend:
           agent: "testing"
           comment: "✅ ADMIN ERROR NOTIFICATION SYSTEM FULLY VERIFIED: Comprehensive testing confirms all components working correctly with updated ADMIN_TELEGRAM_ID (7066790254): (1) ✅ Environment variable loaded correctly from .env file, (2) ✅ notify_admin_error function properly configured with correct parameters, HTML formatting, and error message structure, (3) ✅ Contact Administrator buttons found in test_error_message (line 250-251) and general error handler (line 2353-2354) using correct URL format tg://user?id={ADMIN_TELEGRAM_ID}, (4) ✅ Backend server loads ADMIN_TELEGRAM_ID without critical errors, (5) ✅ Telegram bot integration working with valid token (@whitelabellbot) and correct admin ID format, (6) ✅ LIVE TEST: Successfully sent test notification to admin ID 7066790254 (Message ID: 2457). All 3 integration points verified: show_error_message(), notify_admin_error(), and general error handler. Expected results achieved: ADMIN_TELEGRAM_ID='7066790254', error notifications sent to new ID, Contact Administrator buttons link to tg://user?id=7066790254."
 
+  - task: "Help Command - Add Contact Administrator Button"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "Added 'Contact Administrator' button to help_command() function (line 306-329). When user clicks '❓ Помощь' button, they now see a '💬 Связаться с администратором' button that opens direct chat with admin (tg://user?id=7066790254). Updated help text to inform users about contacting admin for questions/problems. Backend restarted successfully."
+
 metadata:
   created_by: "main_agent"
   version: "1.1"
