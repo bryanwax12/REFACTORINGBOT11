@@ -1257,12 +1257,12 @@ def main():
     results['telegram_bot_admin_integration'] = test_telegram_bot_admin_integration()
     results['admin_notification_sending'] = test_admin_notification_sending()
     
-    # 3. Test Admin Panel Endpoints (Supporting)
+    # 4. Test Admin Panel Endpoints (Supporting)
     results['admin_search_orders'] = test_admin_search_orders()
     results['admin_refund_order'] = test_admin_refund_order()
     results['admin_export_csv'] = test_admin_export_csv()
     
-    # 4. Test Supporting Infrastructure
+    # 5. Test Supporting Infrastructure
     results['telegram_infrastructure'] = test_telegram_bot_infrastructure()
     results['bot_token'] = test_telegram_bot_token()
     results['conversation_handlers'] = test_conversation_handler_functions()
