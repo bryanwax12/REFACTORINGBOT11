@@ -314,7 +314,9 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     help_text = """
 
+
 *Если у вас возникли вопросы или проблемы, нажмите кнопку ниже:*
+
 
 """
     
