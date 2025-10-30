@@ -4074,6 +4074,24 @@ async def startup_event():
                         CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
                         CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
                     ],
+                    PARCEL_LENGTH: [
+                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_parcel_length),
+                        CallbackQueryHandler(order_parcel_length, pattern='^skip_dimensions$'),
+                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
+                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
+                    ],
+                    PARCEL_WIDTH: [
+                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_parcel_width),
+                        CallbackQueryHandler(order_parcel_width, pattern='^skip_dimensions$'),
+                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
+                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
+                    ],
+                    PARCEL_HEIGHT: [
+                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_parcel_height),
+                        CallbackQueryHandler(order_parcel_height, pattern='^skip_height$'),
+                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
+                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
+                    ],
                     CONFIRM_DATA: [
                         CallbackQueryHandler(handle_edit_choice, pattern='^(edit_from_address|edit_to_address)$'),
                         CallbackQueryHandler(handle_data_confirmation, pattern='^(confirm_data|edit_data|edit_addresses_error|return_to_order|confirm_cancel|cancel_order)$')
