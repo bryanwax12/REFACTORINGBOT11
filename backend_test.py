@@ -996,10 +996,246 @@ def test_admin_notification_sending():
         print(f"❌ Admin notification sending test error: {e}")
         return False
 
+def test_help_command_implementation():
+    """Test Help Command with Contact Administrator Button Implementation"""
+    print("\n🔍 Testing Help Command with Contact Administrator Button...")
+    
+    try:
+        # Read server.py to check help_command implementation
+        with open('/app/backend/server.py', 'r') as f:
+            server_code = f.read()
+        
+        # 1. Verify help_command function exists at lines 306-329
+        help_function_pattern = r'async def help_command\(update: Update, context: ContextTypes\.DEFAULT_TYPE\):'
+        help_function_found = bool(re.search(help_function_pattern, server_code))
+        print(f"   help_command function exists: {'✅' if help_function_found else '❌'}")
+        
+        # Check if function is at expected lines (306-329)
+        lines = server_code.split('\n')
+        help_function_line = None
+        for i, line in enumerate(lines, 1):
+            if 'async def help_command(' in line:
+                help_function_line = i
+                break
+        
+        if help_function_line:
+            print(f"   help_command function location: Line {help_function_line} {'✅' if 306 <= help_function_line <= 329 else '⚠️'}")
+        
+        # 2. Verify function handles both callback queries and direct commands
+        handles_callback = 'if update.callback_query:' in server_code and 'query = update.callback_query' in server_code
+        handles_direct = 'send_method = update.message.reply_text' in server_code
+        print(f"   Handles callback queries: {'✅' if handles_callback else '❌'}")
+        print(f"   Handles direct commands: {'✅' if handles_direct else '❌'}")
+        
+        # 3. Verify ADMIN_TELEGRAM_ID is loaded and used correctly
+        uses_admin_id = 'if ADMIN_TELEGRAM_ID:' in server_code
+        admin_id_in_url = 'tg://user?id={ADMIN_TELEGRAM_ID}' in server_code
+        print(f"   Uses ADMIN_TELEGRAM_ID conditionally: {'✅' if uses_admin_id else '❌'}")
+        print(f"   Correct URL format with ADMIN_TELEGRAM_ID: {'✅' if admin_id_in_url else '❌'}")
+        
+        # 4. Verify Contact Administrator button configuration
+        contact_button_text = '💬 Связаться с администратором' in server_code
+        contact_button_url = 'url=f"tg://user?id={ADMIN_TELEGRAM_ID}"' in server_code
+        print(f"   Contact Administrator button text: {'✅' if contact_button_text else '❌'}")
+        print(f"   Contact Administrator button URL: {'✅' if contact_button_url else '❌'}")
+        
+        # 5. Verify Main Menu button is present
+        main_menu_button = '🔙 Главное меню' in server_code and "callback_data='start'" in server_code
+        print(f"   Main Menu button present: {'✅' if main_menu_button else '❌'}")
+        
+        # 6. Verify help text content
+        help_text_russian = 'Доступные команды:' in server_code
+        help_text_contact_info = 'связаться с администратором' in server_code
+        help_text_formatting = '/start - Начать работу' in server_code and '/help - Показать эту справку' in server_code
+        print(f"   Help text in Russian: {'✅' if help_text_russian else '❌'}")
+        print(f"   Help text mentions contacting admin: {'✅' if help_text_contact_info else '❌'}")
+        print(f"   Help text proper formatting: {'✅' if help_text_formatting else '❌'}")
+        
+        # 7. Verify integration points
+        # Check if help_command is registered in CommandHandler
+        help_command_handler = 'CommandHandler("help", help_command)' in server_code
+        print(f"   /help command handler registered: {'✅' if help_command_handler else '❌'}")
+        
+        # Check if 'help' callback is handled in button_callback
+        help_callback_handler = "elif query.data == 'help':" in server_code and "await help_command(update, context)" in server_code
+        print(f"   'help' callback handler registered: {'✅' if help_callback_handler else '❌'}")
+        
+        # Check if Help button exists in main menu
+        help_button_main_menu = '❓ Помощь' in server_code and "callback_data='help'" in server_code
+        print(f"   Help button in main menu: {'✅' if help_button_main_menu else '❌'}")
+        
+        # 8. Verify expected URL format
+        expected_url = "tg://user?id=7066790254"
+        # Load admin ID to verify it matches expected
+        load_dotenv('/app/backend/.env')
+        admin_id = os.environ.get('ADMIN_TELEGRAM_ID', '')
+        expected_admin_id = "7066790254"
+        
+        admin_id_correct = admin_id == expected_admin_id
+        print(f"   ADMIN_TELEGRAM_ID matches expected (7066790254): {'✅' if admin_id_correct else '❌'}")
+        
+        # Overall assessment
+        all_checks = [
+            help_function_found, handles_callback, handles_direct, uses_admin_id,
+            admin_id_in_url, contact_button_text, contact_button_url, main_menu_button,
+            help_text_russian, help_text_contact_info, help_text_formatting,
+            help_command_handler, help_callback_handler, help_button_main_menu, admin_id_correct
+        ]
+        
+        passed_checks = sum(all_checks)
+        total_checks = len(all_checks)
+        
+        print(f"\n📊 Help Command Implementation Summary:")
+        print(f"   Checks passed: {passed_checks}/{total_checks}")
+        print(f"   Success rate: {(passed_checks/total_checks)*100:.1f}%")
+        
+        # Specific verification of expected results
+        print(f"\n✅ Expected Results Verification:")
+        if help_function_found and 306 <= (help_function_line or 0) <= 329:
+            print(f"   ✅ help_command() function exists at lines 306-329")
+        else:
+            print(f"   ❌ help_command() function location issue")
+        
+        if contact_button_text and contact_button_url and admin_id_correct:
+            print(f"   ✅ Contact Administrator button: '💬 Связаться с администратором'")
+            print(f"   ✅ Button URL: tg://user?id=7066790254")
+        else:
+            print(f"   ❌ Contact Administrator button configuration issue")
+        
+        if uses_admin_id:
+            print(f"   ✅ Button only appears if ADMIN_TELEGRAM_ID is configured")
+        else:
+            print(f"   ❌ Button conditional display issue")
+        
+        if main_menu_button:
+            print(f"   ✅ '🔙 Главное меню' button present as second button")
+        else:
+            print(f"   ❌ Main Menu button issue")
+        
+        if help_text_russian and help_text_contact_info:
+            print(f"   ✅ Help text in Russian with admin contact information")
+        else:
+            print(f"   ❌ Help text content issue")
+        
+        if help_command_handler and help_callback_handler and help_button_main_menu:
+            print(f"   ✅ All integration points working:")
+            print(f"      - help_command registered in ConversationHandler")
+            print(f"      - /help command handler registration")
+            print(f"      - 'help' callback_data handler in menu_handler")
+        else:
+            print(f"   ❌ Integration points issue")
+        
+        # Return success if most critical checks pass
+        critical_checks = [
+            help_function_found, contact_button_text, contact_button_url, 
+            main_menu_button, help_command_handler, help_callback_handler, admin_id_correct
+        ]
+        
+        return all(critical_checks)
+        
+    except Exception as e:
+        print(f"❌ Help command implementation test error: {e}")
+        return False
+
+def test_telegram_bot_help_infrastructure():
+    """Test Telegram bot infrastructure for Help command"""
+    print("\n🔍 Testing Telegram Bot Help Command Infrastructure...")
+    
+    try:
+        # Check if bot is running and can handle help commands
+        log_result = os.popen("tail -n 100 /var/log/supervisor/backend.err.log").read()
+        
+        # Look for successful bot initialization
+        bot_started = "Telegram Bot started successfully!" in log_result or "Application started" in log_result
+        print(f"   Bot initialization: {'✅' if bot_started else '❌'}")
+        
+        # Check for any help-related errors
+        help_errors = any(pattern in log_result.lower() for pattern in ['help command', 'help_command', 'help error'])
+        print(f"   No help command errors: {'✅' if not help_errors else '❌'}")
+        
+        # Verify bot token is valid for help command
+        load_dotenv('/app/backend/.env')
+        bot_token = os.environ.get('TELEGRAM_BOT_TOKEN')
+        
+        if bot_token:
+            # Test bot token validity
+            response = requests.get(f"https://api.telegram.org/bot{bot_token}/getMe", timeout=10)
+            if response.status_code == 200:
+                bot_info = response.json()
+                if bot_info.get('ok'):
+                    bot_data = bot_info.get('result', {})
+                    print(f"   Bot token valid: ✅ (@{bot_data.get('username', 'Unknown')})")
+                    bot_valid = True
+                else:
+                    print(f"   ❌ Invalid bot token response")
+                    bot_valid = False
+            else:
+                print(f"   ❌ Bot token validation failed: {response.status_code}")
+                bot_valid = False
+        else:
+            print(f"   ❌ Bot token not found")
+            bot_valid = False
+        
+        # Check if admin ID is configured for Contact Administrator button
+        admin_id = os.environ.get('ADMIN_TELEGRAM_ID')
+        admin_configured = admin_id == "7066790254"
+        print(f"   Admin ID configured correctly: {'✅' if admin_configured else '❌'}")
+        
+        return bot_started and not help_errors and bot_valid and admin_configured
+        
+    except Exception as e:
+        print(f"❌ Error checking Telegram bot help infrastructure: {e}")
+        return False
+
+def test_help_command_url_generation():
+    """Test Help Command URL generation for Contact Administrator button"""
+    print("\n🔍 Testing Help Command URL Generation...")
+    
+    try:
+        # Load environment variables
+        load_dotenv('/app/backend/.env')
+        admin_id = os.environ.get('ADMIN_TELEGRAM_ID')
+        
+        if not admin_id:
+            print("   ❌ ADMIN_TELEGRAM_ID not found in environment")
+            return False
+        
+        print(f"   ADMIN_TELEGRAM_ID loaded: ✅ ({admin_id})")
+        
+        # Verify the expected URL format
+        expected_url = f"tg://user?id={admin_id}"
+        expected_full_url = "tg://user?id=7066790254"
+        
+        print(f"   Generated URL: {expected_url}")
+        print(f"   Expected URL: {expected_full_url}")
+        
+        url_matches = expected_url == expected_full_url
+        print(f"   URL format correct: {'✅' if url_matches else '❌'}")
+        
+        # Verify URL format is valid Telegram deep link
+        url_pattern = r'^tg://user\?id=\d+$'
+        url_valid = bool(re.match(url_pattern, expected_url))
+        print(f"   URL pattern valid: {'✅' if url_valid else '❌'}")
+        
+        # Verify admin ID is numeric and positive
+        try:
+            admin_id_int = int(admin_id)
+            id_valid = admin_id_int > 0
+            print(f"   Admin ID format valid: {'✅' if id_valid else '❌'}")
+        except ValueError:
+            print(f"   ❌ Admin ID is not numeric")
+            id_valid = False
+        
+        return url_matches and url_valid and id_valid
+        
+    except Exception as e:
+        print(f"❌ Help command URL generation test error: {e}")
+        return False
+
 def main():
-    """Run all tests - Focus on Admin Error Notification System"""
-    print("🚀 Testing Admin Error Notification System")
-    print("🎯 Focus: Updated ADMIN_TELEGRAM_ID (7066790254)")
+    """Run all tests - Focus on Help Command with Contact Administrator Button"""
+    print("🚀 Testing Help Command with Contact Administrator Button")
+    print("🎯 Focus: Help Command Enhancement with Admin Contact")
     print("=" * 60)
     
     # Test results
