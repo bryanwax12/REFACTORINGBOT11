@@ -927,7 +927,19 @@ const Dashboard = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="carrier">Carrier *</Label>
-                      <select id="carrier" className="w-full border rounded-md p-2">
+                      <select 
+                        id="carrier" 
+                        className="w-full border rounded-md p-2"
+                        onChange={(e) => {
+                          const carrier = e.target.value;
+                          setSelectedService('');
+                          if (carrier) {
+                            fetchShippingRates(carrier);
+                          } else {
+                            setAvailableRates([]);
+                          }
+                        }}
+                      >
                         <option value="">Select Carrier</option>
                         <option value="ups">UPS</option>
                         <option value="fedex">FedEx</option>
@@ -935,12 +947,34 @@ const Dashboard = () => {
                       </select>
                     </div>
                     <div>
-                      <Label htmlFor="service_code">Service Code *</Label>
-                      <Input id="service_code" placeholder="ups_ground" />
+                      <Label htmlFor="service_code">Service & Price *</Label>
+                      {loadingRates ? (
+                        <div className="w-full border rounded-md p-2 text-muted-foreground">
+                          Loading rates...
+                        </div>
+                      ) : availableRates.length > 0 ? (
+                        <select 
+                          id="service_code" 
+                          className="w-full border rounded-md p-2"
+                          value={selectedService}
+                          onChange={(e) => setSelectedService(e.target.value)}
+                        >
+                          <option value="">Select Service</option>
+                          {availableRates.map((rate, index) => (
+                            <option key={index} value={rate.service_code}>
+                              {rate.service_name} - ${rate.shipping_amount?.amount || rate.total_amount}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <div className="w-full border rounded-md p-2 text-muted-foreground">
+                          Select carrier to see prices
+                        </div>
+                      )}
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Examples: ups_ground, fedex_ground, usps_priority_mail
+                    Select carrier first to load available services with prices
                   </p>
                 </div>
 
