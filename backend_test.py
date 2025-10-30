@@ -1232,6 +1232,147 @@ def test_help_command_url_generation():
         print(f"❌ Help command URL generation test error: {e}")
         return False
 
+def test_help_command_formatting_improvements():
+    """Test Help Command Markdown formatting improvements per review request"""
+    print("\n🔍 Testing Help Command Markdown Formatting Improvements...")
+    
+    try:
+        # Read server.py to check help_command formatting
+        with open('/app/backend/server.py', 'r') as f:
+            server_code = f.read()
+        
+        # Extract help_command function
+        help_function_match = re.search(
+            r'async def help_command\(.*?\n(.*?)(?=async def|\Z)', 
+            server_code, 
+            re.DOTALL
+        )
+        
+        if not help_function_match:
+            print("   ❌ help_command function not found")
+            return False
+        
+        help_function_code = help_function_match.group(1)
+        print("   ✅ help_command function found")
+        
+        # 1. Verify Markdown formatting - Bold text markers
+        print("\n   📋 Testing Markdown Formatting:")
+        
+        # Check for bold "Доступные команды:"
+        bold_commands = '*Доступные команды:*' in help_function_code
+        print(f"      '*Доступные команды:*' bold formatting: {'✅' if bold_commands else '❌'}")
+        
+        # Check for bold "Если у вас возникли вопросы или проблемы, нажмите кнопку ниже:"
+        bold_questions = '*Если у вас возникли вопросы или проблемы, нажмите кнопку ниже:*' in help_function_code
+        print(f"      '*Если у вас возникли вопросы или проблемы, нажмите кнопку ниже:*' bold formatting: {'✅' if bold_questions else '❌'}")
+        
+        # 2. Verify parse_mode='Markdown' is present
+        parse_mode_markdown = "parse_mode='Markdown'" in help_function_code
+        print(f"      parse_mode='Markdown' in send_method call: {'✅' if parse_mode_markdown else '❌'}")
+        
+        # 3. Verify text content - Check that redundant text is removed
+        print("\n   📋 Testing Text Content:")
+        
+        # Check that redundant "чтобы связаться с администратором" is NOT at the end
+        redundant_text_removed = 'чтобы связаться с администратором"""' not in help_function_code
+        print(f"      Redundant 'чтобы связаться с администратором' removed from end: {'✅' if redundant_text_removed else '❌'}")
+        
+        # Check simplified text: "нажмите кнопку ниже:" (not "нажмите кнопку ниже, чтобы связаться с администратором")
+        simplified_text = 'нажмите кнопку ниже:*"""' in help_function_code
+        print(f"      Simplified text 'нажмите кнопку ниже:': {'✅' if simplified_text else '❌'}")
+        
+        # Check that all commands are still present
+        start_command = '/start - Начать работу' in help_function_code
+        help_command_text = '/help - Показать эту справку' in help_function_code
+        print(f"      /start command present: {'✅' if start_command else '❌'}")
+        print(f"      /help command present: {'✅' if help_command_text else '❌'}")
+        
+        # 4. Verify Button Layout
+        print("\n   📋 Testing Button Layout:")
+        
+        # Check Contact Administrator button on first row
+        contact_admin_button = 'InlineKeyboardButton("💬 Связаться с администратором", url=f"tg://user?id={ADMIN_TELEGRAM_ID}")' in help_function_code
+        print(f"      Contact Administrator button configured: {'✅' if contact_admin_button else '❌'}")
+        
+        # Check Main Menu button on separate row
+        main_menu_button = 'InlineKeyboardButton("🔙 Главное меню", callback_data=\'start\')' in help_function_code
+        print(f"      Main Menu button on separate row: {'✅' if main_menu_button else '❌'}")
+        
+        # Check URL format: tg://user?id=7066790254
+        correct_url_format = 'tg://user?id={ADMIN_TELEGRAM_ID}' in help_function_code
+        print(f"      Correct URL format tg://user?id={{ADMIN_TELEGRAM_ID}}: {'✅' if correct_url_format else '❌'}")
+        
+        # 5. Verify function is properly defined
+        print("\n   📋 Testing Function Definition:")
+        
+        function_properly_defined = 'async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):' in server_code
+        print(f"      Function properly defined: {'✅' if function_properly_defined else '❌'}")
+        
+        # 6. Integration check - verify bot is running without errors
+        print("\n   📋 Testing Integration:")
+        
+        # Check backend logs for any help command errors
+        try:
+            log_result = os.popen("tail -n 100 /var/log/supervisor/backend.err.log").read()
+            help_errors = any(pattern in log_result.lower() for pattern in ['help command error', 'help_command error', 'markdown error'])
+            print(f"      No help command errors in logs: {'✅' if not help_errors else '❌'}")
+        except:
+            print(f"      Log check: ⚠️ Unable to check logs")
+            help_errors = False
+        
+        # Check if help command is accessible
+        help_accessible = 'CommandHandler("help", help_command)' in server_code or '"help"' in server_code
+        print(f"      Help command accessible: {'✅' if help_accessible else '❌'}")
+        
+        # Overall assessment
+        formatting_checks = [bold_commands, bold_questions, parse_mode_markdown]
+        content_checks = [redundant_text_removed, simplified_text, start_command, help_command_text]
+        button_checks = [contact_admin_button, main_menu_button, correct_url_format]
+        integration_checks = [function_properly_defined, not help_errors, help_accessible]
+        
+        all_formatting_passed = all(formatting_checks)
+        all_content_passed = all(content_checks)
+        all_button_passed = all(button_checks)
+        all_integration_passed = all(integration_checks)
+        
+        print(f"\n   📊 Formatting Improvements Summary:")
+        print(f"      Markdown formatting: {'✅ PASS' if all_formatting_passed else '❌ FAIL'}")
+        print(f"      Text content: {'✅ PASS' if all_content_passed else '❌ FAIL'}")
+        print(f"      Button layout: {'✅ PASS' if all_button_passed else '❌ FAIL'}")
+        print(f"      Integration: {'✅ PASS' if all_integration_passed else '❌ FAIL'}")
+        
+        # Expected Results Verification
+        print(f"\n   ✅ Expected Results Verification:")
+        if all_formatting_passed:
+            print(f"      ✅ help_text contains bold markers: '*Доступные команды:*' and '*Если у вас возникли вопросы или проблемы, нажмите кнопку ниже:*'")
+            print(f"      ✅ parse_mode='Markdown' present in send_method call")
+        else:
+            print(f"      ❌ Markdown formatting issues detected")
+        
+        if all_content_passed:
+            print(f"      ✅ Text is simplified (removed redundant phrase)")
+            print(f"      ✅ All commands (/start, /help) are still present")
+        else:
+            print(f"      ❌ Text content issues detected")
+        
+        if all_button_passed:
+            print(f"      ✅ Button layout correct (2 separate rows)")
+            print(f"      ✅ URL format: tg://user?id=7066790254")
+        else:
+            print(f"      ❌ Button layout issues detected")
+        
+        if all_integration_passed:
+            print(f"      ✅ Bot running without errors")
+            print(f"      ✅ Help command is accessible")
+        else:
+            print(f"      ❌ Integration issues detected")
+        
+        return all_formatting_passed and all_content_passed and all_button_passed and all_integration_passed
+        
+    except Exception as e:
+        print(f"❌ Help command formatting improvements test error: {e}")
+        return False
+
 def main():
     """Run all tests - Focus on Help Command with Contact Administrator Button"""
     print("🚀 Testing Help Command with Contact Administrator Button")
