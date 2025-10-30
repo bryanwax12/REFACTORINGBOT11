@@ -764,8 +764,172 @@ const Dashboard = () => {
               <CardDescription>Create shipping label manually when bot is not working</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">Coming soon - Manual label creation form</p>
+              <div className="space-y-6">
+                {/* From Address */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">From Address (Sender)</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="from_name">Name *</Label>
+                      <Input id="from_name" placeholder="John Doe" />
+                    </div>
+                    <div>
+                      <Label htmlFor="from_phone">Phone *</Label>
+                      <Input id="from_phone" placeholder="+1234567890" />
+                    </div>
+                    <div className="col-span-2">
+                      <Label htmlFor="from_address">Address *</Label>
+                      <Input id="from_address" placeholder="123 Main St" />
+                    </div>
+                    <div>
+                      <Label htmlFor="from_city">City *</Label>
+                      <Input id="from_city" placeholder="New York" />
+                    </div>
+                    <div>
+                      <Label htmlFor="from_state">State *</Label>
+                      <Input id="from_state" placeholder="NY" maxLength="2" />
+                    </div>
+                    <div>
+                      <Label htmlFor="from_zip">ZIP Code *</Label>
+                      <Input id="from_zip" placeholder="10001" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* To Address */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">To Address (Recipient)</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="to_name">Name *</Label>
+                      <Input id="to_name" placeholder="Jane Smith" />
+                    </div>
+                    <div>
+                      <Label htmlFor="to_phone">Phone *</Label>
+                      <Input id="to_phone" placeholder="+1234567890" />
+                    </div>
+                    <div className="col-span-2">
+                      <Label htmlFor="to_address">Address *</Label>
+                      <Input id="to_address" placeholder="456 Oak Ave" />
+                    </div>
+                    <div>
+                      <Label htmlFor="to_city">City *</Label>
+                      <Input id="to_city" placeholder="Los Angeles" />
+                    </div>
+                    <div>
+                      <Label htmlFor="to_state">State *</Label>
+                      <Input id="to_state" placeholder="CA" maxLength="2" />
+                    </div>
+                    <div>
+                      <Label htmlFor="to_zip">ZIP Code *</Label>
+                      <Input id="to_zip" placeholder="90001" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Parcel Info */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Parcel Information</h3>
+                  <div className="grid grid-cols-4 gap-4">
+                    <div>
+                      <Label htmlFor="weight">Weight (lb) *</Label>
+                      <Input id="weight" type="number" placeholder="2.5" step="0.1" />
+                    </div>
+                    <div>
+                      <Label htmlFor="length">Length (in) *</Label>
+                      <Input id="length" type="number" placeholder="10" step="0.1" />
+                    </div>
+                    <div>
+                      <Label htmlFor="width">Width (in) *</Label>
+                      <Input id="width" type="number" placeholder="10" step="0.1" />
+                    </div>
+                    <div>
+                      <Label htmlFor="height">Height (in) *</Label>
+                      <Input id="height" type="number" placeholder="10" step="0.1" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Carrier Selection */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Shipping Service</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="carrier">Carrier *</Label>
+                      <select id="carrier" className="w-full border rounded-md p-2">
+                        <option value="">Select Carrier</option>
+                        <option value="ups">UPS</option>
+                        <option value="fedex">FedEx</option>
+                        <option value="usps">USPS</option>
+                      </select>
+                    </div>
+                    <div>
+                      <Label htmlFor="service_code">Service Code *</Label>
+                      <Input id="service_code" placeholder="ups_ground" />
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Examples: ups_ground, fedex_ground, usps_priority_mail
+                  </p>
+                </div>
+
+                {/* Create Button */}
+                <Button 
+                  className="w-full" 
+                  size="lg"
+                  onClick={() => {
+                    // Get form values
+                    const formData = {
+                      from_address: {
+                        name: document.getElementById('from_name').value,
+                        phone: document.getElementById('from_phone').value,
+                        street: document.getElementById('from_address').value,
+                        city: document.getElementById('from_city').value,
+                        state: document.getElementById('from_state').value,
+                        zip: document.getElementById('from_zip').value
+                      },
+                      to_address: {
+                        name: document.getElementById('to_name').value,
+                        phone: document.getElementById('to_phone').value,
+                        street: document.getElementById('to_address').value,
+                        city: document.getElementById('to_city').value,
+                        state: document.getElementById('to_state').value,
+                        zip: document.getElementById('to_zip').value
+                      },
+                      parcel: {
+                        weight: parseFloat(document.getElementById('weight').value),
+                        length: parseFloat(document.getElementById('length').value),
+                        width: parseFloat(document.getElementById('width').value),
+                        height: parseFloat(document.getElementById('height').value)
+                      },
+                      carrier: document.getElementById('carrier').value,
+                      service_code: document.getElementById('service_code').value
+                    };
+
+                    // Validation
+                    if (!formData.from_address.name || !formData.to_address.name) {
+                      toast.error('Please fill all required fields');
+                      return;
+                    }
+
+                    // Call API
+                    toast.info('Creating label...');
+                    axios.post(`${API}/admin/create-label-manual`, formData)
+                      .then(response => {
+                        toast.success('Label created successfully!');
+                        loadData();
+                        // Clear form
+                        document.querySelectorAll('input').forEach(input => input.value = '');
+                      })
+                      .catch(error => {
+                        const errorMsg = error.response?.data?.detail || 'Failed to create label';
+                        toast.error(errorMsg);
+                      });
+                  }}
+                >
+                  <Send className="mr-2 h-4 w-4" />
+                  Create Label
+                </Button>
               </div>
             </CardContent>
           </Card>
