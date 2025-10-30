@@ -1014,6 +1014,7 @@ def main():
     results['contact_admin_buttons'] = test_contact_admin_buttons()
     results['backend_admin_id_loading'] = test_backend_admin_id_loading()
     results['telegram_bot_admin_integration'] = test_telegram_bot_admin_integration()
+    results['admin_notification_sending'] = test_admin_notification_sending()
     
     # 3. Test Admin Panel Endpoints (Supporting)
     results['admin_search_orders'] = test_admin_search_orders()
