@@ -932,9 +932,9 @@ def test_telegram_bot_admin_integration():
         return False
 
 def main():
-    """Run all tests - Focus on New Admin Panel API Endpoints"""
-    print("🚀 Testing New Admin Panel Backend API Endpoints")
-    print("🎯 Focus: Search Orders, Refund Orders, Export CSV")
+    """Run all tests - Focus on Admin Error Notification System"""
+    print("🚀 Testing Admin Error Notification System")
+    print("🎯 Focus: Updated ADMIN_TELEGRAM_ID (7066790254)")
     print("=" * 60)
     
     # Test results
@@ -943,32 +943,50 @@ def main():
     # 1. Test API Health
     results['api_health'] = test_api_health()
     
-    # 2. Test NEW Admin Panel Endpoints (Main Focus)
+    # 2. Test ADMIN ERROR NOTIFICATION SYSTEM (Main Focus)
+    results['admin_telegram_id_env'] = test_admin_telegram_id_environment()
+    results['admin_notification_function'] = test_admin_notification_function()
+    results['contact_admin_buttons'] = test_contact_admin_buttons()
+    results['backend_admin_id_loading'] = test_backend_admin_id_loading()
+    results['telegram_bot_admin_integration'] = test_telegram_bot_admin_integration()
+    
+    # 3. Test Admin Panel Endpoints (Supporting)
     results['admin_search_orders'] = test_admin_search_orders()
     results['admin_refund_order'] = test_admin_refund_order()
     results['admin_export_csv'] = test_admin_export_csv()
     
-    # 3. Test Supporting Infrastructure
+    # 4. Test Supporting Infrastructure
     results['telegram_infrastructure'] = test_telegram_bot_infrastructure()
     results['bot_token'] = test_telegram_bot_token()
     results['conversation_handlers'] = test_conversation_handler_functions()
     results['return_to_order'] = test_return_to_order_functionality()
     results['shipstation_rates'], rates_data = test_shipping_rates()
     
-    # 4. Check Backend Logs
+    # 5. Check Backend Logs
     check_backend_logs()
     
     # Summary
     print("\n" + "=" * 60)
-    print("📊 ADMIN PANEL API ENDPOINTS TEST SUMMARY")
+    print("📊 ADMIN ERROR NOTIFICATION SYSTEM TEST SUMMARY")
     print("=" * 60)
     
-    # Priority order for Admin Panel API tests
-    admin_tests = ['api_health', 'admin_search_orders', 'admin_refund_order', 'admin_export_csv']
-    other_tests = [k for k in results.keys() if k not in admin_tests]
+    # Priority order for Admin Error Notification tests
+    admin_notification_tests = [
+        'admin_telegram_id_env', 'admin_notification_function', 'contact_admin_buttons',
+        'backend_admin_id_loading', 'telegram_bot_admin_integration'
+    ]
+    admin_panel_tests = ['api_health', 'admin_search_orders', 'admin_refund_order', 'admin_export_csv']
+    other_tests = [k for k in results.keys() if k not in admin_notification_tests + admin_panel_tests]
     
-    print("🎯 ADMIN PANEL API TESTS:")
-    for test_name in admin_tests:
+    print("🎯 ADMIN ERROR NOTIFICATION TESTS:")
+    for test_name in admin_notification_tests:
+        if test_name in results:
+            passed = results[test_name]
+            status = "✅ PASS" if passed else "❌ FAIL"
+            print(f"   {test_name.replace('_', ' ').title()}: {status}")
+    
+    print("\n📋 ADMIN PANEL API TESTS:")
+    for test_name in admin_panel_tests:
         if test_name in results:
             passed = results[test_name]
             status = "✅ PASS" if passed else "❌ FAIL"
@@ -981,75 +999,73 @@ def main():
         print(f"   {test_name.replace('_', ' ').title()}: {status}")
     
     # Overall result
-    admin_tests_passed = all(results.get(test, False) for test in admin_tests if test in results)
+    admin_notification_passed = all(results.get(test, False) for test in admin_notification_tests if test in results)
+    admin_panel_passed = all(results.get(test, False) for test in admin_panel_tests if test in results)
     all_passed = all(results.values())
     
-    print(f"\n🎯 Admin Panel API Status: {'✅ SUCCESS' if admin_tests_passed else '❌ FAILED'}")
+    print(f"\n🎯 Admin Error Notification Status: {'✅ SUCCESS' if admin_notification_passed else '❌ FAILED'}")
+    print(f"📋 Admin Panel API Status: {'✅ SUCCESS' if admin_panel_passed else '❌ FAILED'}")
     print(f"📊 Overall Result: {'✅ ALL TESTS PASSED' if all_passed else '❌ SOME TESTS FAILED'}")
     
-    # Specific findings for Admin Panel APIs
-    print("\n🔧 Admin Panel API Analysis:")
-    if results.get('admin_search_orders'):
-        print(f"   ✅ Search Orders API working - supports order ID and tracking number search")
-        print(f"   ✅ Payment and shipping status filters working")
-        print(f"   ✅ Order enrichment with tracking data working")
+    # Specific findings for Admin Error Notification System
+    print("\n🔧 Admin Error Notification System Analysis:")
+    if results.get('admin_telegram_id_env'):
+        print(f"   ✅ ADMIN_TELEGRAM_ID environment variable loaded correctly (7066790254)")
     else:
-        print(f"   ❌ Search Orders API issues detected")
+        print(f"   ❌ ADMIN_TELEGRAM_ID environment variable issues detected")
     
-    if results.get('admin_refund_order'):
-        print(f"   ✅ Refund Order API working - returns money to user balance")
-        print(f"   ✅ Order status updates (refund_status, shipping_status)")
-        print(f"   ✅ Telegram notifications sent to users")
-        print(f"   ✅ Error handling for invalid refund attempts")
+    if results.get('admin_notification_function'):
+        print(f"   ✅ send_admin_notification function properly configured")
+        print(f"   ✅ Function uses updated ADMIN_TELEGRAM_ID")
+        print(f"   ✅ HTML formatting and error message structure correct")
     else:
-        print(f"   ❌ Refund Order API issues detected")
+        print(f"   ❌ Admin notification function issues detected")
     
-    if results.get('admin_export_csv'):
-        print(f"   ✅ CSV Export API working - proper CSV format and headers")
-        print(f"   ✅ Content-Disposition header for file download")
-        print(f"   ✅ Payment and shipping status filters working")
-        print(f"   ✅ Order data enrichment with tracking information")
+    if results.get('contact_admin_buttons'):
+        print(f"   ✅ Contact Administrator buttons use correct URL: tg://user?id=7066790254")
+        print(f"   ✅ Buttons found in test_error_message and general error handler")
+        print(f"   ✅ Conditional button display based on ADMIN_TELEGRAM_ID")
     else:
-        print(f"   ❌ CSV Export API issues detected")
+        print(f"   ❌ Contact Administrator button issues detected")
     
-    # Supporting Infrastructure Status
-    print("\n🏗️ Supporting Infrastructure:")
-    if results.get('telegram_infrastructure'):
-        print(f"   ✅ Telegram Bot infrastructure ready")
+    if results.get('backend_admin_id_loading'):
+        print(f"   ✅ Backend server loads ADMIN_TELEGRAM_ID without errors")
     else:
-        print(f"   ⚠️ Telegram Bot infrastructure issues")
+        print(f"   ❌ Backend ADMIN_TELEGRAM_ID loading issues detected")
     
-    if results.get('shipstation_rates'):
-        print(f"   ✅ ShipStation API working (order creation support)")
+    if results.get('telegram_bot_admin_integration'):
+        print(f"   ✅ Telegram bot admin integration working")
+        print(f"   ✅ Bot token valid and admin ID format correct")
+        print(f"   ✅ Admin ID matches expected updated value (7066790254)")
     else:
-        print(f"   ⚠️ ShipStation API issues (may affect new orders)")
+        print(f"   ❌ Telegram bot admin integration issues detected")
     
-    # API Testing Summary
-    print("\n📋 API TESTING SUMMARY:")
-    print("   🔍 Search Orders API (GET /api/orders/search):")
-    print("      - Search by order ID: Tested")
-    print("      - Search by tracking number: Tested") 
-    print("      - Filter by payment_status: Tested")
-    print("      - Filter by shipping_status: Tested")
-    print("      - Order enrichment with tracking data: Tested")
+    # Integration Points Summary
+    print("\n📋 INTEGRATION POINTS VERIFICATION:")
+    print("   🔍 Line 250-251 (test_error_message):")
+    print("      - Contact admin button with tg://user?id={ADMIN_TELEGRAM_ID}: Tested")
     
-    print("   💰 Refund Order API (POST /api/orders/{order_id}/refund):")
-    print("      - Refund paid orders: Tested")
-    print("      - User balance increase: Tested")
-    print("      - Order status updates: Tested")
-    print("      - Telegram notifications: Tested")
-    print("      - Error handling (already refunded, unpaid): Tested")
+    print("   🔍 Line 783-808 (notify_admin_error):")
+    print("      - Function sends notifications to ADMIN_TELEGRAM_ID: Tested")
+    print("      - Error message formatting and user info: Tested")
     
-    print("   📊 Export CSV API (GET /api/orders/export/csv):")
-    print("      - CSV format and headers: Tested")
-    print("      - Content-Disposition header: Tested")
-    print("      - Payment status filter: Tested")
-    print("      - Shipping status filter: Tested")
-    print("      - Data enrichment: Tested")
+    print("   🔍 Line 2353-2354 (general error handler):")
+    print("      - Contact admin button in error handler: Tested")
+    print("      - Conditional button display: Tested")
     
-    print("\n✅ ADMIN PANEL BACKEND APIs READY FOR FRONTEND INTEGRATION")
+    # Expected Results Verification
+    print("\n✅ EXPECTED RESULTS VERIFICATION:")
+    if admin_notification_passed:
+        print("   ✅ ADMIN_TELEGRAM_ID is '7066790254'")
+        print("   ✅ Error notifications sent to new ID (7066790254)")
+        print("   ✅ Contact Administrator buttons link to tg://user?id=7066790254")
+        print("   ✅ All 3 integration points use updated ADMIN_TELEGRAM_ID")
+    else:
+        print("   ❌ Some expected results not met - see failed tests above")
     
-    return admin_tests_passed
+    print("\n✅ ADMIN ERROR NOTIFICATION SYSTEM UPDATE VERIFICATION COMPLETE")
+    
+    return admin_notification_passed
 
 if __name__ == "__main__":
     main()
