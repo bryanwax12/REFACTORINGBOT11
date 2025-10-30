@@ -3803,9 +3803,9 @@ async def calculate_shipping_rates(request: ShippingRateRequest):
                         'unit': 'pound'
                     },
                     'dimensions': {
-                        'length': parcel.get('length', 5),
-                        'width': parcel.get('width', 5),
-                        'height': parcel.get('height', 5),
+                        'length': parcel.get('length', 10),
+                        'width': parcel.get('width', 10),
+                        'height': parcel.get('height', 10),
                         'unit': 'inch'
                     }
                 }]
