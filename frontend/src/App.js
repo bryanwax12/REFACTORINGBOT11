@@ -1008,12 +1008,17 @@ const Dashboard = () => {
                         height: parseFloat(document.getElementById('height').value)
                       },
                       carrier: document.getElementById('carrier').value,
-                      service_code: document.getElementById('service_code').value
+                      service_code: selectedService
                     };
 
                     // Validation
                     if (!formData.from_address.name || !formData.to_address.name) {
                       toast.error('Please fill all required fields');
+                      return;
+                    }
+                    
+                    if (!selectedService) {
+                      toast.error('Please select a shipping service');
                       return;
                     }
 
