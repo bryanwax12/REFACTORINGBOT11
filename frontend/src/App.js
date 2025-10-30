@@ -638,18 +638,6 @@ const Dashboard = () => {
                           </td>
                           <td className="py-3">
                             <div className="flex gap-1 justify-end">
-                              {/* Create/Recreate Label button - for all paid orders */}
-                              {order.payment_status === 'paid' && (
-                                <Button
-                                  size="sm"
-                                  variant="default"
-                                  onClick={() => createLabelManually(order)}
-                                  title={order.label_id ? "Recreate Label" : "Create Label"}
-                                  className="bg-blue-600 hover:bg-blue-700"
-                                >
-                                  <Send className="h-4 w-4" />
-                                </Button>
-                              )}
                               {order.label_id && (
                                 <Button
                                   size="sm"
