@@ -283,7 +283,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
     welcome_message = f"""Добро пожаловать, {first_name}! 🚀
 
-Я помогу вам создать shipping labels с оплатой в криптовалюте.
+Я помогу вам создать shipping labels.
 
 Выберите действие:"""
     
