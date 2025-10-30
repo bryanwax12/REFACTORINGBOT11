@@ -1039,7 +1039,7 @@ def main():
     # Priority order for Admin Error Notification tests
     admin_notification_tests = [
         'admin_telegram_id_env', 'admin_notification_function', 'contact_admin_buttons',
-        'backend_admin_id_loading', 'telegram_bot_admin_integration'
+        'backend_admin_id_loading', 'telegram_bot_admin_integration', 'admin_notification_sending'
     ]
     admin_panel_tests = ['api_health', 'admin_search_orders', 'admin_refund_order', 'admin_export_csv']
     other_tests = [k for k in results.keys() if k not in admin_notification_tests + admin_panel_tests]
