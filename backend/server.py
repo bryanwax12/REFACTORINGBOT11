@@ -334,6 +334,43 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await send_method(help_text, reply_markup=reply_markup, parse_mode='Markdown')
 
 
+async def faq_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Handle both command and callback
+    if update.callback_query:
+        query = update.callback_query
+        await query.answer()
+        send_method = query.message.reply_text
+    else:
+        send_method = update.message.reply_text
+    
+    faq_text = """📦 *White Label Shipping Bot*
+
+*Создавайте профессиональные shipping labels за минуты!*
+
+✅ *Что я умею:*
+• Создание shipping labels для любых посылок
+• Поддержка всех популярных курьеров (UPS, FedEx, USPS)
+• Точный расчёт стоимости доставки
+• Оплата криптовалютой (BTC, ETH, USDT, LTC)
+• Индивидуальные скидки
+
+🌍 *Доставка:*
+Отправляйте посылки из любой точки США
+
+💰 *Преимущества:*
+• Быстрое оформление
+• Прозрачные цены
+• Безопасные платежи
+• Поддержка 24/7"""
+    
+    keyboard = [
+        [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]
+    ]
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await send_method(faq_text, reply_markup=reply_markup, parse_mode='Markdown')
+
+
 
 async def handle_create_label_request(update: Update, context: ContextTypes.DEFAULT_TYPE, order_id: str):
     """Handle request to create/recreate shipping label for existing paid order"""
