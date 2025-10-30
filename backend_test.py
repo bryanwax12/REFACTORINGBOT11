@@ -1389,6 +1389,7 @@ def main():
     results['help_command_implementation'] = test_help_command_implementation()
     results['help_command_infrastructure'] = test_telegram_bot_help_infrastructure()
     results['help_command_url_generation'] = test_help_command_url_generation()
+    results['help_command_formatting_improvements'] = test_help_command_formatting_improvements()
     
     # 3. Test ADMIN ERROR NOTIFICATION SYSTEM (Supporting)
     results['admin_telegram_id_env'] = test_admin_telegram_id_environment()
