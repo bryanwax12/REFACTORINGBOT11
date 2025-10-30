@@ -38,6 +38,9 @@ const Dashboard = () => {
   const [expenseStats, setExpenseStats] = useState(null);
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [availableRates, setAvailableRates] = useState([]);
+  const [loadingRates, setLoadingRates] = useState(false);
+  const [selectedService, setSelectedService] = useState('');
 
   useEffect(() => {
     loadData();
