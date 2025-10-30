@@ -3495,6 +3495,166 @@ async def refund_order(order_id: str, refund_reason: Optional[str] = None):
         logger.error(f"Error refunding order: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
+@api_router.post("/admin/create-label/{order_id}", dependencies=[Depends(verify_api_key)])
+async def create_label_manually(order_id: str):
+    """
+    Manually create shipping label for paid order (admin function)
+    """
+    try:
+        # Find order
+        order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+        if not order:
+            raise HTTPException(status_code=404, detail="Order not found")
+        
+        # Check if paid
+        if order['payment_status'] != 'paid':
+            raise HTTPException(status_code=400, detail="Order must be paid to create label")
+        
+        # Check if label already exists
+        if order.get('label_id'):
+            raise HTTPException(status_code=400, detail="Label already exists for this order")
+        
+        # Prepare ShipStation API request
+        if not SHIPSTATION_API_KEY:
+            raise HTTPException(status_code=500, detail="ShipStation API key not configured")
+        
+        headers = {
+            'API-Key': SHIPSTATION_API_KEY,
+            'Content-Type': 'application/json'
+        }
+        
+        # Build shipment data from order
+        shipment_data = {
+            'shipment': {
+                'service_code': order.get('selected_service_code', order.get('service_code', '')),
+                'ship_to': {
+                    'name': order['address_to']['name'],
+                    'phone': order['address_to'].get('phone', ''),
+                    'company_name': '-',
+                    'address_line1': order['address_to']['street'],
+                    'address_line2': order['address_to'].get('street2', ''),
+                    'city_locality': order['address_to']['city'],
+                    'state_province': order['address_to']['state'],
+                    'postal_code': order['address_to']['zip'],
+                    'country_code': 'US'
+                },
+                'ship_from': {
+                    'name': order['address_from']['name'],
+                    'phone': order['address_from'].get('phone', ''),
+                    'company_name': '-',
+                    'address_line1': order['address_from']['street'],
+                    'address_line2': order['address_from'].get('street2', ''),
+                    'city_locality': order['address_from']['city'],
+                    'state_province': order['address_from']['state'],
+                    'postal_code': order['address_from']['zip'],
+                    'country_code': 'US'
+                },
+                'packages': [{
+                    'weight': {
+                        'value': order['parcel'].get('weight', 1),
+                        'unit': 'pound'
+                    },
+                    'dimensions': {
+                        'length': order['parcel'].get('length', 10),
+                        'width': order['parcel'].get('width', 10),
+                        'height': order['parcel'].get('height', 10),
+                        'unit': 'inch'
+                    }
+                }]
+            }
+        }
+        
+        logger.info(f"Creating label manually for order {order_id}")
+        
+        # Create label via ShipStation
+        response = requests.post(
+            'https://api.shipstation.com/v2/labels',
+            headers=headers,
+            json=shipment_data,
+            timeout=30
+        )
+        
+        if response.status_code != 200:
+            error_msg = response.text
+            logger.error(f"ShipStation label creation failed: {error_msg}")
+            raise HTTPException(status_code=response.status_code, detail=f"ShipStation error: {error_msg}")
+        
+        label_response = response.json()
+        label_data = label_response.get('label', {})
+        
+        # Extract label info
+        label_id = label_data.get('label_id')
+        tracking_number = label_data.get('tracking_number')
+        carrier_code = label_data.get('carrier_code', '').lower()
+        label_download_url = label_data.get('label_download', {}).get('pdf')
+        
+        if not label_id or not tracking_number:
+            raise HTTPException(status_code=500, detail="Failed to get label info from ShipStation")
+        
+        # Save label to database
+        label_doc = {
+            'label_id': label_id,
+            'order_id': order_id,
+            'tracking_number': tracking_number,
+            'carrier': carrier_code,
+            'label_url': label_download_url,
+            'created_at': datetime.now(timezone.utc).isoformat(),
+            'status': 'created'
+        }
+        await db.shipping_labels.insert_one({**label_doc, '_id': label_id})
+        
+        # Update order with label info
+        await db.orders.update_one(
+            {'id': order_id},
+            {
+                '$set': {
+                    'label_id': label_id,
+                    'tracking_number': tracking_number,
+                    'carrier': carrier_code,
+                    'shipping_status': 'label_created',
+                    'label_created_at': datetime.now(timezone.utc).isoformat()
+                }
+            }
+        )
+        
+        logger.info(f"Label created manually for order {order_id}: {label_id}")
+        
+        # Try to send notification to user via Telegram
+        try:
+            if bot_instance:
+                telegram_id = order.get('telegram_id')
+                if telegram_id:
+                    message = f"""✅ Ваша shipping label создана!
+
+📦 Order ID: {order_id[:8]}
+📋 Tracking #: {tracking_number}
+🚚 Carrier: {carrier_code.upper()}
+
+Вы можете отслеживать посылку по номеру отслеживания."""
+                    
+                    await bot_instance.send_message(
+                        chat_id=telegram_id,
+                        text=message
+                    )
+        except Exception as e:
+            logger.error(f"Failed to send label notification: {e}")
+        
+        return {
+            "status": "success",
+            "order_id": order_id,
+            "label_id": label_id,
+            "tracking_number": tracking_number,
+            "carrier": carrier_code,
+            "message": "Label created successfully"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error creating label manually: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.post("/webhooks/cryptopay")
 async def cryptopay_webhook(request: Request):
     try:
