@@ -1269,6 +1269,141 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
         return PARCEL_WEIGHT
 
 
+async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Check if it's a callback query (skip dimensions button)
+    if hasattr(update, 'callback_query') and update.callback_query:
+        query = update.callback_query
+        await query.answer()
+        
+        if query.data == 'skip_dimensions':
+            # Use default dimensions 5x5x5
+            context.user_data['length'] = 5
+            context.user_data['width'] = 5
+            context.user_data['height'] = 5
+            
+            await query.message.reply_text("✅ Используются стандартные размеры: 5x5x5 дюймов")
+            
+            # Show data confirmation
+            context.user_data['last_state'] = CONFIRM_DATA
+            return await show_data_confirmation(update, context)
+    
+    try:
+        length = float(update.message.text.strip())
+        
+        if length <= 0:
+            await update.message.reply_text("❌ Длина должна быть больше 0. Попробуйте еще раз:")
+            return PARCEL_LENGTH
+        
+        if length > 108:  # 9 feet max
+            await update.message.reply_text("❌ Длина слишком большая. Максимум 108 дюймов. Попробуйте еще раз:")
+            return PARCEL_LENGTH
+        
+        context.user_data['length'] = length
+        
+        # Ask for width
+        keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартные размеры", callback_data='skip_dimensions')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await update.message.reply_text(
+            """📏 Ширина посылки в дюймах (inches)
+Например: 10
+
+Или нажмите кнопку ниже, чтобы использовать стандартные размеры для ширины и высоты (5x5 дюймов)""",
+            reply_markup=reply_markup
+        )
+        context.user_data['last_state'] = PARCEL_WIDTH
+        return PARCEL_WIDTH
+            
+    except ValueError:
+        await update.message.reply_text("❌ Неверный формат. Введите число (например: 12 или 12.5):")
+        return PARCEL_LENGTH
+
+async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Check if it's a callback query (skip dimensions button)
+    if hasattr(update, 'callback_query') and update.callback_query:
+        query = update.callback_query
+        await query.answer()
+        
+        if query.data == 'skip_dimensions':
+            # Use default dimensions 5x5 for width and height
+            context.user_data['width'] = 5
+            context.user_data['height'] = 5
+            
+            await query.message.reply_text("✅ Используются стандартные размеры для ширины и высоты: 5x5 дюймов")
+            
+            # Show data confirmation
+            context.user_data['last_state'] = CONFIRM_DATA
+            return await show_data_confirmation(update, context)
+    
+    try:
+        width = float(update.message.text.strip())
+        
+        if width <= 0:
+            await update.message.reply_text("❌ Ширина должна быть больше 0. Попробуйте еще раз:")
+            return PARCEL_WIDTH
+        
+        if width > 108:
+            await update.message.reply_text("❌ Ширина слишком большая. Максимум 108 дюймов. Попробуйте еще раз:")
+            return PARCEL_WIDTH
+        
+        context.user_data['width'] = width
+        
+        # Ask for height
+        keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартную высоту", callback_data='skip_height')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await update.message.reply_text(
+            """📏 Высота посылки в дюймах (inches)
+Например: 8
+
+Или нажмите кнопку ниже, чтобы использовать стандартную высоту (5 дюймов)""",
+            reply_markup=reply_markup
+        )
+        context.user_data['last_state'] = PARCEL_HEIGHT
+        return PARCEL_HEIGHT
+            
+    except ValueError:
+        await update.message.reply_text("❌ Неверный формат. Введите число (например: 10 или 10.5):")
+        return PARCEL_WIDTH
+
+async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Check if it's a callback query (skip height button)
+    if hasattr(update, 'callback_query') and update.callback_query:
+        query = update.callback_query
+        await query.answer()
+        
+        if query.data == 'skip_height':
+            # Use default height 5
+            context.user_data['height'] = 5
+            
+            await query.message.reply_text("✅ Используется стандартная высота: 5 дюймов")
+            
+            # Show data confirmation
+            context.user_data['last_state'] = CONFIRM_DATA
+            return await show_data_confirmation(update, context)
+    
+    try:
+        height = float(update.message.text.strip())
+        
+        if height <= 0:
+            await update.message.reply_text("❌ Высота должна быть больше 0. Попробуйте еще раз:")
+            return PARCEL_HEIGHT
+        
+        if height > 108:
+            await update.message.reply_text("❌ Высота слишком большая. Максимум 108 дюймов. Попробуйте еще раз:")
+            return PARCEL_HEIGHT
+        
+        context.user_data['height'] = height
+        
+        # Show data confirmation
+        context.user_data['last_state'] = CONFIRM_DATA
+        return await show_data_confirmation(update, context)
+            
+    except ValueError:
+        await update.message.reply_text("❌ Неверный формат. Введите число (например: 8 или 8.5):")
+        return PARCEL_HEIGHT
+
+
 async def show_data_confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Show summary of entered data with edit option"""
     data = context.user_data
