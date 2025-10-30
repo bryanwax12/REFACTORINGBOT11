@@ -1422,17 +1422,29 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
         
         context.user_data['width'] = width
         
-        # Ask for height
-        keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартную высоту", callback_data='skip_height')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
+        # Ask for height (with skip option only if weight <= 10 lb)
+        weight = context.user_data.get('weight', 0)
         
-        await update.message.reply_text(
-            """📏 Высота посылки в дюймах (inches)
+        if weight > 10:
+            # Heavy parcel - user MUST enter dimensions
+            await update.message.reply_text(
+                """📏 Высота посылки в дюймах (inches)
+
+Введите высоту в дюймах (например: 10):"""
+            )
+        else:
+            # Light parcel - can skip and use default dimensions
+            keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартную высоту", callback_data='skip_height')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            await update.message.reply_text(
+                """📏 Высота посылки в дюймах (inches)
 Например: 8
 
 Или нажмите кнопку ниже, чтобы использовать стандартную высоту (10 дюймов)""",
-            reply_markup=reply_markup
-        )
+                reply_markup=reply_markup
+            )
+        
         context.user_data['last_state'] = PARCEL_HEIGHT
         return PARCEL_HEIGHT
             
