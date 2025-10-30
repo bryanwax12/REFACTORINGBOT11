@@ -1323,6 +1323,11 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
             
             await query.message.reply_text("✅ Используются стандартные размеры: 10x10x10 дюймов")
             
+            # If we're editing parcel, mark as complete
+            if context.user_data.get('editing_parcel'):
+                context.user_data['editing_parcel'] = False
+                await query.message.reply_text("✅ Размеры посылки обновлены!")
+            
             # Show data confirmation
             context.user_data['last_state'] = CONFIRM_DATA
             return await show_data_confirmation(update, context)
