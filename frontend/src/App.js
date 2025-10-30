@@ -256,7 +256,20 @@ const Dashboard = () => {
       }
       
     } catch (error) {
-      const errorMsg = error.response?.data?.detail || 'Failed to fetch shipping rates';
+      let errorMsg = 'Failed to fetch shipping rates';
+      
+      if (error.response?.data?.detail) {
+        const detail = error.response.data.detail;
+        // Handle FastAPI validation errors (array of objects)
+        if (Array.isArray(detail)) {
+          errorMsg = detail.map(err => err.msg || 'Validation error').join(', ');
+        } else if (typeof detail === 'string') {
+          errorMsg = detail;
+        }
+      } else if (error.message) {
+        errorMsg = error.message;
+      }
+      
       toast.error(errorMsg);
       console.error('Fetch rates error:', error);
       setAvailableRates([]);
