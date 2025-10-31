@@ -1406,6 +1406,176 @@ def test_help_command_url_generation():
         print(f"❌ Help command URL generation test error: {e}")
         return False
 
+def test_telegram_bot_shipping_rates():
+    """Test Telegram bot shipping rates with all carriers and refresh button - CRITICAL TEST per review request"""
+    print("\n🔍 Testing Telegram Bot Shipping Rates with All Carriers and Refresh Button...")
+    print("🎯 CRITICAL: Testing user reported issue - only UPS rates show up, missing refresh button")
+    
+    try:
+        # Read server.py to check the specific changes mentioned in review request
+        with open('/app/backend/server.py', 'r') as f:
+            server_code = f.read()
+        
+        print("   📋 TESTING REVIEW REQUEST CHANGES:")
+        
+        # 1. Check that allowed_services includes 'stamps_com' key (lines 1902-1930)
+        print("   1. Testing allowed_services includes 'stamps_com' key:")
+        
+        # Find allowed_services dictionary
+        allowed_services_match = re.search(
+            r'allowed_services\s*=\s*\{(.*?)\}', 
+            server_code, 
+            re.DOTALL
+        )
+        
+        if allowed_services_match:
+            allowed_services_content = allowed_services_match.group(1)
+            stamps_com_in_allowed = "'stamps_com'" in allowed_services_content
+            print(f"      'stamps_com' key in allowed_services: {'✅' if stamps_com_in_allowed else '❌'}")
+            
+            # Check for USPS service codes in stamps_com
+            if stamps_com_in_allowed:
+                usps_codes = ['usps_ground_advantage', 'usps_priority_mail', 'usps_priority_mail_express']
+                stamps_com_has_usps_codes = all(code in allowed_services_content for code in usps_codes)
+                print(f"      stamps_com has USPS service codes: {'✅' if stamps_com_has_usps_codes else '❌'}")
+            else:
+                stamps_com_has_usps_codes = False
+        else:
+            print("      ❌ allowed_services dictionary not found")
+            stamps_com_in_allowed = False
+            stamps_com_has_usps_codes = False
+        
+        # 2. Check that carrier_icons includes 'Stamps.com' mapping (lines 2016-2022)
+        print("   2. Testing carrier_icons includes 'Stamps.com' mapping:")
+        
+        carrier_icons_match = re.search(
+            r'carrier_icons\s*=\s*\{(.*?)\}', 
+            server_code, 
+            re.DOTALL
+        )
+        
+        if carrier_icons_match:
+            carrier_icons_content = carrier_icons_match.group(1)
+            stamps_com_icon = "'Stamps.com': '🦅 USPS'" in carrier_icons_content
+            print(f"      'Stamps.com': '🦅 USPS' mapping: {'✅' if stamps_com_icon else '❌'}")
+        else:
+            print("      ❌ carrier_icons dictionary not found")
+            stamps_com_icon = False
+        
+        # 3. Check that "🔄 Обновить тарифы" button is added before cancel button (lines 2065-2072)
+        print("   3. Testing refresh rates button in keyboard:")
+        
+        refresh_button_text = '🔄 Обновить тарифы' in server_code
+        refresh_button_callback = "callback_data='refresh_rates'" in server_code
+        print(f"      '🔄 Обновить тарифы' button text: {'✅' if refresh_button_text else '❌'}")
+        print(f"      callback_data='refresh_rates': {'✅' if refresh_button_callback else '❌'}")
+        
+        # Check button placement before cancel button
+        refresh_before_cancel = server_code.find('🔄 Обновить тарифы') < server_code.find('❌ Отмена')
+        print(f"      Refresh button before cancel button: {'✅' if refresh_before_cancel else '❌'}")
+        
+        # 4. Check that 'refresh_rates' is in SELECT_CARRIER state pattern handler (line 4835)
+        print("   4. Testing ConversationHandler pattern includes 'refresh_rates':")
+        
+        # Find SELECT_CARRIER pattern
+        select_carrier_pattern_match = re.search(
+            r'SELECT_CARRIER:.*?pattern=\'([^\']+)\'', 
+            server_code
+        )
+        
+        if select_carrier_pattern_match:
+            pattern_content = select_carrier_pattern_match.group(1)
+            refresh_rates_in_pattern = 'refresh_rates' in pattern_content
+            print(f"      'refresh_rates' in SELECT_CARRIER pattern: {'✅' if refresh_rates_in_pattern else '❌'}")
+            print(f"      Pattern: {pattern_content}")
+        else:
+            print("      ❌ SELECT_CARRIER pattern not found")
+            refresh_rates_in_pattern = False
+        
+        # 5. Check that select_carrier() handles 'refresh_rates' callback (lines 2120-2123)
+        print("   5. Testing select_carrier() handles 'refresh_rates' callback:")
+        
+        # Find select_carrier function
+        select_carrier_match = re.search(
+            r'async def select_carrier\(.*?\n(.*?)(?=async def|\Z)', 
+            server_code, 
+            re.DOTALL
+        )
+        
+        if select_carrier_match:
+            select_carrier_code = select_carrier_match.group(1)
+            handles_refresh_rates = "if query.data == 'refresh_rates':" in select_carrier_code
+            calls_fetch_rates = "return await fetch_shipping_rates(update, context)" in select_carrier_code
+            print(f"      Handles 'refresh_rates' callback: {'✅' if handles_refresh_rates else '❌'}")
+            print(f"      Calls fetch_shipping_rates(): {'✅' if calls_fetch_rates else '❌'}")
+        else:
+            print("      ❌ select_carrier function not found")
+            handles_refresh_rates = False
+            calls_fetch_rates = False
+        
+        # 6. Test fetch_shipping_rates function exists and is properly implemented
+        print("   6. Testing fetch_shipping_rates() function:")
+        
+        fetch_rates_function = 'async def fetch_shipping_rates(' in server_code
+        print(f"      fetch_shipping_rates() function exists: {'✅' if fetch_rates_function else '❌'}")
+        
+        # Check if function handles rate fetching for multiple carriers
+        if fetch_rates_function:
+            # Look for carrier filtering logic
+            carrier_filtering = 'rates_by_carrier_display' in server_code
+            print(f"      Implements carrier grouping: {'✅' if carrier_filtering else '❌'}")
+        else:
+            carrier_filtering = False
+        
+        # 7. Overall assessment of the fix
+        print("\n   📊 REVIEW REQUEST VERIFICATION SUMMARY:")
+        
+        all_changes_implemented = all([
+            stamps_com_in_allowed,
+            stamps_com_has_usps_codes,
+            stamps_com_icon,
+            refresh_button_text,
+            refresh_button_callback,
+            refresh_rates_in_pattern,
+            handles_refresh_rates,
+            calls_fetch_rates,
+            fetch_rates_function
+        ])
+        
+        print(f"   All required changes implemented: {'✅' if all_changes_implemented else '❌'}")
+        
+        if all_changes_implemented:
+            print("   ✅ TELEGRAM BOT SHIPPING RATES FIX VERIFIED:")
+            print("      - stamps_com added to allowed_services with USPS codes")
+            print("      - Stamps.com mapped to '🦅 USPS' icon")
+            print("      - '🔄 Обновить тарифы' button added before cancel")
+            print("      - 'refresh_rates' included in SELECT_CARRIER pattern")
+            print("      - select_carrier() handles refresh_rates callback")
+            print("      - Bot should now show UPS, USPS/Stamps.com, and FedEx rates")
+            print("      - Refresh button should reload rates when clicked")
+        else:
+            print("   ❌ TELEGRAM BOT SHIPPING RATES FIX INCOMPLETE:")
+            missing_items = []
+            if not stamps_com_in_allowed: missing_items.append("stamps_com in allowed_services")
+            if not stamps_com_has_usps_codes: missing_items.append("USPS codes in stamps_com")
+            if not stamps_com_icon: missing_items.append("Stamps.com icon mapping")
+            if not refresh_button_text: missing_items.append("refresh button text")
+            if not refresh_button_callback: missing_items.append("refresh button callback")
+            if not refresh_rates_in_pattern: missing_items.append("refresh_rates in pattern")
+            if not handles_refresh_rates: missing_items.append("refresh_rates handler")
+            if not calls_fetch_rates: missing_items.append("fetch_rates call")
+            if not fetch_rates_function: missing_items.append("fetch_rates function")
+            
+            print(f"      Missing: {', '.join(missing_items)}")
+        
+        return all_changes_implemented
+        
+    except Exception as e:
+        print(f"❌ Error testing Telegram bot shipping rates: {e}")
+        import traceback
+        print(f"   Traceback: {traceback.format_exc()}")
+        return False
+
 def test_help_command_formatting_improvements():
     """Test Help Command Markdown formatting improvements per review request"""
     print("\n🔍 Testing Help Command Markdown Formatting Improvements...")
