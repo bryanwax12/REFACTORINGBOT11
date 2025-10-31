@@ -2194,39 +2194,45 @@ Shipping label создан успешно!""",
             # Create order
             order = await create_order_in_db(user, data, selected_rate, amount, user_discount, discount_amount)
             
-            # Create crypto invoice
-            if crypto:
-                invoice = await crypto.create_invoice(
-                    asset="USDT",
-                    amount=amount
-                )
-                
-                pay_url = getattr(invoice, 'bot_invoice_url', None) or getattr(invoice, 'mini_app_invoice_url', None)
+            # Create Oxapay invoice
+            invoice_result = await create_oxapay_invoice(
+                amount=amount,
+                order_id=order['id'],
+                description=f"Shipping Label - Order {order['id'][:8]}"
+            )
+            
+            if invoice_result.get('success'):
+                track_id = invoice_result['trackId']
+                pay_link = invoice_result['payLink']
                 
                 payment = Payment(
                     order_id=order['id'],
                     amount=amount,
-                    invoice_id=invoice.invoice_id,
-                    pay_url=pay_url
+                    invoice_id=track_id,
+                    pay_url=pay_link
                 )
                 payment_dict = payment.model_dump()
                 payment_dict['created_at'] = payment_dict['created_at'].isoformat()
                 await db.payments.insert_one(payment_dict)
                 
-                keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+                keyboard = [[InlineKeyboardButton("💳 Оплатить", url=pay_link)],
+                           [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 
                 await query.message.reply_text(
                     f"""✅ Заказ создан!
 
-💰 Оплатите ${amount} USDT:
-{pay_url}
+💰 Сумма к оплате: ${amount}
+🪙 Криптовалюта: BTC, ETH, USDT, USDC и др.
 
-После оплаты мы автоматически создадим shipping label.""",
+Нажмите кнопку "Оплатить" для перехода на страницу оплаты.
+
+После успешной оплаты мы автоматически создадим shipping label.""",
                     reply_markup=reply_markup
                 )
             else:
-                await query.message.reply_text("❌ Система оплаты не настроена.")
+                error_msg = invoice_result.get('error', 'Unknown error')
+                await query.message.reply_text(f"❌ Ошибка создания инвойса: {error_msg}")
                 
         elif query.data == 'top_up_balance':
             # Request custom top-up amount
