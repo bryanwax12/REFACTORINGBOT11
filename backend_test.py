@@ -1959,14 +1959,15 @@ def main():
         print(f"   ✅ Button has correct callback_data='start' for main menu navigation")
         print(f"   ✅ Function located at expected lines (3922-3985 range)")
     else:
-        print(f"   ❌ CRITICAL FAILURE: Oxapay Order ID Length Fix has issues!")
-        print(f"   ❌ Check order_id generation in handle_topup_amount_input function")
-        print(f"   ❌ Verify order_id format: 'top_{{timestamp}}_{{uuid[:8]}}'")
-        print(f"   ❌ Test invoice creation with $15 amount")
-        print(f"   ❌ Ensure order_id length is under 50 characters")
+        print(f"   ❌ REVIEW FAILURE: Oxapay Webhook Success Message has issues!")
+        print(f"   ❌ Check InlineKeyboardButton and InlineKeyboardMarkup configuration")
+        print(f"   ❌ Verify message text includes 'Спасибо! Ваш баланс пополнен!' with bold formatting")
+        print(f"   ❌ Ensure parse_mode='Markdown' is present")
+        print(f"   ❌ Check reply_markup is passed to send_message")
+        print(f"   ❌ Verify button has callback_data='start'")
     
     
-    return critical_oxapay_passed
+    return critical_webhook_passed
 
 if __name__ == "__main__":
     main()
