@@ -105,6 +105,21 @@
 user_problem_statement: "Fix Oxapay payment integration validation error - user reported error when creating invoice for custom top-up amounts: 'Ошибка создания инвойса: {\"result\":101,\"message\":\"Validation problem\"}'"
 
 backend:
+  - task: "Oxapay Payment Integration - Invoice Creation Fix"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "User reported: Oxapay invoice creation failing with 'Validation problem' error (result code 101) when user tries to top-up balance with custom amount."
+        - working: "NA"
+          agent: "main"
+          comment: "🔧 ROOT CAUSE IDENTIFIED: The Oxapay API implementation was using incorrect format. Issues found: (1) API key was sent in payload body as 'merchant' instead of in headers as 'merchant_api_key', (2) Wrong endpoint - using '/merchants/request' instead of '/v1/payment/invoice', (3) Wrong parameter names - using camelCase ('feePaidByPayer', 'underPaidCover', 'callbackUrl', 'returnUrl', 'orderId') instead of snake_case ('fee_paid_by_payer', 'under_paid_coverage', 'callback_url', 'return_url', 'order_id'). FIXED: (1) Updated API URL from 'https://api.oxapay.com/merchants' to 'https://api.oxapay.com', (2) Changed endpoint from '/request' to '/v1/payment/invoice', (3) Moved API key from payload to headers {'merchant_api_key': OXAPAY_API_KEY}, (4) Updated all parameter names to snake_case format according to official docs, (5) Also fixed check_oxapay_payment function - updated endpoint from '/inquiry' to '/v1/payment/info' with API key in headers. Backend restarted successfully. Ready for testing - user should try top-up with custom amount again."
+
   - task: "ShipStation V2 API Rate Request Fix"
     implemented: true
     working: true
