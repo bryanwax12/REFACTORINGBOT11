@@ -544,49 +544,75 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
     
     await send_method(message, reply_markup=reply_markup, parse_mode='Markdown')
 
-async def handle_topup(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
+async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle custom topup amount input"""
+    if not context.user_data.get('awaiting_topup_amount'):
+        return
     
-    topup_amount = float(query.data.split('_')[1])
-    telegram_id = query.from_user.id
-    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
-    
-    if crypto:
-        invoice = await crypto.create_invoice(
-            asset="USDT",
-            amount=topup_amount
+    try:
+        amount = float(update.message.text.strip())
+        
+        if amount < 10:
+            await update.message.reply_text("❌ *Минимальная сумма для пополнения: $10*", parse_mode='Markdown')
+            return
+        
+        if amount > 10000:
+            await update.message.reply_text("❌ *Максимальная сумма для пополнения: $10,000*", parse_mode='Markdown')
+            return
+        
+        # Clear the waiting flag
+        context.user_data['awaiting_topup_amount'] = False
+        
+        telegram_id = update.effective_user.id
+        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        
+        # Create Oxapay invoice
+        invoice_result = await create_oxapay_invoice(
+            amount=amount,
+            order_id=f"topup_{user['id']}_{uuid.uuid4().hex[:8]}",
+            description=f"Balance Top-up ${amount}"
         )
         
-        pay_url = getattr(invoice, 'bot_invoice_url', None) or getattr(invoice, 'mini_app_invoice_url', None)
-        
-        # Save top-up payment
-        payment = Payment(
-            order_id=f"topup_{user['id']}",
-            amount=topup_amount,
-            invoice_id=invoice.invoice_id,
-            pay_url=pay_url,
-            currency="USDT",
-            status="pending"
-        )
-        payment_dict = payment.model_dump()
-        payment_dict['created_at'] = payment_dict['created_at'].isoformat()
-        payment_dict['telegram_id'] = telegram_id
-        payment_dict['type'] = 'topup'
-        await db.payments.insert_one(payment_dict)
-        
-        keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        
-        await query.message.reply_text(
-            f"""💵 Пополнение баланса
+        if invoice_result.get('success'):
+            track_id = invoice_result['trackId']
+            pay_link = invoice_result['payLink']
+            
+            # Save top-up payment
+            payment = Payment(
+                order_id=f"topup_{user['id']}",
+                amount=amount,
+                invoice_id=track_id,
+                pay_url=pay_link,
+                status="pending"
+            )
+            payment_dict = payment.model_dump()
+            payment_dict['created_at'] = payment_dict['created_at'].isoformat()
+            payment_dict['telegram_id'] = telegram_id
+            payment_dict['type'] = 'topup'
+            await db.payments.insert_one(payment_dict)
+            
+            keyboard = [[InlineKeyboardButton("💳 Оплатить", url=pay_link)],
+                       [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            await update.message.reply_text(
+                f"""*✅ Счёт на пополнение создан!*
 
-💰 Оплатите ${topup_amount} USDT:
-{pay_url}
+*💵 Сумма: ${amount}*
+*🪙 Криптовалюта: Любая из доступных*
 
-После оплаты баланс будет пополнен автоматически.""",
-            reply_markup=reply_markup
-        )
+*Нажмите кнопку "Оплатить" для перехода на страницу оплаты.*
+
+*После успешной оплаты баланс будет автоматически пополнен.*""",
+                reply_markup=reply_markup,
+                parse_mode='Markdown'
+            )
+        else:
+            error_msg = invoice_result.get('error', 'Unknown error')
+            await update.message.reply_text(f"❌ *Ошибка создания инвойса:* {error_msg}", parse_mode='Markdown')
+            
+    except ValueError:
+        await update.message.reply_text("❌ *Неверный формат. Введите число (например: 10 или 25.50)*", parse_mode='Markdown')
 
 # Conversation states for order creation
 FROM_NAME, FROM_ADDRESS, FROM_ADDRESS2, FROM_CITY, FROM_STATE, FROM_ZIP, FROM_PHONE, TO_NAME, TO_ADDRESS, TO_ADDRESS2, TO_CITY, TO_STATE, TO_ZIP, TO_PHONE, PARCEL_WEIGHT, PARCEL_LENGTH, PARCEL_WIDTH, PARCEL_HEIGHT, CONFIRM_DATA, EDIT_MENU, SELECT_CARRIER, PAYMENT_METHOD, TOPUP_AMOUNT = range(23)
