@@ -1893,7 +1893,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         all_rates = rate_response.get('rate_response', {}).get('rates', [])
         
         # Filter out GlobalPost and Stamps.com rates
-        excluded_carriers = ['globalpost', 'stamps_com', 'stamps.com']
+        excluded_carriers = ['globalpost']
         all_rates = [
             rate for rate in all_rates 
             if rate.get('carrier_code', '').lower() not in excluded_carriers
@@ -4467,7 +4467,7 @@ async def calculate_shipping_rates(request: ShippingRateRequest):
         all_rates = rate_response.get('rate_response', {}).get('rates', [])
         
         # Filter out GlobalPost and Stamps.com rates
-        excluded_carriers = ['globalpost', 'stamps_com', 'stamps.com']
+        excluded_carriers = ['globalpost']
         all_rates = [
             rate for rate in all_rates 
             if rate.get('carrier_code', '').lower() not in excluded_carriers
