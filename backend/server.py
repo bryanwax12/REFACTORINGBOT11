@@ -42,7 +42,7 @@ if TELEGRAM_BOT_TOKEN:
 
 # Oxapay - Cryptocurrency Payment Gateway
 OXAPAY_API_KEY = os.environ.get('OXAPAY_API_KEY', '')
-OXAPAY_API_URL = 'https://api.oxapay.com/merchants'
+OXAPAY_API_URL = 'https://api.oxapay.com'
 
 # Oxapay helper functions
 async def create_oxapay_invoice(amount: float, order_id: str, description: str = "Shipping Label Payment"):
@@ -51,22 +51,29 @@ async def create_oxapay_invoice(amount: float, order_id: str, description: str =
         raise HTTPException(status_code=500, detail="Oxapay API key not configured")
     
     try:
+        # Prepare headers with API key
+        headers = {
+            "merchant_api_key": OXAPAY_API_KEY,
+            "Content-Type": "application/json"
+        }
+        
+        # Prepare payload according to official documentation
         payload = {
-            "merchant": OXAPAY_API_KEY,
             "amount": amount,
             "currency": "USD",
             "lifeTime": 30,  # 30 minutes
-            "feePaidByPayer": 0,  # Merchant pays fees
-            "underPaidCover": 2,  # Accept 2% underpayment
-            "callbackUrl": f"{os.environ.get('BACKEND_URL', '')}/api/oxapay/webhook",
-            "returnUrl": f"https://t.me/{os.environ.get('BOT_USERNAME', '')}",
+            "fee_paid_by_payer": 0,  # Merchant pays fees
+            "under_paid_coverage": 2,  # Accept 2% underpayment
+            "callback_url": f"{os.environ.get('BACKEND_URL', '')}/api/oxapay/webhook",
+            "return_url": f"https://t.me/{os.environ.get('BOT_USERNAME', '')}",
             "description": description,
-            "orderId": order_id
+            "order_id": order_id
         }
         
         response = requests.post(
-            f"{OXAPAY_API_URL}/request",
+            f"{OXAPAY_API_URL}/v1/payment/invoice",
             json=payload,
+            headers=headers,
             timeout=30
         )
         
@@ -89,14 +96,20 @@ async def create_oxapay_invoice(amount: float, order_id: str, description: str =
 async def check_oxapay_payment(track_id: str):
     """Check payment status via Oxapay"""
     try:
+        # Prepare headers with API key
+        headers = {
+            "merchant_api_key": OXAPAY_API_KEY,
+            "Content-Type": "application/json"
+        }
+        
         payload = {
-            "merchant": OXAPAY_API_KEY,
             "trackId": track_id
         }
         
         response = requests.post(
-            f"{OXAPAY_API_URL}/inquiry",
+            f"{OXAPAY_API_URL}/v1/payment/info",
             json=payload,
+            headers=headers,
             timeout=30
         )
         
