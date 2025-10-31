@@ -1892,7 +1892,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         rate_response = response.json()
         all_rates = rate_response.get('rate_response', {}).get('rates', [])
         
-        # Filter out GlobalPost and Stamps.com rates
+        # Filter out only GlobalPost rates (keep stamps_com which is USPS)
         excluded_carriers = ['globalpost']
         all_rates = [
             rate for rate in all_rates 
@@ -4466,7 +4466,7 @@ async def calculate_shipping_rates(request: ShippingRateRequest):
         rate_response = response.json()
         all_rates = rate_response.get('rate_response', {}).get('rates', [])
         
-        # Filter out GlobalPost and Stamps.com rates
+        # Filter out only GlobalPost rates (keep stamps_com which is USPS)
         excluded_carriers = ['globalpost']
         all_rates = [
             rate for rate in all_rates 
