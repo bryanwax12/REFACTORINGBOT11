@@ -932,8 +932,8 @@ async def get_shipstation_carrier_ids():
             data = response.json()
             carriers = data.get('carriers', [])
             
-            # Exclude specific carriers: GlobalPost, Stamps.com
-            excluded_carriers = ['globalpost', 'stamps_com', 'stamps']
+            # Exclude only GlobalPost (Stamps.com is USPS, keep it)
+            excluded_carriers = ['globalpost']
             
             # Extract carrier IDs from active carriers, excluding unwanted ones
             carrier_ids = [
