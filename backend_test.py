@@ -225,18 +225,76 @@ def test_shipping_rates():
             else:
                 print(f"   ❌ Low rate count (got {len(rates)}, expected 20-30+)")
             
-            # Check for specific carriers mentioned in review (USPS, UPS, FedEx)
+            # CRITICAL TEST: Check for specific carriers mentioned in review (USPS/stamps_com, UPS, FedEx)
+            print(f"\n   📊 CRITICAL CARRIER DIVERSITY TEST:")
+            
             carrier_names = [r.get('carrier_friendly_name', r.get('carrier', '')).upper() for r in rates]
+            carrier_codes = [r.get('carrier_code', '').lower() for r in rates]
             unique_carriers = set(carrier_names)
+            unique_carrier_codes = set(carrier_codes)
             
-            ups_rates = [r for r in rates if 'UPS' in r.get('carrier_friendly_name', r.get('carrier', '')).upper()]
-            usps_rates = [r for r in rates if 'USPS' in r.get('carrier_friendly_name', r.get('carrier', '')).upper()]
-            fedex_rates = [r for r in rates if any(x in r.get('carrier_friendly_name', r.get('carrier', '')).upper() for x in ['FEDEX', 'FDX'])]
+            # Check for UPS rates
+            ups_rates = [r for r in rates if 'UPS' in r.get('carrier_friendly_name', r.get('carrier', '')).upper() or 'ups' in r.get('carrier_code', '').lower()]
             
-            print(f"   Unique carriers: {len(unique_carriers)} - {sorted(unique_carriers)}")
+            # Check for USPS/stamps_com rates (this is the key fix from review request)
+            usps_rates = [r for r in rates if any(x in r.get('carrier_friendly_name', r.get('carrier', '')).upper() for x in ['USPS', 'STAMPS']) or 
+                         any(x in r.get('carrier_code', '').lower() for x in ['usps', 'stamps_com', 'stamps'])]
+            
+            # Check for FedEx rates
+            fedex_rates = [r for r in rates if any(x in r.get('carrier_friendly_name', r.get('carrier', '')).upper() for x in ['FEDEX', 'FDX']) or 
+                          'fedex' in r.get('carrier_code', '').lower()]
+            
+            print(f"   Unique carrier names: {len(unique_carriers)} - {sorted(unique_carriers)}")
+            print(f"   Unique carrier codes: {len(unique_carrier_codes)} - {sorted(unique_carrier_codes)}")
+            
+            print(f"\n   📋 CARRIER-SPECIFIC RESULTS:")
             print(f"   UPS rates: {len(ups_rates)} {'✅' if ups_rates else '❌'}")
-            print(f"   USPS rates: {len(usps_rates)} {'✅' if usps_rates else '❌'}")
+            print(f"   USPS/Stamps.com rates: {len(usps_rates)} {'✅' if usps_rates else '❌'}")
             print(f"   FedEx rates: {len(fedex_rates)} {'✅' if fedex_rates else '❌'}")
+            
+            # CRITICAL: Verify we have diversity (multiple carriers)
+            carriers_found = sum([bool(ups_rates), bool(usps_rates), bool(fedex_rates)])
+            print(f"   Total carriers with rates: {carriers_found}/3")
+            
+            if carriers_found >= 2:
+                print(f"   ✅ CARRIER DIVERSITY ACHIEVED: Multiple carriers returning rates")
+            else:
+                print(f"   ❌ CARRIER DIVERSITY ISSUE: Only {carriers_found} carrier(s) returning rates")
+            
+            # Show sample rates from each carrier
+            if ups_rates:
+                sample_ups = ups_rates[0]
+                print(f"   📦 Sample UPS Rate: {sample_ups.get('service_type', 'Unknown')} - ${float(sample_ups.get('shipping_amount', {}).get('amount', 0)):.2f}")
+            
+            if usps_rates:
+                sample_usps = usps_rates[0]
+                print(f"   📦 Sample USPS Rate: {sample_usps.get('service_type', 'Unknown')} - ${float(sample_usps.get('shipping_amount', {}).get('amount', 0)):.2f}")
+            
+            if fedex_rates:
+                sample_fedex = fedex_rates[0]
+                print(f"   📦 Sample FedEx Rate: {sample_fedex.get('service_type', 'Unknown')} - ${float(sample_fedex.get('shipping_amount', {}).get('amount', 0)):.2f}")
+            
+            # Test carrier_code diversity as mentioned in review request
+            print(f"\n   📋 CARRIER CODE VERIFICATION:")
+            for code in sorted(unique_carrier_codes):
+                if code:
+                    code_rates = [r for r in rates if r.get('carrier_code', '').lower() == code]
+                    print(f"   {code}: {len(code_rates)} rates")
+            
+            # CRITICAL SUCCESS CRITERIA from review request
+            multiple_carriers = carriers_found >= 2
+            has_usps_stamps = bool(usps_rates)  # This is the key fix - stamps_com should now be included
+            has_ups = bool(ups_rates)
+            
+            print(f"\n   🎯 REVIEW REQUEST SUCCESS CRITERIA:")
+            print(f"   Multiple carriers (≥2): {'✅' if multiple_carriers else '❌'}")
+            print(f"   USPS/Stamps.com rates: {'✅' if has_usps_stamps else '❌'}")
+            print(f"   UPS rates: {'✅' if has_ups else '❌'}")
+            
+            if has_usps_stamps and has_ups:
+                print(f"   ✅ CRITICAL FIX VERIFIED: Both USPS/stamps_com and UPS rates are now available")
+            else:
+                print(f"   ❌ CRITICAL ISSUE: Missing expected carrier rates")
             
             # Verify rate structure as mentioned in review
             if rates:
