@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Fix Oxapay payment integration validation error - user reported error when creating invoice for custom top-up amounts: 'Ошибка создания инвойса: {\"result\":101,\"message\":\"Validation problem\"}'"
+user_problem_statement: "After successful balance top-up via Oxapay, send thank you message with 'Main Menu' button - user wants confirmation message after payment with navigation button"
 
 backend:
   - task: "Oxapay Payment Integration - Invoice Creation Fix"
