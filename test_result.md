@@ -371,13 +371,11 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus:
-    - "Oxapay Payment Integration - Invoice Creation Fix"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
-  manual_testing_required:
-    - "Oxapay Payment Integration: CRITICAL FIX COMPLETED - Fixed API endpoint, headers, and parameter format according to official Oxapay documentation. User should test: (1) Go to /balance in bot, (2) Click 'Пополнить баланс', (3) Enter custom amount (e.g., $15), (4) Verify invoice is created successfully without validation error, (5) Test payment flow with generated link."
+  manual_testing_required: []
     - "Return to Order - CRITICAL FIX COMPLETED: Backend testing verified the fix is working. Manual testing via @whitelabellbot recommended to confirm end-to-end functionality: start /order, enter name, click cancel at 'Адрес отправителя' step, click 'return to order', then enter '215 Clayton St.' - should now accept address without errors."
   completed_testing:
     - "Admin Panel Backend APIs - ALL ENDPOINTS TESTED AND WORKING: (1) Search Orders API (GET /api/orders/search) - search by order ID, tracking number, payment/shipping status filters, order enrichment ✅, (2) Refund Order API (POST /api/orders/{order_id}/refund) - refunds paid orders, updates user balance, order status, Telegram notifications ✅, (3) Export CSV API (GET /api/orders/export/csv) - proper CSV format, download headers, filters, data enrichment ✅. Fixed critical FastAPI routing conflict. All APIs ready for frontend integration."
