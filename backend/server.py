@@ -2118,6 +2118,10 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if query.data == 'return_to_order':
         return await return_to_order(update, context)
     
+    if query.data == 'refresh_rates':
+        # Refresh shipping rates
+        return await fetch_shipping_rates(update, context)
+    
     # Get selected carrier index
     carrier_idx = int(query.data.split('_')[-1])
     selected_rate = context.user_data['rates'][carrier_idx]
