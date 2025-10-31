@@ -1,94 +1,93 @@
 <analysis>
-The AI engineer's work primarily focused on iteratively enhancing and debugging a Telegram bot application. Initially, significant effort was dedicated to fixing core bot functionalities, such as  management for conversation flow and correcting step numbering. Subsequent work addressed critical integrations, notably ShipStation (for shipping labels) and CryptoBot (for payments). The engineer meticulously refined label creation, rate de-duplication, and robust error handling including admin notifications. A major part of the trajectory involved building out a comprehensive admin panel with features like tracking, refunds, profit and expense monitoring, and a discount system. Security measures, including API key protection and input sanitization, were also implemented. User feedback was crucial, leading to corrections like the ShipEngine company name workaround and dynamic display of multiple labels. The work culminated with ongoing security enhancements and a pending task to update administrator contact details.
+The AI engineer's work primarily focused on iteratively enhancing and debugging a Telegram bot and its associated admin panel. Initial tasks involved updating  and refining bot UI/UX, including button placement and message formatting. A significant development was the migration of the bot to a new Telegram account. Core functionality improvements included adding user input for parcel dimensions for more accurate shipping rates, and adapting the system when the track by ID for dimensions feature proved unfeasible. The default parcel dimensions were adjusted, and conditional dimension input was implemented for heavier packages. In the admin panel, a manual Create Label feature was added, evolving from a simple button to a dedicated tab with dynamic rate fetching. A major shift in payment processing occurred from CryptoBot to Oxapay, requiring extensive code modifications and dependency updates. The current critical task is debugging a  with Oxapay during invoice creation, after implementing a custom amount top-up feature.
 </analysis>
 
 <product_requirements>
-The application is a Telegram bot for shipping label generation and crypto payments, targeting robust user interaction and administrative oversight. It features user authentication, crypto payment integration (CryptoBot, with planned Heleket), and ShipStation V2 API for labels.
+The application is a Telegram bot for shipping label generation and crypto payments, targeting robust user interaction and administrative oversight. It features user authentication, crypto payment integration (initially CryptoBot, planned Heleket, now Oxapay), and ShipStation V2 API for labels.
 
-Key user requirements and implemented features:
--   **Shipping**: ShipStation V2 integration, carrier filtering, dynamic rate fetching, de-duplicated shipping rates, and label voiding upon refund. Address validation was removed as not supported by ShipStation V2.
--   **Payments**: CryptoBot integration with custom top-up and multiple cryptocurrencies (BTC, ETH, USDT, LTC). Heleket integration is planned.
--   **UI/UX (Bot)**: Corrected  navigation, consistent step numbering, dynamic prompts, and a functional main menu. Russian localization for bot messages and buttons (Главное меню).
--   **UI/UX (Admin Panel)**: Comprehensive order management with search (Order ID, Tracking #), refund functionality, label download (proxied), and export to Excel/CSV. Display of user Telegram ID, name, and tracking status (progress bar). Profit tracking (fixed 0/label, deducted on refund). Real-time ShipStation expense tracking with date filters.
--   **Error Handling**: Admin Telegram notifications for critical issues, with Contact Administrator button.
--   **Security**: Admin API Key protection for backend, input sanitization for user inputs, and security logging.
--   **Customization**: Per-user discount system.
--   **Issue Resolution**: Addressed ShipStation company name on labels via a hyphen workaround.
+**Key user requirements and implemented features:**
+-   **Shipping**: ShipStation V2 integration, carrier filtering, dynamic rate fetching, de-duplicated shipping rates, label voiding upon refund. Address validation removed. Added user input for parcel dimensions (length, width, height) with a skip option, and adjusted default dimensions to 10x10x10 inches. For parcels over 10lb, dimension input is now mandatory.
+-   **Payments**: CryptoBot was integrated, then fully replaced by Oxapay for custom top-up and multiple cryptocurrencies (BTC, ETH, USDT, LTC). Users can now enter any top-up amount over 0.
+-   **UI/UX (Bot)**: Corrected  navigation, consistent step numbering, dynamic prompts, functional main menu. Russian localization for bot messages and buttons. Contact Administrator button added to Help and FAQ sections. Welcome message text and formatting updated.
+-   **UI/UX (Admin Panel)**: Comprehensive order management with search, refund, label download, and export to Excel/CSV. Display of user Telegram ID, name, tracking status. Profit tracking, real-time ShipStation expense tracking. Per-user discount system. Manual Create Label form implemented in a dedicated admin tab, allowing dynamic service rate fetching based on carrier selection.
+-   **Error Handling**: Admin Telegram notifications for critical issues.
+-   **Security**: Admin API Key protection for backend, input sanitization, security logging.
+-   **Issue Resolution**: ShipStation company name workaround; frontend/backend fixes for dimension input, manual label creation, and Oxapay integration.
 </product_requirements>
 
 <key_technical_concepts>
 -   **Full-stack**: React (frontend), FastAPI (backend), MongoDB (database).
 -   **Telegram Bot API**:  with .
--   **Payment Gateways**: CryptoBot API (), Heleket (planned).
--   **Shipping API**: ShipStation V2 API ().
--   **Data Validation**: Pydantic for API models.
+-   **Payment Gateways**: CryptoBot API (removed), Oxapay API (new integration).
+-   **Shipping API**: ShipStation V2 API.
+-   **Data Validation**: Pydantic.
 -   **Security**: API Key authentication, Input Sanitization, Logging.
--   **Environment Config**:  for API keys and URLs.
 </key_technical_concepts>
 
 <code_architecture>
 
 
 -   **/app/backend/server.py**:
-    -   **Summary of why this file is important:** Centralizes all backend logic: Telegram bot handlers, FastAPI endpoints for admin panel, database interactions, CryptoBot, and ShipStation integrations.
+    -   **Summary of why this file is important:** Centralizes all backend logic: Telegram bot handlers, FastAPI endpoints for admin panel, database interactions, and ShipStation/Oxapay integrations.
     -   **Summary of the changes made to this file:**
-        -   **Bot Logic**: Fixed  management,  logic, phone number validation, step numbering consistency, removed My Orders and Track Shipment commands/buttons, added Russian button text (Главное меню).
-        -   **ShipStation**: Removed V2 address validation, corrected label creation status to 200, de-duplicated rates, added API for voiding labels and tracking status. Applied - as  workaround.
-        -   **Admin API**: Added endpoints for  (search, export, multiple label display), ,  (profit, expenses), .
-        -   **Models**: Updated  (added ),  (added ),  (added ).
-        -   **Security**: Implemented  middleware for admin routes, , and  for input sanitization.
-        -   **Heleket**: Initial API research and playbook integration preparatory steps.
+        -   Updated  usage.
+        -   Modified  for admin contact, FAQ button, and message formatting (bolding, removing commands, centering attempts).
+        -   Updated  welcome message (removed crypto payment mention, made bold).
+        -   Implemented logic to collect parcel , ,  from user, using default  if skipped, and making input mandatory for .
+        -   Updated , , , ,  to support dimension input.
+        -   Removed all CryptoBot related imports, initialization, and payment/top-up processing logic.
+        -   Integrated Oxapay for payment processing and top-up, including a new  import.
+        -   Replaced CryptoBot webhook handler with Oxapay webhook handler.
+        -   Modified  and created  for custom top-up amounts.
+        -   Added new FastAPI endpoint  for manual label creation in admin panel.
+        -   Fixed  to .
+        -   Cleaned up syntax errors and old code.
 -   **/app/backend/.env**:
-    -   **Summary of why this file is important:** Stores environment variables critical for backend operation, including API keys (ShipStation, CryptoBot, Heleket), database connection string, and Telegram bot token.
-    -   **Summary of the changes made to this file:**  (for error notifications),  (updated multiple times for production and sandbox),  (added for backend security), placeholders for Heleket API keys (Merchant ID, Payment API Key, Payout API Key, Webhook Secret).
+    -   **Summary of why this file is important:** Stores environment variables critical for backend operation.
+    -   **Summary of the changes made to this file:** Updated , , and added .
 -   **/app/backend/requirements.txt**:
     -   **Summary of why this file is important:** Lists Python dependencies for the backend.
-    -   **Summary of the changes made to this file:** Implied updates for , , , To use the fastapi command, please install "fastapi[standard]":
-
-	pip install "fastapi[standard]", , , , , , . Specific additions for security components like  from  module.
--   **/app/frontend/.env**:
-    -   **Summary of why this file is important:** Stores environment variables for the frontend, primarily the backend URL and admin API key for authentication.
-    -   **Summary of the changes made to this file:**  and  (added for admin panel security).
+    -   **Summary of the changes made to this file:** Removed .
 -   **/app/frontend/src/App.js**:
-    -   **Summary of why this file is important:** The main React component, handling routing, global state, fetching data for dashboard statistics, and managing UI elements.
-    -   **Summary of the changes made to this file:** Integrated new  and  cards, updated API calls to include  in headers, and managed state for new modals ().
--   **/app/frontend/src/components/OrdersTab.jsx**:
-    -   **Summary of why this file is important:** Displays the list of orders in the admin panel, including tracking, download, and refund actions.
-    -   **Summary of the changes made to this file:** Updated table structure to show user info (name, Telegram ID), display multiple labels per order, integrated tracking status progress bar, and updated buttons for  (using proxy endpoint) and .
--   **/app/frontend/src/components/UsersTab.jsx**:
-    -   **Summary of why this file is important:** Displays a list of users in the admin panel.
-    -   **Summary of the changes made to this file:** Added a 🎁 Discount button for each user and logic to trigger the . Displays user's current discount percentage.
--   **/app/frontend/src/components/Dashboard.jsx**:
-    -   **Summary of why this file is important:** Orchestrates the overall admin panel layout and includes various statistics cards and tabs.
-    -   **Summary of the changes made to this file:** Integrated new UI components for profit tracking (), expense tracking (), and modals (, , ).
--   **/app/frontend/src/components/refundModal.jsx**:
-    -   **Summary of why this file is important:** Handles the UI for initiating a refund for an order.
-    -   **Summary of the changes made to this file:** Updated to support the refund API call.
--   **/app/frontend/src/components/TrackingModal.jsx**:
-    -   **Summary of why this file is important:** Displays detailed tracking information for a selected label.
-    -   **Summary of the changes made to this file:** Updated to fetch and display detailed tracking status from the backend API.
--   **/app/frontend/src/components/ExpenseInfo.jsx**:
-    -   **Summary of why this file is important:** New component to display ShipStation expense statistics.
-    -   **Summary of the changes made to this file:** Created to show total/daily expenses and average cost per label, including date range filters.
--   **/app/frontend/src/components/DiscountModal.jsx**:
-    -   **Summary of why this file is important:** New component to allow setting discounts for individual users.
-    -   **Summary of the changes made to this file:** Created to provide an input field for setting a user's discount percentage and trigger the backend API.
+    -   **Summary of why this file is important:** The main React component, handling routing, global state, fetching data, and managing UI elements for the admin panel.
+    -   **Summary of the changes made to this file:**
+        -   Added Weight and Dimensions columns to the Orders table.
+        -   Removed the Create Label button from the Orders table.
+        -   Added a new Create Label tab with a form for manual label creation.
+        -   Implemented state and logic for  to dynamically load shipping services and prices based on selected carrier.
+        -   Updated  function (now used by the manual form).
+        -   Added comprehensive input validation for the manual label creation form.
+        -   Fixed several frontend runtime errors related to scope, object rendering in , and  vs  API payload.
+-   **/app/frontend/.env**:
+    -   **Summary of why this file is important:** Stores environment variables for the frontend.
+    -   **Summary of the changes made to this file:**  and  are used for communication. Other variables in current work are for backend.
+-   **/app/frontend/src/components/OrdersTab.jsx**: This file was initially thought to be used, but later it was determined that the relevant UI code was within . No changes were made here explicitly.
 </code_architecture>
 
 <pending_tasks>
--   **Heleket Integration**: The integration playbook for Heleket was retrieved, and the bot verification code  was added to the bot description via BotFather. However, the actual implementation of payment processing with Heleket is pending, awaiting the user to provide the correct , , , and  after a 24-hour waiting period for generation.
--   **Admin Telegram ID Update**: The user requested to change the  used for error notifications and to check other usages. This task is currently in progress.
+-   **Oxapay Integration Debugging**: The Oxapay invoice creation is failing with a  message. This requires debugging the  function in  to ensure the request payload matches Oxapay's API requirements.
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer was implementing security enhancements for the application. This included:
-1.  **Admin API Key Protection**: An  was added to  and a FastAPI  middleware () was implemented in  to secure all admin-related API endpoints (e.g., , , , , ). The frontend (, ) was updated to include this API key in  headers for all backend calls.
-2.  **Input Sanitization**:  was applied to user inputs in  and  functions in  to prevent potential injection attacks.
-3.  **Security Logging**: A  was added to  to log requests, enhancing traceability and security monitoring.
+Immediately before this summary request, the AI engineer was actively implementing the Oxapay payment gateway integration as a replacement for CryptoBot. This involved removing all CryptoBot-related code and integrating Oxapay's API calls for payment processing and user balance top-ups.
 
-The very last user request was to change the  used for error notifications and to investigate its other usages within the codebase. The AI engineer's last action was to start searching for all occurrences of .
+Specifically, the following changes were made:
+-   **Backend ()**:
+    -   Removed  imports and  initialization.
+    -   Added  from  to .
+    -   Modified  and  functions to use Oxapay API calls for invoice creation instead of CryptoBot.
+    -   Updated the webhook handler from  to  to process Oxapay payment notifications.
+    -   Refactored  to remove fixed top-up amount buttons and instead prompt the user to enter a custom amount (minimum 0).
+    -   Created a new  function to process the user's custom top-up amount and initiate an Oxapay invoice.
+    -   Updated the  to register the new text-based input for top-up amounts.
+-   **Configuration ()**:
+    -   Added the  provided by the user.
+-   **Dependencies ()**:
+    -   Removed  from the list of required Python packages.
+
+The very last user message reported an error: . The AI engineer's last action was to acknowledge this and begin inspecting the  function for potential issues in the request payload or parameters.
 </current_work>
 
 <optional_next_step>
-Find all occurrences of  in the codebase, then ask the user for the new ID to update it.
+Debug the Oxapay  by inspecting the  function in .
 </optional_next_step>
