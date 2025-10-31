@@ -2016,6 +2016,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         carrier_icons = {
             'UPS': '🛡 UPS',  # Щит - фирменный логотип UPS (коричнево-золотой щит)
             'USPS': '🦅 USPS',  # Орёл - символ почтовой службы США
+            'Stamps.com': '🦅 USPS',  # Stamps.com это USPS
             'FedEx One Balance': '⚡ FedEx',  # Молния - символ скорости FedEx Express
             'FedEx': '⚡ FedEx'
         }
