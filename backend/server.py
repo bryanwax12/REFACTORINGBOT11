@@ -528,26 +528,21 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
     user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
     balance = user.get('balance', 0.0) if user else 0.0
     
-    message = f"""💳 Ваш баланс: ${balance:.2f}
+    message = f"""*💳 Ваш баланс: ${balance:.2f}*
 
-Вы можете использовать баланс для оплаты заказов.
+*Вы можете использовать баланс для оплаты заказов.*
 
-Хотите пополнить баланс?"""
+*Введите сумму для пополнения (минимум $10):*"""
     
     keyboard = [
-        [
-            InlineKeyboardButton("💵 $10", callback_data='topup_10'),
-            InlineKeyboardButton("💵 $25", callback_data='topup_25')
-        ],
-        [
-            InlineKeyboardButton("💵 $50", callback_data='topup_50'),
-            InlineKeyboardButton("💵 $100", callback_data='topup_100')
-        ],
         [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await send_method(message, reply_markup=reply_markup)
+    # Set state to wait for amount input
+    context.user_data['awaiting_topup_amount'] = True
+    
+    await send_method(message, reply_markup=reply_markup, parse_mode='Markdown')
 
 async def handle_topup(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
