@@ -4653,7 +4653,8 @@ async def startup_event():
             application.add_handler(CommandHandler("test_error", test_error_message))
             application.add_handler(CommandHandler("help", help_command))
             application.add_handler(CommandHandler("balance", my_balance_command))
-            application.add_handler(CallbackQueryHandler(handle_topup, pattern='^topup_\d+$'))
+            # Handler for topup amount input (text messages)
+            application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_topup_amount_input))
             application.add_handler(CallbackQueryHandler(button_callback))
             
             await application.initialize()
