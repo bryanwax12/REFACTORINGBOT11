@@ -1749,7 +1749,7 @@ def main():
     print(f"📊 Overall Result: {'✅ ALL TESTS PASSED' if all_passed else '❌ SOME TESTS FAILED'}")
     
     # Critical Assessment for Oxapay Fix
-    critical_oxapay_tests = ['oxapay_api_configuration', 'oxapay_invoice_creation']
+    critical_oxapay_tests = ['oxapay_order_id_length_fix', 'oxapay_invoice_creation']
     critical_oxapay_passed = all(results.get(test, False) for test in critical_oxapay_tests if test in results)
     
     print("\n🔧 Oxapay Payment Integration Analysis:")
