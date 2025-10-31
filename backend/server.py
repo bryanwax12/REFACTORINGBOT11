@@ -573,6 +573,11 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
         telegram_id = update.effective_user.id
         send_method = update.message.reply_text
     
+    # Check if user is blocked
+    if await check_user_blocked(telegram_id):
+        await send_blocked_message(update)
+        return
+    
     user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
     balance = user.get('balance', 0.0) if user else 0.0
     
