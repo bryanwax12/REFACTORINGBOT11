@@ -1752,21 +1752,20 @@ def main():
     critical_oxapay_tests = ['oxapay_order_id_length_fix', 'oxapay_invoice_creation']
     critical_oxapay_passed = all(results.get(test, False) for test in critical_oxapay_tests if test in results)
     
-    print("\n🔧 Oxapay Payment Integration Analysis:")
+    print("\n🔧 Oxapay Order ID Length Fix Analysis:")
     if critical_oxapay_passed:
-        print(f"   ✅ CRITICAL SUCCESS: Oxapay Payment Integration Fix is working!")
-        print(f"   ✅ API configuration updated correctly")
-        print(f"   ✅ Invoice creation no longer returns validation error (result code 101)")
-        print(f"   ✅ API endpoint changed to /v1/payment/invoice")
-        print(f"   ✅ API key moved to headers as merchant_api_key")
-        print(f"   ✅ Parameters converted to snake_case format")
-        print(f"   ✅ Payment check endpoint updated to /v1/payment/info")
+        print(f"   ✅ CRITICAL SUCCESS: Oxapay Order ID Length Fix is working!")
+        print(f"   ✅ Order ID generation changed from 'topup_{{user_id}}_{{uuid}}' to 'top_{{timestamp}}_{{uuid}}'")
+        print(f"   ✅ Order ID length reduced from 51+ chars to 23 chars (well under 50 char limit)")
+        print(f"   ✅ Invoice creation with $15 amount successful")
+        print(f"   ✅ No more 'order id field must not be greater than 50 characters' error")
+        print(f"   ✅ API returns status 200 with track_id and payment_url")
     else:
-        print(f"   ❌ CRITICAL FAILURE: Oxapay Payment Integration Fix has issues!")
-        print(f"   ❌ Check API configuration in server.py")
-        print(f"   ❌ Verify OXAPAY_API_KEY in environment")
+        print(f"   ❌ CRITICAL FAILURE: Oxapay Order ID Length Fix has issues!")
+        print(f"   ❌ Check order_id generation in handle_topup_amount_input function")
+        print(f"   ❌ Verify order_id format: 'top_{{timestamp}}_{{uuid[:8]}}'")
         print(f"   ❌ Test invoice creation with $15 amount")
-        print(f"   ❌ Ensure no validation error (result code 101)")
+        print(f"   ❌ Ensure order_id length is under 50 characters")
     
     
     return critical_oxapay_passed
