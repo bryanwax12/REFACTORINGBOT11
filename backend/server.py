@@ -2356,28 +2356,27 @@ async def handle_topup_crypto_selection(update: Update, context: ContextTypes.DE
             'BTC': 'Bitcoin',
             'ETH': 'Ethereum',
             'USDT': 'USDT (Tether)',
-            'TON': 'TON',
             'LTC': 'Litecoin',
-            'USDC': 'USDC',
-            'BNB': 'BNB (Binance Coin)',
-            'TRX': 'TRX (Tron)'
+            'USDC': 'USDC'
         }
         
-        if crypto:
-            # Create invoice with selected cryptocurrency
-            invoice = await crypto.create_invoice(
-                asset=crypto_asset,
-                amount=topup_amount
-            )
-            
-            pay_url = getattr(invoice, 'bot_invoice_url', None) or getattr(invoice, 'mini_app_invoice_url', None)
+        # Create Oxapay invoice for top-up
+        invoice_result = await create_oxapay_invoice(
+            amount=topup_amount,
+            order_id=f"topup_{user['id']}_{uuid.uuid4().hex[:8]}",
+            description=f"Balance Top-up ${topup_amount}"
+        )
+        
+        if invoice_result.get('success'):
+            track_id = invoice_result['trackId']
+            pay_link = invoice_result['payLink']
             
             # Save top-up payment
             payment = Payment(
                 order_id=f"topup_{user['id']}",
                 amount=topup_amount,
-                invoice_id=invoice.invoice_id,
-                pay_url=pay_url,
+                invoice_id=track_id,
+                pay_url=pay_link,
                 currency=crypto_asset,
                 status="pending"
             )
@@ -2387,17 +2386,25 @@ async def handle_topup_crypto_selection(update: Update, context: ContextTypes.DE
             payment_dict['type'] = 'topup'
             await db.payments.insert_one(payment_dict)
             
-            keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+            keyboard = [[InlineKeyboardButton("💳 Оплатить", url=pay_link)],
+                       [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
-            
-            crypto_display_name = crypto_names.get(crypto_asset, crypto_asset)
             
             await query.message.reply_text(
                 f"""✅ Счёт на пополнение создан!
 
 💵 Сумма: ${topup_amount}
-💰 Криптовалюта: {crypto_display_name}
+🪙 Криптовалюта: Любая из доступных
 
+Нажмите кнопку "Оплатить" для перехода на страницу оплаты.
+
+После успешной оплаты баланс будет автоматически пополнен.""",
+                reply_markup=reply_markup
+            )
+        else:
+            error_msg = invoice_result.get('error', 'Unknown error')
+            await query.message.reply_text(f"❌ Ошибка создания инвойса: {error_msg}")
+        
 Оплатите по ссылке:
 {pay_url}
 
