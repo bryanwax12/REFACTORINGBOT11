@@ -163,6 +163,52 @@ def test_shipstation_carrier_ids():
         print(f"   Traceback: {traceback.format_exc()}")
         return False
 
+def test_carrier_exclusion_fix():
+    """Test carrier exclusion fix - CRITICAL TEST per review request"""
+    print("\n🔍 Testing Carrier Exclusion Fix...")
+    print("🎯 CRITICAL: Verifying only 'globalpost' is excluded, 'stamps_com' is kept")
+    
+    try:
+        # Read the server.py file to verify the exclusion logic
+        with open('/app/backend/server.py', 'r') as f:
+            server_code = f.read()
+        
+        print("   📋 Analyzing get_shipstation_carrier_ids() function:")
+        
+        # Find the exclusion list in the function
+        import re
+        exclusion_pattern = r"excluded_carriers\s*=\s*\[(.*?)\]"
+        match = re.search(exclusion_pattern, server_code)
+        
+        if match:
+            exclusion_content = match.group(1)
+            print(f"   Found exclusion list: {exclusion_content}")
+            
+            # Check that only 'globalpost' is excluded
+            globalpost_excluded = "'globalpost'" in exclusion_content
+            stamps_com_excluded = "'stamps_com'" in exclusion_content or "'stamps'" in exclusion_content
+            
+            print(f"   'globalpost' excluded: {'✅' if globalpost_excluded else '❌'}")
+            print(f"   'stamps_com' excluded: {'❌ (GOOD)' if not stamps_com_excluded else '✅ (BAD - should not be excluded)'}")
+            
+            # Verify the fix is correct
+            fix_correct = globalpost_excluded and not stamps_com_excluded
+            print(f"   Exclusion fix correct: {'✅' if fix_correct else '❌'}")
+            
+            if fix_correct:
+                print(f"   ✅ CARRIER EXCLUSION FIX VERIFIED: Only 'globalpost' excluded, 'stamps_com' kept")
+            else:
+                print(f"   ❌ CARRIER EXCLUSION ISSUE: Fix not properly applied")
+            
+            return fix_correct
+        else:
+            print(f"   ❌ Could not find exclusion list in get_shipstation_carrier_ids() function")
+            return False
+        
+    except Exception as e:
+        print(f"❌ Error testing carrier exclusion fix: {e}")
+        return False
+
 def test_shipping_rates():
     """Test shipping rate calculation (POST /api/calculate-shipping) - CRITICAL TEST per review request"""
     print("\n🔍 Testing ShipStation Shipping Rates Calculation...")
