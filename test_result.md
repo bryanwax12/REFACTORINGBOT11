@@ -189,6 +189,23 @@ backend:
           agent: "main"
           comment: "✅ ADDITIONAL UPDATE: Filtered out GlobalPost and Stamps.com carriers as requested by user. Updated get_shipstation_carrier_ids() to exclude carrier_codes: 'globalpost', 'stamps_com', 'stamps'. Added additional filtering in fetch_shipping_rates() and calculate_shipping_rates(). Now returns only USPS (14 rates), UPS (7 rates), and FedEx (10 rates) - total 31 rates. GlobalPost and Stamps.com successfully excluded."
 
+  - task: "ShipStation Carrier Exclusion Fix - Keep USPS/Stamps.com"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "User reported: Only UPS rates showing up in Create Label tab. Need to update carrier exclusion list to only exclude 'globalpost' and keep 'stamps_com' (which is USPS)."
+        - working: "NA"
+          agent: "main"
+          comment: "Updated get_shipstation_carrier_ids() function to only exclude 'globalpost'. Removed 'stamps_com' and 'stamps' from exclusion list. Backend restarted to clear carrier cache."
+        - working: true
+          agent: "testing"
+          comment: "✅ SHIPSTATION CARRIER EXCLUSION FIX VERIFIED: Comprehensive testing confirms the fix is working perfectly. (1) ✅ Carrier exclusion updated correctly - get_shipstation_carrier_ids() now only excludes 'globalpost', keeps 'stamps_com', (2) ✅ Function returns 3 carrier IDs as expected: ['se-4002273', 'se-4002274', 'se-4013427'] (stamps_com, ups, fedex), (3) ✅ /api/calculate-shipping endpoint now returns rates from multiple carriers: UPS (5 rates), Stamps.com/USPS (13 rates), FedEx (2 rates) - total 20 rates, (4) ✅ Carrier diversity achieved - all 3 carriers (UPS, USPS/stamps_com, FedEx) now returning rates, (5) ✅ Fixed secondary filtering issue in calculate-shipping endpoint that was still excluding stamps_com rates, (6) ✅ Added stamps_com to allowed_services configuration. CRITICAL SUCCESS: Multiple carriers now available in Create Label tab instead of only UPS. Users will see rates from USPS/Stamps.com, UPS, and FedEx as requested."
 backend:
   - task: "Data Confirmation Screen with Edit Button"
     implemented: true
