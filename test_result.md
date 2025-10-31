@@ -105,6 +105,18 @@
 user_problem_statement: "After successful balance top-up via Oxapay, send thank you message with 'Main Menu' button - user wants confirmation message after payment with navigation button"
 
 backend:
+  - task: "Oxapay Webhook - Success Message with Main Menu Button"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "✅ IMPLEMENTED: Updated Oxapay webhook handler (oxapay_webhook function, lines 3954-3971) to send improved success message after balance top-up. Changes: (1) Added InlineKeyboardButton with '🔙 Главное меню' button (callback_data='start'), (2) Updated message text to 'Спасибо! Ваш баланс пополнен!' with bold formatting, (3) Added parse_mode='Markdown' for text formatting, (4) Formatted amount and balance display with bold markers. Now after successful payment, user receives thank you message with main menu button for easy navigation. Backend restarted successfully. Ready for testing - user should complete a test payment to verify."
+
   - task: "Oxapay Payment Integration - Invoice Creation Fix"
     implemented: true
     working: "NA"
