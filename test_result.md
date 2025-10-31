@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Critical bug: User balance disappeared after successful Oxapay payment - balance shows $0 and payment not reflected in admin panel. Telegram ID: 7066790254"
+user_problem_statement: "Add 'Top-ups' tab in admin panel to track balance top-up history - user wants to see who, when, and how much users topped up their balance"
 
 backend:
   - task: "Oxapay Webhook - Critical Bug Fix (track_id format mismatch)"
