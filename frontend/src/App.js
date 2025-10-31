@@ -789,29 +789,32 @@ const Dashboard = () => {
                             {new Date(order.created_at).toLocaleDateString()}
                           </td>
                           <td className="py-3">
-                            <div className="flex gap-1 justify-end">
+                            <div className="flex flex-col gap-1 justify-end">
                               {order.label_id && (
                                 <Button
                                   size="sm"
-                                  variant="ghost"
+                                  variant="outline"
                                   onClick={() => downloadLabel(order)}
                                   title="Download Label"
+                                  className="w-[120px] justify-start"
                                 >
-                                  <FileText className="h-4 w-4" />
+                                  <FileText className="h-4 w-4 mr-2" />
+                                  Label
                                 </Button>
                               )}
                               {order.payment_status === 'paid' && order.refund_status !== 'refunded' && (
                                 <Button
                                   size="sm"
-                                  variant="ghost"
+                                  variant="outline"
                                   onClick={() => {
                                     setRefundModal({ open: true, order });
                                     setRefundReason('');
                                   }}
                                   title="Refund & Void Label"
-                                  className="text-red-600 hover:text-red-700"
+                                  className="w-[120px] justify-start text-red-600 hover:text-red-700 border-red-300 hover:bg-red-50"
                                 >
-                                  <RefreshCw className="h-4 w-4" />
+                                  <RefreshCw className="h-4 w-4 mr-2" />
+                                  Refund
                                 </Button>
                               )}
                             </div>
