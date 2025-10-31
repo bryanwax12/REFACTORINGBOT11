@@ -1124,6 +1124,99 @@ const Dashboard = () => {
         </TabsContent>
 
 
+        <TabsContent value="topups" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5" />
+                История пополнений баланса
+              </CardTitle>
+              <CardDescription>Все пополнения баланса пользователями</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {topups.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">Пополнений пока нет</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left p-2">Дата и время</th>
+                        <th className="text-left p-2">Пользователь</th>
+                        <th className="text-left p-2">Telegram ID</th>
+                        <th className="text-right p-2">Сумма</th>
+                        <th className="text-center p-2">Статус</th>
+                        <th className="text-left p-2">Invoice ID</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {topups.map((topup) => (
+                        <tr key={topup.id} className="border-b hover:bg-gray-50">
+                          <td className="p-2">
+                            {topup.created_at ? new Date(topup.created_at).toLocaleString('ru-RU', {
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            }) : '-'}
+                          </td>
+                          <td className="p-2">
+                            <div>
+                              <p className="font-medium">{topup.first_name || 'N/A'}</p>
+                              {topup.username && <p className="text-sm text-muted-foreground">@{topup.username}</p>}
+                            </div>
+                          </td>
+                          <td className="p-2 font-mono text-sm">{topup.telegram_id}</td>
+                          <td className="p-2 text-right font-semibold text-green-600">
+                            ${topup.amount?.toFixed(2) || '0.00'}
+                          </td>
+                          <td className="p-2 text-center">
+                            <Badge variant={topup.status === 'paid' ? 'default' : 'secondary'}>
+                              {topup.status}
+                            </Badge>
+                          </td>
+                          <td className="p-2 font-mono text-xs text-muted-foreground">
+                            {topup.invoice_id || '-'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Top-ups Summary Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Статистика пополнений</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Всего пополнений</p>
+                  <p className="text-2xl font-bold">{topups.length}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Оплаченных</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {topups.filter(t => t.status === 'paid').length}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Общая сумма пополнений</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    ${topups.filter(t => t.status === 'paid').reduce((sum, t) => sum + (t.amount || 0), 0).toFixed(2)}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+
         <TabsContent value="leaderboard" className="space-y-4">
           <Card>
             <CardHeader>
