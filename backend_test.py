@@ -2378,37 +2378,75 @@ def run_shipstation_carrier_tests():
     return review_test_results
 
 if __name__ == "__main__":
-    print("🚀 Starting Backend Test Suite...")
-    print("🎯 FOCUS: ShipStation Carrier IDs and Shipping Rates Testing")
+    print("🚀 Starting Backend Test Suite for Telegram Shipping Bot")
+    print("🎯 FOCUS: Telegram Bot Shipping Rates with All Carriers and Refresh Button")
     print("=" * 70)
     
-    # Run the specific tests requested in the review
-    review_results = run_shipstation_carrier_tests()
+    # Track test results
+    test_results = {}
     
-    # Check backend logs for any carrier-related errors
+    # CRITICAL TEST: Telegram Bot Shipping Rates (per review request)
+    print("\n🎯 PRIORITY: Testing Telegram Bot Shipping Rates Fix")
+    test_results['telegram_bot_shipping_rates'] = test_telegram_bot_shipping_rates()
+    
+    # Supporting ShipStation Tests
+    test_results['shipstation_carrier_ids'] = test_shipstation_carrier_ids()
+    test_results['carrier_exclusion_fix'] = test_carrier_exclusion_fix()
+    test_results['shipping_rates'] = test_shipping_rates()[0] if test_shipping_rates()[0] else False
+    
+    # Telegram Bot Infrastructure Tests
+    test_results['bot_token'] = test_telegram_bot_token()
+    test_results['bot_infrastructure'] = test_telegram_bot_infrastructure()
+    test_results['conversation_handlers'] = test_conversation_handler_functions()
+    
+    # Check backend logs
     print("\n" + "=" * 70)
-    print("📋 CHECKING BACKEND LOGS FOR CARRIER ISSUES")
+    print("📋 CHECKING BACKEND LOGS")
     print("=" * 70)
     check_backend_logs()
     
-    # Final assessment
+    # Summary
     print("\n" + "=" * 70)
-    print("🏁 FINAL ASSESSMENT")
+    print("📊 TEST RESULTS SUMMARY")
     print("=" * 70)
     
-    critical_tests_passed = sum([
-        review_results.get('carrier_exclusion_fix', False),
-        review_results.get('shipstation_carrier_ids', False), 
-        review_results.get('shipping_rates_multiple_carriers', False)
-    ])
+    passed_tests = sum(1 for result in test_results.values() if result)
+    total_tests = len(test_results)
     
-    if critical_tests_passed >= 2:
-        print("✅ SHIPSTATION CARRIER FIX VERIFICATION: SUCCESS")
-        print("   The carrier exclusion fix is working correctly.")
-        print("   Multiple carriers should now be available in Create Label tab.")
+    # Show critical test result first
+    critical_test = test_results.get('telegram_bot_shipping_rates', False)
+    critical_status = "✅ PASS" if critical_test else "❌ FAIL"
+    print(f"{'🎯 CRITICAL: telegram_bot_shipping_rates':40} {critical_status}")
+    
+    # Show other test results
+    for test_name, result in test_results.items():
+        if test_name != 'telegram_bot_shipping_rates':  # Skip critical test (already shown)
+            status = "✅ PASS" if result else "❌ FAIL"
+            print(f"{test_name:40} {status}")
+    
+    print(f"\nOverall: {passed_tests}/{total_tests} tests passed ({(passed_tests/total_tests)*100:.1f}%)")
+    
+    # Final assessment focused on the review request
+    print("\n" + "=" * 70)
+    print("🏁 REVIEW REQUEST ASSESSMENT")
+    print("=" * 70)
+    
+    if critical_test:
+        print("✅ TELEGRAM BOT SHIPPING RATES FIX: SUCCESS")
+        print("   ✅ stamps_com added to allowed_services with USPS service codes")
+        print("   ✅ Stamps.com mapped to '🦅 USPS' icon in carrier_icons")
+        print("   ✅ '🔄 Обновить тарифы' button added before cancel button")
+        print("   ✅ 'refresh_rates' included in SELECT_CARRIER pattern handler")
+        print("   ✅ select_carrier() handles 'refresh_rates' callback correctly")
+        print("\n🎉 EXPECTED RESULTS:")
+        print("   - Bot should show rates from UPS, USPS/Stamps.com, and FedEx carriers")
+        print("   - '🔄 Обновить тарифы' button should be present in rates display")
+        print("   - Clicking refresh button should reload rates")
     else:
-        print("❌ SHIPSTATION CARRIER FIX VERIFICATION: ISSUES DETECTED")
-        print("   The carrier exclusion fix may not be working as expected.")
-        print("   Only UPS rates may still be showing up.")
+        print("❌ TELEGRAM BOT SHIPPING RATES FIX: ISSUES DETECTED")
+        print("   ❌ User reported issue may persist:")
+        print("      - Only UPS rates showing up in bot")
+        print("      - 'Refresh Rates' button missing")
+        print("   🔧 Please review the implementation and fix missing components")
     
     print("=" * 70)
