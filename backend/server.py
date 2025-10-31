@@ -79,7 +79,16 @@ async def create_oxapay_invoice(amount: float, order_id: str, description: str =
         
         if response.status_code == 200:
             data = response.json()
-            if data.get('result') == 100:  # Success
+            # Check for new API format (status 200 with data object)
+            if data.get('status') == 200 and 'data' in data:
+                invoice_data = data.get('data', {})
+                return {
+                    'trackId': invoice_data.get('track_id'),
+                    'payLink': invoice_data.get('payment_url'),
+                    'success': True
+                }
+            # Check for old API format (result code 100)
+            elif data.get('result') == 100:
                 return {
                     'trackId': data.get('trackId'),
                     'payLink': data.get('payLink'),
