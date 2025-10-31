@@ -4540,6 +4540,38 @@ async def get_expense_stats(date_from: Optional[str] = None, date_to: Optional[s
         logger.error(f"Error getting expense stats: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.get("/topups")
+async def get_topups(authenticated: bool = Depends(verify_admin_key)):
+    """
+    Get all balance top-ups history with user information
+    """
+    try:
+        # Get all top-up payments
+        topups = await db.payments.find({"type": "topup"}).sort("created_at", -1).to_list(1000)
+        
+        # Enrich with user information
+        enriched_topups = []
+        for topup in topups:
+            telegram_id = topup.get('telegram_id')
+            if telegram_id:
+                user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+                if user:
+                    enriched_topups.append({
+                        "id": topup.get('id'),
+                        "telegram_id": telegram_id,
+                        "first_name": user.get('first_name'),
+                        "username": user.get('username'),
+                        "amount": topup.get('amount'),
+                        "status": topup.get('status'),
+                        "invoice_id": topup.get('invoice_id'),
+                        "created_at": topup.get('created_at')
+                    })
+        
+        return enriched_topups
+    except Exception as e:
+        logger.error(f"Error getting topups: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 app.include_router(api_router)
 
 app.add_middleware(
