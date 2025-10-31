@@ -392,11 +392,13 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "Oxapay Webhook - Success Message with Main Menu Button"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
-  manual_testing_required: []
+  manual_testing_required:
+    - "Oxapay Payment Success Message: New feature added - after successful balance top-up, user receives 'Спасибо! Ваш баланс пополнен!' message with Main Menu button. TESTING REQUIRED: (1) Create top-up invoice via bot, (2) Complete test payment through Oxapay, (3) Verify bot sends thank you message with amount and new balance, (4) Verify Main Menu button appears and works correctly."
     - "Return to Order - CRITICAL FIX COMPLETED: Backend testing verified the fix is working. Manual testing via @whitelabellbot recommended to confirm end-to-end functionality: start /order, enter name, click cancel at 'Адрес отправителя' step, click 'return to order', then enter '215 Clayton St.' - should now accept address without errors."
   completed_testing:
     - "Oxapay Payment Integration Fix - COMPREHENSIVE TESTING COMPLETE: Fixed validation error (result code 101) that was preventing invoice creation for balance top-ups. (1) API configuration updated correctly ✅ - API URL changed to https://api.oxapay.com, endpoint changed to /v1/payment/invoice, API key moved to headers as merchant_api_key, parameters converted to snake_case format, (2) Invoice creation tested successfully with $15 amount ✅ - returned trackId and payLink without validation errors, (3) Payment check function updated to /v1/payment/info endpoint ✅, (4) Response parsing updated for new API format ✅. The fix is working perfectly and users can now create invoices for balance top-up without errors."
