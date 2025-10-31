@@ -128,6 +128,9 @@ backend:
         - working: "NA"
           agent: "main"
           comment: "🔧 ORDER_ID LENGTH FIX: Changed order_id generation in handle_topup_amount_input function from 'topup_{user_id}_{uuid[:8]}' (51 chars) to 'top_{timestamp}_{uuid[:8]}' (23 chars max). New format: 'top_' (4 chars) + 10-digit timestamp + '_' (1 char) + 8 random hex chars = 23 chars total, well under 50 char limit. Added 'import time' to support timestamp generation. Backend restarted successfully. Ready for testing - user should try top-up again."
+        - working: true
+          agent: "testing"
+          comment: "✅ OXAPAY ORDER_ID LENGTH FIX VERIFIED: Comprehensive testing confirms the fix is working perfectly. (1) ✅ Order ID generation format changed successfully - new format 'top_{timestamp}_{uuid[:8]}' generates 23 characters (well under 50 char limit), (2) ✅ Multiple generation tests confirm consistent length of 23 chars vs old format of 51+ chars, (3) ✅ Invoice creation test successful with $15 amount - returned trackId: 192105324 and payLink: https://pay.oxapay.com/10720216/192105324, (4) ✅ No 'order id field must not be greater than 50 characters' error - API returns status 200 instead of error 400, (5) ✅ Order ID format validation passed with pattern 'top_1761926916_8d831783', (6) ✅ Import time statement added correctly to support timestamp generation. The order_id length fix is working correctly and users should now be able to create invoices for balance top-up without the 50-character limit error."
 
   - task: "ShipStation V2 API Rate Request Fix"
     implemented: true
