@@ -1725,7 +1725,7 @@ def main():
     ]
     
     # Show results by category
-    print("\n🎯 OXAPAY PAYMENT INTEGRATION TESTS:")
+    print("\n🎯 OXAPAY ORDER ID LENGTH FIX TESTS:")
     for test_name in oxapay_tests:
         if test_name in results:
             passed = results[test_name]
