@@ -1913,7 +1913,14 @@ def main():
     ]
     
     # Show results by category
-    print("\n🎯 OXAPAY ORDER ID LENGTH FIX TESTS:")
+    print("\n🎯 OXAPAY WEBHOOK SUCCESS MESSAGE TEST:")
+    for test_name in webhook_tests:
+        if test_name in results:
+            passed = results[test_name]
+            status = "✅ PASS" if passed else "❌ FAIL"
+            print(f"   {test_name.replace('_', ' ').title()}: {status}")
+    
+    print("\n🔧 SUPPORTING OXAPAY TESTS:")
     for test_name in oxapay_tests:
         if test_name in results:
             passed = results[test_name]
@@ -1928,26 +1935,29 @@ def main():
             print(f"   {test_name.replace('_', ' ').title()}: {status}")
     
     # Overall Assessment
+    webhook_passed = all(results.get(test, False) for test in webhook_tests if test in results)
     oxapay_passed = all(results.get(test, False) for test in oxapay_tests if test in results)
     supporting_passed = all(results.get(test, False) for test in supporting_tests if test in results)
     all_passed = all(results.values())
     
-    print(f"\n🎯 Oxapay Integration Status: {'✅ SUCCESS' if oxapay_passed else '❌ FAILED'}")
+    print(f"\n🎯 Webhook Success Message Status: {'✅ SUCCESS' if webhook_passed else '❌ FAILED'}")
+    print(f"🔧 Supporting Oxapay Status: {'✅ SUCCESS' if oxapay_passed else '❌ FAILED'}")
     print(f"🔧 Supporting Infrastructure Status: {'✅ SUCCESS' if supporting_passed else '❌ FAILED'}")
     print(f"📊 Overall Result: {'✅ ALL TESTS PASSED' if all_passed else '❌ SOME TESTS FAILED'}")
     
-    # Critical Assessment for Oxapay Fix
-    critical_oxapay_tests = ['oxapay_order_id_length_fix', 'oxapay_invoice_creation']
-    critical_oxapay_passed = all(results.get(test, False) for test in critical_oxapay_tests if test in results)
+    # Critical Assessment for Webhook Success Message
+    critical_webhook_tests = ['oxapay_webhook_success_message']
+    critical_webhook_passed = all(results.get(test, False) for test in critical_webhook_tests if test in results)
     
-    print("\n🔧 Oxapay Order ID Length Fix Analysis:")
-    if critical_oxapay_passed:
-        print(f"   ✅ CRITICAL SUCCESS: Oxapay Order ID Length Fix is working!")
-        print(f"   ✅ Order ID generation changed from 'topup_{{user_id}}_{{uuid}}' to 'top_{{timestamp}}_{{uuid}}'")
-        print(f"   ✅ Order ID length reduced from 51+ chars to 23 chars (well under 50 char limit)")
-        print(f"   ✅ Invoice creation with $15 amount successful")
-        print(f"   ✅ No more 'order id field must not be greater than 50 characters' error")
-        print(f"   ✅ API returns status 200 with track_id and payment_url")
+    print("\n🎯 Oxapay Webhook Success Message Analysis:")
+    if critical_webhook_passed:
+        print(f"   ✅ REVIEW SUCCESS: Oxapay Webhook Success Message is correctly implemented!")
+        print(f"   ✅ InlineKeyboardButton and InlineKeyboardMarkup correctly configured")
+        print(f"   ✅ Message text includes 'Спасибо! Ваш баланс пополнен!' with bold formatting")
+        print(f"   ✅ parse_mode='Markdown' present for text formatting")
+        print(f"   ✅ reply_markup is passed to send_message")
+        print(f"   ✅ Button has correct callback_data='start' for main menu navigation")
+        print(f"   ✅ Function located at expected lines (3922-3985 range)")
     else:
         print(f"   ❌ CRITICAL FAILURE: Oxapay Order ID Length Fix has issues!")
         print(f"   ❌ Check order_id generation in handle_topup_amount_input function")
