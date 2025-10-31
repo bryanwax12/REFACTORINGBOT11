@@ -2062,6 +2062,11 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
                     callback_data=f'select_carrier_{idx}'
                 )])
         
+        # Add refresh rates button
+        keyboard.append([
+            InlineKeyboardButton("🔄 Обновить тарифы", callback_data='refresh_rates')
+        ])
+        
         # Add cancel button
         keyboard.append([
             InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')
