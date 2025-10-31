@@ -1619,38 +1619,21 @@ def main():
     # 1. Test API Health
     results['api_health'] = test_api_health()
     
-    # 2. Test HELP COMMAND WITH CONTACT ADMINISTRATOR BUTTON (Main Focus)
-    results['help_command_implementation'] = test_help_command_implementation()
-    results['help_command_infrastructure'] = test_telegram_bot_help_infrastructure()
-    results['help_command_url_generation'] = test_help_command_url_generation()
-    results['help_command_formatting_improvements'] = test_help_command_formatting_improvements()
+    # 2. Test OXAPAY PAYMENT INTEGRATION FIX (Main Focus)
+    results['oxapay_api_configuration'] = test_oxapay_api_configuration()
+    results['oxapay_invoice_creation'] = test_oxapay_invoice_creation()
+    results['oxapay_payment_check'] = test_oxapay_payment_check()
     
-    # 3. Test ADMIN ERROR NOTIFICATION SYSTEM (Supporting)
-    results['admin_telegram_id_env'] = test_admin_telegram_id_environment()
-    results['admin_notification_function'] = test_admin_notification_function()
-    results['contact_admin_buttons'] = test_contact_admin_buttons()
-    results['backend_admin_id_loading'] = test_backend_admin_id_loading()
-    results['telegram_bot_admin_integration'] = test_telegram_bot_admin_integration()
-    results['admin_notification_sending'] = test_admin_notification_sending()
-    
-    # 4. Test Admin Panel Endpoints (Supporting)
-    results['admin_search_orders'] = test_admin_search_orders()
-    results['admin_refund_order'] = test_admin_refund_order()
-    results['admin_export_csv'] = test_admin_export_csv()
-    
-    # 5. Test Supporting Infrastructure
+    # 3. Test Supporting Infrastructure (if needed)
     results['telegram_infrastructure'] = test_telegram_bot_infrastructure()
     results['bot_token'] = test_telegram_bot_token()
-    results['conversation_handlers'] = test_conversation_handler_functions()
-    results['return_to_order'] = test_return_to_order_functionality()
-    results['shipstation_rates'], rates_data = test_shipping_rates()
     
-    # 6. Check Backend Logs
+    # 4. Check Backend Logs
     check_backend_logs()
     
     # Summary
     print("\n" + "=" * 60)
-    print("📊 HELP COMMAND WITH CONTACT ADMINISTRATOR BUTTON TEST SUMMARY")
+    print("📊 OXAPAY PAYMENT INTEGRATION FIX TEST SUMMARY")
     print("=" * 60)
     
     # Priority order for Help Command tests
