@@ -2405,15 +2405,6 @@ async def handle_topup_crypto_selection(update: Update, context: ContextTypes.DE
             error_msg = invoice_result.get('error', 'Unknown error')
             await query.message.reply_text(f"❌ Ошибка создания инвойса: {error_msg}")
         
-Оплатите по ссылке:
-{pay_url}
-
-⏰ После оплаты баланс будет пополнен автоматически, и вы сможете оплатить заказ.""",
-                reply_markup=reply_markup
-            )
-        else:
-            await query.message.reply_text("❌ Система оплаты не настроена.")
-        
         context.user_data.clear()
         return ConversationHandler.END
         
