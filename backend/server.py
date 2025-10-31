@@ -4493,7 +4493,7 @@ async def calculate_shipping_rates(request: ShippingRateRequest):
                 'usps_ground_advantage',
                 'usps_priority_mail',  # Already includes 2-3 day delivery
                 'usps_priority_mail_express'
-            ]
+            ],
             'stamps_com': [
                 'usps_ground_advantage',
                 'usps_priority_mail',
