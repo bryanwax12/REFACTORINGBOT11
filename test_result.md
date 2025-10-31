@@ -107,11 +107,11 @@ user_problem_statement: "Fix Oxapay payment integration validation error - user 
 backend:
   - task: "Oxapay Payment Integration - Invoice Creation Fix"
     implemented: true
-    working: true
+    working: "NA"
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "critical"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         - working: false
           agent: "user"
@@ -122,6 +122,12 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ OXAPAY PAYMENT INTEGRATION FIX VERIFIED: Comprehensive testing confirms the fix is working perfectly. (1) ✅ API configuration updated correctly - API URL changed to https://api.oxapay.com, endpoint changed to /v1/payment/invoice, API key moved to headers as merchant_api_key, all parameters converted to snake_case format, (2) ✅ Invoice creation test successful with $15 amount - returned trackId: 101681153 and payLink: https://pay.oxapay.com/10720216/101681153, (3) ✅ No validation error (result code 101) - fix eliminated the original problem, (4) ✅ Payment check function updated to /v1/payment/info endpoint with API key in headers, (5) ✅ Response parsing updated to handle new API format with status 200 and data object structure. The Oxapay integration is now working correctly and users should be able to create invoices for balance top-up without validation errors."
+        - working: false
+          agent: "user"
+          comment: "❌ NEW VALIDATION ERROR: User reported error 400 from Oxapay API: 'The order id field must not be greater than 50 characters.' The order_id was being generated as 'topup_{user_id}_{random}' where user_id is a full UUID (36 chars) + prefix 'topup_' (6 chars) + underscore (1 char) + 8 random chars = 51 chars total, exceeding the 50 char limit."
+        - working: "NA"
+          agent: "main"
+          comment: "🔧 ORDER_ID LENGTH FIX: Changed order_id generation in handle_topup_amount_input function from 'topup_{user_id}_{uuid[:8]}' (51 chars) to 'top_{timestamp}_{uuid[:8]}' (23 chars max). New format: 'top_' (4 chars) + 10-digit timestamp + '_' (1 char) + 8 random hex chars = 23 chars total, well under 50 char limit. Added 'import time' to support timestamp generation. Backend restarted successfully. Ready for testing - user should try top-up again."
 
   - task: "ShipStation V2 API Rate Request Fix"
     implemented: true
