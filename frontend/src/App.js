@@ -49,12 +49,13 @@ const Dashboard = () => {
 
   const loadData = async () => {
     try {
-      const [statsRes, ordersRes, usersRes, leaderboardRes, expenseRes] = await Promise.all([
+      const [statsRes, ordersRes, usersRes, leaderboardRes, expenseRes, topupsRes] = await Promise.all([
         axios.get(`${API}/stats`),
         axios.get(`${API}/orders`),
         axios.get(`${API}/users`),
         axios.get(`${API}/users/leaderboard`),
-        axios.get(`${API}/stats/expenses`)
+        axios.get(`${API}/stats/expenses`),
+        axios.get(`${API}/topups`)
       ]);
       
       setStats(statsRes.data);
@@ -62,6 +63,7 @@ const Dashboard = () => {
       setUsers(usersRes.data);
       setLeaderboard(leaderboardRes.data);
       setExpenseStats(expenseRes.data);
+      setTopups(topupsRes.data);
     } catch (error) {
       toast.error("Failed to load data");
     } finally {
