@@ -107,11 +107,11 @@ user_problem_statement: "Fix Oxapay payment integration validation error - user 
 backend:
   - task: "Oxapay Payment Integration - Invoice Creation Fix"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "critical"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: false
           agent: "user"
@@ -119,6 +119,9 @@ backend:
         - working: "NA"
           agent: "main"
           comment: "🔧 ROOT CAUSE IDENTIFIED: The Oxapay API implementation was using incorrect format. Issues found: (1) API key was sent in payload body as 'merchant' instead of in headers as 'merchant_api_key', (2) Wrong endpoint - using '/merchants/request' instead of '/v1/payment/invoice', (3) Wrong parameter names - using camelCase ('feePaidByPayer', 'underPaidCover', 'callbackUrl', 'returnUrl', 'orderId') instead of snake_case ('fee_paid_by_payer', 'under_paid_coverage', 'callback_url', 'return_url', 'order_id'). FIXED: (1) Updated API URL from 'https://api.oxapay.com/merchants' to 'https://api.oxapay.com', (2) Changed endpoint from '/request' to '/v1/payment/invoice', (3) Moved API key from payload to headers {'merchant_api_key': OXAPAY_API_KEY}, (4) Updated all parameter names to snake_case format according to official docs, (5) Also fixed check_oxapay_payment function - updated endpoint from '/inquiry' to '/v1/payment/info' with API key in headers. Backend restarted successfully. Ready for testing - user should try top-up with custom amount again."
+        - working: true
+          agent: "testing"
+          comment: "✅ OXAPAY PAYMENT INTEGRATION FIX VERIFIED: Comprehensive testing confirms the fix is working perfectly. (1) ✅ API configuration updated correctly - API URL changed to https://api.oxapay.com, endpoint changed to /v1/payment/invoice, API key moved to headers as merchant_api_key, all parameters converted to snake_case format, (2) ✅ Invoice creation test successful with $15 amount - returned trackId: 101681153 and payLink: https://pay.oxapay.com/10720216/101681153, (3) ✅ No validation error (result code 101) - fix eliminated the original problem, (4) ✅ Payment check function updated to /v1/payment/info endpoint with API key in headers, (5) ✅ Response parsing updated to handle new API format with status 200 and data object structure. The Oxapay integration is now working correctly and users should be able to create invoices for balance top-up without validation errors."
 
   - task: "ShipStation V2 API Rate Request Fix"
     implemented: true
