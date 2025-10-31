@@ -3931,6 +3931,10 @@ async def oxapay_webhook(request: Request):
         status = body.get('status')  # Waiting, Confirming, Paying, Paid, Expired, etc.
         order_id = body.get('order_id') or body.get('orderId')  # Support both formats
         
+        # Convert track_id to int if it's a string number
+        if track_id and isinstance(track_id, str) and track_id.isdigit():
+            track_id = int(track_id)
+        
         if status == 'Paid':
             payment = await db.payments.find_one({"invoice_id": track_id}, {"_id": 0})
             if payment:
