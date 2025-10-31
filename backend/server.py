@@ -3882,68 +3882,70 @@ async def create_label_manual_form(request: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@api_router.post("/webhooks/cryptopay")
-async def cryptopay_webhook(request: Request):
+@api_router.post("/oxapay/webhook")
+async def oxapay_webhook(request: Request):
+    """Handle Oxapay payment webhooks"""
     try:
         body = await request.json()
+        logger.info(f"Oxapay webhook received: {body}")
         
-        # Verify webhook signature
-        if crypto:
-            # Update payment status
-            invoice_id = body.get('payload', {}).get('invoice_id')
-            payment_status = body.get('payload', {}).get('status')
-            
-            if payment_status == 'paid':
-                payment = await db.payments.find_one({"invoice_id": invoice_id}, {"_id": 0})
-                if payment:
-                    # Update payment
-                    await db.payments.update_one(
-                        {"invoice_id": invoice_id},
-                        {"$set": {"status": "paid"}}
+        # Extract payment info
+        track_id = body.get('trackId')
+        status = body.get('status')  # Waiting, Confirming, Paid, Expired, etc.
+        order_id = body.get('orderId')
+        
+        if status == 'Paid':
+            payment = await db.payments.find_one({"invoice_id": track_id}, {"_id": 0})
+            if payment:
+                # Update payment status
+                await db.payments.update_one(
+                    {"invoice_id": track_id},
+                    {"$set": {"status": "paid"}}
+                )
+                
+                # Check if it's a top-up
+                if payment.get('type') == 'topup':
+                    # Add to balance
+                    telegram_id = payment.get('telegram_id')
+                    amount = payment.get('amount', 0)
+                    
+                    await db.users.update_one(
+                        {"telegram_id": telegram_id},
+                        {"$inc": {"balance": amount}}
                     )
                     
-                    # Check if it's a top-up
-                    if payment.get('type') == 'topup':
-                        # Add to balance
-                        telegram_id = payment.get('telegram_id')
-                        amount = payment.get('amount', 0)
+                    # Notify user
+                    if bot_instance:
+                        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+                        new_balance = user.get('balance', 0)
                         
-                        await db.users.update_one(
-                            {"telegram_id": telegram_id},
-                            {"$inc": {"balance": amount}}
-                        )
-                        
-                        # Notify user
-                        if bot_instance:
-                            user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
-                            new_balance = user.get('balance', 0)
-                            
-                            await bot_instance.send_message(
-                                chat_id=telegram_id,
-                                text=f"""✅ Баланс пополнен!
+                        await bot_instance.send_message(
+                            chat_id=telegram_id,
+                            text=f"""✅ Баланс пополнен!
 
 💰 Зачислено: ${amount}
 💳 Новый баланс: ${new_balance:.2f}"""
-                            )
-                    else:
-                        # Regular order payment
-                        # Update order
-                        await db.orders.update_one(
-                            {"id": payment['order_id']},
-                            {"$set": {"payment_status": "paid"}}
                         )
-                        
-                        # Auto-create shipping label
-                        try:
-                            order = await db.orders.find_one({"id": payment['order_id']}, {"_id": 0})
+                else:
+                    # Regular order payment
+                    # Update order
+                    await db.orders.update_one(
+                        {"id": payment['order_id']},
+                        {"$set": {"payment_status": "paid"}}
+                    )
+                    
+                    # Auto-create shipping label
+                    try:
+                        order = await db.orders.find_one({"id": payment['order_id']}, {"_id": 0})
+                        if order:
                             await create_and_send_label(payment['order_id'], order['telegram_id'], None)
-                        except Exception as e:
-                            logger.error(f"Failed to create label: {e}")
+                    except Exception as e:
+                        logger.error(f"Failed to create label: {e}")
         
         return {"status": "ok"}
     except Exception as e:
-        logger.error(f"Webhook error: {e}")
-        return {"status": "error"}
+        logger.error(f"Oxapay webhook error: {e}")
+        return {"status": "error", "message": str(e)}
 
 @api_router.get("/users")
 async def get_users(authenticated: bool = Depends(verify_admin_key)):
