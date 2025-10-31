@@ -3926,10 +3926,10 @@ async def oxapay_webhook(request: Request):
         body = await request.json()
         logger.info(f"Oxapay webhook received: {body}")
         
-        # Extract payment info
-        track_id = body.get('trackId')
-        status = body.get('status')  # Waiting, Confirming, Paid, Expired, etc.
-        order_id = body.get('orderId')
+        # Extract payment info - Oxapay sends snake_case keys
+        track_id = body.get('track_id') or body.get('trackId')  # Support both formats
+        status = body.get('status')  # Waiting, Confirming, Paying, Paid, Expired, etc.
+        order_id = body.get('order_id') or body.get('orderId')  # Support both formats
         
         if status == 'Paid':
             payment = await db.payments.find_one({"invoice_id": track_id}, {"_id": 0})
