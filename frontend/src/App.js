@@ -852,7 +852,7 @@ const Dashboard = () => {
                         </p>
                       </div>
                       <div className="flex items-center gap-4">
-                        <div className="text-right">
+                        <div className="text-right min-w-[120px]">
                           <p className="text-sm font-semibold text-emerald-600">
                             Balance: ${(user.balance || 0).toFixed(2)}
                           </p>
@@ -865,51 +865,59 @@ const Dashboard = () => {
                             {new Date(user.created_at).toLocaleDateString()}
                           </p>
                         </div>
-                        <div className="flex gap-2">
-                          <Button 
-                            size="sm" 
-                            variant="ghost"
-                            data-testid={`view-details-${user.telegram_id}`}
-                            onClick={() => viewUserDetails(user.telegram_id)}
-                          >
-                            👁️ Details
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            data-testid={`add-balance-${user.telegram_id}`}
-                            onClick={() => handleBalanceAction(user.telegram_id, 'add')}
-                          >
-                            💰 Add
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            data-testid={`deduct-balance-${user.telegram_id}`}
-                            onClick={() => handleBalanceAction(user.telegram_id, 'deduct')}
-                            disabled={(user.balance || 0) === 0}
-                          >
-                            ➖ Deduct
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            className="text-purple-600 border-purple-300 hover:bg-purple-50"
-                            onClick={() => {
-                              setDiscountModal({ open: true, user });
-                              setDiscountValue(user.discount?.toString() || '0');
-                            }}
-                          >
-                            🎁 Discount
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant={user.blocked ? "default" : "destructive"}
-                            onClick={() => handleBlockUser(user.telegram_id, user.blocked)}
-                            data-testid={`block-user-${user.telegram_id}`}
-                          >
-                            {user.blocked ? '✅ Unblock' : '⛔ Block'}
-                          </Button>
+                        <div className="flex flex-col gap-2">
+                          <div className="flex gap-2">
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              className="w-[90px]"
+                              data-testid={`view-details-${user.telegram_id}`}
+                              onClick={() => viewUserDetails(user.telegram_id)}
+                            >
+                              👁️ Details
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              className="w-[90px]"
+                              data-testid={`add-balance-${user.telegram_id}`}
+                              onClick={() => handleBalanceAction(user.telegram_id, 'add')}
+                            >
+                              💰 Add
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              className="w-[90px]"
+                              data-testid={`deduct-balance-${user.telegram_id}`}
+                              onClick={() => handleBalanceAction(user.telegram_id, 'deduct')}
+                              disabled={(user.balance || 0) === 0}
+                            >
+                              ➖ Deduct
+                            </Button>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              className="w-[90px] text-purple-600 border-purple-300 hover:bg-purple-50"
+                              onClick={() => {
+                                setDiscountModal({ open: true, user });
+                                setDiscountValue(user.discount?.toString() || '0');
+                              }}
+                            >
+                              🎁 Discount
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant={user.blocked ? "default" : "destructive"}
+                              className="w-[186px]"
+                              onClick={() => handleBlockUser(user.telegram_id, user.blocked)}
+                              data-testid={`block-user-${user.telegram_id}`}
+                            >
+                              {user.blocked ? '✅ Unblock' : '⛔ Block'}
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </div>
