@@ -389,6 +389,20 @@ const Dashboard = () => {
     }
   };
 
+  const handleBlockUser = async (telegram_id, isBlocked) => {
+    try {
+      const endpoint = isBlocked ? 'unblock' : 'block';
+      const action = isBlocked ? 'разблокирован' : 'заблокирован';
+      
+      await axios.post(`${API}/users/${telegram_id}/${endpoint}`);
+      
+      toast.success(`Пользователь ${action}`);
+      loadData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Failed to update user status");
+    }
+  };
+
   const submitBalanceChange = async () => {
     const amount = parseFloat(balanceAmount);
     
