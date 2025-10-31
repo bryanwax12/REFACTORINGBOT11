@@ -8,6 +8,7 @@ import requests
 import json
 import os
 import re
+import uuid
 from dotenv import load_dotenv
 
 # Load environment variables
