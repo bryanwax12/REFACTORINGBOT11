@@ -4068,6 +4068,76 @@ async def get_user_details(telegram_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.post("/users/{telegram_id}/block")
+async def block_user(telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
+    """Block a user from using the bot"""
+    try:
+        user = await db.users.find_one({"telegram_id": telegram_id})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Update user blocked status
+        result = await db.users.update_one(
+            {"telegram_id": telegram_id},
+            {"$set": {"blocked": True}}
+        )
+        
+        if result.modified_count > 0:
+            # Notify user via Telegram
+            if bot_instance:
+                try:
+                    await bot_instance.send_message(
+                        chat_id=telegram_id,
+                        text="⛔️ *Вы были заблокированы администратором.*\n\nДоступ к боту ограничен.",
+                        parse_mode='Markdown'
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to send block notification: {e}")
+            
+            return {"success": True, "message": "User blocked successfully"}
+        else:
+            return {"success": False, "message": "User already blocked"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error blocking user: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/users/{telegram_id}/unblock")
+async def unblock_user(telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
+    """Unblock a user to allow bot usage"""
+    try:
+        user = await db.users.find_one({"telegram_id": telegram_id})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Update user blocked status
+        result = await db.users.update_one(
+            {"telegram_id": telegram_id},
+            {"$set": {"blocked": False}}
+        )
+        
+        if result.modified_count > 0:
+            # Notify user via Telegram
+            if bot_instance:
+                try:
+                    await bot_instance.send_message(
+                        chat_id=telegram_id,
+                        text="✅ *Вы были разблокированы!*\n\nТеперь вы можете снова использовать бот.",
+                        parse_mode='Markdown'
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to send unblock notification: {e}")
+            
+            return {"success": True, "message": "User unblocked successfully"}
+        else:
+            return {"success": False, "message": "User already unblocked"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error unblocking user: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/users/leaderboard")
 async def get_leaderboard():
     try:
