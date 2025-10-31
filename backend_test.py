@@ -1700,10 +1700,9 @@ def main():
     # 1. Test API Health
     results['api_health'] = test_api_health()
     
-    # 2. Test OXAPAY PAYMENT INTEGRATION FIX (Main Focus)
-    results['oxapay_api_configuration'] = test_oxapay_api_configuration()
+    # 2. Test OXAPAY ORDER ID LENGTH FIX (Main Focus)
+    results['oxapay_order_id_length_fix'] = test_oxapay_order_id_length_fix()
     results['oxapay_invoice_creation'] = test_oxapay_invoice_creation()
-    results['oxapay_payment_check'] = test_oxapay_payment_check()
     
     # 3. Test Supporting Infrastructure (if needed)
     results['telegram_infrastructure'] = test_telegram_bot_infrastructure()
