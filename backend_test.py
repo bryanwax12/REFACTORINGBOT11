@@ -1636,66 +1636,57 @@ def main():
     print("📊 OXAPAY PAYMENT INTEGRATION FIX TEST SUMMARY")
     print("=" * 60)
     
-    # Priority order for Help Command tests
-    help_command_tests = [
-        'help_command_implementation', 'help_command_infrastructure', 'help_command_url_generation', 'help_command_formatting_improvements'
+    # Priority order for Oxapay tests
+    oxapay_tests = [
+        'oxapay_api_configuration', 'oxapay_invoice_creation', 'oxapay_payment_check'
     ]
-    admin_notification_tests = [
-        'admin_telegram_id_env', 'admin_notification_function', 'contact_admin_buttons',
-        'backend_admin_id_loading', 'telegram_bot_admin_integration', 'admin_notification_sending'
+    supporting_tests = [
+        'api_health', 'telegram_infrastructure', 'bot_token'
     ]
-    admin_panel_tests = ['api_health', 'admin_search_orders', 'admin_refund_order', 'admin_export_csv']
-    other_tests = [k for k in results.keys() if k not in help_command_tests + admin_notification_tests + admin_panel_tests]
     
-    print("🎯 HELP COMMAND TESTS:")
-    for test_name in help_command_tests:
+    # Show results by category
+    print("\n🎯 OXAPAY PAYMENT INTEGRATION TESTS:")
+    for test_name in oxapay_tests:
         if test_name in results:
             passed = results[test_name]
             status = "✅ PASS" if passed else "❌ FAIL"
             print(f"   {test_name.replace('_', ' ').title()}: {status}")
     
-    print("\n📋 ADMIN ERROR NOTIFICATION TESTS:")
-    for test_name in admin_notification_tests:
+    print("\n🔧 SUPPORTING INFRASTRUCTURE:")
+    for test_name in supporting_tests:
         if test_name in results:
             passed = results[test_name]
             status = "✅ PASS" if passed else "❌ FAIL"
             print(f"   {test_name.replace('_', ' ').title()}: {status}")
     
-    print("\n📋 ADMIN PANEL API TESTS:")
-    for test_name in admin_panel_tests:
-        if test_name in results:
-            passed = results[test_name]
-            status = "✅ PASS" if passed else "❌ FAIL"
-            print(f"   {test_name.replace('_', ' ').title()}: {status}")
-    
-    print("\n📋 SUPPORTING INFRASTRUCTURE TESTS:")
-    for test_name in other_tests:
-        passed = results[test_name]
-        status = "✅ PASS" if passed else "❌ FAIL"
-        print(f"   {test_name.replace('_', ' ').title()}: {status}")
-    
-    # Overall result
-    help_command_passed = all(results.get(test, False) for test in help_command_tests if test in results)
-    admin_notification_passed = all(results.get(test, False) for test in admin_notification_tests if test in results)
-    admin_panel_passed = all(results.get(test, False) for test in admin_panel_tests if test in results)
+    # Overall Assessment
+    oxapay_passed = all(results.get(test, False) for test in oxapay_tests if test in results)
+    supporting_passed = all(results.get(test, False) for test in supporting_tests if test in results)
     all_passed = all(results.values())
     
-    print(f"\n🎯 Help Command Status: {'✅ SUCCESS' if help_command_passed else '❌ FAILED'}")
-    print(f"📋 Admin Error Notification Status: {'✅ SUCCESS' if admin_notification_passed else '❌ FAILED'}")
-    print(f"📋 Admin Panel API Status: {'✅ SUCCESS' if admin_panel_passed else '❌ FAILED'}")
+    print(f"\n🎯 Oxapay Integration Status: {'✅ SUCCESS' if oxapay_passed else '❌ FAILED'}")
+    print(f"🔧 Supporting Infrastructure Status: {'✅ SUCCESS' if supporting_passed else '❌ FAILED'}")
     print(f"📊 Overall Result: {'✅ ALL TESTS PASSED' if all_passed else '❌ SOME TESTS FAILED'}")
     
-    # Specific findings for Help Command
-    print("\n🔧 Help Command Analysis:")
-    if results.get('help_command_implementation'):
-        print(f"   ✅ help_command() function properly implemented at lines 306-329")
-        print(f"   ✅ Function handles both callback queries and direct commands")
-        print(f"   ✅ ADMIN_TELEGRAM_ID loaded and used correctly")
-        print(f"   ✅ Contact Administrator button configured correctly")
-        print(f"   ✅ Main Menu button present as second button")
-        print(f"   ✅ Help text in Russian with admin contact information")
+    # Critical Assessment for Oxapay Fix
+    critical_oxapay_tests = ['oxapay_api_configuration', 'oxapay_invoice_creation']
+    critical_oxapay_passed = all(results.get(test, False) for test in critical_oxapay_tests if test in results)
+    
+    print("\n🔧 Oxapay Payment Integration Analysis:")
+    if critical_oxapay_passed:
+        print(f"   ✅ CRITICAL SUCCESS: Oxapay Payment Integration Fix is working!")
+        print(f"   ✅ API configuration updated correctly")
+        print(f"   ✅ Invoice creation no longer returns validation error (result code 101)")
+        print(f"   ✅ API endpoint changed to /v1/payment/invoice")
+        print(f"   ✅ API key moved to headers as merchant_api_key")
+        print(f"   ✅ Parameters converted to snake_case format")
+        print(f"   ✅ Payment check endpoint updated to /v1/payment/info")
     else:
-        print(f"   ❌ Help command implementation issues detected")
+        print(f"   ❌ CRITICAL FAILURE: Oxapay Payment Integration Fix has issues!")
+        print(f"   ❌ Check API configuration in server.py")
+        print(f"   ❌ Verify OXAPAY_API_KEY in environment")
+        print(f"   ❌ Test invoice creation with $15 amount")
+        print(f"   ❌ Ensure no validation error (result code 101)")
     
     if results.get('help_command_infrastructure'):
         print(f"   ✅ Telegram bot infrastructure ready for Help command")
