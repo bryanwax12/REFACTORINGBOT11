@@ -343,6 +343,25 @@ async def test_error_message(update: Update, context: ContextTypes.DEFAULT_TYPE)
     
     await update.message.reply_text(user_message, reply_markup=reply_markup)
 
+# Helper function to check if user is blocked
+async def check_user_blocked(telegram_id: int) -> bool:
+    """Check if user is blocked"""
+    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0, "blocked": 1})
+    return user.get('blocked', False) if user else False
+
+async def send_blocked_message(update: Update):
+    """Send blocked message to user"""
+    message = """⛔️ *Вы заблокированы*
+
+Ваш доступ к боту был ограничен администратором.
+
+Для получения дополнительной информации, пожалуйста, свяжитесь с администратором."""
+    
+    if update.message:
+        await update.message.reply_text(message, parse_mode='Markdown')
+    elif update.callback_query:
+        await update.callback_query.message.reply_text(message, parse_mode='Markdown')
+
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Handle both command and callback
     if update.callback_query:
