@@ -501,6 +501,7 @@ const Dashboard = () => {
           <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
           <TabsTrigger value="orders" data-testid="tab-orders">Orders</TabsTrigger>
           <TabsTrigger value="users" data-testid="tab-users">Users</TabsTrigger>
+          <TabsTrigger value="topups" data-testid="tab-topups">Top-ups</TabsTrigger>
           <TabsTrigger value="create-label" data-testid="tab-create-label">Create Label</TabsTrigger>
           <TabsTrigger value="leaderboard" data-testid="tab-leaderboard">Leaderboard</TabsTrigger>
         </TabsList>
