@@ -164,8 +164,9 @@ def test_shipstation_carrier_ids():
         return False
 
 def test_shipping_rates():
-    """Test shipping rate calculation (POST /api/calculate-shipping) - ShipStation V2 API Fix"""
-    print("\n🔍 Testing ShipStation V2 API Rate Calculation...")
+    """Test shipping rate calculation (POST /api/calculate-shipping) - CRITICAL TEST per review request"""
+    print("\n🔍 Testing ShipStation Shipping Rates Calculation...")
+    print("🎯 CRITICAL: Testing multiple carrier rates - should include USPS/stamps_com, UPS, and FedEx")
     
     # Test with valid US addresses as specified in review request
     test_payload = {
