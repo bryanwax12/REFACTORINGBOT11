@@ -840,7 +840,12 @@ const Dashboard = () => {
                   {users.map((user) => (
                     <div key={user.id} className="flex items-center justify-between border-b pb-4 last:border-0" data-testid="user-item">
                       <div className="flex-1">
-                        <p className="font-medium">{user.first_name || 'Unknown'}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{user.first_name || 'Unknown'}</p>
+                          {user.blocked && (
+                            <Badge variant="destructive" className="text-xs">⛔ Заблокирован</Badge>
+                          )}
+                        </div>
                         <p className="text-sm text-muted-foreground">@{user.username || 'no_username'}</p>
                         <p className="text-xs text-muted-foreground mt-1">
                           Telegram ID: {user.telegram_id}
@@ -896,6 +901,14 @@ const Dashboard = () => {
                             }}
                           >
                             🎁 Discount
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant={user.blocked ? "default" : "destructive"}
+                            onClick={() => handleBlockUser(user.telegram_id, user.blocked)}
+                            data-testid={`block-user-${user.telegram_id}`}
+                          >
+                            {user.blocked ? '✅ Unblock' : '⛔ Block'}
                           </Button>
                         </div>
                       </div>
