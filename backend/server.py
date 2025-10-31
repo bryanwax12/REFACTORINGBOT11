@@ -676,6 +676,13 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     
+    telegram_id = query.from_user.id
+    
+    # Check if user is blocked
+    if await check_user_blocked(telegram_id):
+        await send_blocked_message(update)
+        return ConversationHandler.END
+    
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
