@@ -1871,9 +1871,9 @@ def test_oxapay_webhook_success_message():
         return False
 
 def main():
-    """Run all tests - Focus on Oxapay Payment Integration Fix"""
-    print("🚀 Testing Oxapay Payment Integration Fix")
-    print("🎯 Focus: Fix for validation error (result code 101)")
+    """Run all tests - Focus on Oxapay Webhook Success Message"""
+    print("🚀 Testing Oxapay Webhook Success Message with Main Menu Button")
+    print("🎯 Focus: Review Request - Webhook handler code verification")
     print("=" * 60)
     
     # Test results
@@ -1882,23 +1882,29 @@ def main():
     # 1. Test API Health
     results['api_health'] = test_api_health()
     
-    # 2. Test OXAPAY ORDER ID LENGTH FIX (Main Focus)
+    # 2. Test OXAPAY WEBHOOK SUCCESS MESSAGE (Main Focus)
+    results['oxapay_webhook_success_message'] = test_oxapay_webhook_success_message()
+    
+    # 3. Test Supporting Oxapay Infrastructure
     results['oxapay_order_id_length_fix'] = test_oxapay_order_id_length_fix()
     results['oxapay_invoice_creation'] = test_oxapay_invoice_creation()
     
-    # 3. Test Supporting Infrastructure (if needed)
+    # 4. Test Supporting Infrastructure (if needed)
     results['telegram_infrastructure'] = test_telegram_bot_infrastructure()
     results['bot_token'] = test_telegram_bot_token()
     
-    # 4. Check Backend Logs
+    # 5. Check Backend Logs
     check_backend_logs()
     
     # Summary
     print("\n" + "=" * 60)
-    print("📊 OXAPAY PAYMENT INTEGRATION FIX TEST SUMMARY")
+    print("📊 OXAPAY WEBHOOK SUCCESS MESSAGE TEST SUMMARY")
     print("=" * 60)
     
     # Priority order for Oxapay tests
+    webhook_tests = [
+        'oxapay_webhook_success_message'
+    ]
     oxapay_tests = [
         'oxapay_order_id_length_fix', 'oxapay_invoice_creation'
     ]
