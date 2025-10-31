@@ -1689,55 +1689,8 @@ def main():
         print(f"   ❌ Test invoice creation with $15 amount")
         print(f"   ❌ Ensure no validation error (result code 101)")
     
-    if results.get('help_command_infrastructure'):
-        print(f"   ✅ Telegram bot infrastructure ready for Help command")
-        print(f"   ✅ Bot token valid and no help command errors")
-        print(f"   ✅ Admin ID configured correctly for Contact Administrator button")
-    else:
-        print(f"   ❌ Help command infrastructure issues detected")
     
-    if results.get('help_command_url_generation'):
-        print(f"   ✅ Contact Administrator button URL: tg://user?id=7066790254")
-        print(f"   ✅ URL format valid and admin ID correct")
-    else:
-        print(f"   ❌ Help command URL generation issues detected")
-    
-    # Integration Points Summary
-    print("\n📋 HELP COMMAND INTEGRATION POINTS VERIFICATION:")
-    print("   🔍 help_command() function (lines 306-329):")
-    print("      - Function definition and implementation: Tested")
-    print("      - Callback query and direct command handling: Tested")
-    print("      - ADMIN_TELEGRAM_ID conditional usage: Tested")
-    
-    print("   🔍 Button Configuration:")
-    print("      - '💬 Связаться с администратором' button: Tested")
-    print("      - Button URL format tg://user?id=7066790254: Tested")
-    print("      - '🔙 Главное меню' button as second button: Tested")
-    
-    print("   🔍 ConversationHandler Registration:")
-    print("      - help_command registered in ConversationHandler: Tested")
-    print("      - /help command handler registration: Tested")
-    print("      - 'help' callback_data handler in menu_handler: Tested")
-    
-    print("   🔍 Main Menu Integration:")
-    print("      - '❓ Помощь' button in main menu: Tested")
-    print("      - Button callback_data='help': Tested")
-    
-    # Expected Results Verification
-    print("\n✅ EXPECTED RESULTS VERIFICATION:")
-    if help_command_passed:
-        print("   ✅ help_command() function exists at lines 306-329")
-        print("   ✅ Keyboard has 2 buttons: Contact Administrator (with URL) and Main Menu (with callback)")
-        print("   ✅ Contact Administrator button URL: tg://user?id=7066790254")
-        print("   ✅ Help text mentions contacting administrator for questions/problems")
-        print("   ✅ Bot running without errors and help command accessible")
-        print("   ✅ All integration points working correctly")
-    else:
-        print("   ❌ Some expected results not met - see failed tests above")
-    
-    print("\n✅ HELP COMMAND WITH CONTACT ADMINISTRATOR BUTTON VERIFICATION COMPLETE")
-    
-    return help_command_passed
+    return critical_oxapay_passed
 
 if __name__ == "__main__":
     main()
