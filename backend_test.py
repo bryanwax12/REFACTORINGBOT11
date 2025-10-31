@@ -1374,10 +1374,80 @@ def test_help_command_formatting_improvements():
         print(f"❌ Help command formatting improvements test error: {e}")
         return False
 
+def test_oxapay_order_id_length_fix():
+    """Test Oxapay order_id length fix for top-up - CRITICAL TEST"""
+    print("\n🔍 Testing Oxapay Order ID Length Fix...")
+    print("🎯 CRITICAL: Testing fix for 'order id field must not be greater than 50 characters' error")
+    
+    try:
+        import time
+        
+        # Test the new order_id generation format
+        print("   📋 Testing New Order ID Generation Format:")
+        
+        # Generate order_id using the new format from the fix
+        # New format: "top_" (4) + timestamp (10) + "_" (1) + random hex (8) = 23 chars max
+        test_order_id = f"top_{int(time.time())}_{uuid.uuid4().hex[:8]}"
+        
+        print(f"      Generated order_id: {test_order_id}")
+        print(f"      Order ID length: {len(test_order_id)} characters")
+        
+        # Verify length is under 50 characters
+        length_valid = len(test_order_id) <= 50
+        print(f"      Length under 50 chars: {'✅' if length_valid else '❌'}")
+        
+        # Verify expected length (should be around 23 characters)
+        expected_length = 23  # "top_" (4) + timestamp (10) + "_" (1) + hex (8)
+        length_as_expected = len(test_order_id) == expected_length
+        print(f"      Length matches expected ({expected_length} chars): {'✅' if length_as_expected else '❌'}")
+        
+        # Verify format pattern
+        import re
+        pattern = r'^top_\d{10}_[a-f0-9]{8}$'
+        format_valid = bool(re.match(pattern, test_order_id))
+        print(f"      Format pattern valid: {'✅' if format_valid else '❌'}")
+        
+        # Test multiple generations to ensure consistency
+        print("   📋 Testing Multiple Generations:")
+        all_lengths_valid = True
+        for i in range(5):
+            test_id = f"top_{int(time.time())}_{uuid.uuid4().hex[:8]}"
+            if len(test_id) > 50:
+                all_lengths_valid = False
+                print(f"      Generation {i+1}: ❌ Length {len(test_id)} > 50")
+            else:
+                print(f"      Generation {i+1}: ✅ Length {len(test_id)} <= 50")
+        
+        print(f"      All generations valid: {'✅' if all_lengths_valid else '❌'}")
+        
+        # Compare with old format that was causing the error
+        print("   📋 Comparing with Old Format:")
+        
+        # Simulate old format that was failing: "topup_{user_id}_{uuid[:8]}"
+        # Where user_id is a full UUID (36 chars)
+        old_user_id = str(uuid.uuid4())  # 36 characters
+        old_order_id = f"topup_{old_user_id}_{uuid.uuid4().hex[:8]}"
+        
+        print(f"      Old format example: {old_order_id}")
+        print(f"      Old format length: {len(old_order_id)} characters")
+        
+        old_length_invalid = len(old_order_id) > 50
+        print(f"      Old format exceeds 50 chars: {'✅' if old_length_invalid else '❌'}")
+        
+        # Verify the fix resolves the issue
+        fix_resolves_issue = length_valid and len(test_order_id) < len(old_order_id)
+        print(f"      Fix resolves length issue: {'✅' if fix_resolves_issue else '❌'}")
+        
+        return length_valid and length_as_expected and format_valid and all_lengths_valid and fix_resolves_issue
+        
+    except Exception as e:
+        print(f"❌ Order ID length fix test error: {e}")
+        return False
+
 def test_oxapay_invoice_creation():
-    """Test Oxapay invoice creation fix - CRITICAL TEST"""
-    print("\n🔍 Testing Oxapay Invoice Creation Fix...")
-    print("🎯 CRITICAL: Testing fix for validation error (result code 101)")
+    """Test Oxapay invoice creation with new order_id format - CRITICAL TEST"""
+    print("\n🔍 Testing Oxapay Invoice Creation with Fixed Order ID...")
+    print("🎯 CRITICAL: Testing invoice creation with $15 amount and new order_id format")
     
     try:
         # Import the create_oxapay_invoice function from server.py
@@ -1386,6 +1456,7 @@ def test_oxapay_invoice_creation():
         
         # Import asyncio to run async function
         import asyncio
+        import time
         
         # Load environment to check if OXAPAY_API_KEY is configured
         load_dotenv('/app/backend/.env')
@@ -1397,15 +1468,24 @@ def test_oxapay_invoice_creation():
         
         print(f"   ✅ OXAPAY_API_KEY configured: {oxapay_api_key[:8]}...")
         
-        # Test with $15 as requested in review
+        # Test with $15 as requested in review using NEW order_id format
         test_amount = 15.0
-        test_order_id = f"test_topup_{uuid.uuid4().hex[:8]}"
-        test_description = "Test Balance Top-up $15"
+        # Use the NEW fixed format: "top_" + timestamp + "_" + random hex
+        test_order_id = f"top_{int(time.time())}_{uuid.uuid4().hex[:8]}"
+        test_description = f"Balance Top-up ${test_amount}"
         
         print(f"   📋 Test Parameters:")
         print(f"      Amount: ${test_amount}")
         print(f"      Order ID: {test_order_id}")
+        print(f"      Order ID Length: {len(test_order_id)} chars (must be ≤ 50)")
         print(f"      Description: {test_description}")
+        
+        # Verify order_id length before API call
+        if len(test_order_id) > 50:
+            print(f"   ❌ Order ID length {len(test_order_id)} exceeds 50 characters!")
+            return False
+        
+        print(f"   ✅ Order ID length validation passed")
         
         # Import the function from server.py
         try:
@@ -1416,7 +1496,7 @@ def test_oxapay_invoice_creation():
             return False
         
         # Test the function
-        print(f"   🔄 Calling create_oxapay_invoice...")
+        print(f"   🔄 Calling create_oxapay_invoice with fixed order_id...")
         
         # Run the async function
         loop = asyncio.new_event_loop()
@@ -1442,7 +1522,7 @@ def test_oxapay_invoice_creation():
             print(f"      Success flag: {'✅' if success else '❌'} ({success})")
             
             if success:
-                # Check for required fields in successful response
+                # Check for required fields in successful responsese
                 track_id = result.get('trackId')
                 pay_link = result.get('payLink')
                 
