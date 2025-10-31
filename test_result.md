@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Add 'Contact Administrator' button in Help section of Telegram bot - user wants to add Telegram contact button for admin support in the Help menu"
+user_problem_statement: "Fix Oxapay payment integration validation error - user reported error when creating invoice for custom top-up amounts: 'Ошибка создания инвойса: {\"result\":101,\"message\":\"Validation problem\"}'"
 
 backend:
   - task: "ShipStation V2 API Rate Request Fix"
