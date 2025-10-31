@@ -40,15 +40,75 @@ bot_instance = None
 if TELEGRAM_BOT_TOKEN:
     bot_instance = Bot(token=TELEGRAM_BOT_TOKEN)
 
-# CryptoBot
-CRYPTOBOT_TOKEN = os.environ.get('CRYPTOBOT_TOKEN', '')
-crypto = None
-if CRYPTOBOT_TOKEN:
-    crypto = AioCryptoPay(token=CRYPTOBOT_TOKEN, network=Networks.MAIN_NET)
-
-# Oxapay
+# Oxapay - Cryptocurrency Payment Gateway
 OXAPAY_API_KEY = os.environ.get('OXAPAY_API_KEY', '')
 OXAPAY_API_URL = 'https://api.oxapay.com/merchants'
+
+# Oxapay helper functions
+async def create_oxapay_invoice(amount: float, order_id: str, description: str = "Shipping Label Payment"):
+    """Create payment invoice via Oxapay"""
+    if not OXAPAY_API_KEY:
+        raise HTTPException(status_code=500, detail="Oxapay API key not configured")
+    
+    try:
+        payload = {
+            "merchant": OXAPAY_API_KEY,
+            "amount": amount,
+            "currency": "USD",
+            "lifeTime": 30,  # 30 minutes
+            "feePaidByPayer": 0,  # Merchant pays fees
+            "underPaidCover": 2,  # Accept 2% underpayment
+            "callbackUrl": f"{os.environ.get('BACKEND_URL', '')}/api/oxapay/webhook",
+            "returnUrl": f"https://t.me/{os.environ.get('BOT_USERNAME', '')}",
+            "description": description,
+            "orderId": order_id
+        }
+        
+        response = requests.post(
+            f"{OXAPAY_API_URL}/request",
+            json=payload,
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('result') == 100:  # Success
+                return {
+                    'trackId': data.get('trackId'),
+                    'payLink': data.get('payLink'),
+                    'success': True
+                }
+        
+        logger.error(f"Oxapay invoice creation failed: {response.text}")
+        return {'success': False, 'error': response.text}
+        
+    except Exception as e:
+        logger.error(f"Oxapay error: {e}")
+        return {'success': False, 'error': str(e)}
+
+async def check_oxapay_payment(track_id: str):
+    """Check payment status via Oxapay"""
+    try:
+        payload = {
+            "merchant": OXAPAY_API_KEY,
+            "trackId": track_id
+        }
+        
+        response = requests.post(
+            f"{OXAPAY_API_URL}/inquiry",
+            json=payload,
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            return data
+        
+        return None
+        
+    except Exception as e:
+        logger.error(f"Oxapay inquiry error: {e}")
+        return None
 
 app = FastAPI(title="Telegram Shipping Bot")
 api_router = APIRouter(prefix="/api")
