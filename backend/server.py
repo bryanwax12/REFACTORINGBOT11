@@ -3956,12 +3956,18 @@ async def oxapay_webhook(request: Request):
                         user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
                         new_balance = user.get('balance', 0)
                         
+                        # Create keyboard with main menu button
+                        keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+                        reply_markup = InlineKeyboardMarkup(keyboard)
+                        
                         await bot_instance.send_message(
                             chat_id=telegram_id,
-                            text=f"""✅ Баланс пополнен!
+                            text=f"""✅ *Спасибо! Ваш баланс пополнен!*
 
-💰 Зачислено: ${amount}
-💳 Новый баланс: ${new_balance:.2f}"""
+💰 *Зачислено:* ${amount}
+💳 *Новый баланс:* ${new_balance:.2f}""",
+                            reply_markup=reply_markup,
+                            parse_mode='Markdown'
                         )
                 else:
                     # Regular order payment
