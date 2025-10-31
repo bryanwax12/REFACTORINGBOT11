@@ -1718,7 +1718,7 @@ def main():
     
     # Priority order for Oxapay tests
     oxapay_tests = [
-        'oxapay_api_configuration', 'oxapay_invoice_creation', 'oxapay_payment_check'
+        'oxapay_order_id_length_fix', 'oxapay_invoice_creation'
     ]
     supporting_tests = [
         'api_health', 'telegram_infrastructure', 'bot_token'
