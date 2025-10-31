@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "After successful balance top-up via Oxapay, send thank you message with 'Main Menu' button - user wants confirmation message after payment with navigation button"
+user_problem_statement: "Critical bug: User balance disappeared after successful Oxapay payment - balance shows $0 and payment not reflected in admin panel. Telegram ID: 7066790254"
 
 backend:
   - task: "Oxapay Webhook - Success Message with Main Menu Button"
