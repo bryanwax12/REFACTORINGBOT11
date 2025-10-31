@@ -45,6 +45,10 @@ crypto = None
 if CRYPTOBOT_TOKEN:
     crypto = AioCryptoPay(token=CRYPTOBOT_TOKEN, network=Networks.MAIN_NET)
 
+# Oxapay
+OXAPAY_API_KEY = os.environ.get('OXAPAY_API_KEY', '')
+OXAPAY_API_URL = 'https://api.oxapay.com/merchants'
+
 app = FastAPI(title="Telegram Shipping Bot")
 api_router = APIRouter(prefix="/api")
 
