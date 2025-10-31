@@ -588,10 +588,12 @@ async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAUL
         telegram_id = update.effective_user.id
         user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
         
-        # Create Oxapay invoice
+        # Create Oxapay invoice (order_id must be <= 50 chars)
+        # Generate short order_id: "top_" (4) + timestamp (10) + "_" (1) + random (8) = 23 chars
+        order_id = f"top_{int(time.time())}_{uuid.uuid4().hex[:8]}"
         invoice_result = await create_oxapay_invoice(
             amount=amount,
-            order_id=f"topup_{user['id']}_{uuid.uuid4().hex[:8]}",
+            order_id=order_id,
             description=f"Balance Top-up ${amount}"
         )
         
