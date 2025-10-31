@@ -102,7 +102,26 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Add 'Top-ups' tab in admin panel to track balance top-up history - user wants to see who, when, and how much users topped up their balance"
+user_problem_statement: "Test Telegram bot shipping rates with all carriers and refresh button - user reported that only UPS rates show up in the bot and the 'Refresh Rates' button is missing"
+
+backend:
+  - task: "Telegram Bot Shipping Rates with All Carriers and Refresh Button"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "❌ USER REPORTED ISSUE: Only UPS rates show up in Telegram bot and the 'Refresh Rates' button is missing. User expects to see rates from UPS, USPS/Stamps.com, and FedEx carriers with a refresh button to reload rates."
+        - working: "NA"
+          agent: "main"
+          comment: "🔧 FIXES APPLIED: (1) Added 'stamps_com' to allowed_services in fetch_shipping_rates() function with USPS service codes (lines 1902-1930), (2) Added 'Stamps.com' to carrier_icons dictionary mapping to '🦅 USPS' icon (lines 2016-2022), (3) Added '🔄 Обновить тарифы' button before the cancel button in rates display (lines 2065-2072), (4) Added 'refresh_rates' to SELECT_CARRIER state pattern handler (line 4835), (5) Added refresh_rates handling in select_carrier() function to call fetch_shipping_rates() again (lines 2120-2123). Backend restarted successfully."
+        - working: true
+          agent: "testing"
+          comment: "✅ TELEGRAM BOT SHIPPING RATES FIX VERIFIED: Comprehensive testing confirms all review request changes are correctly implemented. CODE VERIFICATION: (1) ✅ 'stamps_com' key added to allowed_services with USPS service codes (usps_ground_advantage, usps_priority_mail, usps_priority_mail_express, usps_first_class_mail, usps_media_mail), (2) ✅ 'Stamps.com': '🦅 USPS' mapping added to carrier_icons dictionary, (3) ✅ '🔄 Обновить тарифы' button with callback_data='refresh_rates' added to keyboard before cancel button, (4) ✅ 'refresh_rates' included in SELECT_CARRIER pattern handler: '^(select_carrier_|refresh_rates|return_to_order|confirm_cancel|cancel_order)', (5) ✅ select_carrier() function handles 'refresh_rates' callback and calls fetch_shipping_rates(), (6) ✅ fetch_shipping_rates() function exists and implements carrier grouping. API TESTING: ✅ ShipStation V2 API returns 20 rates from 3 carriers (UPS: 5 rates, USPS/Stamps.com: 13 rates, FedEx: 2 rates), ✅ Carrier diversity achieved with multiple carriers returning rates, ✅ No 400 Bad Request errors. EXPECTED RESULTS ACHIEVED: Bot should now show rates from UPS, USPS/Stamps.com, and FedEx carriers with '🔄 Обновить тарифы' button present and functional for reloading rates."
 
 backend:
   - task: "Oxapay Webhook - Critical Bug Fix (track_id format mismatch)"
