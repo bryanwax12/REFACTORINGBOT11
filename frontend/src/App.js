@@ -504,7 +504,8 @@ const Dashboard = () => {
       toast.info('Отправка рассылки...');
 
       const response = await axios.post(`${API}/broadcast`, {
-        message: broadcastMessage
+        message: broadcastMessage,
+        image_url: broadcastImageUrl || null
       });
 
       if (response.data.success) {
