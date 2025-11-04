@@ -467,6 +467,16 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         first_name = update.effective_user.first_name
         send_method = update.message.reply_text
     
+    # Check if bot is in maintenance mode
+    if await check_maintenance_mode(update):
+        await send_method(
+            "🔧 *Бот находится на техническом обслуживании.*\n\n"
+            "Пожалуйста, попробуйте позже.\n\n"
+            "Приносим извинения за неудобства.",
+            parse_mode='Markdown'
+        )
+        return ConversationHandler.END
+    
     # Check if user is blocked
     if await check_user_blocked(telegram_id):
         await send_blocked_message(update)
