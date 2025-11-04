@@ -1747,6 +1747,7 @@ async def show_data_confirmation(update: Update, context: ContextTypes.DEFAULT_T
     keyboard = [
         [InlineKeyboardButton("✅ Всё верно, показать тарифы", callback_data='confirm_data')],
         [InlineKeyboardButton("✏️ Редактировать данные", callback_data='edit_data')],
+        [InlineKeyboardButton("💾 Сохранить как шаблон", callback_data='save_template')],
         [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
