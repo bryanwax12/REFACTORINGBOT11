@@ -2864,6 +2864,7 @@ Shipping label создан успешно!""",
                 )
                 
                 # Mark order as completed to prevent stale button interactions
+                context.user_data.clear()
                 context.user_data['order_completed'] = True
             
         elif query.data == 'pay_with_crypto':
