@@ -5337,7 +5337,7 @@ async def startup_event():
                     ],
                     CONFIRM_DATA: [
                         CallbackQueryHandler(handle_edit_choice, pattern='^(edit_from_address|edit_to_address)$'),
-                        CallbackQueryHandler(handle_data_confirmation, pattern='^(confirm_data|edit_data|edit_addresses_error|return_to_order|confirm_cancel|cancel_order)$')
+                        CallbackQueryHandler(handle_data_confirmation, pattern='^(confirm_data|save_template|edit_data|edit_addresses_error|return_to_order|confirm_cancel|cancel_order)$')
                     ],
                     EDIT_MENU: [CallbackQueryHandler(handle_edit_choice, pattern='^(edit_from_address|edit_to_address|edit_parcel|back_to_confirmation|return_to_order|confirm_cancel)$')],
                     SELECT_CARRIER: [CallbackQueryHandler(select_carrier, pattern='^(select_carrier_|refresh_rates|check_data|return_to_order|confirm_cancel|cancel_order)')],
