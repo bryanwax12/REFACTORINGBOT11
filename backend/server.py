@@ -391,6 +391,19 @@ async def send_blocked_message(update: Update):
     elif update.callback_query:
         await update.callback_query.message.reply_text(message, parse_mode='Markdown')
 
+async def check_stale_interaction(query, context: ContextTypes.DEFAULT_TYPE) -> bool:
+    """Check if button press is from an old/completed interaction"""
+    # If user_data is empty or doesn't have active order data, it's likely stale
+    if not context.user_data or len(context.user_data) == 0:
+        await query.answer()
+        await query.message.reply_text(
+            "⚠️ *Этот заказ уже завершён или отменён.*\n\n"
+            "Для создания нового заказа используйте главное меню.",
+            parse_mode='Markdown'
+        )
+        return True
+    return False
+
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Handle both command and callback
     if update.callback_query:
