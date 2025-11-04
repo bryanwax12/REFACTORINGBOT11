@@ -2869,6 +2869,14 @@ async def confirm_cancel_order(update: Update, context: ContextTypes.DEFAULT_TYP
     await query.message.reply_text("❌ Создание заказа отменено.", reply_markup=reply_markup)
     return ConversationHandler.END
 
+async def check_data_from_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Return to data confirmation screen from cancel dialog"""
+    query = update.callback_query
+    await query.answer()
+    
+    # Go back to data confirmation screen
+    return await show_data_confirmation(update, context)
+
 async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Return to order after cancel button - restore exact screen"""
     query = update.callback_query
