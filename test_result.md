@@ -499,15 +499,18 @@ backend:
 frontend:
   - task: "Check All Bot Access - Frontend Button and Function"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/frontend/src/App.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
           agent: "main"
           comment: "✅ FRONTEND IMPLEMENTED: Added 'Check All Bot Access' button in Users tab (lines 1145-1152). Button calls handleCheckAllBotAccess function which was already implemented (lines 514-531). Function shows confirmation dialog, calls backend endpoint /api/users/check-all-bot-access, displays toast with results (checked_count, accessible_count, blocked_count), and reloads user data to update UI with bot_blocked_by_user status. Button styled with orange theme (border-orange-600 text-orange-600 hover:bg-orange-50) and disabled when no users. Ready for testing."
+        - working: true
+          agent: "testing"
+          comment: "✅ CHECK ALL BOT ACCESS FRONTEND FEATURE VERIFIED: Comprehensive testing confirms all requirements are correctly implemented and working. BUTTON VISIBILITY & PLACEMENT: (1) ✅ Button visible in Users tab, (2) ✅ Correctly positioned between '✓ Проверить всех' and '📣 Пригласить всех в канал' buttons, (3) ✅ All three buttons display in proper order. BUTTON STYLING: (1) ✅ Orange theme applied correctly (border-orange-600 text-orange-600 hover:bg-orange-50), (2) ✅ Button text correct: '🚫 Проверить блокировку бота', (3) ✅ Icon and emoji display properly. BUTTON FUNCTIONALITY: (1) ✅ Button enabled when users present (5 users detected), (2) ✅ Button would be disabled when users.length === 0 (logic verified), (3) ✅ Confirmation dialog appears with correct text: 'Проверить доступность бота для всех пользователей?', (4) ✅ handleCheckAllBotAccess function implemented correctly (lines 514-531). BACKEND INTEGRATION: (1) ✅ API endpoint POST /api/users/check-all-bot-access working perfectly, (2) ✅ Returns proper response: checked_count=5, accessible_count=4, blocked_count=1, failed_count=0, (3) ✅ API response time acceptable (1.73s). UI STATE MANAGEMENT: (1) ✅ Bot blocked badges display correctly (1 user with '🚫 Заблокировал бота' badge), (2) ✅ Individual bot access buttons show proper states, (3) ✅ loadData() function called to refresh UI after API response. CRITICAL SUCCESS: All 15/15 verification checks passed (100% success rate). The Check All Bot Access feature is fully functional: admin can check bot blocking status for all users at once, proper confirmation dialog appears, backend API processes request correctly, and UI updates with current bot access status. Feature ready for production use."
 
 metadata:
   created_by: "main_agent"
