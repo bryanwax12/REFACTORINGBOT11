@@ -681,8 +681,7 @@ async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAUL
             payment_dict['type'] = 'topup'
             await db.payments.insert_one(payment_dict)
             
-            keyboard = [[InlineKeyboardButton("💳 Оплатить", url=pay_link)],
-                       [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+            keyboard = [[InlineKeyboardButton("💳 Оплатить", url=pay_link)]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
             await update.message.reply_text(
@@ -3141,8 +3140,7 @@ async def handle_topup_crypto_selection(update: Update, context: ContextTypes.DE
             payment_dict['type'] = 'topup'
             await db.payments.insert_one(payment_dict)
             
-            keyboard = [[InlineKeyboardButton("💳 Оплатить", url=pay_link)],
-                       [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+            keyboard = [[InlineKeyboardButton("💳 Оплатить", url=pay_link)]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
             await query.message.reply_text(
