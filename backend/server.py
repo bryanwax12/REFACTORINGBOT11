@@ -4803,9 +4803,9 @@ async def invite_user_to_channel(telegram_id: int, authenticated: bool = Depends
         if not bot_instance:
             raise HTTPException(status_code=500, detail="Bot not initialized")
         
-        # Send invitation message with button
-        keyboard = [[InlineKeyboardButton("📣 Присоединиться к каналу", url=CHANNEL_INVITE_LINK)]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
+        # Send invitation message with inline button for channel
+        inline_keyboard = [[InlineKeyboardButton("📣 Присоединиться к каналу", url=CHANNEL_INVITE_LINK)]]
+        inline_markup = InlineKeyboardMarkup(inline_keyboard)
         
         message = f"""🎉 *Приглашение в наш канал!*
 
@@ -4823,7 +4823,14 @@ async def invite_user_to_channel(telegram_id: int, authenticated: bool = Depends
                 chat_id=telegram_id,
                 text=message,
                 parse_mode='Markdown',
-                reply_markup=reply_markup
+                reply_markup=inline_markup
+            )
+            
+            # Send main menu keyboard separately to keep it persistent
+            await bot_instance.send_message(
+                chat_id=telegram_id,
+                text="Используйте кнопку ниже для быстрого доступа к меню ⬇️",
+                reply_markup=get_main_menu_keyboard()
             )
             
             # Update user record to track invitation
