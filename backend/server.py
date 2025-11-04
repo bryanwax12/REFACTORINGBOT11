@@ -4931,6 +4931,7 @@ async def invite_all_users_to_channel(authenticated: bool = Depends(verify_admin
 class BroadcastRequest(BaseModel):
     message: str
     image_url: Optional[str] = None
+    file_id: Optional[str] = None  # Telegram file_id from upload
 
 @api_router.post("/broadcast")
 async def broadcast_message(
