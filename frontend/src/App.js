@@ -403,6 +403,39 @@ const Dashboard = () => {
     }
   };
 
+
+  const handleInviteToChannel = async (telegram_id) => {
+    try {
+      const response = await axios.post(`${API}/users/${telegram_id}/invite-channel`);
+      
+      if (response.data.success) {
+        toast.success('✅ Приглашение отправлено!');
+        loadData(); // Reload to update invitation status
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Failed to send channel invitation");
+    }
+  };
+
+  const handleInviteAllToChannel = async () => {
+    try {
+      const confirmed = window.confirm('Отправить приглашение в канал всем пользователям?');
+      if (!confirmed) return;
+
+      toast.info('Отправка приглашений...');
+      
+      const response = await axios.post(`${API}/users/invite-all-channel`);
+      
+      if (response.data.success) {
+        toast.success(`✅ Приглашения отправлены: ${response.data.success_count} успешно, ${response.data.failed_count} ошибок`);
+        loadData(); // Reload to update invitation statuses
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Failed to send mass channel invitations");
+    }
+  };
+
+
   const submitBalanceChange = async () => {
     const amount = parseFloat(balanceAmount);
     
