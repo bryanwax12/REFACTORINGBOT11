@@ -2931,11 +2931,13 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     query = update.callback_query
     await query.answer()
     
-    # Check if user has pending order data
-    pending_data = context.user_data.get('pending_order_data')
-    logger.info(f"Pending order data exists: {pending_data is not None}")
+    telegram_id = query.from_user.id
     
-    if not pending_data or not pending_data.get('selected_rate'):
+    # Get pending order data from database
+    pending_order = await db.pending_orders.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    logger.info(f"Pending order data found: {pending_order is not None}")
+    
+    if not pending_order or not pending_order.get('selected_rate'):
         await query.message.reply_text(
             "❌ Не найдены данные незавершенного заказа.\n\nПожалуйста, создайте новый заказ.",
             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("📦 Создать заказ", callback_data='new_order')]])
@@ -2943,7 +2945,7 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
         return ConversationHandler.END
     
     # Restore order data to context
-    context.user_data.update(pending_data)
+    context.user_data.update(pending_order)
     
     telegram_id = query.from_user.id
     user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
