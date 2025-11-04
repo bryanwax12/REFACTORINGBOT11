@@ -5172,31 +5172,6 @@ async def check_bot_access(telegram_id: int, authenticated: bool = Depends(verif
         logger.error(f"Error checking bot access: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-                        "success": True,
-                        "file_id": file_id,
-                        "message": "Image uploaded successfully"
-                    }
-            except Exception as e:
-                logger.error(f"Failed to upload to Telegram: {e}")
-                # Fall back to serving from disk
-        
-        # If Telegram upload failed, serve from disk
-        # Create static URL (you'd need to serve this via FastAPI)
-        static_url = f"/static/broadcast_images/{temp_filename}"
-        
-        return {
-            "success": True,
-            "url": static_url,
-            "local_path": str(temp_path),
-            "message": "Image saved locally"
-        }
-            
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error uploading image: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
 @api_router.get("/users/leaderboard")
 async def get_leaderboard():
     try:
