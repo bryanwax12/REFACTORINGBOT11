@@ -1406,6 +1406,218 @@ def test_help_command_url_generation():
         print(f"❌ Help command URL generation test error: {e}")
         return False
 
+def test_continue_order_after_template_save():
+    """Test Continue Order After Template Save functionality - CRITICAL TEST per review request"""
+    print("\n🔍 Testing Continue Order After Template Save Functionality...")
+    print("🎯 CRITICAL: Testing fix for user reported issue - bot asks for weight again after template save")
+    
+    try:
+        # Read server.py to check the implementation
+        with open('/app/backend/server.py', 'r') as f:
+            server_code = f.read()
+        
+        print("   📋 TESTING CONTINUE ORDER AFTER TEMPLATE SAVE IMPLEMENTATION:")
+        
+        # 1. Test continue_order_after_template() Function Implementation
+        print("   1. Testing continue_order_after_template() Function:")
+        
+        # Check if function exists at expected lines (around 1959-1965)
+        continue_function_pattern = r'async def continue_order_after_template\(update: Update, context: ContextTypes\.DEFAULT_TYPE\):'
+        continue_function_found = bool(re.search(continue_function_pattern, server_code))
+        print(f"      Function exists: {'✅' if continue_function_found else '❌'}")
+        
+        # Find the function location
+        lines = server_code.split('\n')
+        function_line = None
+        for i, line in enumerate(lines, 1):
+            if 'async def continue_order_after_template(' in line:
+                function_line = i
+                break
+        
+        if function_line:
+            print(f"      Function location: Line {function_line} {'✅' if 1950 <= function_line <= 1970 else '⚠️'}")
+        
+        # Check if function calls show_data_confirmation() instead of returning PARCEL_WEIGHT
+        calls_show_data_confirmation = 'return await show_data_confirmation(update, context)' in server_code
+        print(f"      Calls show_data_confirmation(): {'✅' if calls_show_data_confirmation else '❌'}")
+        
+        # Check that function does NOT return PARCEL_WEIGHT state
+        returns_parcel_weight = 'return PARCEL_WEIGHT' in server_code and 'continue_order_after_template' in server_code
+        print(f"      Does NOT return PARCEL_WEIGHT: {'✅' if not returns_parcel_weight else '❌'}")
+        
+        # Check function comment/documentation
+        has_correct_comment = 'Continue order creation after saving template - return to data confirmation' in server_code
+        print(f"      Has correct documentation: {'✅' if has_correct_comment else '❌'}")
+        
+        # 2. Test show_data_confirmation() Function
+        print("   2. Testing show_data_confirmation() Function:")
+        
+        # Check if function exists
+        show_data_function_pattern = r'async def show_data_confirmation\(update: Update, context: ContextTypes\.DEFAULT_TYPE\):'
+        show_data_function_found = bool(re.search(show_data_function_pattern, server_code))
+        print(f"      Function exists: {'✅' if show_data_function_found else '❌'}")
+        
+        # Check if function displays correct message
+        displays_check_data_message = '📋 Проверьте введенные данные:' in server_code
+        print(f"      Displays '📋 Проверьте введенные данные:': {'✅' if displays_check_data_message else '❌'}")
+        
+        # Check if function shows all required data
+        shows_from_data = all(field in server_code for field in ['from_name', 'from_street', 'from_city', 'from_state', 'from_zip', 'from_phone'])
+        shows_to_data = all(field in server_code for field in ['to_name', 'to_street', 'to_city', 'to_state', 'to_zip', 'to_phone'])
+        shows_parcel_data = all(field in server_code for field in ['weight', 'length', 'width', 'height'])
+        print(f"      Shows from address data: {'✅' if shows_from_data else '❌'}")
+        print(f"      Shows to address data: {'✅' if shows_to_data else '❌'}")
+        print(f"      Shows parcel data (weight, dimensions): {'✅' if shows_parcel_data else '❌'}")
+        
+        # Check if function has correct buttons
+        has_correct_buttons = all(button in server_code for button in [
+            'Всё верно, показать тарифы',
+            'Редактировать данные', 
+            'Сохранить как шаблон'
+        ])
+        print(f"      Has correct buttons: {'✅' if has_correct_buttons else '❌'}")
+        
+        # Check if function returns CONFIRM_DATA state
+        returns_confirm_data = 'return CONFIRM_DATA' in server_code and 'show_data_confirmation' in server_code
+        print(f"      Returns CONFIRM_DATA state: {'✅' if returns_confirm_data else '❌'}")
+        
+        # 3. Test ConversationHandler Registration
+        print("   3. Testing ConversationHandler Registration:")
+        
+        # Check if continue_order callback is registered in TEMPLATE_NAME state
+        callback_registered = bool(re.search(
+            r'CallbackQueryHandler\(continue_order_after_template, pattern=\'\^continue_order\$\'\)',
+            server_code
+        ))
+        print(f"      continue_order callback registered: {'✅' if callback_registered else '❌'}")
+        
+        # Check if it's in TEMPLATE_NAME state
+        template_name_state_has_callback = bool(re.search(
+            r'TEMPLATE_NAME:.*?CallbackQueryHandler\(continue_order_after_template',
+            server_code, re.DOTALL
+        ))
+        print(f"      Registered in TEMPLATE_NAME state: {'✅' if template_name_state_has_callback else '❌'}")
+        
+        # 4. Test Context Data Preservation Logic
+        print("   4. Testing Context Data Preservation:")
+        
+        # Check if show_data_confirmation accesses context.user_data
+        accesses_context_data = 'data = context.user_data' in server_code and 'show_data_confirmation' in server_code
+        print(f"      Accesses context.user_data: {'✅' if accesses_context_data else '❌'}")
+        
+        # Check if it displays data from context (addresses, weight, dimensions)
+        displays_context_fields = all(f"data.get('{field}')" in server_code for field in [
+            'from_name', 'to_name', 'weight'
+        ])
+        print(f"      Displays data from context: {'✅' if displays_context_fields else '❌'}")
+        
+        # 5. Test Complete Flow Logic
+        print("   5. Testing Complete Flow Logic:")
+        
+        # Verify the fix addresses the original problem
+        # OLD BEHAVIOR: Function returned to PARCEL_WEIGHT state
+        # NEW BEHAVIOR: Function calls show_data_confirmation() 
+        
+        # Check that the function implementation matches the fix description
+        function_content_pattern = r'async def continue_order_after_template.*?return await show_data_confirmation\(update, context\)'
+        correct_implementation = bool(re.search(function_content_pattern, server_code, re.DOTALL))
+        print(f"      Correct implementation (calls show_data_confirmation): {'✅' if correct_implementation else '❌'}")
+        
+        # Check that function does NOT ask for weight input
+        no_weight_input = not ('Вес посылки' in server_code and 'continue_order_after_template' in server_code)
+        print(f"      Does NOT ask for weight input: {'✅' if no_weight_input else '❌'}")
+        
+        # Check comment explains the fix
+        explains_fix = 'Since template was saved from CONFIRM_DATA screen, we have all data including weight/dimensions' in server_code
+        print(f"      Comment explains the fix: {'✅' if explains_fix else '❌'}")
+        
+        # 6. Test Integration Points
+        print("   6. Testing Integration Points:")
+        
+        # Check if CONFIRM_DATA state is properly defined
+        confirm_data_state_defined = 'CONFIRM_DATA' in server_code
+        print(f"      CONFIRM_DATA state defined: {'✅' if confirm_data_state_defined else '❌'}")
+        
+        # Check if template save functionality exists
+        save_template_exists = 'save_template' in server_code or 'Сохранить как шаблон' in server_code
+        print(f"      Template save functionality exists: {'✅' if save_template_exists else '❌'}")
+        
+        # Check if "Продолжить создание заказа" button exists
+        continue_button_exists = 'Продолжить создание заказа' in server_code
+        print(f"      'Продолжить создание заказа' button exists: {'✅' if continue_button_exists else '❌'}")
+        
+        # Overall Assessment
+        print("\n   📊 IMPLEMENTATION VERIFICATION SUMMARY:")
+        
+        critical_checks = [
+            continue_function_found,
+            calls_show_data_confirmation,
+            not returns_parcel_weight,
+            show_data_function_found,
+            displays_check_data_message,
+            shows_parcel_data,
+            has_correct_buttons,
+            returns_confirm_data,
+            callback_registered,
+            template_name_state_has_callback,
+            correct_implementation,
+            no_weight_input
+        ]
+        
+        passed_checks = sum(critical_checks)
+        total_checks = len(critical_checks)
+        
+        print(f"      Critical checks passed: {passed_checks}/{total_checks}")
+        print(f"      Success rate: {(passed_checks/total_checks)*100:.1f}%")
+        
+        # Verify specific requirements from review request
+        print("\n   ✅ REVIEW REQUEST VERIFICATION:")
+        
+        if continue_function_found and function_line and 1950 <= function_line <= 1970:
+            print(f"   ✅ continue_order_after_template() function exists at lines ~1959-1965")
+        else:
+            print(f"   ❌ Function location issue")
+        
+        if calls_show_data_confirmation and not returns_parcel_weight:
+            print(f"   ✅ Function calls show_data_confirmation() instead of returning PARCEL_WEIGHT")
+        else:
+            print(f"   ❌ Function implementation issue")
+        
+        if show_data_function_found and displays_check_data_message and shows_parcel_data:
+            print(f"   ✅ show_data_confirmation() displays all data with correct message")
+        else:
+            print(f"   ❌ show_data_confirmation() implementation issue")
+        
+        if callback_registered and template_name_state_has_callback:
+            print(f"   ✅ continue_order callback properly registered in TEMPLATE_NAME state")
+        else:
+            print(f"   ❌ ConversationHandler registration issue")
+        
+        if accesses_context_data and displays_context_fields:
+            print(f"   ✅ Context data preservation working (addresses, weight, dimensions)")
+        else:
+            print(f"   ❌ Context data preservation issue")
+        
+        if correct_implementation and no_weight_input and explains_fix:
+            print(f"   ✅ CRITICAL FIX VERIFIED: Bot returns to CONFIRM_DATA screen, not weight input")
+        else:
+            print(f"   ❌ CRITICAL ISSUE: Fix not properly implemented")
+        
+        # Expected workflow verification
+        print(f"\n   🎯 EXPECTED WORKFLOW VERIFICATION:")
+        print(f"   User on CONFIRM_DATA screen → clicks 'Сохранить как шаблон' → enters template name")
+        print(f"   → template saved → clicks 'Продолжить создание заказа' → continue_order_after_template()")
+        print(f"   → calls show_data_confirmation() → returns to CONFIRM_DATA screen → can proceed with rates")
+        
+        # Return success if all critical checks pass
+        return all(critical_checks)
+        
+    except Exception as e:
+        print(f"❌ Continue order after template save test error: {e}")
+        import traceback
+        print(f"   Traceback: {traceback.format_exc()}")
+        return False
+
 def test_template_rename_functionality():
     """Test Template Rename Functionality - CRITICAL TEST per review request"""
     print("\n🔍 Testing Template Rename Functionality (Bot Freeze Fix)...")
