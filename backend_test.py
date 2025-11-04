@@ -2621,13 +2621,13 @@ if __name__ == "__main__":
     total_tests = len(test_results)
     
     # Show critical test result first
-    critical_test = test_results.get('telegram_bot_shipping_rates', False)
+    critical_test = test_results.get('templates_use_template', False)
     critical_status = "✅ PASS" if critical_test else "❌ FAIL"
-    print(f"{'🎯 CRITICAL: telegram_bot_shipping_rates':40} {critical_status}")
+    print(f"{'🎯 CRITICAL: templates_use_template':40} {critical_status}")
     
     # Show other test results
     for test_name, result in test_results.items():
-        if test_name != 'telegram_bot_shipping_rates':  # Skip critical test (already shown)
+        if test_name != 'templates_use_template':  # Skip critical test (already shown)
             status = "✅ PASS" if result else "❌ FAIL"
             print(f"{test_name:40} {status}")
     
@@ -2639,15 +2639,17 @@ if __name__ == "__main__":
     print("=" * 70)
     
     if critical_test:
-        print("✅ TELEGRAM BOT SHIPPING RATES FIX: SUCCESS")
-        print("   ✅ stamps_com added to allowed_services with USPS service codes")
-        print("   ✅ Stamps.com mapped to '🦅 USPS' icon in carrier_icons")
-        print("   ✅ '🔄 Обновить тарифы' button added before cancel button")
-        print("   ✅ 'refresh_rates' included in SELECT_CARRIER pattern handler")
-        print("   ✅ select_carrier() handles 'refresh_rates' callback correctly")
+        print("✅ TEMPLATES FEATURE - USE TEMPLATE FUNCTIONALITY: SUCCESS")
+        print("   ✅ use_template() function fixed - syntax error resolved")
+        print("   ✅ start_order_with_template() function created and complete")
+        print("   ✅ start_order_with_template registered as ConversationHandler entry_point")
+        print("   ✅ Template data loading into context.user_data working")
+        print("   ✅ Confirmation message with template details displays")
+        print("   ✅ 'Продолжить создание заказа' button enters PARCEL_WEIGHT state")
         print("\n🎉 EXPECTED RESULTS:")
-        print("   - Bot should show rates from UPS, USPS/Stamps.com, and FedEx carriers")
-        print("   - '🔄 Обновить тарифы' button should be present in rates display")
+        print("   - User clicks template → use_template loads data → shows confirmation")
+        print("   - User clicks 'Продолжить создание заказа' → enters ConversationHandler at PARCEL_WEIGHT")
+        print("   - User enters weight → continues normal order flow")
         print("   - Clicking refresh button should reload rates")
     else:
         print("❌ TELEGRAM BOT SHIPPING RATES FIX: ISSUES DETECTED")
