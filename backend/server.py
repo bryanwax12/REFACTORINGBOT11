@@ -2971,10 +2971,14 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     user_discount = pending_order.get('user_discount', 0)
     discount_text = f"\n🎉 *Ваша скидка:* {user_discount}%" if user_discount > 0 else ""
     
+    # Handle different rate structures
+    carrier_name = selected_rate.get('carrier_name') or selected_rate.get('carrierName', 'Unknown Carrier')
+    service_type = selected_rate.get('service_type') or selected_rate.get('serviceType', 'Standard Service')
+    
     await query.message.reply_text(
         f"""💳 *Выберите способ оплаты*
 
-📦 *Выбранный тариф:* {selected_rate['carrier_name']} - {selected_rate['service_type']}
+📦 *Выбранный тариф:* {carrier_name} - {service_type}
 💰 *Стоимость:* ${amount:.2f}{discount_text}
 💵 *Ваш баланс:* ${user_balance:.2f}
 
