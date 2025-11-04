@@ -1513,8 +1513,9 @@ def test_template_rename_functionality():
         
         # Check if rename_template_start is NOT in standalone handlers
         standalone_handlers_section = server_code[server_code.find('# Template handlers'):server_code.find('# Handler for topup')]
-        rename_in_standalone = 'rename_template_start' in standalone_handlers_section
-        print(f"      rename_template_start NOT in standalone handlers: {'✅' if not rename_in_standalone else '❌'}")
+        # Look for actual handler registration (not just function name in comments)
+        rename_handler_in_standalone = 'CallbackQueryHandler(rename_template_start' in standalone_handlers_section
+        print(f"      rename_template_start NOT in standalone handlers: {'✅' if not rename_handler_in_standalone else '❌'}")
         
         # Check for comment indicating it's handled by ConversationHandler
         comment_found = '# rename_template_start is now handled by template_rename_handler ConversationHandler' in server_code
