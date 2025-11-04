@@ -2968,7 +2968,7 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    user_discount = pending_data.get('user_discount', 0)
+    user_discount = pending_order.get('user_discount', 0)
     discount_text = f"\n🎉 *Ваша скидка:* {user_discount}%" if user_discount > 0 else ""
     
     await query.message.reply_text(
@@ -2982,6 +2982,9 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
         reply_markup=reply_markup,
         parse_mode='Markdown'
     )
+    
+    # Delete pending order after restoring
+    await db.pending_orders.delete_one({"telegram_id": telegram_id})
     
     return PAYMENT_METHOD
 
