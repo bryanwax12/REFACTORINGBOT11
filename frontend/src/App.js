@@ -1647,18 +1647,41 @@ const Dashboard = () => {
                     </Button>
                   </div>
 
-                  {/* Insert Image Button */}
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={handleInsertImage}
-                    title="Вставить изображение"
-                    className="gap-2"
-                  >
-                    <ImageIcon className="w-4 h-4" />
-                    Вставить картинку
-                  </Button>
+                  {/* Image Upload/Insert Buttons */}
+                  <div className="flex gap-1">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => document.getElementById('image-upload-input').click()}
+                      disabled={uploadingImage}
+                      title="Загрузить с компьютера"
+                      className="gap-2"
+                    >
+                      <ImageIcon className="w-4 h-4" />
+                      {uploadingImage ? 'Загрузка...' : 'Загрузить'}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={handleInsertImage}
+                      title="Вставить по URL"
+                      className="gap-2"
+                    >
+                      <LinkIcon className="w-4 h-4" />
+                      URL
+                    </Button>
+                  </div>
+                  
+                  {/* Hidden file input */}
+                  <input
+                    id="image-upload-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleUploadImage}
+                    className="hidden"
+                  />
 
                   {/* Preview Toggle */}
                   <Button
