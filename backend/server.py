@@ -1700,8 +1700,13 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
     await query.answer()
     
     if query.data == 'cancel_order':
-        await cancel_order(update, context)
-        return ConversationHandler.END
+        return await cancel_order(update, context)
+    
+    if query.data == 'confirm_cancel':
+        return await confirm_cancel_order(update, context)
+    
+    if query.data == 'return_to_order':
+        return await return_to_order(update, context)
     
     if query.data == 'confirm_data':
         # User confirmed data, proceed to fetch rates
