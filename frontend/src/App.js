@@ -1792,15 +1792,15 @@ const Dashboard = () => {
               </div>
 
               {/* Live Preview */}
-              {showPreview && (broadcastMessage || broadcastImageUrl) && (
+              {showPreview && (broadcastMessage || broadcastImageUrl || uploadedImagePreview) && (
                 <div className="mt-6 space-y-2">
                   <Label>📱 Live Preview (как будет выглядеть в Telegram):</Label>
                   <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-200">
                     {/* Telegram Message Bubble */}
                     <div className="bg-white rounded-2xl shadow-sm p-4 max-w-md">
-                      {broadcastImageUrl && (
+                      {(uploadedImagePreview || broadcastImageUrl) && (
                         <img 
-                          src={broadcastImageUrl} 
+                          src={uploadedImagePreview || broadcastImageUrl} 
                           alt="Message" 
                           className="w-full rounded-lg mb-3"
                           onError={(e) => e.target.style.display = 'none'}
