@@ -2861,6 +2861,9 @@ Shipping label создан успешно!""",
 Пожалуйста, свяжитесь с администратором.""",
                     reply_markup=reply_markup
                 )
+                
+                # Mark order as completed to prevent stale button interactions
+                context.user_data['order_completed'] = True
             
         elif query.data == 'pay_with_crypto':
             # Create order
