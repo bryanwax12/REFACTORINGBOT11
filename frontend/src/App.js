@@ -10,7 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { toast, Toaster } from "sonner";
-import { Package, DollarSign, Users, TrendingUp, Send, MapPin, Box, Search, Download, RefreshCw, FileText, Copy, ExternalLink } from "lucide-react";
+import { Package, DollarSign, Users, TrendingUp, Send, MapPin, Box, Search, Download, RefreshCw, FileText, Copy, ExternalLink, Bold, Italic, Code, Link as LinkIcon, Image as ImageIcon } from "lucide-react";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
