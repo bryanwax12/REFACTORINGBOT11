@@ -1777,8 +1777,10 @@ const Dashboard = () => {
                     onClick={() => {
                       setBroadcastMessage('');
                       setBroadcastImageUrl('');
+                      setBroadcastFileId('');
+                      setUploadedImagePreview('');
                     }}
-                    disabled={(!broadcastMessage && !broadcastImageUrl) || sendingBroadcast}
+                    disabled={(!broadcastMessage && !broadcastImageUrl && !uploadedImagePreview) || sendingBroadcast}
                   >
                     Очистить
                   </Button>
