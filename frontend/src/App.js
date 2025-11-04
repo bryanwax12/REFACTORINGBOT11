@@ -511,7 +511,8 @@ const Dashboard = () => {
 
       const response = await axios.post(`${API}/broadcast`, {
         message: broadcastMessage,
-        image_url: broadcastImageUrl || null
+        image_url: broadcastImageUrl || null,
+        file_id: broadcastFileId || null
       });
 
       if (response.data.success) {
