@@ -480,6 +480,32 @@ backend:
           agent: "main"
           comment: "✅ HELP TEXT SIMPLIFIED FURTHER: Per user request, removed all command information and description text. Now help_command() shows only: '*Если у вас возникли вопросы или проблемы, нажмите кнопку ниже:*' (in bold). Removed: '📦 Доступные команды:', '/start - Начать работу', '/help - Показать эту справку', 'Для создания заказа используйте кнопку...'. Help section now focused only on contacting administrator. Buttons remain unchanged: Contact Administrator button first, Main Menu button below. Backend restarted successfully."
 
+backend:
+  - task: "Check All Bot Access - Backend Endpoint"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "✅ BACKEND ENDPOINT IMPLEMENTED: Added POST /api/users/check-all-bot-access endpoint (lines 5148-5221). Function checks bot access for all users by sending typing action. Updates bot_blocked_by_user status in database. Returns checked_count, accessible_count, blocked_count, and failed_count. Includes error handling for 'bot was blocked by the user' and other errors. Ready for testing."
+
+frontend:
+  - task: "Check All Bot Access - Frontend Button and Function"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "✅ FRONTEND IMPLEMENTED: Added 'Check All Bot Access' button in Users tab (lines 1145-1152). Button calls handleCheckAllBotAccess function which was already implemented (lines 514-531). Function shows confirmation dialog, calls backend endpoint /api/users/check-all-bot-access, displays toast with results (checked_count, accessible_count, blocked_count), and reloads user data to update UI with bot_blocked_by_user status. Button styled with orange theme (border-orange-600 text-orange-600 hover:bg-orange-50) and disabled when no users. Ready for testing."
+
 metadata:
   created_by: "main_agent"
   version: "1.1"
