@@ -5474,7 +5474,7 @@ async def startup_event():
             application.add_handler(CallbackQueryHandler(use_template, pattern='^template_use_'))
             application.add_handler(CallbackQueryHandler(delete_template, pattern='^template_delete_'))
             application.add_handler(CallbackQueryHandler(confirm_delete_template, pattern='^template_confirm_delete_'))
-            application.add_handler(CallbackQueryHandler(rename_template_start, pattern='^template_rename_'))
+            # rename_template_start is now handled by template_rename_handler ConversationHandler
             application.add_handler(CallbackQueryHandler(my_templates_menu, pattern='^my_templates$'))
             
             # Handler for topup amount input (text messages)
