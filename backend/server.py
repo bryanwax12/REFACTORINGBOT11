@@ -433,6 +433,9 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             InlineKeyboardButton("💳 Мой баланс", callback_data='my_balance')
         ],
         [
+            InlineKeyboardButton("📋 Мои шаблоны", callback_data='my_templates')
+        ],
+        [
             InlineKeyboardButton("❓ Помощь", callback_data='help')
         ],
         [
