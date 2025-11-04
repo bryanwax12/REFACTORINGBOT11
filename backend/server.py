@@ -5236,6 +5236,8 @@ async def startup_event():
                 states={
                     FROM_NAME: [
                         MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_name),
+                        CallbackQueryHandler(order_new, pattern='^order_new$'),
+                        CallbackQueryHandler(order_from_template_list, pattern='^order_from_template$'),
                         CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
                         CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
                     ],
