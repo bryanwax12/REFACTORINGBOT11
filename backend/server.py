@@ -4929,6 +4929,7 @@ async def invite_all_users_to_channel(authenticated: bool = Depends(verify_admin
 
 class BroadcastRequest(BaseModel):
     message: str
+    image_url: Optional[str] = None
 
 @api_router.post("/broadcast")
 async def broadcast_message(
@@ -4941,6 +4942,7 @@ async def broadcast_message(
             raise HTTPException(status_code=400, detail="Message is required")
         
         message = request.message
+        image_url = request.image_url
         
         if not bot_instance:
             raise HTTPException(status_code=500, detail="Bot not initialized")
