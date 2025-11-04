@@ -1468,6 +1468,73 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Broadcast Tab */}
+        <TabsContent value="broadcast" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>📢 Broadcast Message</CardTitle>
+              <CardDescription>Send a message to all users (excluding blocked users)</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="broadcast-message">Message (Markdown supported)</Label>
+                <Textarea
+                  id="broadcast-message"
+                  placeholder="Введите сообщение для рассылки...&#10;&#10;Вы можете использовать Markdown:&#10;*жирный текст*&#10;_курсив_&#10;[ссылка](https://example.com)"
+                  value={broadcastMessage}
+                  onChange={(e) => setBroadcastMessage(e.target.value)}
+                  rows={8}
+                  className="font-mono"
+                />
+                <p className="text-sm text-muted-foreground">
+                  {broadcastMessage.length} символов
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between pt-4 border-t">
+                <div className="text-sm text-muted-foreground">
+                  Будет отправлено: <strong>{users.filter(u => !u.blocked).length}</strong> пользователям
+                  {users.filter(u => u.blocked).length > 0 && (
+                    <span className="ml-2 text-orange-600">
+                      (пропущено заблокированных: {users.filter(u => u.blocked).length})
+                    </span>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setBroadcastMessage('')}
+                    disabled={!broadcastMessage || sendingBroadcast}
+                  >
+                    Очистить
+                  </Button>
+                  <Button
+                    onClick={handleSendBroadcast}
+                    disabled={!broadcastMessage || sendingBroadcast}
+                  >
+                    {sendingBroadcast ? 'Отправка...' : '📤 Отправить всем'}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Preview */}
+              {broadcastMessage && (
+                <div className="mt-6 space-y-2">
+                  <Label>Предпросмотр:</Label>
+                  <div className="p-4 bg-muted rounded-lg border">
+                    <div className="whitespace-pre-wrap text-sm">
+                      {broadcastMessage}
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    * Telegram применит Markdown форматирование при отправке
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
 
       {/* User Details Modal */}
