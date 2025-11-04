@@ -904,14 +904,24 @@ const Dashboard = () => {
                   <CardTitle>Registered Users</CardTitle>
                   <CardDescription>Users who started the Telegram bot</CardDescription>
                 </div>
-                <Button 
-                  onClick={handleInviteAllToChannel}
-                  variant="default"
-                  className="bg-blue-600 hover:bg-blue-700"
-                  disabled={users.length === 0}
-                >
-                  📣 Пригласить всех в канал
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={handleCheckAllChannelStatus}
+                    variant="outline"
+                    className="border-green-600 text-green-600 hover:bg-green-50"
+                    disabled={users.length === 0}
+                  >
+                    ✓ Проверить всех
+                  </Button>
+                  <Button 
+                    onClick={handleInviteAllToChannel}
+                    variant="default"
+                    className="bg-blue-600 hover:bg-blue-700"
+                    disabled={users.length === 0}
+                  >
+                    📣 Пригласить всех в канал
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
