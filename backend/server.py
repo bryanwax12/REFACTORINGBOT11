@@ -391,6 +391,23 @@ async def send_blocked_message(update: Update):
     elif update.callback_query:
         await update.callback_query.message.reply_text(message, parse_mode='Markdown')
 
+async def handle_orphaned_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle button presses that are not caught by any active handler (orphaned buttons)"""
+    query = update.callback_query
+    
+    # Ignore menu buttons (start, help, etc)
+    if query.data in ['start', 'help', 'contact_admin', 'my_templates']:
+        return
+    
+    logger.info(f"Orphaned button detected: {query.data} from user {update.effective_user.id}")
+    
+    await query.answer("⚠️ Этот заказ уже завершён")
+    await query.message.reply_text(
+        "⚠️ *Этот заказ уже завершён или отменён.*\n\n"
+        "Для создания нового заказа используйте меню в нижней части экрана.",
+        parse_mode='Markdown'
+    )
+
 async def check_stale_interaction(query, context: ContextTypes.DEFAULT_TYPE) -> bool:
     """Check if button press is from an old/completed interaction"""
     logger.info(f"check_stale_interaction called - user_data keys: {list(context.user_data.keys())}")
