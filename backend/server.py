@@ -1935,7 +1935,10 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
     template_dict['created_at'] = template_dict['created_at'].isoformat()
     await db.templates.insert_one(template_dict)
     
-    keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+    keyboard = [
+        [InlineKeyboardButton("📦 Продолжить создание заказа", callback_data='continue_order')],
+        [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]
+    ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await update.message.reply_text(
@@ -1943,12 +1946,15 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 Теперь вы можете использовать его для быстрого создания заказов.
 
-📋 Найти в меню: *Мои шаблоны*""",
+*Продолжить создание этого заказа?*""",
         reply_markup=reply_markup,
         parse_mode='Markdown'
     )
     
-    return ConversationHandler.END
+    # Save template name for potential continuation
+    context.user_data['saved_template_name'] = template_name
+    
+    return TEMPLATE_NAME  # Stay in state to handle continue button
 
 async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Show user's templates list"""
