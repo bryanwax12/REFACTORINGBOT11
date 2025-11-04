@@ -2141,6 +2141,10 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if query.data == 'return_to_order':
         return await return_to_order(update, context)
     
+    if query.data == 'check_data':
+        # Return to data confirmation screen
+        return await check_data_from_cancel(update, context)
+    
     if query.data == 'refresh_rates':
         # Refresh shipping rates
         return await fetch_shipping_rates(update, context)
