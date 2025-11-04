@@ -2651,6 +2651,11 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
 
 async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
+    
+    # Check for stale interaction
+    if await check_stale_interaction(query, context):
+        return ConversationHandler.END
+    
     await query.answer()
     
     if query.data == 'cancel_order':
