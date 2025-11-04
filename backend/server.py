@@ -2840,6 +2840,9 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Shipping label создан успешно!""",
                     reply_markup=reply_markup
                 )
+                
+                # Mark order as completed to prevent stale button interactions
+                context.user_data['order_completed'] = True
             else:
                 # Label creation failed - don't charge user
                 await db.orders.update_one(
