@@ -6213,9 +6213,6 @@ async def startup_event():
             # rename_template_start is now handled by template_rename_handler ConversationHandler
             application.add_handler(CallbackQueryHandler(my_templates_menu, pattern='^my_templates$'))
             
-            # Return to payment after top-up
-            application.add_handler(CallbackQueryHandler(return_to_payment_after_topup, pattern='^return_to_payment$'))
-            
             # Handler for topup amount input (text messages)
             application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_topup_amount_input))
             application.add_handler(CallbackQueryHandler(button_callback))
