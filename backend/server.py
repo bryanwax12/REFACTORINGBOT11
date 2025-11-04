@@ -2483,10 +2483,12 @@ async def handle_topup_crypto_selection(update: Update, context: ContextTypes.DE
             'USDC': 'USDC'
         }
         
-        # Create Oxapay invoice for top-up
+        # Create Oxapay invoice for top-up (order_id must be <= 50 chars)
+        # Generate short order_id: "top_" (4) + timestamp (10) + "_" (1) + random (8) = 23 chars
+        order_id = f"top_{int(time.time())}_{uuid.uuid4().hex[:8]}"
         invoice_result = await create_oxapay_invoice(
             amount=topup_amount,
-            order_id=f"topup_{user['id']}_{uuid.uuid4().hex[:8]}",
+            order_id=order_id,
             description=f"Balance Top-up ${topup_amount}"
         )
         
