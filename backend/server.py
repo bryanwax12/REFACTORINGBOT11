@@ -4849,7 +4849,9 @@ async def invite_all_users_to_channel(authenticated: bool = Depends(verify_admin
         
         success_count = 0
         failed_count = 0
+        skipped_count = 0
         failed_users = []
+        skipped_users = []
         
         keyboard = [[InlineKeyboardButton("📣 Присоединиться к каналу", url=CHANNEL_INVITE_LINK)]]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -4866,6 +4868,13 @@ async def invite_all_users_to_channel(authenticated: bool = Depends(verify_admin
 👇 Нажмите кнопку ниже, чтобы присоединиться:"""
         
         for user in users:
+            # Skip users who are already channel members
+            if user.get('is_channel_member', False):
+                skipped_count += 1
+                skipped_users.append(user['telegram_id'])
+                logger.info(f"Skipping user {user['telegram_id']} - already in channel")
+                continue
+            
             try:
                 # Send invitation with inline button
                 await bot_instance.send_message(
@@ -4891,10 +4900,12 @@ async def invite_all_users_to_channel(authenticated: bool = Depends(verify_admin
         
         return {
             "success": True,
-            "message": f"Invitations sent to {success_count} users",
+            "message": f"Invitations sent to {success_count} users, skipped {skipped_count} already in channel",
             "success_count": success_count,
             "failed_count": failed_count,
-            "failed_users": failed_users
+            "skipped_count": skipped_count,
+            "failed_users": failed_users,
+            "skipped_users": skipped_users
         }
             
     except HTTPException:
