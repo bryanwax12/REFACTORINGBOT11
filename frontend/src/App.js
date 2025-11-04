@@ -135,6 +135,49 @@ const Dashboard = () => {
     }
   };
 
+  const loadMaintenanceStatus = async () => {
+    try {
+      const response = await axios.get(`${API}/maintenance/status`);
+      setMaintenanceMode(response.data.maintenance_mode);
+    } catch (error) {
+      console.error("Failed to load maintenance status", error);
+    }
+  };
+
+  const enableMaintenanceMode = async () => {
+    if (!window.confirm('Включить режим технического обслуживания? Всем пользователям будет отправлено уведомление.')) {
+      return;
+    }
+    
+    setLoadingMaintenance(true);
+    try {
+      const response = await axios.post(`${API}/maintenance/enable`);
+      setMaintenanceMode(true);
+      toast.success(`Режим обслуживания включён. Уведомлено пользователей: ${response.data.users_notified}`);
+    } catch (error) {
+      toast.error("Ошибка при включении режима обслуживания");
+    } finally {
+      setLoadingMaintenance(false);
+    }
+  };
+
+  const disableMaintenanceMode = async () => {
+    if (!window.confirm('Выключить режим технического обслуживания? Всем пользователям будет отправлено уведомление о возобновлении работы.')) {
+      return;
+    }
+    
+    setLoadingMaintenance(true);
+    try {
+      const response = await axios.post(`${API}/maintenance/disable`);
+      setMaintenanceMode(false);
+      toast.success(`Режим обслуживания выключен. Уведомлено пользователей: ${response.data.users_notified}`);
+    } catch (error) {
+      toast.error("Ошибка при выключении режима обслуживания");
+    } finally {
+      setLoadingMaintenance(false);
+    }
+  };
+
   const searchOrders = async () => {
     if (!searchQuery.trim()) {
       loadData();
