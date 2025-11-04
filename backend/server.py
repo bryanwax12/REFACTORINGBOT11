@@ -1778,6 +1778,19 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         # User confirmed data, proceed to fetch rates
         return await fetch_shipping_rates(update, context)
     
+    if query.data == 'save_template':
+        # Save current order data as template
+        await query.message.reply_text(
+            """💾 Сохранить как шаблон
+
+Введите название для шаблона (до 30 символов):
+*Например:* "Склад NY", "Доставка маме", "Офис"
+
+_Шаблон сохранит оба адреса для быстрого использования в будущем._""",
+            parse_mode='Markdown'
+        )
+        return TEMPLATE_NAME
+    
     if query.data == 'edit_data':
         # Show edit menu
         return await show_edit_menu(update, context)
