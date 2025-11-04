@@ -710,18 +710,39 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await send_blocked_message(update)
         return ConversationHandler.END
     
-    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    # Check if user has templates
+    templates_count = await db.templates.count_documents({"telegram_id": telegram_id})
     
-    await query.message.reply_text(
-        """📦 Создание нового заказа
+    if templates_count > 0:
+        # Show choice: New order or From template
+        keyboard = [
+            [InlineKeyboardButton("📝 Новый заказ", callback_data='order_new')],
+            [InlineKeyboardButton("📋 Из шаблона", callback_data='order_from_template')],
+            [InlineKeyboardButton("❌ Отмена", callback_data='start')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await query.message.reply_text(
+            """📦 Создать заказ
+
+Выберите способ создания:""",
+            reply_markup=reply_markup
+        )
+        return FROM_NAME  # Waiting for choice
+    else:
+        # No templates, go straight to new order
+        keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await query.message.reply_text(
+            """📦 Создание нового заказа
 
 Шаг 1/13: Имя отправителя
 Например: John Smith""",
-        reply_markup=reply_markup
-    )
-    context.user_data['last_state'] = FROM_NAME  # Save state for cancel return
-    return FROM_NAME
+            reply_markup=reply_markup
+        )
+        context.user_data['last_state'] = FROM_NAME
+        return FROM_NAME
 
 async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     name = update.message.text.strip()
