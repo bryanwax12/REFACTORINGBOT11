@@ -2353,6 +2353,9 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             }
         }
         
+        # Log the request for debugging
+        logger.info(f"ShipStation rate request: {rate_request}")
+        
         # Get rates from ShipStation
         response = requests.post(
             'https://api.shipstation.com/v2/rates',
@@ -2365,6 +2368,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             error_data = response.json() if response.text else {}
             error_msg = error_data.get('message', f'Status code: {response.status_code}')
             logger.error(f"ShipStation rate request failed: {error_msg}")
+            logger.error(f"Response body: {response.text}")
             
             keyboard = [
                 [InlineKeyboardButton("✏️ Редактировать адреса", callback_data='edit_addresses_error')],
