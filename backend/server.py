@@ -2068,17 +2068,17 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.message.reply_text("❌ Шаблон не найден")
         return
     
-    # Load template data into context
+    # Load template data into context (use correct keys for rate fetching)
     context.user_data['from_name'] = template.get('from_name', '')
-    context.user_data['from_address'] = template.get('from_street1', '')
-    context.user_data['from_address2'] = template.get('from_street2', '')
+    context.user_data['from_street'] = template.get('from_street1', '')  # Use 'from_street' not 'from_address'
+    context.user_data['from_street2'] = template.get('from_street2', '')
     context.user_data['from_city'] = template.get('from_city', '')
     context.user_data['from_state'] = template.get('from_state', '')
     context.user_data['from_zip'] = template.get('from_zip', '')
     context.user_data['from_phone'] = template.get('from_phone', '')
     context.user_data['to_name'] = template.get('to_name', '')
-    context.user_data['to_address'] = template.get('to_street1', '')
-    context.user_data['to_address2'] = template.get('to_street2', '')
+    context.user_data['to_street'] = template.get('to_street1', '')  # Use 'to_street' not 'to_address'
+    context.user_data['to_street2'] = template.get('to_street2', '')
     context.user_data['to_city'] = template.get('to_city', '')
     context.user_data['to_state'] = template.get('to_state', '')
     context.user_data['to_zip'] = template.get('to_zip', '')
