@@ -2586,25 +2586,25 @@ def run_shipstation_carrier_tests():
 
 if __name__ == "__main__":
     print("🚀 Starting Backend Test Suite for Telegram Shipping Bot")
-    print("🎯 FOCUS: Telegram Bot Shipping Rates with All Carriers and Refresh Button")
+    print("🎯 FOCUS: Templates Feature - Use Template Functionality")
     print("=" * 70)
     
     # Track test results
     test_results = {}
     
-    # CRITICAL TEST: Telegram Bot Shipping Rates (per review request)
-    print("\n🎯 PRIORITY: Testing Telegram Bot Shipping Rates Fix")
-    test_results['telegram_bot_shipping_rates'] = test_telegram_bot_shipping_rates()
+    # CRITICAL TEST: Templates Feature - Use Template Functionality (per review request)
+    print("\n🎯 PRIORITY: Testing Templates Feature - Use Template Functionality")
+    test_results['templates_use_template'] = test_templates_feature_use_template()
     
-    # Supporting ShipStation Tests
-    test_results['shipstation_carrier_ids'] = test_shipstation_carrier_ids()
-    test_results['carrier_exclusion_fix'] = test_carrier_exclusion_fix()
-    test_results['shipping_rates'] = test_shipping_rates()[0] if test_shipping_rates()[0] else False
-    
-    # Telegram Bot Infrastructure Tests
+    # Supporting Tests
+    test_results['api_health'] = test_api_health()
     test_results['bot_token'] = test_telegram_bot_token()
     test_results['bot_infrastructure'] = test_telegram_bot_infrastructure()
     test_results['conversation_handlers'] = test_conversation_handler_functions()
+    
+    # Additional ShipStation Tests (for completeness)
+    test_results['shipstation_carrier_ids'] = test_shipstation_carrier_ids()
+    test_results['shipping_rates'] = test_shipping_rates()[0] if test_shipping_rates()[0] else False
     
     # Check backend logs
     print("\n" + "=" * 70)
