@@ -4710,8 +4710,7 @@ async def oxapay_webhook(request: Request):
                         # Create keyboard with order button
                         # Show button to return to payment after top-up
                         keyboard = [
-                            [InlineKeyboardButton("💳 Оплатить заказ", callback_data='return_to_payment')],
-                            [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]
+                            [InlineKeyboardButton("💳 Оплатить заказ", callback_data='return_to_payment')]
                         ]
                         reply_markup = InlineKeyboardMarkup(keyboard)
                         
