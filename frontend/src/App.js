@@ -527,6 +527,51 @@ const Dashboard = () => {
   };
 
 
+  const formatText = (type) => {
+    if (!textareaRef) return;
+    
+    const start = textareaRef.selectionStart;
+    const end = textareaRef.selectionEnd;
+    const selectedText = broadcastMessage.substring(start, end);
+    
+    if (!selectedText) {
+      toast.error('Пожалуйста, выделите текст для форматирования');
+      return;
+    }
+    
+    let formattedText = '';
+    
+    switch(type) {
+      case 'bold':
+        formattedText = `*${selectedText}*`;
+        break;
+      case 'italic':
+        formattedText = `_${selectedText}_`;
+        break;
+      case 'code':
+        formattedText = `\`${selectedText}\``;
+        break;
+      case 'link':
+        const url = prompt('Введите URL:');
+        if (url) formattedText = `[${selectedText}](${url})`;
+        else return;
+        break;
+      default:
+        return;
+    }
+    
+    const newText = broadcastMessage.substring(0, start) + formattedText + broadcastMessage.substring(end);
+    setBroadcastMessage(newText);
+    
+    // Restore focus and selection
+    setTimeout(() => {
+      textareaRef.focus();
+      textareaRef.setSelectionRange(start, start + formattedText.length);
+    }, 0);
+  };
+
+
+
 
   const submitBalanceChange = async () => {
     const amount = parseFloat(balanceAmount);
