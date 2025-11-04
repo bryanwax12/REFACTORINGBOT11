@@ -959,11 +959,20 @@ const Dashboard = () => {
                             <Button 
                               size="sm" 
                               variant={user.blocked ? "default" : "destructive"}
-                              className="w-[186px]"
+                              className="w-[90px]"
                               onClick={() => handleBlockUser(user.telegram_id, user.blocked)}
                               data-testid={`block-user-${user.telegram_id}`}
                             >
                               {user.blocked ? '✅ Unblock' : '⛔ Block'}
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              className="w-[90px] text-blue-600 border-blue-300 hover:bg-blue-50"
+                              onClick={() => handleInviteToChannel(user.telegram_id)}
+                              title={user.channel_invite_sent ? "Приглашение уже отправлено" : "Отправить приглашение в канал"}
+                            >
+                              {user.channel_invite_sent ? '✅ Invited' : '📨 Invite'}
                             </Button>
                           </div>
                         </div>
