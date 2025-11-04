@@ -4952,6 +4952,141 @@ async def get_leaderboard():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+@api_router.get("/users/{telegram_id}/channel-status")
+async def check_user_channel_status(telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
+    """Check if user is a member of the channel"""
+    try:
+        if not CHANNEL_ID:
+            raise HTTPException(status_code=500, detail="Channel ID not configured")
+        
+        if not bot_instance:
+            raise HTTPException(status_code=500, detail="Bot not initialized")
+        
+        user = await db.users.find_one({"telegram_id": telegram_id})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        try:
+            # Check user status in channel
+            chat_member = await bot_instance.get_chat_member(
+                chat_id=int(CHANNEL_ID),
+                user_id=telegram_id
+            )
+            
+            # Member statuses: "creator", "administrator", "member", "restricted", "left", "kicked"
+            is_member = chat_member.status in ["creator", "administrator", "member", "restricted"]
+            
+            # Update user record
+            await db.users.update_one(
+                {"telegram_id": telegram_id},
+                {"$set": {
+                    "is_channel_member": is_member,
+                    "channel_status_checked_at": datetime.now(timezone.utc).isoformat()
+                }}
+            )
+            
+            return {
+                "success": True,
+                "is_member": is_member,
+                "status": chat_member.status
+            }
+            
+        except Exception as e:
+            # User probably left or was never in channel
+            logger.error(f"Failed to check channel status for user {telegram_id}: {e}")
+            
+            # Update as not member
+            await db.users.update_one(
+                {"telegram_id": telegram_id},
+                {"$set": {
+                    "is_channel_member": False,
+                    "channel_status_checked_at": datetime.now(timezone.utc).isoformat()
+                }}
+            )
+            
+            return {
+                "success": True,
+                "is_member": False,
+                "status": "not_found",
+                "error": str(e)
+            }
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error checking channel status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/users/check-all-channel-status")
+async def check_all_users_channel_status(authenticated: bool = Depends(verify_admin_key)):
+    """Check channel membership status for all users"""
+    try:
+        if not CHANNEL_ID:
+            raise HTTPException(status_code=500, detail="Channel ID not configured")
+        
+        if not bot_instance:
+            raise HTTPException(status_code=500, detail="Bot not initialized")
+        
+        users = await db.users.find({}).to_list(None)
+        
+        checked_count = 0
+        member_count = 0
+        failed_count = 0
+        
+        for user in users:
+            try:
+                chat_member = await bot_instance.get_chat_member(
+                    chat_id=int(CHANNEL_ID),
+                    user_id=user['telegram_id']
+                )
+                
+                is_member = chat_member.status in ["creator", "administrator", "member", "restricted"]
+                
+                await db.users.update_one(
+                    {"telegram_id": user['telegram_id']},
+                    {"$set": {
+                        "is_channel_member": is_member,
+                        "channel_status_checked_at": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+                
+                checked_count += 1
+                if is_member:
+                    member_count += 1
+                
+                # Small delay to avoid rate limiting
+                await asyncio.sleep(0.05)
+                
+            except Exception as e:
+                logger.error(f"Failed to check status for user {user['telegram_id']}: {e}")
+                
+                # Mark as not member
+                await db.users.update_one(
+                    {"telegram_id": user['telegram_id']},
+                    {"$set": {
+                        "is_channel_member": False,
+                        "channel_status_checked_at": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+                
+                failed_count += 1
+        
+        return {
+            "success": True,
+            "message": f"Checked {checked_count} users",
+            "checked_count": checked_count,
+            "member_count": member_count,
+            "failed_count": failed_count
+        }
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error checking all channel statuses: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @api_router.post("/users/{telegram_id}/balance/add")
 async def add_balance(telegram_id: int, amount: float):
     try:
