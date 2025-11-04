@@ -1561,46 +1561,82 @@ const Dashboard = () => {
               {/* Formatting Toolbar */}
               <div className="space-y-2">
                 <Label>Formatting Tools</Label>
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex gap-2 flex-wrap items-center">
+                  {/* Text Formatting */}
+                  <div className="flex gap-1 border rounded-md p-1">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => formatText('bold')}
+                      title="Жирный текст (выделите текст)"
+                      className="h-8 px-2"
+                    >
+                      <Bold className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => formatText('italic')}
+                      title="Курсив (выделите текст)"
+                      className="h-8 px-2"
+                    >
+                      <Italic className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => formatText('code')}
+                      title="Код (выделите текст)"
+                      className="h-8 px-2"
+                    >
+                      <Code className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => formatText('link')}
+                      title="Ссылка (выделите текст)"
+                      className="h-8 px-2"
+                    >
+                      <LinkIcon className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  {/* Insert Image Button */}
                   <Button
                     type="button"
                     size="sm"
                     variant="outline"
-                    onClick={() => formatText('bold')}
-                    title="Жирный текст"
+                    onClick={handleInsertImage}
+                    title="Вставить изображение"
+                    className="gap-2"
                   >
-                    <Bold className="w-4 h-4" />
+                    <ImageIcon className="w-4 h-4" />
+                    Вставить картинку
                   </Button>
+
+                  {/* Preview Toggle */}
                   <Button
                     type="button"
                     size="sm"
-                    variant="outline"
-                    onClick={() => formatText('italic')}
-                    title="Курсив"
+                    variant={showPreview ? "default" : "outline"}
+                    onClick={() => setShowPreview(!showPreview)}
+                    title="Показать/Скрыть предпросмотр"
+                    className="gap-2"
                   >
-                    <Italic className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() => formatText('code')}
-                    title="Код"
-                  >
-                    <Code className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() => formatText('link')}
-                    title="Ссылка"
-                  >
-                    <LinkIcon className="w-4 h-4" />
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    {showPreview ? 'Скрыть превью' : 'Показать превью'}
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Выделите текст и нажмите кнопку для форматирования
+                  💡 Выделите текст и нажмите кнопку форматирования • Используйте "Вставить картинку" для добавления изображения
                 </p>
               </div>
 
