@@ -1064,7 +1064,7 @@ const Dashboard = () => {
                                   </div>
                                   {order.label_created_at && (
                                     <div className="text-xs text-muted-foreground">
-                                      Created: {new Date(order.label_created_at).toLocaleString()}
+                                      Created: {formatKyivDateTime(order.label_created_at)}
                                     </div>
                                   )}
                                 </div>
