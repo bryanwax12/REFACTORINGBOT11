@@ -539,7 +539,70 @@ const Dashboard = () => {
     const url = prompt('Введите URL изображения:');
     if (url) {
       setBroadcastImageUrl(url);
+      setBroadcastFileId(''); // Clear file_id if using URL
+      setUploadedImagePreview('');
       toast.success('Изображение добавлено!');
+    }
+  };
+
+  const handleUploadImage = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Пожалуйста, выберите изображение');
+      return;
+    }
+
+    // Validate file size (10MB max)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Размер изображения должен быть меньше 10MB');
+      return;
+    }
+
+    try {
+      setUploadingImage(true);
+      toast.info('Загрузка изображения...');
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await axios.post(`${API}/upload-image`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.data.success) {
+        // Set file_id for Telegram or URL
+        if (response.data.file_id) {
+          setBroadcastFileId(response.data.file_id);
+          toast.success('✅ Изображение загружено в Telegram!');
+        } else if (response.data.url) {
+          setBroadcastImageUrl(response.data.url);
+          toast.success('✅ Изображение загружено!');
+        }
+        
+        // Create preview from local file
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setUploadedImagePreview(reader.result);
+        };
+        reader.readAsDataURL(file);
+        
+        // Clear URL if using uploaded file
+        if (response.data.file_id) {
+          setBroadcastImageUrl('');
+        }
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error(error.response?.data?.detail || 'Не удалось загрузить изображение');
+    } finally {
+      setUploadingImage(false);
+      // Reset file input
+      event.target.value = '';
     }
   };
 
