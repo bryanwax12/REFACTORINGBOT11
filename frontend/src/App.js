@@ -1143,6 +1143,14 @@ const Dashboard = () => {
                     ✓ Проверить всех
                   </Button>
                   <Button 
+                    onClick={handleCheckAllBotAccess}
+                    variant="outline"
+                    className="border-orange-600 text-orange-600 hover:bg-orange-50"
+                    disabled={users.length === 0}
+                  >
+                    🚫 Проверить блокировку бота
+                  </Button>
+                  <Button 
                     onClick={handleInviteAllToChannel}
                     variant="default"
                     className="bg-blue-600 hover:bg-blue-700"
