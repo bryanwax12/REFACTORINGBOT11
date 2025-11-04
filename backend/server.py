@@ -6299,10 +6299,6 @@ async def startup_event():
             
             # Handler for topup amount input (text messages)
             application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_topup_amount_input))
-            
-            # Catch orphaned buttons from completed orders (must be before button_callback)
-            application.add_handler(CallbackQueryHandler(handle_orphaned_button))
-            
             application.add_handler(CallbackQueryHandler(button_callback))
             
             await application.initialize()
