@@ -4519,6 +4519,13 @@ async def oxapay_webhook(request: Request):
                         else:
                             amount_text = f"💰 *Зачислено:* ${actual_amount:.2f}"
                         
+                        # Create keyboard with order button
+                        keyboard = [
+                            [InlineKeyboardButton("📦 Создать заказ", callback_data='new_order')],
+                            [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]
+                        ]
+                        reply_markup = InlineKeyboardMarkup(keyboard)
+                        
                         await bot_instance.send_message(
                             chat_id=telegram_id,
                             text=f"""✅ *Спасибо! Ваш баланс пополнен!*
