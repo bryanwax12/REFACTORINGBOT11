@@ -1954,6 +1954,33 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
     # Save template name for potential continuation
     context.user_data['saved_template_name'] = template_name
     
+
+
+async def continue_order_after_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Continue order creation after saving template"""
+    query = update.callback_query
+    await query.answer()
+    
+    # Ask for parcel weight (first thing not in template)
+    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    template_name = context.user_data.get('saved_template_name', 'этот шаблон')
+    
+    await query.message.reply_text(
+        f"""✅ *Продолжаем создание заказа!*
+
+Теперь введите данные посылки:
+
+*Вес посылки в фунтах (lb)*
+Например: 5.5""",
+        reply_markup=reply_markup,
+        parse_mode='Markdown'
+    )
+    
+    context.user_data['last_state'] = PARCEL_WEIGHT
+    return PARCEL_WEIGHT
+
     return TEMPLATE_NAME  # Stay in state to handle continue button
 
 async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
