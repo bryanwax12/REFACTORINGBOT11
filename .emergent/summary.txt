@@ -1,93 +1,90 @@
 <analysis>
-The AI engineer's work primarily focused on iteratively enhancing and debugging a Telegram bot and its associated admin panel. Initial tasks involved updating  and refining bot UI/UX, including button placement and message formatting. A significant development was the migration of the bot to a new Telegram account. Core functionality improvements included adding user input for parcel dimensions for more accurate shipping rates, and adapting the system when the track by ID for dimensions feature proved unfeasible. The default parcel dimensions were adjusted, and conditional dimension input was implemented for heavier packages. In the admin panel, a manual Create Label feature was added, evolving from a simple button to a dedicated tab with dynamic rate fetching. A major shift in payment processing occurred from CryptoBot to Oxapay, requiring extensive code modifications and dependency updates. The current critical task is debugging a  with Oxapay during invoice creation, after implementing a custom amount top-up feature.
+The trajectory details the AI engineer's work on a Telegram bot and admin panel. Initial efforts focused on debugging Oxapay invoice creation, resolving validation errors related to API key placement (header vs. payload) and  length constraints. Frontend/backend issues, like carrier display and button functionality (cancel/return), were addressed. New features included an admin panel Top-ups tab, user blocking functionality, and UI alignment improvements. A significant ongoing task is the implementation of a Templates feature for the bot, allowing users to save and reuse address information for new orders. The AI engineer is currently debugging the  functionality, specifically ensuring the ConversationHandler restarts correctly with pre-filled template data. Many of the fixes involved adjustments to API request payloads, updating ConversationHandler states, and refining UI elements.
 </analysis>
 
 <product_requirements>
-The application is a Telegram bot for shipping label generation and crypto payments, targeting robust user interaction and administrative oversight. It features user authentication, crypto payment integration (initially CryptoBot, planned Heleket, now Oxapay), and ShipStation V2 API for labels.
-
-**Key user requirements and implemented features:**
--   **Shipping**: ShipStation V2 integration, carrier filtering, dynamic rate fetching, de-duplicated shipping rates, label voiding upon refund. Address validation removed. Added user input for parcel dimensions (length, width, height) with a skip option, and adjusted default dimensions to 10x10x10 inches. For parcels over 10lb, dimension input is now mandatory.
--   **Payments**: CryptoBot was integrated, then fully replaced by Oxapay for custom top-up and multiple cryptocurrencies (BTC, ETH, USDT, LTC). Users can now enter any top-up amount over 0.
--   **UI/UX (Bot)**: Corrected  navigation, consistent step numbering, dynamic prompts, functional main menu. Russian localization for bot messages and buttons. Contact Administrator button added to Help and FAQ sections. Welcome message text and formatting updated.
--   **UI/UX (Admin Panel)**: Comprehensive order management with search, refund, label download, and export to Excel/CSV. Display of user Telegram ID, name, tracking status. Profit tracking, real-time ShipStation expense tracking. Per-user discount system. Manual Create Label form implemented in a dedicated admin tab, allowing dynamic service rate fetching based on carrier selection.
--   **Error Handling**: Admin Telegram notifications for critical issues.
--   **Security**: Admin API Key protection for backend, input sanitization, security logging.
--   **Issue Resolution**: ShipStation company name workaround; frontend/backend fixes for dimension input, manual label creation, and Oxapay integration.
+The application is a Telegram bot designed for shipping label generation and cryptocurrency payments, complemented by an admin panel for management.
+**Core Features:**
+-   **Shipping:** ShipStation V2 integration for label creation. Dynamic rate fetching, filtering, and de-duplication. Parcel dimensions (length, width, height) input, with a default of 10x10x10 inches and mandatory input for parcels over 10lb. Address validation was initially removed but proposed for re-implementation.
+-   **Payments:** Transitioned from CryptoBot to Oxapay. Supports custom top-up amounts (minimum 0) and multiple cryptocurrencies. Requires exact payment for funds to be credited (with a 2% underpayment tolerance).
+-   **Bot UI/UX:** Multilingual (Russian). Consistent navigation, dynamic prompts, and a functional main menu. Contact Administrator button. Welcome message updates.
+-   **Admin Panel UI/UX:** Order management with search, refund, label download. User details (Telegram ID, name). Profit/expense tracking. Per-user discount. Manual Create Label form. New Top-ups tab to view payment history. User management with Block/Unblock functionality. UI alignment for buttons in Orders and Users tabs.
+-   **Error Handling:** Admin Telegram notifications for critical issues.
+-   **Security:** Admin API Key protection, input sanitization.
+-   **Templates (in progress):** Users can save and reuse address information as templates. Templates will include sender/recipient addresses. Users can name, view, use, rename, and delete templates. A limit of 10 templates per user.
 </product_requirements>
 
 <key_technical_concepts>
--   **Full-stack**: React (frontend), FastAPI (backend), MongoDB (database).
--   **Telegram Bot API**:  with .
--   **Payment Gateways**: CryptoBot API (removed), Oxapay API (new integration).
--   **Shipping API**: ShipStation V2 API.
--   **Data Validation**: Pydantic.
--   **Security**: API Key authentication, Input Sanitization, Logging.
+-   **Full-stack:** React (frontend), FastAPI (backend), MongoDB (database).
+-   **Telegram Bot API:**  with .
+-   **Payment Gateways:** Oxapay API.
+-   **Shipping API:** ShipStation V2 API.
+-   **Data Validation:** Pydantic.
+-   **API Key Authentication:** For admin panel and third-party services.
 </key_technical_concepts>
 
 <code_architecture>
 
 
 -   **/app/backend/server.py**:
-    -   **Summary of why this file is important:** Centralizes all backend logic: Telegram bot handlers, FastAPI endpoints for admin panel, database interactions, and ShipStation/Oxapay integrations.
+    -   **Summary of why this file is important:** Core of the backend, integrating Telegram bot logic, FastAPI endpoints, database interactions, and external APIs (ShipStation, Oxapay).
     -   **Summary of the changes made to this file:**
-        -   Updated  usage.
-        -   Modified  for admin contact, FAQ button, and message formatting (bolding, removing commands, centering attempts).
-        -   Updated  welcome message (removed crypto payment mention, made bold).
-        -   Implemented logic to collect parcel , ,  from user, using default  if skipped, and making input mandatory for .
-        -   Updated , , , ,  to support dimension input.
-        -   Removed all CryptoBot related imports, initialization, and payment/top-up processing logic.
-        -   Integrated Oxapay for payment processing and top-up, including a new  import.
-        -   Replaced CryptoBot webhook handler with Oxapay webhook handler.
-        -   Modified  and created  for custom top-up amounts.
-        -   Added new FastAPI endpoint  for manual label creation in admin panel.
-        -   Fixed  to .
-        -   Cleaned up syntax errors and old code.
+        -   Fixed  to use  in headers and correct  generation logic (shortened for top-ups).
+        -   Updated Oxapay webhook handler for correct snake_case keys (, , ) and to use the actual paid amount from the webhook.
+        -   Added  Pydantic model and associated conversation states (, , , ).
+        -   Implemented API endpoints for , , .
+        -   Modified  to include My Templates button.
+        -   Modified  to offer New Order or From Template.
+        -   Added , , , , , , , ,  functions for template management.
+        -   Added a helper function  and integrated checks into main bot commands.
+        -   Adjusted  to include  (USPS).
+        -   Added Refresh Rates button and handler in bot's  UI.
+        -   Fixed  logic for cancel/return flow.
+        -   Added ❌ Отмена buttons to parcel dimension and phone input steps.
+        -   Removed  and updated  to directly create Oxapay invoice.
+        -   Added 📋 Проверить данные button to cancel confirmation dialog and its handler.
+        -   Removed all explicit Oxapay mentions from user-facing bot messages.
+        -   Added Создать заказ button after successful balance top-up.
+        -   Added a warning about exact payment amount in invoice creation messages.
+        -   Corrected multiple  and  during template implementation.
+        -   Modified  to prepare  and initiate .
 -   **/app/backend/.env**:
     -   **Summary of why this file is important:** Stores environment variables critical for backend operation.
-    -   **Summary of the changes made to this file:** Updated , , and added .
+    -   **Summary of the changes made to this file:**  was added.
 -   **/app/backend/requirements.txt**:
     -   **Summary of why this file is important:** Lists Python dependencies for the backend.
-    -   **Summary of the changes made to this file:** Removed .
+    -   **Summary of the changes made to this file:**  was removed.
 -   **/app/frontend/src/App.js**:
-    -   **Summary of why this file is important:** The main React component, handling routing, global state, fetching data, and managing UI elements for the admin panel.
+    -   **Summary of why this file is important:** Main React component for the admin panel, handling routing, state, and UI.
     -   **Summary of the changes made to this file:**
         -   Added Weight and Dimensions columns to the Orders table.
-        -   Removed the Create Label button from the Orders table.
-        -   Added a new Create Label tab with a form for manual label creation.
-        -   Implemented state and logic for  to dynamically load shipping services and prices based on selected carrier.
-        -   Updated  function (now used by the manual form).
-        -   Added comprehensive input validation for the manual label creation form.
-        -   Fixed several frontend runtime errors related to scope, object rendering in , and  vs  API payload.
+        -   Added a new Top-ups tab with a table displaying top-up history and statistics, fetching data from .
+        -   Added Block/Unblock buttons to the Users table, along with a  status badge.
+        -   Aligned buttons in the Users tab (Details, Add, Deduct, Discount, Block) into two rows with fixed width.
+        -   Aligned Label and Refund buttons in the Orders tab vertically.
 -   **/app/frontend/.env**:
     -   **Summary of why this file is important:** Stores environment variables for the frontend.
-    -   **Summary of the changes made to this file:**  and  are used for communication. Other variables in current work are for backend.
--   **/app/frontend/src/components/OrdersTab.jsx**: This file was initially thought to be used, but later it was determined that the relevant UI code was within . No changes were made here explicitly.
+    -   **Summary of the changes made to this file:** No explicit changes mentioned in the trajectory, but  and  are used.
+-   **/app/frontend/src/components/OrdersTab.jsx**:
+    -   **Summary of why this file is important:** Intended for order-related UI.
+    -   **Summary of the changes made to this file:** No changes were explicitly made here, as relevant UI code was within .
 </code_architecture>
 
 <pending_tasks>
--   **Oxapay Integration Debugging**: The Oxapay invoice creation is failing with a  message. This requires debugging the  function in  to ensure the request payload matches Oxapay's API requirements.
+-   **Template Feature Completion:** The Use Template functionality is not fully working, specifically initiating the ConversationHandler with pre-filled data after a template is selected.
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer was actively implementing the Oxapay payment gateway integration as a replacement for CryptoBot. This involved removing all CryptoBot-related code and integrating Oxapay's API calls for payment processing and user balance top-ups.
+Immediately before this summary request, the AI engineer was implementing the Templates feature for the Telegram bot. Users should be able to select a saved template, and the bot should then pre-fill the order creation flow with the template's address data.
 
-Specifically, the following changes were made:
--   **Backend ()**:
-    -   Removed  imports and  initialization.
-    -   Added  from  to .
-    -   Modified  and  functions to use Oxapay API calls for invoice creation instead of CryptoBot.
-    -   Updated the webhook handler from  to  to process Oxapay payment notifications.
-    -   Refactored  to remove fixed top-up amount buttons and instead prompt the user to enter a custom amount (minimum 0).
-    -   Created a new  function to process the user's custom top-up amount and initiate an Oxapay invoice.
-    -   Updated the  to register the new text-based input for top-up amounts.
--   **Configuration ()**:
-    -   Added the  provided by the user.
--   **Dependencies ()**:
-    -   Removed  from the list of required Python packages.
+The user reported that after clicking a template button (e.g., Склад NY) and then clicking Использовать шаблон (Use Template), nothing happens. The AI engineer identified that while the template data is loaded, the bot tries to prompt the user for the next piece of information (weight) *outside* of the  flow. This means the subsequent user input is not handled correctly.
 
-The very last user message reported an error: . The AI engineer's last action was to acknowledge this and begin inspecting the  function for potential issues in the request payload or parameters.
+The last action taken by the AI engineer was to:
+1.  Read the file .
+2.  Edit this file to address the issue, specifically by modifying the  function to correctly initiate the  with the pre-filled . This involves starting the order creation process () but bypassing the initial address input steps, jumping directly to the weight input.
+3.  The specific edit was to the  function to ensure that when a template is selected, the  is properly entered or re-entered at the correct state (e.g., ) with the template data already populated in .
 </current_work>
 
 <optional_next_step>
-Debug the Oxapay  by inspecting the  function in .
+Complete the  function to correctly restart the  at  state.
 </optional_next_step>
