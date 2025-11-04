@@ -5308,6 +5308,22 @@ async def startup_event():
             application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
             
             # Conversation handler for order creation
+            # Template rename conversation handler
+            template_rename_handler = ConversationHandler(
+                entry_points=[
+                    CallbackQueryHandler(rename_template_start, pattern='^template_rename_')
+                ],
+                states={
+                    TEMPLATE_RENAME: [
+                        MessageHandler(filters.TEXT & ~filters.COMMAND, rename_template_save)
+                    ]
+                },
+                fallbacks=[
+                    CallbackQueryHandler(my_templates_menu, pattern='^my_templates$'),
+                    CommandHandler('start', start_command)
+                ]
+            )
+            
             order_conv_handler = ConversationHandler(
                 entry_points=[
                     CallbackQueryHandler(new_order_start, pattern='^new_order$'),
