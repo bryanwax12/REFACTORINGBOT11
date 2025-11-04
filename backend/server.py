@@ -4788,6 +4788,10 @@ async def invite_user_to_channel(telegram_id: int, authenticated: bool = Depends
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
+        # Check if user is blocked
+        if user.get('blocked', False):
+            raise HTTPException(status_code=400, detail="Cannot send invitation to blocked user")
+        
         if not CHANNEL_INVITE_LINK:
             raise HTTPException(status_code=500, detail="Channel invite link not configured")
         
