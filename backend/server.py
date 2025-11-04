@@ -5944,7 +5944,9 @@ async def startup_event():
                     CallbackQueryHandler(my_templates_menu, pattern='^my_templates$'),
                     CommandHandler('start', start_command)
                 ],
-                per_message=True
+                per_chat=True,
+                per_user=True,
+                per_message=False
             )
             
             order_conv_handler = ConversationHandler(
