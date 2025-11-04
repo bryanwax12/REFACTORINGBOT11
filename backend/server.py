@@ -4880,6 +4880,13 @@ async def invite_all_users_to_channel(authenticated: bool = Depends(verify_admin
                 logger.info(f"Skipping user {user['telegram_id']} - user is blocked")
                 continue
             
+            # Skip users who blocked the bot
+            if user.get('bot_blocked_by_user', False):
+                skipped_count += 1
+                skipped_users.append(user['telegram_id'])
+                logger.info(f"Skipping user {user['telegram_id']} - user blocked the bot")
+                continue
+            
             # Skip users who are already channel members
             if user.get('is_channel_member', False):
                 skipped_count += 1
