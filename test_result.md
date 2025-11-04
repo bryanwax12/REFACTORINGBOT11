@@ -124,6 +124,22 @@ backend:
           comment: "✅ TEMPLATES FEATURE USE TEMPLATE FUNCTIONALITY VERIFIED: Comprehensive testing confirms all critical fixes are working perfectly. IMPLEMENTATION VERIFICATION: (1) ✅ use_template() function exists and properly loads template data into context.user_data with all required fields (from_name, from_address, from_city, to_name, to_address, to_city, etc.), (2) ✅ Function shows confirmation message with template details including sender and recipient information, (3) ✅ 'Продолжить создание заказа' button correctly configured with callback_data='start_order_with_template', (4) ✅ start_order_with_template() function exists and returns PARCEL_WEIGHT state, (5) ✅ Function shows weight input prompt with template name, (6) ✅ start_order_with_template properly registered as ConversationHandler entry_point with pattern '^start_order_with_template$' (line 5315), (7) ✅ Template handlers (use_template, my_templates_menu) correctly registered, (8) ✅ Code syntax correct with no duplicate fragments, (9) ✅ Template field mapping working correctly, (10) ✅ Database connectivity confirmed with 1 template ('Склад NY') available for testing. CRITICAL SUCCESS: All 14/14 implementation checks passed (100% success rate). The complete template workflow now functions correctly: User clicks template → use_template() loads data → shows confirmation → user clicks 'Продолжить создание заказа' → start_order_with_template() enters ConversationHandler at PARCEL_WEIGHT state → user enters weight → continues normal order flow. The user-reported issue has been resolved."
 
 backend:
+  - task: "Templates Feature - Rename Template Functionality (Bot Freeze Fix)"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "❌ USER REPORTED ISSUE: When renaming a template, bot freezes after user enters new name. User clicks 'Переименовать' button, bot shows prompt 'Введите новое название для шаблона (до 30 символов):', user types new name (e.g., 'fafasfas') and sends it, but bot doesn't respond - it freezes/hangs."
+        - working: "NA"
+          agent: "main"
+          comment: "🔧 ROOT CAUSE IDENTIFIED AND FIXED: The issue was that rename_template_start() was registered as a standalone handler OUTSIDE ConversationHandler but returned TEMPLATE_RENAME state, which was only valid INSIDE ConversationHandler. This created a state conflict - bot thought it entered a conversation but actually didn't, so when user sent text input, bot couldn't process it. SOLUTION: Created separate template_rename_handler ConversationHandler with rename_template_start as entry_point and rename_template_save in TEMPLATE_RENAME state. CHANGES: (1) Created new template_rename_handler ConversationHandler with entry_point CallbackQueryHandler(rename_template_start, pattern='^template_rename_'), (2) Moved TEMPLATE_RENAME state handling to new handler, (3) Removed rename_template_start from standalone handlers list, (4) Removed TEMPLATE_RENAME from order_conv_handler, (5) Registered template_rename_handler before order_conv_handler. Now rename workflow works correctly: User clicks 'Переименовать' → enters template_rename_handler → bot shows prompt → user types name → rename_template_save processes it → updates DB → shows confirmation → exits conversation. Backend restarted successfully. Ready for testing."
+
+backend:
   - task: "Oxapay Webhook - Critical Bug Fix (track_id format mismatch)"
     implemented: true
     working: true
