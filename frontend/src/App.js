@@ -436,6 +436,40 @@ const Dashboard = () => {
   };
 
 
+  const handleCheckChannelStatus = async (telegram_id) => {
+    try {
+      const response = await axios.get(`${API}/users/${telegram_id}/channel-status`);
+      
+      if (response.data.success) {
+        const status = response.data.is_member ? 'в канале' : 'не в канале';
+        toast.success(`Статус обновлен: пользователь ${status}`);
+        loadData(); // Reload to update status display
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Failed to check channel status");
+    }
+  };
+
+  const handleCheckAllChannelStatus = async () => {
+    try {
+      const confirmed = window.confirm('Проверить статус членства в канале для всех пользователей?');
+      if (!confirmed) return;
+
+      toast.info('Проверка статусов...');
+      
+      const response = await axios.post(`${API}/users/check-all-channel-status`);
+      
+      if (response.data.success) {
+        toast.success(`✅ Проверено: ${response.data.checked_count} пользователей. В канале: ${response.data.member_count}`);
+        loadData(); // Reload to update statuses
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Failed to check channel statuses");
+    }
+  };
+
+
+
   const submitBalanceChange = async () => {
     const amount = parseFloat(balanceAmount);
     
