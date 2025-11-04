@@ -455,11 +455,14 @@ const Dashboard = () => {
   };
 
   const handleCheckAllChannelStatus = async () => {
+    console.log('handleCheckAllChannelStatus called');
     try {
       const confirmed = window.confirm('Проверить статус членства в канале для всех пользователей?');
+      console.log('Confirmed:', confirmed);
       if (!confirmed) return;
 
       toast.info('Проверка статусов...');
+      console.log('Sending request to:', `${API}/users/check-all-channel-status`);
       
       const response = await axios.post(`${API}/users/check-all-channel-status`);
       
