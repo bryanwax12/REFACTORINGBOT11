@@ -43,6 +43,10 @@ const Dashboard = () => {
   const [loadingRates, setLoadingRates] = useState(false);
   const [selectedService, setSelectedService] = useState('');
 
+  const [broadcastMessage, setBroadcastMessage] = useState('');
+  const [sendingBroadcast, setSendingBroadcast] = useState(false);
+
+
   useEffect(() => {
     loadData();
   }, []);
