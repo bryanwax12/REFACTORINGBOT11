@@ -1617,7 +1617,7 @@ def test_template_rename_functionality():
         else:
             print(f"   ❌ State configuration issue")
         
-        if not rename_in_standalone and comment_found:
+        if not rename_handler_in_standalone and comment_found:
             print(f"   ✅ rename_template_start removed from standalone handlers")
         else:
             print(f"   ❌ Standalone handlers cleanup issue")
