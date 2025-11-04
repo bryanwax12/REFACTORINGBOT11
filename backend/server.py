@@ -2072,7 +2072,7 @@ async def view_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await query.message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown')
-    return TEMPLATE_VIEW
+    # Don't return state - working outside ConversationHandler
 
 async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Load template data into context and start order"""
