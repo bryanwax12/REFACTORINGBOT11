@@ -532,6 +532,14 @@ const Dashboard = () => {
   };
 
 
+  const handleInsertImage = () => {
+    const url = prompt('Введите URL изображения:');
+    if (url) {
+      setBroadcastImageUrl(url);
+      toast.success('Изображение добавлено!');
+    }
+  };
+
   const formatText = (type) => {
     if (!textareaRef) return;
     
