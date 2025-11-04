@@ -810,6 +810,16 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     telegram_id = query.from_user.id
     
+    # Check if bot is in maintenance mode
+    if await check_maintenance_mode(update):
+        await query.message.reply_text(
+            "🔧 *Бот находится на техническом обслуживании.*\n\n"
+            "Пожалуйста, попробуйте позже.\n\n"
+            "Приносим извинения за неудобства.",
+            parse_mode='Markdown'
+        )
+        return ConversationHandler.END
+    
     # Check if user is blocked
     if await check_user_blocked(telegram_id):
         await send_blocked_message(update)
