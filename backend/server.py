@@ -3044,10 +3044,7 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
             payment_dict['type'] = 'topup'
             await db.payments.insert_one(payment_dict)
             
-            keyboard = [
-                [InlineKeyboardButton("💳 Оплатить", url=pay_link)],
-                [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]
-            ]
+            keyboard = [[InlineKeyboardButton("💳 Оплатить", url=pay_link)]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
             await update.message.reply_text(
