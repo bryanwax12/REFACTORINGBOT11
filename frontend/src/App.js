@@ -2211,7 +2211,7 @@ const Dashboard = () => {
                     <div>
                       <p className="text-sm text-muted-foreground">Estimated Delivery</p>
                       <p className="text-sm font-medium">
-                        {new Date(trackingModal.tracking.estimated_delivery).toLocaleDateString()}
+                        {formatKyivDate(trackingModal.tracking.estimated_delivery)}
                       </p>
                     </div>
                   )}
