@@ -2952,37 +2952,45 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     amount = pending_order.get('final_amount', selected_rate.get('amount', selected_rate.get('totalAmount', 0)))
     user_balance = user.get('balance', 0)
     
-    # Show payment options
+    # Handle different rate structures - use correct keys
+    carrier_name = selected_rate.get('carrier') or selected_rate.get('carrier_name') or selected_rate.get('carrierName', 'Unknown Carrier')
+    service_type = selected_rate.get('service') or selected_rate.get('service_type') or selected_rate.get('serviceType', 'Standard Service')
+    
+    user_discount = pending_order.get('user_discount', 0)
+    discount_text = f"\n🎉 *Ваша скидка:* {user_discount}%" if user_discount > 0 else ""
+    
+    # Show payment options - only balance payment if sufficient
     keyboard = []
     
     if user_balance >= amount:
+        # User has enough balance, only show balance payment option
         keyboard.append([InlineKeyboardButton(f"💰 Оплатить с баланса (${user_balance:.2f})", callback_data='pay_from_balance')])
-    
-    keyboard.append([InlineKeyboardButton("🪙 Оплатить криптовалютой", callback_data='pay_with_crypto')])
-    
-    if user_balance < amount:
+        
+        message_text = f"""💳 *Оплата заказа*
+
+📦 *Выбранный тариф:* {carrier_name} - {service_type}
+💰 *Стоимость:* ${amount:.2f}{discount_text}
+💵 *Ваш баланс:* ${user_balance:.2f}"""
+    else:
+        # Not enough balance
+        keyboard.append([InlineKeyboardButton("🪙 Оплатить криптовалютой", callback_data='pay_with_crypto')])
         keyboard.append([InlineKeyboardButton("💵 Пополнить баланс", callback_data='top_up_balance')])
+        
+        message_text = f"""💳 *Выберите способ оплаты*
+
+📦 *Выбранный тариф:* {carrier_name} - {service_type}
+💰 *Стоимость:* ${amount:.2f}{discount_text}
+💵 *Ваш баланс:* ${user_balance:.2f}
+
+Выберите способ оплаты:"""
     
     keyboard.append([InlineKeyboardButton("🔙 Назад к тарифам", callback_data='back_to_rates')])
     keyboard.append([InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')])
     
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    user_discount = pending_order.get('user_discount', 0)
-    discount_text = f"\n🎉 *Ваша скидка:* {user_discount}%" if user_discount > 0 else ""
-    
-    # Handle different rate structures
-    carrier_name = selected_rate.get('carrier_name') or selected_rate.get('carrierName', 'Unknown Carrier')
-    service_type = selected_rate.get('service_type') or selected_rate.get('serviceType', 'Standard Service')
-    
     await query.message.reply_text(
-        f"""💳 *Выберите способ оплаты*
-
-📦 *Выбранный тариф:* {carrier_name} - {service_type}
-💰 *Стоимость:* ${amount:.2f}{discount_text}
-💵 *Ваш баланс:* ${user_balance:.2f}
-
-Выберите способ оплаты:""",
+        message_text,
         reply_markup=reply_markup,
         parse_mode='Markdown'
     )
