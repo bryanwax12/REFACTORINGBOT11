@@ -3067,9 +3067,9 @@ def test_oxapay_webhook_success_message():
         return False
 
 def main():
-    """Run all tests - Focus on Continue Order After Template Save"""
-    print("🚀 Testing Continue Order After Template Save Functionality")
-    print("🎯 Focus: Review Request - Template save flow fix verification")
+    """Run all tests - Focus on Check All Bot Access Feature"""
+    print("🚀 Testing Check All Bot Access Feature")
+    print("🎯 Focus: Review Request - Check All Bot Access endpoint testing")
     print("=" * 80)
     
     # Test results
@@ -3078,32 +3078,31 @@ def main():
     # 1. Test API Health
     results['api_health'] = test_api_health()
     
-    # 2. Test CONTINUE ORDER AFTER TEMPLATE SAVE (Main Focus)
-    results['continue_order_after_template'] = test_continue_order_after_template_save()
+    # 2. Test CHECK ALL BOT ACCESS (Main Focus)
+    results['check_all_bot_access'] = test_check_all_bot_access()
     
     # 3. Test Supporting Infrastructure
     results['telegram_infrastructure'] = test_telegram_bot_infrastructure()
     results['bot_token'] = test_telegram_bot_token()
-    results['conversation_functions'] = test_conversation_handler_functions()
     
     # 4. Check Backend Logs
     check_backend_logs()
     
     # Summary
     print("\n" + "=" * 80)
-    print("📊 CONTINUE ORDER AFTER TEMPLATE SAVE TEST SUMMARY")
+    print("📊 CHECK ALL BOT ACCESS TEST SUMMARY")
     print("=" * 80)
     
     # Priority order for tests
     main_tests = [
-        'continue_order_after_template'
+        'check_all_bot_access'
     ]
     supporting_tests = [
-        'api_health', 'telegram_infrastructure', 'bot_token', 'conversation_functions'
+        'api_health', 'telegram_infrastructure', 'bot_token'
     ]
     
     # Show results by category
-    print("\n🎯 CONTINUE ORDER AFTER TEMPLATE SAVE TEST:")
+    print("\n🎯 CHECK ALL BOT ACCESS TEST:")
     for test_name in main_tests:
         if test_name in results:
             passed = results[test_name]
@@ -3122,31 +3121,31 @@ def main():
     supporting_passed = all(results.get(test, False) for test in supporting_tests if test in results)
     all_passed = all(results.values())
     
-    print(f"\n🎯 Continue Order After Template Save Status: {'✅ SUCCESS' if main_passed else '❌ FAILED'}")
+    print(f"\n🎯 Check All Bot Access Status: {'✅ SUCCESS' if main_passed else '❌ FAILED'}")
     print(f"🔧 Supporting Infrastructure Status: {'✅ SUCCESS' if supporting_passed else '❌ FAILED'}")
     print(f"📊 Overall Result: {'✅ ALL TESTS PASSED' if all_passed else '❌ SOME TESTS FAILED'}")
     
-    # Critical Assessment for Continue Order After Template Save
-    critical_tests = ['continue_order_after_template']
+    # Critical Assessment for Check All Bot Access
+    critical_tests = ['check_all_bot_access']
     critical_passed = all(results.get(test, False) for test in critical_tests if test in results)
     
-    print("\n🎯 Continue Order After Template Save Analysis:")
+    print("\n🎯 Check All Bot Access Analysis:")
     if critical_passed:
-        print(f"   ✅ REVIEW SUCCESS: Continue Order After Template Save is correctly implemented!")
-        print(f"   ✅ continue_order_after_template() function exists and calls show_data_confirmation()")
-        print(f"   ✅ Function does NOT return to PARCEL_WEIGHT state (asking for weight again)")
-        print(f"   ✅ show_data_confirmation() displays all data with correct message")
-        print(f"   ✅ ConversationHandler registration is correct in TEMPLATE_NAME state")
-        print(f"   ✅ Context data preservation working (addresses, weight, dimensions)")
-        print(f"   ✅ Expected workflow: CONFIRM_DATA → template save → continue → CONFIRM_DATA")
+        print(f"   ✅ REVIEW SUCCESS: Check All Bot Access feature is working correctly!")
+        print(f"   ✅ POST /api/users/check-all-bot-access endpoint accessible with admin auth")
+        print(f"   ✅ Returns success with counts: checked_count, accessible_count, blocked_count, failed_count")
+        print(f"   ✅ Updates bot_blocked_by_user field in database for all users")
+        print(f"   ✅ Sets bot_access_checked_at timestamp correctly")
+        print(f"   ✅ Handles errors gracefully (bot blocked by user detection)")
+        print(f"   ✅ Admin API key authentication working properly")
     else:
-        print(f"   ❌ REVIEW FAILURE: Continue Order After Template Save has issues!")
-        print(f"   ❌ Check continue_order_after_template() function implementation")
-        print(f"   ❌ Verify function calls show_data_confirmation() instead of returning PARCEL_WEIGHT")
-        print(f"   ❌ Ensure ConversationHandler registration is correct")
-        print(f"   ❌ Check context data preservation and display")
-        print(f"   ❌ Check reply_markup is passed to send_message")
-        print(f"   ❌ Verify button has callback_data='start'")
+        print(f"   ❌ REVIEW FAILURE: Check All Bot Access feature has issues!")
+        print(f"   ❌ Check POST /api/users/check-all-bot-access endpoint implementation")
+        print(f"   ❌ Verify admin API key authentication (X-Admin-Key header)")
+        print(f"   ❌ Check response structure includes all required counts")
+        print(f"   ❌ Verify database updates for bot_blocked_by_user field")
+        print(f"   ❌ Check error handling for blocked users and other failures")
+        print(f"   ❌ Ensure Telegram bot instance is properly initialized")
     
     
     return critical_webhook_passed
