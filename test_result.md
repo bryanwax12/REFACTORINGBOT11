@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test Telegram bot shipping rates with all carriers and refresh button - user reported that only UPS rates show up in the bot and the 'Refresh Rates' button is missing"
+user_problem_statement: "Complete the Templates feature: When user selects a template and clicks 'Use Template', the bot should load template data and start order creation at PARCEL_WEIGHT state within ConversationHandler flow"
 
 backend:
   - task: "Telegram Bot Shipping Rates with All Carriers and Refresh Button"
