@@ -2118,7 +2118,9 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
 📥 Кому: {template.get('to_name')} ({template.get('to_city')}, {template.get('to_state')})
 
 Нажмите кнопку для продолжения создания заказа.""",
-
+        reply_markup=reply_markup,
+        parse_mode='Markdown'
+    )
 
 async def start_order_with_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Start order creation with pre-loaded template data"""
@@ -2145,10 +2147,6 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
     
     context.user_data['last_state'] = PARCEL_WEIGHT
     return PARCEL_WEIGHT
-
-        reply_markup=reply_markup,
-        parse_mode='Markdown'
-    )
 
 async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Delete template with confirmation"""
