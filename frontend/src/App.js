@@ -731,6 +731,11 @@ const Dashboard = () => {
           <CardContent>
             <div className="text-2xl font-bold">{stats?.total_users || 0}</div>
             <p className="text-xs text-muted-foreground mt-1">Registered via Telegram</p>
+            {users.filter(u => u.bot_blocked_by_user).length > 0 && (
+              <p className="text-xs text-orange-600 mt-1">
+                🚫 {users.filter(u => u.bot_blocked_by_user).length} заблокировали бота
+              </p>
+            )}
           </CardContent>
         </Card>
 
