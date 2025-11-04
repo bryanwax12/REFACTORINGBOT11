@@ -1659,7 +1659,7 @@ const Dashboard = () => {
               </div>
 
               {/* Live Preview */}
-              {(broadcastMessage || broadcastImageUrl) && (
+              {showPreview && (broadcastMessage || broadcastImageUrl) && (
                 <div className="mt-6 space-y-2">
                   <Label>📱 Live Preview (как будет выглядеть в Telegram):</Label>
                   <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-200">
