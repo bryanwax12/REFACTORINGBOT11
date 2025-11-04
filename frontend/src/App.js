@@ -45,7 +45,9 @@ const Dashboard = () => {
   const [selectedService, setSelectedService] = useState('');
 
   const [broadcastMessage, setBroadcastMessage] = useState('');
+  const [broadcastImageUrl, setBroadcastImageUrl] = useState('');
   const [sendingBroadcast, setSendingBroadcast] = useState(false);
+  const [textareaRef, setTextareaRef] = useState(null);
 
 
   useEffect(() => {
