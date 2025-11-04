@@ -3508,6 +3508,7 @@ async def check_data_from_cancel(update: Update, context: ContextTypes.DEFAULT_T
 
 async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Return to order after cancel button - restore exact screen"""
+    logger.info(f"return_to_order called - user_id: {update.effective_user.id}")
     query = update.callback_query
     await query.answer()
     
