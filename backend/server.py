@@ -395,13 +395,24 @@ async def check_stale_interaction(query, context: ContextTypes.DEFAULT_TYPE) -> 
     """Check if button press is from an old/completed interaction"""
     # If user_data is empty or doesn't have active order data, it's likely stale
     if not context.user_data or len(context.user_data) == 0:
-        await query.answer()
+        await query.answer("⚠️ Этот заказ уже завершён")
         await query.message.reply_text(
             "⚠️ *Этот заказ уже завершён или отменён.*\n\n"
-            "Для создания нового заказа используйте главное меню.",
+            "Для создания нового заказа используйте меню в нижней части экрана.",
             parse_mode='Markdown'
         )
         return True
+    
+    # Check if order was already completed (has order_completed flag)
+    if context.user_data.get('order_completed'):
+        await query.answer("⚠️ Этот заказ уже завершён")
+        await query.message.reply_text(
+            "⚠️ *Этот заказ уже завершён.*\n\n"
+            "Для создания нового заказа используйте меню в нижней части экрана.",
+            parse_mode='Markdown'
+        )
+        return True
+    
     return False
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
