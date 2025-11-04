@@ -5462,6 +5462,7 @@ async def startup_event():
                 ]
             )
             
+            application.add_handler(template_rename_handler)
             application.add_handler(order_conv_handler)
             application.add_handler(CommandHandler("start", start_command))
             application.add_handler(CommandHandler("test_error", test_error_message))
