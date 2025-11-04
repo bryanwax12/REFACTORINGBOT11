@@ -465,8 +465,7 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus:
-    - "Templates Feature - Rename Template Functionality (Bot Freeze Fix)"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
