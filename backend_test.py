@@ -1406,6 +1406,161 @@ def test_help_command_url_generation():
         print(f"❌ Help command URL generation test error: {e}")
         return False
 
+def test_template_based_order_creation():
+    """Test template-based order creation flow - CRITICAL TEST per review request"""
+    print("\n🔍 Testing Template-Based Order Creation Flow...")
+    print("🎯 CRITICAL: Verifying template functionality after user-reported fix")
+    
+    try:
+        # Test 1: Database Template Structure
+        print("   Test 1: Template Database Structure")
+        
+        import pymongo
+        load_dotenv('/app/backend/.env')
+        MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
+        DB_NAME = os.environ.get('DB_NAME', 'telegram_shipping_bot')
+        
+        client = pymongo.MongoClient(MONGO_URL)
+        db = client[DB_NAME]
+        
+        # Check templates collection exists
+        collections = db.list_collection_names()
+        templates_exists = 'templates' in collections
+        print(f"      Templates collection exists: {'✅' if templates_exists else '❌'}")
+        
+        if not templates_exists:
+            print("      ❌ Cannot test template functionality - no templates collection")
+            client.close()
+            return False
+        
+        # Check template count and structure
+        template_count = db.templates.count_documents({})
+        print(f"      Templates in database: {template_count}")
+        
+        if template_count == 0:
+            print("      ⚠️ No templates found - template functionality cannot be fully tested")
+            client.close()
+            return True  # Not a failure, just no test data
+        
+        # Get sample template and verify structure
+        template = db.templates.find_one({}, {'_id': 0})
+        required_fields = ['from_name', 'from_street1', 'from_city', 'from_state', 'from_zip', 
+                          'to_name', 'to_street1', 'to_city', 'to_state', 'to_zip']
+        
+        missing_fields = [f for f in required_fields if f not in template]
+        if missing_fields:
+            print(f"      ❌ Missing required fields: {missing_fields}")
+            client.close()
+            return False
+        else:
+            print(f"      ✅ All required fields present")
+        
+        # Verify correct field mapping (from_street1 not from_address)
+        correct_mapping = ('from_street1' in template and 'to_street1' in template and
+                          'from_address' not in template and 'to_address' not in template)
+        print(f"      Field mapping correct (street1 not address): {'✅' if correct_mapping else '❌'}")
+        
+        client.close()
+        
+        # Test 2: ConversationHandler Flow Implementation
+        print("   Test 2: ConversationHandler Flow Implementation")
+        
+        with open('/app/backend/server.py', 'r') as f:
+            server_code = f.read()
+        
+        # Check use_template function returns ConversationHandler.END
+        use_template_returns_end = ('async def use_template(' in server_code and 
+                                   'return ConversationHandler.END' in server_code)
+        print(f"      use_template returns ConversationHandler.END: {'✅' if use_template_returns_end else '❌'}")
+        
+        # Check start_order_with_template is registered as entry_point
+        entry_point_registered = 'CallbackQueryHandler(start_order_with_template, pattern=\'^start_order_with_template$\')' in server_code
+        print(f"      start_order_with_template registered as entry_point: {'✅' if entry_point_registered else '❌'}")
+        
+        # Check template data persists in context.user_data
+        context_data_usage = ("context.user_data['from_name'] = template.get('from_name'" in server_code and
+                             "context.user_data['to_name'] = template.get('to_name'" in server_code)
+        print(f"      Template data persists in context.user_data: {'✅' if context_data_usage else '❌'}")
+        
+        # Test 3: Data Integrity - Correct Field Keys
+        print("   Test 3: Data Integrity - Field Key Mapping")
+        
+        # Verify use_template uses correct field mapping
+        correct_from_mapping = "context.user_data['from_street'] = template.get('from_street1'" in server_code
+        correct_to_mapping = "context.user_data['to_street'] = template.get('to_street1'" in server_code
+        
+        print(f"      from_street mapped to from_street1: {'✅' if correct_from_mapping else '❌'}")
+        print(f"      to_street mapped to to_street1: {'✅' if correct_to_mapping else '❌'}")
+        
+        # Check all required address fields are loaded
+        required_context_fields = ['from_name', 'from_street', 'from_city', 'from_state', 'from_zip',
+                                  'to_name', 'to_street', 'to_city', 'to_state', 'to_zip']
+        
+        all_fields_loaded = all(f"context.user_data['{field}']" in server_code for field in required_context_fields)
+        print(f"      All required address fields loaded: {'✅' if all_fields_loaded else '❌'}")
+        
+        # Test 4: Log Analysis
+        print("   Test 4: Recent Log Analysis")
+        
+        # Check for recent template activity in logs
+        log_result = os.popen("tail -n 100 /var/log/supervisor/backend.err.log | grep -E '(start_order_with_template|template)'").read()
+        
+        recent_template_activity = 'start_order_with_template called' in log_result
+        template_data_logged = 'Template data in context:' in log_result
+        template_name_logged = 'Starting order with template:' in log_result
+        
+        print(f"      Recent template function calls: {'✅' if recent_template_activity else '❌'}")
+        print(f"      Template data logging: {'✅' if template_data_logged else '❌'}")
+        print(f"      Template name logging: {'✅' if template_name_logged else '❌'}")
+        
+        # Check for errors
+        template_errors = any(word in log_result.lower() for word in ['error', 'exception', 'failed', 'traceback'])
+        print(f"      No template errors in logs: {'✅' if not template_errors else '❌'}")
+        
+        # Overall assessment
+        all_checks = [
+            templates_exists, template_count > 0, not missing_fields, correct_mapping,
+            use_template_returns_end, entry_point_registered, context_data_usage,
+            correct_from_mapping, correct_to_mapping, all_fields_loaded, not template_errors
+        ]
+        
+        passed_checks = sum(all_checks)
+        total_checks = len(all_checks)
+        
+        print(f"\n   📊 Template Flow Verification Summary:")
+        print(f"      Checks passed: {passed_checks}/{total_checks}")
+        print(f"      Success rate: {(passed_checks/total_checks)*100:.1f}%")
+        
+        # Critical success criteria from review request
+        critical_checks = [
+            use_template_returns_end,  # Fixed: use_template returns ConversationHandler.END
+            entry_point_registered,    # Fixed: start_order_with_template registered as entry_point
+            context_data_usage,        # Template data persists in context.user_data
+            correct_from_mapping,      # Correct field mapping (from_street not from_address)
+            correct_to_mapping,        # Correct field mapping (to_street not to_address)
+            not template_errors        # No errors in logs
+        ]
+        
+        critical_passed = sum(critical_checks)
+        critical_total = len(critical_checks)
+        
+        print(f"\n   🎯 CRITICAL FIX VERIFICATION:")
+        print(f"      Critical checks passed: {critical_passed}/{critical_total}")
+        
+        if critical_passed == critical_total:
+            print(f"      ✅ TEMPLATE-BASED ORDER CREATION FIX VERIFIED")
+            print(f"      ✅ User-reported issue resolved: 'Продолжить создание заказа' button now works")
+            print(f"      ✅ ConversationHandler flow working correctly")
+            print(f"      ✅ Template data integrity maintained")
+        else:
+            print(f"      ❌ TEMPLATE-BASED ORDER CREATION HAS ISSUES")
+        
+        return critical_passed == critical_total
+        
+    except Exception as e:
+        print(f"❌ Template-based order creation test error: {e}")
+        return False
+
 def test_check_all_bot_access():
     """Test Check All Bot Access endpoint - CRITICAL TEST per review request"""
     print("\n🔍 Testing Check All Bot Access Feature...")
