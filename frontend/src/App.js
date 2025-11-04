@@ -1235,7 +1235,7 @@ const Dashboard = () => {
                             </p>
                           )}
                           <p className="text-xs text-muted-foreground">
-                            {new Date(user.created_at).toLocaleDateString()}
+                            {formatKyivDate(user.created_at)}
                           </p>
                         </div>
                         <div className="flex flex-col gap-2">
