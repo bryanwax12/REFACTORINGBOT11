@@ -487,8 +487,7 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus:
-    - "Continue Order After Template Save - Return to Confirmation Screen"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
