@@ -5943,7 +5943,8 @@ async def startup_event():
                 fallbacks=[
                     CallbackQueryHandler(my_templates_menu, pattern='^my_templates$'),
                     CommandHandler('start', start_command)
-                ]
+                ],
+                per_message=True
             )
             
             order_conv_handler = ConversationHandler(
