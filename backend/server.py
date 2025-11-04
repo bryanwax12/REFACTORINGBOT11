@@ -4965,12 +4965,20 @@ async def broadcast_message(
                 continue
             
             try:
-                # Send broadcast message
-                await bot_instance.send_message(
-                    chat_id=user['telegram_id'],
-                    text=message,
-                    parse_mode='Markdown'
-                )
+                # Send broadcast message (with image if provided)
+                if image_url:
+                    await bot_instance.send_photo(
+                        chat_id=user['telegram_id'],
+                        photo=image_url,
+                        caption=message,
+                        parse_mode='Markdown'
+                    )
+                else:
+                    await bot_instance.send_message(
+                        chat_id=user['telegram_id'],
+                        text=message,
+                        parse_mode='Markdown'
+                    )
                 
                 success_count += 1
                 # Small delay to avoid rate limiting
