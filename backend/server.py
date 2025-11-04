@@ -4926,6 +4926,70 @@ async def invite_all_users_to_channel(authenticated: bool = Depends(verify_admin
         raise HTTPException(status_code=500, detail=str(e))
 
 
+
+@api_router.post("/broadcast")
+async def broadcast_message(
+    message: str = None,
+    authenticated: bool = Depends(verify_admin_key)
+):
+    """Send broadcast message to all users"""
+    try:
+        if not message or not message.strip():
+            raise HTTPException(status_code=400, detail="Message is required")
+        
+        if not bot_instance:
+            raise HTTPException(status_code=500, detail="Bot not initialized")
+        
+        # Get all users
+        users = await db.users.find({}).to_list(None)
+        
+        success_count = 0
+        failed_count = 0
+        skipped_count = 0
+        failed_users = []
+        skipped_users = []
+        
+        for user in users:
+            # Skip blocked users
+            if user.get('blocked', False):
+                skipped_count += 1
+                skipped_users.append(user['telegram_id'])
+                logger.info(f"Skipping broadcast to user {user['telegram_id']} - user is blocked")
+                continue
+            
+            try:
+                # Send broadcast message
+                await bot_instance.send_message(
+                    chat_id=user['telegram_id'],
+                    text=message,
+                    parse_mode='Markdown'
+                )
+                
+                success_count += 1
+                # Small delay to avoid rate limiting
+                await asyncio.sleep(0.05)
+            except Exception as e:
+                logger.error(f"Failed to send broadcast to user {user['telegram_id']}: {e}")
+                failed_count += 1
+                failed_users.append(user['telegram_id'])
+        
+        return {
+            "success": True,
+            "message": f"Broadcast sent to {success_count} users, skipped {skipped_count} blocked users",
+            "success_count": success_count,
+            "failed_count": failed_count,
+            "skipped_count": skipped_count,
+            "failed_users": failed_users,
+            "skipped_users": skipped_users
+        }
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error sending broadcast: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @api_router.get("/users/leaderboard")
 async def get_leaderboard():
     try:
