@@ -1142,6 +1142,9 @@ const Dashboard = () => {
                           {user.blocked && (
                             <Badge variant="destructive" className="text-xs">⛔ Заблокирован</Badge>
                           )}
+                          {user.bot_blocked_by_user && (
+                            <Badge variant="destructive" className="text-xs bg-orange-600">🚫 Заблокировал бота</Badge>
+                          )}
                           {user.is_channel_member === true && (
                             <Badge variant="default" className="text-xs bg-green-600">✓ В канале</Badge>
                           )}
