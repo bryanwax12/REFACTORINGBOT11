@@ -430,7 +430,11 @@ const Dashboard = () => {
       const response = await axios.post(`${API}/users/invite-all-channel`);
       
       if (response.data.success) {
-        toast.success(`✅ Приглашения отправлены: ${response.data.success_count} успешно, ${response.data.failed_count} ошибок`);
+        const skipped = response.data.skipped_count || 0;
+        const message = skipped > 0 
+          ? `✅ Приглашения отправлены: ${response.data.success_count} успешно. Пропущено: ${skipped} (уже в канале)`
+          : `✅ Приглашения отправлены: ${response.data.success_count} успешно, ${response.data.failed_count} ошибок`;
+        toast.success(message);
         loadData(); // Reload to update invitation statuses
       }
     } catch (error) {
