@@ -2828,15 +2828,15 @@ def run_shipstation_carrier_tests():
 
 if __name__ == "__main__":
     print("🚀 Starting Backend Test Suite for Telegram Shipping Bot")
-    print("🎯 FOCUS: Templates Feature - Use Template Functionality")
+    print("🎯 FOCUS: Templates Feature - Rename Template Functionality (Bot Freeze Fix)")
     print("=" * 70)
     
     # Track test results
     test_results = {}
     
-    # CRITICAL TEST: Templates Feature - Use Template Functionality (per review request)
-    print("\n🎯 PRIORITY: Testing Templates Feature - Use Template Functionality")
-    test_results['templates_use_template'] = test_templates_feature_use_template()
+    # CRITICAL TEST: Templates Feature - Rename Template Functionality (per review request)
+    print("\n🎯 PRIORITY: Testing Templates Feature - Rename Template Functionality")
+    test_results['template_rename_functionality'] = test_template_rename_functionality()
     
     # Supporting Tests
     test_results['api_health'] = test_api_health()
@@ -2844,9 +2844,8 @@ if __name__ == "__main__":
     test_results['bot_infrastructure'] = test_telegram_bot_infrastructure()
     test_results['conversation_handlers'] = test_conversation_handler_functions()
     
-    # Additional ShipStation Tests (for completeness)
-    test_results['shipstation_carrier_ids'] = test_shipstation_carrier_ids()
-    test_results['shipping_rates'] = test_shipping_rates()[0] if test_shipping_rates()[0] else False
+    # Additional Template Tests (for completeness)
+    test_results['templates_use_template'] = test_templates_feature_use_template()
     
     # Check backend logs
     print("\n" + "=" * 70)
@@ -2863,13 +2862,13 @@ if __name__ == "__main__":
     total_tests = len(test_results)
     
     # Show critical test result first
-    critical_test = test_results.get('templates_use_template', False)
+    critical_test = test_results.get('template_rename_functionality', False)
     critical_status = "✅ PASS" if critical_test else "❌ FAIL"
-    print(f"{'🎯 CRITICAL: templates_use_template':40} {critical_status}")
+    print(f"{'🎯 CRITICAL: template_rename_functionality':40} {critical_status}")
     
     # Show other test results
     for test_name, result in test_results.items():
-        if test_name != 'templates_use_template':  # Skip critical test (already shown)
+        if test_name != 'template_rename_functionality':  # Skip critical test (already shown)
             status = "✅ PASS" if result else "❌ FAIL"
             print(f"{test_name:40} {status}")
     
@@ -2881,23 +2880,33 @@ if __name__ == "__main__":
     print("=" * 70)
     
     if critical_test:
-        print("✅ TEMPLATES FEATURE - USE TEMPLATE FUNCTIONALITY: SUCCESS")
-        print("   ✅ use_template() function fixed - syntax error resolved")
-        print("   ✅ start_order_with_template() function created and complete")
-        print("   ✅ start_order_with_template registered as ConversationHandler entry_point")
-        print("   ✅ Template data loading into context.user_data working")
-        print("   ✅ Confirmation message with template details displays")
-        print("   ✅ 'Продолжить создание заказа' button enters PARCEL_WEIGHT state")
+        print("✅ TEMPLATES FEATURE - RENAME TEMPLATE FUNCTIONALITY: SUCCESS")
+        print("   ✅ template_rename_handler ConversationHandler created and registered")
+        print("   ✅ rename_template_start() as entry_point with correct pattern")
+        print("   ✅ TEMPLATE_RENAME state with rename_template_save() handler")
+        print("   ✅ Fallbacks: my_templates_menu and start_command")
+        print("   ✅ Registered BEFORE order_conv_handler (correct priority)")
+        print("   ✅ rename_template_start() extracts template_id and stores in context")
+        print("   ✅ Shows prompt: 'Введите новое название для шаблона (до 30 символов):'")
+        print("   ✅ Returns TEMPLATE_RENAME state correctly")
+        print("   ✅ rename_template_save() validates name and updates database")
+        print("   ✅ Shows confirmation with 'Просмотреть' button")
+        print("   ✅ Returns ConversationHandler.END to exit conversation")
+        print("   ✅ Removed from standalone handlers (no more state conflict)")
+        print("   ✅ Removed from order_conv_handler (clean separation)")
         print("\n🎉 EXPECTED RESULTS:")
-        print("   - User clicks template → use_template loads data → shows confirmation")
-        print("   - User clicks 'Продолжить создание заказа' → enters ConversationHandler at PARCEL_WEIGHT")
-        print("   - User enters weight → continues normal order flow")
-        print("   - Clicking refresh button should reload rates")
+        print("   - User has template 'Склад NY' in database")
+        print("   - User views template details and clicks 'Переименовать'")
+        print("   - Bot enters template_rename_handler and shows prompt")
+        print("   - User types new name (e.g., 'New Template Name')")
+        print("   - Bot processes with rename_template_save, updates DB")
+        print("   - Bot shows confirmation and exits conversation")
+        print("   - Bot NO LONGER FREEZES - state conflict resolved!")
     else:
-        print("❌ TELEGRAM BOT SHIPPING RATES FIX: ISSUES DETECTED")
+        print("❌ TEMPLATES FEATURE - RENAME TEMPLATE FUNCTIONALITY: ISSUES DETECTED")
         print("   ❌ User reported issue may persist:")
-        print("      - Only UPS rates showing up in bot")
-        print("      - 'Refresh Rates' button missing")
+        print("      - Bot freezes after user enters new template name")
+        print("      - ConversationHandler state conflict not resolved")
         print("   🔧 Please review the implementation and fix missing components")
     
     print("=" * 70)
