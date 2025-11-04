@@ -48,7 +48,10 @@ const Dashboard = () => {
 
   const [broadcastMessage, setBroadcastMessage] = useState('');
   const [broadcastImageUrl, setBroadcastImageUrl] = useState('');
+  const [broadcastFileId, setBroadcastFileId] = useState('');
+  const [uploadedImagePreview, setUploadedImagePreview] = useState('');
   const [sendingBroadcast, setSendingBroadcast] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [textareaRef, setTextareaRef] = useState(null);
   const [showPreview, setShowPreview] = useState(true);
 
