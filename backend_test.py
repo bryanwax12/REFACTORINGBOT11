@@ -1593,7 +1593,7 @@ def test_template_rename_functionality():
             entry_point_found,               # Entry point configured correctly
             template_rename_state,           # TEMPLATE_RENAME state in new handler
             rename_save_handler,             # Message handler for text input
-            not rename_in_standalone,        # Removed from standalone handlers
+            not rename_handler_in_standalone, # Removed from standalone handlers
             not template_rename_in_order,    # Removed from order ConversationHandler
             handler_order_correct,           # Registered before order handler
             workflow_success                 # Complete workflow works
