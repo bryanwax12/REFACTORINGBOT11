@@ -1237,11 +1237,20 @@ const Dashboard = () => {
                             <Button 
                               size="sm" 
                               variant="outline"
-                              className="w-[186px] text-green-600 border-green-300 hover:bg-green-50"
+                              className="w-[90px] text-green-600 border-green-300 hover:bg-green-50"
                               onClick={() => handleCheckChannelStatus(user.telegram_id)}
                               title="Проверить статус в канале"
                             >
-                              {user.is_channel_member === true ? '✓ В канале' : user.is_channel_member === false ? '✗ Проверить снова' : '? Проверить статус'}
+                              {user.is_channel_member === true ? '✓ В канале' : user.is_channel_member === false ? '✗ Проверить' : '? Канал'}
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              className="w-[90px] text-blue-600 border-blue-300 hover:bg-blue-50"
+                              onClick={() => handleCheckBotAccess(user.telegram_id)}
+                              title="Проверить доступность бота"
+                            >
+                              {user.bot_blocked_by_user ? '🚫 Проверить' : '✓ Доступен'}
                             </Button>
                           </div>
                         </div>
