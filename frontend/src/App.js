@@ -865,8 +865,20 @@ const Dashboard = () => {
         <TabsContent value="users" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Registered Users</CardTitle>
-              <CardDescription>Users who started the Telegram bot</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Registered Users</CardTitle>
+                  <CardDescription>Users who started the Telegram bot</CardDescription>
+                </div>
+                <Button 
+                  onClick={handleInviteAllToChannel}
+                  variant="default"
+                  className="bg-blue-600 hover:bg-blue-700"
+                  disabled={users.length === 0}
+                >
+                  📣 Пригласить всех в канал
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {users.length === 0 ? (
