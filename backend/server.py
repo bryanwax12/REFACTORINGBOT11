@@ -5083,7 +5083,29 @@ async def upload_image(
                     os.remove(temp_path)
                     
                     return {
-
+                        "success": True,
+                        "file_id": file_id,
+                        "message": "Image uploaded successfully"
+                    }
+            except Exception as e:
+                logger.error(f"Failed to upload to Telegram: {e}")
+                # Fall back to serving from disk
+        
+        # If Telegram upload failed, serve from disk
+        static_url = f"/static/broadcast_images/{temp_filename}"
+        
+        return {
+            "success": True,
+            "url": static_url,
+            "local_path": str(temp_path),
+            "message": "Image saved locally"
+        }
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error uploading image: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/users/{telegram_id}/check-bot-access")
 async def check_bot_access(telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
