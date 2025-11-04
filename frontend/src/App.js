@@ -50,6 +50,7 @@ const Dashboard = () => {
   const [broadcastImageUrl, setBroadcastImageUrl] = useState('');
   const [sendingBroadcast, setSendingBroadcast] = useState(false);
   const [textareaRef, setTextareaRef] = useState(null);
+  const [showPreview, setShowPreview] = useState(true);
 
 
   useEffect(() => {
