@@ -932,10 +932,16 @@ const Dashboard = () => {
                   {users.map((user) => (
                     <div key={user.id} className="flex items-center justify-between border-b pb-4 last:border-0" data-testid="user-item">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <p className="font-medium">{user.first_name || 'Unknown'}</p>
                           {user.blocked && (
                             <Badge variant="destructive" className="text-xs">⛔ Заблокирован</Badge>
+                          )}
+                          {user.is_channel_member === true && (
+                            <Badge variant="default" className="text-xs bg-green-600">✓ В канале</Badge>
+                          )}
+                          {user.is_channel_member === false && user.channel_invite_sent && (
+                            <Badge variant="outline" className="text-xs text-gray-600">✗ Не в канале</Badge>
                           )}
                         </div>
                         <p className="text-sm text-muted-foreground">@{user.username || 'no_username'}</p>
