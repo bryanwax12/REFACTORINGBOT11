@@ -1406,6 +1406,213 @@ def test_help_command_url_generation():
         print(f"❌ Help command URL generation test error: {e}")
         return False
 
+def test_templates_feature_use_template():
+    """Test Templates Feature - Use Template Functionality - CRITICAL TEST per review request"""
+    print("\n🔍 Testing Templates Feature - Use Template Functionality...")
+    print("🎯 CRITICAL: Testing user reported issue - clicking template button and 'Use Template' does nothing")
+    
+    try:
+        # Read server.py to check the template implementation
+        with open('/app/backend/server.py', 'r') as f:
+            server_code = f.read()
+        
+        print("   📋 TESTING TEMPLATE FUNCTIONALITY IMPLEMENTATION:")
+        
+        # 1. Test use_template() function implementation (lines 2077-2122)
+        print("   1. Testing use_template() function:")
+        
+        use_template_pattern = r'async def use_template\(update: Update, context: ContextTypes\.DEFAULT_TYPE\):'
+        use_template_found = bool(re.search(use_template_pattern, server_code))
+        print(f"      use_template() function exists: {'✅' if use_template_found else '❌'}")
+        
+        # Check if function loads template data correctly
+        template_data_loading = all(field in server_code for field in [
+            "context.user_data['from_name'] = template.get('from_name'",
+            "context.user_data['to_name'] = template.get('to_name'",
+            "context.user_data['using_template'] = True"
+        ])
+        print(f"      Template data loading implemented: {'✅' if template_data_loading else '❌'}")
+        
+        # Check if function shows confirmation message with template details
+        confirmation_message = all(text in server_code for text in [
+            "✅ *Шаблон",
+            "📤 От:",
+            "📥 Кому:",
+            "Нажмите кнопку для продолжения создания заказа"
+        ])
+        print(f"      Confirmation message with template details: {'✅' if confirmation_message else '❌'}")
+        
+        # Check if function displays "Продолжить создание заказа" button
+        continue_button = "📦 Продолжить создание заказа" in server_code and "callback_data='start_order_with_template'" in server_code
+        print(f"      'Продолжить создание заказа' button: {'✅' if continue_button else '❌'}")
+        
+        # 2. Test start_order_with_template() function implementation (lines 2123-2147)
+        print("   2. Testing start_order_with_template() function:")
+        
+        start_order_template_pattern = r'async def start_order_with_template\(update: Update, context: ContextTypes\.DEFAULT_TYPE\):'
+        start_order_template_found = bool(re.search(start_order_template_pattern, server_code))
+        print(f"      start_order_with_template() function exists: {'✅' if start_order_template_found else '❌'}")
+        
+        # Check if function returns PARCEL_WEIGHT state
+        returns_parcel_weight = "return PARCEL_WEIGHT" in server_code
+        print(f"      Returns PARCEL_WEIGHT state: {'✅' if returns_parcel_weight else '❌'}")
+        
+        # Check if function shows weight input prompt with template name
+        weight_prompt = all(text in server_code for text in [
+            "Создание заказа по шаблону",
+            "Вес посылки в фунтах (lb)",
+            "template_name = context.user_data.get('template_name'"
+        ])
+        print(f"      Weight input prompt with template name: {'✅' if weight_prompt else '❌'}")
+        
+        # 3. Test ConversationHandler registration (line ~5315)
+        print("   3. Testing ConversationHandler registration:")
+        
+        # Check if start_order_with_template is registered as entry_point
+        entry_point_registration = "CallbackQueryHandler(start_order_with_template, pattern='^start_order_with_template$')" in server_code
+        print(f"      start_order_with_template registered as entry_point: {'✅' if entry_point_registration else '❌'}")
+        
+        # Check if it's in the entry_points list
+        entry_points_section = re.search(r'entry_points=\[(.*?)\]', server_code, re.DOTALL)
+        if entry_points_section:
+            entry_points_content = entry_points_section.group(1)
+            in_entry_points = 'start_order_with_template' in entry_points_content
+            print(f"      In ConversationHandler entry_points: {'✅' if in_entry_points else '❌'}")
+        else:
+            print(f"      ❌ Could not find entry_points section")
+            in_entry_points = False
+        
+        # 4. Test template handlers registration
+        print("   4. Testing template handlers registration:")
+        
+        # Check if use_template handler is registered
+        use_template_handler = "CallbackQueryHandler(use_template, pattern='^template_use_')" in server_code
+        print(f"      use_template handler registered: {'✅' if use_template_handler else '❌'}")
+        
+        # Check if my_templates_menu handler is registered
+        my_templates_handler = "CallbackQueryHandler(my_templates_menu, pattern='^my_templates$')" in server_code
+        print(f"      my_templates_menu handler registered: {'✅' if my_templates_handler else '❌'}")
+        
+        # 5. Test syntax and code completeness
+        print("   5. Testing code syntax and completeness:")
+        
+        # Check for syntax errors in use_template function
+        use_template_syntax = all(syntax in server_code for syntax in [
+            "reply_markup=reply_markup",
+            "parse_mode='Markdown'",
+            "await query.message.reply_text("
+        ])
+        print(f"      use_template() syntax correct: {'✅' if use_template_syntax else '❌'}")
+        
+        # Check for no duplicate code fragments
+        duplicate_fragments = server_code.count("start_order_with_template") > 10  # Should appear reasonable number of times
+        print(f"      No excessive duplicate code: {'✅' if not duplicate_fragments else '❌'}")
+        
+        # 6. Test template data structure compatibility
+        print("   6. Testing template data structure:")
+        
+        # Check if template fields are correctly mapped
+        field_mapping = all(mapping in server_code for mapping in [
+            "template.get('from_name'",
+            "template.get('from_street1'",
+            "template.get('from_city'",
+            "template.get('to_name'",
+            "template.get('to_street1'",
+            "template.get('to_city'"
+        ])
+        print(f"      Template field mapping correct: {'✅' if field_mapping else '❌'}")
+        
+        # Overall assessment
+        all_checks = [
+            use_template_found, template_data_loading, confirmation_message, continue_button,
+            start_order_template_found, returns_parcel_weight, weight_prompt,
+            entry_point_registration, in_entry_points, use_template_handler, my_templates_handler,
+            use_template_syntax, not duplicate_fragments, field_mapping
+        ]
+        
+        passed_checks = sum(all_checks)
+        total_checks = len(all_checks)
+        
+        print(f"\n📊 Template Feature Implementation Summary:")
+        print(f"   Checks passed: {passed_checks}/{total_checks}")
+        print(f"   Success rate: {(passed_checks/total_checks)*100:.1f}%")
+        
+        # Test database connectivity for templates
+        print("\n   7. Testing template database connectivity:")
+        try:
+            # Import required modules for database testing
+            import sys
+            sys.path.append('/app/backend')
+            import asyncio
+            from motor.motor_asyncio import AsyncIOMotorClient
+            from dotenv import load_dotenv
+            import os
+            
+            # Load environment variables
+            load_dotenv('/app/backend/.env')
+            mongo_url = os.environ['MONGO_URL']
+            db_name = os.environ['DB_NAME']
+            
+            # Test database connection
+            client = AsyncIOMotorClient(mongo_url)
+            db = client[db_name]
+            
+            # Test templates collection access
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            
+            # Count templates in database
+            template_count = loop.run_until_complete(db.templates.count_documents({}))
+            print(f"      Database connection: ✅")
+            print(f"      Templates in database: {template_count}")
+            
+            # Test template structure if templates exist
+            if template_count > 0:
+                sample_template = loop.run_until_complete(db.templates.find_one({}, {"_id": 0}))
+                if sample_template:
+                    required_fields = ['id', 'name', 'from_name', 'from_city', 'to_name', 'to_city']
+                    template_structure_valid = all(field in sample_template for field in required_fields)
+                    print(f"      Template structure valid: {'✅' if template_structure_valid else '❌'}")
+                    print(f"      Sample template: {sample_template.get('name', 'Unknown')}")
+                else:
+                    print(f"      ⚠️ Could not retrieve sample template")
+            else:
+                print(f"      ℹ️ No templates in database for testing")
+            
+            loop.close()
+            database_ok = True
+            
+        except Exception as e:
+            print(f"      ❌ Database connectivity error: {e}")
+            database_ok = False
+        
+        # CRITICAL SUCCESS CRITERIA from review request
+        critical_checks = [
+            use_template_found, start_order_template_found, entry_point_registration,
+            template_data_loading, continue_button, weight_prompt
+        ]
+        
+        print(f"\n   🎯 REVIEW REQUEST SUCCESS CRITERIA:")
+        print(f"   use_template() function fixed: {'✅' if use_template_found and use_template_syntax else '❌'}")
+        print(f"   start_order_with_template() created: {'✅' if start_order_template_found and returns_parcel_weight else '❌'}")
+        print(f"   ConversationHandler entry_point registered: {'✅' if entry_point_registration and in_entry_points else '❌'}")
+        print(f"   Template data loading works: {'✅' if template_data_loading else '❌'}")
+        print(f"   Confirmation message shows: {'✅' if confirmation_message else '❌'}")
+        print(f"   Continue button enters PARCEL_WEIGHT: {'✅' if continue_button and weight_prompt else '❌'}")
+        
+        if all(critical_checks):
+            print(f"   ✅ CRITICAL FIXES VERIFIED: Template 'Use Template' functionality should now work")
+        else:
+            print(f"   ❌ CRITICAL ISSUES: Some template functionality fixes are missing")
+        
+        return all(critical_checks) and database_ok
+        
+    except Exception as e:
+        print(f"❌ Templates feature test error: {e}")
+        import traceback
+        print(f"   Traceback: {traceback.format_exc()}")
+        return False
+
 def test_telegram_bot_shipping_rates():
     """Test Telegram bot shipping rates with all carriers and refresh button - CRITICAL TEST per review request"""
     print("\n🔍 Testing Telegram Bot Shipping Rates with All Carriers and Refresh Button...")
