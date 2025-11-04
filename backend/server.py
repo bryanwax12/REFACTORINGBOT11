@@ -6085,7 +6085,9 @@ async def startup_event():
                     CallbackQueryHandler(cancel_order, pattern='^cancel_order$'),
                     CommandHandler('start', start_command)
                 ],
-                per_message=True
+                per_chat=True,
+                per_user=True,
+                per_message=False
             )
             
             application.add_handler(template_rename_handler)
