@@ -5143,6 +5143,83 @@ async def check_bot_access(telegram_id: int, authenticated: bool = Depends(verif
         except Exception as e:
             error_msg = str(e)
             
+
+
+@api_router.post("/users/check-all-bot-access")
+async def check_all_bot_access(authenticated: bool = Depends(verify_admin_key)):
+    """Check bot access for all users"""
+    try:
+        if not bot_instance:
+            raise HTTPException(status_code=500, detail="Bot not initialized")
+        
+        users = await db.users.find({}).to_list(None)
+        
+        checked_count = 0
+        accessible_count = 0
+        blocked_count = 0
+        failed_count = 0
+        
+        for user in users:
+            try:
+                # Try to send typing action (non-intrusive)
+                await bot_instance.send_chat_action(
+                    chat_id=user['telegram_id'],
+                    action="typing"
+                )
+                
+                # If successful, bot is accessible
+                await db.users.update_one(
+                    {"telegram_id": user['telegram_id']},
+                    {"$set": {
+                        "bot_blocked_by_user": False,
+                        "bot_access_checked_at": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+                
+                checked_count += 1
+                accessible_count += 1
+                
+                # Small delay to avoid rate limiting
+                await asyncio.sleep(0.05)
+                
+            except Exception as e:
+                error_msg = str(e)
+                
+                # Check if user blocked the bot
+                if "bot was blocked by the user" in error_msg.lower() or "forbidden" in error_msg.lower():
+                    logger.warning(f"User {user['telegram_id']} has blocked the bot")
+                    
+                    await db.users.update_one(
+                        {"telegram_id": user['telegram_id']},
+                        {"$set": {
+                            "bot_blocked_by_user": True,
+                            "bot_blocked_at": datetime.now(timezone.utc).isoformat(),
+                            "bot_access_checked_at": datetime.now(timezone.utc).isoformat()
+                        }}
+                    )
+                    
+                    blocked_count += 1
+                    checked_count += 1
+                else:
+                    # Other error
+                    logger.error(f"Error checking bot access for user {user['telegram_id']}: {e}")
+                    failed_count += 1
+        
+        return {
+            "success": True,
+            "message": f"Checked {checked_count} users: {accessible_count} accessible, {blocked_count} blocked",
+            "checked_count": checked_count,
+            "accessible_count": accessible_count,
+            "blocked_count": blocked_count,
+            "failed_count": failed_count
+        }
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error checking all bot access: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
             # Check if user blocked the bot
             if "bot was blocked by the user" in error_msg.lower() or "forbidden" in error_msg.lower():
                 logger.warning(f"User {telegram_id} has blocked the bot")
