@@ -593,3 +593,42 @@ agent_communication:
       message: "🔧 CHECK ALL BOT ACCESS FEATURE IMPLEMENTATION: Добавил функционал массовой проверки блокировки бота для всех пользователей. BACKEND: Создал endpoint POST /api/users/check-all-bot-access (lines 5148-5221), который проверяет доступность бота для каждого пользователя через отправку typing action. Обновляет поле bot_blocked_by_user в базе данных. Возвращает статистику: checked_count, accessible_count, blocked_count, failed_count. Добавлен error handling для обработки ошибок блокировки. FRONTEND: Добавил кнопку \"🚫 Проверить блокировку бота\" в Users tab (lines 1145-1152) рядом с другими массовыми действиями. Функция handleCheckAllBotAccess уже была реализована (lines 514-531) - показывает confirmation dialog, вызывает backend endpoint, отображает toast с результатами и обновляет UI через loadData(). Кнопка имеет оранжевую тему для визуального отличия. Функционал готов к тестированию - администратор может проверить всех пользователей одним нажатием."
     - agent: "testing"
       message: "✅ CHECK ALL BOT ACCESS FEATURE TESTING COMPLETE: Comprehensive verification confirms the newly implemented feature is working perfectly. AUTHENTICATION TESTING: (1) ✅ Correctly rejects unauthenticated requests (401 status), (2) ✅ Correctly rejects invalid admin keys (403 status), (3) ✅ Accepts valid admin API key via x-api-key header. ENDPOINT FUNCTIONALITY: (1) ✅ POST /api/users/check-all-bot-access accessible with admin authentication, (2) ✅ Returns success with all required counts (checked_count: 5, accessible_count: 5, blocked_count: 0, failed_count: 0), (3) ✅ Response structure includes all required fields (success, message, checked_count, accessible_count, blocked_count, failed_count), (4) ✅ Count validation passes (total processed equals checked count). DATABASE UPDATES: (1) ✅ Updates bot_blocked_by_user field correctly for all 5 users in database, (2) ✅ Sets bot_access_checked_at timestamp properly with ISO format, (3) ✅ Sample user verification shows correct status and timestamp. ERROR HANDLING: (1) ✅ Bot properly initialized and accessible via Telegram API, (2) ✅ Error handling implemented for 'bot was blocked by the user' detection, (3) ✅ Graceful handling of Telegram API errors and rate limiting. CRITICAL SUCCESS: All 15/15 implementation checks passed (100% success rate). The Check All Bot Access feature is fully functional: admin can check bot blocking status for all users at once, database is updated with current access status and timestamps, proper counts are returned for monitoring. Backend ready for frontend integration and production use."
+
+backend:
+  - task: "Template Order Creation - 'Продолжить создание заказа' Button Fix"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "❌ USER REPORTED ISSUE: After selecting template 'Склад NY' and clicking 'Продолжить создание заказа' button, nothing happens. Bot loads template but doesn't enter ConversationHandler."
+        - working: "NA"
+          agent: "main"
+          comment: "🔧 ROOT CAUSE IDENTIFIED: use_template() function was not returning ConversationHandler.END, causing the conversation to remain in an undefined state. When user clicked 'Продолжить создание заказа' button (callback_data='start_order_with_template'), the entry_point couldn't start a new conversation because previous conversation wasn't properly closed. SOLUTION: Added 'return ConversationHandler.END' to use_template() function (line 2115). This ensures conversation ends after template loading, allowing start_order_with_template entry_point to start fresh conversation. Added logging to start_order_with_template for debugging. Backend restarted successfully."
+        - working: true
+          agent: "user"
+          comment: "✅ CONFIRMED WORKING: Button now works correctly. Template loads, user clicks button, bot enters PARCEL_WEIGHT state and asks for weight input."
+
+backend:
+  - task: "ConversationHandler Stability - Buttons Working Intermittently Fix"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "❌ USER REPORTED ISSUE: 'Новый заказ' and 'Из шаблона' buttons work intermittently ('через раз'). Sometimes buttons respond, sometimes they don't."
+        - working: "NA"
+          agent: "main"
+          comment: "🔧 SOLUTION APPLIED: PTBUserWarning indicated 'per_message=False' causing CallbackQueryHandler not to be tracked for every message. Initially tried per_message=True but received warning that all handlers must be CallbackQueryHandler (incompatible with MessageHandler for text input). Final solution: Explicitly set per_chat=True, per_user=True, per_message=False for both template_rename_handler and order_conv_handler. This ensures proper conversation tracking per user per chat without requiring all handlers to be CallbackQueryHandler. Changes applied to lines 5947 and 6087. Backend restarted successfully."
+        - working: true
+          agent: "user"
+          comment: "✅ CONFIRMED WORKING: Buttons now work consistently. User can repeatedly click 'Новый заказ' and 'Из шаблона' without intermittent failures."
+
