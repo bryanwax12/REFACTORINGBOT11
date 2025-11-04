@@ -1590,13 +1590,7 @@ const Dashboard = () => {
                       {topups.map((topup) => (
                         <tr key={topup.id} className="border-b hover:bg-gray-50">
                           <td className="p-2">
-                            {topup.created_at ? new Date(topup.created_at).toLocaleString('ru-RU', {
-                              year: 'numeric',
-                              month: '2-digit',
-                              day: '2-digit',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            }) : '-'}
+                            {formatKyivDateTime(topup.created_at)}
                           </td>
                           <td className="p-2">
                             <div>
