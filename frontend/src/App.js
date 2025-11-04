@@ -434,6 +434,7 @@ const Dashboard = () => {
         loadData(); // Reload to update invitation statuses
       }
     } catch (error) {
+      console.error('Error inviting all to channel:', error);
       toast.error(error.response?.data?.detail || "Failed to send mass channel invitations");
     }
   };
