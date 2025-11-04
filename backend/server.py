@@ -393,8 +393,11 @@ async def send_blocked_message(update: Update):
 
 async def check_stale_interaction(query, context: ContextTypes.DEFAULT_TYPE) -> bool:
     """Check if button press is from an old/completed interaction"""
+    logger.info(f"check_stale_interaction called - user_data keys: {list(context.user_data.keys())}")
+    
     # If user_data is empty or doesn't have active order data, it's likely stale
     if not context.user_data or len(context.user_data) == 0:
+        logger.info("Stale interaction detected - empty user_data")
         await query.answer("⚠️ Этот заказ уже завершён")
         await query.message.reply_text(
             "⚠️ *Этот заказ уже завершён или отменён.*\n\n"
@@ -405,6 +408,7 @@ async def check_stale_interaction(query, context: ContextTypes.DEFAULT_TYPE) -> 
     
     # Check if order was already completed (has order_completed flag)
     if context.user_data.get('order_completed'):
+        logger.info("Stale interaction detected - order_completed flag set")
         await query.answer("⚠️ Этот заказ уже завершён")
         await query.message.reply_text(
             "⚠️ *Этот заказ уже завершён.*\n\n"
@@ -413,6 +417,7 @@ async def check_stale_interaction(query, context: ContextTypes.DEFAULT_TYPE) -> 
         )
         return True
     
+    logger.info("Interaction is valid - proceeding")
     return False
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
