@@ -4778,6 +4778,129 @@ async def unblock_user(telegram_id: int, authenticated: bool = Depends(verify_ad
         logger.error(f"Error unblocking user: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.post("/users/{telegram_id}/invite-channel")
+async def invite_user_to_channel(telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
+    """Send channel invitation to a specific user"""
+    try:
+        user = await db.users.find_one({"telegram_id": telegram_id})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        if not CHANNEL_INVITE_LINK:
+            raise HTTPException(status_code=500, detail="Channel invite link not configured")
+        
+        if not bot_instance:
+            raise HTTPException(status_code=500, detail="Bot not initialized")
+        
+        # Send invitation message with button
+        keyboard = [[InlineKeyboardButton("📣 Присоединиться к каналу", url=CHANNEL_INVITE_LINK)]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        message = f"""🎉 *Приглашение в наш канал!*
+
+Присоединяйтесь к нашему каналу и получайте:
+
+📦 Актуальные тарифы доставки
+💰 Специальные предложения и скидки
+🔔 Новости и обновления сервиса
+⚡️ Эксклюзивные акции для подписчиков
+
+👇 Нажмите кнопку ниже, чтобы присоединиться:"""
+        
+        try:
+            await bot_instance.send_message(
+                chat_id=telegram_id,
+                text=message,
+                parse_mode='Markdown',
+                reply_markup=reply_markup
+            )
+            
+            # Update user record to track invitation
+            await db.users.update_one(
+                {"telegram_id": telegram_id},
+                {"$set": {"channel_invite_sent": True, "channel_invite_sent_at": datetime.now(timezone.utc).isoformat()}}
+            )
+            
+            return {"success": True, "message": "Channel invitation sent successfully"}
+        except Exception as e:
+            logger.error(f"Failed to send channel invitation: {e}")
+            raise HTTPException(status_code=500, detail=f"Failed to send invitation: {str(e)}")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error sending channel invitation: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/users/invite-all-channel")
+async def invite_all_users_to_channel(authenticated: bool = Depends(verify_admin_key)):
+    """Send channel invitation to all users"""
+    try:
+        if not CHANNEL_INVITE_LINK:
+            raise HTTPException(status_code=500, detail="Channel invite link not configured")
+        
+        if not bot_instance:
+            raise HTTPException(status_code=500, detail="Bot not initialized")
+        
+        # Get all users
+        users = await db.users.find({}).to_list(None)
+        
+        success_count = 0
+        failed_count = 0
+        failed_users = []
+        
+        keyboard = [[InlineKeyboardButton("📣 Присоединиться к каналу", url=CHANNEL_INVITE_LINK)]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        message = f"""🎉 *Приглашение в наш канал!*
+
+Присоединяйтесь к нашему каналу и получайте:
+
+📦 Актуальные тарифы доставки
+💰 Специальные предложения и скидки
+🔔 Новости и обновления сервиса
+⚡️ Эксклюзивные акции для подписчиков
+
+👇 Нажмите кнопку ниже, чтобы присоединиться:"""
+        
+        for user in users:
+            try:
+                await bot_instance.send_message(
+                    chat_id=user['telegram_id'],
+                    text=message,
+                    parse_mode='Markdown',
+                    reply_markup=reply_markup
+                )
+                
+                # Update user record
+                await db.users.update_one(
+                    {"telegram_id": user['telegram_id']},
+                    {"$set": {"channel_invite_sent": True, "channel_invite_sent_at": datetime.now(timezone.utc).isoformat()}}
+                )
+                
+                success_count += 1
+                # Small delay to avoid rate limiting
+                await asyncio.sleep(0.05)
+            except Exception as e:
+                logger.error(f"Failed to send invitation to user {user['telegram_id']}: {e}")
+                failed_count += 1
+                failed_users.append(user['telegram_id'])
+        
+        return {
+            "success": True,
+            "message": f"Invitations sent to {success_count} users",
+            "success_count": success_count,
+            "failed_count": failed_count,
+            "failed_users": failed_users
+        }
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error sending mass channel invitations: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @api_router.get("/users/leaderboard")
 async def get_leaderboard():
     try:
