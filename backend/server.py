@@ -4983,6 +4983,76 @@ async def broadcast_message(
                 
                 success_count += 1
                 # Small delay to avoid rate limiting
+
+
+@api_router.post("/upload-image")
+async def upload_image(
+    file: UploadFile = File(...),
+    authenticated: bool = Depends(verify_admin_key)
+):
+    """Upload image and return URL or file_id"""
+    try:
+        # Validate file type
+        if not file.content_type or not file.content_type.startswith('image/'):
+            raise HTTPException(status_code=400, detail="File must be an image")
+        
+        # Check file size (max 10MB for Telegram)
+        contents = await file.read()
+        if len(contents) > 10 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="Image size must be less than 10MB")
+        
+        # Save file temporarily
+        upload_dir = Path("/tmp/broadcast_images")
+        upload_dir.mkdir(exist_ok=True)
+        
+        file_extension = file.filename.split('.')[-1] if '.' in file.filename else 'jpg'
+        temp_filename = f"{uuid.uuid4()}.{file_extension}"
+        temp_path = upload_dir / temp_filename
+        
+        with open(temp_path, 'wb') as f:
+            f.write(contents)
+        
+        # Upload to Telegram to get file_id (if bot is available)
+        if bot_instance:
+            try:
+                # Send photo to a test chat (admin) to get file_id
+                if ADMIN_TELEGRAM_ID:
+                    message = await bot_instance.send_photo(
+                        chat_id=int(ADMIN_TELEGRAM_ID),
+                        photo=open(temp_path, 'rb'),
+                        caption="Uploaded image for broadcast (you can delete this message)"
+                    )
+                    file_id = message.photo[-1].file_id  # Get largest photo
+                    
+                    # Clean up temp file
+                    os.remove(temp_path)
+                    
+                    return {
+                        "success": True,
+                        "file_id": file_id,
+                        "message": "Image uploaded successfully"
+                    }
+            except Exception as e:
+                logger.error(f"Failed to upload to Telegram: {e}")
+                # Fall back to serving from disk
+        
+        # If Telegram upload failed, serve from disk
+        # Create static URL (you'd need to serve this via FastAPI)
+        static_url = f"/static/broadcast_images/{temp_filename}"
+        
+        return {
+            "success": True,
+            "url": static_url,
+            "local_path": str(temp_path),
+            "message": "Image saved locally"
+        }
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error uploading image: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
                 await asyncio.sleep(0.05)
             except Exception as e:
                 logger.error(f"Failed to send broadcast to user {user['telegram_id']}: {e}")
