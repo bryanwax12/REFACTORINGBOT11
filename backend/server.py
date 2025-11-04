@@ -5650,6 +5650,20 @@ async def startup_event():
             
             await application.initialize()
             await application.start()
+            
+            # Set bot commands for menu button
+            commands = [
+                BotCommand("start", "🏠 Главное меню"),
+                BotCommand("balance", "💰 Мой баланс"),
+                BotCommand("help", "❓ Помощь")
+            ]
+            await application.bot.set_my_commands(commands)
+            
+            # Set menu button in header (next to attachment icon)
+            await application.bot.set_chat_menu_button(
+                menu_button=MenuButtonCommands()
+            )
+            
             await application.updater.start_polling()
             
             logger.info("Telegram Bot started successfully!")
