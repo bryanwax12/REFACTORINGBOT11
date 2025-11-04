@@ -1583,10 +1583,14 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
         
         if weight > 10:
             # Heavy parcel - user MUST enter dimensions
+            keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
             await update.message.reply_text(
                 """📏 Высота посылки в дюймах (inches)
 
-Введите высоту в дюймах (например: 10):"""
+Введите высоту в дюймах (например: 10):""",
+                reply_markup=reply_markup
             )
         else:
             # Light parcel - can skip and use default dimensions
