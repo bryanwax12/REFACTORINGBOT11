@@ -2034,7 +2034,7 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await query.message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown')
-    return TEMPLATE_LIST
+    # Don't return state - working outside ConversationHandler
 
 async def view_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """View specific template details"""
