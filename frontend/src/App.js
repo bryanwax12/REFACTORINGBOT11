@@ -524,19 +524,6 @@ const Dashboard = () => {
     }
   };
 
-      
-      const response = await axios.post(`${API}/users/check-all-channel-status`);
-      
-      if (response.data.success) {
-        toast.success(`✅ Проверено: ${response.data.checked_count} пользователей. В канале: ${response.data.member_count}`);
-        loadData(); // Reload to update statuses
-      }
-    } catch (error) {
-      console.error('Error checking all channel status:', error);
-      toast.error(error.response?.data?.detail || "Failed to check channel statuses");
-    }
-  };
-
 
 
   const submitBalanceChange = async () => {
