@@ -5309,7 +5309,10 @@ async def startup_event():
             
             # Conversation handler for order creation
             order_conv_handler = ConversationHandler(
-                entry_points=[CallbackQueryHandler(new_order_start, pattern='^new_order$')],
+                entry_points=[
+                    CallbackQueryHandler(new_order_start, pattern='^new_order$'),
+                    CallbackQueryHandler(start_order_with_template, pattern='^start_order_with_template$')
+                ],
                 states={
                     FROM_NAME: [
                         MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_name),
