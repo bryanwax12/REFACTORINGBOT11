@@ -5425,6 +5425,15 @@ async def startup_event():
             application.add_handler(CommandHandler("test_error", test_error_message))
             application.add_handler(CommandHandler("help", help_command))
             application.add_handler(CommandHandler("balance", my_balance_command))
+            
+            # Template handlers (must be before generic button_callback)
+            application.add_handler(CallbackQueryHandler(view_template, pattern='^template_view_'))
+            application.add_handler(CallbackQueryHandler(use_template, pattern='^template_use_'))
+            application.add_handler(CallbackQueryHandler(delete_template, pattern='^template_delete_'))
+            application.add_handler(CallbackQueryHandler(confirm_delete_template, pattern='^template_confirm_delete_'))
+            application.add_handler(CallbackQueryHandler(rename_template_start, pattern='^template_rename_'))
+            application.add_handler(CallbackQueryHandler(my_templates_menu, pattern='^my_templates$'))
+            
             # Handler for topup amount input (text messages)
             application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_topup_amount_input))
             application.add_handler(CallbackQueryHandler(button_callback))
