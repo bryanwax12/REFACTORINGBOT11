@@ -2866,7 +2866,31 @@ Shipping label создан успешно!""",
                 await query.message.reply_text(f"❌ Ошибка создания инвойса: {error_msg}")
                 
         elif query.data == 'top_up_balance':
-            # Request custom top-up amount
+            # Save order data before top-up so user can return to payment after
+            context.user_data['pending_order_data'] = {
+                'selected_rate': data.get('selected_rate'),
+                'final_amount': context.user_data.get('final_amount'),
+                'user_discount': context.user_data.get('user_discount', 0),
+                'discount_amount': context.user_data.get('discount_amount', 0),
+                'from_name': data.get('from_name'),
+                'from_street': data.get('from_street'),
+                'from_street2': data.get('from_street2'),
+                'from_city': data.get('from_city'),
+                'from_state': data.get('from_state'),
+                'from_zip': data.get('from_zip'),
+                'from_phone': data.get('from_phone'),
+                'to_name': data.get('to_name'),
+                'to_street': data.get('to_street'),
+                'to_street2': data.get('to_street2'),
+                'to_city': data.get('to_city'),
+                'to_state': data.get('to_state'),
+                'to_zip': data.get('to_zip'),
+                'to_phone': data.get('to_phone'),
+                'parcel_weight': data.get('parcel_weight'),
+                'parcel_length': data.get('parcel_length'),
+                'parcel_width': data.get('parcel_width'),
+                'parcel_height': data.get('parcel_height')
+            }
             context.user_data['last_state'] = TOPUP_AMOUNT  # Save state for cancel return
             
             keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
