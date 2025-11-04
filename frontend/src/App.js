@@ -89,10 +89,13 @@ const Dashboard = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [textareaRef, setTextareaRef] = useState(null);
   const [showPreview, setShowPreview] = useState(true);
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const [loadingMaintenance, setLoadingMaintenance] = useState(false);
 
 
   useEffect(() => {
     loadData();
+    loadMaintenanceStatus();
   }, []);
 
   const loadData = async () => {
