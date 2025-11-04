@@ -1788,6 +1788,11 @@ async def show_data_confirmation(update: Update, context: ContextTypes.DEFAULT_T
 async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle user's choice on data confirmation"""
     query = update.callback_query
+    
+    # Check for stale interaction
+    if await check_stale_interaction(query, context):
+        return ConversationHandler.END
+    
     await query.answer()
     
     if query.data == 'cancel_order':
