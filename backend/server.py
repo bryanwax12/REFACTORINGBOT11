@@ -4056,6 +4056,7 @@ async def oxapay_webhook(request: Request):
         track_id = body.get('track_id') or body.get('trackId')  # Support both formats
         status = body.get('status')  # Waiting, Confirming, Paying, Paid, Expired, etc.
         order_id = body.get('order_id') or body.get('orderId')  # Support both formats
+        paid_amount = body.get('paidAmount') or body.get('paid_amount') or body.get('amount', 0)  # Actual paid amount
         
         # Convert track_id to int if it's a string number
         if track_id and isinstance(track_id, str) and track_id.isdigit():
@@ -4067,18 +4068,19 @@ async def oxapay_webhook(request: Request):
                 # Update payment status
                 await db.payments.update_one(
                     {"invoice_id": track_id},
-                    {"$set": {"status": "paid"}}
+                    {"$set": {"status": "paid", "paid_amount": paid_amount}}
                 )
                 
                 # Check if it's a top-up
                 if payment.get('type') == 'topup':
-                    # Add to balance
+                    # Add to balance - use actual paid amount
                     telegram_id = payment.get('telegram_id')
-                    amount = payment.get('amount', 0)
+                    requested_amount = payment.get('amount', 0)
+                    actual_amount = paid_amount if paid_amount > 0 else requested_amount
                     
                     await db.users.update_one(
                         {"telegram_id": telegram_id},
-                        {"$inc": {"balance": amount}}
+                        {"$inc": {"balance": actual_amount}}
                     )
                     
                     # Notify user
@@ -4090,11 +4092,18 @@ async def oxapay_webhook(request: Request):
                         keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
                         reply_markup = InlineKeyboardMarkup(keyboard)
                         
+                        # Show requested vs actual amount if different
+                        if abs(actual_amount - requested_amount) > 0.01:
+                            amount_text = f"""💰 *Запрошено:* ${requested_amount:.2f}
+💰 *Зачислено:* ${actual_amount:.2f}"""
+                        else:
+                            amount_text = f"💰 *Зачислено:* ${actual_amount:.2f}"
+                        
                         await bot_instance.send_message(
                             chat_id=telegram_id,
                             text=f"""✅ *Спасибо! Ваш баланс пополнен!*
 
-💰 *Зачислено:* ${amount}
+{amount_text}
 💳 *Новый баланс:* ${new_balance:.2f}""",
                             reply_markup=reply_markup,
                             parse_mode='Markdown'
