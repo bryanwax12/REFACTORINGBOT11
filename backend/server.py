@@ -4636,7 +4636,10 @@ async def oxapay_webhook(request: Request):
                             amount_text = f"💰 *Зачислено:* ${actual_amount:.2f}"
                         
                         # Create keyboard with order button
+                        # Check if user has pending order (was topping up during order creation)
+                        # We can't access context here, so show button to return to payment
                         keyboard = [
+                            [InlineKeyboardButton("💳 Оплатить заказ", callback_data='return_to_payment')],
                             [InlineKeyboardButton("📦 Создать заказ", callback_data='new_order')],
                             [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]
                         ]
@@ -4647,7 +4650,9 @@ async def oxapay_webhook(request: Request):
                             text=f"""✅ *Спасибо! Ваш баланс пополнен!*
 
 {amount_text}
-💳 *Новый баланс:* ${new_balance:.2f}""",
+💳 *Новый баланс:* ${new_balance:.2f}
+
+_Если вы пополняли баланс для оплаты заказа, нажмите "Оплатить заказ"_""",
                             reply_markup=reply_markup,
                             parse_mode='Markdown'
                         )
