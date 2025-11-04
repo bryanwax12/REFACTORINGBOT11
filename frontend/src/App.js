@@ -936,8 +936,8 @@ const Dashboard = () => {
                 <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
                   <p className="text-sm font-medium text-blue-900">
                     📅 Filtered Period: 
-                    {dateFrom && ` From ${new Date(dateFrom).toLocaleDateString()}`}
-                    {dateTo && ` To ${new Date(dateTo).toLocaleDateString()}`}
+                    {dateFrom && ` From ${formatKyivDate(dateFrom)}`}
+                    {dateTo && ` To ${formatKyivDate(dateTo)}`}
                   </p>
                   <p className="text-xs text-blue-700 mt-1">
                     Total spent in this period: ${expenseStats?.total_expense?.toFixed(2) || '0.00'} 
