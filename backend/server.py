@@ -1027,7 +1027,10 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("✅ Адрес отправителя обновлен!")
         return await show_data_confirmation(update, context)
     
-    keyboard = [[InlineKeyboardButton("⏭️ Пропустить", callback_data='skip_from_phone')]]
+    keyboard = [
+        [InlineKeyboardButton("⏭️ Пропустить", callback_data='skip_from_phone')],
+        [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
+    ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await update.message.reply_text(
