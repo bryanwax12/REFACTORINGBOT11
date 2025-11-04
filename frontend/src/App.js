@@ -418,11 +418,14 @@ const Dashboard = () => {
   };
 
   const handleInviteAllToChannel = async () => {
+    console.log('handleInviteAllToChannel called');
     try {
       const confirmed = window.confirm('Отправить приглашение в канал всем пользователям?');
+      console.log('Confirmed:', confirmed);
       if (!confirmed) return;
 
       toast.info('Отправка приглашений...');
+      console.log('Sending request to:', `${API}/users/invite-all-channel`);
       
       const response = await axios.post(`${API}/users/invite-all-channel`);
       
