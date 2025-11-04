@@ -1,90 +1,76 @@
 <analysis>
-The trajectory details the AI engineer's work on a Telegram bot and admin panel. Initial efforts focused on debugging Oxapay invoice creation, resolving validation errors related to API key placement (header vs. payload) and  length constraints. Frontend/backend issues, like carrier display and button functionality (cancel/return), were addressed. New features included an admin panel Top-ups tab, user blocking functionality, and UI alignment improvements. A significant ongoing task is the implementation of a Templates feature for the bot, allowing users to save and reuse address information for new orders. The AI engineer is currently debugging the  functionality, specifically ensuring the ConversationHandler restarts correctly with pre-filled template data. Many of the fixes involved adjustments to API request payloads, updating ConversationHandler states, and refining UI elements.
+The AI engineer's trajectory details extensive work on a Telegram bot and its admin panel. Initially, the focus was on stabilizing core features like Oxapay payments and ShipStation integration, fixing critical bugs, and refining UI/UX. A major development cycle involved implementing a Templates feature, which required significant debugging around  states and data handling. Subsequent efforts addressed user requests for channel invitation functionalities within the admin panel, including individual/mass invitations, tracking channel membership, and preventing messages to blocked or already-subscribed users. The bot's UI was enhanced with a Telegram Menu Button. The latest major feature added was a Broadcast tab in the admin panel, enabling rich text (Markdown) and image broadcasting to all bot users, involving a file upload endpoint and error handling. Throughout the process, the AI debugged numerous frontend (React) and backend (FastAPI, ) issues, often related to state management, API key handling, and data serialization.
 </analysis>
 
 <product_requirements>
-The application is a Telegram bot designed for shipping label generation and cryptocurrency payments, complemented by an admin panel for management.
+The core product is a Telegram bot for shipping label generation and crypto payments, managed via an admin panel.
 **Core Features:**
--   **Shipping:** ShipStation V2 integration for label creation. Dynamic rate fetching, filtering, and de-duplication. Parcel dimensions (length, width, height) input, with a default of 10x10x10 inches and mandatory input for parcels over 10lb. Address validation was initially removed but proposed for re-implementation.
--   **Payments:** Transitioned from CryptoBot to Oxapay. Supports custom top-up amounts (minimum 0) and multiple cryptocurrencies. Requires exact payment for funds to be credited (with a 2% underpayment tolerance).
--   **Bot UI/UX:** Multilingual (Russian). Consistent navigation, dynamic prompts, and a functional main menu. Contact Administrator button. Welcome message updates.
--   **Admin Panel UI/UX:** Order management with search, refund, label download. User details (Telegram ID, name). Profit/expense tracking. Per-user discount. Manual Create Label form. New Top-ups tab to view payment history. User management with Block/Unblock functionality. UI alignment for buttons in Orders and Users tabs.
--   **Error Handling:** Admin Telegram notifications for critical issues.
--   **Security:** Admin API Key protection, input sanitization.
--   **Templates (in progress):** Users can save and reuse address information as templates. Templates will include sender/recipient addresses. Users can name, view, use, rename, and delete templates. A limit of 10 templates per user.
+*   **Shipping:** ShipStation V2 integration, dynamic rate fetching, parcel dimension input (default 10x10x10 inches, mandatory for >10lb), and address validation (proposed).
+*   **Payments:** Oxapay integration, custom top-up amounts (min 0), multiple cryptocurrencies, exact payment required (2% tolerance). Explicit Oxapay mentions removed from bot.
+*   **Bot UI/UX:** Multilingual (Russian), consistent navigation, dynamic prompts, functional main menu (My Templates, New Order, Refresh Rates, Contact Administrator), and Telegram Menu Button.
+*   **Admin Panel UI/UX:** Order management (search, refund, label download), user details, profit/expense tracking, per-user discount, Create Label form. New Top-ups tab for payment history. User management with Block/Unblock, Invite to Channel, Invite All, Check Channel Status, and Check Bot Access. Broadcast tab for rich-text and image messages.
+*   **Error Handling:** Admin Telegram notifications for critical issues.
+*   **Security:** Admin API Key protection, input sanitization.
+*   **Templates:** Users can save/reuse sender/recipient address info (max 10 per user), name, view, use, rename, delete templates.
+*   **Channel Integration:** Admin can invite individual or all users to a Telegram channel. Bot tracks channel membership and user blocking status to avoid sending duplicate/unwanted messages.
+*   **Broadcast/Mass Messaging:** Admin can send messages with Markdown formatting and images (upload or URL) to all bot users, excluding blocked ones.
 </product_requirements>
 
 <key_technical_concepts>
 -   **Full-stack:** React (frontend), FastAPI (backend), MongoDB (database).
--   **Telegram Bot API:**  with .
--   **Payment Gateways:** Oxapay API.
--   **Shipping API:** ShipStation V2 API.
--   **Data Validation:** Pydantic.
+-   **Telegram Bot API:**  with  for multi-step interactions.
+-   **Payment Gateways:** Oxapay API for cryptocurrency payments.
+-   **Shipping API:** ShipStation V2 API for shipping label generation.
+-   **Data Validation:** Pydantic for API request/response models.
 -   **API Key Authentication:** For admin panel and third-party services.
+-   **Frontend UI:** Shadcn/ui (implied by component names like Tabs, Button, Card, Input).
 </key_technical_concepts>
 
 <code_architecture>
 
 
 -   **/app/backend/server.py**:
-    -   **Summary of why this file is important:** Core of the backend, integrating Telegram bot logic, FastAPI endpoints, database interactions, and external APIs (ShipStation, Oxapay).
+    -   **Summary of why this file is important:** The central backend application. It orchestrates the Telegram bot logic, handles FastAPI endpoints for the admin panel, interacts with MongoDB, and integrates with external APIs like ShipStation and Oxapay.
     -   **Summary of the changes made to this file:**
-        -   Fixed  to use  in headers and correct  generation logic (shortened for top-ups).
-        -   Updated Oxapay webhook handler for correct snake_case keys (, , ) and to use the actual paid amount from the webhook.
-        -   Added  Pydantic model and associated conversation states (, , , ).
-        -   Implemented API endpoints for , , .
-        -   Modified  to include My Templates button.
-        -   Modified  to offer New Order or From Template.
-        -   Added , , , , , , , ,  functions for template management.
-        -   Added a helper function  and integrated checks into main bot commands.
-        -   Adjusted  to include  (USPS).
-        -   Added Refresh Rates button and handler in bot's  UI.
-        -   Fixed  logic for cancel/return flow.
-        -   Added ❌ Отмена buttons to parcel dimension and phone input steps.
-        -   Removed  and updated  to directly create Oxapay invoice.
-        -   Added 📋 Проверить данные button to cancel confirmation dialog and its handler.
-        -   Removed all explicit Oxapay mentions from user-facing bot messages.
-        -   Added Создать заказ button after successful balance top-up.
-        -   Added a warning about exact payment amount in invoice creation messages.
-        -   Corrected multiple  and  during template implementation.
-        -   Modified  to prepare  and initiate .
+        -   **Oxapay/Top-ups:**  fixed for headers/ length. Oxapay webhook handler updated for snake_case keys and paid amount.  directly creates invoice, removed explicit Oxapay mentions.
+        -   **Templates:** Added  Pydantic model. Implemented , , , , , , , , .  logic refined to correctly set  and restart  at .  updated to use /.  directs to  state. Fixed / keys to / in  and .  configuration for templates was refactored, creating a separate handler for template management.
+        -   **Bot UI/UX:**  modified for My Templates button. Refresh Rates button added.  fixed. ❌ Отмена buttons added to various steps. Создать заказ button after top-up. Telegram  added programmatically and old  removed.
+        -   **Admin Endpoints:** Added .  and .
+        -   **Channel Integration:** Added  and  environment variables. New endpoints  for individual invites and  for mass invites. Logic added to skip blocked users and those already in the channel for invitations.
+        -   **Broadcast Feature:** Added  endpoint to send messages and/or images to all users. Supports  or .  endpoint for uploading local images to Telegram to get .  and  endpoints to verify if bot is blocked by user.
+        -   **Error Handling/Logging:** Enhanced logging for ShipStation rate requests and  failures, specifically for bot was blocked by the user errors.
+        -   **Code Quality:** Fixed multiple  and  during template and broadcast implementation.
 -   **/app/backend/.env**:
     -   **Summary of why this file is important:** Stores environment variables critical for backend operation.
-    -   **Summary of the changes made to this file:**  was added.
+    -   **Summary of the changes made to this file:** , , and  were added.
 -   **/app/backend/requirements.txt**:
     -   **Summary of why this file is important:** Lists Python dependencies for the backend.
     -   **Summary of the changes made to this file:**  was removed.
 -   **/app/frontend/src/App.js**:
-    -   **Summary of why this file is important:** Main React component for the admin panel, handling routing, state, and UI.
+    -   **Summary of why this file is important:** Main React component for the admin panel, handling routing, state management, and UI rendering for all admin tabs.
     -   **Summary of the changes made to this file:**
-        -   Added Weight and Dimensions columns to the Orders table.
-        -   Added a new Top-ups tab with a table displaying top-up history and statistics, fetching data from .
-        -   Added Block/Unblock buttons to the Users table, along with a  status badge.
-        -   Aligned buttons in the Users tab (Details, Add, Deduct, Discount, Block) into two rows with fixed width.
-        -   Aligned Label and Refund buttons in the Orders tab vertically.
+        -   **Orders Tab:** Added Weight and Dimensions columns. Label and Refund buttons vertically aligned.
+        -   **Top-ups Tab:** Added new tab with table displaying top-up history and statistics ().
+        -   **Users Tab:** Added Block/Unblock buttons and  status badge. Aligned buttons. Added Invite to Channel button for individual users and Invite All to Channel button above the table. Display  status. Added Check Status button for individual users and Check All button for mass status updates. Added Bot Blocked status badge. Added Check Bot Access button for individual users. Added  function for mass bot access checks. Displayed  status.
+        -   **Broadcast Tab:** Added a new 📢 Broadcast tab. Implemented  state,  function,  function. Integrated  for live preview. Added buttons for text formatting (bold, italic, link, color), 📷 Insert Image (URL), ⬆️ Upload Image (local file), 👁️ Preview toggle. Displays uploaded image preview. Clears inputs after sending.
+        -   **State Management:** Introduced states for managing new features (e.g., , , , ).
+        -   **Error Handling/UI:** Added  for API failures.  for debugging.
 -   **/app/frontend/.env**:
     -   **Summary of why this file is important:** Stores environment variables for the frontend.
-    -   **Summary of the changes made to this file:** No explicit changes mentioned in the trajectory, but  and  are used.
--   **/app/frontend/src/components/OrdersTab.jsx**:
-    -   **Summary of why this file is important:** Intended for order-related UI.
-    -   **Summary of the changes made to this file:** No changes were explicitly made here, as relevant UI code was within .
+    -   **Summary of the changes made to this file:** No explicit changes mentioned.
+-   **/app/frontend/src/components/ui/textarea.jsx**:
+    -   **Summary of why this file is important:** A UI component for multiline text input (used in Broadcast tab).
+    -   **Summary of the changes made to this file:** No explicit changes mentioned, but it's used.
 </code_architecture>
 
 <pending_tasks>
--   **Template Feature Completion:** The Use Template functionality is not fully working, specifically initiating the ConversationHandler with pre-filled data after a template is selected.
+-   **Broadcast Tab:** The functionality to check bot blocking status for *all* users (a Check All Bot Access button) was requested by the user (сделай кнопку что бы можно проверить всех пользователей на блокировку) and the AI engineer had just started adding the function () in the frontend.
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer was implementing the Templates feature for the Telegram bot. Users should be able to select a saved template, and the bot should then pre-fill the order creation flow with the template's address data.
-
-The user reported that after clicking a template button (e.g., Склад NY) and then clicking Использовать шаблон (Use Template), nothing happens. The AI engineer identified that while the template data is loaded, the bot tries to prompt the user for the next piece of information (weight) *outside* of the  flow. This means the subsequent user input is not handled correctly.
-
-The last action taken by the AI engineer was to:
-1.  Read the file .
-2.  Edit this file to address the issue, specifically by modifying the  function to correctly initiate the  with the pre-filled . This involves starting the order creation process () but bypassing the initial address input steps, jumping directly to the weight input.
-3.  The specific edit was to the  function to ensure that when a template is selected, the  is properly entered or re-entered at the correct state (e.g., ) with the template data already populated in .
+Immediately before this summary, the AI engineer was working on the Broadcast feature within the admin panel, specifically enhancing the ability to manage and send messages. The user requested a button to check the bot blocking status for *all* users, to identify which users have blocked the bot en masse. The AI engineer had just finished adding the  endpoint to the backend () to process this request. The current task is to implement the corresponding frontend logic () in  and integrate the button into the Users tab of the admin panel, to trigger this mass check and update the UI with the results. This will complete the visibility of blocked bot users and allow admin to effectively filter out inactive users for future broadcasts.
 </current_work>
 
 <optional_next_step>
-Complete the  function to correctly restart the  at  state.
+Implement the  function in  and add the Check All Bot Access button.
 </optional_next_step>
