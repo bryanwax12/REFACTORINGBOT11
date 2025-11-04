@@ -1530,34 +1530,6 @@ const Dashboard = () => {
               <CardDescription>Send a message to all users (excluding blocked users)</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Image URL Input */}
-              <div className="space-y-2">
-                <Label htmlFor="broadcast-image" className="flex items-center gap-2">
-                  <ImageIcon className="w-4 h-4" />
-                  Image URL (optional)
-                </Label>
-                <Input
-                  id="broadcast-image"
-                  type="url"
-                  placeholder="https://example.com/image.jpg"
-                  value={broadcastImageUrl}
-                  onChange={(e) => setBroadcastImageUrl(e.target.value)}
-                />
-                {broadcastImageUrl && (
-                  <div className="mt-2">
-                    <img 
-                      src={broadcastImageUrl} 
-                      alt="Preview" 
-                      className="max-h-32 rounded border"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                        toast.error('Не удалось загрузить изображение');
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-
               {/* Formatting Toolbar */}
               <div className="space-y-2">
                 <Label>Formatting Tools</Label>
