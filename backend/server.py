@@ -5260,6 +5260,150 @@ async def broadcast_message(
         logger.error(f"Error sending broadcast: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.get("/maintenance/status")
+async def get_maintenance_status(authenticated: bool = Depends(verify_admin_key)):
+    """Get current maintenance mode status"""
+    try:
+        settings = await db.settings.find_one({"key": "maintenance_mode"})
+        is_maintenance = settings.get("value", False) if settings else False
+        
+        return {
+            "maintenance_mode": is_maintenance
+        }
+    except Exception as e:
+        logger.error(f"Error getting maintenance status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/maintenance/enable")
+async def enable_maintenance_mode(authenticated: bool = Depends(verify_admin_key)):
+    """Enable maintenance mode - notify all users and admin"""
+    try:
+        # Set maintenance mode in database
+        await db.settings.update_one(
+            {"key": "maintenance_mode"},
+            {"$set": {"value": True, "updated_at": datetime.now(timezone.utc).isoformat()}},
+            upsert=True
+        )
+        
+        # Send message to all users
+        users = await db.users.find({"blocked": {"$ne": True}}).to_list(length=None)
+        
+        maintenance_message = """🔧 *Бот находится на техническом обслуживании.*
+
+Пожалуйста, попробуйте позже.
+
+Приносим извинения за неудобства."""
+        
+        success_count = 0
+        failed_count = 0
+        
+        for user in users:
+            try:
+                await bot_instance.send_message(
+                    chat_id=user['telegram_id'],
+                    text=maintenance_message,
+                    parse_mode='Markdown'
+                )
+                success_count += 1
+                await asyncio.sleep(0.05)  # Rate limiting
+            except Exception as e:
+                logger.error(f"Failed to send maintenance message to {user['telegram_id']}: {e}")
+                failed_count += 1
+        
+        # Send confirmation to admin
+        if ADMIN_TELEGRAM_ID:
+            admin_message = f"""✅ *Режим технического обслуживания включён*
+
+📊 Уведомлений отправлено: {success_count}
+❌ Ошибок: {failed_count}
+
+Вы можете продолжать работу с ботом для тестирования и исправлений."""
+            
+            try:
+                await bot_instance.send_message(
+                    chat_id=ADMIN_TELEGRAM_ID,
+                    text=admin_message,
+                    parse_mode='Markdown'
+                )
+            except Exception as e:
+                logger.error(f"Failed to send confirmation to admin: {e}")
+        
+        return {
+            "status": "success",
+            "maintenance_mode": True,
+            "users_notified": success_count,
+            "failed": failed_count
+        }
+        
+    except Exception as e:
+        logger.error(f"Error enabling maintenance mode: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/maintenance/disable")
+async def disable_maintenance_mode(authenticated: bool = Depends(verify_admin_key)):
+    """Disable maintenance mode - notify all users"""
+    try:
+        # Disable maintenance mode in database
+        await db.settings.update_one(
+            {"key": "maintenance_mode"},
+            {"$set": {"value": False, "updated_at": datetime.now(timezone.utc).isoformat()}},
+            upsert=True
+        )
+        
+        # Send message to all users that bot is back online
+        users = await db.users.find({"blocked": {"$ne": True}}).to_list(length=None)
+        
+        back_online_message = """✅ *Бот снова работает!*
+
+Техническое обслуживание завершено. Вы можете продолжать пользоваться ботом.
+
+Спасибо за ожидание! 🚀"""
+        
+        success_count = 0
+        failed_count = 0
+        
+        for user in users:
+            try:
+                await bot_instance.send_message(
+                    chat_id=user['telegram_id'],
+                    text=back_online_message,
+                    parse_mode='Markdown'
+                )
+                success_count += 1
+                await asyncio.sleep(0.05)  # Rate limiting
+            except Exception as e:
+                logger.error(f"Failed to send back online message to {user['telegram_id']}: {e}")
+                failed_count += 1
+        
+        # Send confirmation to admin
+        if ADMIN_TELEGRAM_ID:
+            admin_message = f"""✅ *Режим технического обслуживания выключен*
+
+📊 Уведомлений отправлено: {success_count}
+❌ Ошибок: {failed_count}
+
+Бот снова доступен для всех пользователей."""
+            
+            try:
+                await bot_instance.send_message(
+                    chat_id=ADMIN_TELEGRAM_ID,
+                    text=admin_message,
+                    parse_mode='Markdown'
+                )
+            except Exception as e:
+                logger.error(f"Failed to send confirmation to admin: {e}")
+        
+        return {
+            "status": "success",
+            "maintenance_mode": False,
+            "users_notified": success_count,
+            "failed": failed_count
+        }
+        
+    except Exception as e:
+        logger.error(f"Error disabling maintenance mode: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.post("/upload-image")
 async def upload_image(
     file: UploadFile = File(...),
