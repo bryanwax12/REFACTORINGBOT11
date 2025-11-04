@@ -526,6 +526,8 @@ const Dashboard = () => {
         toast.success(message);
         setBroadcastMessage(''); // Clear the form
         setBroadcastImageUrl(''); // Clear image URL
+        setBroadcastFileId(''); // Clear file_id
+        setUploadedImagePreview(''); // Clear preview
       }
     } catch (error) {
       console.error('Error sending broadcast:', error);
