@@ -1705,11 +1705,11 @@ const Dashboard = () => {
               </div>
 
               {/* Image Preview (if added) */}
-              {broadcastImageUrl && (
+              {(broadcastImageUrl || uploadedImagePreview || broadcastFileId) && (
                 <div className="border rounded-lg p-3 bg-muted/50">
                   <div className="flex items-start gap-3">
                     <img 
-                      src={broadcastImageUrl} 
+                      src={uploadedImagePreview || broadcastImageUrl} 
                       alt="Attached" 
                       className="max-h-24 rounded border bg-white"
                       onError={(e) => {
@@ -1718,14 +1718,25 @@ const Dashboard = () => {
                       }}
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium">Изображение добавлено</p>
-                      <p className="text-xs text-muted-foreground truncate">{broadcastImageUrl}</p>
+                      <p className="text-sm font-medium">
+                        {broadcastFileId ? '✅ Загружено в Telegram' : '🔗 Изображение по URL'}
+                      </p>
+                      {broadcastImageUrl && (
+                        <p className="text-xs text-muted-foreground truncate">{broadcastImageUrl}</p>
+                      )}
+                      {broadcastFileId && (
+                        <p className="text-xs text-green-600">Готово к отправке через Telegram</p>
+                      )}
                     </div>
                     <Button
                       type="button"
                       size="sm"
                       variant="ghost"
-                      onClick={() => setBroadcastImageUrl('')}
+                      onClick={() => {
+                        setBroadcastImageUrl('');
+                        setBroadcastFileId('');
+                        setUploadedImagePreview('');
+                      }}
                       title="Удалить изображение"
                     >
                       ✕
