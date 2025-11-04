@@ -576,6 +576,8 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await start_command(update, context)
     elif query.data == 'my_balance':
         await my_balance_command(update, context)
+    elif query.data == 'my_templates':
+        await my_templates_menu(update, context)
     elif query.data == 'help':
         await help_command(update, context)
     elif query.data == 'faq':
