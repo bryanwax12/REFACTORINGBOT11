@@ -1810,7 +1810,14 @@ async def show_edit_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     keyboard = [
         [InlineKeyboardButton("📤 Адрес отправителя", callback_data='edit_from_address')],
-
+        [InlineKeyboardButton("📥 Адрес получателя", callback_data='edit_to_address')],
+        [InlineKeyboardButton("📦 Вес посылки", callback_data='edit_parcel')],
+        [InlineKeyboardButton("⬅️ Назад", callback_data='back_to_confirmation')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await query.message.reply_text(message, reply_markup=reply_markup)
+    return EDIT_MENU
 
 # Template Management Functions
 async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
