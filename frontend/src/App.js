@@ -1624,8 +1624,11 @@ const Dashboard = () => {
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
-                    onClick={() => setBroadcastMessage('')}
-                    disabled={!broadcastMessage || sendingBroadcast}
+                    onClick={() => {
+                      setBroadcastMessage('');
+                      setBroadcastImageUrl('');
+                    }}
+                    disabled={(!broadcastMessage && !broadcastImageUrl) || sendingBroadcast}
                   >
                     Очистить
                   </Button>
