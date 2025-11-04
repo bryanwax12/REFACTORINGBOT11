@@ -4945,6 +4945,7 @@ async def broadcast_message(
         
         message = request.message
         image_url = request.image_url
+        file_id = request.file_id
         
         if not bot_instance:
             raise HTTPException(status_code=500, detail="Bot not initialized")
