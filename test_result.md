@@ -141,6 +141,25 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ TEMPLATES RENAME FUNCTIONALITY VERIFIED: Comprehensive testing confirms the ConversationHandler state conflict fix is working perfectly. IMPLEMENTATION VERIFICATION: (1) ✅ template_rename_handler ConversationHandler created and registered correctly, (2) ✅ Entry point configured with CallbackQueryHandler(rename_template_start, pattern='^template_rename_'), (3) ✅ TEMPLATE_RENAME state properly defined with MessageHandler for rename_template_save, (4) ✅ Fallbacks configured (my_templates_menu, start_command), (5) ✅ Handler registered BEFORE order_conv_handler (correct priority), (6) ✅ rename_template_start() function extracts template_id correctly and stores in context.user_data['renaming_template_id'], (7) ✅ Shows correct prompt 'Введите новое название для шаблона (до 30 символов):', (8) ✅ Returns TEMPLATE_RENAME state properly, (9) ✅ rename_template_save() validates name (max 30 chars, not empty), retrieves template_id from context, updates database, (10) ✅ Shows confirmation message with 'Просмотреть' button, (11) ✅ Returns ConversationHandler.END to exit conversation, (12) ✅ rename_template_start removed from standalone handlers (no state conflict), (13) ✅ TEMPLATE_RENAME removed from order_conv_handler (clean separation), (14) ✅ Database connectivity confirmed with 1 template available for testing. CRITICAL SUCCESS: All 8/8 critical components passed (100% success rate). The complete rename workflow now functions correctly: User clicks 'Переименовать' → enters template_rename_handler → bot shows prompt → user types new name → rename_template_save processes → updates DB → shows confirmation → exits conversation. The user-reported bot freeze issue has been completely resolved - no more state conflicts."
+        - working: true
+          agent: "testing"
+          comment: "✅ TEMPLATES RENAME FUNCTIONALITY VERIFIED: Testing confirmed fix is working perfectly. ConversationHandler properly created and registered, state conflict resolved, bot no longer freezes."
+
+backend:
+  - task: "Continue Order After Template Save - Return to Confirmation Screen"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "❌ USER REPORTED ISSUE: After saving template from data confirmation screen, when clicking 'Продолжить создание заказа' button, bot asks for parcel weight again. This is wrong because weight and dimensions data already exists. User should be returned to '📋 Проверьте введенные данные:' screen to continue with order creation (select shipping rate)."
+        - working: "NA"
+          agent: "main"
+          comment: "🔧 FIX APPLIED: Modified continue_order_after_template() function (lines 1959-1965). PROBLEM: Function was returning user to PARCEL_WEIGHT state, asking for weight input again, even though weight/dimensions data already existed in context.user_data (since template was saved from CONFIRM_DATA screen). SOLUTION: Changed continue_order_after_template() to call show_data_confirmation() instead, which displays the '📋 Проверьте введенные данные:' screen with all entered data and options to proceed with rate selection or edit data. Now flow works correctly: User on CONFIRM_DATA screen → clicks 'Сохранить как шаблон' → enters template name → template saved → clicks 'Продолжить создание заказа' → returns to CONFIRM_DATA screen → can proceed with 'Все верно, показать тарифы' button. Backend restarted successfully. Ready for testing."
 
 backend:
   - task: "Oxapay Webhook - Critical Bug Fix (track_id format mismatch)"
