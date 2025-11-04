@@ -4994,7 +4994,27 @@ async def broadcast_message(
                 
                 success_count += 1
                 # Small delay to avoid rate limiting
-
+                await asyncio.sleep(0.05)
+            except Exception as e:
+                logger.error(f"Failed to send broadcast to user {user['telegram_id']}: {e}")
+                failed_count += 1
+                failed_users.append(user['telegram_id'])
+        
+        return {
+            "success": True,
+            "message": f"Broadcast sent to {success_count} users, skipped {skipped_count} blocked users",
+            "success_count": success_count,
+            "failed_count": failed_count,
+            "skipped_count": skipped_count,
+            "failed_users": failed_users,
+            "skipped_users": skipped_users
+        }
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error sending broadcast: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/upload-image")
 async def upload_image(
