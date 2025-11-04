@@ -5342,6 +5342,26 @@ async def startup_event():
                     PAYMENT_METHOD: [CallbackQueryHandler(process_payment, pattern='^(pay_from_balance|pay_with_crypto|top_up_balance|back_to_rates|return_to_order|confirm_cancel|cancel_order)')],
                     TOPUP_AMOUNT: [
                         MessageHandler(filters.TEXT & ~filters.COMMAND, handle_topup_amount)
+                    ],
+                    TEMPLATE_NAME: [
+                        MessageHandler(filters.TEXT & ~filters.COMMAND, save_template_name),
+                        CallbackQueryHandler(start_command, pattern='^start$')
+                    ],
+                    TEMPLATE_LIST: [
+                        CallbackQueryHandler(use_template, pattern='^template_use_'),
+                        CallbackQueryHandler(view_template, pattern='^template_view_'),
+                        CallbackQueryHandler(start_command, pattern='^start$')
+                    ],
+                    TEMPLATE_VIEW: [
+                        CallbackQueryHandler(use_template, pattern='^template_use_'),
+                        CallbackQueryHandler(rename_template_start, pattern='^template_rename_'),
+                        CallbackQueryHandler(delete_template, pattern='^template_delete_'),
+                        CallbackQueryHandler(confirm_delete_template, pattern='^template_confirm_delete_'),
+                        CallbackQueryHandler(my_templates_menu, pattern='^my_templates$'),
+                        CallbackQueryHandler(start_command, pattern='^start$')
+                    ],
+                    TEMPLATE_RENAME: [
+                        MessageHandler(filters.TEXT & ~filters.COMMAND, rename_template_save)
                     ]
                 },
                 fallbacks=[
