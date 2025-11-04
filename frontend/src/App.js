@@ -1521,11 +1521,87 @@ const Dashboard = () => {
               <CardDescription>Send a message to all users (excluding blocked users)</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Image URL Input */}
               <div className="space-y-2">
-                <Label htmlFor="broadcast-message">Message (Markdown supported)</Label>
+                <Label htmlFor="broadcast-image" className="flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4" />
+                  Image URL (optional)
+                </Label>
+                <Input
+                  id="broadcast-image"
+                  type="url"
+                  placeholder="https://example.com/image.jpg"
+                  value={broadcastImageUrl}
+                  onChange={(e) => setBroadcastImageUrl(e.target.value)}
+                />
+                {broadcastImageUrl && (
+                  <div className="mt-2">
+                    <img 
+                      src={broadcastImageUrl} 
+                      alt="Preview" 
+                      className="max-h-32 rounded border"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        toast.error('Не удалось загрузить изображение');
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Formatting Toolbar */}
+              <div className="space-y-2">
+                <Label>Formatting Tools</Label>
+                <div className="flex gap-2 flex-wrap">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => formatText('bold')}
+                    title="Жирный текст"
+                  >
+                    <Bold className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => formatText('italic')}
+                    title="Курсив"
+                  >
+                    <Italic className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => formatText('code')}
+                    title="Код"
+                  >
+                    <Code className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => formatText('link')}
+                    title="Ссылка"
+                  >
+                    <LinkIcon className="w-4 h-4" />
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Выделите текст и нажмите кнопку для форматирования
+                </p>
+              </div>
+
+              {/* Message Textarea */}
+              <div className="space-y-2">
+                <Label htmlFor="broadcast-message">Message</Label>
                 <Textarea
+                  ref={(ref) => setTextareaRef(ref)}
                   id="broadcast-message"
-                  placeholder="Введите сообщение для рассылки...&#10;&#10;Вы можете использовать Markdown:&#10;*жирный текст*&#10;_курсив_&#10;[ссылка](https://example.com)"
+                  placeholder="Введите сообщение для рассылки..."
                   value={broadcastMessage}
                   onChange={(e) => setBroadcastMessage(e.target.value)}
                   rows={8}
