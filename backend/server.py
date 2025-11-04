@@ -4885,8 +4885,7 @@ async def startup_event():
                     SELECT_CARRIER: [CallbackQueryHandler(select_carrier, pattern='^(select_carrier_|refresh_rates|return_to_order|confirm_cancel|cancel_order)')],
                     PAYMENT_METHOD: [CallbackQueryHandler(process_payment, pattern='^(pay_from_balance|pay_with_crypto|top_up_balance|back_to_rates|return_to_order|confirm_cancel|cancel_order)')],
                     TOPUP_AMOUNT: [
-                        MessageHandler(filters.TEXT & ~filters.COMMAND, handle_topup_amount),
-                        CallbackQueryHandler(handle_topup_crypto_selection, pattern='^(topup_crypto_|return_to_order|confirm_cancel|cancel_order)')
+                        MessageHandler(filters.TEXT & ~filters.COMMAND, handle_topup_amount)
                     ]
                 },
                 fallbacks=[
