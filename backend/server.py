@@ -4960,11 +4960,18 @@ async def broadcast_message(
         skipped_users = []
         
         for user in users:
-            # Skip blocked users
+            # Skip admin-blocked users
             if user.get('blocked', False):
                 skipped_count += 1
                 skipped_users.append(user['telegram_id'])
-                logger.info(f"Skipping broadcast to user {user['telegram_id']} - user is blocked")
+                logger.info(f"Skipping broadcast to user {user['telegram_id']} - user is blocked by admin")
+                continue
+            
+            # Skip users who blocked the bot
+            if user.get('bot_blocked_by_user', False):
+                skipped_count += 1
+                skipped_users.append(user['telegram_id'])
+                logger.info(f"Skipping broadcast to user {user['telegram_id']} - user blocked the bot")
                 continue
             
             try:
