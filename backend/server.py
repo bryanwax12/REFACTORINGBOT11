@@ -2866,8 +2866,9 @@ Shipping label создан успешно!""",
                 await query.message.reply_text(f"❌ Ошибка создания инвойса: {error_msg}")
                 
         elif query.data == 'top_up_balance':
-            # Save order data before top-up so user can return to payment after
-            context.user_data['pending_order_data'] = {
+            # Save order data to database before top-up so user can return to payment after
+            pending_order = {
+                'telegram_id': telegram_id,
                 'selected_rate': data.get('selected_rate'),
                 'final_amount': context.user_data.get('final_amount'),
                 'user_discount': context.user_data.get('user_discount', 0),
@@ -2889,8 +2890,15 @@ Shipping label создан успешно!""",
                 'parcel_weight': data.get('parcel_weight'),
                 'parcel_length': data.get('parcel_length'),
                 'parcel_width': data.get('parcel_width'),
-                'parcel_height': data.get('parcel_height')
+                'parcel_height': data.get('parcel_height'),
+                'created_at': datetime.now(timezone.utc).isoformat()
             }
+            
+            # Delete any existing pending order for this user
+            await db.pending_orders.delete_many({"telegram_id": telegram_id})
+            # Save new pending order
+            await db.pending_orders.insert_one(pending_order)
+            
             context.user_data['last_state'] = TOPUP_AMOUNT  # Save state for cancel return
             
             keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
