@@ -490,13 +490,8 @@ const Dashboard = () => {
       setSendingBroadcast(true);
       toast.info('Отправка рассылки...');
 
-      const formData = new FormData();
-      formData.append('message', broadcastMessage);
-
-      const response = await axios.post(`${API}/broadcast`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+      const response = await axios.post(`${API}/broadcast`, {
+        message: broadcastMessage
       });
 
       if (response.data.success) {
