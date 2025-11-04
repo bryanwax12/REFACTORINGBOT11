@@ -471,6 +471,7 @@ const Dashboard = () => {
         loadData(); // Reload to update statuses
       }
     } catch (error) {
+      console.error('Error checking all channel status:', error);
       toast.error(error.response?.data?.detail || "Failed to check channel statuses");
     }
   };
