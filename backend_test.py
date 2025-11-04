@@ -1433,7 +1433,7 @@ def test_check_all_bot_access():
         
         # Test 2: Test with invalid admin key (should fail)
         print("   Test 2: Testing with invalid admin key")
-        headers = {'X-Admin-Key': 'invalid_key'}
+        headers = {'x-api-key': 'invalid_key'}
         response = requests.post(f"{API_BASE}/users/check-all-bot-access", headers=headers, timeout=30)
         
         if response.status_code == 403:
@@ -1443,7 +1443,7 @@ def test_check_all_bot_access():
         
         # Test 3: Test with valid admin key (main test)
         print("   Test 3: Testing with valid admin authentication")
-        headers = {'X-Admin-Key': admin_api_key}
+        headers = {'x-api-key': admin_api_key}
         
         print(f"   📋 Sending POST request to /api/users/check-all-bot-access")
         print(f"   📋 Using admin key: {admin_api_key[:20]}...")
