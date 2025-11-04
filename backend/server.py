@@ -2947,10 +2947,9 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     # Restore order data to context
     context.user_data.update(pending_order)
     
-    telegram_id = query.from_user.id
     user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
-    selected_rate = pending_data['selected_rate']
-    amount = pending_data.get('final_amount', selected_rate['amount'])
+    selected_rate = pending_order['selected_rate']
+    amount = pending_order.get('final_amount', selected_rate['amount'])
     user_balance = user.get('balance', 0)
     
     # Show payment options
