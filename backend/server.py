@@ -2075,7 +2075,7 @@ async def view_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Don't return state - working outside ConversationHandler
 
 async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Load template data into context and start order"""
+    """Load template data into context and start order via ConversationHandler"""
     query = update.callback_query
     await query.answer()
     
@@ -2084,7 +2084,7 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     if not template:
         await query.message.reply_text("❌ Шаблон не найден")
-        return ConversationHandler.END
+        return
     
     # Load template data into context
     context.user_data['from_name'] = template.get('from_name', '')
@@ -2101,24 +2101,26 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['to_state'] = template.get('to_state', '')
     context.user_data['to_zip'] = template.get('to_zip', '')
     context.user_data['to_phone'] = template.get('to_phone', '')
+    context.user_data['using_template'] = True
+    context.user_data['template_name'] = template['name']
     
-    # Ask for parcel weight (first thing not in template)
-    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+    # Instead of staying outside ConversationHandler, show confirmation with button to start
+    keyboard = [
+        [InlineKeyboardButton("📦 Продолжить создание заказа", callback_data='start_order_with_template')],
+        [InlineKeyboardButton("🔙 К списку шаблонов", callback_data='my_templates')]
+    ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await query.message.reply_text(
         f"""✅ *Шаблон "{template['name']}" загружен!*
 
-Теперь введите данные посылки:
+📤 От: {template.get('from_name')} ({template.get('from_city')}, {template.get('from_state')})
+📥 Кому: {template.get('to_name')} ({template.get('to_city')}, {template.get('to_state')})
 
-*Вес посылки в фунтах (lb)*
-Например: 5.5""",
+Нажмите кнопку для продолжения создания заказа.""",
         reply_markup=reply_markup,
         parse_mode='Markdown'
     )
-    
-    context.user_data['last_state'] = PARCEL_WEIGHT
-    return PARCEL_WEIGHT
 
 async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Delete template with confirmation"""
