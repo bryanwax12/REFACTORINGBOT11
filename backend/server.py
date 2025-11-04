@@ -2919,11 +2919,13 @@ Shipping label создан успешно!""",
 
 async def return_to_payment_after_topup(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Return user to payment screen after topping up balance"""
+    logger.info(f"return_to_payment_after_topup called - user_id: {update.effective_user.id}")
     query = update.callback_query
     await query.answer()
     
     # Check if user has pending order data
     pending_data = context.user_data.get('pending_order_data')
+    logger.info(f"Pending order data exists: {pending_data is not None}")
     
     if not pending_data or not pending_data.get('selected_rate'):
         await query.message.reply_text(
