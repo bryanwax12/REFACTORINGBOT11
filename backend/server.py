@@ -5083,6 +5083,73 @@ async def upload_image(
                     os.remove(temp_path)
                     
                     return {
+
+
+@api_router.post("/users/{telegram_id}/check-bot-access")
+async def check_bot_access(telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
+    """Check if bot can send messages to user"""
+    try:
+        user = await db.users.find_one({"telegram_id": telegram_id})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        if not bot_instance:
+            raise HTTPException(status_code=500, detail="Bot not initialized")
+        
+        try:
+            # Try to send a test message
+            await bot_instance.send_chat_action(
+                chat_id=telegram_id,
+                action="typing"
+            )
+            
+            # If successful, user hasn't blocked the bot
+            await db.users.update_one(
+                {"telegram_id": telegram_id},
+                {"$set": {
+                    "bot_blocked_by_user": False,
+                    "bot_access_checked_at": datetime.now(timezone.utc).isoformat()
+                }}
+            )
+            
+            return {
+                "success": True,
+                "bot_accessible": True,
+                "message": "Bot can send messages to user"
+            }
+            
+        except Exception as e:
+            error_msg = str(e)
+            
+            # Check if user blocked the bot
+            if "bot was blocked by the user" in error_msg.lower() or "forbidden" in error_msg.lower():
+                logger.warning(f"User {telegram_id} has blocked the bot")
+                
+                await db.users.update_one(
+                    {"telegram_id": telegram_id},
+                    {"$set": {
+                        "bot_blocked_by_user": True,
+                        "bot_blocked_at": datetime.now(timezone.utc).isoformat(),
+                        "bot_access_checked_at": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+                
+                return {
+                    "success": True,
+                    "bot_accessible": False,
+                    "message": "User has blocked the bot"
+                }
+            else:
+                # Other error
+                logger.error(f"Error checking bot access for user {telegram_id}: {e}")
+                raise HTTPException(status_code=500, detail=f"Error checking access: {str(e)}")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error checking bot access: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
                         "success": True,
                         "file_id": file_id,
                         "message": "Image uploaded successfully"
