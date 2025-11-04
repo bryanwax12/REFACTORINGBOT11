@@ -2288,6 +2288,24 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         
         data = context.user_data
         
+        # Validate required fields
+        required_fields = ['from_name', 'from_street', 'from_city', 'from_state', 'from_zip', 
+                          'to_name', 'to_street', 'to_city', 'to_state', 'to_zip', 'weight']
+        missing_fields = [field for field in required_fields if not data.get(field)]
+        
+        if missing_fields:
+            logger.error(f"Missing required fields: {missing_fields}")
+            keyboard = [
+                [InlineKeyboardButton("✏️ Редактировать данные", callback_data='edit_data')],
+                [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await query.message.reply_text(
+                f"❌ Отсутствуют обязательные данные: {', '.join(missing_fields)}\n\nПожалуйста, заполните все поля.",
+                reply_markup=reply_markup
+            )
+            return CONFIRM_DATA
+        
         # Get carrier IDs
         headers = {
             'API-Key': SHIPSTATION_API_KEY,
