@@ -820,7 +820,38 @@ const Dashboard = () => {
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground mt-1">Shipping bot analytics and management</p>
         </div>
+        <div className="flex gap-3">
+          {maintenanceMode ? (
+            <Button 
+              onClick={disableMaintenanceMode}
+              disabled={loadingMaintenance}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {loadingMaintenance ? '⏳ Обработка...' : '✅ Выключить режим обслуживания'}
+            </Button>
+          ) : (
+            <Button 
+              onClick={enableMaintenanceMode}
+              disabled={loadingMaintenance}
+              variant="outline"
+              className="border-orange-600 text-orange-600 hover:bg-orange-50"
+            >
+              {loadingMaintenance ? '⏳ Обработка...' : '🔧 Включить режим обслуживания'}
+            </Button>
+          )}
+        </div>
       </div>
+      
+      {maintenanceMode && (
+        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+          <div className="flex items-center gap-2">
+            <span className="text-orange-600 font-semibold">⚠️ Режим технического обслуживания активен</span>
+          </div>
+          <p className="text-sm text-orange-600 mt-1">
+            Все пользователи получили уведомление. Только администратор может пользоваться ботом.
+          </p>
+        </div>
+      )}
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card data-testid="stat-users">
