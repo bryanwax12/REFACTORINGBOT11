@@ -325,6 +325,30 @@ class OrderCreate(BaseModel):
     parcel: Parcel
     amount: float
 
+class Template(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    telegram_id: int
+    name: str  # User-defined template name
+    # From address
+    from_name: str
+    from_street1: str
+    from_street2: Optional[str] = None
+    from_city: str
+    from_state: str
+    from_zip: str
+    from_phone: Optional[str] = None
+    # To address
+    to_name: str
+    to_street1: str
+    to_street2: Optional[str] = None
+    to_city: str
+    to_state: str
+    to_zip: str
+    to_phone: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 # Telegram Bot Handlers
 async def test_error_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Test command to show error message with admin contact button"""
