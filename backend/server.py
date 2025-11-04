@@ -2842,6 +2842,7 @@ async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Don't save current_state - it's already saved in last_state
     keyboard = [
+        [InlineKeyboardButton("📋 Проверить данные", callback_data='check_data')],
         [InlineKeyboardButton("↩️ Вернуться к заказу", callback_data='return_to_order')],
         [InlineKeyboardButton("✅ Да, отменить заказ", callback_data='confirm_cancel')]
     ]
