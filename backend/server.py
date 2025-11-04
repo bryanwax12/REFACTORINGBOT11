@@ -4996,7 +4996,17 @@ async def broadcast_message(
                 # Small delay to avoid rate limiting
                 await asyncio.sleep(0.05)
             except Exception as e:
+                error_msg = str(e)
                 logger.error(f"Failed to send broadcast to user {user['telegram_id']}: {e}")
+                
+                # Check if user blocked the bot
+                if "bot was blocked by the user" in error_msg.lower() or "forbidden" in error_msg.lower():
+                    logger.warning(f"User {user['telegram_id']} has blocked the bot")
+                    await db.users.update_one(
+                        {"telegram_id": user['telegram_id']},
+                        {"$set": {"bot_blocked_by_user": True, "bot_blocked_at": datetime.now(timezone.utc).isoformat()}}
+                    )
+                
                 failed_count += 1
                 failed_users.append(user['telegram_id'])
         
