@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Add 'Check All Bot Access' button in Users tab to check bot blocking status for all users at once"
+user_problem_statement: "Fix template order creation flow: (1) 'Продолжить создание заказа' button not working after template selection, (2) 'Новый заказ' and 'Из шаблона' buttons working intermittently"
 
 backend:
   - task: "Templates Feature - Use Template Functionality"
