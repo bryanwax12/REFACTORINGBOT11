@@ -5143,6 +5143,34 @@ async def check_bot_access(telegram_id: int, authenticated: bool = Depends(verif
         except Exception as e:
             error_msg = str(e)
             
+            # Check if user blocked the bot
+            if "bot was blocked by the user" in error_msg.lower() or "forbidden" in error_msg.lower():
+                logger.warning(f"User {telegram_id} has blocked the bot")
+                
+                await db.users.update_one(
+                    {"telegram_id": telegram_id},
+                    {"$set": {
+                        "bot_blocked_by_user": True,
+                        "bot_blocked_at": datetime.now(timezone.utc).isoformat(),
+                        "bot_access_checked_at": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+                
+                return {
+                    "success": True,
+                    "bot_accessible": False,
+                    "message": "Bot is blocked by user"
+                }
+            else:
+                # Other error
+                logger.error(f"Error checking bot access for user {telegram_id}: {e}")
+                raise HTTPException(status_code=500, detail=f"Error checking bot access: {str(e)}")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error checking bot access: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @api_router.post("/users/check-all-bot-access")
