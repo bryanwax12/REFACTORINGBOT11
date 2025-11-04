@@ -2917,6 +2917,63 @@ Shipping label создан успешно!""",
         await query.message.reply_text(f"❌ Ошибка при оплате: {str(e)}")
         return ConversationHandler.END
 
+async def return_to_payment_after_topup(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Return user to payment screen after topping up balance"""
+    query = update.callback_query
+    await query.answer()
+    
+    # Check if user has pending order data
+    pending_data = context.user_data.get('pending_order_data')
+    
+    if not pending_data or not pending_data.get('selected_rate'):
+        await query.message.reply_text(
+            "❌ Не найдены данные незавершенного заказа.\n\nПожалуйста, создайте новый заказ.",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("📦 Создать заказ", callback_data='new_order')]])
+        )
+        return ConversationHandler.END
+    
+    # Restore order data to context
+    context.user_data.update(pending_data)
+    
+    telegram_id = query.from_user.id
+    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    selected_rate = pending_data['selected_rate']
+    amount = pending_data.get('final_amount', selected_rate['amount'])
+    user_balance = user.get('balance', 0)
+    
+    # Show payment options
+    keyboard = []
+    
+    if user_balance >= amount:
+        keyboard.append([InlineKeyboardButton(f"💰 Оплатить с баланса (${user_balance:.2f})", callback_data='pay_from_balance')])
+    
+    keyboard.append([InlineKeyboardButton("🪙 Оплатить криптовалютой", callback_data='pay_with_crypto')])
+    
+    if user_balance < amount:
+        keyboard.append([InlineKeyboardButton("💵 Пополнить баланс", callback_data='top_up_balance')])
+    
+    keyboard.append([InlineKeyboardButton("🔙 Назад к тарифам", callback_data='back_to_rates')])
+    keyboard.append([InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')])
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    user_discount = pending_data.get('user_discount', 0)
+    discount_text = f"\n🎉 *Ваша скидка:* {user_discount}%" if user_discount > 0 else ""
+    
+    await query.message.reply_text(
+        f"""💳 *Выберите способ оплаты*
+
+📦 *Выбранный тариф:* {selected_rate['carrier_name']} - {selected_rate['service_type']}
+💰 *Стоимость:* ${amount:.2f}{discount_text}
+💵 *Ваш баланс:* ${user_balance:.2f}
+
+Выберите способ оплаты:""",
+        reply_markup=reply_markup,
+        parse_mode='Markdown'
+    )
+    
+    return PAYMENT_METHOD
+
 async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle custom top-up amount input and create Oxapay invoice directly"""
     try:
