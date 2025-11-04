@@ -1117,7 +1117,7 @@ const Dashboard = () => {
                             )}
                           </td>
                           <td className="py-3 text-xs text-muted-foreground">
-                            {new Date(order.created_at).toLocaleDateString()}
+                            {formatKyivDateTime(order.created_at)}
                           </td>
                           <td className="py-3">
                             <div className="flex flex-col gap-1 justify-end">
