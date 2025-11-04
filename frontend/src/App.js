@@ -21,6 +21,41 @@ const ADMIN_API_KEY = process.env.REACT_APP_ADMIN_API_KEY;
 // Axios default headers with API key
 axios.defaults.headers.common['X-API-Key'] = ADMIN_API_KEY;
 
+// Helper function to format date/time in Kyiv timezone
+const formatKyivDateTime = (dateString) => {
+  if (!dateString) return 'N/A';
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleString('ru-RU', {
+      timeZone: 'Europe/Kiev',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  } catch (e) {
+    return dateString;
+  }
+};
+
+// Helper function to format date only in Kyiv timezone
+const formatKyivDate = (dateString) => {
+  if (!dateString) return 'N/A';
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ru-RU', {
+      timeZone: 'Europe/Kiev',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+  } catch (e) {
+    return dateString;
+  }
+};
+
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [orders, setOrders] = useState([]);
