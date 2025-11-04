@@ -4827,13 +4827,6 @@ async def invite_user_to_channel(telegram_id: int, authenticated: bool = Depends
                 reply_markup=inline_markup
             )
             
-            # Send main menu keyboard separately to keep it persistent
-            await bot_instance.send_message(
-                chat_id=telegram_id,
-                text="Используйте кнопку ниже для быстрого доступа к меню ⬇️",
-                reply_markup=get_main_menu_keyboard()
-            )
-            
             # Update user record to track invitation
             await db.users.update_one(
                 {"telegram_id": telegram_id},
