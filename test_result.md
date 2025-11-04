@@ -632,3 +632,17 @@ backend:
           agent: "user"
           comment: "✅ CONFIRMED WORKING: Buttons now work consistently. User can repeatedly click 'Новый заказ' and 'Из шаблона' without intermittent failures."
 
+
+backend:
+  - task: "Stale Button Protection - Prevent interactions with completed orders"
+    implemented: true
+    working: "pending_test"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "pending_test"
+          agent: "main"
+          comment: "✅ STALE BUTTON PROTECTION IMPLEMENTED: Added check_stale_interaction() helper function to prevent users from clicking buttons on old/completed orders. Function checks if context.user_data is empty or if order_completed flag is set. Added protection to key handlers: process_payment, handle_data_confirmation, select_carrier. When stale interaction detected, shows user-friendly message: '⚠️ Этот заказ уже завершён или отменён. Для создания нового заказа используйте меню в нижней части экрана.' After successful label creation (pay_from_balance), context.user_data is cleared and order_completed flag is set. Same applies on label creation failure. This prevents confusion when users try to interact with buttons from previous completed orders. Ready for testing."
+
