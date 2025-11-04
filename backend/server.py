@@ -460,13 +460,6 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Send welcome message with inline keyboard
     await send_method(welcome_message, reply_markup=reply_markup, parse_mode='Markdown')
-    
-    # Add persistent menu keyboard (only for new message, not callback)
-    if update.message:
-        await update.message.reply_text(
-            "Используйте кнопку ниже для быстрого доступа к меню ⬇️",
-            reply_markup=get_main_menu_keyboard()
-        )
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Handle both command and callback
