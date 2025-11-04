@@ -444,7 +444,7 @@ metadata:
 
 test_plan:
   current_focus: 
-    - "Telegram Bot Shipping Rates with All Carriers and Refresh Button"
+    - "Templates Feature - Use Template Functionality"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
