@@ -2109,6 +2109,9 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=reply_markup,
         parse_mode='Markdown'
     )
+    
+    # End this conversation so the button can start a new one
+    return ConversationHandler.END
 
 async def start_order_with_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Start order creation with pre-loaded template data"""
