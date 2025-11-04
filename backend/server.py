@@ -2233,6 +2233,7 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
 
 async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Start new order (without template)"""
+    logger.info(f"order_new called - user_id: {update.effective_user.id}")
     query = update.callback_query
     await query.answer()
     
@@ -2247,6 +2248,7 @@ async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=reply_markup
     )
     context.user_data['last_state'] = FROM_NAME
+    logger.info(f"order_new returning FROM_NAME state")
     return FROM_NAME
 
 async def order_from_template_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
