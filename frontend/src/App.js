@@ -1638,17 +1638,42 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Preview */}
-              {broadcastMessage && (
+              {/* Live Preview */}
+              {(broadcastMessage || broadcastImageUrl) && (
                 <div className="mt-6 space-y-2">
-                  <Label>Предпросмотр:</Label>
-                  <div className="p-4 bg-muted rounded-lg border">
-                    <div className="whitespace-pre-wrap text-sm">
-                      {broadcastMessage}
+                  <Label>📱 Live Preview (как будет выглядеть в Telegram):</Label>
+                  <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-200">
+                    {/* Telegram Message Bubble */}
+                    <div className="bg-white rounded-2xl shadow-sm p-4 max-w-md">
+                      {broadcastImageUrl && (
+                        <img 
+                          src={broadcastImageUrl} 
+                          alt="Message" 
+                          className="w-full rounded-lg mb-3"
+                          onError={(e) => e.target.style.display = 'none'}
+                        />
+                      )}
+                      <div className="prose prose-sm max-w-none">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            p: ({node, ...props}) => <p className="mb-2" {...props} />,
+                            strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
+                            em: ({node, ...props}) => <em className="italic" {...props} />,
+                            a: ({node, ...props}) => <a className="text-blue-600 underline" {...props} />,
+                            code: ({node, inline, ...props}) => 
+                              inline ? 
+                                <code className="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono" {...props} /> :
+                                <code className="block bg-gray-100 p-2 rounded text-sm font-mono" {...props} />
+                          }}
+                        >
+                          {broadcastMessage}
+                        </ReactMarkdown>
+                      </div>
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    * Telegram применит Markdown форматирование при отправке
+                    * Предпросмотр показывает приблизительный вид сообщения в Telegram
                   </p>
                 </div>
               )}
