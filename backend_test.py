@@ -1494,7 +1494,11 @@ def test_check_all_bot_access():
             
             if users_response.status_code == 200:
                 users_data = users_response.json()
-                users = users_data.get('users', [])
+                # Handle both list and dict response formats
+                if isinstance(users_data, list):
+                    users = users_data
+                else:
+                    users = users_data.get('users', [])
                 
                 print(f"      Found {len(users)} users in database")
                 
