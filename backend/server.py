@@ -4891,11 +4891,19 @@ async def invite_all_users_to_channel(authenticated: bool = Depends(verify_admin
         
         for user in users:
             try:
+                # Send invitation with inline button
                 await bot_instance.send_message(
                     chat_id=user['telegram_id'],
                     text=message,
                     parse_mode='Markdown',
                     reply_markup=reply_markup
+                )
+                
+                # Send persistent menu keyboard
+                await bot_instance.send_message(
+                    chat_id=user['telegram_id'],
+                    text="Используйте кнопку ниже для быстрого доступа к меню ⬇️",
+                    reply_markup=get_main_menu_keyboard()
                 )
                 
                 # Update user record
@@ -4906,7 +4914,7 @@ async def invite_all_users_to_channel(authenticated: bool = Depends(verify_admin
                 
                 success_count += 1
                 # Small delay to avoid rate limiting
-                await asyncio.sleep(0.05)
+                await asyncio.sleep(0.1)
             except Exception as e:
                 logger.error(f"Failed to send invitation to user {user['telegram_id']}: {e}")
                 failed_count += 1
