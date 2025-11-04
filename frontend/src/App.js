@@ -510,6 +510,27 @@ const Dashboard = () => {
     }
   };
 
+
+  const handleCheckAllBotAccess = async () => {
+    try {
+      const confirmed = window.confirm('Проверить доступность бота для всех пользователей?');
+      if (!confirmed) return;
+
+      toast.info('Проверка доступности бота...');
+      
+      const response = await axios.post(`${API}/users/check-all-bot-access`);
+      
+      if (response.data.success) {
+        toast.success(`✅ Проверено: ${response.data.checked_count} пользователей. Доступен: ${response.data.accessible_count}, Заблокировали: ${response.data.blocked_count}`);
+        loadData(); // Reload to update statuses
+      }
+    } catch (error) {
+      console.error('Error checking all bot access:', error);
+      toast.error(error.response?.data?.detail || "Failed to check bot access");
+    }
+  };
+
+
   const handleSendBroadcast = async () => {
     if (!broadcastMessage || !broadcastMessage.trim()) {
       toast.error('Пожалуйста, введите сообщение для рассылки');
