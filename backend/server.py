@@ -1801,6 +1801,46 @@ _Шаблон сохранит оба адреса для быстрого ис�
     if query.data == 'edit_addresses_error':
         # Show edit menu after rate error
         return await show_edit_menu(update, context)
+    
+    if query.data == 'edit_from_address':
+        # Edit from address
+        context.user_data['editing_from_address'] = True
+        keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.message.reply_text(
+            "📤 Редактирование адреса отправителя\n\nШаг 1/6: Имя отправителя\nНапример: John Smith",
+            reply_markup=reply_markup
+        )
+        context.user_data['last_state'] = FROM_NAME
+        return FROM_NAME
+    
+    if query.data == 'edit_to_address':
+        # Edit to address
+        context.user_data['editing_to_address'] = True
+        keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.message.reply_text(
+            "📥 Редактирование адреса получателя\n\nШаг 1/6: Имя получателя\nНапример: Jane Doe",
+            reply_markup=reply_markup
+        )
+        context.user_data['last_state'] = TO_NAME
+        return TO_NAME
+    
+    if query.data == 'edit_parcel':
+        # Edit parcel dimensions
+        context.user_data['editing_parcel'] = True
+        keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.message.reply_text(
+            "📦 Редактирование посылки\n\nВведите вес посылки в фунтах:\nНапример: 5 или 2.5",
+            reply_markup=reply_markup
+        )
+        context.user_data['last_state'] = PARCEL_WEIGHT
+        return PARCEL_WEIGHT
+    
+    if query.data == 'back_to_confirmation':
+        # Return to confirmation screen
+        return await show_data_confirmation(update, context)
 
 async def show_edit_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Show menu to select what to edit"""
