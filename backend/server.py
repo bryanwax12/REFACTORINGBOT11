@@ -1957,31 +1957,13 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 
 async def continue_order_after_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Continue order creation after saving template"""
+    """Continue order creation after saving template - return to data confirmation"""
     query = update.callback_query
     await query.answer()
     
-    # Ask for parcel weight (first thing not in template)
-    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    template_name = context.user_data.get('saved_template_name', 'этот шаблон')
-    
-    await query.message.reply_text(
-        f"""✅ *Продолжаем создание заказа!*
-
-Теперь введите данные посылки:
-
-*Вес посылки в фунтах (lb)*
-Например: 5.5""",
-        reply_markup=reply_markup,
-        parse_mode='Markdown'
-    )
-    
-    context.user_data['last_state'] = PARCEL_WEIGHT
-    return PARCEL_WEIGHT
-
-    return TEMPLATE_NAME  # Stay in state to handle continue button
+    # Since template was saved from CONFIRM_DATA screen, we have all data including weight/dimensions
+    # Return to data confirmation screen
+    return await show_data_confirmation(update, context)
 
 async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Show user's templates list"""
