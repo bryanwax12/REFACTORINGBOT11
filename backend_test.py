@@ -2876,10 +2876,10 @@ def test_oxapay_webhook_success_message():
         return False
 
 def main():
-    """Run all tests - Focus on Oxapay Webhook Success Message"""
-    print("🚀 Testing Oxapay Webhook Success Message with Main Menu Button")
-    print("🎯 Focus: Review Request - Webhook handler code verification")
-    print("=" * 60)
+    """Run all tests - Focus on Continue Order After Template Save"""
+    print("🚀 Testing Continue Order After Template Save Functionality")
+    print("🎯 Focus: Review Request - Template save flow fix verification")
+    print("=" * 80)
     
     # Test results
     results = {}
@@ -2887,46 +2887,33 @@ def main():
     # 1. Test API Health
     results['api_health'] = test_api_health()
     
-    # 2. Test OXAPAY WEBHOOK SUCCESS MESSAGE (Main Focus)
-    results['oxapay_webhook_success_message'] = test_oxapay_webhook_success_message()
+    # 2. Test CONTINUE ORDER AFTER TEMPLATE SAVE (Main Focus)
+    results['continue_order_after_template'] = test_continue_order_after_template_save()
     
-    # 3. Test Supporting Oxapay Infrastructure
-    results['oxapay_order_id_length_fix'] = test_oxapay_order_id_length_fix()
-    results['oxapay_invoice_creation'] = test_oxapay_invoice_creation()
-    
-    # 4. Test Supporting Infrastructure (if needed)
+    # 3. Test Supporting Infrastructure
     results['telegram_infrastructure'] = test_telegram_bot_infrastructure()
     results['bot_token'] = test_telegram_bot_token()
+    results['conversation_functions'] = test_conversation_handler_functions()
     
-    # 5. Check Backend Logs
+    # 4. Check Backend Logs
     check_backend_logs()
     
     # Summary
-    print("\n" + "=" * 60)
-    print("📊 OXAPAY WEBHOOK SUCCESS MESSAGE TEST SUMMARY")
-    print("=" * 60)
+    print("\n" + "=" * 80)
+    print("📊 CONTINUE ORDER AFTER TEMPLATE SAVE TEST SUMMARY")
+    print("=" * 80)
     
-    # Priority order for Oxapay tests
-    webhook_tests = [
-        'oxapay_webhook_success_message'
-    ]
-    oxapay_tests = [
-        'oxapay_order_id_length_fix', 'oxapay_invoice_creation'
+    # Priority order for tests
+    main_tests = [
+        'continue_order_after_template'
     ]
     supporting_tests = [
-        'api_health', 'telegram_infrastructure', 'bot_token'
+        'api_health', 'telegram_infrastructure', 'bot_token', 'conversation_functions'
     ]
     
     # Show results by category
-    print("\n🎯 OXAPAY WEBHOOK SUCCESS MESSAGE TEST:")
-    for test_name in webhook_tests:
-        if test_name in results:
-            passed = results[test_name]
-            status = "✅ PASS" if passed else "❌ FAIL"
-            print(f"   {test_name.replace('_', ' ').title()}: {status}")
-    
-    print("\n🔧 SUPPORTING OXAPAY TESTS:")
-    for test_name in oxapay_tests:
+    print("\n🎯 CONTINUE ORDER AFTER TEMPLATE SAVE TEST:")
+    for test_name in main_tests:
         if test_name in results:
             passed = results[test_name]
             status = "✅ PASS" if passed else "❌ FAIL"
@@ -2940,34 +2927,33 @@ def main():
             print(f"   {test_name.replace('_', ' ').title()}: {status}")
     
     # Overall Assessment
-    webhook_passed = all(results.get(test, False) for test in webhook_tests if test in results)
-    oxapay_passed = all(results.get(test, False) for test in oxapay_tests if test in results)
+    main_passed = all(results.get(test, False) for test in main_tests if test in results)
     supporting_passed = all(results.get(test, False) for test in supporting_tests if test in results)
     all_passed = all(results.values())
     
-    print(f"\n🎯 Webhook Success Message Status: {'✅ SUCCESS' if webhook_passed else '❌ FAILED'}")
-    print(f"🔧 Supporting Oxapay Status: {'✅ SUCCESS' if oxapay_passed else '❌ FAILED'}")
+    print(f"\n🎯 Continue Order After Template Save Status: {'✅ SUCCESS' if main_passed else '❌ FAILED'}")
     print(f"🔧 Supporting Infrastructure Status: {'✅ SUCCESS' if supporting_passed else '❌ FAILED'}")
     print(f"📊 Overall Result: {'✅ ALL TESTS PASSED' if all_passed else '❌ SOME TESTS FAILED'}")
     
-    # Critical Assessment for Webhook Success Message
-    critical_webhook_tests = ['oxapay_webhook_success_message']
-    critical_webhook_passed = all(results.get(test, False) for test in critical_webhook_tests if test in results)
+    # Critical Assessment for Continue Order After Template Save
+    critical_tests = ['continue_order_after_template']
+    critical_passed = all(results.get(test, False) for test in critical_tests if test in results)
     
-    print("\n🎯 Oxapay Webhook Success Message Analysis:")
-    if critical_webhook_passed:
-        print(f"   ✅ REVIEW SUCCESS: Oxapay Webhook Success Message is correctly implemented!")
-        print(f"   ✅ InlineKeyboardButton and InlineKeyboardMarkup correctly configured")
-        print(f"   ✅ Message text includes 'Спасибо! Ваш баланс пополнен!' with bold formatting")
-        print(f"   ✅ parse_mode='Markdown' present for text formatting")
-        print(f"   ✅ reply_markup is passed to send_message")
-        print(f"   ✅ Button has correct callback_data='start' for main menu navigation")
-        print(f"   ✅ Function located at expected lines (3922-3985 range)")
+    print("\n🎯 Continue Order After Template Save Analysis:")
+    if critical_passed:
+        print(f"   ✅ REVIEW SUCCESS: Continue Order After Template Save is correctly implemented!")
+        print(f"   ✅ continue_order_after_template() function exists and calls show_data_confirmation()")
+        print(f"   ✅ Function does NOT return to PARCEL_WEIGHT state (asking for weight again)")
+        print(f"   ✅ show_data_confirmation() displays all data with correct message")
+        print(f"   ✅ ConversationHandler registration is correct in TEMPLATE_NAME state")
+        print(f"   ✅ Context data preservation working (addresses, weight, dimensions)")
+        print(f"   ✅ Expected workflow: CONFIRM_DATA → template save → continue → CONFIRM_DATA")
     else:
-        print(f"   ❌ REVIEW FAILURE: Oxapay Webhook Success Message has issues!")
-        print(f"   ❌ Check InlineKeyboardButton and InlineKeyboardMarkup configuration")
-        print(f"   ❌ Verify message text includes 'Спасибо! Ваш баланс пополнен!' with bold formatting")
-        print(f"   ❌ Ensure parse_mode='Markdown' is present")
+        print(f"   ❌ REVIEW FAILURE: Continue Order After Template Save has issues!")
+        print(f"   ❌ Check continue_order_after_template() function implementation")
+        print(f"   ❌ Verify function calls show_data_confirmation() instead of returning PARCEL_WEIGHT")
+        print(f"   ❌ Ensure ConversationHandler registration is correct")
+        print(f"   ❌ Check context data preservation and display")
         print(f"   ❌ Check reply_markup is passed to send_message")
         print(f"   ❌ Verify button has callback_data='start'")
     
