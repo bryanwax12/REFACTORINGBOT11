@@ -476,6 +476,25 @@ const Dashboard = () => {
     try {
       const confirmed = window.confirm('Проверить статус членства в канале для всех пользователей?');
       console.log('Confirmed:', confirmed);
+
+
+  const handleCheckBotAccess = async (telegram_id) => {
+    try {
+      const response = await axios.post(`${API}/users/${telegram_id}/check-bot-access`);
+      
+      if (response.data.success) {
+        if (response.data.bot_accessible) {
+          toast.success('✅ Бот доступен для пользователя');
+        } else {
+          toast.error('🚫 Пользователь заблокировал бота');
+        }
+        loadData(); // Reload to update status
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Failed to check bot access");
+    }
+  };
+
       if (!confirmed) return;
 
       toast.info('Проверка статусов...');
