@@ -6059,7 +6059,8 @@ async def startup_event():
             order_conv_handler = ConversationHandler(
                 entry_points=[
                     CallbackQueryHandler(new_order_start, pattern='^new_order$'),
-                    CallbackQueryHandler(start_order_with_template, pattern='^start_order_with_template$')
+                    CallbackQueryHandler(start_order_with_template, pattern='^start_order_with_template$'),
+                    CallbackQueryHandler(return_to_payment_after_topup, pattern='^return_to_payment$')
                 ],
                 states={
                     FROM_NAME: [
