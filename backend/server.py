@@ -1808,6 +1808,366 @@ async def show_edit_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     keyboard = [
         [InlineKeyboardButton("📤 Адрес отправителя", callback_data='edit_from_address')],
+
+
+# Template Management Functions
+async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Save template with user-provided name"""
+    template_name = update.message.text.strip()[:30]  # Limit to 30 chars
+    
+    if not template_name:
+        await update.message.reply_text("❌ Название не может быть пустым. Попробуйте еще раз:")
+        return TEMPLATE_NAME
+    
+    telegram_id = update.effective_user.id
+    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    
+    # Check if template with this name already exists
+    existing = await db.templates.find_one({
+        "telegram_id": telegram_id,
+        "name": template_name
+    })
+    
+    if existing:
+        # Ask to update or use new name
+        keyboard = [
+            [InlineKeyboardButton("🔄 Обновить существующий", callback_data=f'template_update_{existing["id"]}')],
+            [InlineKeyboardButton("📝 Ввести другое название", callback_data='template_new_name')],
+            [InlineKeyboardButton("❌ Отмена", callback_data='start')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await update.message.reply_text(
+            f"""⚠️ Шаблон с названием "{template_name}" уже существует.
+
+Что делать?""",
+            reply_markup=reply_markup
+        )
+        context.user_data['pending_template_name'] = template_name
+        return TEMPLATE_NAME
+    
+    # Check template limit (10 templates max)
+    templates_count = await db.templates.count_documents({"telegram_id": telegram_id})
+    if templates_count >= 10:
+        await update.message.reply_text(
+            """❌ Достигнут лимит шаблонов (10)
+
+Удалите старые шаблоны в меню "📋 Мои шаблоны" """,
+            parse_mode='Markdown'
+        )
+        return ConversationHandler.END
+    
+    # Create template
+    template = Template(
+        user_id=user['id'],
+        telegram_id=telegram_id,
+        name=template_name,
+        from_name=context.user_data.get('from_name', ''),
+        from_street1=context.user_data.get('from_address', ''),
+        from_street2=context.user_data.get('from_address2', ''),
+        from_city=context.user_data.get('from_city', ''),
+        from_state=context.user_data.get('from_state', ''),
+        from_zip=context.user_data.get('from_zip', ''),
+        from_phone=context.user_data.get('from_phone', ''),
+        to_name=context.user_data.get('to_name', ''),
+        to_street1=context.user_data.get('to_address', ''),
+        to_street2=context.user_data.get('to_address2', ''),
+        to_city=context.user_data.get('to_city', ''),
+        to_state=context.user_data.get('to_state', ''),
+        to_zip=context.user_data.get('to_zip', ''),
+        to_phone=context.user_data.get('to_phone', '')
+    )
+    
+    template_dict = template.model_dump()
+    template_dict['created_at'] = template_dict['created_at'].isoformat()
+    await db.templates.insert_one(template_dict)
+    
+    keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await update.message.reply_text(
+        f"""✅ *Шаблон "{template_name}" сохранен!*
+
+Теперь вы можете использовать его для быстрого создания заказов.
+
+📋 Найти в меню: *Мои шаблоны*""",
+        reply_markup=reply_markup,
+        parse_mode='Markdown'
+    )
+    
+    return ConversationHandler.END
+
+async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Show user's templates list"""
+    query = update.callback_query
+    await query.answer()
+    
+    telegram_id = query.from_user.id
+    
+    # Get user templates
+    templates = await db.templates.find({"telegram_id": telegram_id}).sort("created_at", -1).to_list(10)
+    
+    if not templates:
+        keyboard = [
+            [InlineKeyboardButton("📦 Создать заказ", callback_data='new_order')],
+            [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await query.message.reply_text(
+            """📋 *Мои шаблоны*
+
+У вас пока нет сохраненных шаблонов.
+
+Создайте заказ и нажмите "*Сохранить как шаблон*" на экране проверки данных.""",
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
+        )
+        return ConversationHandler.END
+    
+    # Build template list message
+    message = f"📋 *Мои шаблоны ({len(templates)}/10):*\n\n"
+    
+    keyboard = []
+    for i, template in enumerate(templates, 1):
+        from_city = template.get('from_city', '')
+        from_state = template.get('from_state', '')
+        to_city = template.get('to_city', '')
+        to_state = template.get('to_state', '')
+        
+        message += f"{i}. 📦 *{template['name']}*\n"
+        message += f"   От: {template.get('from_name', '')} ({from_city}, {from_state})\n"
+        message += f"   Кому: {template.get('to_name', '')} ({to_city}, {to_state})\n\n"
+        
+        keyboard.append([InlineKeyboardButton(
+            f"{i}. {template['name']}", 
+            callback_data=f'template_view_{template["id"]}'
+        )])
+    
+    keyboard.append([InlineKeyboardButton("🔙 Главное меню", callback_data='start')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await query.message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown')
+    return TEMPLATE_LIST
+
+async def view_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """View specific template details"""
+    query = update.callback_query
+    await query.answer()
+    
+    template_id = query.data.replace('template_view_', '')
+    template = await db.templates.find_one({"id": template_id}, {"_id": 0})
+    
+    if not template:
+        await query.message.reply_text("❌ Шаблон не найден")
+        return ConversationHandler.END
+    
+    # Format template details
+    message = f"""📋 *Шаблон: "{template['name']}"*
+
+📤 *Отправитель:*
+{template.get('from_name', '')}
+{template.get('from_street1', '')}
+{template.get('from_street2', '') + ', ' if template.get('from_street2') else ''}{template.get('from_city', '')}, {template.get('from_state', '')} {template.get('from_zip', '')}
+{('📞 ' + template.get('from_phone', '')) if template.get('from_phone') else ''}
+
+📥 *Получатель:*
+{template.get('to_name', '')}
+{template.get('to_street1', '')}
+{template.get('to_street2', '') + ', ' if template.get('to_street2') else ''}{template.get('to_city', '')}, {template.get('to_state', '')} {template.get('to_zip', '')}
+{('📞 ' + template.get('to_phone', '')) if template.get('to_phone') else ''}"""
+    
+    keyboard = [
+        [InlineKeyboardButton("📦 Использовать шаблон", callback_data=f'template_use_{template_id}')],
+        [InlineKeyboardButton("✏️ Переименовать", callback_data=f'template_rename_{template_id}')],
+        [InlineKeyboardButton("🗑️ Удалить", callback_data=f'template_delete_{template_id}')],
+        [InlineKeyboardButton("🔙 К списку шаблонов", callback_data='my_templates')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await query.message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown')
+    return TEMPLATE_VIEW
+
+async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Load template data into context and start order"""
+    query = update.callback_query
+    await query.answer()
+    
+    template_id = query.data.replace('template_use_', '')
+    template = await db.templates.find_one({"id": template_id}, {"_id": 0})
+    
+    if not template:
+        await query.message.reply_text("❌ Шаблон не найден")
+        return ConversationHandler.END
+    
+    # Load template data into context
+    context.user_data['from_name'] = template.get('from_name', '')
+    context.user_data['from_address'] = template.get('from_street1', '')
+    context.user_data['from_address2'] = template.get('from_street2', '')
+    context.user_data['from_city'] = template.get('from_city', '')
+    context.user_data['from_state'] = template.get('from_state', '')
+    context.user_data['from_zip'] = template.get('from_zip', '')
+    context.user_data['from_phone'] = template.get('from_phone', '')
+    context.user_data['to_name'] = template.get('to_name', '')
+    context.user_data['to_address'] = template.get('to_street1', '')
+    context.user_data['to_address2'] = template.get('to_street2', '')
+    context.user_data['to_city'] = template.get('to_city', '')
+    context.user_data['to_state'] = template.get('to_state', '')
+    context.user_data['to_zip'] = template.get('to_zip', '')
+    context.user_data['to_phone'] = template.get('to_phone', '')
+    
+    # Ask for parcel weight (first thing not in template)
+    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await query.message.reply_text(
+        f"""✅ *Шаблон "{template['name']}" загружен!*
+
+Теперь введите данные посылки:
+
+*Вес посылки в фунтах (lb)*
+Например: 5.5""",
+        reply_markup=reply_markup,
+        parse_mode='Markdown'
+    )
+    
+    context.user_data['last_state'] = PARCEL_WEIGHT
+    return PARCEL_WEIGHT
+
+async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Delete template with confirmation"""
+    query = update.callback_query
+    await query.answer()
+    
+    template_id = query.data.replace('template_delete_', '')
+    template = await db.templates.find_one({"id": template_id}, {"_id": 0})
+    
+    if not template:
+        await query.message.reply_text("❌ Шаблон не найден")
+        return ConversationHandler.END
+    
+    keyboard = [
+        [InlineKeyboardButton("✅ Да, удалить", callback_data=f'template_confirm_delete_{template_id}')],
+        [InlineKeyboardButton("❌ Отмена", callback_data=f'template_view_{template_id}')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await query.message.reply_text(
+        f"""⚠️ *Удалить шаблон "{template['name']}"?*
+
+Это действие нельзя отменить.""",
+        reply_markup=reply_markup,
+        parse_mode='Markdown'
+    )
+    return TEMPLATE_VIEW
+
+async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Confirm and delete template"""
+    query = update.callback_query
+    await query.answer()
+    
+    template_id = query.data.replace('template_confirm_delete_', '')
+    template = await db.templates.find_one({"id": template_id}, {"_id": 0})
+    
+    if template:
+        await db.templates.delete_one({"id": template_id})
+        
+        keyboard = [[InlineKeyboardButton("🔙 К списку шаблонов", callback_data='my_templates')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await query.message.reply_text(
+            f"""✅ Шаблон "{template['name']}" удален""",
+            reply_markup=reply_markup
+        )
+    else:
+        await query.message.reply_text("❌ Шаблон не найден")
+    
+    return ConversationHandler.END
+
+async def rename_template_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Start template rename process"""
+    query = update.callback_query
+    await query.answer()
+    
+    template_id = query.data.replace('template_rename_', '')
+    context.user_data['renaming_template_id'] = template_id
+    
+    await query.message.reply_text(
+        """✏️ Введите новое название для шаблона (до 30 символов):"""
+    )
+    return TEMPLATE_RENAME
+
+async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Save new template name"""
+    new_name = update.message.text.strip()[:30]
+    
+    if not new_name:
+        await update.message.reply_text("❌ Название не может быть пустым. Попробуйте еще раз:")
+        return TEMPLATE_RENAME
+    
+    template_id = context.user_data.get('renaming_template_id')
+    
+    await db.templates.update_one(
+        {"id": template_id},
+        {"$set": {"name": new_name}}
+    )
+    
+    keyboard = [[InlineKeyboardButton("👁️ Просмотреть", callback_data=f'template_view_{template_id}')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await update.message.reply_text(
+        f"""✅ Шаблон переименован в "{new_name}" """,
+        reply_markup=reply_markup
+    )
+    
+    return ConversationHandler.END
+
+async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Start new order (without template)"""
+    query = update.callback_query
+    await query.answer()
+    
+    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await query.message.reply_text(
+        """📦 Создание нового заказа
+
+Шаг 1/13: Имя отправителя
+Например: John Smith""",
+        reply_markup=reply_markup
+    )
+    context.user_data['last_state'] = FROM_NAME
+    return FROM_NAME
+
+async def order_from_template_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Show template list for order creation"""
+    query = update.callback_query
+    await query.answer()
+    
+    telegram_id = query.from_user.id
+    templates = await db.templates.find({"telegram_id": telegram_id}).sort("created_at", -1).to_list(10)
+    
+    if not templates:
+        await query.message.reply_text("❌ У вас нет сохраненных шаблонов")
+        return ConversationHandler.END
+    
+    message = "📋 *Выберите шаблон:*\n\n"
+    keyboard = []
+    
+    for i, template in enumerate(templates, 1):
+        message += f"{i}. *{template['name']}*\n"
+        keyboard.append([InlineKeyboardButton(
+            f"{i}. {template['name']}", 
+            callback_data=f'template_use_{template["id"]}'
+        )])
+    
+    keyboard.append([InlineKeyboardButton("❌ Отмена", callback_data='start')])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await query.message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown')
+    return TEMPLATE_LIST
+
         [InlineKeyboardButton("📥 Адрес получателя", callback_data='edit_to_address')],
         [InlineKeyboardButton("📦 Вес и размеры посылки", callback_data='edit_parcel')],
         [InlineKeyboardButton("⬅️ Назад", callback_data='back_to_confirmation')]
