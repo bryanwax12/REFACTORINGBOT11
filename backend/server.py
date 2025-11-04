@@ -2167,8 +2167,7 @@ async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_
         )
     else:
         await query.message.reply_text("❌ Шаблон не найден")
-    
-    return ConversationHandler.END
+    # Don't return state - deleted successfully
 
 async def rename_template_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Start template rename process"""
