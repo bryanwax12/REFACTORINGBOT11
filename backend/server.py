@@ -35,8 +35,9 @@ ADMIN_API_KEY = os.environ.get('ADMIN_API_KEY', '')
 # Admin notifications
 ADMIN_TELEGRAM_ID = os.environ.get('ADMIN_TELEGRAM_ID', '')
 
-# Channel invite link
+# Channel invite link and ID
 CHANNEL_INVITE_LINK = os.environ.get('CHANNEL_INVITE_LINK', '')
+CHANNEL_ID = os.environ.get('CHANNEL_ID', '')
 
 # Telegram Bot
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
