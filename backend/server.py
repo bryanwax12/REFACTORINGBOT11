@@ -2177,57 +2177,6 @@ async def order_from_template_list(update: Update, context: ContextTypes.DEFAULT
     await query.message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown')
     return TEMPLATE_LIST
 
-        [InlineKeyboardButton("📥 Адрес получателя", callback_data='edit_to_address')],
-        [InlineKeyboardButton("📦 Вес и размеры посылки", callback_data='edit_parcel')],
-        [InlineKeyboardButton("⬅️ Назад", callback_data='back_to_confirmation')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    await query.message.reply_text(message, reply_markup=reply_markup)
-    context.user_data['last_state'] = EDIT_MENU  # Save state for cancel return
-    return EDIT_MENU
-
-async def handle_edit_choice(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle user's choice of what to edit"""
-    query = update.callback_query
-    await query.answer()
-    
-    if query.data == 'back_to_confirmation':
-        return await show_data_confirmation(update, context)
-    
-    if query.data == 'edit_from_address':
-        context.user_data['editing_from_address'] = True
-        keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await query.message.reply_text(
-            "📤 Редактирование адреса отправителя\n\nШаг 1/6: Имя отправителя\nНапример: John Smith",
-            reply_markup=reply_markup
-        )
-        context.user_data['last_state'] = FROM_NAME  # Save state for cancel return
-        return FROM_NAME
-    
-    if query.data == 'edit_to_address':
-        context.user_data['editing_to_address'] = True
-        keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await query.message.reply_text(
-            "📥 Редактирование адреса получателя\n\nШаг 1/6: Имя получателя\nНапример: Jane Doe",
-            reply_markup=reply_markup
-        )
-        context.user_data['last_state'] = TO_NAME  # Save state for cancel return
-        return TO_NAME
-    
-    if query.data == 'edit_parcel':
-        context.user_data['editing_parcel'] = True
-        keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await query.message.reply_text(
-            "📦 Редактирование посылки\n\nВведите вес посылки в фунтах:\nНапример: 5 или 2.5",
-            reply_markup=reply_markup
-        )
-        context.user_data['last_state'] = PARCEL_WEIGHT  # Save state for cancel return
-        return PARCEL_WEIGHT
-
 async def skip_address_validation(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Skip address validation and continue with rate fetching"""
     query = update.callback_query
