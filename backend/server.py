@@ -5450,14 +5450,10 @@ async def startup_event():
                     ],
                     TEMPLATE_VIEW: [
                         CallbackQueryHandler(use_template, pattern='^template_use_'),
-                        CallbackQueryHandler(rename_template_start, pattern='^template_rename_'),
                         CallbackQueryHandler(delete_template, pattern='^template_delete_'),
                         CallbackQueryHandler(confirm_delete_template, pattern='^template_confirm_delete_'),
                         CallbackQueryHandler(my_templates_menu, pattern='^my_templates$'),
                         CallbackQueryHandler(start_command, pattern='^start$')
-                    ],
-                    TEMPLATE_RENAME: [
-                        MessageHandler(filters.TEXT & ~filters.COMMAND, rename_template_save)
                     ]
                 },
                 fallbacks=[
