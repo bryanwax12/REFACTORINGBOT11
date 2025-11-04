@@ -2118,6 +2118,34 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
 📥 Кому: {template.get('to_name')} ({template.get('to_city')}, {template.get('to_state')})
 
 Нажмите кнопку для продолжения создания заказа.""",
+
+
+async def start_order_with_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Start order creation with pre-loaded template data"""
+    query = update.callback_query
+    await query.answer()
+    
+    # Template data already loaded in context.user_data
+    # Ask for parcel weight (first thing not in template)
+    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    template_name = context.user_data.get('template_name', 'шаблон')
+    
+    await query.message.reply_text(
+        f"""📦 Создание заказа по шаблону "{template_name}"
+
+Теперь введите данные посылки:
+
+*Вес посылки в фунтах (lb)*
+Например: 5.5""",
+        reply_markup=reply_markup,
+        parse_mode='Markdown'
+    )
+    
+    context.user_data['last_state'] = PARCEL_WEIGHT
+    return PARCEL_WEIGHT
+
         reply_markup=reply_markup,
         parse_mode='Markdown'
     )
