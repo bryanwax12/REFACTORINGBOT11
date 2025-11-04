@@ -389,17 +389,6 @@ async def send_blocked_message(update: Update):
     elif update.callback_query:
         await update.callback_query.message.reply_text(message, parse_mode='Markdown')
 
-
-def get_main_menu_keyboard():
-    """Get persistent Reply Keyboard with main menu button"""
-    keyboard = [[KeyboardButton("🏠 Меню")]]
-    return ReplyKeyboardMarkup(
-        keyboard,
-        resize_keyboard=True,  # Make button compact
-        persistent=True,  # Keep keyboard visible
-        one_time_keyboard=False  # Don't hide after use
-    )
-
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Handle both command and callback
     if update.callback_query:
