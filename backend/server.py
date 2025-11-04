@@ -2386,7 +2386,7 @@ Shipping label создан успешно!""",
         return ConversationHandler.END
 
 async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle custom top-up amount input"""
+    """Handle custom top-up amount input and create Oxapay invoice directly"""
     try:
         amount_text = update.message.text.strip()
         
@@ -2400,48 +2400,72 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
             return TOPUP_AMOUNT
         
         # Check limits
-        if topup_amount < 5:
+        if topup_amount < 10:
             await update.message.reply_text(
-                "❌ Минимальная сумма пополнения: $5"
+                "❌ Минимальная сумма пополнения: $10"
             )
             return TOPUP_AMOUNT
         
-        if topup_amount > 1000:
+        if topup_amount > 10000:
             await update.message.reply_text(
-                "❌ Максимальная сумма пополнения: $1000"
+                "❌ Максимальная сумма пополнения: $10,000"
             )
             return TOPUP_AMOUNT
         
-        # Save amount in context
-        context.user_data['topup_amount'] = topup_amount
+        telegram_id = update.effective_user.id
+        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
         
-        # Show cryptocurrency selection (only BTC, ETH, USDT, LTC)
-        keyboard = [
-            [
-                InlineKeyboardButton("₿ Bitcoin (BTC)", callback_data='topup_crypto_btc'),
-                InlineKeyboardButton("Ξ Ethereum (ETH)", callback_data='topup_crypto_eth')
-            ],
-            [
-                InlineKeyboardButton("₮ USDT (Tether)", callback_data='topup_crypto_usdt'),
-                InlineKeyboardButton("Ł Litecoin (LTC)", callback_data='topup_crypto_ltc')
-            ],
-            [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        
-        await update.message.reply_text(
-            f"""💰 Выберите криптовалюту для пополнения:
-
-💵 Сумма: ${topup_amount}
-
-Доступные криптовалюты:
-• Bitcoin (BTC)
-• Ethereum (ETH)  
-• USDT (Tether)
-• Litecoin (LTC)""",
-            reply_markup=reply_markup
+        # Create Oxapay invoice directly (order_id must be <= 50 chars)
+        # Generate short order_id: "top_" (4) + timestamp (10) + "_" (1) + random (8) = 23 chars
+        order_id = f"top_{int(time.time())}_{uuid.uuid4().hex[:8]}"
+        invoice_result = await create_oxapay_invoice(
+            amount=topup_amount,
+            order_id=order_id,
+            description=f"Balance Top-up ${topup_amount}"
         )
-        return TOPUP_AMOUNT  # Stay in same state to handle crypto selection
+        
+        if invoice_result.get('success'):
+            track_id = invoice_result['trackId']
+            pay_link = invoice_result['payLink']
+            
+            # Save top-up payment
+            payment = Payment(
+                order_id=f"topup_{user['id']}",
+                amount=topup_amount,
+                invoice_id=track_id,
+                pay_url=pay_link,
+                status="pending"
+            )
+            payment_dict = payment.model_dump()
+            payment_dict['created_at'] = payment_dict['created_at'].isoformat()
+            payment_dict['telegram_id'] = telegram_id
+            payment_dict['type'] = 'topup'
+            await db.payments.insert_one(payment_dict)
+            
+            keyboard = [
+                [InlineKeyboardButton("💳 Оплатить", url=pay_link)],
+                [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            await update.message.reply_text(
+                f"""✅ *Счёт на пополнение создан!*
+
+💵 *Сумма: ${topup_amount}*
+🪙 *Криптовалюта: Любая из доступных на Oxapay*
+
+*Нажмите кнопку "Оплатить" для перехода на страницу оплаты.*
+*На сайте Oxapay вы сможете выбрать удобную криптовалюту.*
+
+*После успешной оплаты баланс будет автоматически пополнен.*""",
+                reply_markup=reply_markup,
+                parse_mode='Markdown'
+            )
+            return ConversationHandler.END
+        else:
+            error_msg = invoice_result.get('error', 'Unknown error')
+            await update.message.reply_text(f"❌ *Ошибка создания инвойса:* {error_msg}", parse_mode='Markdown')
+            return ConversationHandler.END
         
     except Exception as e:
         logger.error(f"Top-up amount handling error: {e}")
