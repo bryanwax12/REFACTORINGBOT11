@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Complete the Templates feature: When user selects a template and clicks 'Use Template', the bot should load template data and start order creation at PARCEL_WEIGHT state within ConversationHandler flow"
+user_problem_statement: "Add 'Check All Bot Access' button in Users tab to check bot blocking status for all users at once"
 
 backend:
   - task: "Templates Feature - Use Template Functionality"
