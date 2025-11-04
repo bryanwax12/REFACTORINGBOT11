@@ -2840,12 +2840,22 @@ async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         query = update.callback_query
         await query.answer()
     
-    # Don't save current_state - it's already saved in last_state
-    keyboard = [
-        [InlineKeyboardButton("📋 Проверить данные", callback_data='check_data')],
-        [InlineKeyboardButton("↩️ Вернуться к заказу", callback_data='return_to_order')],
-        [InlineKeyboardButton("✅ Да, отменить заказ", callback_data='confirm_cancel')]
-    ]
+    # Check if we're on shipping rates screen
+    last_state = context.user_data.get('last_state')
+    
+    # Add "Check Data" button only if on shipping rates selection screen
+    if last_state == SELECT_CARRIER:
+        keyboard = [
+            [InlineKeyboardButton("📋 Проверить данные", callback_data='check_data')],
+            [InlineKeyboardButton("↩️ Вернуться к заказу", callback_data='return_to_order')],
+            [InlineKeyboardButton("✅ Да, отменить заказ", callback_data='confirm_cancel')]
+        ]
+    else:
+        keyboard = [
+            [InlineKeyboardButton("↩️ Вернуться к заказу", callback_data='return_to_order')],
+            [InlineKeyboardButton("✅ Да, отменить заказ", callback_data='confirm_cancel')]
+        ]
+    
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await query.message.reply_text(
