@@ -2227,7 +2227,7 @@ const Dashboard = () => {
                               {event.city && `${event.city}, `}{event.state}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              {new Date(event.occurred_at || event.datetime).toLocaleString()}
+                              {formatKyivDateTime(event.occurred_at || event.datetime)}
                             </p>
                           </div>
                         ))}
