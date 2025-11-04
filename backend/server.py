@@ -2112,8 +2112,11 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def start_order_with_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Start order creation with pre-loaded template data"""
+    logger.info(f"start_order_with_template called - user_id: {update.effective_user.id}")
     query = update.callback_query
     await query.answer()
+    
+    logger.info(f"Template data in context: {list(context.user_data.keys())}")
     
     # Template data already loaded in context.user_data
     # Ask for parcel weight (first thing not in template)
@@ -2121,6 +2124,7 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     template_name = context.user_data.get('template_name', 'шаблон')
+    logger.info(f"Starting order with template: {template_name}")
     
     await query.message.reply_text(
         f"""📦 Создание заказа по шаблону "{template_name}"
@@ -2134,6 +2138,7 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
     )
     
     context.user_data['last_state'] = PARCEL_WEIGHT
+    logger.info(f"Returning PARCEL_WEIGHT state")
     return PARCEL_WEIGHT
 
 async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
