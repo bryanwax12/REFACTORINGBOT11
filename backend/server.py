@@ -5609,9 +5609,6 @@ async def startup_event():
             # rename_template_start is now handled by template_rename_handler ConversationHandler
             application.add_handler(CallbackQueryHandler(my_templates_menu, pattern='^my_templates$'))
             
-            # Handler for persistent menu button
-            application.add_handler(MessageHandler(filters.Regex('^🏠 Меню$'), start_command))
-            
             # Handler for topup amount input (text messages)
             application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_topup_amount_input))
             application.add_handler(CallbackQueryHandler(button_callback))
