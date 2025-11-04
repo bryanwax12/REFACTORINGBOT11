@@ -471,6 +471,52 @@ const Dashboard = () => {
 
       toast.info('Проверка статусов...');
       console.log('Sending request to:', `${API}/users/check-all-channel-status`);
+
+
+  const handleSendBroadcast = async () => {
+    if (!broadcastMessage || !broadcastMessage.trim()) {
+      toast.error('Пожалуйста, введите сообщение для рассылки');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Отправить рассылку всем пользователям?\n\nСообщение будет отправлено ${users.length} пользователям (кроме заблокированных).\n\nПродолжить?`
+    );
+    
+    if (!confirmed) return;
+
+    try {
+      setSendingBroadcast(true);
+      toast.info('Отправка рассылки...');
+
+      const formData = new FormData();
+      formData.append('message', broadcastMessage);
+
+      const response = await axios.post(`${API}/broadcast`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.data.success) {
+        const skipped = response.data.skipped_count || 0;
+        const failed = response.data.failed_count || 0;
+        
+        let message = `✅ Рассылка отправлена: ${response.data.success_count} пользователям`;
+        if (skipped > 0) message += `. Пропущено: ${skipped} (заблокированные)`;
+        if (failed > 0) message += `. Ошибок: ${failed}`;
+        
+        toast.success(message);
+        setBroadcastMessage(''); // Clear the form
+      }
+    } catch (error) {
+      console.error('Error sending broadcast:', error);
+      toast.error(error.response?.data?.detail || 'Failed to send broadcast');
+    } finally {
+      setSendingBroadcast(false);
+    }
+  };
+
       
       const response = await axios.post(`${API}/users/check-all-channel-status`);
       
