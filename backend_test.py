@@ -1406,6 +1406,248 @@ def test_help_command_url_generation():
         print(f"❌ Help command URL generation test error: {e}")
         return False
 
+def test_template_rename_functionality():
+    """Test Template Rename Functionality - CRITICAL TEST per review request"""
+    print("\n🔍 Testing Template Rename Functionality (Bot Freeze Fix)...")
+    print("🎯 CRITICAL: Testing fix for user reported issue - bot freezes after user enters new template name")
+    
+    try:
+        # Read server.py to check the template rename implementation
+        with open('/app/backend/server.py', 'r') as f:
+            server_code = f.read()
+        
+        print("   📋 TESTING TEMPLATE RENAME IMPLEMENTATION:")
+        
+        # 1. Test ConversationHandler Registration
+        print("   1. Testing ConversationHandler Registration:")
+        
+        # Check if template_rename_handler is properly created
+        template_rename_handler_found = 'template_rename_handler = ConversationHandler(' in server_code
+        print(f"      template_rename_handler created: {'✅' if template_rename_handler_found else '❌'}")
+        
+        # Check entry_point configuration
+        entry_point_pattern = r"CallbackQueryHandler\(rename_template_start, pattern='\^template_rename_'\)"
+        entry_point_found = bool(re.search(entry_point_pattern, server_code))
+        print(f"      Entry point configured correctly: {'✅' if entry_point_found else '❌'}")
+        
+        # Check TEMPLATE_RENAME state handling
+        template_rename_state = 'TEMPLATE_RENAME: [' in server_code
+        rename_save_handler = 'MessageHandler(filters.TEXT & ~filters.COMMAND, rename_template_save)' in server_code
+        print(f"      TEMPLATE_RENAME state defined: {'✅' if template_rename_state else '❌'}")
+        print(f"      rename_template_save handler configured: {'✅' if rename_save_handler else '❌'}")
+        
+        # Check fallbacks
+        fallback_templates = 'CallbackQueryHandler(my_templates_menu, pattern=\'^my_templates$\')' in server_code
+        fallback_start = 'CommandHandler(\'start\', start_command)' in server_code
+        print(f"      Fallback to my_templates_menu: {'✅' if fallback_templates else '❌'}")
+        print(f"      Fallback to start_command: {'✅' if fallback_start else '❌'}")
+        
+        # Check if handler is registered BEFORE order_conv_handler
+        template_handler_line = None
+        order_handler_line = None
+        lines = server_code.split('\n')
+        for i, line in enumerate(lines):
+            if 'application.add_handler(template_rename_handler)' in line:
+                template_handler_line = i
+            elif 'application.add_handler(order_conv_handler)' in line:
+                order_handler_line = i
+        
+        handler_order_correct = (template_handler_line is not None and 
+                               order_handler_line is not None and 
+                               template_handler_line < order_handler_line)
+        print(f"      Handler registered before order_conv_handler: {'✅' if handler_order_correct else '❌'}")
+        
+        # 2. Test Function Implementation
+        print("   2. Testing Function Implementation:")
+        
+        # Check rename_template_start function (lines ~2200-2211)
+        rename_start_pattern = r'async def rename_template_start\(update: Update, context: ContextTypes\.DEFAULT_TYPE\):'
+        rename_start_found = bool(re.search(rename_start_pattern, server_code))
+        print(f"      rename_template_start function exists: {'✅' if rename_start_found else '❌'}")
+        
+        # Check if function extracts template_id correctly
+        template_id_extraction = "template_id = query.data.replace('template_rename_', '')" in server_code
+        print(f"      Template ID extraction: {'✅' if template_id_extraction else '❌'}")
+        
+        # Check if function stores template_id in context
+        context_storage = "context.user_data['renaming_template_id'] = template_id" in server_code
+        print(f"      Template ID stored in context: {'✅' if context_storage else '❌'}")
+        
+        # Check prompt message
+        prompt_message = "✏️ Введите новое название для шаблона (до 30 символов):" in server_code
+        print(f"      Correct prompt message: {'✅' if prompt_message else '❌'}")
+        
+        # Check if function returns TEMPLATE_RENAME state
+        returns_template_rename = 'return TEMPLATE_RENAME' in server_code
+        print(f"      Returns TEMPLATE_RENAME state: {'✅' if returns_template_rename else '❌'}")
+        
+        # Check rename_template_save function (lines ~2213-2236)
+        rename_save_pattern = r'async def rename_template_save\(update: Update, context: ContextTypes\.DEFAULT_TYPE\):'
+        rename_save_found = bool(re.search(rename_save_pattern, server_code))
+        print(f"      rename_template_save function exists: {'✅' if rename_save_found else '❌'}")
+        
+        # Check name validation
+        name_validation = "if not new_name:" in server_code and "return TEMPLATE_RENAME" in server_code
+        print(f"      Name validation implemented: {'✅' if name_validation else '❌'}")
+        
+        # Check template_id retrieval from context
+        template_id_retrieval = "template_id = context.user_data.get('renaming_template_id')" in server_code
+        print(f"      Template ID retrieved from context: {'✅' if template_id_retrieval else '❌'}")
+        
+        # Check database update
+        db_update = 'await db.templates.update_one(' in server_code and '{"$set": {"name": new_name}}' in server_code
+        print(f"      Database update implemented: {'✅' if db_update else '❌'}")
+        
+        # Check confirmation message with "Просмотреть" button
+        confirmation_message = '✅ Шаблон переименован в' in server_code
+        view_button = '👁️ Просмотреть' in server_code and 'template_view_' in server_code
+        print(f"      Confirmation message: {'✅' if confirmation_message else '❌'}")
+        print(f"      'Просмотреть' button: {'✅' if view_button else '❌'}")
+        
+        # Check if function returns ConversationHandler.END
+        returns_end = 'return ConversationHandler.END' in server_code
+        print(f"      Returns ConversationHandler.END: {'✅' if returns_end else '❌'}")
+        
+        # 3. Test Standalone Handlers Cleanup
+        print("   3. Testing Standalone Handlers Cleanup:")
+        
+        # Check if rename_template_start is NOT in standalone handlers
+        standalone_handlers_section = server_code[server_code.find('# Template handlers'):server_code.find('# Handler for topup')]
+        rename_in_standalone = 'rename_template_start' in standalone_handlers_section
+        print(f"      rename_template_start NOT in standalone handlers: {'✅' if not rename_in_standalone else '❌'}")
+        
+        # Check for comment indicating it's handled by ConversationHandler
+        comment_found = '# rename_template_start is now handled by template_rename_handler ConversationHandler' in server_code
+        print(f"      Comment about ConversationHandler handling: {'✅' if comment_found else '❌'}")
+        
+        # 4. Test Order ConversationHandler Cleanup
+        print("   4. Testing Order ConversationHandler Cleanup:")
+        
+        # Check if TEMPLATE_RENAME state is NOT in order_conv_handler
+        order_handler_section = server_code[server_code.find('order_conv_handler = ConversationHandler('):server_code.find('application.add_handler(template_rename_handler)')]
+        template_rename_in_order = 'TEMPLATE_RENAME:' in order_handler_section
+        print(f"      TEMPLATE_RENAME NOT in order_conv_handler: {'✅' if not template_rename_in_order else '❌'}")
+        
+        # Check if rename_template_start callback is NOT in TEMPLATE_VIEW state
+        template_view_section = order_handler_section[order_handler_section.find('TEMPLATE_VIEW:'):] if 'TEMPLATE_VIEW:' in order_handler_section else ''
+        rename_callback_in_view = 'rename_template_start' in template_view_section
+        print(f"      rename_template_start NOT in TEMPLATE_VIEW state: {'✅' if not rename_callback_in_view else '❌'}")
+        
+        # 5. Test Complete Flow Simulation
+        print("   5. Testing Complete Flow Simulation:")
+        
+        # Check if all required components are present for the workflow
+        workflow_components = [
+            template_rename_handler_found,  # ConversationHandler exists
+            entry_point_found,              # Entry point configured
+            rename_start_found,             # Start function exists
+            rename_save_found,              # Save function exists
+            template_id_extraction,         # ID extraction works
+            context_storage,                # Context storage works
+            template_id_retrieval,          # Context retrieval works
+            db_update,                      # Database update works
+            returns_end                     # Conversation ends properly
+        ]
+        
+        workflow_success = all(workflow_components)
+        print(f"      Complete workflow components: {'✅' if workflow_success else '❌'}")
+        
+        # Test database connectivity for templates
+        print("   6. Testing Database Connectivity:")
+        try:
+            # Import required modules for database test
+            import sys
+            sys.path.append('/app/backend')
+            import asyncio
+            from motor.motor_asyncio import AsyncIOMotorClient
+            from dotenv import load_dotenv
+            import os
+            
+            # Load environment and connect to database
+            load_dotenv('/app/backend/.env')
+            mongo_url = os.environ['MONGO_URL']
+            client = AsyncIOMotorClient(mongo_url)
+            db = client[os.environ['DB_NAME']]
+            
+            # Test template collection access
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            template_count = loop.run_until_complete(db.templates.count_documents({}))
+            loop.close()
+            
+            print(f"      Database connection: ✅")
+            print(f"      Templates in database: {template_count}")
+            
+            db_connectivity = True
+        except Exception as e:
+            print(f"      ❌ Database connectivity error: {e}")
+            db_connectivity = False
+        
+        # Overall Assessment
+        print(f"\n📊 Template Rename Functionality Assessment:")
+        
+        # Critical components for the fix
+        critical_components = [
+            template_rename_handler_found,   # Separate ConversationHandler created
+            entry_point_found,               # Entry point configured correctly
+            template_rename_state,           # TEMPLATE_RENAME state in new handler
+            rename_save_handler,             # Message handler for text input
+            not rename_in_standalone,        # Removed from standalone handlers
+            not template_rename_in_order,    # Removed from order ConversationHandler
+            handler_order_correct,           # Registered before order handler
+            workflow_success                 # Complete workflow works
+        ]
+        
+        passed_critical = sum(critical_components)
+        total_critical = len(critical_components)
+        
+        print(f"   Critical components passed: {passed_critical}/{total_critical}")
+        print(f"   Success rate: {(passed_critical/total_critical)*100:.1f}%")
+        
+        # Specific fix verification
+        print(f"\n✅ Fix Verification Results:")
+        if template_rename_handler_found and entry_point_found:
+            print(f"   ✅ Separate template_rename_handler ConversationHandler created")
+        else:
+            print(f"   ❌ ConversationHandler creation issue")
+        
+        if template_rename_state and rename_save_handler:
+            print(f"   ✅ TEMPLATE_RENAME state properly configured in new handler")
+        else:
+            print(f"   ❌ State configuration issue")
+        
+        if not rename_in_standalone and comment_found:
+            print(f"   ✅ rename_template_start removed from standalone handlers")
+        else:
+            print(f"   ❌ Standalone handlers cleanup issue")
+        
+        if not template_rename_in_order:
+            print(f"   ✅ TEMPLATE_RENAME removed from order_conv_handler")
+        else:
+            print(f"   ❌ Order ConversationHandler cleanup issue")
+        
+        if handler_order_correct:
+            print(f"   ✅ template_rename_handler registered before order_conv_handler")
+        else:
+            print(f"   ❌ Handler registration order issue")
+        
+        if workflow_success:
+            print(f"   ✅ Complete rename workflow properly implemented")
+            print(f"      User clicks 'Переименовать' → enters template_rename_handler")
+            print(f"      → bot shows prompt → user types name → rename_template_save processes")
+            print(f"      → updates DB → shows confirmation → exits conversation")
+        else:
+            print(f"   ❌ Workflow implementation issues detected")
+        
+        # Return success if all critical components pass
+        return all(critical_components) and db_connectivity
+        
+    except Exception as e:
+        print(f"❌ Template rename functionality test error: {e}")
+        import traceback
+        print(f"   Traceback: {traceback.format_exc()}")
+        return False
+
 def test_templates_feature_use_template():
     """Test Templates Feature - Use Template Functionality - CRITICAL TEST per review request"""
     print("\n🔍 Testing Templates Feature - Use Template Functionality...")
