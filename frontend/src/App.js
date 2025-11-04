@@ -1612,6 +1612,36 @@ const Dashboard = () => {
                 </p>
               </div>
 
+              {/* Image Preview (if added) */}
+              {broadcastImageUrl && (
+                <div className="border rounded-lg p-3 bg-muted/50">
+                  <div className="flex items-start gap-3">
+                    <img 
+                      src={broadcastImageUrl} 
+                      alt="Attached" 
+                      className="max-h-24 rounded border bg-white"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        toast.error('Не удалось загрузить изображение');
+                      }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium">Изображение добавлено</p>
+                      <p className="text-xs text-muted-foreground truncate">{broadcastImageUrl}</p>
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setBroadcastImageUrl('')}
+                      title="Удалить изображение"
+                    >
+                      ✕
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               {/* Message Textarea */}
               <div className="space-y-2">
                 <Label htmlFor="broadcast-message">Message</Label>
