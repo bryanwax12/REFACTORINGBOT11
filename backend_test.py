@@ -1532,7 +1532,11 @@ def test_continue_order_after_template_save():
         print(f"      Correct implementation (calls show_data_confirmation): {'✅' if correct_implementation else '❌'}")
         
         # Check that function does NOT ask for weight input
-        no_weight_input = not ('Вес посылки' in server_code and 'continue_order_after_template' in server_code)
+        # Look specifically in the continue_order_after_template function
+        no_weight_input = True
+        if function_content_match:
+            function_content = function_content_match.group(0)
+            no_weight_input = 'Вес посылки' not in function_content
         print(f"      Does NOT ask for weight input: {'✅' if no_weight_input else '❌'}")
         
         # Check comment explains the fix
