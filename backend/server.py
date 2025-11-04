@@ -6081,7 +6081,8 @@ async def startup_event():
                 fallbacks=[
                     CallbackQueryHandler(cancel_order, pattern='^cancel_order$'),
                     CommandHandler('start', start_command)
-                ]
+                ],
+                per_message=True
             )
             
             application.add_handler(template_rename_handler)
