@@ -1025,6 +1025,17 @@ const Dashboard = () => {
                               {user.channel_invite_sent ? '✅ Invited' : '📨 Invite'}
                             </Button>
                           </div>
+                          <div className="flex gap-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              className="w-[186px] text-green-600 border-green-300 hover:bg-green-50"
+                              onClick={() => handleCheckChannelStatus(user.telegram_id)}
+                              title="Проверить статус в канале"
+                            >
+                              {user.is_channel_member === true ? '✓ В канале' : user.is_channel_member === false ? '✗ Проверить снова' : '? Проверить статус'}
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </div>
