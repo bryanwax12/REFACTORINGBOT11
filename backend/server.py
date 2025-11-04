@@ -2145,7 +2145,7 @@ async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=reply_markup,
         parse_mode='Markdown'
     )
-    return TEMPLATE_VIEW
+    # Don't return state - working outside ConversationHandler
 
 async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Confirm and delete template"""
