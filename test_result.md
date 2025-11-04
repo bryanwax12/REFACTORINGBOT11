@@ -519,9 +519,7 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus: 
-    - "Check All Bot Access - Backend Endpoint"
-    - "Check All Bot Access - Frontend Button and Function"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
