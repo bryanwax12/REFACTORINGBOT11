@@ -1996,7 +1996,7 @@ const Dashboard = () => {
                           <div>
                             <p className="font-medium">Order #{order.id.substring(0, 8)}</p>
                             <p className="text-sm text-muted-foreground">
-                              {new Date(order.created_at).toLocaleString()}
+                              {formatKyivDateTime(order.created_at)}
                             </p>
                           </div>
                           <div className="text-right">
