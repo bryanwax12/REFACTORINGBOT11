@@ -1442,7 +1442,15 @@ def test_continue_order_after_template_save():
         print(f"      Calls show_data_confirmation(): {'✅' if calls_show_data_confirmation else '❌'}")
         
         # Check that function does NOT return PARCEL_WEIGHT state
-        returns_parcel_weight = 'return PARCEL_WEIGHT' in server_code and 'continue_order_after_template' in server_code
+        # Look specifically in the continue_order_after_template function
+        function_content_match = re.search(
+            r'async def continue_order_after_template.*?(?=async def|\Z)',
+            server_code, re.DOTALL
+        )
+        returns_parcel_weight = False
+        if function_content_match:
+            function_content = function_content_match.group(0)
+            returns_parcel_weight = 'return PARCEL_WEIGHT' in function_content
         print(f"      Does NOT return PARCEL_WEIGHT: {'✅' if not returns_parcel_weight else '❌'}")
         
         # Check function comment/documentation
