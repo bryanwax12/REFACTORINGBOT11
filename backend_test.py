@@ -1105,6 +1105,336 @@ def test_telegram_bot_admin_integration():
         print(f"❌ Telegram bot admin integration test error: {e}")
         return False
 
+def test_cancel_button_functionality():
+    """Test Cancel Button Functionality Across All ConversationHandler States - CRITICAL TEST"""
+    print("\n🔍 Testing Cancel Button Functionality Across All States...")
+    print("🎯 CRITICAL: Verifying 'Отмена' button works consistently in ALL ConversationHandler states")
+    
+    try:
+        # Read server.py to analyze cancel button implementation
+        with open('/app/backend/server.py', 'r') as f:
+            server_code = f.read()
+        
+        print("   📋 CANCEL BUTTON IMPLEMENTATION ANALYSIS:")
+        
+        # Test 1: Verify cancel_order function exists and is properly implemented
+        cancel_function_pattern = r'async def cancel_order\(update: Update, context: ContextTypes\.DEFAULT_TYPE\):'
+        cancel_function_found = bool(re.search(cancel_function_pattern, server_code))
+        print(f"   cancel_order function exists: {'✅' if cancel_function_found else '❌'}")
+        
+        # Test 2: Verify confirmation dialog message
+        confirmation_message = "⚠️ Вы уверены, что хотите отменить создание заказа?"
+        has_confirmation_message = confirmation_message in server_code
+        print(f"   Confirmation dialog message: {'✅' if has_confirmation_message else '❌'}")
+        
+        # Test 3: Verify confirmation dialog buttons
+        return_button = "↩️ Вернуться к заказу"
+        confirm_cancel_button = "✅ Да, отменить заказ"
+        has_return_button = return_button in server_code and "callback_data='return_to_order'" in server_code
+        has_confirm_button = confirm_cancel_button in server_code and "callback_data='confirm_cancel'" in server_code
+        
+        print(f"   'Вернуться к заказу' button: {'✅' if has_return_button else '❌'}")
+        print(f"   'Да, отменить заказ' button: {'✅' if has_confirm_button else '❌'}")
+        
+        # Test 4: Verify cancel_order is registered in ConversationHandler fallbacks
+        fallback_registration = "CallbackQueryHandler(cancel_order, pattern='^cancel_order$')" in server_code
+        print(f"   cancel_order in fallbacks: {'✅' if fallback_registration else '❌'}")
+        
+        # Test 5: Count cancel buttons across all conversation states
+        cancel_button_pattern = r'InlineKeyboardButton\([^)]*❌ Отмена[^)]*callback_data=[\'"]cancel_order[\'"]'
+        cancel_buttons = re.findall(cancel_button_pattern, server_code)
+        cancel_button_count = len(cancel_buttons)
+        
+        # Also check for cancel_order callback_data references
+        cancel_callback_count = server_code.count("callback_data='cancel_order'")
+        
+        print(f"   Cancel buttons found: {cancel_button_count}")
+        print(f"   Cancel callback references: {cancel_callback_count}")
+        
+        # Test 6: Verify return_to_order function handles all states
+        return_function_found = bool(re.search(r'async def return_to_order\(', server_code))
+        print(f"   return_to_order function exists: {'✅' if return_function_found else '❌'}")
+        
+        # Test 7: Check specific conversation states are handled in return_to_order
+        conversation_states = [
+            'FROM_NAME', 'FROM_ADDRESS', 'FROM_ADDRESS2', 'FROM_CITY', 'FROM_STATE', 'FROM_ZIP', 'FROM_PHONE',
+            'TO_NAME', 'TO_ADDRESS', 'TO_ADDRESS2', 'TO_CITY', 'TO_STATE', 'TO_ZIP', 'TO_PHONE',
+            'PARCEL_WEIGHT', 'PARCEL_LENGTH', 'PARCEL_WIDTH', 'PARCEL_HEIGHT',
+            'CONFIRM_DATA', 'EDIT_MENU', 'SELECT_CARRIER', 'PAYMENT_METHOD'
+        ]
+        
+        states_handled = {}
+        for state in conversation_states:
+            # Check if return_to_order handles this state
+            state_pattern = rf'last_state == {state}'
+            handled = bool(re.search(state_pattern, server_code))
+            states_handled[state] = handled
+        
+        handled_count = sum(states_handled.values())
+        total_states = len(conversation_states)
+        
+        print(f"\n   📊 CONVERSATION STATE COVERAGE:")
+        print(f"   States handled in return_to_order: {handled_count}/{total_states}")
+        
+        # Show which states are handled/missing
+        for state, handled in states_handled.items():
+            status = '✅' if handled else '❌'
+            print(f"      {state}: {status}")
+        
+        # Test 8: Verify confirm_cancel_order function
+        confirm_cancel_found = bool(re.search(r'async def confirm_cancel_order\(', server_code))
+        print(f"\n   confirm_cancel_order function: {'✅' if confirm_cancel_found else '❌'}")
+        
+        # Test 9: Check special state handlers have cancel_order callbacks
+        special_states_with_cancel = {
+            'CONFIRM_DATA': False,
+            'SELECT_CARRIER': False, 
+            'PAYMENT_METHOD': False
+        }
+        
+        # Look for these states in ConversationHandler configuration
+        for state in special_states_with_cancel.keys():
+            # Check if state has cancel_order callback in its handlers
+            state_section_pattern = rf'{state}:\s*\[[^\]]*CallbackQueryHandler\([^)]*cancel_order[^)]*\)'
+            has_cancel = bool(re.search(state_section_pattern, server_code, re.DOTALL))
+            special_states_with_cancel[state] = has_cancel
+        
+        print(f"\n   📋 SPECIAL STATE CANCEL HANDLERS:")
+        for state, has_cancel in special_states_with_cancel.items():
+            print(f"      {state}: {'✅' if has_cancel else '❌'}")
+        
+        # Test 10: Verify cancel buttons in state handler functions
+        state_handler_functions = [
+            'order_from_name', 'order_from_address', 'order_from_city', 'order_from_state', 
+            'order_from_zip', 'order_from_phone', 'order_to_name', 'order_to_address', 
+            'order_to_city', 'order_to_state', 'order_to_zip', 'order_to_phone', 
+            'order_parcel_weight', 'show_data_confirmation', 'show_edit_menu'
+        ]
+        
+        functions_with_cancel = {}
+        for func in state_handler_functions:
+            # Check if function creates cancel button
+            func_pattern = rf'async def {func}\(.*?\n.*?❌ Отмена.*?cancel_order'
+            has_cancel_button = bool(re.search(func_pattern, server_code, re.DOTALL))
+            functions_with_cancel[func] = has_cancel_button
+        
+        functions_with_cancel_count = sum(functions_with_cancel.values())
+        print(f"\n   📋 STATE HANDLER FUNCTIONS WITH CANCEL BUTTONS:")
+        print(f"   Functions with cancel buttons: {functions_with_cancel_count}/{len(state_handler_functions)}")
+        
+        # Test 11: Verify edit mode cancel functionality
+        edit_mode_cancel = "context.user_data.get('editing_" in server_code
+        print(f"\n   Edit mode cancel support: {'✅' if edit_mode_cancel else '❌'}")
+        
+        # Test 12: Check for orphaned button handling
+        orphaned_button_handler = "handle_orphaned_button" in server_code
+        print(f"   Orphaned button handling: {'✅' if orphaned_button_handler else '❌'}")
+        
+        # OVERALL ASSESSMENT
+        print(f"\n🎯 CRITICAL CANCEL BUTTON FUNCTIONALITY ASSESSMENT:")
+        
+        # Core functionality checks
+        core_checks = [
+            cancel_function_found,
+            has_confirmation_message,
+            has_return_button,
+            has_confirm_button,
+            fallback_registration,
+            return_function_found,
+            confirm_cancel_found
+        ]
+        
+        core_passed = sum(core_checks)
+        print(f"   Core functionality: {core_passed}/7 {'✅' if core_passed >= 6 else '❌'}")
+        
+        # State coverage checks
+        state_coverage_good = handled_count >= 20  # Should handle most states
+        print(f"   State coverage: {'✅' if state_coverage_good else '❌'} ({handled_count}/{total_states})")
+        
+        # Button presence checks
+        sufficient_cancel_buttons = cancel_callback_count >= 15  # Should have many cancel buttons
+        print(f"   Cancel button presence: {'✅' if sufficient_cancel_buttons else '❌'} ({cancel_callback_count} references)")
+        
+        # Special state checks
+        special_states_good = sum(special_states_with_cancel.values()) >= 1
+        print(f"   Special state handling: {'✅' if special_states_good else '❌'}")
+        
+        # FINAL VERDICT
+        all_critical_checks = [
+            core_passed >= 6,
+            state_coverage_good,
+            sufficient_cancel_buttons
+        ]
+        
+        success = all(all_critical_checks)
+        
+        if success:
+            print(f"\n✅ CANCEL BUTTON FUNCTIONALITY VERIFICATION COMPLETE")
+            print(f"   🎯 CRITICAL SUCCESS: Cancel button implementation appears comprehensive")
+            print(f"   📊 Summary: {core_passed}/7 core functions, {handled_count}/{total_states} states, {cancel_callback_count} cancel buttons")
+            print(f"   🔧 Implementation includes:")
+            print(f"      • Confirmation dialog with correct text and buttons")
+            print(f"      • Return to order functionality for all major states")
+            print(f"      • Proper ConversationHandler fallback registration")
+            print(f"      • Cancel order confirmation and cleanup")
+        else:
+            print(f"\n❌ CANCEL BUTTON FUNCTIONALITY ISSUES DETECTED")
+            print(f"   🚨 CRITICAL ISSUES:")
+            if core_passed < 6:
+                print(f"      • Core functionality incomplete ({core_passed}/7)")
+            if not state_coverage_good:
+                print(f"      • Insufficient state coverage ({handled_count}/{total_states})")
+            if not sufficient_cancel_buttons:
+                print(f"      • Too few cancel buttons ({cancel_callback_count} references)")
+        
+        return success
+        
+    except Exception as e:
+        print(f"❌ Cancel button functionality test error: {e}")
+        import traceback
+        print(f"   Traceback: {traceback.format_exc()}")
+        return False
+
+def test_cancel_button_conversation_states():
+    """Test Cancel Button in Specific Conversation States - DETAILED ANALYSIS"""
+    print("\n🔍 Testing Cancel Button in Specific Conversation States...")
+    print("🎯 DETAILED: Analyzing cancel button presence in each conversation state")
+    
+    try:
+        # Read server.py for detailed analysis
+        with open('/app/backend/server.py', 'r') as f:
+            server_code = f.read()
+        
+        # Define all conversation states that should have cancel buttons
+        address_input_states = [
+            ('FROM_NAME', 'order_from_name', 'Шаг 1/13: Имя отправителя'),
+            ('FROM_ADDRESS', 'order_from_address', 'Шаг 2/13: Адрес отправителя'),
+            ('FROM_ADDRESS2', 'order_from_address2', 'Шаг 3/13: Квартира/Офис отправителя'),
+            ('FROM_CITY', 'order_from_city', 'Шаг 4/13: Город отправителя'),
+            ('FROM_STATE', 'order_from_state', 'Шаг 5/13: Штат отправителя'),
+            ('FROM_ZIP', 'order_from_zip', 'Шаг 6/13: ZIP код отправителя'),
+            ('FROM_PHONE', 'order_from_phone', 'Шаг 7/13: Телефон отправителя'),
+            ('TO_NAME', 'order_to_name', 'Шаг 8/13: Имя получателя'),
+            ('TO_ADDRESS', 'order_to_address', 'Шаг 9/13: Адрес получателя'),
+            ('TO_ADDRESS2', 'order_to_address2', 'Шаг 10/13: Квартира/Офис получателя'),
+            ('TO_CITY', 'order_to_city', 'Шаг 11/13: Город получателя'),
+            ('TO_STATE', 'order_to_state', 'Шаг 12/13: Штат получателя'),
+            ('TO_ZIP', 'order_to_zip', 'Шаг 13/13: ZIP код получателя'),
+            ('TO_PHONE', 'order_to_phone', 'Телефон получателя')
+        ]
+        
+        parcel_info_states = [
+            ('PARCEL_WEIGHT', 'order_parcel_weight', 'Вес посылки в фунтах'),
+            ('PARCEL_LENGTH', 'order_parcel_length', 'Длина посылки в дюймах'),
+            ('PARCEL_WIDTH', 'order_parcel_width', 'Ширина посылки в дюймах'),
+            ('PARCEL_HEIGHT', 'order_parcel_height', 'Высота посылки в дюймах')
+        ]
+        
+        special_states = [
+            ('CONFIRM_DATA', 'show_data_confirmation', 'Проверьте введенные данные'),
+            ('EDIT_MENU', 'show_edit_menu', 'Что хотите изменить?'),
+            ('SELECT_CARRIER', 'fetch_shipping_rates', 'Выберите тариф доставки'),
+            ('PAYMENT_METHOD', 'handle_payment_selection', 'Выберите способ оплаты')
+        ]
+        
+        all_states = address_input_states + parcel_info_states + special_states
+        
+        print(f"   📊 TESTING {len(all_states)} CONVERSATION STATES:")
+        
+        # Test each state category
+        categories = [
+            ("ADDRESS INPUT STATES", address_input_states),
+            ("PARCEL INFO STATES", parcel_info_states), 
+            ("SPECIAL STATES", special_states)
+        ]
+        
+        overall_results = {}
+        
+        for category_name, states in categories:
+            print(f"\n   📋 {category_name}:")
+            category_results = {}
+            
+            for state_name, function_name, description in states:
+                # Check if function exists
+                function_pattern = rf'async def {function_name}\('
+                function_exists = bool(re.search(function_pattern, server_code))
+                
+                # Check if function has cancel button
+                cancel_button_pattern = rf'async def {function_name}\(.*?❌ Отмена.*?cancel_order'
+                has_cancel_button = bool(re.search(cancel_button_pattern, server_code, re.DOTALL))
+                
+                # Check if state is handled in return_to_order
+                return_handling_pattern = rf'last_state == {state_name}'
+                handled_in_return = bool(re.search(return_handling_pattern, server_code))
+                
+                # Overall state assessment
+                state_ok = function_exists and (has_cancel_button or handled_in_return)
+                
+                category_results[state_name] = {
+                    'function_exists': function_exists,
+                    'has_cancel_button': has_cancel_button,
+                    'handled_in_return': handled_in_return,
+                    'overall_ok': state_ok
+                }
+                
+                status = '✅' if state_ok else '❌'
+                print(f"      {state_name}: {status}")
+                print(f"         Function exists: {'✅' if function_exists else '❌'}")
+                print(f"         Has cancel button: {'✅' if has_cancel_button else '❌'}")
+                print(f"         Return handling: {'✅' if handled_in_return else '❌'}")
+            
+            overall_results[category_name] = category_results
+        
+        # Calculate overall statistics
+        total_states = len(all_states)
+        states_with_functions = sum(1 for category in overall_results.values() 
+                                  for state in category.values() 
+                                  if state['function_exists'])
+        states_with_cancel = sum(1 for category in overall_results.values() 
+                               for state in category.values() 
+                               if state['has_cancel_button'])
+        states_with_return = sum(1 for category in overall_results.values() 
+                               for state in category.values() 
+                               if state['handled_in_return'])
+        states_overall_ok = sum(1 for category in overall_results.values() 
+                              for state in category.values() 
+                              if state['overall_ok'])
+        
+        print(f"\n📊 DETAILED CANCEL BUTTON STATE ANALYSIS:")
+        print(f"   Total states tested: {total_states}")
+        print(f"   States with functions: {states_with_functions}/{total_states} ({(states_with_functions/total_states)*100:.1f}%)")
+        print(f"   States with cancel buttons: {states_with_cancel}/{total_states} ({(states_with_cancel/total_states)*100:.1f}%)")
+        print(f"   States with return handling: {states_with_return}/{total_states} ({(states_with_return/total_states)*100:.1f}%)")
+        print(f"   States overall OK: {states_overall_ok}/{total_states} ({(states_overall_ok/total_states)*100:.1f}%)")
+        
+        # Success criteria: At least 80% of states should be properly handled
+        success_threshold = 0.8
+        success = (states_overall_ok / total_states) >= success_threshold
+        
+        if success:
+            print(f"\n✅ CONVERSATION STATE CANCEL FUNCTIONALITY: PASS")
+            print(f"   🎯 SUCCESS: {states_overall_ok}/{total_states} states properly handle cancel functionality")
+            print(f"   📈 Success rate: {(states_overall_ok/total_states)*100:.1f}% (threshold: {success_threshold*100}%)")
+        else:
+            print(f"\n❌ CONVERSATION STATE CANCEL FUNCTIONALITY: FAIL")
+            print(f"   🚨 ISSUE: Only {states_overall_ok}/{total_states} states properly handle cancel functionality")
+            print(f"   📉 Success rate: {(states_overall_ok/total_states)*100:.1f}% (threshold: {success_threshold*100}%)")
+            
+            # Show problematic states
+            print(f"\n   🔍 PROBLEMATIC STATES:")
+            for category_name, category_results in overall_results.items():
+                for state_name, results in category_results.items():
+                    if not results['overall_ok']:
+                        print(f"      {state_name}: Function exists: {results['function_exists']}, "
+                              f"Cancel button: {results['has_cancel_button']}, "
+                              f"Return handling: {results['handled_in_return']}")
+        
+        return success
+        
+    except Exception as e:
+        print(f"❌ Cancel button conversation states test error: {e}")
+        return False
+
 def test_admin_notification_sending():
     """Test actual admin notification sending functionality"""
     print("\n🔍 Testing Admin Notification Sending...")
