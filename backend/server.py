@@ -1621,19 +1621,19 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Check if we're in editing mode
     if context.user_data.get('editing_to_address'):
-        bot_msg = await update.message.reply_text(
-            """Шаг 6/6: ZIP код получателя
-Например: 10007""",
-            reply_markup=reply_markup
-        )
+        message_text = """Шаг 6/6: ZIP код получателя
+Например: 10007"""
     else:
-        bot_msg = await update.message.reply_text(
-            """Шаг 13/13: ZIP код получателя
-Например: 10007""",
-            reply_markup=reply_markup
-        )
+        message_text = """Шаг 13/13: ZIP код получателя
+Например: 10007"""
+    
+    bot_msg = await update.message.reply_text(
+        message_text,
+        reply_markup=reply_markup
+    )
     context.user_data['last_bot_message_id'] = bot_msg.message_id
-    context.user_data['last_state'] = TO_ZIP  # Save state for next step
+    context.user_data['last_bot_message_text'] = message_text
+    context.user_data['last_state'] = TO_ZIP
     return TO_ZIP
 
 async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
