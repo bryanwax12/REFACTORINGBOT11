@@ -1027,14 +1027,16 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE)
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    bot_msg = await update.message.reply_text(
-        """Шаг 3/13: Квартира/Офис отправителя (необязательно)
+    message_text = """Шаг 3/13: Квартира/Офис отправителя (необязательно)
 Например: Apt 5, Suite 201
-Или нажмите "Пропустить" """,
+Или нажмите "Пропустить" """
+    bot_msg = await update.message.reply_text(
+        message_text,
         reply_markup=reply_markup
     )
-    context.user_data['last_bot_message_id'] = bot_msg.message_id  # Save for next step
-    context.user_data['last_state'] = FROM_ADDRESS2  # Save state for next step
+    context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = message_text
+    context.user_data['last_state'] = FROM_ADDRESS2
     return FROM_ADDRESS2
 
 async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
