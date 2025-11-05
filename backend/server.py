@@ -2271,15 +2271,21 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await update.message.reply_text(
-        f"""✅ *Шаблон "{template_name}" сохранен!*
+    message_text = f"""✅ *Шаблон "{template_name}" сохранен!*
 
 Теперь вы можете использовать его для быстрого создания заказов.
 
-*Продолжить создание этого заказа?*""",
+*Продолжить создание этого заказа?*"""
+    
+    bot_msg = await update.message.reply_text(
+        message_text,
         reply_markup=reply_markup,
         parse_mode='Markdown'
     )
+    
+    # Save last bot message context for button protection
+    context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = message_text
     
     # Save template name for potential continuation
     context.user_data['saved_template_name'] = template_name
