@@ -1862,6 +1862,9 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
         
         context.user_data['width'] = width
         
+        # Mark previous message as selected
+        await mark_message_as_selected(update, context)
+        
         # Ask for height (with skip option only if weight <= 10 lb)
         weight = context.user_data.get('weight', 0)
         
@@ -1870,7 +1873,7 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
             keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            await update.message.reply_text(
+            bot_msg = await update.message.reply_text(
                 """📏 Высота посылки в дюймах (inches)
 
 Введите высоту в дюймах (например: 10):""",
@@ -1881,7 +1884,7 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
             keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартную высоту", callback_data='skip_height')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            await update.message.reply_text(
+            bot_msg = await update.message.reply_text(
                 """📏 Высота посылки в дюймах (inches)
 Например: 8
 
@@ -1889,6 +1892,7 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
                 reply_markup=reply_markup
             )
         
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_state'] = PARCEL_HEIGHT
         return PARCEL_HEIGHT
             
