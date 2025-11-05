@@ -1665,14 +1665,16 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    bot_msg = await update.message.reply_text(
-        """Телефон получателя (необязательно)
+    message_text = """Телефон получателя (необязательно)
 Например: +1234567890 или 1234567890
-Или нажмите "Пропустить" """,
+Или нажмите "Пропустить" """
+    bot_msg = await update.message.reply_text(
+        message_text,
         reply_markup=reply_markup
     )
     context.user_data['last_bot_message_id'] = bot_msg.message_id
-    context.user_data['last_state'] = TO_PHONE  # Save state for next step
+    context.user_data['last_bot_message_text'] = message_text
+    context.user_data['last_state'] = TO_PHONE
     return TO_PHONE
 
 async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
