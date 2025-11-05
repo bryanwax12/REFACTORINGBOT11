@@ -2535,8 +2535,8 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['last_bot_message_id'] = bot_msg.message_id
     context.user_data['last_bot_message_text'] = message_text
     
-    # End this conversation so the button can start a new one
-    return ConversationHandler.END
+    # Stay in conversation - go to TEMPLATE_LOADED state
+    return TEMPLATE_LOADED
 
 async def start_order_with_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Start order creation with pre-loaded template data"""
