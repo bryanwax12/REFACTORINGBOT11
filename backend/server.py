@@ -2424,6 +2424,9 @@ async def view_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     
+    # Mark previous message as selected
+    await mark_message_as_selected(update, context)
+    
     template_id = query.data.replace('template_view_', '')
     template = await db.templates.find_one({"id": template_id}, {"_id": 0})
     
@@ -2455,6 +2458,9 @@ async def view_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await query.message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown')
+    # Clear last_bot_message to prevent accidentally removing these buttons
+    context.user_data.pop('last_bot_message_id', None)
+    context.user_data.pop('last_bot_message_text', None)
     # Don't return state - working outside ConversationHandler
 
 async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
