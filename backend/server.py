@@ -1026,14 +1026,18 @@ async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE
     else:
         context.user_data['from_street2'] = None
     
+    # Mark previous message as selected
+    await mark_message_as_selected(update, context)
+    
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await (update.message or update.callback_query.message).reply_text(
+    bot_msg = await (update.message or update.callback_query.message).reply_text(
         """Шаг 4/13: Город отправителя
 Например: San Francisco""",
         reply_markup=reply_markup
     )
+    context.user_data['last_bot_message_id'] = bot_msg.message_id
     context.user_data['last_state'] = FROM_CITY  # Save state for next step
     return FROM_CITY
 
