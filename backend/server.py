@@ -660,10 +660,8 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == 'faq':
         await faq_command(update, context)
     elif query.data == 'new_order':
-        # Check if this is from an old message after order completion
-        if context.user_data.get('order_completed'):
-            logger.info(f"Orphaned new_order button detected from user {update.effective_user.id}")
-            context.user_data.clear()  # Clear the flag to allow new order
+        # Always allow starting new order - clear any previous data
+        context.user_data.clear()
         await new_order_start(update, context)
     elif query.data == 'cancel_order':
         # Check if this is an orphaned cancel button (no active order)
