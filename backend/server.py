@@ -437,6 +437,24 @@ async def check_stale_interaction(query, context: ContextTypes.DEFAULT_TYPE) -> 
     logger.info("Interaction is valid - proceeding")
     return False
 
+async def show_return_to_order_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Show message when user tries to access menu during active order"""
+    query = update.callback_query
+    await query.answer("⚠️ Завершите текущий заказ")
+    
+    keyboard = [
+        [InlineKeyboardButton("🔙 Вернуться к заказу", callback_data='return_to_order')],
+        [InlineKeyboardButton("❌ Отменить заказ", callback_data='cancel_order')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await query.message.reply_text(
+        "⚠️ *У вас есть незавершённый заказ*\n\n"
+        "Для доступа к другим функциям сначала завершите или отмените текущий заказ.",
+        reply_markup=reply_markup,
+        parse_mode='Markdown'
+    )
+
 async def check_maintenance_mode(update: Update) -> bool:
     """Check if bot is in maintenance mode and user is not admin"""
     try:
