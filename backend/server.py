@@ -264,7 +264,7 @@ class User(BaseModel):
     last_name: Optional[str] = None
     balance: float = 0.0
     blocked: bool = False
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class Address(BaseModel):
     name: str
@@ -297,7 +297,7 @@ class ShippingLabel(BaseModel):
     service_level: Optional[str] = None
     amount: Optional[str] = None
     status: str = "pending"
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class Payment(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -308,7 +308,7 @@ class Payment(BaseModel):
     status: str = "pending"
     invoice_id: Optional[int] = None
     pay_url: Optional[str] = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class Order(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -321,7 +321,7 @@ class Order(BaseModel):
     amount: float
     payment_status: str = "pending"
     shipping_status: str = "pending"
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class OrderCreate(BaseModel):
     telegram_id: int
@@ -352,7 +352,7 @@ class Template(BaseModel):
     to_state: str
     to_zip: str
     to_phone: Optional[str] = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 # Telegram Bot Handlers
 async def test_error_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
