@@ -6810,6 +6810,8 @@ async def startup_event():
                     ],
                     TEMPLATE_NAME: [
                         MessageHandler(filters.TEXT & ~filters.COMMAND, save_template_name),
+                        CallbackQueryHandler(handle_template_update, pattern='^template_update_'),
+                        CallbackQueryHandler(handle_template_new_name, pattern='^template_new_name$'),
                         CallbackQueryHandler(continue_order_after_template, pattern='^continue_order$'),
                         CallbackQueryHandler(start_command, pattern='^start$')
                     ],
