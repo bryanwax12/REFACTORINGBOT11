@@ -2933,7 +2933,6 @@ Shipping label создан успешно!""",
                 # Mark order as completed to prevent stale button interactions
                 context.user_data.clear()
                 context.user_data['order_completed'] = True
-                context.user_data['active_order'] = False
             else:
                 # Label creation failed - don't charge user
                 await db.orders.update_one(
@@ -2956,7 +2955,6 @@ Shipping label создан успешно!""",
                 # Mark order as completed to prevent stale button interactions
                 context.user_data.clear()
                 context.user_data['order_completed'] = True
-                context.user_data['active_order'] = False
             
         elif query.data == 'pay_with_crypto':
             # Create order
