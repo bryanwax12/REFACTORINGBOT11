@@ -2920,6 +2920,9 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Return to rate selection - call fetch_shipping_rates again
         return await fetch_shipping_rates(update, context)
     
+    # Mark previous message as selected (remove buttons)
+    await mark_message_as_selected(update, context)
+    
     telegram_id = query.from_user.id
     user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
     data = context.user_data
