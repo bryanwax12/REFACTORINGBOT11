@@ -3948,18 +3948,24 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await query.message.reply_text(
-            "Шаг 7/13: Телефон отправителя (необязательно)\n\nНапример: 5551234567\nИли нажмите 'Пропустить'",
-            reply_markup=reply_markup
-        )
+        message_text = "Шаг 7/13: Телефон отправителя (необязательно)\n\nНапример: 5551234567\nИли нажмите 'Пропустить'"
+        bot_msg = await query.message.reply_text(message_text, reply_markup=reply_markup)
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
         return FROM_PHONE
     
     elif last_state == TO_NAME:
-        await query.message.reply_text("Шаг 8/13: Имя получателя\n\nНапример: John Smith")
+        message_text = "Шаг 8/13: Имя получателя\n\nНапример: John Smith"
+        bot_msg = await query.message.reply_text(message_text)
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
         return TO_NAME
     
     elif last_state == TO_ADDRESS:
-        await query.message.reply_text("Шаг 9/13: Адрес получателя\n\nВведите улицу и номер дома\nНапример: 123 Main St")
+        message_text = "Шаг 9/13: Адрес получателя\n\nВведите улицу и номер дома\nНапример: 123 Main St"
+        bot_msg = await query.message.reply_text(message_text)
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
         return TO_ADDRESS
     
     if last_state == TO_ADDRESS2:
