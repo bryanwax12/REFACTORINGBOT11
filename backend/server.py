@@ -848,8 +848,8 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Clear any previous order data (including order_completed flag)
     context.user_data.clear()
     
-    # Set flag that order is in progress
-    context.user_data['active_order'] = True
+    # DON'T set active_order flag here - too early!
+    # Flag will be set when user actually starts entering data (order_new or start_order_with_template)
     
     # Check if bot is in maintenance mode
     if await check_maintenance_mode(update):
