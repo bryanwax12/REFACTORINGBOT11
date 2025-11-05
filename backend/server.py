@@ -3961,6 +3961,9 @@ async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         query = update.callback_query
         await query.answer()
     
+    # Mark previous message as selected (remove buttons and add "✅ Выбрано")
+    await mark_message_as_selected(update, context)
+    
     # Check if we're on shipping rates screen
     last_state = context.user_data.get('last_state')
     
