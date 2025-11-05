@@ -1155,13 +1155,15 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
+    message_text = """Шаг 6/13: ZIP код отправителя
+Например: 94117"""
     bot_msg = await update.message.reply_text(
-        """Шаг 6/13: ZIP код отправителя
-Например: 94117""",
+        message_text,
         reply_markup=reply_markup
     )
     context.user_data['last_bot_message_id'] = bot_msg.message_id
-    context.user_data['last_state'] = FROM_ZIP  # Save state for next step
+    context.user_data['last_bot_message_text'] = message_text
+    context.user_data['last_state'] = FROM_ZIP
     return FROM_ZIP
 
 
