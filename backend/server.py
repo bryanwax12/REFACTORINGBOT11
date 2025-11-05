@@ -781,6 +781,7 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
 *Введите сумму для пополнения (минимум $10):*"""
     
     keyboard = [
+        [InlineKeyboardButton("❌ Отмена", callback_data='start')],
         [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -788,7 +789,12 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
     # Set state to wait for amount input
     context.user_data['awaiting_topup_amount'] = True
     
-    await send_method(message, reply_markup=reply_markup, parse_mode='Markdown')
+    # Send message and save context for mark_message_as_selected
+    bot_message = await send_method(message, reply_markup=reply_markup, parse_mode='Markdown')
+    
+    # Save last bot message context for button protection
+    context.user_data['last_bot_message_id'] = bot_message.message_id
+    context.user_data['last_bot_message_text'] = message
 
 async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle custom topup amount input"""
