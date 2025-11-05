@@ -1108,12 +1108,14 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
+    message_text = """Шаг 5/13: Штат отправителя (2 буквы)
+Например: CA"""
     bot_msg = await update.message.reply_text(
-        """Шаг 5/13: Штат отправителя (2 буквы)
-Например: CA""",
+        message_text,
         reply_markup=reply_markup
-    )
+    ))
     context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = message_text
     context.user_data['last_state'] = FROM_STATE  # Save state for next step
     return FROM_STATE
 
@@ -1151,12 +1153,14 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
+    message_text = """Шаг 6/13: ZIP код отправителя
+Например: 94117"""
     bot_msg = await update.message.reply_text(
-        """Шаг 6/13: ZIP код отправителя
-Например: 94117""",
+        message_text,
         reply_markup=reply_markup
-    )
+    ))
     context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = message_text
     context.user_data['last_state'] = FROM_ZIP  # Save state for next step
     return FROM_ZIP
 
@@ -1295,12 +1299,14 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
+    message_text = """Шаг 7/13: Телефон отправителя
+Например: +1234567890 или 1234567890"""
     bot_msg = await update.message.reply_text(
-        """Шаг 7/13: Телефон отправителя
-Например: +1234567890 или 1234567890""",
+        message_text,
         reply_markup=reply_markup
-    )
+    ))
     context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = message_text
     context.user_data['last_state'] = FROM_PHONE  # Save state for next step
     return FROM_PHONE
 
@@ -1320,12 +1326,14 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
             keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            bot_msg = await query.message.reply_text(
-                """Шаг 8/13: Имя получателя
-Например: Jane Doe""",
+            message_text = """Шаг 8/13: Имя получателя
+Например: Jane Doe"""
+    bot_msg = await query.message.reply_text(
+                message_text,
                 reply_markup=reply_markup
-            )
-            context.user_data['last_bot_message_id'] = bot_msg.message_id
+            ))
+    context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = message_text
             context.user_data['last_state'] = TO_NAME  # Save state for next step
             return TO_NAME
     
@@ -1362,12 +1370,14 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
+    message_text = """Шаг 8/13: Имя получателя
+Например: Jane Doe"""
     bot_msg = await update.message.reply_text(
-        """Шаг 8/13: Имя получателя
-Например: Jane Doe""",
+        message_text,
         reply_markup=reply_markup
-    )
+    ))
     context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = message_text
     context.user_data['last_state'] = TO_NAME  # Save state for next step
     return TO_NAME
 
@@ -1409,12 +1419,14 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=reply_markup
         )
     else:
-        bot_msg = await update.message.reply_text(
-            """Шаг 9/13: Адрес получателя
-Например: 123 Main St.""",
+        message_text = """Шаг 9/13: Адрес получателя
+Например: 123 Main St."""
+    bot_msg = await update.message.reply_text(
+            message_text,
             reply_markup=reply_markup
-        )
+        ))
     context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = message_text
     context.user_data['last_state'] = TO_ADDRESS  # Save state for next step
     return TO_ADDRESS
 
@@ -1564,12 +1576,14 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=reply_markup
         )
     else:
-        bot_msg = await update.message.reply_text(
-            """Шаг 12/13: Штат получателя (2 буквы)
-Например: NY""",
+        message_text = """Шаг 12/13: Штат получателя (2 буквы)
+Например: NY"""
+    bot_msg = await update.message.reply_text(
+            message_text,
             reply_markup=reply_markup
-        )
+        ))
     context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = message_text
     context.user_data['last_state'] = TO_STATE  # Save state for next step
     return TO_STATE
 
@@ -1615,12 +1629,14 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=reply_markup
         )
     else:
-        bot_msg = await update.message.reply_text(
-            """Шаг 13/13: ZIP код получателя
-Например: 10007""",
+        message_text = """Шаг 13/13: ZIP код получателя
+Например: 10007"""
+    bot_msg = await update.message.reply_text(
+            message_text,
             reply_markup=reply_markup
-        )
+        ))
     context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = message_text
     context.user_data['last_state'] = TO_ZIP  # Save state for next step
     return TO_ZIP
 
@@ -1679,12 +1695,14 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
             keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            bot_msg = await query.message.reply_text(
-                """Вес посылки в фунтах (lb)
-Например: 2""",
+            message_text = """Вес посылки в фунтах (lb)
+Например: 2"""
+    bot_msg = await query.message.reply_text(
+                message_text,
                 reply_markup=reply_markup
-            )
-            context.user_data['last_bot_message_id'] = bot_msg.message_id
+            ))
+    context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = message_text
             context.user_data['last_state'] = PARCEL_WEIGHT  # Save state for next step
             return PARCEL_WEIGHT
     
@@ -1721,12 +1739,14 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
+    message_text = """Вес посылки в фунтах (lb)
+Например: 2"""
     bot_msg = await update.message.reply_text(
-        """Вес посылки в фунтах (lb)
-Например: 2""",
+        message_text,
         reply_markup=reply_markup
-    )
+    ))
     context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = message_text
     context.user_data['last_state'] = PARCEL_WEIGHT  # Save state for next step
     return PARCEL_WEIGHT
 
@@ -1771,15 +1791,16 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
             keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартные размеры", callback_data='skip_dimensions')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            bot_msg = await update.message.reply_text(
-                """📏 Длина посылки в дюймах (inches)
+            message_text = """📏 Длина посылки в дюймах (inches)
 Например: 12
 
-Или нажмите кнопку ниже, чтобы использовать стандартные размеры (10x10x10 дюймов)""",
+Или нажмите кнопку ниже, чтобы использовать стандартные размеры (10x10x10 дюймов)"""
+    bot_msg = await update.message.reply_text(
+                message_text,
                 reply_markup=reply_markup
-            )
-        
-        context.user_data['last_bot_message_id'] = bot_msg.message_id
+            ))
+    context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = message_text
         context.user_data['last_state'] = PARCEL_LENGTH  # Save state for next step
         return PARCEL_LENGTH
             
@@ -1849,15 +1870,16 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
             keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартные размеры", callback_data='skip_dimensions')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            bot_msg = await update.message.reply_text(
-                """📏 Ширина посылки в дюймах (inches)
+            message_text = """📏 Ширина посылки в дюймах (inches)
 Например: 10
 
-Или нажмите кнопку ниже, чтобы использовать стандартные размеры для ширины и высоты (10x10 дюймов)""",
+Или нажмите кнопку ниже, чтобы использовать стандартные размеры для ширины и высоты (10x10 дюймов)"""
+    bot_msg = await update.message.reply_text(
+                message_text,
                 reply_markup=reply_markup
-            )
-        
-        context.user_data['last_bot_message_id'] = bot_msg.message_id
+            ))
+    context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = message_text
         context.user_data['last_state'] = PARCEL_WIDTH
         return PARCEL_WIDTH
             
@@ -1925,15 +1947,16 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
             keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартную высоту", callback_data='skip_height')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            bot_msg = await update.message.reply_text(
-                """📏 Высота посылки в дюймах (inches)
+            message_text = """📏 Высота посылки в дюймах (inches)
 Например: 8
 
-Или нажмите кнопку ниже, чтобы использовать стандартную высоту (10 дюймов)""",
+Или нажмите кнопку ниже, чтобы использовать стандартную высоту (10 дюймов)"""
+    bot_msg = await update.message.reply_text(
+                message_text,
                 reply_markup=reply_markup
-            )
-        
-        context.user_data['last_bot_message_id'] = bot_msg.message_id
+            ))
+    context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = message_text
         context.user_data['last_state'] = PARCEL_HEIGHT
         return PARCEL_HEIGHT
             
@@ -2097,11 +2120,13 @@ _Шаблон сохранит оба адреса для быстрого ис�
         context.user_data['editing_from_address'] = True
         keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        bot_msg = await query.message.reply_text(
-            "📤 Редактирование адреса отправителя\n\nШаг 1/6: Имя отправителя\nНапример: John Smith",
+        message_text = "📤 Редактирование адреса отправителя\n\nШаг 1/6: Имя отправителя\nНапример: John Smith"
+    bot_msg = await query.message.reply_text(
+            message_text,
             reply_markup=reply_markup
-        )
-        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        ))
+    context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = message_text
         context.user_data['last_state'] = FROM_NAME
         return FROM_NAME
     
@@ -2113,11 +2138,13 @@ _Шаблон сохранит оба адреса для быстрого ис�
         context.user_data['editing_to_address'] = True
         keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        bot_msg = await query.message.reply_text(
-            "📥 Редактирование адреса получателя\n\nШаг 1/6: Имя получателя\nНапример: Jane Doe",
+        message_text = "📥 Редактирование адреса получателя\n\nШаг 1/6: Имя получателя\nНапример: Jane Doe"
+    bot_msg = await query.message.reply_text(
+            message_text,
             reply_markup=reply_markup
-        )
-        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        ))
+    context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = message_text
         context.user_data['last_state'] = TO_NAME
         return TO_NAME
     
@@ -2129,11 +2156,13 @@ _Шаблон сохранит оба адреса для быстрого ис�
         context.user_data['editing_parcel'] = True
         keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        bot_msg = await query.message.reply_text(
-            "📦 Редактирование посылки\n\nВведите вес посылки в фунтах:\nНапример: 5 или 2.5",
+        message_text = "📦 Редактирование посылки\n\nВведите вес посылки в фунтах:\nНапример: 5 или 2.5"
+    bot_msg = await query.message.reply_text(
+            message_text,
             reply_markup=reply_markup
-        )
-        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        ))
+    context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = message_text
         context.user_data['last_state'] = PARCEL_WEIGHT
         return PARCEL_WEIGHT
     
