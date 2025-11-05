@@ -2605,6 +2605,9 @@ async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_
     query = update.callback_query
     await query.answer()
     
+    # Mark previous message as selected
+    await mark_message_as_selected(update, context)
+    
     template_id = query.data.replace('template_confirm_delete_', '')
     template = await db.templates.find_one({"id": template_id}, {"_id": 0})
     
