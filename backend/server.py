@@ -6226,7 +6226,7 @@ async def get_carriers():
                 "carrier_code": carrier.get('carrier_code'),
                 "account_id": carrier.get('carrier_id'),
                 "active": not carrier.get('disabled_by_billing_plan', False),
-                "services": len(carrier.get('services', [])
+                "services": len(carrier.get('services', []))
             }
             for carrier in carriers
         ]
