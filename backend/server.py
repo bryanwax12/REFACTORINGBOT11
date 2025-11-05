@@ -801,6 +801,9 @@ async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAUL
     if not context.user_data.get('awaiting_topup_amount'):
         return
     
+    # Mark previous message as selected (remove buttons and add "✅ Выбрано")
+    await mark_message_as_selected(update, context)
+    
     try:
         amount = float(update.message.text.strip())
         
