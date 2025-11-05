@@ -668,19 +668,34 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     
     if query.data == 'start' or query.data == 'main_menu':
-        # Don't clear user_data - might have template data
+        # Check if user has active order
+        if context.user_data.get('active_order'):
+            await show_return_to_order_message(update, context)
+            return
         await start_command(update, context)
     elif query.data == 'my_balance':
-        # Don't clear user_data - might have template data
+        # Check if user has active order
+        if context.user_data.get('active_order'):
+            await show_return_to_order_message(update, context)
+            return
         await my_balance_command(update, context)
     elif query.data == 'my_templates':
-        # Don't clear user_data - might have template data
+        # Check if user has active order
+        if context.user_data.get('active_order'):
+            await show_return_to_order_message(update, context)
+            return
         await my_templates_menu(update, context)
     elif query.data == 'help':
-        # Don't clear user_data - might have template data
+        # Check if user has active order
+        if context.user_data.get('active_order'):
+            await show_return_to_order_message(update, context)
+            return
         await help_command(update, context)
     elif query.data == 'faq':
-        # Don't clear user_data - might have template data
+        # Check if user has active order
+        if context.user_data.get('active_order'):
+            await show_return_to_order_message(update, context)
+            return
         await faq_command(update, context)
     elif query.data == 'new_order':
         # Starting new order - this is intentional, so clear previous data
