@@ -4020,6 +4020,9 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     
+    # Mark previous message as selected (remove buttons and add "✅ Выбрано")
+    await mark_message_as_selected(update, context)
+    
     # Get the state we were in when cancel was pressed
     last_state = context.user_data.get('last_state')
     
