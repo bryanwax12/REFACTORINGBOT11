@@ -650,14 +650,19 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     
     if query.data == 'start' or query.data == 'main_menu':
+        context.user_data.clear()  # Clear any previous order data
         await start_command(update, context)
     elif query.data == 'my_balance':
+        context.user_data.clear()  # Clear any previous order data
         await my_balance_command(update, context)
     elif query.data == 'my_templates':
+        context.user_data.clear()  # Clear any previous order data
         await my_templates_menu(update, context)
     elif query.data == 'help':
+        context.user_data.clear()  # Clear any previous order data
         await help_command(update, context)
     elif query.data == 'faq':
+        context.user_data.clear()  # Clear any previous order data
         await faq_command(update, context)
     elif query.data == 'new_order':
         # Always allow starting new order - clear any previous data
