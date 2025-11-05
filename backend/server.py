@@ -2357,6 +2357,9 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
     query = update.callback_query
     await query.answer()
     
+    # Mark previous message as selected (remove buttons from template confirmation)
+    await mark_message_as_selected(update, context)
+    
     logger.info(f"Template data in context: {list(context.user_data.keys())}")
     
     # Template data already loaded in context.user_data
@@ -2368,7 +2371,7 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
     logger.info(f"Starting order with template: {template_name}")
     
     try:
-        await query.message.edit_text(
+        bot_msg = await query.message.edit_text(
             f"""📦 Создание заказа по шаблону "{template_name}"
 
 Теперь введите данные посылки:
@@ -2378,9 +2381,10 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
             reply_markup=reply_markup,
             parse_mode='Markdown'
         )
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
     except Exception as e:
         # If edit fails, send new message
-        await query.message.reply_text(
+        bot_msg = await query.message.reply_text(
             f"""📦 Создание заказа по шаблону "{template_name}"
 
 Теперь введите данные посылки:
@@ -2390,6 +2394,7 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
             reply_markup=reply_markup,
             parse_mode='Markdown'
         )
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
     
     context.user_data['last_state'] = PARCEL_WEIGHT
     logger.info(f"Returning PARCEL_WEIGHT state")
