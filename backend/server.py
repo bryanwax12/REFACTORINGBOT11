@@ -2216,9 +2216,7 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
 Что делать?""",
             reply_markup=reply_markup
         )
-        # Clear last_bot_message to prevent accidentally removing these buttons
-        context.user_data.pop('last_bot_message_id', None)
-        context.user_data.pop('last_bot_message_text', None)
+        # Don't clear last_bot_message here - we need it for mark_message_as_selected
         context.user_data['pending_template_name'] = template_name
         return TEMPLATE_NAME
     
