@@ -3666,6 +3666,7 @@ async def confirm_cancel_order(update: Update, context: ContextTypes.DEFAULT_TYP
     await query.answer()
     
     context.user_data.clear()
+    context.user_data['active_order'] = False
     
     keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
