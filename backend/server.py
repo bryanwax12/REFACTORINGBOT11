@@ -2634,7 +2634,8 @@ async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_
     template = await db.templates.find_one({"id": template_id}, {"_id": 0})
     
     if template:
-        await db.templates.delete_one({"id": template_id})
+        result = await db.templates.delete_one({"id": template_id})
+        logger.info(f"🗑️ Deleted template '{template['name']}' (id: {template_id}) - deleted_count: {result.deleted_count}")
         
         keyboard = [[InlineKeyboardButton("🔙 К списку шаблонов", callback_data='my_templates')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
@@ -2644,6 +2645,7 @@ async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_
             reply_markup=reply_markup
         )
     else:
+        logger.warning(f"⚠️ Template {template_id} not found for deletion")
         await query.message.reply_text("❌ Шаблон не найден")
     # Don't return state - deleted successfully
 
