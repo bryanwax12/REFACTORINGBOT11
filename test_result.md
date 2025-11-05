@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Fix template order creation flow: (1) 'Продолжить создание заказа' button not working after template selection, (2) 'Новый заказ' and 'Из шаблона' buttons working intermittently"
+user_problem_statement: "Ensure consistent 'Отмена' (Cancel) button functionality across all ConversationHandler states - verify that cancel button always shows confirmation dialog in ALL bot states during order creation"
 
 backend:
   - task: "Templates Feature - Use Template Functionality"
