@@ -3974,26 +3974,35 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await query.message.reply_text(
-            """Шаг 10/13: Квартира/Офис получателя (необязательно)
+        message_text = """Шаг 10/13: Квартира/Офис получателя (необязательно)
 
 Например: Apt 12, Suite 305
 
-Или нажмите "Пропустить" """,
-            reply_markup=reply_markup
-        )
+Или нажмите "Пропустить" """
+        bot_msg = await query.message.reply_text(message_text, reply_markup=reply_markup)
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
         return TO_ADDRESS2
     
     elif last_state == TO_CITY:
-        await query.message.reply_text("Шаг 11/13: Город получателя\n\nНапример: New York")
+        message_text = "Шаг 11/13: Город получателя\n\nНапример: New York"
+        bot_msg = await query.message.reply_text(message_text)
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
         return TO_CITY
     
     elif last_state == TO_STATE:
-        await query.message.reply_text("Шаг 11/13: Штат получателя\n\nВведите двухбуквенный код штата\nНапример: CA, NY, TX")
+        message_text = "Шаг 11/13: Штат получателя\n\nВведите двухбуквенный код штата\nНапример: CA, NY, TX"
+        bot_msg = await query.message.reply_text(message_text)
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
         return TO_STATE
     
     elif last_state == TO_ZIP:
-        await query.message.reply_text("Шаг 12/13: ZIP код получателя\n\nНапример: 10001")
+        message_text = "Шаг 12/13: ZIP код получателя\n\nНапример: 10001"
+        bot_msg = await query.message.reply_text(message_text)
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
         return TO_ZIP
     
     elif last_state == TO_PHONE:
