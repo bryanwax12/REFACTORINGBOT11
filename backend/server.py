@@ -287,7 +287,7 @@ class Parcel(BaseModel):
 
 class ShippingLabel(BaseModel):
     model_config = ConfigDict(extra="ignore")
-    id: str = Field(default_factory=lambda: str(uuid.uuid4())
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     order_id: str
     label_id: Optional[str] = None  # ShipStation label ID for voiding
     shipment_id: Optional[str] = None  # ShipStation shipment ID
@@ -301,7 +301,7 @@ class ShippingLabel(BaseModel):
 
 class Payment(BaseModel):
     model_config = ConfigDict(extra="ignore")
-    id: str = Field(default_factory=lambda: str(uuid.uuid4())
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     order_id: str
     amount: float
     currency: str = "USDT"
@@ -312,7 +312,7 @@ class Payment(BaseModel):
 
 class Order(BaseModel):
     model_config = ConfigDict(extra="ignore")
-    id: str = Field(default_factory=lambda: str(uuid.uuid4())
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     user_id: str
     telegram_id: int
     address_from: Address
@@ -332,7 +332,7 @@ class OrderCreate(BaseModel):
 
 class Template(BaseModel):
     model_config = ConfigDict(extra="ignore")
-    id: str = Field(default_factory=lambda: str(uuid.uuid4())
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     user_id: str
     telegram_id: int
     name: str  # User-defined template name
