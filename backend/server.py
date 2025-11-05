@@ -1789,6 +1789,9 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
         
         context.user_data['length'] = length
         
+        # Mark previous message as selected
+        await mark_message_as_selected(update, context)
+        
         # Ask for width (with skip option only if weight <= 10 lb)
         weight = context.user_data.get('weight', 0)
         
@@ -1797,7 +1800,7 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
             keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            await update.message.reply_text(
+            bot_msg = await update.message.reply_text(
                 """📏 Ширина посылки в дюймах (inches)
 
 Введите ширину в дюймах (например: 12):""",
@@ -1808,7 +1811,7 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
             keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартные размеры", callback_data='skip_dimensions')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            await update.message.reply_text(
+            bot_msg = await update.message.reply_text(
                 """📏 Ширина посылки в дюймах (inches)
 Например: 10
 
@@ -1816,6 +1819,7 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
                 reply_markup=reply_markup
             )
         
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_state'] = PARCEL_WIDTH
         return PARCEL_WIDTH
             
