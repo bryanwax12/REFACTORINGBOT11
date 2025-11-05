@@ -1517,19 +1517,19 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Check if we're in editing mode
     if context.user_data.get('editing_to_address'):
-        bot_msg = await (update.message or update.callback_query.message).reply_text(
-            """Шаг 4/6: Город получателя
-Например: New York""",
-            reply_markup=reply_markup
-        )
+        message_text = """Шаг 4/6: Город получателя
+Например: New York"""
     else:
-        bot_msg = await (update.message or update.callback_query.message).reply_text(
-            """Шаг 11/13: Город получателя
-Например: New York""",
-            reply_markup=reply_markup
-        )
+        message_text = """Шаг 11/13: Город получателя
+Например: New York"""
+    
+    bot_msg = await (update.message or update.callback_query.message).reply_text(
+        message_text,
+        reply_markup=reply_markup
+    )
     context.user_data['last_bot_message_id'] = bot_msg.message_id
-    context.user_data['last_state'] = TO_CITY  # Save state for next step
+    context.user_data['last_bot_message_text'] = message_text
+    context.user_data['last_state'] = TO_CITY
     return TO_CITY
 
 async def skip_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
