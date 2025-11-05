@@ -2340,19 +2340,22 @@ async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_T
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
-        await query.message.reply_text(
-            f"""✅ *Шаблон "{template_name}" обновлен!*
+        message_text = f"""✅ *Шаблон "{template_name}" обновлен!*
 
 Данные шаблона обновлены текущими адресами.
 
-*Продолжить создание этого заказа?*""",
+*Продолжить создание этого заказа?*"""
+        
+        bot_msg = await query.message.reply_text(
+            message_text,
             reply_markup=reply_markup,
             parse_mode='Markdown'
         )
+        
+        # Save last bot message context for button protection
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
         context.user_data['saved_template_name'] = template_name
-        # Clear last_bot_message to prevent accidentally removing these buttons
-        context.user_data.pop('last_bot_message_id', None)
-        context.user_data.pop('last_bot_message_text', None)
     else:
         await query.message.reply_text("❌ Не удалось обновить шаблон")
         return ConversationHandler.END
