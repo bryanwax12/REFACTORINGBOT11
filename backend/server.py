@@ -2547,6 +2547,9 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
     await query.answer()
     logger.info(f"🟢 Query answered")
     
+    # Clear topup flag to prevent conflict with parcel weight input
+    context.user_data['awaiting_topup_amount'] = False
+    
     # Mark previous message as selected (remove buttons from template confirmation)
     await mark_message_as_selected(update, context)
     
