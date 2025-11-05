@@ -1474,21 +1474,21 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Check if we're in editing mode
     if context.user_data.get('editing_to_address'):
-        bot_msg = await update.message.reply_text(
-            """Шаг 3/6: Квартира/Офис получателя (необязательно)
+        message_text = """Шаг 3/6: Квартира/Офис получателя (необязательно)
 Например: Apt 12, Suite 305
-Или нажмите "Пропустить" """,
-            reply_markup=reply_markup
-        )
+Или нажмите "Пропустить" """
     else:
-        bot_msg = await update.message.reply_text(
-            """Шаг 10/13: Квартира/Офис получателя (необязательно)
+        message_text = """Шаг 10/13: Квартира/Офис получателя (необязательно)
 Например: Apt 12, Suite 305
-Или нажмите "Пропустить" """,
-            reply_markup=reply_markup
-        )
+Или нажмите "Пропустить" """
+    
+    bot_msg = await update.message.reply_text(
+        message_text,
+        reply_markup=reply_markup
+    )
     context.user_data['last_bot_message_id'] = bot_msg.message_id
-    context.user_data['last_state'] = TO_ADDRESS2  # Save state for next step
+    context.user_data['last_bot_message_text'] = message_text
+    context.user_data['last_state'] = TO_ADDRESS2
     return TO_ADDRESS2
 
 async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
