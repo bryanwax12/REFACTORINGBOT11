@@ -530,15 +530,30 @@ frontend:
           agent: "testing"
           comment: "✅ CHECK ALL BOT ACCESS FRONTEND FEATURE VERIFIED: Comprehensive testing confirms all requirements are correctly implemented and working. BUTTON VISIBILITY & PLACEMENT: (1) ✅ Button visible in Users tab, (2) ✅ Correctly positioned between '✓ Проверить всех' and '📣 Пригласить всех в канал' buttons, (3) ✅ All three buttons display in proper order. BUTTON STYLING: (1) ✅ Orange theme applied correctly (border-orange-600 text-orange-600 hover:bg-orange-50), (2) ✅ Button text correct: '🚫 Проверить блокировку бота', (3) ✅ Icon and emoji display properly. BUTTON FUNCTIONALITY: (1) ✅ Button enabled when users present (5 users detected), (2) ✅ Button would be disabled when users.length === 0 (logic verified), (3) ✅ Confirmation dialog appears with correct text: 'Проверить доступность бота для всех пользователей?', (4) ✅ handleCheckAllBotAccess function implemented correctly (lines 514-531). BACKEND INTEGRATION: (1) ✅ API endpoint POST /api/users/check-all-bot-access working perfectly, (2) ✅ Returns proper response: checked_count=5, accessible_count=4, blocked_count=1, failed_count=0, (3) ✅ API response time acceptable (1.73s). UI STATE MANAGEMENT: (1) ✅ Bot blocked badges display correctly (1 user with '🚫 Заблокировал бота' badge), (2) ✅ Individual bot access buttons show proper states, (3) ✅ loadData() function called to refresh UI after API response. CRITICAL SUCCESS: All 15/15 verification checks passed (100% success rate). The Check All Bot Access feature is fully functional: admin can check bot blocking status for all users at once, proper confirmation dialog appears, backend API processes request correctly, and UI updates with current bot access status. Feature ready for production use."
 
+  - task: "Balance Top-Up Flow - Button Protection and Cancel Button Fix"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "❌ USER REPORTED ISSUE: In balance top-up flow ('Пополнение баланса'), after entering amount and clicking 'Отмена' (Cancel) button: (1) Cancel button doesn't work, (2) Missing '✅ Выбрано' text in previous message after entering amount. Button protection mechanism not implemented in top-up flow."
+        - working: "NA"
+          agent: "main"
+          comment: "🔧 FIX APPLIED: Modified balance top-up flow to implement button protection mechanism. CHANGES: (1) Added 'Отмена' button to my_balance_command() function - now shows both 'Отмена' and 'Главное меню' buttons when asking for top-up amount (lines 758-798), (2) Added last_bot_message_id and last_bot_message_text saving after sending balance message - stores bot message context for mark_message_as_selected (lines 793-798), (3) Added mark_message_as_selected call at beginning of handle_topup_amount_input() function - removes buttons and adds '✅ Выбрано' text when user enters amount (line 798). EXPECTED BEHAVIOR: User clicks 'Пополнить баланс' → sees balance with 'Отмена' and 'Главное меню' buttons → enters amount → previous message shows '✅ Выбрано' and buttons removed → can click 'Отмена' button before entering amount to return to main menu. Backend restarted. Ready for testing."
+
 metadata:
   created_by: "main_agent"
   version: "1.1"
-  test_sequence: 2
+  test_sequence: 3
   run_ui: false
 
 test_plan:
   current_focus:
-    - "Cancel Order Button - Consistent Confirmation Across All States"
+    - "Balance Top-Up Flow - Button Protection and Cancel Button Fix"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
