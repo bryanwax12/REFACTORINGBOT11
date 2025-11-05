@@ -684,15 +684,6 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Handle create label button
         order_id = query.data.replace('create_label_', '')
         await handle_create_label_request(update, context, order_id)
-    else:
-        # Handle orphaned buttons from completed orders
-        logger.info(f"Orphaned button detected: {query.data} from user {update.effective_user.id}")
-        await query.answer("⚠️ Этот заказ уже завершён")
-        await query.message.reply_text(
-            "⚠️ *Этот заказ уже завершён или отменён.*\n\n"
-            "Для создания нового заказа используйте меню в нижней части экрана.",
-            parse_mode='Markdown'
-        )
 
 async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Handle both command and callback
