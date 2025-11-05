@@ -2425,6 +2425,9 @@ async def order_from_template_list(update: Update, context: ContextTypes.DEFAULT
     query = update.callback_query
     await query.answer()
     
+    # Set active_order flag - user chose "From template" to create order
+    context.user_data['active_order'] = True
+    
     telegram_id = query.from_user.id
     templates = await db.templates.find({"telegram_id": telegram_id}).sort("created_at", -1).to_list(10)
     
