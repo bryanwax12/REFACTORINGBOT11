@@ -2206,12 +2206,15 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
-        await update.message.reply_text(
+        bot_msg = await update.message.reply_text(
             f"""⚠️ Шаблон с названием "{template_name}" уже существует.
 
 Что делать?""",
             reply_markup=reply_markup
         )
+        # Clear last_bot_message to prevent accidentally removing these buttons
+        context.user_data.pop('last_bot_message_id', None)
+        context.user_data.pop('last_bot_message_text', None)
         context.user_data['pending_template_name'] = template_name
         return TEMPLATE_NAME
     
