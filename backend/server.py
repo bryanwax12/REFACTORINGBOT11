@@ -471,6 +471,7 @@ async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT
             try:
                 # Get the last bot message ID and text
                 last_msg_id = context.user_data['last_bot_message_id']
+                last_msg_text = context.user_data.get('last_bot_message_text', '')
                 chat_id = update.effective_chat.id
                 
                 # Try to add "✅ Выбрано" if we have the text
@@ -915,11 +916,16 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
+        message_text = """📦 Создание нового заказа
+
+Шаг 1/13: Имя отправителя
+Например: John Smith"""
         bot_msg = await query.message.reply_text(
             message_text,
             reply_markup=reply_markup
         )
         context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
         context.user_data['last_state'] = FROM_NAME
         return FROM_NAME
 
@@ -964,11 +970,14 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
+    message_text = """Шаг 2/13: Адрес отправителя
+Например: 215 Clayton St."""
     bot_msg = await update.message.reply_text(
         message_text,
         reply_markup=reply_markup
     )
     context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = message_text  # Save text for editing
     context.user_data['last_state'] = FROM_ADDRESS  # Save state for next step
     return FROM_ADDRESS
 
@@ -1018,11 +1027,15 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE)
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
+    message_text = """Шаг 3/13: Квартира/Офис отправителя (необязательно)
+Например: Apt 5, Suite 201
+Или нажмите "Пропустить" """
     bot_msg = await update.message.reply_text(
         message_text,
         reply_markup=reply_markup
     )
     context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = message_text
     context.user_data['last_state'] = FROM_ADDRESS2
     return FROM_ADDRESS2
 
@@ -1096,7 +1109,8 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     bot_msg = await update.message.reply_text(
-        message_text,
+        """Шаг 5/13: Штат отправителя (2 буквы)
+Например: CA""",
         reply_markup=reply_markup
     )
     context.user_data['last_bot_message_id'] = bot_msg.message_id
@@ -1138,7 +1152,8 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     bot_msg = await update.message.reply_text(
-        message_text,
+        """Шаг 6/13: ZIP код отправителя
+Например: 94117""",
         reply_markup=reply_markup
     )
     context.user_data['last_bot_message_id'] = bot_msg.message_id
@@ -1281,7 +1296,8 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     bot_msg = await update.message.reply_text(
-        message_text,
+        """Шаг 7/13: Телефон отправителя
+Например: +1234567890 или 1234567890""",
         reply_markup=reply_markup
     )
     context.user_data['last_bot_message_id'] = bot_msg.message_id
@@ -1296,7 +1312,7 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         if query.data == 'skip_from_phone':
             # Skip phone - set empty or default value
-    context.user_data['from_phone'] = ''
+            context.user_data['from_phone'] = ''
             
             # Mark previous message as selected
             await mark_message_as_selected(update, context)
@@ -1304,13 +1320,14 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
             keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-    bot_msg = await query.message.reply_text(
-                message_text,
+            bot_msg = await query.message.reply_text(
+                """Шаг 8/13: Имя получателя
+Например: Jane Doe""",
                 reply_markup=reply_markup
             )
-    context.user_data['last_bot_message_id'] = bot_msg.message_id
-    context.user_data['last_state'] = TO_NAME  # Save state for next step
-    return TO_NAME
+            context.user_data['last_bot_message_id'] = bot_msg.message_id
+            context.user_data['last_state'] = TO_NAME  # Save state for next step
+            return TO_NAME
     
     phone = update.message.text.strip()
     
@@ -1346,7 +1363,8 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     bot_msg = await update.message.reply_text(
-        message_text,
+        """Шаг 8/13: Имя получателя
+Например: Jane Doe""",
         reply_markup=reply_markup
     )
     context.user_data['last_bot_message_id'] = bot_msg.message_id
@@ -1391,8 +1409,9 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=reply_markup
         )
     else:
-    bot_msg = await update.message.reply_text(
-            message_text,
+        bot_msg = await update.message.reply_text(
+            """Шаг 9/13: Адрес получателя
+Например: 123 Main St.""",
             reply_markup=reply_markup
         )
     context.user_data['last_bot_message_id'] = bot_msg.message_id
@@ -1545,8 +1564,9 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=reply_markup
         )
     else:
-    bot_msg = await update.message.reply_text(
-            message_text,
+        bot_msg = await update.message.reply_text(
+            """Шаг 12/13: Штат получателя (2 буквы)
+Например: NY""",
             reply_markup=reply_markup
         )
     context.user_data['last_bot_message_id'] = bot_msg.message_id
@@ -1595,8 +1615,9 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=reply_markup
         )
     else:
-    bot_msg = await update.message.reply_text(
-            message_text,
+        bot_msg = await update.message.reply_text(
+            """Шаг 13/13: ZIP код получателя
+Например: 10007""",
             reply_markup=reply_markup
         )
     context.user_data['last_bot_message_id'] = bot_msg.message_id
@@ -1650,7 +1671,7 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         if query.data == 'skip_to_phone':
             # Skip phone - set empty or default value
-    context.user_data['to_phone'] = ''
+            context.user_data['to_phone'] = ''
             
             # Mark previous message as selected
             await mark_message_as_selected(update, context)
@@ -1658,12 +1679,13 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
             keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-    bot_msg = await query.message.reply_text(
-                message_text,
+            bot_msg = await query.message.reply_text(
+                """Вес посылки в фунтах (lb)
+Например: 2""",
                 reply_markup=reply_markup
             )
-    context.user_data['last_bot_message_id'] = bot_msg.message_id
-    context.user_data['last_state'] = PARCEL_WEIGHT  # Save state for next step
+            context.user_data['last_bot_message_id'] = bot_msg.message_id
+            context.user_data['last_state'] = PARCEL_WEIGHT  # Save state for next step
             return PARCEL_WEIGHT
     
     phone = update.message.text.strip()
@@ -1700,7 +1722,8 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     bot_msg = await update.message.reply_text(
-        message_text,
+        """Вес посылки в фунтах (lb)
+Например: 2""",
         reply_markup=reply_markup
     )
     context.user_data['last_bot_message_id'] = bot_msg.message_id
@@ -1709,7 +1732,7 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
-        weight = float(update.message.text.strip()
+        weight = float(update.message.text.strip())
         
         if weight <= 0:
             await update.message.reply_text("❌ Вес должен быть больше 0. Попробуйте еще раз:")
@@ -1748,11 +1771,15 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
             keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартные размеры", callback_data='skip_dimensions')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-    bot_msg = await update.message.reply_text(
-                message_text,
+            bot_msg = await update.message.reply_text(
+                """📏 Длина посылки в дюймах (inches)
+Например: 12
+
+Или нажмите кнопку ниже, чтобы использовать стандартные размеры (10x10x10 дюймов)""",
                 reply_markup=reply_markup
             )
-    context.user_data['last_bot_message_id'] = bot_msg.message_id
+        
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_state'] = PARCEL_LENGTH  # Save state for next step
         return PARCEL_LENGTH
             
@@ -1769,9 +1796,9 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
         
         if query.data == 'skip_dimensions':
             # Use default dimensions 10x10x10
-    context.user_data['length'] = 10
-    context.user_data['width'] = 10
-    context.user_data['height'] = 10
+            context.user_data['length'] = 10
+            context.user_data['width'] = 10
+            context.user_data['height'] = 10
             
             # Mark previous message as selected
             await mark_message_as_selected(update, context)
@@ -1780,15 +1807,15 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
             
             # If we're editing parcel, mark as complete
             if context.user_data.get('editing_parcel'):
-        context.user_data['editing_parcel'] = False
+                context.user_data['editing_parcel'] = False
                 await query.message.reply_text("✅ Размеры посылки обновлены!")
             
             # Show data confirmation
-    context.user_data['last_state'] = CONFIRM_DATA
+            context.user_data['last_state'] = CONFIRM_DATA
             return await show_data_confirmation(update, context)
     
     try:
-        length = float(update.message.text.strip()
+        length = float(update.message.text.strip())
         
         if length <= 0:
             await update.message.reply_text("❌ Длина должна быть больше 0. Попробуйте еще раз:")
@@ -1822,11 +1849,15 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
             keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартные размеры", callback_data='skip_dimensions')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-    bot_msg = await update.message.reply_text(
-                message_text,
+            bot_msg = await update.message.reply_text(
+                """📏 Ширина посылки в дюймах (inches)
+Например: 10
+
+Или нажмите кнопку ниже, чтобы использовать стандартные размеры для ширины и высоты (10x10 дюймов)""",
                 reply_markup=reply_markup
             )
-    context.user_data['last_bot_message_id'] = bot_msg.message_id
+        
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_state'] = PARCEL_WIDTH
         return PARCEL_WIDTH
             
@@ -1842,8 +1873,8 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
         
         if query.data == 'skip_dimensions':
             # Use default dimensions 10x10 for width and height
-    context.user_data['width'] = 10
-    context.user_data['height'] = 10
+            context.user_data['width'] = 10
+            context.user_data['height'] = 10
             
             # Mark previous message as selected
             await mark_message_as_selected(update, context)
@@ -1852,15 +1883,15 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
             
             # If we're editing parcel, mark as complete
             if context.user_data.get('editing_parcel'):
-        context.user_data['editing_parcel'] = False
+                context.user_data['editing_parcel'] = False
                 await query.message.reply_text("✅ Размеры посылки обновлены!")
             
             # Show data confirmation
-    context.user_data['last_state'] = CONFIRM_DATA
+            context.user_data['last_state'] = CONFIRM_DATA
             return await show_data_confirmation(update, context)
     
     try:
-        width = float(update.message.text.strip()
+        width = float(update.message.text.strip())
         
         if width <= 0:
             await update.message.reply_text("❌ Ширина должна быть больше 0. Попробуйте еще раз:")
@@ -1894,11 +1925,15 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
             keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартную высоту", callback_data='skip_height')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-    bot_msg = await update.message.reply_text(
-                message_text,
+            bot_msg = await update.message.reply_text(
+                """📏 Высота посылки в дюймах (inches)
+Например: 8
+
+Или нажмите кнопку ниже, чтобы использовать стандартную высоту (10 дюймов)""",
                 reply_markup=reply_markup
             )
-    context.user_data['last_bot_message_id'] = bot_msg.message_id
+        
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_state'] = PARCEL_HEIGHT
         return PARCEL_HEIGHT
             
@@ -1914,7 +1949,7 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
         
         if query.data == 'skip_height':
             # Use default height 10
-    context.user_data['height'] = 10
+            context.user_data['height'] = 10
             
             # Mark previous message as selected
             await mark_message_as_selected(update, context)
@@ -1923,15 +1958,15 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
             
             # If we're editing parcel, mark as complete
             if context.user_data.get('editing_parcel'):
-        context.user_data['editing_parcel'] = False
+                context.user_data['editing_parcel'] = False
                 await query.message.reply_text("✅ Размеры посылки обновлены!")
             
             # Show data confirmation
-    context.user_data['last_state'] = CONFIRM_DATA
+            context.user_data['last_state'] = CONFIRM_DATA
             return await show_data_confirmation(update, context)
     
     try:
-        height = float(update.message.text.strip()
+        height = float(update.message.text.strip())
         
         if height <= 0:
             await update.message.reply_text("❌ Высота должна быть больше 0. Попробуйте еще раз:")
@@ -1948,7 +1983,7 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
         
         # If we're editing parcel, mark as complete
         if context.user_data.get('editing_parcel'):
-    context.user_data['editing_parcel'] = False
+            context.user_data['editing_parcel'] = False
             await update.message.reply_text("✅ Размеры посылки обновлены!")
         
         # Show data confirmation
@@ -2062,12 +2097,11 @@ _Шаблон сохранит оба адреса для быстрого ис�
         context.user_data['editing_from_address'] = True
         keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        message_text = "📤 Редактирование адреса отправителя\n\nШаг 1/6: Имя отправителя\nНапример: John Smith"
-    bot_msg = await query.message.reply_text(
-            message_text,
+        bot_msg = await query.message.reply_text(
+            "📤 Редактирование адреса отправителя\n\nШаг 1/6: Имя отправителя\nНапример: John Smith",
             reply_markup=reply_markup
         )
-    context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_state'] = FROM_NAME
         return FROM_NAME
     
@@ -2079,12 +2113,11 @@ _Шаблон сохранит оба адреса для быстрого ис�
         context.user_data['editing_to_address'] = True
         keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        message_text = "📥 Редактирование адреса получателя\n\nШаг 1/6: Имя получателя\nНапример: Jane Doe"
-    bot_msg = await query.message.reply_text(
-            message_text,
+        bot_msg = await query.message.reply_text(
+            "📥 Редактирование адреса получателя\n\nШаг 1/6: Имя получателя\nНапример: Jane Doe",
             reply_markup=reply_markup
         )
-    context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_state'] = TO_NAME
         return TO_NAME
     
@@ -2096,12 +2129,11 @@ _Шаблон сохранит оба адреса для быстрого ис�
         context.user_data['editing_parcel'] = True
         keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        message_text = "📦 Редактирование посылки\n\nВведите вес посылки в фунтах:\nНапример: 5 или 2.5"
-    bot_msg = await query.message.reply_text(
-            message_text,
+        bot_msg = await query.message.reply_text(
+            "📦 Редактирование посылки\n\nВведите вес посылки в фунтах:\nНапример: 5 или 2.5",
             reply_markup=reply_markup
         )
-    context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_state'] = PARCEL_WEIGHT
         return PARCEL_WEIGHT
     
@@ -2528,11 +2560,16 @@ async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
+    message_text = """📦 Создание нового заказа
+
+Шаг 1/13: Имя отправителя
+Например: John Smith"""
     bot_msg = await query.message.reply_text(
         message_text,
         reply_markup=reply_markup
     )
     context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = message_text
     context.user_data['last_state'] = FROM_NAME
     logger.info(f"order_new returning FROM_NAME state")
     return FROM_NAME
@@ -2790,7 +2827,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         balanced_rates = []
         for carrier, carrier_rates in rates_by_carrier.items():
             # Sort by price (ascending)
-            sorted_carrier_rates = sorted(carrier_rates, key=lambda r: float(r['shipping_amount']['amount'])
+            sorted_carrier_rates = sorted(carrier_rates, key=lambda r: float(r['shipping_amount']['amount']))
             
             # Deduplicate by service_type - keep only cheapest for each service
             seen_services = {}
@@ -2805,7 +2842,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             balanced_rates.extend(deduplicated_rates[:5])
         
         # Sort all balanced rates by carrier, then by price
-        balanced_rates = sorted(balanced_rates, key=lambda r: (r['carrier_friendly_name'], float(r['shipping_amount']['amount']))
+        balanced_rates = sorted(balanced_rates, key=lambda r: (r['carrier_friendly_name'], float(r['shipping_amount']['amount'])))
         
         # Take top 15 overall but maintain carrier grouping
         for rate in balanced_rates[:15]:
@@ -2820,7 +2857,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
                 'currency': rate['shipping_amount']['currency'],
                 'days': rate.get('delivery_days')
             }
-    context.user_data['rates'].append(rate_data)
+            context.user_data['rates'].append(rate_data)
         
         # Create buttons for carrier selection
         from datetime import datetime, timedelta, timezone
@@ -2840,7 +2877,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             carrier = rate['carrier']
             if carrier not in rates_by_carrier_display:
                 rates_by_carrier_display[carrier] = []
-            rates_by_carrier_display[carrier].append((i, rate)
+            rates_by_carrier_display[carrier].append((i, rate))
         
         # Count unique carriers
         unique_carriers = set([r['carrier'] for r in context.user_data['rates']])
@@ -3106,8 +3143,8 @@ Shipping label создан успешно!""",
                 )
                 
                 # Mark order as completed to prevent stale button interactions
-        context.user_data.clear()
-        context.user_data['order_completed'] = True
+                context.user_data.clear()
+                context.user_data['order_completed'] = True
             else:
                 # Label creation failed - don't charge user
                 await db.orders.update_one(
@@ -3128,8 +3165,8 @@ Shipping label создан успешно!""",
                 )
                 
                 # Mark order as completed to prevent stale button interactions
-        context.user_data.clear()
-        context.user_data['order_completed'] = True
+                context.user_data.clear()
+                context.user_data['order_completed'] = True
             
         elif query.data == 'pay_with_crypto':
             # Create order
@@ -3209,7 +3246,7 @@ Shipping label создан успешно!""",
             # Save new pending order
             await db.pending_orders.insert_one(pending_order)
             
-    context.user_data['last_state'] = TOPUP_AMOUNT  # Save state for cancel return
+            context.user_data['last_state'] = TOPUP_AMOUNT  # Save state for cancel return
             
             keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -3260,7 +3297,7 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
     selected_rate = pending_order['selected_rate']
     logger.info(f"Selected rate keys: {selected_rate.keys()}")
-    amount = pending_order.get('final_amount', selected_rate.get('amount', selected_rate.get('totalAmount', 0))
+    amount = pending_order.get('final_amount', selected_rate.get('amount', selected_rate.get('totalAmount', 0)))
     user_balance = user.get('balance', 0)
     
     # Handle different rate structures - use correct keys
@@ -4153,7 +4190,7 @@ async def create_order(order_data: OrderCreate):
             }
             
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/orders/search")
 async def search_orders(
@@ -4236,7 +4273,7 @@ async def search_orders(
         return result
     except Exception as e:
         logger.error(f"Error searching orders: {e}")
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/orders/export/csv")
 async def export_orders_csv(
@@ -4336,7 +4373,7 @@ async def export_orders_csv(
         
     except Exception as e:
         logger.error(f"Error exporting orders: {e}")
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/orders", response_model=List[dict])
 async def get_orders(telegram_id: Optional[int] = None):
@@ -4420,7 +4457,7 @@ async def create_shipping_label(order_id: str):
         
     except Exception as e:
         logger.error(f"Error creating label: {e}")
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/shipping/track/{tracking_number}")
 async def track_shipment(tracking_number: str, carrier: str):
@@ -4483,7 +4520,7 @@ async def track_shipment(tracking_number: str, carrier: str):
             }
     except Exception as e:
         logger.error(f"Error tracking shipment: {e}")
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @api_router.get("/labels/{label_id}/download")
@@ -4530,7 +4567,7 @@ async def download_label(label_id: str):
         raise
     except Exception as e:
         logger.error(f"Error downloading label: {e}")
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @api_router.post("/orders/{order_id}/refund")
@@ -4661,7 +4698,7 @@ async def refund_order(order_id: str, refund_reason: Optional[str] = None):
         raise
     except Exception as e:
         logger.error(f"Error refunding order: {e}")
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @api_router.post("/admin/create-label/{order_id}", dependencies=[Depends(verify_admin_key)])
@@ -4680,7 +4717,7 @@ async def create_label_manually(order_id: str):
             raise HTTPException(status_code=400, detail="Order must be paid to create label")
         
         # If label already exists, we'll recreate it (void old one first if possible)
-        recreating = bool(order.get('label_id')
+        recreating = bool(order.get('label_id'))
         if recreating:
             logger.info(f"Recreating label for order {order_id} (old label_id: {order.get('label_id')})")
         
@@ -4822,7 +4859,7 @@ async def create_label_manually(order_id: str):
         raise
     except Exception as e:
         logger.error(f"Error creating label manually: {e}")
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @api_router.post("/admin/create-label-manual", dependencies=[Depends(verify_admin_key)])
@@ -4917,7 +4954,7 @@ async def create_label_manual_form(request: Request):
             raise HTTPException(status_code=500, detail="Failed to get label info from ShipStation")
         
         # Generate order ID
-        order_id = str(uuid.uuid4()
+        order_id = str(uuid.uuid4())
         
         # Save label to database
         label_doc = {
@@ -4969,7 +5006,7 @@ async def create_label_manual_form(request: Request):
         raise
     except Exception as e:
         logger.error(f"Error creating label from form: {e}")
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @api_router.post("/oxapay/webhook")
@@ -5148,7 +5185,7 @@ async def get_user_details(telegram_id: int):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/users/{telegram_id}/block")
 async def block_user(telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
@@ -5183,7 +5220,7 @@ async def block_user(telegram_id: int, authenticated: bool = Depends(verify_admi
         raise
     except Exception as e:
         logger.error(f"Error blocking user: {e}")
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/users/{telegram_id}/unblock")
 async def unblock_user(telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
@@ -5218,7 +5255,7 @@ async def unblock_user(telegram_id: int, authenticated: bool = Depends(verify_ad
         raise
     except Exception as e:
         logger.error(f"Error unblocking user: {e}")
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/users/{telegram_id}/invite-channel")
 async def invite_user_to_channel(telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
@@ -5276,7 +5313,7 @@ async def invite_user_to_channel(telegram_id: int, authenticated: bool = Depends
         raise
     except Exception as e:
         logger.error(f"Error sending channel invitation: {e}")
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/users/invite-all-channel")
 async def invite_all_users_to_channel(authenticated: bool = Depends(verify_admin_key)):
@@ -5370,7 +5407,7 @@ async def invite_all_users_to_channel(authenticated: bool = Depends(verify_admin
         raise
     except Exception as e:
         logger.error(f"Error sending mass channel invitations: {e}")
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 
@@ -5477,7 +5514,7 @@ async def broadcast_message(
         raise
     except Exception as e:
         logger.error(f"Error sending broadcast: {e}")
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/maintenance/status")
 async def get_maintenance_status(authenticated: bool = Depends(verify_admin_key)):
@@ -5491,7 +5528,7 @@ async def get_maintenance_status(authenticated: bool = Depends(verify_admin_key)
         }
     except Exception as e:
         logger.error(f"Error getting maintenance status: {e}")
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/maintenance/enable")
 async def enable_maintenance_mode(authenticated: bool = Depends(verify_admin_key)):
@@ -5556,7 +5593,7 @@ async def enable_maintenance_mode(authenticated: bool = Depends(verify_admin_key
         
     except Exception as e:
         logger.error(f"Error enabling maintenance mode: {e}")
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/maintenance/disable")
 async def disable_maintenance_mode(authenticated: bool = Depends(verify_admin_key)):
@@ -5621,7 +5658,7 @@ async def disable_maintenance_mode(authenticated: bool = Depends(verify_admin_ke
         
     except Exception as e:
         logger.error(f"Error disabling maintenance mode: {e}")
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/upload-image")
 async def upload_image(
@@ -5688,7 +5725,7 @@ async def upload_image(
         raise
     except Exception as e:
         logger.error(f"Error uploading image: {e}")
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/users/{telegram_id}/check-bot-access")
 async def check_bot_access(telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
@@ -5753,7 +5790,7 @@ async def check_bot_access(telegram_id: int, authenticated: bool = Depends(verif
         raise
     except Exception as e:
         logger.error(f"Error checking bot access: {e}")
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @api_router.post("/users/check-all-bot-access")
@@ -5829,7 +5866,7 @@ async def check_all_bot_access(authenticated: bool = Depends(verify_admin_key)):
         raise
     except Exception as e:
         logger.error(f"Error checking all bot access: {e}")
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/users/leaderboard")
 async def get_leaderboard():
@@ -5877,7 +5914,7 @@ async def get_leaderboard():
         
         return leaderboard
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @api_router.get("/users/{telegram_id}/channel-status")
@@ -5943,7 +5980,7 @@ async def check_user_channel_status(telegram_id: int, authenticated: bool = Depe
         raise
     except Exception as e:
         logger.error(f"Error checking channel status: {e}")
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/users/check-all-channel-status")
 async def check_all_users_channel_status(authenticated: bool = Depends(verify_admin_key)):
@@ -6011,7 +6048,7 @@ async def check_all_users_channel_status(authenticated: bool = Depends(verify_ad
         raise
     except Exception as e:
         logger.error(f"Error checking all channel statuses: {e}")
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @api_router.post("/users/{telegram_id}/balance/add")
@@ -6045,7 +6082,7 @@ async def add_balance(telegram_id: int, amount: float):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/users/{telegram_id}/balance/deduct")
 async def deduct_balance(telegram_id: int, amount: float):
@@ -6082,7 +6119,7 @@ async def deduct_balance(telegram_id: int, amount: float):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @api_router.post("/users/{telegram_id}/discount")
@@ -6126,7 +6163,7 @@ async def set_user_discount(telegram_id: int, discount: float):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/carriers")
 async def get_carriers():
@@ -6172,7 +6209,7 @@ async def get_carriers():
         
     except Exception as e:
         logger.error(f"Error fetching carriers: {e}")
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 class ShippingRateRequest(BaseModel):
     from_address: Address
@@ -6340,7 +6377,7 @@ async def calculate_shipping_rates(request: ShippingRateRequest):
         raise
     except Exception as e:
         logger.error(f"Error calculating shipping rates: {e}")
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/stats")
 async def get_stats(authenticated: bool = Depends(verify_admin_key)):
@@ -6444,7 +6481,7 @@ async def get_expense_stats(date_from: Optional[str] = None, date_to: Optional[s
         }
     except Exception as e:
         logger.error(f"Error getting expense stats: {e}")
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/topups")
 async def get_topups(authenticated: bool = Depends(verify_admin_key)):
@@ -6476,7 +6513,7 @@ async def get_topups(authenticated: bool = Depends(verify_admin_key)):
         return enriched_topups
     except Exception as e:
         logger.error(f"Error getting topups: {e}")
-        raise HTTPException(status_code=500, detail=str(e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 app.include_router(api_router)
 
@@ -6670,23 +6707,23 @@ async def startup_event():
             
             application.add_handler(template_rename_handler)
             application.add_handler(order_conv_handler)
-            application.add_handler(CommandHandler("start", start_command)
-            application.add_handler(CommandHandler("test_error", test_error_message)
-            application.add_handler(CommandHandler("help", help_command)
-            application.add_handler(CommandHandler("balance", my_balance_command)
+            application.add_handler(CommandHandler("start", start_command))
+            application.add_handler(CommandHandler("test_error", test_error_message))
+            application.add_handler(CommandHandler("help", help_command))
+            application.add_handler(CommandHandler("balance", my_balance_command))
             
             # Template handlers (must be before generic button_callback)
-            application.add_handler(CallbackQueryHandler(view_template, pattern='^template_view_')
-            application.add_handler(CallbackQueryHandler(use_template, pattern='^template_use_')
-            application.add_handler(CallbackQueryHandler(delete_template, pattern='^template_delete_')
-            application.add_handler(CallbackQueryHandler(confirm_delete_template, pattern='^template_confirm_delete_')
+            application.add_handler(CallbackQueryHandler(view_template, pattern='^template_view_'))
+            application.add_handler(CallbackQueryHandler(use_template, pattern='^template_use_'))
+            application.add_handler(CallbackQueryHandler(delete_template, pattern='^template_delete_'))
+            application.add_handler(CallbackQueryHandler(confirm_delete_template, pattern='^template_confirm_delete_'))
             # rename_template_start is now handled by template_rename_handler ConversationHandler
-            application.add_handler(CallbackQueryHandler(my_templates_menu, pattern='^my_templates$')
-            application.add_handler(CallbackQueryHandler(order_from_template_list, pattern='^order_from_template$')
+            application.add_handler(CallbackQueryHandler(my_templates_menu, pattern='^my_templates$'))
+            application.add_handler(CallbackQueryHandler(order_from_template_list, pattern='^order_from_template$'))
             
             # Handler for topup amount input (text messages)
-            application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_topup_amount_input)
-            application.add_handler(CallbackQueryHandler(button_callback)
+            application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_topup_amount_input))
+            application.add_handler(CallbackQueryHandler(button_callback))
             
             await application.initialize()
             await application.start()
