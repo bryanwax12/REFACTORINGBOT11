@@ -664,8 +664,8 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data.clear()
         await new_order_start(update, context)
     elif query.data == 'cancel_order':
-        # Check if this is an orphaned cancel button (no active order)
-        if not context.user_data or len(context.user_data) == 0 or context.user_data.get('order_completed'):
+        # Check if this is an orphaned cancel button (order already completed)
+        if context.user_data.get('order_completed'):
             logger.info(f"Orphaned cancel button detected from user {update.effective_user.id}")
             await query.answer("⚠️ Этот заказ уже завершён")
             await query.message.reply_text(
@@ -674,6 +674,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 parse_mode='Markdown'
             )
         else:
+            # Always allow cancel - even if context is empty (user just started)
             await cancel_order(update, context)
     elif query.data.startswith('create_label_'):
         # Handle create label button
