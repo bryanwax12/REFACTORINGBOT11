@@ -1254,6 +1254,8 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Check if we're editing from address
     if context.user_data.get('editing_from_address'):
         context.user_data['editing_from_address'] = False
+        # Mark previous message as selected before returning to confirmation
+        await mark_message_as_selected(update, context)
         await update.message.reply_text("✅ Адрес отправителя обновлен!")
         return await show_data_confirmation(update, context)
     
