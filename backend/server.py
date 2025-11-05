@@ -2234,16 +2234,29 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
     template_name = context.user_data.get('template_name', 'шаблон')
     logger.info(f"Starting order with template: {template_name}")
     
-    await query.message.reply_text(
-        f"""📦 Создание заказа по шаблону "{template_name}"
+    try:
+        await query.message.edit_text(
+            f"""📦 Создание заказа по шаблону "{template_name}"
 
 Теперь введите данные посылки:
 
 *Вес посылки в фунтах (lb)*
 Например: 5.5""",
-        reply_markup=reply_markup,
-        parse_mode='Markdown'
-    )
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
+        )
+    except Exception as e:
+        # If edit fails, send new message
+        await query.message.reply_text(
+            f"""📦 Создание заказа по шаблону "{template_name}"
+
+Теперь введите данные посылки:
+
+*Вес посылки в фунтах (lb)*
+Например: 5.5""",
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
+        )
     
     context.user_data['last_state'] = PARCEL_WEIGHT
     logger.info(f"Returning PARCEL_WEIGHT state")
