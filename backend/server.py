@@ -2335,6 +2335,9 @@ async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_T
             parse_mode='Markdown'
         )
         context.user_data['saved_template_name'] = template_name
+        # Clear last_bot_message to prevent accidentally removing these buttons
+        context.user_data.pop('last_bot_message_id', None)
+        context.user_data.pop('last_bot_message_text', None)
     else:
         await query.message.reply_text("❌ Не удалось обновить шаблон")
         return ConversationHandler.END
