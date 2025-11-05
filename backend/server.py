@@ -2274,6 +2274,85 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
     context.user_data['saved_template_name'] = template_name
     
 
+async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Update existing template with current order data"""
+    query = update.callback_query
+    await query.answer()
+    
+    # Mark previous message as selected
+    await mark_message_as_selected(update, context)
+    
+    template_id = query.data.replace('template_update_', '')
+    telegram_id = query.from_user.id
+    
+    # Get user
+    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    if not user:
+        await query.message.reply_text("❌ Ошибка: пользователь не найден")
+        return ConversationHandler.END
+    
+    # Update template
+    update_data = {
+        "from_name": context.user_data.get('from_name', ''),
+        "from_street1": context.user_data.get('from_street', ''),
+        "from_street2": context.user_data.get('from_street2', ''),
+        "from_city": context.user_data.get('from_city', ''),
+        "from_state": context.user_data.get('from_state', ''),
+        "from_zip": context.user_data.get('from_zip', ''),
+        "from_phone": context.user_data.get('from_phone', ''),
+        "to_name": context.user_data.get('to_name', ''),
+        "to_street1": context.user_data.get('to_street', ''),
+        "to_street2": context.user_data.get('to_street2', ''),
+        "to_city": context.user_data.get('to_city', ''),
+        "to_state": context.user_data.get('to_state', ''),
+        "to_zip": context.user_data.get('to_zip', ''),
+        "to_phone": context.user_data.get('to_phone', ''),
+        "updated_at": datetime.now(timezone.utc)
+    }
+    
+    result = await db.templates.update_one(
+        {"id": template_id, "telegram_id": telegram_id},
+        {"$set": update_data}
+    )
+    
+    if result.modified_count > 0:
+        template_name = context.user_data.get('pending_template_name', 'шаблон')
+        keyboard = [
+            [InlineKeyboardButton("📦 Продолжить создание заказа", callback_data='continue_order')],
+            [InlineKeyboardButton("🏠 Главное меню", callback_data='start')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await query.message.reply_text(
+            f"""✅ *Шаблон "{template_name}" обновлен!*
+
+Данные шаблона обновлены текущими адресами.
+
+*Продолжить создание этого заказа?*""",
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
+        )
+        context.user_data['saved_template_name'] = template_name
+    else:
+        await query.message.reply_text("❌ Не удалось обновить шаблон")
+        return ConversationHandler.END
+
+
+async def handle_template_new_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Ask user to enter a new template name"""
+    query = update.callback_query
+    await query.answer()
+    
+    # Mark previous message as selected
+    await mark_message_as_selected(update, context)
+    
+    await query.message.reply_text(
+        """📝 Введите новое название для шаблона:
+
+Например: Доставка маме 2, Офис NY"""
+    )
+    return TEMPLATE_NAME
+
 
 async def continue_order_after_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Continue order creation after saving template - return to data confirmation"""
