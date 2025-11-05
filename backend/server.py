@@ -1372,13 +1372,15 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
+    message_text = """Шаг 8/13: Имя получателя
+Например: Jane Doe"""
     bot_msg = await update.message.reply_text(
-        """Шаг 8/13: Имя получателя
-Например: Jane Doe""",
+        message_text,
         reply_markup=reply_markup
     )
     context.user_data['last_bot_message_id'] = bot_msg.message_id
-    context.user_data['last_state'] = TO_NAME  # Save state for next step
+    context.user_data['last_bot_message_text'] = message_text
+    context.user_data['last_state'] = TO_NAME
     return TO_NAME
 
 async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
