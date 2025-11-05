@@ -2270,6 +2270,9 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
     
     logger.info(f"Template data in context: {list(context.user_data.keys())}")
     
+    # Set flag that order is in progress
+    context.user_data['active_order'] = True
+    
     # Template data already loaded in context.user_data
     # Ask for parcel weight (first thing not in template)
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
