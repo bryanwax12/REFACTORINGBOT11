@@ -1680,14 +1680,18 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     context.user_data['to_phone'] = formatted_phone
     
+    # Mark previous message as selected
+    await mark_message_as_selected(update, context)
+    
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await update.message.reply_text(
+    bot_msg = await update.message.reply_text(
         """Вес посылки в фунтах (lb)
 Например: 2""",
         reply_markup=reply_markup
     )
+    context.user_data['last_bot_message_id'] = bot_msg.message_id
     context.user_data['last_state'] = PARCEL_WEIGHT  # Save state for next step
     return PARCEL_WEIGHT
 
