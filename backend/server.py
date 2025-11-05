@@ -1918,6 +1918,9 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
     if query.data == 'cancel_order':
         return await cancel_order(update, context)
     
+    # Mark previous message as selected (remove buttons)
+    await mark_message_as_selected(update, context)
+    
     if query.data == 'confirm_cancel':
         return await confirm_cancel_order(update, context)
     
