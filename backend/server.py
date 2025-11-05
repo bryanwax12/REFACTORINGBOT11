@@ -2702,6 +2702,9 @@ async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     
+    # Clear topup flag to prevent conflict with order input
+    context.user_data['awaiting_topup_amount'] = False
+    
     # Mark previous message as selected (remove buttons from choice screen)
     await mark_message_as_selected(update, context)
     
