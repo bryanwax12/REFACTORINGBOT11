@@ -463,8 +463,22 @@ async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT
                 except Exception as e2:
                     logger.warning(f"Could not mark message as selected: {e2}")
         
-        # For text messages, we can't edit previous message easily
-        # So we'll handle this in text input handlers differently
+        # For text messages (when user types input), store the bot's message ID to edit later
+        elif update.message and 'last_bot_message_id' in context.user_data:
+            try:
+                # Get the last bot message ID
+                last_msg_id = context.user_data['last_bot_message_id']
+                chat_id = update.effective_chat.id
+                
+                # Try to remove buttons from that message
+                await context.bot.edit_message_reply_markup(
+                    chat_id=chat_id,
+                    message_id=last_msg_id,
+                    reply_markup=None
+                )
+                logger.info(f"Removed buttons from previous message {last_msg_id}")
+            except Exception as e:
+                logger.warning(f"Could not remove buttons from previous message: {e}")
         
     except Exception as e:
         logger.warning(f"Error in mark_message_as_selected: {e}")
