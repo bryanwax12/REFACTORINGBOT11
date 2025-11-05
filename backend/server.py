@@ -2066,10 +2066,13 @@ async def show_data_confirmation(update: Update, context: ContextTypes.DEFAULT_T
     
     # Check if it's a message or callback query
     if hasattr(update, 'callback_query') and update.callback_query:
-        await update.callback_query.message.reply_text(message, reply_markup=reply_markup)
+        bot_msg = await update.callback_query.message.reply_text(message, reply_markup=reply_markup)
     else:
-        await update.message.reply_text(message, reply_markup=reply_markup)
+        bot_msg = await update.message.reply_text(message, reply_markup=reply_markup)
     
+    # Save last bot message context for button protection
+    context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = message
     context.user_data['last_state'] = CONFIRM_DATA  # Save state for cancel return
     return CONFIRM_DATA
 
