@@ -680,7 +680,10 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
         await my_balance_command(update, context)
     elif query.data == 'my_templates':
-        # Don't block templates - they are part of order creation process
+        # Check if user has active order
+        if context.user_data.get('active_order'):
+            await show_return_to_order_message(update, context)
+            return
         await my_templates_menu(update, context)
     elif query.data == 'help':
         # Check if user has active order
