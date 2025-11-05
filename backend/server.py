@@ -665,7 +665,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Don't clear user_data - might have template data
         await faq_command(update, context)
     elif query.data == 'new_order':
-        # Always allow starting new order - clear any previous data
+        # Starting new order - this is intentional, so clear previous data
         context.user_data.clear()
         await new_order_start(update, context)
     elif query.data == 'cancel_order':
