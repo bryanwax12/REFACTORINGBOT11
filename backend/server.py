@@ -916,14 +916,16 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
-        bot_msg = await query.message.reply_text(
-            """📦 Создание нового заказа
+        message_text = """📦 Создание нового заказа
 
 Шаг 1/13: Имя отправителя
-Например: John Smith""",
+Например: John Smith"""
+        bot_msg = await query.message.reply_text(
+            message_text,
             reply_markup=reply_markup
         )
         context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
         context.user_data['last_state'] = FROM_NAME
         return FROM_NAME
 
