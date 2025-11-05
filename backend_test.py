@@ -3706,85 +3706,124 @@ def run_shipstation_carrier_tests():
 
 if __name__ == "__main__":
     print("🚀 Starting Backend Test Suite for Telegram Shipping Bot")
-    print("🎯 FOCUS: Templates Feature - Rename Template Functionality (Bot Freeze Fix)")
+    print("🎯 CRITICAL FOCUS: Cancel Button Functionality Testing")
     print("=" * 70)
     
     # Track test results
     test_results = {}
     
-    # CRITICAL TEST: Templates Feature - Rename Template Functionality (per review request)
-    print("\n🎯 PRIORITY: Testing Templates Feature - Rename Template Functionality")
-    test_results['template_rename_functionality'] = test_template_rename_functionality()
+    # PRIORITY 1: CRITICAL CANCEL BUTTON TESTS (per review request)
+    print("\n🔥 PRIORITY 1: CRITICAL CANCEL BUTTON FUNCTIONALITY TESTS")
+    print("-" * 70)
+    test_results['Cancel Button Functionality'] = test_cancel_button_functionality()
+    test_results['Cancel Button Conversation States'] = test_cancel_button_conversation_states()
     
-    # Supporting Tests
-    test_results['api_health'] = test_api_health()
-    test_results['bot_token'] = test_telegram_bot_token()
-    test_results['bot_infrastructure'] = test_telegram_bot_infrastructure()
-    test_results['conversation_handlers'] = test_conversation_handler_functions()
+    # PRIORITY 2: SUPPORTING INFRASTRUCTURE TESTS
+    print("\n🔧 PRIORITY 2: SUPPORTING INFRASTRUCTURE TESTS")
+    print("-" * 70)
+    test_results['API Health'] = test_api_health()
+    test_results['Telegram Bot Token'] = test_telegram_bot_token()
+    test_results['Telegram Bot Infrastructure'] = test_telegram_bot_infrastructure()
+    test_results['Conversation Handler Functions'] = test_conversation_handler_functions()
+    test_results['Return to Order Functionality'] = test_return_to_order_functionality()
     
-    # Additional Template Tests (for completeness)
-    test_results['templates_use_template'] = test_templates_feature_use_template()
+    # PRIORITY 3: ADDITIONAL BACKEND TESTS (if time permits)
+    print("\n📋 PRIORITY 3: ADDITIONAL BACKEND VERIFICATION")
+    print("-" * 70)
+    test_results['Carriers'] = test_carriers()[0] if test_carriers()[0] else False
+    test_results['ShipStation Carrier IDs'] = test_shipstation_carrier_ids()
+    test_results['Carrier Exclusion Fix'] = test_carrier_exclusion_fix()
+    test_results['Shipping Rates'] = test_shipping_rates()[0] if test_shipping_rates()[0] else False
+    test_results['Admin Search Orders'] = test_admin_search_orders()
+    test_results['Admin Refund Order'] = test_admin_refund_order()
+    test_results['Admin Export CSV'] = test_admin_export_csv()
+    test_results['Admin Telegram ID Environment'] = test_admin_telegram_id_environment()
+    test_results['Admin Notification Function'] = test_admin_notification_function()
+    test_results['Contact Admin Buttons'] = test_contact_admin_buttons()
+    test_results['Backend Admin ID Loading'] = test_backend_admin_id_loading()
+    test_results['Telegram Bot Admin Integration'] = test_telegram_bot_admin_integration()
+    test_results['Admin Notification Sending'] = test_admin_notification_sending()
+    test_results['Help Command Implementation'] = test_help_command_implementation()
+    test_results['Telegram Bot Help Infrastructure'] = test_telegram_bot_help_infrastructure()
+    test_results['Help Command URL Generation'] = test_help_command_url_generation()
+    test_results['Template Based Order Creation'] = test_template_based_order_creation()
     
     # Check backend logs
-    print("\n" + "=" * 70)
-    print("📋 CHECKING BACKEND LOGS")
-    print("=" * 70)
     check_backend_logs()
     
-    # Summary
+    # Print summary
     print("\n" + "=" * 70)
     print("📊 TEST RESULTS SUMMARY")
     print("=" * 70)
     
-    passed_tests = sum(1 for result in test_results.values() if result)
+    # Separate critical tests from others
+    critical_tests = [
+        'Cancel Button Functionality',
+        'Cancel Button Conversation States'
+    ]
+    
+    infrastructure_tests = [
+        'API Health',
+        'Telegram Bot Token', 
+        'Telegram Bot Infrastructure',
+        'Conversation Handler Functions',
+        'Return to Order Functionality'
+    ]
+    
+    # Calculate results by category
+    critical_passed = sum(1 for test in critical_tests if test_results.get(test, False))
+    critical_total = len(critical_tests)
+    
+    infrastructure_passed = sum(1 for test in infrastructure_tests if test_results.get(test, False))
+    infrastructure_total = len(infrastructure_tests)
+    
+    other_tests = [test for test in test_results.keys() 
+                   if test not in critical_tests and test not in infrastructure_tests]
+    other_passed = sum(1 for test in other_tests if test_results.get(test, False))
+    other_total = len(other_tests)
+    
+    total_passed = sum(test_results.values())
     total_tests = len(test_results)
     
-    # Show critical test result first
-    critical_test = test_results.get('template_rename_functionality', False)
-    critical_status = "✅ PASS" if critical_test else "❌ FAIL"
-    print(f"{'🎯 CRITICAL: template_rename_functionality':40} {critical_status}")
+    print(f"🔥 CRITICAL TESTS (Cancel Button): {critical_passed}/{critical_total}")
+    for test in critical_tests:
+        status = "✅ PASS" if test_results.get(test, False) else "❌ FAIL"
+        print(f"   {test}: {status}")
     
-    # Show other test results
-    for test_name, result in test_results.items():
-        if test_name != 'template_rename_functionality':  # Skip critical test (already shown)
-            status = "✅ PASS" if result else "❌ FAIL"
-            print(f"{test_name:40} {status}")
+    print(f"\n🔧 INFRASTRUCTURE TESTS: {infrastructure_passed}/{infrastructure_total}")
+    for test in infrastructure_tests:
+        status = "✅ PASS" if test_results.get(test, False) else "❌ FAIL"
+        print(f"   {test}: {status}")
     
-    print(f"\nOverall: {passed_tests}/{total_tests} tests passed ({(passed_tests/total_tests)*100:.1f}%)")
+    print(f"\n📋 OTHER TESTS: {other_passed}/{other_total}")
+    for test in other_tests:
+        status = "✅ PASS" if test_results.get(test, False) else "❌ FAIL"
+        print(f"   {test}: {status}")
     
-    # Final assessment focused on the review request
-    print("\n" + "=" * 70)
-    print("🏁 REVIEW REQUEST ASSESSMENT")
-    print("=" * 70)
+    # Overall assessment
+    critical_success_rate = (critical_passed / critical_total) * 100 if critical_total > 0 else 0
+    overall_success_rate = (total_passed / total_tests) * 100 if total_tests > 0 else 0
     
-    if critical_test:
-        print("✅ TEMPLATES FEATURE - RENAME TEMPLATE FUNCTIONALITY: SUCCESS")
-        print("   ✅ template_rename_handler ConversationHandler created and registered")
-        print("   ✅ rename_template_start() as entry_point with correct pattern")
-        print("   ✅ TEMPLATE_RENAME state with rename_template_save() handler")
-        print("   ✅ Fallbacks: my_templates_menu and start_command")
-        print("   ✅ Registered BEFORE order_conv_handler (correct priority)")
-        print("   ✅ rename_template_start() extracts template_id and stores in context")
-        print("   ✅ Shows prompt: 'Введите новое название для шаблона (до 30 символов):'")
-        print("   ✅ Returns TEMPLATE_RENAME state correctly")
-        print("   ✅ rename_template_save() validates name and updates database")
-        print("   ✅ Shows confirmation with 'Просмотреть' button")
-        print("   ✅ Returns ConversationHandler.END to exit conversation")
-        print("   ✅ Removed from standalone handlers (no more state conflict)")
-        print("   ✅ Removed from order_conv_handler (clean separation)")
-        print("\n🎉 EXPECTED RESULTS:")
-        print("   - User has template 'Склад NY' in database")
-        print("   - User views template details and clicks 'Переименовать'")
-        print("   - Bot enters template_rename_handler and shows prompt")
-        print("   - User types new name (e.g., 'New Template Name')")
-        print("   - Bot processes with rename_template_save, updates DB")
-        print("   - Bot shows confirmation and exits conversation")
-        print("   - Bot NO LONGER FREEZES - state conflict resolved!")
+    print(f"\n📈 RESULTS BREAKDOWN:")
+    print(f"   Critical Tests: {critical_passed}/{critical_total} ({critical_success_rate:.1f}%)")
+    print(f"   Infrastructure: {infrastructure_passed}/{infrastructure_total} ({(infrastructure_passed/infrastructure_total)*100:.1f}%)")
+    print(f"   Other Tests: {other_passed}/{other_total} ({(other_passed/other_total)*100:.1f}%)")
+    print(f"   Overall: {total_passed}/{total_tests} ({overall_success_rate:.1f}%)")
+    
+    # Final verdict based on critical tests
+    if critical_success_rate >= 100:
+        print(f"\n🎉 CRITICAL SUCCESS: All cancel button tests passed!")
+        print(f"   ✅ Cancel button functionality verified across all ConversationHandler states")
+    elif critical_success_rate >= 50:
+        print(f"\n⚠️ PARTIAL SUCCESS: Some cancel button issues detected")
+        print(f"   🔍 Review failed critical tests above for specific issues")
     else:
-        print("❌ TEMPLATES FEATURE - RENAME TEMPLATE FUNCTIONALITY: ISSUES DETECTED")
-        print("   ❌ User reported issue may persist:")
-        print("      - Bot freezes after user enters new template name")
-        print("      - ConversationHandler state conflict not resolved")
-        print("   🔧 Please review the implementation and fix missing components")
+        print(f"\n❌ CRITICAL FAILURE: Major cancel button functionality issues")
+        print(f"   🚨 Cancel button may not work consistently across all states")
+    
+    if overall_success_rate >= 80:
+        print(f"   🔧 Backend infrastructure: HEALTHY ({overall_success_rate:.1f}%)")
+    else:
+        print(f"   ⚠️ Backend infrastructure: NEEDS ATTENTION ({overall_success_rate:.1f}%)")
     
     print("=" * 70)
