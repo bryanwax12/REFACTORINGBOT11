@@ -3233,7 +3233,12 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ])
     
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.message.reply_text(confirmation_text, reply_markup=reply_markup)
+    bot_msg = await query.message.reply_text(confirmation_text, reply_markup=reply_markup)
+    
+    # Save last bot message context for button protection
+    context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = confirmation_text
+    
     return PAYMENT_METHOD
 
 async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
