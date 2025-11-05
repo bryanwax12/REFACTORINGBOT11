@@ -437,6 +437,38 @@ async def check_stale_interaction(query, context: ContextTypes.DEFAULT_TYPE) -> 
     logger.info("Interaction is valid - proceeding")
     return False
 
+async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Mark previous message as selected by removing buttons and adding checkmark"""
+    try:
+        # Check if this is a callback query (button press)
+        if update.callback_query:
+            query = update.callback_query
+            message = query.message
+            
+            # Try to edit the message to add "✅ Выбрано" and remove buttons
+            try:
+                # Get current message text
+                current_text = message.text or message.caption or ""
+                
+                # Don't add "✅ Выбрано" if it's already there or if it's an error message
+                if "✅ Выбрано" not in current_text and "❌" not in current_text:
+                    new_text = current_text + "\n\n✅ Выбрано"
+                    await message.edit_text(new_text, parse_mode='Markdown', reply_markup=None)
+                    logger.info(f"Marked message as selected for user {update.effective_user.id}")
+            except Exception as e:
+                # If editing fails (message too old, same text, etc.), just try to remove markup
+                try:
+                    await message.edit_reply_markup(reply_markup=None)
+                    logger.info(f"Removed markup for user {update.effective_user.id}")
+                except Exception as e2:
+                    logger.warning(f"Could not mark message as selected: {e2}")
+        
+        # For text messages, we can't edit previous message easily
+        # So we'll handle this in text input handlers differently
+        
+    except Exception as e:
+        logger.warning(f"Error in mark_message_as_selected: {e}")
+
 async def check_maintenance_mode(update: Update) -> bool:
     """Check if bot is in maintenance mode and user is not admin"""
     try:
