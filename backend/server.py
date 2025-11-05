@@ -663,14 +663,6 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Starting new order - this is intentional, so clear previous data
         context.user_data.clear()
         await new_order_start(update, context)
-    elif query.data == 'continue_active_order':
-        # User wants to continue with their active order - just delete the warning message
-        await query.answer("✅ Продолжайте создание заказа")
-        try:
-            await query.message.delete()
-        except Exception as e:
-            logger.error(f"Failed to delete message: {e}")
-    
     elif query.data == 'cancel_order':
         # Check if this is an orphaned cancel button (no active order)
         if not context.user_data or len(context.user_data) == 0 or context.user_data.get('order_completed'):
