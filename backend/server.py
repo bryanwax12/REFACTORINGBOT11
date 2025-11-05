@@ -937,14 +937,18 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "success"
     )
     
+    # Mark previous message as selected (remove buttons from step 1)
+    await mark_message_as_selected(update, context)
+    
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await update.message.reply_text(
+    bot_msg = await update.message.reply_text(
         """Шаг 2/13: Адрес отправителя
 Например: 215 Clayton St.""",
         reply_markup=reply_markup
     )
+    context.user_data['last_bot_message_id'] = bot_msg.message_id  # Save for next step
     context.user_data['last_state'] = FROM_ADDRESS  # Save state for next step
     return FROM_ADDRESS
 
