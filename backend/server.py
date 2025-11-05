@@ -2596,23 +2596,14 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
 *Вес посылки в фунтах (lb)*
 Например: 5.5"""
     
-    try:
-        bot_msg = await query.message.edit_text(
-            message_text,
-            reply_markup=reply_markup,
-            parse_mode='Markdown'
-        )
-        context.user_data['last_bot_message_id'] = bot_msg.message_id
-        context.user_data['last_bot_message_text'] = message_text
-    except Exception as e:
-        # If edit fails, send new message
-        bot_msg = await query.message.reply_text(
-            message_text,
-            reply_markup=reply_markup,
-            parse_mode='Markdown'
-        )
-        context.user_data['last_bot_message_id'] = bot_msg.message_id
-        context.user_data['last_bot_message_text'] = message_text
+    # Always send new message (previous message already edited by mark_message_as_selected)
+    bot_msg = await query.message.reply_text(
+        message_text,
+        reply_markup=reply_markup,
+        parse_mode='Markdown'
+    )
+    context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = message_text
     
     context.user_data['last_state'] = PARCEL_WEIGHT
     logger.info(f"Returning PARCEL_WEIGHT state")
