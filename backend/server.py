@@ -4029,37 +4029,37 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif last_state == PARCEL_LENGTH:
         keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартные размеры", callback_data='skip_dimensions')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await query.message.reply_text(
-            """📏 Длина посылки в дюймах (inches)
+        message_text = """📏 Длина посылки в дюймах (inches)
 Например: 12
 
-Или нажмите кнопку ниже, чтобы использовать стандартные размеры (10x10x10 дюймов)""",
-            reply_markup=reply_markup
-        )
+Или нажмите кнопку ниже, чтобы использовать стандартные размеры (10x10x10 дюймов)"""
+        bot_msg = await query.message.reply_text(message_text, reply_markup=reply_markup)
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
         return PARCEL_LENGTH
     
     elif last_state == PARCEL_WIDTH:
         keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартные размеры", callback_data='skip_dimensions')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await query.message.reply_text(
-            """📏 Ширина посылки в дюймах (inches)
+        message_text = """📏 Ширина посылки в дюймах (inches)
 Например: 10
 
-Или нажмите кнопку ниже, чтобы использовать стандартные размеры для ширины и высоты (10x10 дюймов)""",
-            reply_markup=reply_markup
-        )
+Или нажмите кнопку ниже, чтобы использовать стандартные размеры для ширины и высоты (10x10 дюймов)"""
+        bot_msg = await query.message.reply_text(message_text, reply_markup=reply_markup)
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
         return PARCEL_WIDTH
     
     elif last_state == PARCEL_HEIGHT:
         keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартную высоту", callback_data='skip_height')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await query.message.reply_text(
-            """📏 Высота посылки в дюймах (inches)
+        message_text = """📏 Высота посылки в дюймах (inches)
 Например: 8
 
-Или нажмите кнопку ниже, чтобы использовать стандартную высоту (10 дюймов)""",
-            reply_markup=reply_markup
-        )
+Или нажмите кнопку ниже, чтобы использовать стандартную высоту (10 дюймов)"""
+        bot_msg = await query.message.reply_text(message_text, reply_markup=reply_markup)
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
         return PARCEL_HEIGHT
     
     # Special states - show their specific screens
