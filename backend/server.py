@@ -2572,6 +2572,9 @@ async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     
+    # Mark previous message as selected
+    await mark_message_as_selected(update, context)
+    
     template_id = query.data.replace('template_delete_', '')
     template = await db.templates.find_one({"id": template_id}, {"_id": 0})
     
@@ -2592,6 +2595,9 @@ async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=reply_markup,
         parse_mode='Markdown'
     )
+    # Clear last_bot_message to prevent accidentally removing these buttons
+    context.user_data.pop('last_bot_message_id', None)
+    context.user_data.pop('last_bot_message_text', None)
     # Don't return state - working outside ConversationHandler
 
 async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
