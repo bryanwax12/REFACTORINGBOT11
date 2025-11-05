@@ -2540,9 +2540,11 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def start_order_with_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Start order creation with pre-loaded template data"""
-    logger.info(f"start_order_with_template called - user_id: {update.effective_user.id}")
+    logger.info(f"🟢 start_order_with_template CALLED - user_id: {update.effective_user.id}")
+    logger.info(f"🟢 Context keys: {list(context.user_data.keys())}")
     query = update.callback_query
     await query.answer()
+    logger.info(f"🟢 Query answered")
     
     # Mark previous message as selected (remove buttons from template confirmation)
     await mark_message_as_selected(update, context)
