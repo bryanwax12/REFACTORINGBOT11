@@ -2382,6 +2382,9 @@ async def continue_order_after_template(update: Update, context: ContextTypes.DE
     query = update.callback_query
     await query.answer()
     
+    # Mark previous message as selected (remove buttons and add "✅ Выбрано")
+    await mark_message_as_selected(update, context)
+    
     # Since template was saved from CONFIRM_DATA screen, we have all data including weight/dimensions
     # Return to data confirmation screen
     return await show_data_confirmation(update, context)
