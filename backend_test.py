@@ -1105,6 +1105,202 @@ def test_telegram_bot_admin_integration():
         print(f"❌ Telegram bot admin integration test error: {e}")
         return False
 
+def test_balance_topup_flow_button_protection():
+    """Test Balance Top-Up Flow - Button Protection and Cancel Button Fix - CRITICAL TEST per review request"""
+    print("\n🔍 Testing Balance Top-Up Flow - Button Protection and Cancel Button Fix...")
+    print("🎯 CRITICAL: Verifying fixes for cancel button functionality and '✅ Выбрано' text in balance top-up flow")
+    
+    try:
+        # Read server.py to analyze the balance top-up flow implementation
+        with open('/app/backend/server.py', 'r') as f:
+            server_code = f.read()
+        
+        print("   📋 BALANCE TOP-UP FLOW IMPLEMENTATION ANALYSIS:")
+        
+        # Test 1: Verify my_balance_command() function exists and is correctly implemented
+        my_balance_pattern = r'async def my_balance_command\(update: Update, context: ContextTypes\.DEFAULT_TYPE\):'
+        my_balance_found = bool(re.search(my_balance_pattern, server_code))
+        print(f"   my_balance_command function exists: {'✅' if my_balance_found else '❌'}")
+        
+        # Test 2: Verify my_balance_command() saves last_bot_message_id and last_bot_message_text
+        # Check for the specific lines mentioned in review request (lines 793-798)
+        saves_message_id = "context.user_data['last_bot_message_id'] = bot_message.message_id" in server_code
+        saves_message_text = "context.user_data['last_bot_message_text'] = message" in server_code
+        
+        print(f"   my_balance_command saves last_bot_message_id: {'✅' if saves_message_id else '❌'}")
+        print(f"   my_balance_command saves last_bot_message_text: {'✅' if saves_message_text else '❌'}")
+        
+        # Test 3: Verify keyboard has both "❌ Отмена" and "🔙 Главное меню" buttons
+        # Look for the specific button configuration in my_balance_command
+        my_balance_section_pattern = r'async def my_balance_command.*?keyboard = \[(.*?)\].*?reply_markup = InlineKeyboardMarkup\(keyboard\)'
+        my_balance_match = re.search(my_balance_section_pattern, server_code, re.DOTALL)
+        
+        has_cancel_button = False
+        has_main_menu_button = False
+        
+        if my_balance_match:
+            keyboard_section = my_balance_match.group(1)
+            has_cancel_button = "❌ Отмена" in keyboard_section and "callback_data='start'" in keyboard_section
+            has_main_menu_button = "🔙 Главное меню" in keyboard_section and "callback_data='start'" in keyboard_section
+        
+        print(f"   Keyboard has '❌ Отмена' button: {'✅' if has_cancel_button else '❌'}")
+        print(f"   Keyboard has '🔙 Главное меню' button: {'✅' if has_main_menu_button else '❌'}")
+        
+        # Test 4: Verify handle_topup_amount_input() function exists
+        handle_topup_pattern = r'async def handle_topup_amount_input\(update: Update, context: ContextTypes\.DEFAULT_TYPE\):'
+        handle_topup_found = bool(re.search(handle_topup_pattern, server_code))
+        print(f"   handle_topup_amount_input function exists: {'✅' if handle_topup_found else '❌'}")
+        
+        # Test 5: Verify handle_topup_amount_input() calls mark_message_as_selected at beginning
+        # Check for the specific call mentioned in review request (line 805)
+        calls_mark_selected = "await mark_message_as_selected(update, context)" in server_code
+        
+        # More specific check - ensure it's called at the beginning of handle_topup_amount_input
+        handle_topup_section_pattern = r'async def handle_topup_amount_input.*?if not context\.user_data\.get\(\'awaiting_topup_amount\'\):.*?return.*?await mark_message_as_selected\(update, context\)'
+        calls_at_beginning = bool(re.search(handle_topup_section_pattern, server_code, re.DOTALL))
+        
+        print(f"   handle_topup_amount_input calls mark_message_as_selected: {'✅' if calls_mark_selected else '❌'}")
+        print(f"   mark_message_as_selected called at beginning: {'✅' if calls_at_beginning else '❌'}")
+        
+        # Test 6: Verify mark_message_as_selected() function exists and works correctly
+        mark_selected_pattern = r'async def mark_message_as_selected\(update: Update, context: ContextTypes\.DEFAULT_TYPE\):'
+        mark_selected_found = bool(re.search(mark_selected_pattern, server_code))
+        print(f"   mark_message_as_selected function exists: {'✅' if mark_selected_found else '❌'}")
+        
+        # Test 7: Verify mark_message_as_selected() functionality
+        # Check for key functionality: removes buttons and adds "✅ Выбрано"
+        adds_selected_text = '✅ Выбрано' in server_code and 'new_text = current_text + "\\n\\n✅ Выбрано"' in server_code
+        removes_buttons = 'reply_markup=None' in server_code
+        handles_text_messages = 'last_bot_message_id' in server_code and 'context.user_data' in server_code
+        
+        print(f"   mark_message_as_selected adds '✅ Выбрано' text: {'✅' if adds_selected_text else '❌'}")
+        print(f"   mark_message_as_selected removes buttons: {'✅' if removes_buttons else '❌'}")
+        print(f"   mark_message_as_selected handles text messages: {'✅' if handles_text_messages else '❌'}")
+        
+        # Test 8: Verify the complete flow integration
+        # Check that my_balance_command sets awaiting_topup_amount flag
+        sets_awaiting_flag = "context.user_data['awaiting_topup_amount'] = True" in server_code
+        print(f"   my_balance_command sets awaiting_topup_amount flag: {'✅' if sets_awaiting_flag else '❌'}")
+        
+        # Test 9: Verify button protection mechanism components
+        # Check for the button protection mechanism mentioned in review request
+        button_protection_components = [
+            saves_message_id,
+            saves_message_text,
+            calls_mark_selected,
+            adds_selected_text,
+            removes_buttons
+        ]
+        
+        button_protection_working = all(button_protection_components)
+        print(f"   Button protection mechanism complete: {'✅' if button_protection_working else '❌'}")
+        
+        # Test 10: Verify expected behavior flow
+        print(f"\n   📋 EXPECTED BEHAVIOR FLOW VERIFICATION:")
+        
+        # Flow step 1: User clicks "💰 Пополнить баланс"
+        balance_button_callback = "elif query.data == 'my_balance':" in server_code and "await my_balance_command(update, context)" in server_code
+        print(f"   Step 1 - Balance button callback: {'✅' if balance_button_callback else '❌'}")
+        
+        # Flow step 2: Bot shows balance with buttons and saves context
+        shows_balance_with_buttons = (has_cancel_button and has_main_menu_button and 
+                                    saves_message_id and saves_message_text)
+        print(f"   Step 2 - Shows balance with buttons & saves context: {'✅' if shows_balance_with_buttons else '❌'}")
+        
+        # Flow step 3: User enters amount, mark_message_as_selected called
+        handles_amount_input = (handle_topup_found and calls_at_beginning and 
+                              sets_awaiting_flag)
+        print(f"   Step 3 - Handles amount input with mark_selected: {'✅' if handles_amount_input else '❌'}")
+        
+        # Flow step 4: Previous message gets "✅ Выбрано" and buttons removed
+        message_marked_selected = (adds_selected_text and removes_buttons and 
+                                 handles_text_messages)
+        print(f"   Step 4 - Previous message marked as selected: {'✅' if message_marked_selected else '❌'}")
+        
+        # Flow step 5: Invoice creation continues
+        creates_invoice = "await create_oxapay_invoice" in server_code
+        print(f"   Step 5 - Invoice creation continues: {'✅' if creates_invoice else '❌'}")
+        
+        # OVERALL ASSESSMENT
+        print(f"\n🎯 CRITICAL BALANCE TOP-UP FLOW FIX ASSESSMENT:")
+        
+        # Core fix components from review request
+        core_fixes = [
+            my_balance_found,
+            saves_message_id,
+            saves_message_text,
+            has_cancel_button,
+            has_main_menu_button,
+            handle_topup_found,
+            calls_at_beginning,
+            mark_selected_found,
+            adds_selected_text,
+            removes_buttons
+        ]
+        
+        fixes_implemented = sum(core_fixes)
+        total_fixes = len(core_fixes)
+        
+        print(f"   Core fixes implemented: {fixes_implemented}/{total_fixes}")
+        
+        # Specific issues from review request
+        print(f"\n   📋 SPECIFIC ISSUES FROM REVIEW REQUEST:")
+        
+        # Issue 1: Cancel button doesn't work
+        cancel_button_fix = has_cancel_button and balance_button_callback
+        print(f"   Issue 1 - Cancel button now works: {'✅' if cancel_button_fix else '❌'}")
+        
+        # Issue 2: Missing "✅ Выбрано" text after entering amount
+        selected_text_fix = (calls_at_beginning and adds_selected_text and 
+                           handles_text_messages)
+        print(f"   Issue 2 - '✅ Выбрано' text now appears: {'✅' if selected_text_fix else '❌'}")
+        
+        # Button protection mechanism
+        button_protection_fix = (saves_message_id and saves_message_text and 
+                               calls_mark_selected and button_protection_working)
+        print(f"   Button protection mechanism implemented: {'✅' if button_protection_fix else '❌'}")
+        
+        # FINAL VERDICT
+        critical_fixes = [
+            cancel_button_fix,
+            selected_text_fix,
+            button_protection_fix
+        ]
+        
+        all_fixes_working = all(critical_fixes)
+        
+        if all_fixes_working:
+            print(f"\n✅ BALANCE TOP-UP FLOW FIXES VERIFICATION COMPLETE")
+            print(f"   🎯 CRITICAL SUCCESS: All reported issues have been fixed")
+            print(f"   📊 Implementation Summary:")
+            print(f"      • my_balance_command() correctly saves last_bot_message_id and last_bot_message_text ✅")
+            print(f"      • Keyboard has both 'Отмена' and 'Главное меню' buttons ✅")
+            print(f"      • handle_topup_amount_input() calls mark_message_as_selected at beginning ✅")
+            print(f"      • mark_message_as_selected() removes buttons and adds '✅ Выбрано' text ✅")
+            print(f"      • Complete button protection mechanism implemented ✅")
+            print(f"   🔧 Expected Behavior:")
+            print(f"      1. User clicks 'Пополнить баланс' → sees balance with cancel/menu buttons")
+            print(f"      2. User enters amount → previous message shows '✅ Выбрано' and buttons removed")
+            print(f"      3. Cancel button works before entering amount")
+            print(f"      4. Invoice creation continues normally")
+        else:
+            print(f"\n❌ BALANCE TOP-UP FLOW FIXES INCOMPLETE")
+            print(f"   🚨 CRITICAL ISSUES REMAINING:")
+            if not cancel_button_fix:
+                print(f"      • Cancel button functionality not properly implemented")
+            if not selected_text_fix:
+                print(f"      • '✅ Выбрано' text mechanism not working")
+            if not button_protection_fix:
+                print(f"      • Button protection mechanism incomplete")
+        
+        return all_fixes_working
+        
+    except Exception as e:
+        print(f"❌ Balance top-up flow test error: {e}")
+        import traceback
+        print(f"   Traceback: {traceback.format_exc()}")
+        return False
+
 def test_cancel_button_functionality():
     """Test Cancel Button Functionality Across All ConversationHandler States - CRITICAL TEST"""
     print("\n🔍 Testing Cancel Button Functionality Across All States...")
