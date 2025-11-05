@@ -2210,6 +2210,9 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     
+    # Mark previous message as selected (remove buttons from choice menu)
+    await mark_message_as_selected(update, context)
+    
     telegram_id = query.from_user.id
     
     # Get user templates
