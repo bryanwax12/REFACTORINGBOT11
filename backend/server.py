@@ -6868,6 +6868,11 @@ async def startup_event():
                         CallbackQueryHandler(confirm_delete_template, pattern='^template_confirm_delete_'),
                         CallbackQueryHandler(my_templates_menu, pattern='^my_templates$'),
                         CallbackQueryHandler(start_command, pattern='^start$')
+                    ],
+                    TEMPLATE_LOADED: [
+                        CallbackQueryHandler(start_order_with_template, pattern='^start_order_with_template$'),
+                        CallbackQueryHandler(my_templates_menu, pattern='^my_templates$'),
+                        CallbackQueryHandler(start_command, pattern='^start$')
                     ]
                 },
                 fallbacks=[
