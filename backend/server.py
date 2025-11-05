@@ -3892,11 +3892,17 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Restore exact screen with instructions for each state
     if last_state == FROM_NAME:
-        await query.message.reply_text("Шаг 1/13: Имя отправителя\n\nНапример: Ivan Petrov")
+        message_text = "Шаг 1/13: Имя отправителя\n\nНапример: Ivan Petrov"
+        bot_msg = await query.message.reply_text(message_text)
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
         return FROM_NAME
     
     elif last_state == FROM_ADDRESS:
-        await query.message.reply_text("Шаг 2/13: Адрес отправителя\n\nВведите улицу и номер дома\nНапример: 215 Clayton St")
+        message_text = "Шаг 2/13: Адрес отправителя\n\nВведите улицу и номер дома\nНапример: 215 Clayton St"
+        bot_msg = await query.message.reply_text(message_text)
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
         return FROM_ADDRESS
     
     elif last_state == FROM_ADDRESS2:
