@@ -2392,6 +2392,7 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Get user templates
     templates = await db.templates.find({"telegram_id": telegram_id}).sort("created_at", -1).to_list(10)
+    logger.info(f"📋 my_templates_menu: user {telegram_id} has {len(templates)} templates")
     
     if not templates:
         keyboard = [
