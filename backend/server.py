@@ -1849,6 +1849,9 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
             context.user_data['width'] = 10
             context.user_data['height'] = 10
             
+            # Mark previous message as selected
+            await mark_message_as_selected(update, context)
+            
             await query.message.reply_text("✅ Используются стандартные размеры для ширины и высоты: 10x10 дюймов")
             
             # If we're editing parcel, mark as complete
