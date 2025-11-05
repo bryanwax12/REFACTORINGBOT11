@@ -1301,13 +1301,15 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
+    message_text = """Шаг 7/13: Телефон отправителя
+Например: +1234567890 или 1234567890"""
     bot_msg = await update.message.reply_text(
-        """Шаг 7/13: Телефон отправителя
-Например: +1234567890 или 1234567890""",
+        message_text,
         reply_markup=reply_markup
     )
     context.user_data['last_bot_message_id'] = bot_msg.message_id
-    context.user_data['last_state'] = FROM_PHONE  # Save state for next step
+    context.user_data['last_bot_message_text'] = message_text
+    context.user_data['last_state'] = FROM_PHONE
     return FROM_PHONE
 
 async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
