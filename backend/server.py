@@ -3995,6 +3995,9 @@ async def confirm_cancel_order(update: Update, context: ContextTypes.DEFAULT_TYP
     query = update.callback_query
     await query.answer()
     
+    # Mark previous message as selected (remove buttons and add "✅ Выбрано")
+    await mark_message_as_selected(update, context)
+    
     context.user_data.clear()
     
     keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
