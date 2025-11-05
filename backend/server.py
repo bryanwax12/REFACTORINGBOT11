@@ -466,43 +466,22 @@ async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT
                 except Exception as e2:
                     logger.warning(f"Could not remove buttons from clicked message: {e2}")
         
-        # For text messages (when user types input), remove buttons and add "✅ Выбрано"
+        # For text messages (when user types input), just remove buttons
         elif update.message and 'last_bot_message_id' in context.user_data:
             try:
-                # Get the last bot message ID and text
+                # Get the last bot message ID
                 last_msg_id = context.user_data['last_bot_message_id']
-                last_msg_text = context.user_data.get('last_bot_message_text', '')
                 chat_id = update.effective_chat.id
                 
-                # Try to add "✅ Выбрано" to the text and remove buttons
-                if last_msg_text and "✅ Выбрано" not in last_msg_text and "❌" not in last_msg_text:
-                    try:
-                        new_text = last_msg_text + "\n\n✅ Выбрано"
-                        await context.bot.edit_message_text(
-                            text=new_text,
-                            chat_id=chat_id,
-                            message_id=last_msg_id,
-                            reply_markup=None
-                        )
-                        logger.info(f"Added '✅ Выбрано' to previous message {last_msg_id}")
-                    except Exception as e:
-                        # If editing text fails, just remove buttons
-                        await context.bot.edit_message_reply_markup(
-                            chat_id=chat_id,
-                            message_id=last_msg_id,
-                            reply_markup=None
-                        )
-                        logger.info(f"Removed buttons (text edit failed) from message {last_msg_id}")
-                else:
-                    # Just remove buttons if no text or already has checkmark
-                    await context.bot.edit_message_reply_markup(
-                        chat_id=chat_id,
-                        message_id=last_msg_id,
-                        reply_markup=None
-                    )
-                    logger.info(f"Removed buttons from previous message {last_msg_id}")
+                # Just remove buttons (don't edit text to avoid showing wrong step info)
+                await context.bot.edit_message_reply_markup(
+                    chat_id=chat_id,
+                    message_id=last_msg_id,
+                    reply_markup=None
+                )
+                logger.info(f"Removed buttons from previous message {last_msg_id} for user {update.effective_user.id}")
             except Exception as e:
-                logger.warning(f"Could not edit previous message: {e}")
+                logger.warning(f"Could not remove buttons from previous message: {e}")
         
     except Exception as e:
         logger.warning(f"Error in mark_message_as_selected: {e}")
