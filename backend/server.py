@@ -257,7 +257,7 @@ async def log_requests(request: Request, call_next):
 # Models
 class User(BaseModel):
     model_config = ConfigDict(extra="ignore")
-    id: str = Field(default_factory=lambda: str(uuid.uuid4())
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     telegram_id: int
     username: Optional[str] = None
     first_name: Optional[str] = None
