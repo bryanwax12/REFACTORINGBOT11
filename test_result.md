@@ -568,6 +568,12 @@ frontend:
         - working: "NA"
           agent: "main"
           comment: "🔧 CRITICAL FIX #2 APPLIED: Root cause - handle_topup_amount_input is a global MessageHandler that processes ALL text input when awaiting_topup_amount flag is True. When user opens balance top-up screen, flag is set to True. If user then creates order from template without completing top-up, flag remains True and intercepts parcel weight input. SOLUTION: Clear awaiting_topup_amount flag when starting order creation: (1) Added 'context.user_data[\"awaiting_topup_amount\"] = False' in start_order_with_template() function (line 2552), (2) Added same flag clearing in order_new() function (line 2705), (3) new_order_start() already calls context.user_data.clear() which clears flag (line 887). EXPECTED FLOW: User opens balance top-up (flag set to True) → user closes and starts order from template → start_order_with_template clears flag → user enters weight → order_parcel_weight handler processes input correctly, not handle_topup_amount_input. Backend restarted. Ready for testing."
+        - working: false
+          agent: "user"
+          comment: "❌ NEW ISSUE WITH SCREENSHOT: After clicking on template button '1. Миссис Буркул1' in templates list, buttons don't disappear and '✅ Выбрано' text is not added to previous message. Button protection mechanism not working in template list flow."
+        - working: "NA"
+          agent: "main"
+          comment: "🔧 CRITICAL FIX #3 APPLIED: Root cause - my_templates_menu() function was not saving last_bot_message_id and last_bot_message_text after sending message (line 2437), and view_template() function was clearing these values (lines 2480-2481), preventing mark_message_as_selected from working. SOLUTION: (1) Modified my_templates_menu() to save bot_msg and store message_id and text in context.user_data (lines 2437-2440), (2) Modified view_template() to save bot_msg and store message_id and text instead of clearing them (lines 2478-2481). EXPECTED FLOW: User opens templates list → my_templates_menu saves message context → user clicks template button → mark_message_as_selected removes buttons and adds '✅ Выбрано' → view_template shows template details with new message context saved. Backend restarted. Ready for testing."
 
 metadata:
   created_by: "main_agent"
