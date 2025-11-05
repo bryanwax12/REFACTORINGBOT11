@@ -443,7 +443,7 @@ async def show_return_to_order_message(update: Update, context: ContextTypes.DEF
     await query.answer("⚠️ Завершите текущий заказ")
     
     keyboard = [
-        [InlineKeyboardButton("🔙 Вернуться к заказу", callback_data='return_to_order')],
+        [InlineKeyboardButton("🔙 Продолжить заказ", callback_data='continue_active_order')],
         [InlineKeyboardButton("❌ Отменить заказ", callback_data='cancel_order')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
