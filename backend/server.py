@@ -4011,19 +4011,19 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await query.message.reply_text(
-            "Шаг 13/13: Телефон получателя (необязательно)\n\nНапример: 5559876543\nИли нажмите 'Пропустить'",
-            reply_markup=reply_markup
-        )
+        message_text = "Шаг 13/13: Телефон получателя (необязательно)\n\nНапример: 5559876543\nИли нажмите 'Пропустить'"
+        bot_msg = await query.message.reply_text(message_text, reply_markup=reply_markup)
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
         return TO_PHONE
     
     elif last_state == PARCEL_WEIGHT:
         keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        await query.message.reply_text(
-            "Вес посылки в фунтах (lb)\nНапример: 2",
-            reply_markup=reply_markup
-        )
+        message_text = "Вес посылки в фунтах (lb)\nНапример: 2"
+        bot_msg = await query.message.reply_text(message_text, reply_markup=reply_markup)
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
         return PARCEL_WEIGHT
     
     elif last_state == PARCEL_LENGTH:
