@@ -2308,6 +2308,9 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.message.reply_text("❌ Шаблон не найден")
         return
     
+    # Mark previous message as selected (remove buttons from template list)
+    await mark_message_as_selected(update, context)
+    
     # Load template data into context (use correct keys for rate fetching)
     context.user_data['from_name'] = template.get('from_name', '')
     context.user_data['from_street'] = template.get('from_street1', '')  # Use 'from_street' not 'from_address'
@@ -2333,7 +2336,7 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await query.message.reply_text(
+    bot_msg = await query.message.reply_text(
         f"""✅ *Шаблон "{template['name']}" загружен!*
 
 📤 От: {template.get('from_name')} ({template.get('from_city')}, {template.get('from_state')})
@@ -2343,6 +2346,7 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=reply_markup,
         parse_mode='Markdown'
     )
+    context.user_data['last_bot_message_id'] = bot_msg.message_id
     
     # End this conversation so the button can start a new one
     return ConversationHandler.END
