@@ -1693,13 +1693,15 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
             keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
+            message_text = """Вес посылки в фунтах (lb)
+Например: 2"""
             bot_msg = await query.message.reply_text(
-                """Вес посылки в фунтах (lb)
-Например: 2""",
+                message_text,
                 reply_markup=reply_markup
             )
             context.user_data['last_bot_message_id'] = bot_msg.message_id
-            context.user_data['last_state'] = PARCEL_WEIGHT  # Save state for next step
+            context.user_data['last_bot_message_text'] = message_text
+            context.user_data['last_state'] = PARCEL_WEIGHT
             return PARCEL_WEIGHT
     
     phone = update.message.text.strip()
