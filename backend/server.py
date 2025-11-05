@@ -1570,19 +1570,19 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Check if we're in editing mode
     if context.user_data.get('editing_to_address'):
-        bot_msg = await update.message.reply_text(
-            """Шаг 5/6: Штат получателя (2 буквы)
-Например: NY""",
-            reply_markup=reply_markup
-        )
+        message_text = """Шаг 5/6: Штат получателя (2 буквы)
+Например: NY"""
     else:
-        bot_msg = await update.message.reply_text(
-            """Шаг 12/13: Штат получателя (2 буквы)
-Например: NY""",
-            reply_markup=reply_markup
-        )
+        message_text = """Шаг 12/13: Штат получателя (2 буквы)
+Например: NY"""
+    
+    bot_msg = await update.message.reply_text(
+        message_text,
+        reply_markup=reply_markup
+    )
     context.user_data['last_bot_message_id'] = bot_msg.message_id
-    context.user_data['last_state'] = TO_STATE  # Save state for next step
+    context.user_data['last_bot_message_text'] = message_text
+    context.user_data['last_state'] = TO_STATE
     return TO_STATE
 
 async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
