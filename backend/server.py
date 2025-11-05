@@ -2271,7 +2271,8 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
     
     logger.info(f"Template data in context: {list(context.user_data.keys())}")
     
-    # DON'T set active_order flag here - user hasn't started entering data yet
+    # Set active_order flag - user clicked "Continue with template" and will start entering weight
+    context.user_data['active_order'] = True
     
     # Template data already loaded in context.user_data
     # Ask for parcel weight (first thing not in template)
