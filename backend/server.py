@@ -792,7 +792,7 @@ async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAUL
         return
     
     try:
-        amount = float(update.message.text.strip()
+        amount = float(update.message.text.strip())
         
         if amount < 10:
             await update.message.reply_text("❌ *Минимальная сумма для пополнения: $10*", parse_mode='Markdown')
