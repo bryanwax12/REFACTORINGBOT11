@@ -531,6 +531,10 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.callback_query:
         query = update.callback_query
         await query.answer()
+        
+        # Mark previous message as selected (remove buttons and add "✅ Выбрано")
+        await mark_message_as_selected(update, context)
+        
         telegram_id = query.from_user.id
         username = query.from_user.username
         first_name = query.from_user.first_name
