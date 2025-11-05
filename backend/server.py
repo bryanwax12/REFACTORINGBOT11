@@ -2478,10 +2478,10 @@ async def view_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await query.message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown')
-    # Clear last_bot_message to prevent accidentally removing these buttons
-    context.user_data.pop('last_bot_message_id', None)
-    context.user_data.pop('last_bot_message_text', None)
+    bot_msg = await query.message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown')
+    # Save last message context for button protection
+    context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = message
     # Don't return state - working outside ConversationHandler
 
 async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
