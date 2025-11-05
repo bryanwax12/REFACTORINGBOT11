@@ -548,6 +548,21 @@ frontend:
           agent: "testing"
           comment: "✅ BALANCE TOP-UP FLOW FIXES VERIFICATION COMPLETE: Comprehensive testing confirms all reported issues have been fixed. IMPLEMENTATION VERIFICATION: (1) ✅ my_balance_command() function exists and correctly saves last_bot_message_id and last_bot_message_text (lines 796-797), (2) ✅ Keyboard has both '❌ Отмена' and '🔙 Главное меню' buttons (lines 784-785), both with callback_data='start', (3) ✅ handle_topup_amount_input() function exists and calls mark_message_as_selected at beginning (line 805), (4) ✅ mark_message_as_selected() function exists and correctly removes buttons and adds '✅ Выбрано' text (lines 440-512), (5) ✅ Button protection mechanism complete - saves context, handles text messages, removes buttons, adds selected text, (6) ✅ Expected behavior flow verified: balance button callback works, shows balance with buttons & saves context, handles amount input with mark_selected, previous message marked as selected, invoice creation continues. CRITICAL SUCCESS: All 10/10 core fixes implemented (100% success rate). Both user-reported issues resolved: (1) Cancel button now works - both 'Отмена' and 'Главное меню' buttons present with correct callback_data='start', (2) '✅ Выбрано' text now appears - mark_message_as_selected called at beginning of handle_topup_amount_input and properly adds text while removing buttons. Complete button protection mechanism implemented as requested."
 
+  - task: "Template Use Flow - Button Freeze Fix"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "❌ USER REPORTED ISSUE WITH SCREENSHOT: After loading template and clicking '📦 Продолжить создание заказа' (Continue order creation) button, bot freezes/hangs. User sees template loaded message with '✅ Выбрано' text, but clicking the continue button doesn't work."
+        - working: "NA"
+          agent: "main"
+          comment: "🔧 CRITICAL FIX APPLIED: Root cause identified - use_template() was returning ConversationHandler.END, which ended the conversation. When user clicked 'Продолжить создание заказа', the button callback couldn't be handled because conversation was already ended. SOLUTION: (1) Added new conversation state TEMPLATE_LOADED (now 28 states total), (2) Modified use_template() to return TEMPLATE_LOADED instead of ConversationHandler.END (line 2540), (3) Added last_bot_message_text saving in use_template() for button protection (line 2535), (4) Registered TEMPLATE_LOADED state in ConversationHandler with start_order_with_template handler (lines 6875-6879), (5) Added logging to start_order_with_template for debugging. EXPECTED FLOW: User selects template → use_template loads data and returns TEMPLATE_LOADED state → conversation stays active → user clicks 'Продолжить создание заказа' → start_order_with_template handles button in TEMPLATE_LOADED state → transitions to PARCEL_WEIGHT state. Backend restarted successfully. Ready for testing."
+
 metadata:
   created_by: "main_agent"
   version: "1.1"
