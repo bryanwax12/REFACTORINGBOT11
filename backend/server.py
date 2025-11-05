@@ -452,7 +452,11 @@ async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT
                 # Don't add "✅ Выбрано" if it's already there or if it's an error message
                 if "✅ Выбрано" not in current_text and "❌" not in current_text:
                     new_text = current_text + "\n\n✅ Выбрано"
-                    await message.edit_text(new_text, reply_markup=None)
+                    # Try without parse_mode first, then with Markdown if that fails
+                    try:
+                        await message.edit_text(new_text, reply_markup=None)
+                    except Exception:
+                        await message.edit_text(new_text, reply_markup=None, parse_mode='Markdown')
                     logger.info(f"Added '✅ Выбрано' and removed buttons for user {update.effective_user.id}")
                 else:
                     # Just remove buttons if text already has checkmark or error
