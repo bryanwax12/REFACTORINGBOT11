@@ -1063,13 +1063,15 @@ async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
+    message_text = """Шаг 4/13: Город отправителя
+Например: San Francisco"""
     bot_msg = await (update.message or update.callback_query.message).reply_text(
-        """Шаг 4/13: Город отправителя
-Например: San Francisco""",
+        message_text,
         reply_markup=reply_markup
     )
     context.user_data['last_bot_message_id'] = bot_msg.message_id
-    context.user_data['last_state'] = FROM_CITY  # Save state for next step
+    context.user_data['last_bot_message_text'] = message_text
+    context.user_data['last_state'] = FROM_CITY
     return FROM_CITY
 
 async def skip_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
