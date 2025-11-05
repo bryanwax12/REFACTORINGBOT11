@@ -989,18 +989,22 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE)
     
     context.user_data['from_street'] = address
     
+    # Mark previous message as selected (remove buttons from step 2)
+    await mark_message_as_selected(update, context)
+    
     keyboard = [
         [InlineKeyboardButton("⏭ Пропустить", callback_data='skip_from_address2')],
         [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await update.message.reply_text(
+    bot_msg = await update.message.reply_text(
         """Шаг 3/13: Квартира/Офис отправителя (необязательно)
 Например: Apt 5, Suite 201
 Или нажмите "Пропустить" """,
         reply_markup=reply_markup
     )
+    context.user_data['last_bot_message_id'] = bot_msg.message_id  # Save for next step
     context.user_data['last_state'] = FROM_ADDRESS2  # Save state for next step
     return FROM_ADDRESS2
 
