@@ -1714,13 +1714,16 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
             await update.message.reply_text("✅ Вес посылки обновлен!")
             # Don't set editing_parcel to False yet - we need to edit dimensions too
         
+        # Mark previous message as selected
+        await mark_message_as_selected(update, context)
+        
         # Ask for length (with skip option only if weight <= 10 lb)
         if weight > 10:
             # Heavy parcel - user MUST enter dimensions
             keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            await update.message.reply_text(
+            bot_msg = await update.message.reply_text(
                 """📏 Длина посылки в дюймах (inches)
 
 ⚠️ Для посылок тяжелее 10 фунтов необходимо указать точные размеры для корректного расчета стоимости.
@@ -1733,7 +1736,7 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
             keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартные размеры", callback_data='skip_dimensions')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            await update.message.reply_text(
+            bot_msg = await update.message.reply_text(
                 """📏 Длина посылки в дюймах (inches)
 Например: 12
 
@@ -1741,6 +1744,7 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
                 reply_markup=reply_markup
             )
         
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_state'] = PARCEL_LENGTH  # Save state for next step
         return PARCEL_LENGTH
             
