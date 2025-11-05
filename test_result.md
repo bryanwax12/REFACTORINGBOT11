@@ -534,7 +534,8 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "Cancel Order Button - Consistent Confirmation Across All States"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
