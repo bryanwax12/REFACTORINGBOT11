@@ -6501,6 +6501,7 @@ async def startup_event():
             application.add_handler(CallbackQueryHandler(confirm_delete_template, pattern='^template_confirm_delete_'))
             # rename_template_start is now handled by template_rename_handler ConversationHandler
             application.add_handler(CallbackQueryHandler(my_templates_menu, pattern='^my_templates$'))
+            application.add_handler(CallbackQueryHandler(order_from_template_list, pattern='^order_from_template$'))
             
             # Handler for topup amount input (text messages)
             application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_topup_amount_input))
