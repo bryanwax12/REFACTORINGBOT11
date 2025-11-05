@@ -2630,12 +2630,18 @@ async def rename_template_start(update: Update, context: ContextTypes.DEFAULT_TY
     query = update.callback_query
     await query.answer()
     
+    # Mark previous message as selected
+    await mark_message_as_selected(update, context)
+    
     template_id = query.data.replace('template_rename_', '')
     context.user_data['renaming_template_id'] = template_id
     
     await query.message.reply_text(
         """✏️ Введите новое название для шаблона (до 30 символов):"""
     )
+    # Clear last_bot_message to not interfere with text input
+    context.user_data.pop('last_bot_message_id', None)
+    context.user_data.pop('last_bot_message_text', None)
     return TEMPLATE_RENAME
 
 async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYPE):
