@@ -599,7 +599,11 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     # Send welcome message with inline keyboard
-    await send_method(welcome_message, reply_markup=reply_markup, parse_mode='Markdown')
+    bot_msg = await send_method(welcome_message, reply_markup=reply_markup, parse_mode='Markdown')
+    
+    # Save last bot message context for button protection
+    context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = welcome_message
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Handle both command and callback
