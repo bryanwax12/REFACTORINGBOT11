@@ -1,60 +1,52 @@
 <analysis>
-The AI engineer's work trajectory involved continuous development and bug fixing for a Telegram bot and its admin panel. Key features implemented include a Check All Bot Access button in the admin panel, a robust mechanism for handling top-up payments while preserving order context (migrating from  to a MongoDB  collection), and fixing inconsistent button behaviors in the bot. A significant portion of the work focused on user experience, such as correcting date formats in the admin panel to Kyiv time and refining the bot's flow for template-based order creation. A new Maintenance Mode was added to the admin panel, affecting bot access for users. The most challenging aspect was implementing and refining stale button protection logic, which underwent several iterations, culminating in a decision to completely re-implement it based on a state machine concept provided by the user, due to persistent issues with aggressive context clearing and conflicting handlers. The engineer also managed BotFather settings, generated marketing content, and assessed the bot's value. The latest task involves ensuring consistent cancel order functionality across all bot states, highlighting a deep dive into  and global callback interactions.
+The AI engineer's work primarily focused on implementing and refining a stale button protection mechanism in the Telegram bot. This involved ensuring that after a user interaction (button press or text input), the previous bot message's buttons are removed and a ✅ Выбрано text is appended. This feature underwent numerous iterative refinements due to user feedback, requiring the  function to be continuously updated and applied across dozens of bot interaction functions, including order creation, template handling, and editing flows. A significant challenge arose when an automated script corrupted the codebase, necessitating a git rollback and manual re-implementation of the feature. The task also intermittently touched upon ensuring consistent Отмена button functionality. The trajectory concludes with a reported bug in the Пополнение баланса flow, indicating the button protection is still not fully integrated.
 </analysis>
 
 <product_requirements>
-The application is a Telegram bot for shipping label generation and cryptocurrency payments, managed by an admin panel. Key functionalities include ShipStation V2 integration for dynamic rates and label creation (with parcel dimensions), Oxapay for crypto payments (custom amounts, min 0, 2% tolerance, no Oxapay mentions), and a multi-lingual bot UI with menu and templates. The admin panel provides order/user management (block/unblock, channel invites), top-up history, and a broadcast feature for rich-text and image messages. Recent additions include user-defined order templates, channel invitation tools for admins, and a broadcast tab with bot access checks. Users can save and reuse address templates. The bot ensures error handling, security, and an efficient user flow. A Maintenance Mode allows admins to temporarily disable the bot for users.
+The application is a Telegram bot for shipping label generation and cryptocurrency payments, featuring an admin panel. Core functionalities include ShipStation V2 integration for dynamic rates and label creation (handling parcel dimensions), and Oxapay for crypto payments (custom amounts, min 0, 2% tolerance, no Oxapay brand mentions). The bot supports a multi-lingual UI, menu navigation, and user-defined order templates for saving and reusing addresses. The admin panel offers order and user management (block/unblock, channel invites), top-up history, and a broadcast feature for rich-text messages. Recent enhancements include Maintenance Mode to control bot access and a robust stale button protection mechanism to improve user experience by clearing previous interaction buttons and marking selections.
 </product_requirements>
 
 <key_technical_concepts>
 -   **Full-stack:** React (frontend), FastAPI (backend), MongoDB (database).
--   **Telegram Bot API:**  with .
+-   **Telegram Bot API:**  with  for state management.
 -   **Payment Gateways:** Oxapay API for crypto payments.
 -   **Shipping API:** ShipStation V2 API for labels.
 -   **Data Validation:** Pydantic.
--   **State Management:**  (bot),  (React).
+-   **State Management:**  (bot).
 </key_technical_concepts>
 
 <code_architecture>
 
 
 -   **/app/backend/server.py**:
-    -   **Summary of why this file is important:** The core backend, handling bot logic, FastAPI endpoints, MongoDB interactions, and external API integrations (ShipStation, Oxapay).
+    -   **Summary of why this file is important:** This is the central backend logic for the Telegram bot, handling user interactions,  states, payment processing (Oxapay), shipping label generation (ShipStation), and database operations with MongoDB.
     -   **Summary of the changes made to this file:**
-        -   **Bot Flow/State Management:**  returns .  params adjusted (removed ).  logic refined in menu commands and new order flows.  now edits messages.
-        -   **Payments:**  MongoDB collection for temporary storage during top-ups.  and  updated to use it.  registered as . Amount to pay displayed after top-up. Главное меню button removed from top-up screens.
-        -   **Admin Endpoints:**  and ,  added.
-        -   **Maintenance Mode:** Global  setting in DB. Middleware to restrict bot access for users, checks in , .
-        -   **Protection Logic (Iterative):**  flag, ,  (all removed, then re-implemented based on user's conceptual plan).  modified to handle orphaned buttons and  behavior.
-        -   **Bug Fixes**:  for  fixed by using  and  keys.  logic in  adjusted to ensure confirmation always appears.
+        -   **Button Protection Logic:**
+            -   New function  created to remove buttons from previous messages and optionally add ✅ Выбрано text. This function underwent several iterations: initially added, then simplified to only remove buttons, then reverted to add ✅ Выбрано (requiring ), then adjusted for .
+            -   A new helper  was introduced to consistently save  and .
+            -   Extensive modifications were made across almost all text input handlers and callback query handlers (e.g., , , , , , , , , , , , , , , , , , , , , ) to:
+                -   Call  on user interaction.
+                -   Save the  and  of the bot's last message to  for subsequent editing.
+            -   Logic around clearing  in template flows (, , ) was refined multiple times to avoid conflicts with .
+        -   **Template Handlers:** New functions  and  were created and registered as  in the  state to process user choices when a template name already exists.
+        -   **Error Handling/Rollback:** The file experienced significant corruption due to an automated script attempting bulk updates, leading to numerous  and  issues. This necessitated a git rollback to a previous working commit and subsequent manual re-implementation of many changes.
 -   **/app/backend/.env**:
     -   **Summary of why this file is important:** Stores environment variables for backend operation.
-    -   **Summary of the changes made to this file:**  was switched between sandbox and production keys multiple times based on user request.
+    -   **Summary of the changes made to this file:** No direct changes were mentioned in the trajectory's current phase, but previously  was switched.
 -   **/app/frontend/src/App.js**:
     -   **Summary of why this file is important:** Main React component for the admin panel, handling routing, state, and UI.
-    -   **Summary of the changes made to this file:**
-        -   **Users Tab:** Check All Bot Access button added with  function.
-        -   **Date Formatting:**  and  helper functions added. All  and  instances replaced with these functions across Orders, Users, Top-ups, Create Label, Tracking Modal, and Date Filters.
-        -   **Maintenance Mode:**  state,  and  functions added. Buttons Включить режим обслуживания / Выключить режим обслуживания added to the header.
--   **/app/frontend/public/privacy-policy.html**:
-    -   **Summary of why this file is important:** Hosts the bot's privacy policy, accessible via a public URL.
-    -   **Summary of the changes made to this file:** Created from scratch, then iteratively modified to remove specific company names (Oxapay, ShipStation) and help command as per user's requests.
--   **/app/frontend/public/marketing-materials.txt**:
-    -   **Summary of why this file is important:** Contains various promotional texts for the bot.
-    -   **Summary of the changes made to this file:** Created to provide marketing copy as requested by the user.
+    -   **Summary of the changes made to this file:** No changes were made in this trajectory.
 </code_architecture>
 
 <pending_tasks>
--   The previous protection logic for stale button presses during order creation was completely removed. The user provided a new conceptual plan for this protection (state machine with ). The AI engineer has asked questions to clarify this new approach.
--   A final check is needed to ensure that the Отмена (Cancel) button consistently triggers the confirmation function in *all* ConversationHandler states.
+-   Complete the consistent implementation of stale button protection (removing buttons and adding ✅ Выбрано) across all remaining bot interaction points.
+-   Specifically, fix the Пополнение баланса (top-up) flow, where user-reported issues indicate buttons are not working and ✅ Выбрано text is missing.
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer was addressing a bug related to the Отмена (Cancel) button. The user reported, проверь что бы у всех кнопока отмена была эта функция (check that all cancel buttons have this function). This implies a previous fix (removing a blocking  check in ) might not have fully resolved the consistency of the cancel flow across all bot states.
-
-The AI engineer's last action was to confirm that the  function already correctly displays a confirmation message and that it is registered as a  handler in the , meaning it should be caught in all conversation states. The immediate task is to perform a thorough check across all relevant states to ensure that the Отмена button consistently triggers the  function with confirmation, without any unexpected behavior or blocks. This is part of ensuring a robust and predictable user experience, particularly during multi-step order creation processes.
+Immediately before this summary request, the AI engineer was addressing a user-reported bug in the Пополнение баланса (top-up) flow. The user provided feedback and a screenshot, indicating that when entering an amount and then clicking the Отмена (Cancel) button, the button does not work as expected, and the ✅ Выбрано text (which should appear in the previous message to mark the selection) is missing. The AI engineer's last action was to identify the relevant code sections for the top-up process to investigate why the button protection logic () and button functionality are failing in this specific conversation state. The current state of the product is that the general button protection feature is largely implemented across many order creation and template management flows, but specific edge cases, like the top-up flow, still exhibit inconsistencies.
 </current_work>
 
 <optional_next_step>
-Thoroughly check all ConversationHandler states to confirm the Отмена button consistently triggers the  confirmation.
+Investigate the top-up related functions in  to ensure  is correctly invoked and / are saved.
 </optional_next_step>
