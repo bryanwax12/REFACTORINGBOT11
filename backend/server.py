@@ -2402,7 +2402,8 @@ async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     
-    # DON'T set active_order flag here - user hasn't started entering data yet
+    # Set active_order flag - user chose "New order" and will start entering data
+    context.user_data['active_order'] = True
     
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
