@@ -1951,6 +1951,9 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
         
         context.user_data['height'] = height
         
+        # Mark previous message as selected
+        await mark_message_as_selected(update, context)
+        
         # If we're editing parcel, mark as complete
         if context.user_data.get('editing_parcel'):
             context.user_data['editing_parcel'] = False
