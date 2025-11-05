@@ -650,34 +650,14 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     
     if query.data == 'start' or query.data == 'main_menu':
-        # Check if user has active order
-        if context.user_data.get('active_order'):
-            await show_return_to_order_message(update, context)
-            return
         await start_command(update, context)
     elif query.data == 'my_balance':
-        # Check if user has active order
-        if context.user_data.get('active_order'):
-            await show_return_to_order_message(update, context)
-            return
         await my_balance_command(update, context)
     elif query.data == 'my_templates':
-        # Check if user has active order
-        if context.user_data.get('active_order'):
-            await show_return_to_order_message(update, context)
-            return
         await my_templates_menu(update, context)
     elif query.data == 'help':
-        # Check if user has active order
-        if context.user_data.get('active_order'):
-            await show_return_to_order_message(update, context)
-            return
         await help_command(update, context)
     elif query.data == 'faq':
-        # Check if user has active order
-        if context.user_data.get('active_order'):
-            await show_return_to_order_message(update, context)
-            return
         await faq_command(update, context)
     elif query.data == 'new_order':
         # Starting new order - this is intentional, so clear previous data
