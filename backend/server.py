@@ -2102,6 +2102,9 @@ async def show_edit_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Show menu to select what to edit"""
     query = update.callback_query
     
+    # Mark previous message as selected
+    await mark_message_as_selected(update, context)
+    
     message = "✏️ Что вы хотите изменить?"
     
     keyboard = [
