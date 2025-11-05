@@ -807,6 +807,9 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Clear any previous order data (including order_completed flag)
     context.user_data.clear()
     
+    # Set flag that order is in progress
+    context.user_data['active_order'] = True
+    
     # Check if bot is in maintenance mode
     if await check_maintenance_mode(update):
         await query.message.reply_text(
