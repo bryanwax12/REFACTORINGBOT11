@@ -904,10 +904,7 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle custom topup amount input"""
-    logger.info(f"🟡 handle_topup_amount_input called - user_id: {update.effective_user.id}")
-    logger.info(f"🟡 awaiting_topup_amount: {context.user_data.get('awaiting_topup_amount')}")
     if not context.user_data.get('awaiting_topup_amount'):
-        logger.info(f"🟡 Not awaiting topup - returning early")
         return
     
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
