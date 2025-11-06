@@ -6938,13 +6938,18 @@ async def startup_event():
     logger.info("Starting application...")
     
     # Initialize Bot Protection System
-    global bot_protection
+    global bot_protection, telegram_safety
     bot_protection = BotProtection(
         owner_telegram_id=int(ADMIN_TELEGRAM_ID) if ADMIN_TELEGRAM_ID else 0,
         bot_name="WhiteLabelShippingBot"
     )
     instance_info = bot_protection.get_instance_info()
     logger.info(f"🔒 Bot Protection System initialized: {instance_info}")
+    
+    # Initialize Telegram Safety System
+    telegram_safety = TelegramSafetySystem()
+    logger.info("🛡️ Telegram Safety System initialized (Rate Limiting, Anti-Block)")
+    logger.info(f"📋 Best Practices: {len(TelegramBestPractices.get_guidelines())} guidelines active")
     
     # Create MongoDB indexes for performance optimization (5000+ users)
     try:
