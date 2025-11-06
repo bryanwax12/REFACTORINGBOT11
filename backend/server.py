@@ -885,8 +885,7 @@ async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAUL
             keyboard = [[InlineKeyboardButton("💳 Оплатить", url=pay_link)]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            await update.message.reply_text(
-                f"""*✅ Счёт на пополнение создан!*
+            message_text = f"""*✅ Счёт на пополнение создан!*
 
 *💵 Сумма: ${amount}*
 *🪙 Криптовалюта: Любая из доступных*
@@ -897,10 +896,17 @@ async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAUL
 ⚠️ *ВАЖНО: Оплатите точно ${amount}!*
 _Если вы оплатите другую сумму, деньги не поступят на баланс._
 
-*После успешной оплаты баланс будет автоматически пополнен.*""",
+*После успешной оплаты баланс будет автоматически пополнен.*"""
+            
+            bot_msg = await update.message.reply_text(
+                message_text,
                 reply_markup=reply_markup,
                 parse_mode='Markdown'
             )
+            
+            # Save last bot message context for button protection
+            context.user_data['last_bot_message_id'] = bot_msg.message_id
+            context.user_data['last_bot_message_text'] = message_text
         else:
             error_msg = invoice_result.get('error', 'Unknown error')
             await update.message.reply_text(f"❌ *Ошибка создания инвойса:* {error_msg}", parse_mode='Markdown')
