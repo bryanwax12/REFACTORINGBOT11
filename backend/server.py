@@ -3587,17 +3587,24 @@ Shipping label создан успешно!""",
             keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            await query.message.reply_text(
-                """💵 Пополнение баланса
+            message_text = """💵 Пополнение баланса
 
 Введите сумму пополнения в долларах США (USD):
 
 Например: 50
 
 Минимальная сумма: $5
-Максимальная сумма: $1000""",
+Максимальная сумма: $1000"""
+            
+            bot_msg = await query.message.reply_text(
+                message_text,
                 reply_markup=reply_markup
             )
+            
+            # Save message context for button protection
+            context.user_data['last_bot_message_id'] = bot_msg.message_id
+            context.user_data['last_bot_message_text'] = message_text
+            
             return TOPUP_AMOUNT
         
         context.user_data.clear()
