@@ -6912,7 +6912,13 @@ async def startup_event():
     if TELEGRAM_BOT_TOKEN and TELEGRAM_BOT_TOKEN != "your_telegram_bot_token_here":
         try:
             logger.info("Initializing Telegram Bot...")
-            application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
+            # Build application with optimized settings for high load (5000+ concurrent users)
+            application = (
+                Application.builder()
+                .token(TELEGRAM_BOT_TOKEN)
+                .concurrent_updates(True)  # Process updates concurrently
+                .build()
+            )
             
             # Conversation handler for order creation
             # Template rename conversation handler
