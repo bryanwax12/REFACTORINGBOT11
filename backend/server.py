@@ -760,7 +760,11 @@ async def faq_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await send_method(faq_text, reply_markup=reply_markup, parse_mode='Markdown')
+    bot_msg = await send_method(faq_text, reply_markup=reply_markup, parse_mode='Markdown')
+    
+    # Save message ID and text for button protection
+    context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = faq_text
 
 
 
