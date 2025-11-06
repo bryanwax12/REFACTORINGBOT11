@@ -3095,7 +3095,12 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         # Save state for cancel return - only when showing rates
         context.user_data['last_state'] = SELECT_CARRIER
         
-        await query.message.reply_text(message, reply_markup=reply_markup, parse_mode='HTML')
+        bot_msg = await query.message.reply_text(message, reply_markup=reply_markup, parse_mode='HTML')
+        
+        # Save last bot message context for button protection
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message
+        
         return SELECT_CARRIER
         
     except Exception as e:
