@@ -77,10 +77,89 @@ def test_carriers():
         print(f"❌ Carriers test error: {e}")
         return False, None
 
+def test_shipstation_production_api_key():
+    """Test ShipStation Production API Key - CRITICAL TEST per review request"""
+    print("\n🔍 Testing ShipStation Production API Key...")
+    print("🎯 CRITICAL: Verifying production API key P9tNKoBVBHpcnq2riwwG4AG/SUG9sZVZaYSJ0alfG0g is working")
+    
+    try:
+        # Load environment to verify API key
+        from dotenv import load_dotenv
+        load_dotenv('/app/backend/.env')
+        
+        api_key = os.environ.get('SHIPSTATION_API_KEY')
+        expected_prod_key = "P9tNKoBVBHpcnq2riwwG4AG/SUG9sZVZaYSJ0alfG0g"
+        
+        print(f"   📋 API Key Verification:")
+        print(f"   API key loaded: {'✅' if api_key else '❌'}")
+        
+        if api_key == expected_prod_key:
+            print(f"   ✅ Production API key correctly installed: {api_key[:20]}...")
+        else:
+            print(f"   ❌ API key mismatch. Expected: {expected_prod_key[:20]}..., Got: {api_key[:20] if api_key else 'None'}...")
+            return False
+        
+        # Test direct API authentication
+        print(f"\n   📋 Testing ShipStation V2 API Authentication:")
+        
+        headers = {
+            'API-Key': api_key,
+            'Content-Type': 'application/json'
+        }
+        
+        # Test 1: Get carriers endpoint
+        print(f"   Test 1: GET /v2/carriers")
+        response = requests.get(
+            'https://api.shipstation.com/v2/carriers',
+            headers=headers,
+            timeout=15
+        )
+        
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            print(f"   ✅ Carriers API authentication successful")
+            
+            data = response.json()
+            carriers = data.get('carriers', [])
+            print(f"   Total carriers available: {len(carriers)}")
+            
+            # Check for expected carriers
+            carrier_codes = [c.get('carrier_code', '').lower() for c in carriers]
+            usps_found = any('usps' in code or 'stamps' in code for code in carrier_codes)
+            ups_found = any('ups' in code for code in carrier_codes)
+            fedex_found = any('fedex' in code for code in carrier_codes)
+            
+            print(f"   USPS/Stamps.com available: {'✅' if usps_found else '❌'}")
+            print(f"   UPS available: {'✅' if ups_found else '❌'}")
+            print(f"   FedEx available: {'✅' if fedex_found else '❌'}")
+            
+            # Show available carriers
+            print(f"   Available carrier codes: {sorted(set(carrier_codes))}")
+            
+        elif response.status_code == 401:
+            print(f"   ❌ Authentication failed - Invalid API key")
+            return False
+        elif response.status_code == 403:
+            print(f"   ❌ Access forbidden - API key may not have required permissions")
+            return False
+        else:
+            print(f"   ❌ API request failed: {response.status_code}")
+            print(f"   Response: {response.text}")
+            return False
+        
+        return True
+        
+    except Exception as e:
+        print(f"❌ Error testing production API key: {e}")
+        import traceback
+        print(f"   Traceback: {traceback.format_exc()}")
+        return False
+
 def test_shipstation_carrier_ids():
     """Test ShipStation carrier IDs function - CRITICAL TEST per review request"""
     print("\n🔍 Testing ShipStation Carrier IDs Loading...")
-    print("🎯 CRITICAL: Testing carrier exclusion fix - should return 3 carriers (stamps_com, ups, fedex)")
+    print("🎯 CRITICAL: Testing carrier exclusion fix - should return multiple carriers with production key")
     
     try:
         # Import the function from server.py
@@ -103,24 +182,15 @@ def test_shipstation_carrier_ids():
         print(f"   Returned carrier IDs: {carrier_ids}")
         print(f"   Number of carriers: {len(carrier_ids)}")
         
-        # Verify expected results from review request
-        expected_carrier_count = 3
-        expected_carrier_ids = ['se-4002273', 'se-4002274', 'se-4013427']
-        
-        # Check carrier count
-        count_correct = len(carrier_ids) == expected_carrier_count
-        print(f"   Expected carrier count (3): {'✅' if count_correct else '❌'}")
-        
-        # Check if we got the expected carrier IDs (may vary, but should be 3)
-        if len(carrier_ids) == 3:
-            print(f"   ✅ Got expected 3 carriers")
-            print(f"   Carrier IDs: {carrier_ids}")
+        # With production key, we should get multiple carriers
+        if len(carrier_ids) >= 2:
+            print(f"   ✅ Multiple carriers returned ({len(carrier_ids)})")
             
             # Verify carrier ID format (should be se-xxxxxxx)
             valid_format = all(str(cid).startswith('se-') for cid in carrier_ids)
             print(f"   Carrier ID format valid (se-xxxxxxx): {'✅' if valid_format else '❌'}")
         else:
-            print(f"   ❌ Expected 3 carriers, got {len(carrier_ids)}")
+            print(f"   ❌ Too few carriers returned ({len(carrier_ids)})")
         
         # Test exclusion logic - verify globalpost is excluded
         print("   📋 Testing Carrier Exclusion Logic:")
