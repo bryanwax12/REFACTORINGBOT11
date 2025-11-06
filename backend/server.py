@@ -5953,6 +5953,45 @@ async def disable_maintenance_mode(authenticated: bool = Depends(verify_admin_ke
         logger.error(f"Error disabling maintenance mode: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.get("/settings/api-mode")
+async def get_api_mode(authenticated: bool = Depends(verify_admin_key)):
+    """Get current API mode (test or production)"""
+    try:
+        setting = await db.settings.find_one({"key": "api_mode"})
+        mode = setting.get("value", "production") if setting else "production"
+        return {"mode": mode}
+    except Exception as e:
+        logger.error(f"Error getting API mode: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/settings/api-mode")
+async def set_api_mode(request: dict, authenticated: bool = Depends(verify_admin_key)):
+    """Set API mode (test or production)"""
+    try:
+        mode = request.get("mode")
+        if mode not in ["test", "production"]:
+            raise HTTPException(status_code=400, detail="Mode must be 'test' or 'production'")
+        
+        # Save to database
+        await db.settings.update_one(
+            {"key": "api_mode"},
+            {"$set": {"value": mode, "updated_at": datetime.now(timezone.utc).isoformat()}},
+            upsert=True
+        )
+        
+        # Update environment variable in-memory (will revert on restart)
+        global SHIPSTATION_API_KEY
+        if mode == "test":
+            SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY_TEST', SHIPSTATION_API_KEY)
+        else:
+            SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY_PROD', SHIPSTATION_API_KEY)
+        
+        logger.info(f"API mode switched to: {mode}")
+        return {"status": "success", "mode": mode}
+    except Exception as e:
+        logger.error(f"Error setting API mode: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.post("/upload-image")
 async def upload_image(
     file: UploadFile = File(...),
