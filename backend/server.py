@@ -4,6 +4,7 @@ from fastapi.responses import FileResponse
 from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv
 from pathlib import Path
+from bot_protection import BotProtection, get_copyright_footer, PROTECTED_BADGE, VERSION_WATERMARK
 import os
 import logging
 import requests
