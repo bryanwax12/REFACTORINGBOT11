@@ -575,6 +575,21 @@ frontend:
           agent: "main"
           comment: "🔧 CRITICAL FIX #3 APPLIED: Root cause - my_templates_menu() function was not saving last_bot_message_id and last_bot_message_text after sending message (line 2437), and view_template() function was clearing these values (lines 2480-2481), preventing mark_message_as_selected from working. SOLUTION: (1) Modified my_templates_menu() to save bot_msg and store message_id and text in context.user_data (lines 2437-2440), (2) Modified view_template() to save bot_msg and store message_id and text instead of clearing them (lines 2478-2481). EXPECTED FLOW: User opens templates list → my_templates_menu saves message context → user clicks template button → mark_message_as_selected removes buttons and adds '✅ Выбрано' → view_template shows template details with new message context saved. Backend restarted. Ready for testing."
 
+  - task: "Order Creation Flow - City to State Transition Issue"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "❌ USER REPORTED ISSUE: After entering CITY (step 4 'Город отправителя'), bot shows 'Адрес отправителя' prompt instead of expected 'Шаг 5/13: Штат отправителя (2 буквы)' prompt. This breaks the normal order creation flow sequence."
+        - working: "NA"
+          agent: "testing"
+          comment: "🔍 COMPREHENSIVE CODE ANALYSIS COMPLETED: Investigated reported City → State transition issue through multiple analysis approaches. FINDINGS: (1) ✅ order_from_city() function implementation correct (lines 1193-1232) - shows proper 'Шаг 5/13: Штат отправителя (2 буквы)' prompt, saves last_state = FROM_STATE, returns FROM_STATE after validation, (2) ✅ ConversationHandler state mapping verified - FROM_CITY correctly maps to order_from_city, FROM_STATE correctly maps to order_from_state, (3) ✅ Handler registration order correct - ConversationHandler registered before global MessageHandler to prevent interference, (4) ✅ Global handler analysis - handle_topup_amount_input has proper guard clause (awaiting_topup_amount check), order creation functions clear the flag correctly, (5) ✅ Step sequence validation - all 5 order functions (name→address→address2→city→state) show correct prompts and return correct next states, last_state timing correct (set AFTER showing prompt). CONCLUSION: No code implementation issues found. The reported problem appears to be runtime-specific: user context state corruption, race conditions between handlers, or specific user interaction flow not covered in static analysis. RECOMMENDATION: Issue requires runtime debugging with logging to capture actual user context and handler execution when problem occurs. Code implementation follows specifications correctly."
+
   - task: "ShipStation Production API Key Installation"
     implemented: true
     working: true
