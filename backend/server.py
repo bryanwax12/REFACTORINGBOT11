@@ -3923,7 +3923,7 @@ async def create_and_send_label(order_id, telegram_id, message):
                     # Generate AI thank you message
                     thank_you_msg = await generate_thank_you_message()
                     
-                    # Send label as document
+                    # Send label info with download link (without file attachment)
                     message_text = f"""✅ Shipping Label создан!
 
 Order: #{order_id[:8]}
@@ -3932,13 +3932,13 @@ Carrier: {order['selected_carrier'].upper()}
 Service: {order['selected_service']}
 Tracking: {tracking_number}
 
-Ваша этикетка во вложении."""
+📄 [Скачать этикетку PDF]({label_download_url})"""
                     
-                    await bot_instance.send_document(
+                    await bot_instance.send_message(
                         chat_id=telegram_id,
-                        document=label_response_download.content,
-                        filename=f"label_{order_id[:8]}.pdf",
-                        caption=message_text
+                        text=message_text,
+                        parse_mode='Markdown',
+                        disable_web_page_preview=True
                     )
                     
                     # Send tracking info without buttons
