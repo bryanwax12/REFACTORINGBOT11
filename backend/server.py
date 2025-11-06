@@ -1261,8 +1261,6 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['last_bot_message_id'] = bot_msg.message_id
     context.user_data['last_bot_message_text'] = message_text
     context.user_data['last_state'] = FROM_STATE
-    logger.info(f"🟢 order_from_city success - returning FROM_STATE, last_state set to FROM_STATE")
-    logger.info(f"🟢 Showed prompt: '{message_text.split(chr(10))[0]}'")
     return FROM_STATE
 
 async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
