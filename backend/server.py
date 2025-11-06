@@ -1093,6 +1093,9 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     address = update.message.text.strip()
+    logger.info(f"🔴 order_from_address called - user_id: {update.effective_user.id}, address input: '{address}'")
+    logger.info(f"🔴 Current user_data keys: {list(context.user_data.keys())}")
+    logger.info(f"🔴 Current last_state: {context.user_data.get('last_state')}")
     
     # Debug logging
     logger.info(f"Address validation: '{address}' length={len(address)} bytes={address.encode()}")
