@@ -3621,6 +3621,9 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     query = update.callback_query
     await query.answer()
     
+    # Mark previous message as selected
+    await mark_message_as_selected(update, context)
+    
     telegram_id = query.from_user.id
     
     # Get pending order data from database
