@@ -1,52 +1,100 @@
 <analysis>
-The AI engineer's work primarily focused on implementing and refining a stale button protection mechanism in the Telegram bot. This involved ensuring that after a user interaction (button press or text input), the previous bot message's buttons are removed and a ✅ Выбрано text is appended. This feature underwent numerous iterative refinements due to user feedback, requiring the  function to be continuously updated and applied across dozens of bot interaction functions, including order creation, template handling, and editing flows. A significant challenge arose when an automated script corrupted the codebase, necessitating a git rollback and manual re-implementation of the feature. The task also intermittently touched upon ensuring consistent Отмена button functionality. The trajectory concludes with a reported bug in the Пополнение баланса flow, indicating the button protection is still not fully integrated.
+The trajectory chronicles an iterative development process focused on enhancing a Telegram bot's user experience and robustness. Initially, the AI engineer addressed a critical stale button protection mechanism, ensuring buttons are removed and selections marked with ✅ Выбрано after user interaction. This feature proved challenging, requiring extensive, repetitive application across various bot flows (order creation, templates, editing, top-up) and handling edge cases.
+
+A significant portion of the work involved debugging and refining this button protection. The AI repeatedly identified missing  calls or unsaved / context in numerous handler functions, correcting over 25 instances. Beyond bug fixes, the development expanded to include new features like AI-generated gratitude messages, a ShipStation API mode switcher in the admin panel, scalability optimizations for 5000+ users, bot copy protection, Telegram blocking safety measures, and a comprehensive monitoring tab in the admin panel. The process highlighted the iterative nature of development, with user feedback directly driving subsequent fixes and feature enhancements, often revealing new integration points for existing functionalities.
 </analysis>
 
 <product_requirements>
-The application is a Telegram bot for shipping label generation and cryptocurrency payments, featuring an admin panel. Core functionalities include ShipStation V2 integration for dynamic rates and label creation (handling parcel dimensions), and Oxapay for crypto payments (custom amounts, min 0, 2% tolerance, no Oxapay brand mentions). The bot supports a multi-lingual UI, menu navigation, and user-defined order templates for saving and reusing addresses. The admin panel offers order and user management (block/unblock, channel invites), top-up history, and a broadcast feature for rich-text messages. Recent enhancements include Maintenance Mode to control bot access and a robust stale button protection mechanism to improve user experience by clearing previous interaction buttons and marking selections.
+The core application is a Telegram bot for shipping label generation and cryptocurrency payments, complemented by an admin panel.
+**Core Bot Functionality:**
+-   **Shipping:** ShipStation V2 integration for dynamic rates and label creation, accommodating parcel dimensions.
+-   **Payments:** Oxapay integration for crypto payments, supporting custom amounts (min 0, 2% tolerance), with no Oxapay branding.
+-   **User Interface:** Multi-lingual support, robust menu navigation.
+-   **Order Management:** User-defined order templates for saving and reusing addresses.
+**Admin Panel Functionality:**
+-   Order and user management (block/unblock users, channel invites).
+-   Top-up history tracking.
+-   Broadcast feature for rich-text messages.
+**Recent Enhancements and Ongoing Work:**
+-   **Maintenance Mode:** Control bot access.
+-   **Stale Button Protection:** Remove previous bot message buttons and append ✅ Выбрано upon user interaction. This feature has been a primary focus, undergoing continuous refinement and application across almost all bot interaction points (e.g., top-up, order creation, template management, cancellation flows, main menu navigation, payment screens).
+-   **AI Integration:** AI-generated unique gratitude messages after successful shipping label creation.
+-   **Scalability:** Optimization for 5000+ simultaneous users.
+-   **Bot Protection:** Mechanisms to protect the bot from copying and Telegram blocking.
+-   **Monitoring:** Admin panel tab to track bot health and security status.
 </product_requirements>
 
 <key_technical_concepts>
 -   **Full-stack:** React (frontend), FastAPI (backend), MongoDB (database).
--   **Telegram Bot API:**  with  for state management.
+-   **Telegram Bot API:**  with  for state management and  for interactive buttons.
 -   **Payment Gateways:** Oxapay API for crypto payments.
--   **Shipping API:** ShipStation V2 API for labels.
+-   **Shipping API:** ShipStation V2 API for labels and rates.
+-   **AI/LLM Integration:** OpenAI GPT-4o via  library for dynamic text generation, using an Emergent LLM key.
 -   **Data Validation:** Pydantic.
--   **State Management:**  (bot).
+-   **State Management:**  for Telegram bot session data.
+-   **Scalability:** MongoDB connection pooling, Telegram Bot API  optimizations (max_connections, timeouts), MongoDB indexing.
+-   **Security:** Bot instance protection, Telegram safety best practices.
 </key_technical_concepts>
 
 <code_architecture>
 
 
 -   **/app/backend/server.py**:
-    -   **Summary of why this file is important:** This is the central backend logic for the Telegram bot, handling user interactions,  states, payment processing (Oxapay), shipping label generation (ShipStation), and database operations with MongoDB.
+    -   **Summary of why this file is important:** This is the core of the Telegram bot and FastAPI backend, orchestrating all user interactions, API calls (ShipStation, Oxapay, OpenAI), and database operations.
     -   **Summary of the changes made to this file:**
-        -   **Button Protection Logic:**
-            -   New function  created to remove buttons from previous messages and optionally add ✅ Выбрано text. This function underwent several iterations: initially added, then simplified to only remove buttons, then reverted to add ✅ Выбрано (requiring ), then adjusted for .
-            -   A new helper  was introduced to consistently save  and .
-            -   Extensive modifications were made across almost all text input handlers and callback query handlers (e.g., , , , , , , , , , , , , , , , , , , , , ) to:
-                -   Call  on user interaction.
-                -   Save the  and  of the bot's last message to  for subsequent editing.
-            -   Logic around clearing  in template flows (, , ) was refined multiple times to avoid conflicts with .
-        -   **Template Handlers:** New functions  and  were created and registered as  in the  state to process user choices when a template name already exists.
-        -   **Error Handling/Rollback:** The file experienced significant corruption due to an automated script attempting bulk updates, leading to numerous  and  issues. This necessitated a git rollback to a previous working commit and subsequent manual re-implementation of many changes.
+        -   **Button Protection Logic ():** Heavily modified and applied across nearly all callback query and message handlers (e.g., , , , , , , , , , , , , , , , , , ). This involved ensuring  and  are consistently saved and  is called.
+        -   **Conversation Handler States:** A new state  was introduced, and  was modified to transition to this state instead of  to prevent premature conversation termination.
+        -   **Context Management:**  flag introduced and cleared in , , and checked in  to prevent cross-conversation logic interference.
+        -   **AI Integration:**  function added using  and called after successful label creation.
+        -   **Admin Panel Endpoints:** New API routes , , ,  were added to support frontend functionalities for API key switching and bot monitoring.
+        -   **Scalability:** MongoDB connection parameters (, , ) and Telegram  parameters (, , , ) were configured.  function added to startup.
+        -   **Bot Protection & Safety:** Integration of  and  by importing, initializing in , and adding admin notifications. Removed visible watermark.
+        -   **Minor UI/UX Text:** Emojis added to top-up warning messages. User balance information added to shipping rates and My Balance button.
 -   **/app/backend/.env**:
-    -   **Summary of why this file is important:** Stores environment variables for backend operation.
-    -   **Summary of the changes made to this file:** No direct changes were mentioned in the trajectory's current phase, but previously  was switched.
+    -   **Summary of why this file is important:** Stores environment variables for backend operation, including API keys and configurations.
+    -   **Summary of the changes made to this file:** Added , , , , . Existing  was repurposed to hold the currently active key.
+-   **/app/backend/bot_protection.py**:
+    -   **Summary of why this file is important:** Contains logic for preventing bot cloning and unauthorized operation.
+    -   **Summary of the changes made to this file:** Newly created to implement bot protection mechanisms, including instance ID and owner ID checks.
+-   **/app/backend/telegram_safety.py**:
+    -   **Summary of why this file is important:** Contains logic for implementing Telegram best practices to avoid bot blocking.
+    -   **Summary of the changes made to this file:** Newly created to implement Telegram safety measures and health monitoring.
+-   **/app/backend/production_config.py**:
+    -   **Summary of why this file is important:** Placeholder for production-specific configurations, although not directly integrated into the current supervisor setup.
+    -   **Summary of the changes made to this file:** Newly created.
 -   **/app/frontend/src/App.js**:
     -   **Summary of why this file is important:** Main React component for the admin panel, handling routing, state, and UI.
-    -   **Summary of the changes made to this file:** No changes were made in this trajectory.
+    -   **Summary of the changes made to this file:**
+        -   Added state variables (, ) and functions (, ) to manage and display ShipStation API mode.
+        -   Integrated a UI button for toggling API mode and a badge to show the current mode.
+        -   Imported and configured a new  component with its own route () and added a corresponding navigation link.
+-   **/app/frontend/src/components/MonitoringTab.jsx**:
+    -   **Summary of why this file is important:** Provides a dedicated interface in the admin panel for tracking bot health and security.
+    -   **Summary of the changes made to this file:** Newly created component to fetch and display monitoring data from backend endpoints.
+-   **/app/SCALING_GUIDE.md**:
+    -   **Summary of why this file is important:** Provides recommendations for scaling the application.
+    -   **Summary of the changes made to this file:** Newly created.
+-   **/app/SECURITY_PROTECTION.md**:
+    -   **Summary of why this file is important:** Documents the implemented bot protection measures.
+    -   **Summary of the changes made to this file:** Newly created.
+-   **/app/TELEGRAM_SAFETY_GUIDE.md**:
+    -   **Summary of why this file is important:** Documents best practices for Telegram bot safety.
+    -   **Summary of the changes made to this file:** Newly created.
 </code_architecture>
 
 <pending_tasks>
--   Complete the consistent implementation of stale button protection (removing buttons and adding ✅ Выбрано) across all remaining bot interaction points.
--   Specifically, fix the Пополнение баланса (top-up) flow, where user-reported issues indicate buttons are not working and ✅ Выбрано text is missing.
+-   **ShipStation API Key Configuration:** The user has provided a production API key and requested to switch to production mode, which needs to be implemented.
+-   **PDF Tracking Number Fix:** The user initially reported каракули (gibberish) in the PDF label for the tracking number, which was not fully resolved. The AI confirmed tracking number extraction but didn't address the PDF content itself. This remains a pending issue.
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer was addressing a user-reported bug in the Пополнение баланса (top-up) flow. The user provided feedback and a screenshot, indicating that when entering an amount and then clicking the Отмена (Cancel) button, the button does not work as expected, and the ✅ Выбрано text (which should appear in the previous message to mark the selection) is missing. The AI engineer's last action was to identify the relevant code sections for the top-up process to investigate why the button protection logic () and button functionality are failing in this specific conversation state. The current state of the product is that the general button protection feature is largely implemented across many order creation and template management flows, but specific edge cases, like the top-up flow, still exhibit inconsistencies.
+Immediately before this summary request, the AI engineer was addressing the user's continuous feedback regarding the stale button protection mechanism. The user reported that the 💳 Оплатить (Pay) button, shown after creating an invoice for top-up, was not disappearing, and the ✅ Выбрано text was missing from the previous message.
+
+The AI engineer's most recent investigation (Chat Message 773-781) into the  and  functions revealed that while  was correctly called in  (which displays the payment options) and  (for ), it was specifically *missing* for the  callback. The AI's last action in this context was to search for the  handler to implement the missing button protection.
+
+At this precise moment, the user interjected with a new, high-priority request: to set a new Production Key for ShipStation and activate production mode (Chat Message 783). The AI engineer's immediate response was to acknowledge this new request and initiate the process of installing the production API key and switching the ShipStation API mode. The product is currently in a state where a significant amount of the stale button protection has been implemented, along with new features like AI gratitude, scalability, bot protection, and monitoring, but a few specific button protection edge cases (like ) and the PDF tracking number issue are still open.
 </current_work>
 
 <optional_next_step>
-Investigate the top-up related functions in  to ensure  is correctly invoked and / are saved.
+Install the provided Production ShipStation API key and switch the ShipStation API mode to production as requested by the user.
 </optional_next_step>

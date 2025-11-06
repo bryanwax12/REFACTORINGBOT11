@@ -94,7 +94,7 @@ bot_protection.log_suspicious_activity(
 
 ```bash
 # Уникальный ID этого экземпляра бота
-BOT_INSTANCE_ID=a3f5c2d8-1b4e-4f2a-9c3d-5e6f7a8b9c0d
+BOT_INSTANCE_ID=stale-button-fix
 
 # Секретный ключ для подписей (НИКОГДА НЕ ДЕЛИТЕСЬ!)
 BOT_SIGNATURE_KEY=xY9kLm2pQwE3rT4vB5nM6cX7zA8sD9fG0hJ1kL2mN3oP4qR5sT6u
