@@ -4006,10 +4006,16 @@ async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await query.message.reply_text(
-        "⚠️ Вы уверены, что хотите отменить создание заказа?\n\nВсе введённые данные будут потеряны.",
+    message_text = "⚠️ Вы уверены, что хотите отменить создание заказа?\n\nВсе введённые данные будут потеряны."
+    
+    bot_msg = await query.message.reply_text(
+        message_text,
         reply_markup=reply_markup
     )
+    
+    # Save last bot message context for button protection
+    context.user_data['last_bot_message_id'] = bot_msg.message_id
+    context.user_data['last_bot_message_text'] = message_text
     
     # Return the state we were in before cancel
     return context.user_data.get('last_state', PAYMENT_METHOD)
