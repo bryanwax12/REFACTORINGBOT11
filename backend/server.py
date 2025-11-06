@@ -692,8 +692,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await mark_message_as_selected(update, context)
         send_method = query.message.reply_text
     else:
-        # Mark previous message as selected when command is called from menu
-        await mark_message_as_selected(update, context)
+        # Mark previous message as selected (non-blocking)
+        asyncio.create_task(mark_message_as_selected(update, context))
         send_method = update.message.reply_text
     
     help_text = """
@@ -728,8 +728,8 @@ async def faq_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await mark_message_as_selected(update, context)
         send_method = query.message.reply_text
     else:
-        # Mark previous message as selected when command is called from menu
-        await mark_message_as_selected(update, context)
+        # Mark previous message as selected (non-blocking)
+        asyncio.create_task(mark_message_as_selected(update, context))
         send_method = update.message.reply_text
     
     faq_text = """📦 *White Label Shipping Bot*
