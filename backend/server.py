@@ -612,11 +612,8 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         first_name = query.from_user.first_name
         send_method = query.message.reply_text
     else:
-        # Mark previous message as selected when command is called from menu
-        logger.info(f"start_command called via message - user_data keys: {list(context.user_data.keys())}")
-        logger.info(f"last_bot_message_id: {context.user_data.get('last_bot_message_id')}")
-        await mark_message_as_selected(update, context)
-        logger.info(f"mark_message_as_selected completed for start_command")
+        # Mark previous message as selected (non-blocking)
+        asyncio.create_task(mark_message_as_selected(update, context))
         
         telegram_id = update.effective_user.id
         username = update.effective_user.username
