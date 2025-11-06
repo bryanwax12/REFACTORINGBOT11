@@ -5771,7 +5771,7 @@ async def invite_all_users_to_channel(authenticated: bool = Depends(verify_admin
                 
                 success_count += 1
                 # Small delay to avoid rate limiting
-                await asyncio.sleep(0.1)
+                await asyncio.sleep(0.02)
             except Exception as e:
                 logger.error(f"Failed to send invitation to user {user['telegram_id']}: {e}")
                 failed_count += 1
