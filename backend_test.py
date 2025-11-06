@@ -4246,8 +4246,8 @@ def run_shipstation_carrier_tests():
     return review_test_results
 
 if __name__ == "__main__":
-    print("🚀 Starting ShipStation Production API Key Test Suite...")
-    print("🎯 CRITICAL FOCUS: ShipStation V2 API with Production Key")
+    print("🚀 Starting Telegram Bot Backend Test Suite...")
+    print("🎯 CRITICAL FOCUS: Template Flow Issue Investigation")
     print("=" * 80)
     print(f"Backend URL: {BACKEND_URL}")
     print(f"API Base: {API_BASE}")
@@ -4255,12 +4255,29 @@ if __name__ == "__main__":
     # Track test results
     test_results = {}
     
-    # Run CRITICAL tests for ShipStation Production API Key per review request
+    # Run CRITICAL test for Template Flow Issue per review request
     print("\n" + "="*80)
-    print("🎯 CRITICAL TESTS: ShipStation V2 API with Production Key")
+    print("🎯 CRITICAL TEST: Template Flow Issue Investigation")
     print("="*80)
     
     test_results['api_health'] = test_api_health()
+    test_results['template_flow_critical_issue'] = test_template_flow_critical_issue()
+    
+    # Additional backend infrastructure tests
+    print("\n" + "="*80)
+    print("📋 BACKEND INFRASTRUCTURE TESTS")
+    print("="*80)
+    
+    test_results['telegram_bot_token'] = test_telegram_bot_token()
+    test_results['telegram_bot_infrastructure'] = test_telegram_bot_infrastructure()
+    test_results['conversation_handler_functions'] = test_conversation_handler_functions()
+    test_results['balance_topup_flow_button_protection'] = test_balance_topup_flow_button_protection()
+    
+    # ShipStation tests (supporting)
+    print("\n" + "="*80)
+    print("📋 SHIPSTATION API TESTS (Supporting)")
+    print("="*80)
+    
     test_results['shipstation_production_api_key'] = test_shipstation_production_api_key()
     test_results['shipstation_carrier_ids'] = test_shipstation_carrier_ids()
     
