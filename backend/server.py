@@ -826,6 +826,33 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     
     if query.data == 'start' or query.data == 'main_menu':
+        # Check if user has pending order
+        telegram_id = query.from_user.id
+        pending_order = await db.pending_orders.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        
+        if pending_order and pending_order.get('selected_rate'):
+            # Show warning about losing order data
+            await mark_message_as_selected(update, context)
+            
+            keyboard = [
+                [InlineKeyboardButton("✅ Да, в главное меню", callback_data='confirm_exit_to_menu')],
+                [InlineKeyboardButton("❌ Отмена, вернуться", callback_data='return_to_payment')]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            await query.message.reply_text(
+                """⚠️ *Внимание!*
+
+У вас есть неоплаченный заказ.
+
+Если вы перейдете в главное меню, все данные заказа будут удалены и вам придется создавать заказ заново.
+
+Вы уверены?""",
+                reply_markup=reply_markup,
+                parse_mode='Markdown'
+            )
+            return
+        
         await start_command(update, context)
     elif query.data == 'my_balance':
         await my_balance_command(update, context)
