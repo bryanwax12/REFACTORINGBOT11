@@ -2576,8 +2576,8 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
             callback_data=f'template_view_{template["id"]}'
         )])
     
-    # Add cancel button at the bottom
-    keyboard.append([InlineKeyboardButton("❌ Отмена", callback_data='start')])
+    # Add main menu button at the bottom
+    keyboard.append([InlineKeyboardButton("🔙 Главное меню", callback_data='start')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     bot_msg = await query.message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown')
