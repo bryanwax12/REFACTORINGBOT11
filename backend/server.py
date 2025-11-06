@@ -997,7 +997,9 @@ async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAUL
             track_id = invoice_result['trackId']
             pay_link = invoice_result['payLink']
             
-            # Save top-up payment
+            # Save top-up payment with topup input message_id for button removal
+            topup_input_message_id = context.user_data.get('last_bot_message_id')  # Message with "Назад" buttons
+            
             payment = Payment(
                 order_id=f"topup_{user['id']}",
                 amount=amount,
@@ -1009,6 +1011,7 @@ async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAUL
             payment_dict['created_at'] = payment_dict['created_at'].isoformat()
             payment_dict['telegram_id'] = telegram_id
             payment_dict['type'] = 'topup'
+            payment_dict['topup_input_message_id'] = topup_input_message_id  # Save for later button removal
             await db.payments.insert_one(payment_dict)
             
             keyboard = [
