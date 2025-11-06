@@ -91,11 +91,14 @@ const Dashboard = () => {
   const [showPreview, setShowPreview] = useState(true);
   const [maintenanceMode, setMaintenanceMode] = useState(false);
   const [loadingMaintenance, setLoadingMaintenance] = useState(false);
+  const [apiMode, setApiMode] = useState('production'); // 'test' or 'production'
+  const [loadingApiMode, setLoadingApiMode] = useState(false);
 
 
   useEffect(() => {
     loadData();
     loadMaintenanceStatus();
+    loadApiMode();
   }, []);
 
   const loadData = async () => {
