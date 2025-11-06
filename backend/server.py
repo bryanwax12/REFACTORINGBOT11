@@ -848,6 +848,8 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
         telegram_id = query.from_user.id
         send_method = query.message.reply_text
     else:
+        # Mark previous message as selected when command is called from menu
+        await mark_message_as_selected(update, context)
         telegram_id = update.effective_user.id
         send_method = update.message.reply_text
     
