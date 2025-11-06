@@ -6936,6 +6936,15 @@ logger = logging.getLogger(__name__)
 async def startup_event():
     logger.info("Starting application...")
     
+    # Initialize Bot Protection System
+    global bot_protection
+    bot_protection = BotProtection(
+        owner_telegram_id=int(ADMIN_TELEGRAM_ID) if ADMIN_TELEGRAM_ID else 0,
+        bot_name="WhiteLabelShippingBot"
+    )
+    instance_info = bot_protection.get_instance_info()
+    logger.info(f"🔒 Bot Protection System initialized: {instance_info}")
+    
     # Create MongoDB indexes for performance optimization (5000+ users)
     try:
         logger.info("Creating MongoDB indexes for high performance...")
