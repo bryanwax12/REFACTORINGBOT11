@@ -4140,10 +4140,14 @@ Tracking: {tracking_number}
 
 Ваша этикетка во вложении."""
                     
+                    # Clean tracking number for filename (remove invalid characters)
+                    safe_tracking = "".join(c for c in tracking_number if c.isalnum() or c in "-_").strip()
+                    filename = f"{safe_tracking}.pdf" if safe_tracking else f"label_{order_id[:8]}.pdf"
+                    
                     await bot_instance.send_document(
                         chat_id=telegram_id,
                         document=label_response_download.content,
-                        filename=f"{tracking_number}.pdf",
+                        filename=filename,
                         caption=message_text
                     )
                     
