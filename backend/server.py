@@ -21,10 +21,24 @@ import hmac
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
+# MongoDB connection with connection pooling for high load
 mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
+client = AsyncIOMotorClient(
+    mongo_url,
+    maxPoolSize=200,  # Maximum number of connections in pool
+    minPoolSize=10,   # Minimum number of connections to maintain
+    maxIdleTimeMS=45000,  # Close idle connections after 45 seconds
+    waitQueueTimeoutMS=5000,  # Maximum time to wait for connection
+    serverSelectionTimeoutMS=5000  # Timeout for server selection
+)
 db = client[os.environ['DB_NAME']]
+
+# In-memory cache for frequently accessed data
+from functools import lru_cache
+import asyncio
+
+user_balance_cache = {}  # Cache user balances
+cache_ttl = 60  # Cache TTL in seconds
 
 # ShipStation API
 SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY', '')
