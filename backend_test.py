@@ -4335,8 +4335,9 @@ if __name__ == "__main__":
     print(f"\n📋 SUPPORTING TESTS:")
     supporting_passed = 0
     supporting_total = 0
-    for test_name, result in test_results.items():
-        if test_name not in critical_tests:
+    for test_name in supporting_tests:
+        if test_name in test_results:
+            result = test_results[test_name]
             status = "✅ PASS" if result else "❌ FAIL"
             print(f"   {test_name}: {status}")
             if result:
