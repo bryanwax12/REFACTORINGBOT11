@@ -5505,11 +5505,20 @@ async def oxapay_webhook(request: Request):
                         keyboard.append([InlineKeyboardButton("🔙 Главное меню", callback_data='start')])
                         reply_markup = InlineKeyboardMarkup(keyboard)
                         
-                        await bot_instance.send_message(
+                        bot_msg = await bot_instance.send_message(
                             chat_id=telegram_id,
                             text=message_text,
                             reply_markup=reply_markup,
                             parse_mode='Markdown'
+                        )
+                        
+                        # Save message context in pending_orders for button protection
+                        await db.pending_orders.update_one(
+                            {"telegram_id": telegram_id},
+                            {"$set": {
+                                "topup_success_message_id": bot_msg.message_id,
+                                "topup_success_message_text": message_text
+                            }}
                         )
                 else:
                     # Regular order payment
