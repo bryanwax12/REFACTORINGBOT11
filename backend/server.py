@@ -3343,13 +3343,26 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     data = context.user_data
     
-    # Build confirmation text
+    # Build confirmation text with full details
     confirmation_text = f"""✅ Выбрано: {selected_rate['carrier']} - {selected_rate['service']}
 
 📦 Детали заказа:
-📤 От: {data['from_name']}, {data['from_city']}, {data['from_state']}
-📥 До: {data['to_name']}, {data['to_city']}, {data['to_state']}
+
+📤 *Отправитель:*
+{data['from_name']}
+{data['from_street']}{', ' + data.get('from_street2', '') if data.get('from_street2') else ''}
+{data['from_city']}, {data['from_state']} {data['from_zip']}
+📞 {data.get('from_phone', 'Не указан')}
+
+📥 *Получатель:*
+{data['to_name']}
+{data['to_street']}{', ' + data.get('to_street2', '') if data.get('to_street2') else ''}
+{data['to_city']}, {data['to_state']} {data['to_zip']}
+📞 {data.get('to_phone', 'Не указан')}
+
+📏 *Посылка:*
 ⚖️ Вес: {data['weight']} lb
+📦 Размеры: {data.get('length', 0)} x {data.get('width', 0)} x {data.get('height', 0)} inches
 
 💰 Стоимость: ${selected_rate['amount']:.2f}"""
     
