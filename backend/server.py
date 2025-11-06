@@ -2552,14 +2552,21 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     keyboard = []
     for i, template in enumerate(templates, 1):
+        from_name = template.get('from_name', '')
+        from_street = template.get('from_street1', '')
         from_city = template.get('from_city', '')
         from_state = template.get('from_state', '')
+        to_name = template.get('to_name', '')
+        to_street = template.get('to_street1', '')
         to_city = template.get('to_city', '')
         to_state = template.get('to_state', '')
         
         # Add compact template info to message
-        message += f"{i}. 📦 *{template['name']}*\n"
-        message += f"   📤 {from_city}, {from_state} → 📥 {to_city}, {to_state}\n\n"
+        message += f"*{i}. {template['name']}*\n"
+        message += f"📤 *От:* {from_name}\n"
+        message += f"   {from_street}, {from_city}, {from_state}\n"
+        message += f"📥 *Кому:* {to_name}\n"
+        message += f"   {to_street}, {to_city}, {to_state}\n\n"
         
         # Create button with just name
         keyboard.append([InlineKeyboardButton(
