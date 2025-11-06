@@ -137,6 +137,7 @@ async def check_oxapay_payment(track_id: str):
     except Exception as e:
         logger.error(f"Oxapay inquiry error: {e}")
         return None
+
 async def generate_thank_you_message():
     """Generate a unique thank you message using AI"""
     try:
