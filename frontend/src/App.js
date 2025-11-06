@@ -851,6 +851,24 @@ const Dashboard = () => {
           <p className="text-muted-foreground mt-1">Shipping bot analytics and management</p>
         </div>
         <div className="flex gap-3">
+          {apiMode === 'test' ? (
+            <Button 
+              onClick={() => toggleApiMode('production')}
+              disabled={loadingApiMode}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {loadingApiMode ? '⏳ Переключение...' : '🚀 Переключить на Продакшн API'}
+            </Button>
+          ) : (
+            <Button 
+              onClick={() => toggleApiMode('test')}
+              disabled={loadingApiMode}
+              variant="outline"
+              className="border-blue-600 text-blue-600 hover:bg-blue-50"
+            >
+              {loadingApiMode ? '⏳ Переключение...' : '🧪 Переключить на Тестовый API'}
+            </Button>
+          )}
           {maintenanceMode ? (
             <Button 
               onClick={disableMaintenanceMode}
