@@ -2749,11 +2749,11 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
 *Вес посылки в фунтах (lb)*
 Например: 5.5"""
     
-    # Execute answer and mark selected in parallel, then send new message
+    # Execute answer and mark selected, then send new message
     await query.answer()
     
-    # Mark previous message as selected (non-blocking)
-    asyncio.create_task(mark_message_as_selected(update, context))
+    # Mark previous message as selected (blocking)
+    await mark_message_as_selected(update, context)
     
     # Send new message immediately without waiting for mark_message_as_selected
     bot_msg = await query.message.reply_text(
