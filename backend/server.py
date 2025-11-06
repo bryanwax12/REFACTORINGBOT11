@@ -4143,7 +4143,7 @@ Tracking: {tracking_number}
                     await bot_instance.send_document(
                         chat_id=telegram_id,
                         document=label_response_download.content,
-                        filename=f"label_{order_id[:8]}.pdf",
+                        filename=f"{tracking_number}.pdf",
                         caption=message_text
                     )
                     
