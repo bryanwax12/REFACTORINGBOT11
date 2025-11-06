@@ -5,6 +5,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv
 from pathlib import Path
 from bot_protection import BotProtection, get_copyright_footer, PROTECTED_BADGE, VERSION_WATERMARK
+from telegram_safety import TelegramSafetySystem, TelegramBestPractices
 import os
 import logging
 import requests
