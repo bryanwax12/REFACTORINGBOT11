@@ -2548,7 +2548,7 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return ConversationHandler.END
     
     # Build template list message
-    message = f"📋 *Мои шаблоны ({len(templates)}/10):*\n\n"
+    message = f"📋 *Выберите шаблон:*\n\n"
     
     keyboard = []
     for i, template in enumerate(templates, 1):
@@ -2557,12 +2557,11 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         to_city = template.get('to_city', '')
         to_state = template.get('to_state', '')
         
-        message += f"{i}. 📦 *{template['name']}*\n"
-        message += f"   От: {template.get('from_name', '')} ({from_city}, {from_state})\n"
-        message += f"   Кому: {template.get('to_name', '')} ({to_city}, {to_state})\n\n"
+        # Create compact button text with route info
+        button_text = f"📦 {template['name']}\n📍 {from_city}, {from_state} → {to_city}, {to_state}"
         
         keyboard.append([InlineKeyboardButton(
-            f"{i}. {template['name']}", 
+            button_text, 
             callback_data=f'template_view_{template["id"]}'
         )])
     
