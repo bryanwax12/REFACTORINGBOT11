@@ -902,9 +902,22 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if update.callback_query:
         query = update.callback_query
         await query.answer()
+        telegram_id = query.from_user.id
+        
+        # Load message context from database if this is a callback from payment screen
+        payment_record = await db.payments.find_one(
+            {"telegram_id": telegram_id, "type": "topup", "status": "pending"},
+            {"_id": 0},
+            sort=[("created_at", -1)]  # Get latest pending payment
+        )
+        
+        if payment_record and payment_record.get('payment_message_id'):
+            context.user_data['last_bot_message_id'] = payment_record['payment_message_id']
+            context.user_data['last_bot_message_text'] = payment_record.get('payment_message_text', '')
+        
         # Mark previous message as selected (remove buttons and add "✅ Выбрано")
         await mark_message_as_selected(update, context)
-        telegram_id = query.from_user.id
+        
         send_method = query.message.reply_text
     else:
         # Mark previous message as selected (non-blocking)
