@@ -311,6 +311,135 @@ def test_shipping_rates_production():
             "mass_unit": "lb"
         }
     }
+    
+    try:
+        print(f"📦 Production Test Payload: {json.dumps(test_payload, indent=2)}")
+        
+        response = requests.post(
+            f"{API_BASE}/calculate-shipping",
+            json=test_payload,
+            headers={'Content-Type': 'application/json'},
+            timeout=30  # Longer timeout for rate calculation
+        )
+        
+        print(f"Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            print(f"✅ ShipStation Production API Response: {json.dumps(data, indent=2)}")
+            
+            rates = data.get('rates', [])
+            
+            print(f"\n📊 ShipStation V2 Production API Results:")
+            print(f"   Total rates returned: {len(rates)}")
+            
+            # Check if we got rates (production should return rates)
+            if len(rates) >= 10:
+                print(f"   ✅ Good rate count for production API ({len(rates)} rates)")
+            elif len(rates) >= 5:
+                print(f"   ⚠️ Moderate rate count ({len(rates)} rates)")
+            else:
+                print(f"   ❌ Low rate count ({len(rates)} rates)")
+            
+            # CRITICAL TEST: Check for specific carriers (USPS, UPS, FedEx)
+            print(f"\n   📊 PRODUCTION CARRIER DIVERSITY TEST:")
+            
+            carrier_names = [r.get('carrier_friendly_name', r.get('carrier', '')).upper() for r in rates]
+            carrier_codes = [r.get('carrier_code', '').lower() for r in rates]
+            unique_carriers = set(carrier_names)
+            unique_carrier_codes = set(carrier_codes)
+            
+            # Check for UPS rates
+            ups_rates = [r for r in rates if 'UPS' in r.get('carrier_friendly_name', r.get('carrier', '')).upper() or 'ups' in r.get('carrier_code', '').lower()]
+            
+            # Check for USPS/stamps_com rates
+            usps_rates = [r for r in rates if any(x in r.get('carrier_friendly_name', r.get('carrier', '')).upper() for x in ['USPS', 'STAMPS']) or 
+                         any(x in r.get('carrier_code', '').lower() for x in ['usps', 'stamps_com', 'stamps'])]
+            
+            # Check for FedEx rates
+            fedex_rates = [r for r in rates if any(x in r.get('carrier_friendly_name', r.get('carrier', '')).upper() for x in ['FEDEX', 'FDX']) or 
+                          'fedex' in r.get('carrier_code', '').lower()]
+            
+            print(f"   Unique carrier names: {len(unique_carriers)} - {sorted(unique_carriers)}")
+            print(f"   Unique carrier codes: {len(unique_carrier_codes)} - {sorted(unique_carrier_codes)}")
+            
+            print(f"\n   📋 PRODUCTION CARRIER RESULTS:")
+            print(f"   UPS rates: {len(ups_rates)} {'✅' if ups_rates else '❌'}")
+            print(f"   USPS/Stamps.com rates: {len(usps_rates)} {'✅' if usps_rates else '❌'}")
+            print(f"   FedEx rates: {len(fedex_rates)} {'✅' if fedex_rates else '❌'}")
+            
+            # Verify we have diversity (multiple carriers)
+            carriers_found = sum([bool(ups_rates), bool(usps_rates), bool(fedex_rates)])
+            print(f"   Total carriers with rates: {carriers_found}/3")
+            
+            if carriers_found >= 2:
+                print(f"   ✅ PRODUCTION CARRIER DIVERSITY: Multiple carriers returning rates")
+            else:
+                print(f"   ❌ PRODUCTION CARRIER ISSUE: Only {carriers_found} carrier(s) returning rates")
+            
+            # Show sample rates from each carrier
+            if ups_rates:
+                sample_ups = ups_rates[0]
+                print(f"   📦 Sample UPS Rate: {sample_ups.get('service_type', 'Unknown')} - ${float(sample_ups.get('shipping_amount', {}).get('amount', 0)):.2f}")
+            
+            if usps_rates:
+                sample_usps = usps_rates[0]
+                print(f"   📦 Sample USPS Rate: {sample_usps.get('service_type', 'Unknown')} - ${float(sample_usps.get('shipping_amount', {}).get('amount', 0)):.2f}")
+            
+            if fedex_rates:
+                sample_fedex = fedex_rates[0]
+                print(f"   📦 Sample FedEx Rate: {sample_fedex.get('service_type', 'Unknown')} - ${float(sample_fedex.get('shipping_amount', {}).get('amount', 0)):.2f}")
+            
+            # Verify no test mode indicators
+            print(f"\n   🔍 PRODUCTION MODE VERIFICATION:")
+            response_text = json.dumps(data).lower()
+            test_indicators = ['test', 'sandbox', 'demo']
+            has_test_indicators = any(indicator in response_text for indicator in test_indicators)
+            
+            if not has_test_indicators:
+                print(f"   ✅ No test mode indicators found - appears to be production")
+            else:
+                print(f"   ⚠️ Possible test mode indicators found")
+            
+            # CRITICAL SUCCESS CRITERIA from review request
+            multiple_carriers = carriers_found >= 2
+            has_usps_stamps = bool(usps_rates)
+            has_ups = bool(ups_rates)
+            no_auth_errors = True  # We got 200 response
+            
+            print(f"\n   🎯 PRODUCTION API SUCCESS CRITERIA:")
+            print(f"   Production API authentication: {'✅' if no_auth_errors else '❌'}")
+            print(f"   Multiple carriers (≥2): {'✅' if multiple_carriers else '❌'}")
+            print(f"   USPS/Stamps.com rates: {'✅' if has_usps_stamps else '❌'}")
+            print(f"   UPS rates: {'✅' if has_ups else '❌'}")
+            
+            if has_usps_stamps and has_ups and no_auth_errors:
+                print(f"   ✅ PRODUCTION API KEY VERIFIED: Authentication successful, multiple carrier rates available")
+            else:
+                print(f"   ❌ PRODUCTION API ISSUE: Missing expected functionality")
+            
+            return True, data
+        else:
+            print(f"❌ ShipStation Production API test failed: {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"   Error: {error_data}")
+                
+                # Check for authentication errors
+                if response.status_code == 401:
+                    print(f"   🚨 401 Unauthorized - Production API key authentication failed!")
+                elif response.status_code == 403:
+                    print(f"   🚨 403 Forbidden - Production API key lacks required permissions!")
+                elif response.status_code == 400:
+                    print(f"   🚨 400 Bad Request - Check request format and required fields")
+                    
+            except:
+                print(f"   Error: {response.text}")
+            return False, None
+            
+    except Exception as e:
+        print(f"❌ Production shipping rates test error: {e}")
+        return False, None
 
 def test_shipping_rates():
     """Test shipping rate calculation (POST /api/calculate-shipping) - CRITICAL TEST per review request"""
