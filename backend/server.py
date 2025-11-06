@@ -142,27 +142,48 @@ async def generate_thank_you_message():
     """Generate a unique thank you message using AI"""
     try:
         from emergentintegrations.llm.chat import LlmChat, UserMessage
-        from dotenv import load_dotenv
-        load_dotenv()
         
         emergent_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not emergent_key:
+            raise ValueError("EMERGENT_LLM_KEY not found in environment")
         
+        # Generate unique session ID
+        session_id = f"thanks_{int(datetime.now(timezone.utc).timestamp() * 1000)}"
+        
+        # Initialize chat with model
         chat = LlmChat(
             api_key=emergent_key,
-            session_id=f"thanks_{datetime.now(timezone.utc).timestamp()}",
+            session_id=session_id,
             system_message="Ты помощник, который создает теплые и дружелюбные слова благодарности на русском языке для клиентов, которые воспользовались сервисом доставки."
-        ).with_model("openai", "gpt-4o")
+        )
+        chat = chat.with_model("openai", "gpt-4o")
         
+        # Create user message
         user_message = UserMessage(
-            text="Создай короткое теплое сообщение благодарности клиенту за использование нашего сервиса доставки. 2-3 предложения, дружелюбный тон, только текст без эмодзи. Каждый раз создавай уникальное сообщение."
+            text="Создай короткое теплое сообщение благодарности (2-3 предложения) клиенту за использование нашего сервиса доставки. Дружелюбный тон, только текст без эмодзи. Каждый раз создавай РАЗНОЕ уникальное сообщение."
         )
         
+        # Get response
         response = await chat.send_message(user_message)
-        return response.strip()
+        
+        if response and len(response.strip()) > 10:
+            logger.info(f"Generated thank you message: {response[:50]}...")
+            return response.strip()
+        else:
+            raise ValueError("Empty or invalid response from AI")
+            
     except Exception as e:
         logger.error(f"Error generating thank you message: {e}")
-        # Fallback message if AI fails
-        return "Спасибо за использование нашего сервиса! Желаем вам приятной доставки."
+        # Use varied fallback messages
+        import random
+        fallback_messages = [
+            "Спасибо за использование нашего сервиса! Желаем вам приятной доставки.",
+            "Благодарим вас за доверие! Надеемся, что наш сервис оправдал ваши ожидания.",
+            "Спасибо, что выбрали нас! Мы ценим ваше время и доверие.",
+            "Благодарим за заказ! Желаем, чтобы ваша посылка прибыла быстро и в целости.",
+            "Спасибо за сотрудничество! Будем рады видеть вас снова."
+        ]
+        return random.choice(fallback_messages)
 
 app = FastAPI(title="Telegram Shipping Bot")
 api_router = APIRouter(prefix="/api")
