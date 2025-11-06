@@ -5575,14 +5575,10 @@ async def oxapay_webhook(request: Request):
                         except Exception as e:
                             logger.warning(f"Could not remove payment button: {e}")
                     
-                    # Also remove "Назад" and "Главное меню" buttons from topup input message  
-                    # Try to find and remove buttons from recent messages with those specific buttons
-                    if payment.get('payment_message_text'):
-                        # Try to remove buttons from message that contains topup amount input
+                    # Remove "Назад" and "Главное меню" buttons from topup input message
+                    topup_input_message_id = payment.get('topup_input_message_id')
+                    if topup_input_message_id and bot_instance:
                         try:
-                            # Look for message with "Введите сумму для пополнения" text
-                            # We'll remove buttons without adding "✅ Выбрано" text
-                            topup_input_message_id = payment_message_id - 1  # Usually previous message
                             await bot_instance.edit_message_reply_markup(
                                 chat_id=telegram_id,
                                 message_id=topup_input_message_id,
@@ -5591,17 +5587,6 @@ async def oxapay_webhook(request: Request):
                             logger.info(f"Removed topup input buttons from message {topup_input_message_id}")
                         except Exception as e:
                             logger.warning(f"Could not remove topup input buttons: {e}")
-                            # Try with different message_id offset
-                            try:
-                                topup_input_message_id = payment_message_id - 2
-                                await bot_instance.edit_message_reply_markup(
-                                    chat_id=telegram_id,
-                                    message_id=topup_input_message_id,
-                                    reply_markup=None
-                                )
-                                logger.info(f"Removed topup input buttons from message {topup_input_message_id} (offset -2)")
-                            except Exception as e2:
-                                logger.warning(f"Could not remove topup input buttons with offset -2: {e2}")
                     
                     # Notify user
                     if bot_instance:
