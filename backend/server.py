@@ -3920,6 +3920,9 @@ async def create_and_send_label(order_id, telegram_id, message):
                 label_response_download = requests.get(label_download_url, headers=headers_download, timeout=30)
                 
                 if label_response_download.status_code == 200:
+                    # Generate AI thank you message
+                    thank_you_msg = await generate_thank_you_message()
+                    
                     # Send label as document
                     message_text = f"""✅ Shipping Label создан!
 
@@ -3943,6 +3946,12 @@ Tracking: {tracking_number}
                         chat_id=telegram_id,
                         text=f"🔗 Трекинг номер:\n\n`{tracking_number}`",
                         parse_mode='Markdown'
+                    )
+                    
+                    # Send AI-generated thank you message
+                    await bot_instance.send_message(
+                        chat_id=telegram_id,
+                        text=thank_you_msg
                     )
                     
                     logger.info(f"Label PDF sent to user {telegram_id}")
