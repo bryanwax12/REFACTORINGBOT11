@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Install Production ShipStation API key and switch to production mode"
+user_problem_statement: "Menu commands should mark previous buttons as selected"
 
 backend:
   - task: "Cancel Order Button - Consistent Confirmation Across All States"
