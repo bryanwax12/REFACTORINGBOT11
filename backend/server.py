@@ -3912,16 +3912,10 @@ Tracking: {tracking_number}
                         caption=message_text
                     )
                     
-                    # Send tracking info with buttons
-                    keyboard = [
-                        [InlineKeyboardButton("🏠 Главное меню", callback_data='main_menu')]
-                    ]
-                    reply_markup = InlineKeyboardMarkup(keyboard)
-                    
+                    # Send tracking info without buttons
                     await bot_instance.send_message(
                         chat_id=telegram_id,
                         text=f"🔗 Трекинг номер:\n\n`{tracking_number}`",
-                        reply_markup=reply_markup,
                         parse_mode='Markdown'
                     )
                     
