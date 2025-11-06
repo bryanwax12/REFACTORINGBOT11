@@ -996,6 +996,10 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return FROM_NAME
 
 async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Skip if user is in topup flow
+    if context.user_data.get('awaiting_topup_amount'):
+        return ConversationHandler.END
+    
     name = update.message.text.strip()
     
     # Sanitize input
