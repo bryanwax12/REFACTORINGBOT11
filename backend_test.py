@@ -4308,10 +4308,18 @@ if __name__ == "__main__":
     
     # Critical tests first
     critical_tests = [
+        'template_flow_critical_issue',
+        'telegram_bot_infrastructure',
+        'conversation_handler_functions'
+    ]
+    
+    # Supporting tests
+    supporting_tests = [
         'shipstation_production_api_key',
         'shipstation_carrier_ids', 
         'shipping_rates_production',
-        'carrier_exclusion_fix'
+        'carrier_exclusion_fix',
+        'balance_topup_flow_button_protection'
     ]
     
     print("\n🎯 CRITICAL TESTS:")
