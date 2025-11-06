@@ -7188,6 +7188,11 @@ async def startup_event():
                 Application.builder()
                 .token(TELEGRAM_BOT_TOKEN)
                 .concurrent_updates(True)  # Process updates concurrently
+                .connect_timeout(10)  # Faster connection
+                .read_timeout(10)  # Faster read operations
+                .write_timeout(10)  # Faster write operations
+                .pool_timeout(5)  # Faster pool acquisition
+                .rate_limiter(rate_limiter=None)  # Disable rate limiter for max speed
                 .build()
             )
             
