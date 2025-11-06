@@ -888,7 +888,11 @@ async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAUL
             payment_dict['type'] = 'topup'
             await db.payments.insert_one(payment_dict)
             
-            keyboard = [[InlineKeyboardButton("💳 Оплатить", url=pay_link)]]
+            keyboard = [
+                [InlineKeyboardButton("💳 Оплатить", url=pay_link)],
+                [InlineKeyboardButton("◀️ Назад", callback_data='my_balance')],
+                [InlineKeyboardButton("🏠 Главное меню", callback_data='start')]
+            ]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
             message_text = f"""*✅ Счёт на пополнение создан!*
