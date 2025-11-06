@@ -2597,12 +2597,11 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def view_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """View specific template details"""
     query = update.callback_query
-    await query.answer()
-    
-    # Mark previous message as selected
-    await mark_message_as_selected(update, context)
-    
     template_id = query.data.replace('template_view_', '')
+    
+    # Execute in parallel: answer query, mark selected, fetch template
+    await query.answer()
+    asyncio.create_task(mark_message_as_selected(update, context))
     template = await db.templates.find_one({"id": template_id}, {"_id": 0})
     
     if not template:
