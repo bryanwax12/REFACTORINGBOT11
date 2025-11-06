@@ -862,6 +862,13 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await help_command(update, context)
     elif query.data == 'faq':
         await faq_command(update, context)
+    elif query.data == 'confirm_exit_to_menu':
+        # User confirmed exit to main menu - clear pending order
+        telegram_id = query.from_user.id
+        await db.pending_orders.delete_one({"telegram_id": telegram_id})
+        context.user_data.clear()
+        await mark_message_as_selected(update, context)
+        await start_command(update, context)
     elif query.data == 'new_order':
         # Starting new order - this is intentional, so clear previous data
         context.user_data.clear()
