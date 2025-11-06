@@ -911,9 +911,13 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
             sort=[("created_at", -1)]  # Get latest pending payment
         )
         
-        if payment_record and payment_record.get('payment_message_id'):
+        logger.info(f"Payment record found: {payment_record is not None}")
+        if payment_record:
+            logger.info(f"Payment message_id: {payment_record.get('payment_message_id')}")
             context.user_data['last_bot_message_id'] = payment_record['payment_message_id']
             context.user_data['last_bot_message_text'] = payment_record.get('payment_message_text', '')
+        
+        logger.info(f"Context before mark_message_as_selected: last_bot_message_id={context.user_data.get('last_bot_message_id')}")
         
         # Mark previous message as selected (remove buttons and add "✅ Выбрано")
         await mark_message_as_selected(update, context)
