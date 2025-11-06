@@ -3693,6 +3693,9 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
 
 async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle custom top-up amount input and create Oxapay invoice directly"""
+    # Mark previous message as selected (remove "Отмена" button)
+    await mark_message_as_selected(update, context)
+    
     try:
         amount_text = update.message.text.strip()
         
