@@ -279,6 +279,39 @@ def test_carrier_exclusion_fix():
         print(f"❌ Error testing carrier exclusion fix: {e}")
         return False
 
+def test_shipping_rates_production():
+    """Test shipping rate calculation with Production API Key - CRITICAL TEST per review request"""
+    print("\n🔍 Testing ShipStation Production Shipping Rates...")
+    print("🎯 CRITICAL: Testing production API key with sample addresses from NYC to LA")
+    
+    # Use test addresses from review request
+    test_payload = {
+        "from_address": {
+            "name": "John Doe",
+            "street1": "123 Main St",
+            "city": "New York",
+            "state": "NY",
+            "zip": "10001",
+            "country": "US"
+        },
+        "to_address": {
+            "name": "Jane Smith", 
+            "street1": "456 Oak Ave",
+            "city": "Los Angeles",
+            "state": "CA",
+            "zip": "90001",
+            "country": "US"
+        },
+        "parcel": {
+            "length": 10,
+            "width": 8,
+            "height": 6,
+            "distance_unit": "in",
+            "weight": 5,
+            "mass_unit": "lb"
+        }
+    }
+
 def test_shipping_rates():
     """Test shipping rate calculation (POST /api/calculate-shipping) - CRITICAL TEST per review request"""
     print("\n🔍 Testing ShipStation Shipping Rates Calculation...")
