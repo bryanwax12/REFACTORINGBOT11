@@ -2565,6 +2565,9 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
             callback_data=f'template_view_{template["id"]}'
         )])
     
+    # Add info text
+    message += f"_У вас {len(templates)} шаблон(ов). Нажмите на шаблон для просмотра и использования._"
+    
     keyboard.append([InlineKeyboardButton("🔙 Главное меню", callback_data='start')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     
