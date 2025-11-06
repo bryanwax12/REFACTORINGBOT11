@@ -6026,8 +6026,33 @@ async def set_api_mode(request: dict, authenticated: bool = Depends(verify_admin
         global SHIPSTATION_API_KEY
         if mode == "test":
             SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY_TEST', SHIPSTATION_API_KEY)
+            mode_text = "🧪 Тестовый"
+            api_key_display = SHIPSTATION_API_KEY[:20] + "..." if len(SHIPSTATION_API_KEY) > 20 else SHIPSTATION_API_KEY
         else:
             SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY_PROD', SHIPSTATION_API_KEY)
+            mode_text = "🚀 Продакшн"
+            api_key_display = SHIPSTATION_API_KEY[:20] + "..." if len(SHIPSTATION_API_KEY) > 20 else SHIPSTATION_API_KEY
+        
+        # Send notification to admin via Telegram
+        if ADMIN_TELEGRAM_ID and bot_instance:
+            try:
+                notification_message = f"""🔄 *API режим переключен*
+
+Новый режим: *{mode_text}*
+API Key: `{api_key_display}`
+
+ShipStation API: https://ssapi.shipstation.com/
+
+⏰ Время: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')} UTC"""
+                
+                await bot_instance.send_message(
+                    chat_id=ADMIN_TELEGRAM_ID,
+                    text=notification_message,
+                    parse_mode='Markdown'
+                )
+                logger.info(f"API mode notification sent to admin {ADMIN_TELEGRAM_ID}")
+            except Exception as e:
+                logger.error(f"Failed to send API mode notification to admin: {e}")
         
         logger.info(f"API mode switched to: {mode}")
         return {"status": "success", "mode": mode}
