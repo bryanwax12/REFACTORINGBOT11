@@ -3839,8 +3839,15 @@ _Если вы оплатите другую сумму, деньги НЕ по�
             # Save message_id in payment for later removal of button
             await db.payments.update_one(
                 {"invoice_id": track_id},
-                {"$set": {"payment_message_id": bot_msg.message_id}}
+                {"$set": {
+                    "payment_message_id": bot_msg.message_id,
+                    "payment_message_text": message_text
+                }}
             )
+            
+            # Also save in context for immediate use
+            context.user_data['last_bot_message_id'] = bot_msg.message_id
+            context.user_data['last_bot_message_text'] = message_text
             
             return ConversationHandler.END
         else:
