@@ -6909,6 +6909,21 @@ logger = logging.getLogger(__name__)
 @app.on_event("startup")
 async def startup_event():
     logger.info("Starting application...")
+    
+    # Create MongoDB indexes for performance optimization (5000+ users)
+    try:
+        logger.info("Creating MongoDB indexes for high performance...")
+        await db.users.create_index("telegram_id", unique=True)
+        await db.users.create_index([("created_at", -1)])
+        await db.orders.create_index("telegram_id")
+        await db.orders.create_index([("created_at", -1)])
+        await db.orders.create_index("order_id", unique=True)
+        await db.templates.create_index([("telegram_id", 1), ("created_at", -1)])
+        await db.settings.create_index("key", unique=True)
+        logger.info("✅ MongoDB indexes created successfully")
+    except Exception as e:
+        logger.warning(f"Index creation skipped (may already exist): {e}")
+    
     if TELEGRAM_BOT_TOKEN and TELEGRAM_BOT_TOKEN != "your_telegram_bot_token_here":
         try:
             logger.info("Initializing Telegram Bot...")
