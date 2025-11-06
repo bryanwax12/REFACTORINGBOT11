@@ -3151,6 +3151,8 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return await check_data_from_cancel(update, context)
     
     if query.data == 'refresh_rates':
+        # Mark previous message as selected (remove buttons and add "✅ Выбрано")
+        await mark_message_as_selected(update, context)
         # Refresh shipping rates
         return await fetch_shipping_rates(update, context)
     
