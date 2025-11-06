@@ -5588,7 +5588,11 @@ async def oxapay_webhook(request: Request):
                             )
                             logger.info(f"Removed topup input buttons from message {topup_input_message_id}")
                         except Exception as e:
-                            logger.warning(f"Could not remove topup input buttons: {e}")
+                            # Ignore "message not modified" error (buttons already removed)
+                            if "message is not modified" in str(e).lower():
+                                logger.info(f"Topup input buttons already removed from message {topup_input_message_id}")
+                            else:
+                                logger.warning(f"Could not remove topup input buttons: {e}")
                     else:
                         logger.warning(f"No topup_input_message_id found in payment record")
                     
