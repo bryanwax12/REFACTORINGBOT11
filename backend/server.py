@@ -2698,19 +2698,10 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def start_order_with_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Start order creation with pre-loaded template data"""
-    logger.info(f"🟢 start_order_with_template CALLED - user_id: {update.effective_user.id}")
-    logger.info(f"🟢 Context keys: {list(context.user_data.keys())}")
     query = update.callback_query
-    await query.answer()
-    logger.info(f"🟢 Query answered")
     
     # Clear topup flag to prevent conflict with parcel weight input
     context.user_data['awaiting_topup_amount'] = False
-    
-    # Mark previous message as selected (remove buttons from template confirmation)
-    await mark_message_as_selected(update, context)
-    
-    logger.info(f"Template data in context: {list(context.user_data.keys())}")
     
     # Template data already loaded in context.user_data
     # Ask for parcel weight (first thing not in template)
@@ -2718,7 +2709,6 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     template_name = context.user_data.get('template_name', 'шаблон')
-    logger.info(f"Starting order with template: {template_name}")
     
     message_text = f"""📦 Создание заказа по шаблону "{template_name}"
 
@@ -2727,7 +2717,13 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
 *Вес посылки в фунтах (lb)*
 Например: 5.5"""
     
-    # Always send new message (previous message already edited by mark_message_as_selected)
+    # Execute answer and mark selected in parallel, then send new message
+    await query.answer()
+    
+    # Mark previous message as selected (non-blocking)
+    asyncio.create_task(mark_message_as_selected(update, context))
+    
+    # Send new message immediately without waiting for mark_message_as_selected
     bot_msg = await query.message.reply_text(
         message_text,
         reply_markup=reply_markup,
@@ -2737,7 +2733,6 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
     context.user_data['last_bot_message_text'] = message_text
     
     context.user_data['last_state'] = PARCEL_WEIGHT
-    logger.info(f"Returning PARCEL_WEIGHT state")
     return PARCEL_WEIGHT
 
 async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
