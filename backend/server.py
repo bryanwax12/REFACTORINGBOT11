@@ -3129,6 +3129,15 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
                     callback_data=f'select_carrier_{idx}'
                 )])
         
+        # Add user balance info at the end
+        telegram_id = query.from_user.id
+        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        user_balance = user.get('balance', 0.0) if user else 0.0
+        
+        message += f"\n{'='*30}\n"
+        message += f"💰 <b>Ваш баланс: ${user_balance:.2f}</b>\n"
+        message += f"{'='*30}\n"
+        
         # Add refresh rates button
         keyboard.append([
             InlineKeyboardButton("🔄 Обновить тарифы", callback_data='refresh_rates')
