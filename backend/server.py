@@ -2879,7 +2879,24 @@ async def order_from_template_list(update: Update, context: ContextTypes.DEFAULT
     keyboard = []
     
     for i, template in enumerate(templates, 1):
-        message += f"{i}. *{template['name']}*\n"
+        from_name = template.get('from_name', '')
+        from_street = template.get('from_street1', '')
+        from_city = template.get('from_city', '')
+        from_state = template.get('from_state', '')
+        from_zip = template.get('from_zip', '')
+        to_name = template.get('to_name', '')
+        to_street = template.get('to_street1', '')
+        to_city = template.get('to_city', '')
+        to_state = template.get('to_state', '')
+        to_zip = template.get('to_zip', '')
+        
+        # Add detailed template info to message
+        message += f"*{i}. {template['name']}*\n"
+        message += f"📤 От: {from_name}\n"
+        message += f"   {from_street}, {from_city}, {from_state} {from_zip}\n"
+        message += f"📥 Кому: {to_name}\n"
+        message += f"   {to_street}, {to_city}, {to_state} {to_zip}\n\n"
+        
         keyboard.append([InlineKeyboardButton(
             f"{i}. {template['name']}", 
             callback_data=f'template_use_{template["id"]}'
