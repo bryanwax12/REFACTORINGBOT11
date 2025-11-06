@@ -955,11 +955,9 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
     # Send message and save context for mark_message_as_selected
     bot_message = await send_method(message, reply_markup=reply_markup, parse_mode='Markdown')
     
-    # Save message context for button protection ONLY if not callback
-    # (to preserve previous message context for proper button removal)
-    if not update.callback_query:
-        context.user_data['last_bot_message_id'] = bot_message.message_id
-        context.user_data['last_bot_message_text'] = message
+    # Always save message context for button protection
+    context.user_data['last_bot_message_id'] = bot_message.message_id
+    context.user_data['last_bot_message_text'] = message
 
 async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle custom topup amount input"""
