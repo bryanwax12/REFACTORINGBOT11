@@ -5457,14 +5457,23 @@ async def oxapay_webhook(request: Request):
                         {"$inc": {"balance": actual_amount}}
                     )
                     
+                    # Remove "Оплатить" button from previous message
+                    payment_message_id = payment.get('payment_message_id')
+                    if payment_message_id and bot_instance:
+                        try:
+                            await bot_instance.edit_message_reply_markup(
+                                chat_id=telegram_id,
+                                message_id=payment_message_id,
+                                reply_markup=None
+                            )
+                            logger.info(f"Removed payment button from message {payment_message_id}")
+                        except Exception as e:
+                            logger.warning(f"Could not remove payment button: {e}")
+                    
                     # Notify user
                     if bot_instance:
                         user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
                         new_balance = user.get('balance', 0)
-                        
-                        # Create keyboard with main menu button
-                        keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
-                        reply_markup = InlineKeyboardMarkup(keyboard)
                         
                         # Show requested vs actual amount if different
                         if abs(actual_amount - requested_amount) > 0.01:
@@ -5476,26 +5485,22 @@ async def oxapay_webhook(request: Request):
                         # Check if user has pending order
                         pending_order = await db.pending_orders.find_one({"telegram_id": telegram_id}, {"_id": 0})
                         
-                        # Create keyboard with order button
-                        # Show button to return to payment after top-up
-                        keyboard = [
-                            [InlineKeyboardButton("💳 Оплатить заказ", callback_data='return_to_payment')]
-                        ]
-                        reply_markup = InlineKeyboardMarkup(keyboard)
-                        
                         # Build message text
                         message_text = f"""✅ *Спасибо! Ваш баланс пополнен!*
 
 {amount_text}
 💳 *Новый баланс:* ${new_balance:.2f}"""
                         
-                        # Add pending order info if exists
+                        # Create keyboard
+                        keyboard = []
                         if pending_order and pending_order.get('selected_rate'):
                             order_amount = pending_order.get('final_amount', pending_order['selected_rate']['amount'])
                             message_text += f"\n\n📦 *Сумма заказа к оплате:* ${order_amount:.2f}"
                             message_text += "\n_Нажмите 'Оплатить заказ' чтобы завершить оплату_"
-                        else:
-                            message_text += "\n\n_Если вы пополняли баланс для оплаты заказа, нажмите 'Оплатить заказ'_"
+                            keyboard.append([InlineKeyboardButton("💳 Оплатить заказ", callback_data='return_to_payment')])
+                        
+                        keyboard.append([InlineKeyboardButton("🔙 Главное меню", callback_data='start')])
+                        reply_markup = InlineKeyboardMarkup(keyboard)
                         
                         await bot_instance.send_message(
                             chat_id=telegram_id,
