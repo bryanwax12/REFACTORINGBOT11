@@ -576,7 +576,9 @@ async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT
                     )
                     logger.info(f"Removed buttons from message {last_msg_id}")
             except Exception as e:
-                logger.warning(f"Could not edit previous message: {e}")
+                # Ignore "message not modified" error (message already has checkmark)
+                if "message is not modified" not in str(e).lower():
+                    logger.warning(f"Could not edit previous message: {e}")
         
     except Exception as e:
         logger.warning(f"Error in mark_message_as_selected: {e}")
