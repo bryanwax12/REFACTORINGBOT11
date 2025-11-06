@@ -3147,6 +3147,8 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return await return_to_order(update, context)
     
     if query.data == 'check_data':
+        # Mark previous message as selected (remove buttons and add "✅ Выбрано")
+        await mark_message_as_selected(update, context)
         # Return to data confirmation screen
         return await check_data_from_cancel(update, context)
     
