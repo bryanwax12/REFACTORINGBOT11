@@ -6068,9 +6068,21 @@ async def get_bot_health(authenticated: bool = Depends(verify_admin_key)):
     try:
         safety_stats = telegram_safety.get_statistics()
         best_practices = TelegramBestPractices.get_guidelines()
+        protection_info = bot_protection.get_instance_info()
+        
+        # Get database stats
+        total_users = await db.users.count_documents({})
+        total_orders = await db.orders.count_documents({})
+        blocked_users_db = await db.users.count_documents({"blocked": True})
+        
+        # Get API mode
+        api_mode_setting = await db.settings.find_one({"key": "api_mode"})
+        api_mode = api_mode_setting.get("value", "production") if api_mode_setting else "production"
         
         return {
             "status": "healthy",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "uptime": "N/A",  # Can be calculated from startup time
             "safety_statistics": safety_stats,
             "best_practices_active": len(best_practices),
             "guidelines": best_practices,
@@ -6078,11 +6090,141 @@ async def get_bot_health(authenticated: bool = Depends(verify_admin_key)):
                 "rate_limiting": "active",
                 "anti_spam": "active",
                 "error_handling": "active",
-                "blocked_users_tracking": "active"
+                "blocked_users_tracking": "active",
+                "instance_id": protection_info["instance_id"][:8],
+                "bot_name": protection_info["bot_name"]
+            },
+            "database_stats": {
+                "total_users": total_users,
+                "total_orders": total_orders,
+                "blocked_users": blocked_users_db
+            },
+            "api_config": {
+                "mode": api_mode,
+                "shipstation": "configured",
+                "oxapay": "configured",
+                "openai": "configured"
             }
         }
     except Exception as e:
         logger.error(f"Error getting bot health: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/bot/logs")
+async def get_bot_logs(authenticated: bool = Depends(verify_admin_key), limit: int = 100):
+    """Get recent bot logs"""
+    try:
+        import subprocess
+        
+        # Read last N lines from backend log
+        result = subprocess.run(
+            ["tail", "-n", str(limit), "/var/log/supervisor/backend.err.log"],
+            capture_output=True,
+            text=True
+        )
+        
+        logs = result.stdout.split('\n')
+        
+        # Parse and categorize logs
+        parsed_logs = []
+        for log_line in logs:
+            if not log_line.strip():
+                continue
+                
+            log_entry = {
+                "timestamp": "N/A",
+                "level": "INFO",
+                "message": log_line,
+                "category": "general"
+            }
+            
+            # Parse log level
+            if "ERROR" in log_line:
+                log_entry["level"] = "ERROR"
+                log_entry["category"] = "error"
+            elif "WARNING" in log_line:
+                log_entry["level"] = "WARNING"
+                log_entry["category"] = "warning"
+            elif "INFO" in log_line:
+                log_entry["level"] = "INFO"
+            
+            # Categorize by keywords
+            if "SUSPICIOUS" in log_line:
+                log_entry["category"] = "security"
+            elif "rate limit" in log_line.lower():
+                log_entry["category"] = "rate_limit"
+            elif "blocked" in log_line.lower():
+                log_entry["category"] = "blocked_user"
+            elif "API" in log_line or "switched" in log_line:
+                log_entry["category"] = "api"
+            
+            # Extract timestamp if available
+            if log_line.startswith("2025-"):
+                parts = log_line.split(" - ", 1)
+                if len(parts) >= 1:
+                    log_entry["timestamp"] = parts[0]
+                    if len(parts) >= 2:
+                        log_entry["message"] = parts[1]
+            
+            parsed_logs.append(log_entry)
+        
+        return {
+            "logs": parsed_logs[-limit:],  # Return last N logs
+            "total": len(parsed_logs),
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error getting bot logs: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/bot/metrics")
+async def get_bot_metrics(authenticated: bool = Depends(verify_admin_key)):
+    """Get bot performance metrics"""
+    try:
+        # Get order statistics
+        total_orders = await db.orders.count_documents({})
+        today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+        orders_today = await db.orders.count_documents({
+            "created_at": {"$gte": today_start.isoformat()}
+        })
+        
+        # Get user statistics
+        total_users = await db.users.count_documents({})
+        active_users_today = await db.users.count_documents({
+            "last_activity": {"$gte": today_start.isoformat()}
+        })
+        
+        # Get revenue statistics
+        pipeline = [
+            {"$group": {
+                "_id": None,
+                "total_revenue": {"$sum": "$amount"},
+                "avg_order": {"$avg": "$amount"}
+            }}
+        ]
+        revenue_stats = await db.orders.aggregate(pipeline).to_list(1)
+        
+        total_revenue = revenue_stats[0]["total_revenue"] if revenue_stats else 0
+        avg_order = revenue_stats[0]["avg_order"] if revenue_stats else 0
+        
+        return {
+            "orders": {
+                "total": total_orders,
+                "today": orders_today,
+                "avg_per_day": total_orders / max((datetime.now(timezone.utc) - today_start).days, 1)
+            },
+            "users": {
+                "total": total_users,
+                "active_today": active_users_today
+            },
+            "revenue": {
+                "total": round(total_revenue, 2),
+                "average_order": round(avg_order, 2)
+            },
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error getting bot metrics: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/upload-image")
