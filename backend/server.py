@@ -603,6 +603,9 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         first_name = query.from_user.first_name
         send_method = query.message.reply_text
     else:
+        # Mark previous message as selected when command is called from menu
+        await mark_message_as_selected(update, context)
+        
         telegram_id = update.effective_user.id
         username = update.effective_user.username
         first_name = update.effective_user.first_name
