@@ -5564,6 +5564,7 @@ async def oxapay_webhook(request: Request):
                     
                     # Remove "Оплатить" button from payment message
                     payment_message_id = payment.get('payment_message_id')
+                    logger.info(f"Payment message_id for removal: {payment_message_id}")
                     if payment_message_id and bot_instance:
                         try:
                             await bot_instance.edit_message_reply_markup(
@@ -5577,6 +5578,7 @@ async def oxapay_webhook(request: Request):
                     
                     # Remove "Назад" and "Главное меню" buttons from topup input message
                     topup_input_message_id = payment.get('topup_input_message_id')
+                    logger.info(f"Topup input message_id for removal: {topup_input_message_id}")
                     if topup_input_message_id and bot_instance:
                         try:
                             await bot_instance.edit_message_reply_markup(
@@ -5587,6 +5589,8 @@ async def oxapay_webhook(request: Request):
                             logger.info(f"Removed topup input buttons from message {topup_input_message_id}")
                         except Exception as e:
                             logger.warning(f"Could not remove topup input buttons: {e}")
+                    else:
+                        logger.warning(f"No topup_input_message_id found in payment record")
                     
                     # Notify user
                     if bot_instance:
