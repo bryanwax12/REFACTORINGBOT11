@@ -2640,17 +2640,18 @@ async def view_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Load template data into context and start order via ConversationHandler"""
     query = update.callback_query
-    await query.answer()
-    
     template_id = query.data.replace('template_use_', '')
+    
+    # Execute in parallel: answer query and fetch template
+    await query.answer()
     template = await db.templates.find_one({"id": template_id}, {"_id": 0})
     
     if not template:
         await query.message.reply_text("❌ Шаблон не найден")
         return
     
-    # Mark previous message as selected (remove buttons from template list)
-    await mark_message_as_selected(update, context)
+    # Mark previous message as selected (non-blocking)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     # Load template data into context (use correct keys for rate fetching)
     context.user_data['from_name'] = template.get('from_name', '')
