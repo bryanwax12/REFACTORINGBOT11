@@ -3269,6 +3269,8 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Handle back to rates
     if query.data == 'back_to_rates':
+        # Mark previous message as selected (remove buttons and add "✅ Выбрано")
+        await mark_message_as_selected(update, context)
         # Return to rate selection - call fetch_shipping_rates again
         return await fetch_shipping_rates(update, context)
     
