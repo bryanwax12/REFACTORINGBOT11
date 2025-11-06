@@ -61,6 +61,7 @@ const Dashboard = () => {
   const [orders, setOrders] = useState([]);
   const [users, setUsers] = useState([]);
   const [topups, setTopups] = useState([]);
+  const [monitoringData, setMonitoringData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [balanceModal, setBalanceModal] = useState({ open: false, telegram_id: null, action: null });
   const [balanceAmount, setBalanceAmount] = useState('');
