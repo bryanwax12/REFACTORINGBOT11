@@ -3754,8 +3754,7 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
             keyboard = [[InlineKeyboardButton("💳 Оплатить", url=pay_link)]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            await update.message.reply_text(
-                f"""✅ *Счёт на пополнение создан!*
+            message_text = f"""✅ *Счёт на пополнение создан!*
 
 💵 *Сумма: ${topup_amount}*
 🪙 *Криптовалюта: Любая из доступных*
@@ -3766,10 +3765,20 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
 ⚠️ *ВАЖНО: Оплатите точно ${topup_amount}!*
 _Если вы оплатите другую сумму, деньги не поступят на баланс._
 
-*После успешной оплаты баланс будет автоматически пополнен.*""",
+*После успешной оплаты баланс будет автоматически пополнен.*"""
+            
+            bot_msg = await update.message.reply_text(
+                message_text,
                 reply_markup=reply_markup,
                 parse_mode='Markdown'
             )
+            
+            # Save message_id in payment for later removal of button
+            await db.payments.update_one(
+                {"invoice_id": track_id},
+                {"$set": {"payment_message_id": bot_msg.message_id}}
+            )
+            
             return ConversationHandler.END
         else:
             error_msg = invoice_result.get('error', 'Unknown error')
