@@ -181,6 +181,33 @@ const Dashboard = () => {
     }
   };
 
+  const loadApiMode = async () => {
+    try {
+      const response = await axios.get(`${API}/settings/api-mode`);
+      setApiMode(response.data.mode);
+    } catch (error) {
+      console.error("Failed to load API mode", error);
+    }
+  };
+
+  const toggleApiMode = async (newMode) => {
+    const modeText = newMode === 'test' ? 'тестовый' : 'продакшн';
+    if (!window.confirm(`Переключить на ${modeText} API?`)) {
+      return;
+    }
+    
+    setLoadingApiMode(true);
+    try {
+      const response = await axios.post(`${API}/settings/api-mode`, { mode: newMode });
+      setApiMode(newMode);
+      toast.success(`API переключён на ${modeText} режим`);
+    } catch (error) {
+      toast.error("Ошибка при переключении API режима");
+    } finally {
+      setLoadingApiMode(false);
+    }
+  };
+
   const searchOrders = async () => {
     if (!searchQuery.trim()) {
       loadData();
