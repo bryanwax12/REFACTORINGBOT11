@@ -912,7 +912,7 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
         )
         
         logger.info(f"Payment record found: {payment_record is not None}")
-        if payment_record:
+        if payment_record and payment_record.get('payment_message_id'):
             logger.info(f"Payment message_id: {payment_record.get('payment_message_id')}")
             context.user_data['last_bot_message_id'] = payment_record['payment_message_id']
             context.user_data['last_bot_message_text'] = payment_record.get('payment_message_text', '')
