@@ -2827,6 +2827,7 @@ const Home = () => {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/create" element={<CreateOrder />} />
+          <Route path="/monitoring" element={<MonitoringTab />} />
         </Routes>
       </main>
     </div>
