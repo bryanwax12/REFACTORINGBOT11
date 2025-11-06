@@ -5868,7 +5868,7 @@ async def broadcast_message(
                 
                 success_count += 1
                 # Small delay to avoid rate limiting
-                await asyncio.sleep(0.05)
+                await asyncio.sleep(0.02)
             except Exception as e:
                 error_msg = str(e)
                 logger.error(f"Failed to send broadcast to user {user['telegram_id']}: {e}")
@@ -5945,7 +5945,7 @@ async def enable_maintenance_mode(authenticated: bool = Depends(verify_admin_key
                     parse_mode='Markdown'
                 )
                 success_count += 1
-                await asyncio.sleep(0.05)  # Rate limiting
+                await asyncio.sleep(0.02)  # Rate limiting
             except Exception as e:
                 logger.error(f"Failed to send maintenance message to {user['telegram_id']}: {e}")
                 failed_count += 1
@@ -6010,7 +6010,7 @@ async def disable_maintenance_mode(authenticated: bool = Depends(verify_admin_ke
                     parse_mode='Markdown'
                 )
                 success_count += 1
-                await asyncio.sleep(0.05)  # Rate limiting
+                await asyncio.sleep(0.02)  # Rate limiting
             except Exception as e:
                 logger.error(f"Failed to send back online message to {user['telegram_id']}: {e}")
                 failed_count += 1
@@ -6445,7 +6445,7 @@ async def check_all_bot_access(authenticated: bool = Depends(verify_admin_key)):
                 accessible_count += 1
                 
                 # Small delay to avoid rate limiting
-                await asyncio.sleep(0.05)
+                await asyncio.sleep(0.02)
                 
             except Exception as e:
                 error_msg = str(e)
@@ -6637,7 +6637,7 @@ async def check_all_users_channel_status(authenticated: bool = Depends(verify_ad
                     member_count += 1
                 
                 # Small delay to avoid rate limiting
-                await asyncio.sleep(0.05)
+                await asyncio.sleep(0.02)
                 
             except Exception as e:
                 logger.error(f"Failed to check status for user {user['telegram_id']}: {e}")
