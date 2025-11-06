@@ -641,9 +641,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 *Я помогу вам создать shipping labels.*
 
-*Выберите действие:*
-
-{get_copyright_footer()}"""
+*Выберите действие:*"""
     
     # Create keyboard with buttons
     keyboard = [
