@@ -921,6 +921,9 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     
+    # Mark previous message as selected (remove buttons and add "✅ Выбрано")
+    await mark_message_as_selected(update, context)
+    
     telegram_id = query.from_user.id
     
     # Clear any previous order data (including order_completed flag)
