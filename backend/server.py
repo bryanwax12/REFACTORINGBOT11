@@ -851,6 +851,8 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
         send_method = query.message.reply_text
     else:
         # Mark previous message as selected when command is called from menu
+        logger.info(f"my_balance_command called via message - user_data keys: {list(context.user_data.keys())}")
+        logger.info(f"last_bot_message_id: {context.user_data.get('last_bot_message_id')}")
         await mark_message_as_selected(update, context)
         telegram_id = update.effective_user.id
         send_method = update.message.reply_text
