@@ -1224,9 +1224,6 @@ async def skip_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     city = update.message.text.strip()
-    logger.info(f"🟢 order_from_city called - user_id: {update.effective_user.id}, city input: '{city}'")
-    logger.info(f"🟢 Current user_data keys: {list(context.user_data.keys())}")
-    logger.info(f"🟢 Current last_state: {context.user_data.get('last_state')}")
     
     # Check for Cyrillic or non-Latin characters
     if any(ord(c) >= 0x0400 and ord(c) <= 0x04FF for c in city):
