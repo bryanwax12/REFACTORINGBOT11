@@ -553,13 +553,20 @@ async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT
                         )
                         logger.info(f"Added '✅ Выбрано' to message {last_msg_id}")
                     except Exception as e:
-                        # Fallback to just removing buttons
-                        await context.bot.edit_message_reply_markup(
-                            chat_id=chat_id,
-                            message_id=last_msg_id,
-                            reply_markup=None
-                        )
-                        logger.info(f"Removed buttons (fallback) from message {last_msg_id}")
+                        # Ignore "message not modified" error (message already has checkmark)
+                        if "message is not modified" in str(e).lower():
+                            logger.info(f"Message {last_msg_id} already marked as selected")
+                        else:
+                            # Fallback to just removing buttons for other errors
+                            try:
+                                await context.bot.edit_message_reply_markup(
+                                    chat_id=chat_id,
+                                    message_id=last_msg_id,
+                                    reply_markup=None
+                                )
+                                logger.info(f"Removed buttons (fallback) from message {last_msg_id}")
+                            except Exception as e2:
+                                logger.warning(f"Could not remove buttons: {e2}")
                 else:
                     # Just remove buttons if no text saved
                     await context.bot.edit_message_reply_markup(
