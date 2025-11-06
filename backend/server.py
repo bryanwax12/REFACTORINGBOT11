@@ -597,6 +597,9 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_dict = user.model_dump()
         user_dict['created_at'] = user_dict['created_at'].isoformat()
         await db.users.insert_one(user_dict)
+        user_balance = 0.0
+    else:
+        user_balance = existing_user.get('balance', 0.0)
         
     welcome_message = f"""*Добро пожаловать, {first_name}! 🚀*
 
@@ -610,7 +613,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             InlineKeyboardButton("📦 Создать заказ", callback_data='new_order')
         ],
         [
-            InlineKeyboardButton("💳 Мой баланс", callback_data='my_balance')
+            InlineKeyboardButton(f"💳 Мой баланс (${user_balance:.2f})", callback_data='my_balance')
         ],
         [
             InlineKeyboardButton("📋 Мои шаблоны", callback_data='my_templates')
