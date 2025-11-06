@@ -798,6 +798,8 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if update.callback_query:
         query = update.callback_query
         await query.answer()
+        # Mark previous message as selected (remove buttons and add "✅ Выбрано")
+        await mark_message_as_selected(update, context)
         telegram_id = query.from_user.id
         send_method = query.message.reply_text
     else:
