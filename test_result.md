@@ -575,10 +575,22 @@ frontend:
           agent: "main"
           comment: "🔧 CRITICAL FIX #3 APPLIED: Root cause - my_templates_menu() function was not saving last_bot_message_id and last_bot_message_text after sending message (line 2437), and view_template() function was clearing these values (lines 2480-2481), preventing mark_message_as_selected from working. SOLUTION: (1) Modified my_templates_menu() to save bot_msg and store message_id and text in context.user_data (lines 2437-2440), (2) Modified view_template() to save bot_msg and store message_id and text instead of clearing them (lines 2478-2481). EXPECTED FLOW: User opens templates list → my_templates_menu saves message context → user clicks template button → mark_message_as_selected removes buttons and adds '✅ Выбрано' → view_template shows template details with new message context saved. Backend restarted. Ready for testing."
 
+  - task: "ShipStation Production API Key Installation"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/.env"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "✅ PRODUCTION KEY INSTALLED: Updated SHIPSTATION_API_KEY in /app/backend/.env from TEST key to Production key (P9tNKoBVBHpcnq2riwwG4AG/SUG9sZVZaYSJ0alfG0g). Backend restarted successfully. Bot protection system initialized correctly. Application started without errors. Ready for testing to verify ShipStation V2 API connection with production credentials."
+
 metadata:
   created_by: "main_agent"
-  version: "1.1"
-  test_sequence: 5
+  version: "1.0"
+  test_sequence: 1
   run_ui: false
 
 test_plan:
