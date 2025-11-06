@@ -4133,125 +4133,99 @@ def run_shipstation_carrier_tests():
     return review_test_results
 
 if __name__ == "__main__":
-    print("🚀 Starting Backend Test Suite for Telegram Shipping Bot")
-    print("🎯 CRITICAL FOCUS: Cancel Button Functionality Testing")
-    print("=" * 70)
+    print("🚀 Starting ShipStation Production API Key Test Suite...")
+    print("🎯 CRITICAL FOCUS: ShipStation V2 API with Production Key")
+    print("=" * 80)
+    print(f"Backend URL: {BACKEND_URL}")
+    print(f"API Base: {API_BASE}")
     
     # Track test results
     test_results = {}
     
-    # PRIORITY 1: CRITICAL CANCEL BUTTON TESTS (per review request)
-    print("\n🔥 PRIORITY 1: CRITICAL CANCEL BUTTON FUNCTIONALITY TESTS")
-    print("-" * 70)
-    test_results['Cancel Button Functionality'] = test_cancel_button_functionality()
-    test_results['Cancel Button Conversation States'] = test_cancel_button_conversation_states()
+    # Run CRITICAL tests for ShipStation Production API Key per review request
+    print("\n" + "="*80)
+    print("🎯 CRITICAL TESTS: ShipStation V2 API with Production Key")
+    print("="*80)
     
-    # PRIORITY 2: SUPPORTING INFRASTRUCTURE TESTS
-    print("\n🔧 PRIORITY 2: SUPPORTING INFRASTRUCTURE TESTS")
-    print("-" * 70)
-    test_results['API Health'] = test_api_health()
-    test_results['Telegram Bot Token'] = test_telegram_bot_token()
-    test_results['Telegram Bot Infrastructure'] = test_telegram_bot_infrastructure()
-    test_results['Conversation Handler Functions'] = test_conversation_handler_functions()
-    test_results['Return to Order Functionality'] = test_return_to_order_functionality()
+    test_results['api_health'] = test_api_health()
+    test_results['shipstation_production_api_key'] = test_shipstation_production_api_key()
+    test_results['shipstation_carrier_ids'] = test_shipstation_carrier_ids()
     
-    # PRIORITY 3: ADDITIONAL BACKEND TESTS (if time permits)
-    print("\n📋 PRIORITY 3: ADDITIONAL BACKEND VERIFICATION")
-    print("-" * 70)
-    test_results['Carriers'] = test_carriers()[0] if test_carriers()[0] else False
-    test_results['ShipStation Carrier IDs'] = test_shipstation_carrier_ids()
-    test_results['Carrier Exclusion Fix'] = test_carrier_exclusion_fix()
-    test_results['Shipping Rates'] = test_shipping_rates()[0] if test_shipping_rates()[0] else False
-    test_results['Admin Search Orders'] = test_admin_search_orders()
-    test_results['Admin Refund Order'] = test_admin_refund_order()
-    test_results['Admin Export CSV'] = test_admin_export_csv()
-    test_results['Admin Telegram ID Environment'] = test_admin_telegram_id_environment()
-    test_results['Admin Notification Function'] = test_admin_notification_function()
-    test_results['Contact Admin Buttons'] = test_contact_admin_buttons()
-    test_results['Backend Admin ID Loading'] = test_backend_admin_id_loading()
-    test_results['Telegram Bot Admin Integration'] = test_telegram_bot_admin_integration()
-    test_results['Admin Notification Sending'] = test_admin_notification_sending()
-    test_results['Help Command Implementation'] = test_help_command_implementation()
-    test_results['Telegram Bot Help Infrastructure'] = test_telegram_bot_help_infrastructure()
-    test_results['Help Command URL Generation'] = test_help_command_url_generation()
-    test_results['Template Based Order Creation'] = test_template_based_order_creation()
+    # Test shipping rates with production key
+    shipping_result = test_shipping_rates_production()
+    test_results['shipping_rates_production'] = shipping_result[0] if shipping_result else False
     
-    # Check backend logs
+    test_results['carrier_exclusion_fix'] = test_carrier_exclusion_fix()
+    
+    # Additional supporting tests
+    print("\n" + "="*80)
+    print("📋 SUPPORTING TESTS: Backend Infrastructure")
+    print("="*80)
+    
+    carriers_result = test_carriers()
+    test_results['carriers'] = carriers_result[0] if carriers_result else False
+    
+    rates_result = test_shipping_rates()
+    test_results['shipping_rates'] = rates_result[0] if rates_result else False
+    
+    # Check backend logs for any ShipStation related errors
     check_backend_logs()
     
-    # Print summary
-    print("\n" + "=" * 70)
-    print("📊 TEST RESULTS SUMMARY")
-    print("=" * 70)
+    # Summary
+    print("\n" + "="*80)
+    print("📊 SHIPSTATION PRODUCTION API KEY TEST RESULTS")
+    print("="*80)
     
-    # Separate critical tests from others
+    # Critical tests first
     critical_tests = [
-        'Cancel Button Functionality',
-        'Cancel Button Conversation States'
+        'shipstation_production_api_key',
+        'shipstation_carrier_ids', 
+        'shipping_rates_production',
+        'carrier_exclusion_fix'
     ]
     
-    infrastructure_tests = [
-        'API Health',
-        'Telegram Bot Token', 
-        'Telegram Bot Infrastructure',
-        'Conversation Handler Functions',
-        'Return to Order Functionality'
-    ]
+    print("\n🎯 CRITICAL TESTS:")
+    critical_passed = 0
+    for test_name in critical_tests:
+        if test_name in test_results:
+            result = test_results[test_name]
+            status = "✅ PASS" if result else "❌ FAIL"
+            print(f"   {test_name}: {status}")
+            if result:
+                critical_passed += 1
     
-    # Calculate results by category
-    critical_passed = sum(1 for test in critical_tests if test_results.get(test, False))
-    critical_total = len(critical_tests)
+    print(f"\n📋 SUPPORTING TESTS:")
+    supporting_passed = 0
+    supporting_total = 0
+    for test_name, result in test_results.items():
+        if test_name not in critical_tests:
+            status = "✅ PASS" if result else "❌ FAIL"
+            print(f"   {test_name}: {status}")
+            if result:
+                supporting_passed += 1
+            supporting_total += 1
     
-    infrastructure_passed = sum(1 for test in infrastructure_tests if test_results.get(test, False))
-    infrastructure_total = len(infrastructure_tests)
-    
-    other_tests = [test for test in test_results.keys() 
-                   if test not in critical_tests and test not in infrastructure_tests]
-    other_passed = sum(1 for test in other_tests if test_results.get(test, False))
-    other_total = len(other_tests)
-    
-    total_passed = sum(test_results.values())
+    # Overall summary
+    total_critical = len(critical_tests)
     total_tests = len(test_results)
+    total_passed = sum(1 for result in test_results.values() if result)
     
-    print(f"🔥 CRITICAL TESTS (Cancel Button): {critical_passed}/{critical_total}")
-    for test in critical_tests:
-        status = "✅ PASS" if test_results.get(test, False) else "❌ FAIL"
-        print(f"   {test}: {status}")
+    print(f"\n📊 SUMMARY:")
+    print(f"   Critical tests: {critical_passed}/{total_critical} passed ({critical_passed/total_critical*100:.1f}%)")
+    if supporting_total > 0:
+        print(f"   Supporting tests: {supporting_passed}/{supporting_total} passed ({supporting_passed/supporting_total*100:.1f}%)")
+    print(f"   Overall: {total_passed}/{total_tests} tests passed ({total_passed/total_tests*100:.1f}%)")
     
-    print(f"\n🔧 INFRASTRUCTURE TESTS: {infrastructure_passed}/{infrastructure_total}")
-    for test in infrastructure_tests:
-        status = "✅ PASS" if test_results.get(test, False) else "❌ FAIL"
-        print(f"   {test}: {status}")
-    
-    print(f"\n📋 OTHER TESTS: {other_passed}/{other_total}")
-    for test in other_tests:
-        status = "✅ PASS" if test_results.get(test, False) else "❌ FAIL"
-        print(f"   {test}: {status}")
-    
-    # Overall assessment
-    critical_success_rate = (critical_passed / critical_total) * 100 if critical_total > 0 else 0
-    overall_success_rate = (total_passed / total_tests) * 100 if total_tests > 0 else 0
-    
-    print(f"\n📈 RESULTS BREAKDOWN:")
-    print(f"   Critical Tests: {critical_passed}/{critical_total} ({critical_success_rate:.1f}%)")
-    print(f"   Infrastructure: {infrastructure_passed}/{infrastructure_total} ({(infrastructure_passed/infrastructure_total)*100:.1f}%)")
-    print(f"   Other Tests: {other_passed}/{other_total} ({(other_passed/other_total)*100:.1f}%)")
-    print(f"   Overall: {total_passed}/{total_tests} ({overall_success_rate:.1f}%)")
-    
-    # Final verdict based on critical tests
-    if critical_success_rate >= 100:
-        print(f"\n🎉 CRITICAL SUCCESS: All cancel button tests passed!")
-        print(f"   ✅ Cancel button functionality verified across all ConversationHandler states")
-    elif critical_success_rate >= 50:
-        print(f"\n⚠️ PARTIAL SUCCESS: Some cancel button issues detected")
-        print(f"   🔍 Review failed critical tests above for specific issues")
+    # Final verdict
+    if critical_passed == total_critical:
+        print("\n🎉 CRITICAL SUCCESS: ShipStation Production API Key is working correctly!")
+        print("✅ Production API key authenticated successfully")
+        print("✅ Carrier IDs fetched successfully") 
+        print("✅ Shipping rates calculated successfully")
+        print("✅ Multiple carriers (USPS, UPS, FedEx) available")
     else:
-        print(f"\n❌ CRITICAL FAILURE: Major cancel button functionality issues")
-        print(f"   🚨 Cancel button may not work consistently across all states")
+        print(f"\n❌ CRITICAL FAILURE: ShipStation Production API Key has issues!")
+        print(f"   {total_critical - critical_passed} critical test(s) failed")
+        print("   Check logs above for detailed error information")
     
-    if overall_success_rate >= 80:
-        print(f"   🔧 Backend infrastructure: HEALTHY ({overall_success_rate:.1f}%)")
-    else:
-        print(f"   ⚠️ Backend infrastructure: NEEDS ATTENTION ({overall_success_rate:.1f}%)")
-    
-    print("=" * 70)
+    print("=" * 80)
