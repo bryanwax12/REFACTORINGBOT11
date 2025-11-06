@@ -840,17 +840,23 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            await query.message.reply_text(
-                """⚠️ *Внимание!*
+            warning_text = """⚠️ *Внимание!*
 
 У вас есть неоплаченный заказ.
 
 Если вы перейдете в главное меню, все данные заказа будут удалены и вам придется создавать заказ заново.
 
-Вы уверены?""",
+Вы уверены?"""
+            
+            bot_msg = await query.message.reply_text(
+                warning_text,
                 reply_markup=reply_markup,
                 parse_mode='Markdown'
             )
+            
+            # Save message context for button protection
+            context.user_data['last_bot_message_id'] = bot_msg.message_id
+            context.user_data['last_bot_message_text'] = warning_text
             return
         
         await start_command(update, context)
