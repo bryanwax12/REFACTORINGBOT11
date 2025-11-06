@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Menu commands should mark previous buttons as selected"
+user_problem_statement: "Optimize bot speed - make it work faster"
 
 backend:
   - task: "Cancel Order Button - Consistent Confirmation Across All States"
