@@ -6036,7 +6036,7 @@ async def set_api_mode(request: dict, authenticated: bool = Depends(verify_admin
         )
         
         # Update environment variable in-memory (will revert on restart)
-        global SHIPSTATION_API_KEY
+        global SHIPSTATION_API_KEY, SHIPSTATION_CARRIER_IDS
         if mode == "test":
             SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY_TEST', SHIPSTATION_API_KEY)
             mode_text = "🧪 Тестовый"
@@ -6045,6 +6045,10 @@ async def set_api_mode(request: dict, authenticated: bool = Depends(verify_admin
             SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY_PROD', SHIPSTATION_API_KEY)
             mode_text = "🚀 Продакшн"
             api_key_display = SHIPSTATION_API_KEY[:20] + "..." if len(SHIPSTATION_API_KEY) > 20 else SHIPSTATION_API_KEY
+        
+        # Clear carrier IDs cache when switching modes
+        SHIPSTATION_CARRIER_IDS = []
+        logger.info(f"Cleared carrier IDs cache after switching to {mode} mode")
         
         # Send notification to admin via Telegram
         if ADMIN_TELEGRAM_ID and bot_instance:
