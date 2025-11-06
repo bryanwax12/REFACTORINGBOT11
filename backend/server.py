@@ -3621,14 +3621,19 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     query = update.callback_query
     await query.answer()
     
-    # Mark previous message as selected
-    await mark_message_as_selected(update, context)
-    
     telegram_id = query.from_user.id
     
-    # Get pending order data from database
+    # Get pending order data from database to load message context
     pending_order = await db.pending_orders.find_one({"telegram_id": telegram_id}, {"_id": 0})
     logger.info(f"Pending order data found: {pending_order is not None}")
+    
+    # Load message context for button protection
+    if pending_order:
+        context.user_data['last_bot_message_id'] = pending_order.get('topup_success_message_id')
+        context.user_data['last_bot_message_text'] = pending_order.get('topup_success_message_text')
+    
+    # Mark previous message as selected
+    await mark_message_as_selected(update, context)
     
     if not pending_order or not pending_order.get('selected_rate'):
         await query.message.reply_text(
