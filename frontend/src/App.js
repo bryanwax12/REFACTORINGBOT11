@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import MonitoringTab from "./components/MonitoringTab";
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import axios from "axios";
