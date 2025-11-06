@@ -7169,6 +7169,24 @@ logger = logging.getLogger(__name__)
 async def startup_event():
     logger.info("Starting application...")
     
+    # Load correct API key based on api_mode in database
+    global SHIPSTATION_API_KEY
+    try:
+        api_mode_setting = await db.settings.find_one({"key": "api_mode"})
+        api_mode = api_mode_setting.get("value", "production") if api_mode_setting else "production"
+        
+        if api_mode == "test":
+            SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY_TEST', SHIPSTATION_API_KEY)
+            logger.info(f"🧪 Loaded TEST API key from environment")
+        else:
+            SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY_PROD', SHIPSTATION_API_KEY)
+            logger.info(f"🚀 Loaded PRODUCTION API key from environment")
+        
+        logger.info(f"✅ ShipStation API mode: {api_mode.upper()}")
+    except Exception as e:
+        logger.error(f"Error loading API mode from database: {e}")
+        logger.info("Using default API key from .env file")
+    
     # Initialize Bot Protection System
     global bot_protection, telegram_safety
     bot_protection = BotProtection(
