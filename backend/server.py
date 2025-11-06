@@ -137,6 +137,31 @@ async def check_oxapay_payment(track_id: str):
     except Exception as e:
         logger.error(f"Oxapay inquiry error: {e}")
         return None
+async def generate_thank_you_message():
+    """Generate a unique thank you message using AI"""
+    try:
+        from emergentintegrations.llm.chat import LlmChat, UserMessage
+        from dotenv import load_dotenv
+        load_dotenv()
+        
+        emergent_key = os.environ.get('EMERGENT_LLM_KEY')
+        
+        chat = LlmChat(
+            api_key=emergent_key,
+            session_id=f"thanks_{datetime.now(timezone.utc).timestamp()}",
+            system_message="Ты помощник, который создает теплые и дружелюбные слова благодарности на русском языке для клиентов, которые воспользовались сервисом доставки."
+        ).with_model("openai", "gpt-4o")
+        
+        user_message = UserMessage(
+            text="Создай короткое теплое сообщение благодарности клиенту за использование нашего сервиса доставки. 2-3 предложения, дружелюбный тон, только текст без эмодзи. Каждый раз создавай уникальное сообщение."
+        )
+        
+        response = await chat.send_message(user_message)
+        return response.strip()
+    except Exception as e:
+        logger.error(f"Error generating thank you message: {e}")
+        # Fallback message if AI fails
+        return "Спасибо за использование нашего сервиса! Желаем вам приятной доставки."
 
 app = FastAPI(title="Telegram Shipping Bot")
 api_router = APIRouter(prefix="/api")
