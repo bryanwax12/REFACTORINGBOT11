@@ -6062,6 +6062,29 @@ ShipStation API: https://ssapi.shipstation.com/
         logger.error(f"Error setting API mode: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.get("/bot/health")
+async def get_bot_health(authenticated: bool = Depends(verify_admin_key)):
+    """Get bot health statistics and safety metrics"""
+    try:
+        safety_stats = telegram_safety.get_statistics()
+        best_practices = TelegramBestPractices.get_guidelines()
+        
+        return {
+            "status": "healthy",
+            "safety_statistics": safety_stats,
+            "best_practices_active": len(best_practices),
+            "guidelines": best_practices,
+            "protection": {
+                "rate_limiting": "active",
+                "anti_spam": "active",
+                "error_handling": "active",
+                "blocked_users_tracking": "active"
+            }
+        }
+    except Exception as e:
+        logger.error(f"Error getting bot health: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.post("/upload-image")
 async def upload_image(
     file: UploadFile = File(...),
