@@ -2548,7 +2548,7 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return ConversationHandler.END
     
     # Build template list message
-    message = f"📋 *Мои шаблоны ({len(templates)}):*\n\n"
+    message = f"📋 *Выберите шаблон:*\n\n"
     
     keyboard = []
     for i, template in enumerate(templates, 1):
@@ -2565,21 +2565,19 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         # Add compact template info to message
         message += f"*{i}. {template['name']}*\n"
-        message += f"📤 *От:* {from_name}\n"
+        message += f"📤 От: {from_name}\n"
         message += f"   {from_street}, {from_city}, {from_state} {from_zip}\n"
-        message += f"📥 *Кому:* {to_name}\n"
+        message += f"📥 Кому: {to_name}\n"
         message += f"   {to_street}, {to_city}, {to_state} {to_zip}\n\n"
         
-        # Create button with just name
+        # Create button with just number and name
         keyboard.append([InlineKeyboardButton(
             f"{i}. {template['name']}", 
             callback_data=f'template_view_{template["id"]}'
         )])
     
-    # Add info text
-    message += f"_Нажмите на кнопку для просмотра деталей и использования шаблона_"
-    
-    keyboard.append([InlineKeyboardButton("🔙 Главное меню", callback_data='start')])
+    # Add cancel button at the bottom
+    keyboard.append([InlineKeyboardButton("❌ Отмена", callback_data='start')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     bot_msg = await query.message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown')
