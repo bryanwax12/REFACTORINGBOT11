@@ -8,6 +8,7 @@ from bot_protection import BotProtection, get_copyright_footer, PROTECTED_BADGE,
 from telegram_safety import TelegramSafetySystem, TelegramBestPractices
 import os
 import logging
+import random
 import requests
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional
