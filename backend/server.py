@@ -206,9 +206,11 @@ async def check_shipstation_balance():
                     
                     # Send notification to admin
                     try:
-                        bot_instance = context.application.bot if 'context' in globals() else None
-                        if not bot_instance:
-                            # Create bot instance for notification
+                        # Get global bot instance or create new one
+                        if 'application' in globals() and hasattr(application, 'bot'):
+                            bot_instance = application.bot
+                        else:
+                            # Import here to avoid circular imports
                             from telegram import Bot
                             bot_instance = Bot(TELEGRAM_BOT_TOKEN)
                         
