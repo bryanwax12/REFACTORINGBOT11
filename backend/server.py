@@ -1520,8 +1520,10 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.answer()
         
         if query.data == 'skip_from_phone':
-            # Skip phone - set empty or default value
-            context.user_data['from_phone'] = ''
+            # Skip phone - generate random phone number
+            random_phone = generate_random_phone()
+            context.user_data['from_phone'] = random_phone
+            logger.info(f"Generated random FROM phone: {random_phone}")
             
             # Mark previous message as selected
             await mark_message_as_selected(update, context)
