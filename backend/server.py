@@ -4299,6 +4299,9 @@ Label PDF: {label_download_url}
             except Exception as e:
                 logger.error(f"Error sending label to user: {e}")
                 
+        # Check ShipStation balance after label creation
+        asyncio.create_task(check_shipstation_balance())
+        
         logger.info(f"Label created successfully for order {order_id}")
         return True  # Success
         
