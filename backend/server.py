@@ -4034,6 +4034,15 @@ async def create_and_send_label(order_id, telegram_id, message):
             'Content-Type': 'application/json'
         }
         
+        # Get phone numbers with fallback
+        from_phone = order['address_from'].get('phone')
+        from_phone = from_phone.strip() if from_phone else '+15551234567'
+        
+        to_phone = order['address_to'].get('phone')  
+        to_phone = to_phone.strip() if to_phone else '+15551234567'
+        
+        logger.info(f"Sending phones to ShipStation - from: '{from_phone}', to: '{to_phone}'")
+        
         # Create label request for ShipStation V2
         label_request = {
             'label_layout': 'letter',
@@ -4041,7 +4050,7 @@ async def create_and_send_label(order_id, telegram_id, message):
             'shipment': {
                 'ship_to': {
                     'name': order['address_to']['name'],
-                    'phone': order['address_to'].get('phone').strip() if order['address_to'].get('phone') else '+15551234567',
+                    'phone': to_phone,
                     'address_line1': order['address_to']['street1'],
                     'address_line2': order['address_to'].get('street2', ''),
                     'city_locality': order['address_to']['city'],
@@ -4052,7 +4061,7 @@ async def create_and_send_label(order_id, telegram_id, message):
                 'ship_from': {
                     'name': order['address_from']['name'],
                     'company_name': '-',  # Minimal placeholder to avoid showing real company name
-                    'phone': order['address_from'].get('phone').strip() if order['address_from'].get('phone') else '+15551234567',
+                    'phone': from_phone,
                     'address_line1': order['address_from']['street1'],
                     'address_line2': order['address_from'].get('street2', ''),
                     'city_locality': order['address_from']['city'],
