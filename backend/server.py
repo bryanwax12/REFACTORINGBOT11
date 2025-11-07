@@ -155,6 +155,14 @@ async def check_oxapay_payment(track_id: str):
         logger.error(f"Oxapay inquiry error: {e}")
         return None
 
+def generate_random_phone():
+    """Generate a random valid US phone number"""
+    # Generate random US phone number in format +1XXXXXXXXXX
+    area_code = random.randint(200, 999)  # Valid area codes start from 200
+    exchange = random.randint(200, 999)   # Valid exchanges start from 200
+    number = random.randint(1000, 9999)   # Last 4 digits
+    return f"+1{area_code}{exchange}{number}"
+
 async def generate_thank_you_message():
     """Generate a unique thank you message using AI"""
     try:
