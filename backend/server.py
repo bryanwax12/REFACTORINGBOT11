@@ -4052,7 +4052,7 @@ async def create_and_send_label(order_id, telegram_id, message):
                 'ship_from': {
                     'name': order['address_from']['name'],
                     'company_name': '-',  # Minimal placeholder to avoid showing real company name
-                    'phone': order['address_from'].get('phone') or '+15551234567',
+                    'phone': order['address_from'].get('phone') or '+15551234567',  # Default phone if empty
                     'address_line1': order['address_from']['street1'],
                     'address_line2': order['address_from'].get('street2', ''),
                     'city_locality': order['address_from']['city'],
