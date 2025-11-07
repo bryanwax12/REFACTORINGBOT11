@@ -7423,6 +7423,9 @@ async def startup_event():
             logger.info(f"🚀 Loaded PRODUCTION API key from environment")
         
         logger.info(f"✅ ShipStation API mode: {api_mode.upper()}")
+    
+    # Check ShipStation balance on startup
+    await check_shipstation_balance()
     except Exception as e:
         logger.error(f"Error loading API mode from database: {e}")
         logger.info("Using default API key from .env file")
