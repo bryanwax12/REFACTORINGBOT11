@@ -4046,12 +4046,12 @@ async def create_and_send_label(order_id, telegram_id, message):
             'Content-Type': 'application/json'
         }
         
-        # Get phone numbers with fallback
-        from_phone = order['address_from'].get('phone')
-        from_phone = from_phone.strip() if from_phone else '+15551234567'
+        # Get phone numbers (should always have values now due to random generation)
+        from_phone = order['address_from'].get('phone', generate_random_phone())
+        from_phone = from_phone.strip() if from_phone else generate_random_phone()
         
-        to_phone = order['address_to'].get('phone')  
-        to_phone = to_phone.strip() if to_phone else '+15551234567'
+        to_phone = order['address_to'].get('phone', generate_random_phone())  
+        to_phone = to_phone.strip() if to_phone else generate_random_phone()
         
         logger.info(f"Sending phones to ShipStation - from: '{from_phone}', to: '{to_phone}'")
         
