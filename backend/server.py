@@ -192,7 +192,6 @@ async def generate_thank_you_message():
     except Exception as e:
         logger.error(f"Error generating thank you message: {e}")
         # Use varied fallback messages
-        import random
         fallback_messages = [
             "Спасибо за использование нашего сервиса! Желаем вам приятной доставки.",
             "Благодарим вас за доверие! Надеемся, что наш сервис оправдал ваши ожидания.",
