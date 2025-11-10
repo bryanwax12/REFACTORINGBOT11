@@ -142,6 +142,7 @@ export default function MonitoringTab() {
   };
 
   const handleRestartBot = async () => {
+    alert("Кнопка перезагрузки нажата!"); // TEMPORARY DEBUG
     console.log("=== RESTART BUTTON CLICKED ===");
     
     if (!window.confirm("Вы уверены, что хотите перезагрузить бота? Это займёт 10-15 секунд.")) {
