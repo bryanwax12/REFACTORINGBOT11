@@ -156,12 +156,11 @@ export default function MonitoringTab() {
       setRestarting(true);
       setAutoRefresh(false); // Stop auto-refresh during restart
       
-      const adminKey = localStorage.getItem("adminKey");
-      console.log("Admin key:", adminKey ? "present" : "missing");
+      console.log("Admin key:", ADMIN_API_KEY ? "present" : "missing");
       
       console.log("Sending restart request to API...");
       const response = await axios.post(`${API}/api/bot/restart`, {}, {
-        headers: { "X-Api-Key": adminKey }
+        headers: { "X-Api-Key": ADMIN_API_KEY }
       });
       console.log("Restart API response:", response.data);
       
