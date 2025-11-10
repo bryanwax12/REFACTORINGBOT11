@@ -6348,20 +6348,18 @@ async def disable_maintenance_mode(authenticated: bool = Depends(verify_admin_ke
 
 async def delayed_restart():
     """Restart backend after a short delay to allow response to be sent"""
-    await asyncio.sleep(2)  # Wait 2 seconds to send response
-    logger.info("Executing delayed restart command...")
-    import os
-    import signal
+    logger.info("Scheduling bot restart...")
+    import subprocess
     
-    # Stop the backend gracefully - supervisor will auto-restart due to autorestart=true
-    # First try graceful restart
-    result = os.system('sudo supervisorctl restart backend')
-    logger.info(f"Restart command executed with result: {result}")
-    
-    # If restart didn't work, force stop (supervisor will auto-start)
-    if result != 0:
-        await asyncio.sleep(1)
-        os.kill(os.getpid(), signal.SIGTERM)
+    # Run restart script in background - it will wait 2 seconds then restart
+    # Using nohup to detach from current process
+    subprocess.Popen(
+        ['nohup', '/tmp/restart_bot.sh'],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        start_new_session=True
+    )
+    logger.info("Restart script launched in background")
 
 @api_router.post("/bot/restart")
 async def restart_bot(
