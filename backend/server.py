@@ -6458,6 +6458,23 @@ ShipStation API: https://ssapi.shipstation.com/
 async def get_bot_health(authenticated: bool = Depends(verify_admin_key)):
     """Get bot health statistics and safety metrics"""
     try:
+        # Check if Telegram bot is actually running
+        bot_is_running = False
+        if 'application' in globals() and application is not None:
+            try:
+                # Try to get bot info - this will fail if bot is not running
+                if application.running:
+                    bot_is_running = True
+            except:
+                bot_is_running = False
+        
+        if not bot_is_running:
+            return {
+                "status": "unhealthy",
+                "message": "Telegram bot is not running",
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+        
         safety_stats = telegram_safety.get_statistics()
         best_practices = TelegramBestPractices.get_guidelines()
         protection_info = bot_protection.get_instance_info()
