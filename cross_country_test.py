@@ -32,7 +32,7 @@ payload = {
 
 print('🔍 Testing Cross-Country Shipping (CA to NY)...')
 response = requests.post(
-    'https://stale-button-fix.preview.emergentagent.com/api/calculate-shipping',
+    'https://crypto-shipping.preview.emergentagent.com/api/calculate-shipping',
     json=payload,
     timeout=30
 )
