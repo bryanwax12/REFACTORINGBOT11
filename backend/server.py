@@ -64,6 +64,15 @@ bot_instance = None
 if TELEGRAM_BOT_TOKEN:
     bot_instance = Bot(token=TELEGRAM_BOT_TOKEN)
 
+# Simple in-memory cache for frequently accessed settings
+SETTINGS_CACHE = {
+    'api_mode': None,
+    'api_mode_timestamp': None,
+    'maintenance_mode': None,
+    'maintenance_timestamp': None
+}
+CACHE_TTL = 60  # Cache TTL in seconds
+
 # Oxapay - Cryptocurrency Payment Gateway
 OXAPAY_API_KEY = os.environ.get('OXAPAY_API_KEY', '')
 OXAPAY_API_URL = 'https://api.oxapay.com'
