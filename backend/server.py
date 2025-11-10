@@ -6346,40 +6346,37 @@ async def disable_maintenance_mode(authenticated: bool = Depends(verify_admin_ke
         logger.error(f"Error disabling maintenance mode: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+async def delayed_restart():
+    """Restart backend after a short delay to allow response to be sent"""
+    await asyncio.sleep(2)  # Wait 2 seconds to send response
+    logger.info("Executing delayed restart command...")
+    import os
+    os.system('sudo supervisorctl restart backend')
+
 @api_router.post("/bot/restart")
-async def restart_bot(authenticated: bool = Depends(verify_admin_key)):
+async def restart_bot(authenticated: bool = Depends(verify_admin_key), background_tasks: BackgroundTasks = None):
     """Restart the Telegram bot backend service"""
     try:
-        import os
-        import sys
+        from fastapi import BackgroundTasks
         
         logger.info("Bot restart requested by admin")
         
-        # Create a restart flag file
-        restart_flag = '/tmp/bot_restart_flag'
-        with open(restart_flag, 'w') as f:
-            f.write('restart')
-        
-        # Use os.system which runs with proper permissions
-        exit_code = os.system('sudo supervisorctl restart backend')
-        
-        if exit_code == 0:
-            logger.info("Bot restart command executed successfully")
-            return {
-                "status": "success",
-                "message": "Бот перезагружается... Подождите 10 секунд",
-                "note": "Страница автоматически обновится через 10 секунд"
-            }
+        # Schedule restart in background after response is sent
+        if background_tasks:
+            background_tasks.add_task(delayed_restart)
         else:
-            logger.error(f"Bot restart command failed with exit code: {exit_code}")
-            return {
-                "status": "warning",
-                "message": "Команда перезагрузки отправлена, но статус неизвестен. Проверьте мониторинг через 10 секунд.",
-                "exit_code": exit_code
-            }
+            # Fallback: use asyncio.create_task
+            asyncio.create_task(delayed_restart())
+        
+        logger.info("Bot restart scheduled successfully")
+        return {
+            "status": "success",
+            "message": "Бот будет перезагружен через 2 секунды...",
+            "note": "Подождите 10-15 секунд для завершения перезагрузки"
+        }
             
     except Exception as e:
-        logger.error(f"Error restarting bot: {e}")
+        logger.error(f"Error scheduling bot restart: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/settings/api-mode")
