@@ -1898,7 +1898,6 @@ def test_cancel_button_conversation_states():
             for state_name, function_name, description in states:
                 # Check if function exists
                 function_pattern = rf'async def {function_name}\('
-def test_admin_notification_for_label_creation():
     """Test Admin Notification for Label Creation - CRITICAL TEST per review request"""
     print("\n🔍 Testing Admin Notification for Label Creation...")
     print("🎯 CRITICAL: Testing notification functionality when shipping labels are created")
