@@ -756,3 +756,16 @@ backend:
           agent: "main"
           comment: "✅ STALE BUTTON PROTECTION IMPLEMENTED: Added check_stale_interaction() helper function to prevent users from clicking buttons on old/completed orders. Function checks if context.user_data is empty or if order_completed flag is set. Added protection to key handlers: process_payment, handle_data_confirmation, select_carrier. When stale interaction detected, shows user-friendly message: '⚠️ Этот заказ уже завершён или отменён. Для создания нового заказа используйте меню в нижней части экрана.' After successful label creation (pay_from_balance), context.user_data is cleared and order_completed flag is set. Same applies on label creation failure. This prevents confusion when users try to interact with buttons from previous completed orders. Ready for testing."
 
+backend:
+  - task: "Admin Notification for Each Created Label"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "✅ ADMIN LABEL NOTIFICATION ALREADY IMPLEMENTED: Verified that admin notification feature is already fully implemented in create_and_send_label() function (lines 4304-4345). After each successful label creation, bot sends detailed notification to ADMIN_TELEGRAM_ID (7066790254) including: (1) 👤 User info: name, username, telegram ID, (2) 📤 Sender address: name and full address with city/state/zip, (3) 📥 Receiver address: name and full address with city/state/zip, (4) 🚚 Carrier and service type, (5) 📋 Tracking number, (6) 💰 Price (amount paid by user), (7) ⚖️ Weight in pounds, (8) 🕐 Timestamp in UTC. Message formatted with Markdown for better readability. Error handling implemented - if notification fails, error is logged but doesn't block label creation. Feature satisfies user request: 'сделай что бы администартору приходило оповещение, за каждый лейбл, что бы он знал (кто сделал, какой и цена)'. Ready for testing to confirm notifications are being sent successfully."
+
