@@ -6351,27 +6351,30 @@ async def restart_bot(authenticated: bool = Depends(verify_admin_key)):
     """Restart the Telegram bot backend service"""
     try:
         import subprocess
+        import os
         
-        # Restart backend service using supervisorctl
+        # Restart backend service using supervisorctl without sudo
+        # This works because supervisor is already running as root
         result = subprocess.run(
-            ['sudo', 'supervisorctl', 'restart', 'backend'],
+            ['supervisorctl', 'restart', 'backend'],
             capture_output=True,
             text=True,
-            timeout=10
+            timeout=10,
+            env=os.environ.copy()
         )
         
-        if result.returncode == 0:
-            logger.info("Bot restart initiated successfully")
+        if result.returncode == 0 or 'started' in result.stdout.lower():
+            logger.info(f"Bot restart initiated successfully: {result.stdout}")
             return {
                 "status": "success",
                 "message": "Бот перезагружается... Подождите 5-10 секунд",
-                "output": result.stdout
+                "output": result.stdout.strip()
             }
         else:
             logger.error(f"Bot restart failed: {result.stderr}")
             raise HTTPException(
                 status_code=500, 
-                detail=f"Ошибка перезагрузки: {result.stderr}"
+                detail=f"Ошибка перезагрузки: {result.stderr or 'Unknown error'}"
             )
             
     except subprocess.TimeoutExpired:
