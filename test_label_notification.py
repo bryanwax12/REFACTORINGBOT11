@@ -176,7 +176,8 @@ async def create_test_order_and_label():
         return False
     
     rates_data = rates_response.json()
-    rates = rates_data.get('rates', [])
+    # Extract rates from nested structure
+    rates = rates_data.get('rate_response', {}).get('rates', [])
     
     print(f"   API Response: {len(rates)} rates returned")
     if 'errors' in rates_data:
@@ -184,7 +185,6 @@ async def create_test_order_and_label():
     
     if not rates:
         print("❌ No rates returned from ShipStation")
-        print(f"   Full response: {rates_data}")
         return False
     
     # Use first USPS rate
