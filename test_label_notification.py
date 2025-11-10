@@ -112,10 +112,15 @@ async def create_test_order_and_label():
         return False
     
     carriers_data = carriers_response.json()
-    carrier_ids = [c['carrier_id'] for c in carriers_data.get('carriers', []) 
-                   if c.get('carrier_code') in ['stamps_com', 'ups', 'fedex']]
+    all_carriers = carriers_data.get('carriers', [])
+    
+    # Filter out globalpost but keep all other active carriers
+    carrier_ids = [c['carrier_id'] for c in all_carriers 
+                   if c.get('carrier_code') not in ['globalpost']]
     
     print(f"✅ Found {len(carrier_ids)} carriers")
+    for c in all_carriers[:5]:  # Show first 5 carriers
+        print(f"   - {c.get('friendly_name', 'Unknown')}: {c.get('carrier_id')}")
     
     # Fetch rates - format addresses for ShipStation API
     rate_request = {
