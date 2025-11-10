@@ -6468,6 +6468,10 @@ async def set_api_mode(request: dict, authenticated: bool = Depends(verify_admin
         SHIPSTATION_CARRIER_IDS = []
         logger.info(f"Cleared carrier IDs cache after switching to {mode} mode")
         
+        # Clear settings cache
+        clear_settings_cache()
+        logger.info("Cleared settings cache")
+        
         # Send notification to admin via Telegram
         if ADMIN_TELEGRAM_ID and bot_instance:
             try:
