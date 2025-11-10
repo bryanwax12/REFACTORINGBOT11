@@ -6350,36 +6350,34 @@ async def disable_maintenance_mode(authenticated: bool = Depends(verify_admin_ke
 async def restart_bot(authenticated: bool = Depends(verify_admin_key)):
     """Restart the Telegram bot backend service"""
     try:
-        import subprocess
         import os
+        import sys
         
-        # Restart backend service using supervisorctl without sudo
-        # This works because supervisor is already running as root
-        result = subprocess.run(
-            ['supervisorctl', 'restart', 'backend'],
-            capture_output=True,
-            text=True,
-            timeout=10,
-            env=os.environ.copy()
-        )
+        logger.info("Bot restart requested by admin")
         
-        if result.returncode == 0 or 'started' in result.stdout.lower():
-            logger.info(f"Bot restart initiated successfully: {result.stdout}")
+        # Create a restart flag file
+        restart_flag = '/tmp/bot_restart_flag'
+        with open(restart_flag, 'w') as f:
+            f.write('restart')
+        
+        # Use os.system which runs with proper permissions
+        exit_code = os.system('sudo supervisorctl restart backend')
+        
+        if exit_code == 0:
+            logger.info("Bot restart command executed successfully")
             return {
                 "status": "success",
-                "message": "Бот перезагружается... Подождите 5-10 секунд",
-                "output": result.stdout.strip()
+                "message": "Бот перезагружается... Подождите 10 секунд",
+                "note": "Страница автоматически обновится через 10 секунд"
             }
         else:
-            logger.error(f"Bot restart failed: {result.stderr}")
-            raise HTTPException(
-                status_code=500, 
-                detail=f"Ошибка перезагрузки: {result.stderr or 'Unknown error'}"
-            )
+            logger.error(f"Bot restart command failed with exit code: {exit_code}")
+            return {
+                "status": "warning",
+                "message": "Команда перезагрузки отправлена, но статус неизвестен. Проверьте мониторинг через 10 секунд.",
+                "exit_code": exit_code
+            }
             
-    except subprocess.TimeoutExpired:
-        logger.error("Bot restart timeout")
-        raise HTTPException(status_code=500, detail="Timeout при перезагрузке бота")
     except Exception as e:
         logger.error(f"Error restarting bot: {e}")
         raise HTTPException(status_code=500, detail=str(e))
