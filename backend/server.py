@@ -668,18 +668,6 @@ async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT
             except Exception:
                 # Silent fail for "message not modified" and other common errors
                 pass
-                else:
-                    # Just remove buttons if no text saved
-                    await context.bot.edit_message_reply_markup(
-                        chat_id=chat_id,
-                        message_id=last_msg_id,
-                        reply_markup=None
-                    )
-                    logger.info(f"Removed buttons from message {last_msg_id}")
-            except Exception as e:
-                # Ignore "message not modified" error (message already has checkmark)
-                if "message is not modified" not in str(e).lower():
-                    logger.warning(f"Could not edit previous message: {e}")
         
     except Exception as e:
         logger.warning(f"Error in mark_message_as_selected: {e}")
