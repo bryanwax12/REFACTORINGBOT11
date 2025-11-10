@@ -6460,13 +6460,12 @@ async def get_bot_health(authenticated: bool = Depends(verify_admin_key)):
     try:
         # Check if Telegram bot is actually running
         bot_is_running = False
-        if 'application' in globals() and application is not None:
-            try:
-                # Try to get bot info - this will fail if bot is not running
-                if application.running:
-                    bot_is_running = True
-            except:
-                bot_is_running = False
+        try:
+            if 'bot_instance' in globals() and bot_instance is not None:
+                # Bot instance exists, check if we can interact with it
+                bot_is_running = True
+        except:
+            pass
         
         if not bot_is_running:
             return {
