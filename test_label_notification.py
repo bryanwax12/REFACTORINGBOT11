@@ -117,14 +117,32 @@ async def create_test_order_and_label():
     
     print(f"✅ Found {len(carrier_ids)} carriers")
     
-    # Fetch rates
+    # Fetch rates - format addresses for ShipStation API
     rate_request = {
         'rate_options': {
             'carrier_ids': carrier_ids
         },
         'shipment': {
-            'ship_to': test_order['address_to'],
-            'ship_from': test_order['address_from'],
+            'ship_to': {
+                'name': test_order['address_to']['name'],
+                'phone': test_order['address_to']['phone'],
+                'address_line1': test_order['address_to']['street1'],
+                'address_line2': test_order['address_to'].get('street2', ''),
+                'city_locality': test_order['address_to']['city'],
+                'state_province': test_order['address_to']['state'],
+                'postal_code': test_order['address_to']['zip'],
+                'country_code': test_order['address_to']['country']
+            },
+            'ship_from': {
+                'name': test_order['address_from']['name'],
+                'phone': test_order['address_from']['phone'],
+                'address_line1': test_order['address_from']['street1'],
+                'address_line2': test_order['address_from'].get('street2', ''),
+                'city_locality': test_order['address_from']['city'],
+                'state_province': test_order['address_from']['state'],
+                'postal_code': test_order['address_from']['zip'],
+                'country_code': test_order['address_from']['country']
+            },
             'packages': [{
                 'weight': {
                     'value': test_order['parcel']['weight'],
