@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 
 const API = process.env.REACT_APP_BACKEND_URL || "";
+const ADMIN_API_KEY = process.env.REACT_APP_ADMIN_API_KEY;
 
 export default function MonitoringTab() {
   const [healthData, setHealthData] = useState(null);
