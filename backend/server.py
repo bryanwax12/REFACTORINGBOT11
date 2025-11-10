@@ -4330,12 +4330,12 @@ Label PDF: {label_download_url}
 
                 # Send to admin
                 if 'application' in globals() and hasattr(application, 'bot'):
-                    bot_instance = application.bot
+                    admin_bot = application.bot
                 else:
                     from telegram import Bot
-                    bot_instance = Bot(TELEGRAM_BOT_TOKEN)
+                    admin_bot = Bot(TELEGRAM_BOT_TOKEN)
                 
-                await bot_instance.send_message(
+                await admin_bot.send_message(
                     chat_id=ADMIN_TELEGRAM_ID,
                     text=admin_message,
                     parse_mode='Markdown'
