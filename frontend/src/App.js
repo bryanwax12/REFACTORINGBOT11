@@ -987,6 +987,19 @@ const Dashboard = () => {
             </p>
           </CardContent>
         </Card>
+
+        <Card data-testid="stat-user-balance">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">User Balances</CardTitle>
+            <DollarSign className="h-4 w-4 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-600">${stats?.total_user_balance?.toFixed(2) || '0.00'}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Total money in user accounts
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-4">
