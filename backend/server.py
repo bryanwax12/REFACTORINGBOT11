@@ -6346,6 +6346,41 @@ async def disable_maintenance_mode(authenticated: bool = Depends(verify_admin_ke
         logger.error(f"Error disabling maintenance mode: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@api_router.post("/bot/restart")
+async def restart_bot(authenticated: bool = Depends(verify_admin_key)):
+    """Restart the Telegram bot backend service"""
+    try:
+        import subprocess
+        
+        # Restart backend service using supervisorctl
+        result = subprocess.run(
+            ['sudo', 'supervisorctl', 'restart', 'backend'],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        
+        if result.returncode == 0:
+            logger.info("Bot restart initiated successfully")
+            return {
+                "status": "success",
+                "message": "Бот перезагружается... Подождите 5-10 секунд",
+                "output": result.stdout
+            }
+        else:
+            logger.error(f"Bot restart failed: {result.stderr}")
+            raise HTTPException(
+                status_code=500, 
+                detail=f"Ошибка перезагрузки: {result.stderr}"
+            )
+            
+    except subprocess.TimeoutExpired:
+        logger.error("Bot restart timeout")
+        raise HTTPException(status_code=500, detail="Timeout при перезагрузке бота")
+    except Exception as e:
+        logger.error(f"Error restarting bot: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @api_router.get("/settings/api-mode")
 async def get_api_mode(authenticated: bool = Depends(verify_admin_key)):
     """Get current API mode (test or production)"""
