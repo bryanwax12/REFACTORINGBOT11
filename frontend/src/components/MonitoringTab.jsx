@@ -17,11 +17,10 @@ export default function MonitoringTab() {
 
   const loadData = async () => {
     try {
-      const adminKey = localStorage.getItem("adminKey");
       const [healthRes, logsRes, metricsRes] = await Promise.all([
-        axios.get(`${API}/api/bot/health`, { headers: { "X-Api-Key": adminKey } }),
-        axios.get(`${API}/api/bot/logs?limit=50`, { headers: { "X-Api-Key": adminKey } }),
-        axios.get(`${API}/api/bot/metrics`, { headers: { "X-Api-Key": adminKey } })
+        axios.get(`${API}/api/bot/health`, { headers: { "X-Api-Key": ADMIN_API_KEY } }),
+        axios.get(`${API}/api/bot/logs?limit=50`, { headers: { "X-Api-Key": ADMIN_API_KEY } }),
+        axios.get(`${API}/api/bot/metrics`, { headers: { "X-Api-Key": ADMIN_API_KEY } })
       ]);
 
       setHealthData(healthRes.data);
