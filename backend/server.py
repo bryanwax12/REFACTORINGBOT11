@@ -622,72 +622,52 @@ async def check_stale_interaction(query, context: ContextTypes.DEFAULT_TYPE) -> 
     return False
 
 async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Remove buttons from previous message and add '✅ Выбрано' text"""
+    """
+    Optimized: Remove buttons from previous message and add '✅ Выбрано' text
+    Simplified logic with early returns to reduce API calls
+    """
     try:
-        # Check if this is a callback query (button press)
+        # Handle callback query (button press)
         if update.callback_query:
-            query = update.callback_query
-            message = query.message
+            message = update.callback_query.message
+            current_text = message.text or message.caption or ""
             
-            # Try to add "✅ Выбрано" and remove buttons
+            # Skip if already marked or error message
+            if "✅ Выбрано" in current_text or "❌" in current_text:
+                return  # Early return - no API call needed
+            
+            # Single try-catch block for efficiency
             try:
-                current_text = message.text or message.caption or ""
-                
-                # Don't add "✅ Выбрано" if it's already there or if it's an error message
-                if "✅ Выбрано" not in current_text and "❌" not in current_text:
-                    new_text = current_text + "\n\n✅ Выбрано"
-                    # Try without parse_mode first, then with Markdown if that fails
-                    try:
-                        await message.edit_text(new_text, reply_markup=None)
-                    except Exception:
-                        await message.edit_text(new_text, reply_markup=None, parse_mode='Markdown')
-                    logger.info(f"Added '✅ Выбрано' and removed buttons for user {update.effective_user.id}")
-                else:
-                    # Just remove buttons if text already has checkmark or error
-                    await message.edit_reply_markup(reply_markup=None)
-                    logger.info(f"Removed buttons from clicked message for user {update.effective_user.id}")
-            except Exception as e:
-                # If editing text fails, just try to remove buttons
+                new_text = current_text + "\n\n✅ Выбрано"
+                await message.edit_text(new_text, reply_markup=None)
+            except Exception:
+                # Silent fallback - just remove buttons
                 try:
                     await message.edit_reply_markup(reply_markup=None)
-                    logger.info(f"Removed buttons (fallback) for user {update.effective_user.id}")
-                except Exception as e2:
-                    logger.warning(f"Could not remove buttons from clicked message: {e2}")
+                except Exception:
+                    pass  # Silent fail - don't log warnings for common cases
+            return
         
-        # For text messages (when user types input), remove buttons and add "✅ Выбрано"
-        elif update.message and 'last_bot_message_id' in context.user_data:
+        # Handle text input messages
+        if update.message and 'last_bot_message_id' in context.user_data:
+            last_msg_id = context.user_data.get('last_bot_message_id')
+            last_msg_text = context.user_data.get('last_bot_message_text', '')
+            
+            # Skip if no data or already marked
+            if not last_msg_text or "✅ Выбрано" in last_msg_text or "❌" in last_msg_text:
+                return  # Early return - no API call needed
+            
             try:
-                # Get the last bot message ID and text
-                last_msg_id = context.user_data['last_bot_message_id']
-                last_msg_text = context.user_data.get('last_bot_message_text', '')
-                chat_id = update.effective_chat.id
-                
-                # Try to add "✅ Выбрано" if we have the text
-                if last_msg_text and "✅ Выбрано" not in last_msg_text and "❌" not in last_msg_text:
-                    try:
-                        new_text = last_msg_text + "\n\n✅ Выбрано"
-                        await context.bot.edit_message_text(
-                            text=new_text,
-                            chat_id=chat_id,
-                            message_id=last_msg_id,
-                            reply_markup=None
-                        )
-                        logger.info(f"Added '✅ Выбрано' to message {last_msg_id}")
-                    except Exception as e:
-                        # Ignore "message not modified" error (message already has checkmark)
-                        if "message is not modified" in str(e).lower():
-                            logger.info(f"Message {last_msg_id} already marked as selected")
-                        else:
-                            # Fallback to just removing buttons for other errors
-                            try:
-                                await context.bot.edit_message_reply_markup(
-                                    chat_id=chat_id,
-                                    message_id=last_msg_id,
-                                    reply_markup=None
-                                )
-                                logger.info(f"Removed buttons (fallback) from message {last_msg_id}")
-                            except Exception as e2:
-                                logger.warning(f"Could not remove buttons: {e2}")
+                new_text = last_msg_text + "\n\n✅ Выбрано"
+                await context.bot.edit_message_text(
+                    text=new_text,
+                    chat_id=update.effective_chat.id,
+                    message_id=last_msg_id,
+                    reply_markup=None
+                )
+            except Exception:
+                # Silent fail for "message not modified" and other common errors
+                pass
                 else:
                     # Just remove buttons if no text saved
                     await context.bot.edit_message_reply_markup(
