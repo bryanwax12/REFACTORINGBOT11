@@ -7014,8 +7014,9 @@ async def check_all_users_channel_status(authenticated: bool = Depends(verify_ad
                 if is_member:
                     member_count += 1
                 
-                # Small delay to avoid rate limiting
-                await asyncio.sleep(0.02)
+                # Delay to avoid rate limiting and channel blocking
+                # Telegram allows ~30 requests per second per user
+                await asyncio.sleep(0.1)  # Increased from 0.02 to 0.1 (10 checks/sec)
                 
             except Exception as e:
                 logger.error(f"Failed to check status for user {user['telegram_id']}: {e}")
