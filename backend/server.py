@@ -4255,8 +4255,12 @@ async def create_and_send_label(order_id, telegram_id, message):
                 label_response_download = requests.get(label_download_url, headers=headers_download, timeout=30)
                 
                 if label_response_download.status_code == 200:
-                    # Generate AI thank you message
-                    thank_you_msg = await generate_thank_you_message()
+                    # Generate AI thank you message ONCE
+                    try:
+                        thank_you_msg = await generate_thank_you_message()
+                    except Exception as e:
+                        logger.error(f"Error generating thank you message: {e}")
+                        thank_you_msg = "Спасибо за использование нашего сервиса!"
                     
                     # Send label as document
                     message_text = f"""✅ Shipping Label создан!
