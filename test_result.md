@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Optimize bot speed - make it work faster"
+user_problem_statement: "Протестируй функционал уведомлений администратору при создании лейбла"
 
 backend:
   - task: "Cancel Order Button - Consistent Confirmation Across All States"
