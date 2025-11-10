@@ -69,28 +69,74 @@ export default function MonitoringTab() {
     return badges[category] || "📋 General";
   };
 
+  const checkBotHealth = async () => {
+    try {
+      const response = await axios.get(`${API}/api/bot/health`, { timeout: 3000 });
+      return response.data.status === "healthy";
+    } catch (error) {
+      return false;
+    }
+  };
+
+  const waitForBotRestart = async () => {
+    setRestartStatus("⏳ Перезагрузка бота...");
+    
+    // Wait 3 seconds for shutdown
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
+    // Poll for bot to come back online
+    let attempts = 0;
+    const maxAttempts = 20; // 20 * 2 seconds = 40 seconds max
+    
+    while (attempts < maxAttempts) {
+      setRestartStatus(`🔄 Ожидание запуска... (попытка ${attempts + 1}/${maxAttempts})`);
+      
+      const isHealthy = await checkBotHealth();
+      if (isHealthy) {
+        setRestartStatus("✅ Бот успешно перезагружен!");
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return true;
+      }
+      
+      attempts++;
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds between attempts
+    }
+    
+    setRestartStatus("⚠️ Превышено время ожидания. Проверьте статус вручную.");
+    return false;
+  };
+
   const handleRestartBot = async () => {
-    if (!window.confirm("Вы уверены, что хотите перезагрузить бота? Это займёт 5-10 секунд.")) {
+    if (!window.confirm("Вы уверены, что хотите перезагрузить бота? Это займёт 10-15 секунд.")) {
       return;
     }
 
     try {
-      setLoading(true);
+      setRestarting(true);
+      setAutoRefresh(false); // Stop auto-refresh during restart
+      
       const adminKey = localStorage.getItem("adminKey");
       await axios.post(`${API}/api/bot/restart`, {}, {
-        headers: { "X-Admin-Key": adminKey }
+        headers: { "X-Api-Key": adminKey }
       });
       
-      alert("✅ Бот перезагружается... Подождите 10 секунд и обновите страницу.");
+      // Wait for bot to restart
+      const success = await waitForBotRestart();
       
-      // Wait 10 seconds and reload data
-      setTimeout(() => {
-        loadData();
-      }, 10000);
+      if (success) {
+        // Reload all data
+        setRestartStatus("📊 Обновление данных...");
+        await loadData();
+        setRestartStatus("");
+      }
+      
     } catch (error) {
       console.error("Failed to restart bot:", error);
-      alert("❌ Ошибка при перезагрузке бота: " + (error.response?.data?.detail || error.message));
-      setLoading(false);
+      setRestartStatus("❌ Ошибка: " + (error.response?.data?.detail || error.message));
+      setTimeout(() => setRestartStatus(""), 5000);
+    } finally {
+      setRestarting(false);
+      setAutoRefresh(true); // Resume auto-refresh
     }
   };
 
