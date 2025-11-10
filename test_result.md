@@ -775,13 +775,22 @@ backend:
 backend:
   - task: "Admin Notification for Each Created Label"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
           agent: "main"
           comment: "✅ ADMIN LABEL NOTIFICATION ALREADY IMPLEMENTED: Verified that admin notification feature is already fully implemented in create_and_send_label() function (lines 4304-4345). After each successful label creation, bot sends detailed notification to ADMIN_TELEGRAM_ID (7066790254) including: (1) 👤 User info: name, username, telegram ID, (2) 📤 Sender address: name and full address with city/state/zip, (3) 📥 Receiver address: name and full address with city/state/zip, (4) 🚚 Carrier and service type, (5) 📋 Tracking number, (6) 💰 Price (amount paid by user), (7) ⚖️ Weight in pounds, (8) 🕐 Timestamp in UTC. Message formatted with Markdown for better readability. Error handling implemented - if notification fails, error is logged but doesn't block label creation. Feature satisfies user request: 'сделай что бы администартору приходило оповещение, за каждый лейбл, что бы он знал (кто сделал, какой и цена)'. Ready for testing to confirm notifications are being sent successfully."
+        - working: false
+          agent: "user"
+          comment: "❌ CRITICAL BUG REPORTED: User reported error 'cannot access local variable bot_instance where it is not associated with a value' when creating label for order ebb7c1ce-6ce4-4677-9b96-9e3878a6e2e8. Error occurred in create_and_send_label function during admin notification sending."
+        - working: "NA"
+          agent: "main"
+          comment: "🔧 CRITICAL FIX APPLIED: Root cause identified in create_and_send_label function (lines 4332-4336). Problem: Inside admin notification block, bot_instance variable was being reassigned locally (bot_instance = application.bot or Bot(TOKEN)), but bot_instance is already used as global variable earlier in the function for sending label to user. This created UnboundLocalError when Python tried to determine variable scope. SOLUTION: Renamed local variable from bot_instance to admin_bot to avoid naming conflict. Changed lines 4333, 4336, 4338 to use admin_bot instead of bot_instance. Now admin notification uses separate bot instance (admin_bot) while user notification continues using global bot_instance. Backend restarted successfully. Error should be resolved - admin notifications will now send without UnboundLocalError."
+        - working: true
+          agent: "testing"
+          comment: "✅ ADMIN NOTIFICATION FIX VERIFIED: Created test label (tracking: 9405550105794011246318) and successfully sent admin notification to ID 7066790254 (Message ID: 4640). All 12/12 implementation checks passed. Notification includes all required information: user, addresses, carrier, tracking, price, weight, timestamp. Feature working correctly."
 
