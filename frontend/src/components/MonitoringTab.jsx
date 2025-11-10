@@ -150,6 +150,27 @@ export default function MonitoringTab() {
 
   return (
     <div className="space-y-6">
+      {/* Restart Overlay */}
+      {restarting && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4 shadow-xl">
+            <div className="text-center">
+              <div className="mb-4">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              </div>
+              <h3 className="text-xl font-bold mb-2">Перезагрузка бота</h3>
+              <p className="text-gray-600 mb-4">{restartStatus}</p>
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div className="bg-blue-600 h-2.5 rounded-full animate-pulse" style={{width: '100%'}}></div>
+              </div>
+              <p className="text-sm text-gray-500 mt-4">
+                Пожалуйста, не закрывайте эту страницу
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -162,17 +183,18 @@ export default function MonitoringTab() {
           <Button
             onClick={handleRestartBot}
             variant="destructive"
-            disabled={loading}
+            disabled={restarting || loading}
           >
-            🔄 Перезагрузить бота
+            {restarting ? "⏳ Перезагрузка..." : "🔄 Перезагрузить бота"}
           </Button>
           <Button
             onClick={() => setAutoRefresh(!autoRefresh)}
             variant={autoRefresh ? "default" : "outline"}
+            disabled={restarting}
           >
             {autoRefresh ? "🔄 Авто-обновление ON" : "⏸️ Авто-обновление OFF"}
           </Button>
-          <Button onClick={loadData} variant="outline">
+          <Button onClick={loadData} variant="outline" disabled={restarting}>
             🔄 Обновить
           </Button>
         </div>
