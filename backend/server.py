@@ -29,11 +29,12 @@ load_dotenv(ROOT_DIR / '.env')
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(
     mongo_url,
-    maxPoolSize=200,  # Maximum number of connections in pool
-    minPoolSize=10,   # Minimum number of connections to maintain
-    maxIdleTimeMS=45000,  # Close idle connections after 45 seconds
-    waitQueueTimeoutMS=5000,  # Maximum time to wait for connection
-    serverSelectionTimeoutMS=5000  # Timeout for server selection
+    maxPoolSize=20,  # Optimized for Preview environment (was 200)
+    minPoolSize=2,   # Lower minimum for resource efficiency (was 10)
+    maxIdleTimeMS=30000,  # Close idle connections faster (was 45000)
+    waitQueueTimeoutMS=3000,  # Shorter wait time (was 5000)
+    serverSelectionTimeoutMS=3000,  # Faster timeout (was 5000)
+    connectTimeoutMS=3000  # Add connection timeout
 )
 db = client[os.environ['DB_NAME']]
 
