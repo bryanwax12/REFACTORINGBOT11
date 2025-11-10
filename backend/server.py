@@ -6351,8 +6351,17 @@ async def delayed_restart():
     await asyncio.sleep(2)  # Wait 2 seconds to send response
     logger.info("Executing delayed restart command...")
     import os
+    import signal
+    
+    # Stop the backend gracefully - supervisor will auto-restart due to autorestart=true
+    # First try graceful restart
     result = os.system('sudo supervisorctl restart backend')
     logger.info(f"Restart command executed with result: {result}")
+    
+    # If restart didn't work, force stop (supervisor will auto-start)
+    if result != 0:
+        await asyncio.sleep(1)
+        os.kill(os.getpid(), signal.SIGTERM)
 
 @api_router.post("/bot/restart")
 async def restart_bot(
