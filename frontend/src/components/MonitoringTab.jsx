@@ -85,10 +85,12 @@ export default function MonitoringTab() {
   };
 
   const waitForBotRestart = async () => {
+    console.log("=== Starting bot restart sequence ===");
     setRestartStatus("⏳ Отправка команды перезагрузки...");
     
     // Wait 2 seconds for API response
     await new Promise(resolve => setTimeout(resolve, 2000));
+    console.log("Initial wait complete, checking for shutdown...");
     
     // Step 1: Wait for bot to stop (check that it becomes unhealthy)
     setRestartStatus("🛑 Ожидание остановки бота...");
@@ -96,10 +98,15 @@ export default function MonitoringTab() {
     const maxStopAttempts = 5; // 5 * 2 seconds = 10 seconds max
     
     while (stopAttempts < maxStopAttempts) {
+      console.log(`Stop check attempt ${stopAttempts + 1}/${maxStopAttempts}`);
       const isHealthy = await checkBotHealth();
+      console.log(`Bot healthy during stop check: ${isHealthy}`);
+      
       if (!isHealthy) {
         // Bot stopped!
+        console.log("Bot successfully stopped!");
         setRestartStatus("✅ Бот остановлен, ожидание запуска...");
+        await new Promise(resolve => setTimeout(resolve, 2000));
         break;
       }
       stopAttempts++;
@@ -107,14 +114,19 @@ export default function MonitoringTab() {
     }
     
     // Step 2: Wait for bot to start (check that it becomes healthy again)
+    console.log("Starting health checks for bot startup...");
     let startAttempts = 0;
     const maxStartAttempts = 15; // 15 * 2 seconds = 30 seconds max
     
     while (startAttempts < maxStartAttempts) {
       setRestartStatus(`🔄 Ожидание запуска... (попытка ${startAttempts + 1}/${maxStartAttempts})`);
+      console.log(`Start check attempt ${startAttempts + 1}/${maxStartAttempts}`);
       
       const isHealthy = await checkBotHealth();
+      console.log(`Bot healthy during start check: ${isHealthy}`);
+      
       if (isHealthy) {
+        console.log("Bot is back online!");
         setRestartStatus("✅ Бот успешно перезагружен!");
         await new Promise(resolve => setTimeout(resolve, 1000));
         return true;
@@ -124,7 +136,8 @@ export default function MonitoringTab() {
       await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds between attempts
     }
     
-    setRestartStatus("⚠️ Превышено время ожидания. Проверьте статус вручную.");
+    console.log("Restart timeout exceeded");
+    setRestartStatus("⚠️ Превышено время ожидания. Проверьте статус вручно.");
     return false;
   };
 
