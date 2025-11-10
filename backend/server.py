@@ -7532,8 +7532,8 @@ async def startup_event():
         
         logger.info(f"✅ ShipStation API mode: {api_mode.upper()}")
         
-        # Check ShipStation balance on startup
-        await check_shipstation_balance()
+        # Note: Balance check removed from startup to avoid unnecessary API calls
+        # Balance is checked after each label creation (in create_and_send_label)
         
     except Exception as e:
         logger.error(f"Error loading API mode from database: {e}")
