@@ -631,7 +631,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Admin Notification for Each Created Label"
+    - "Admin Notification for Label Creation"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
