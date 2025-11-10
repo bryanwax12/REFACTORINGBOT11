@@ -6351,22 +6351,20 @@ async def delayed_restart():
     await asyncio.sleep(2)  # Wait 2 seconds to send response
     logger.info("Executing delayed restart command...")
     import os
-    os.system('sudo supervisorctl restart backend')
+    result = os.system('sudo supervisorctl restart backend')
+    logger.info(f"Restart command executed with result: {result}")
 
 @api_router.post("/bot/restart")
-async def restart_bot(authenticated: bool = Depends(verify_admin_key), background_tasks: BackgroundTasks = None):
+async def restart_bot(
+    background_tasks: BackgroundTasks, 
+    authenticated: bool = Depends(verify_admin_key)
+):
     """Restart the Telegram bot backend service"""
     try:
-        from fastapi import BackgroundTasks
-        
         logger.info("Bot restart requested by admin")
         
         # Schedule restart in background after response is sent
-        if background_tasks:
-            background_tasks.add_task(delayed_restart)
-        else:
-            # Fallback: use asyncio.create_task
-            asyncio.create_task(delayed_restart())
+        background_tasks.add_task(delayed_restart)
         
         logger.info("Bot restart scheduled successfully")
         return {
