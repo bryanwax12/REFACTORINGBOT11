@@ -4301,6 +4301,49 @@ Label PDF: {label_download_url}
             except Exception as e:
                 logger.error(f"Error sending label to user: {e}")
                 
+        # Send notification to admin about new label
+        if ADMIN_TELEGRAM_ID:
+            try:
+                # Get user info
+                user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+                user_name = user.get('first_name', 'Unknown') if user else 'Unknown'
+                username = user.get('username', '') if user else ''
+                user_display = f"{user_name}" + (f" (@{username})" if username else f" (ID: {telegram_id})")
+                
+                # Format admin notification
+                admin_message = f"""📦 *Новый лейбл создан!*
+
+👤 *Пользователь:* {user_display}
+
+📤 *От:* {order['address_from']['name']}
+   {order['address_from']['street1']}, {order['address_from']['city']}, {order['address_from']['state']} {order['address_from']['zip']}
+
+📥 *Кому:* {order['address_to']['name']}  
+   {order['address_to']['street1']}, {order['address_to']['city']}, {order['address_to']['state']} {order['address_to']['zip']}
+
+🚚 *Перевозчик:* {order['selected_carrier']} - {order['selected_service']}
+📋 *Трекинг:* `{tracking_number}`
+💰 *Цена:* ${order['amount']:.2f}
+⚖️ *Вес:* {order['parcel']['weight']} lb
+
+🕐 *Время:* {datetime.now(timezone.utc).strftime('%d.%m.%Y %H:%M UTC')}"""
+
+                # Send to admin
+                if 'application' in globals() and hasattr(application, 'bot'):
+                    bot_instance = application.bot
+                else:
+                    from telegram import Bot
+                    bot_instance = Bot(TELEGRAM_BOT_TOKEN)
+                
+                await bot_instance.send_message(
+                    chat_id=ADMIN_TELEGRAM_ID,
+                    text=admin_message,
+                    parse_mode='Markdown'
+                )
+                logger.info(f"Label creation notification sent to admin {ADMIN_TELEGRAM_ID}")
+            except Exception as e:
+                logger.error(f"Failed to send label notification to admin: {e}")
+        
         # Check ShipStation balance after label creation
         asyncio.create_task(check_shipstation_balance())
         
