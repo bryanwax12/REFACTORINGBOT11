@@ -67,6 +67,31 @@ export default function MonitoringTab() {
     return badges[category] || "📋 General";
   };
 
+  const handleRestartBot = async () => {
+    if (!window.confirm("Вы уверены, что хотите перезагрузить бота? Это займёт 5-10 секунд.")) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const adminKey = localStorage.getItem("adminKey");
+      await axios.post(`${API}/api/bot/restart`, {}, {
+        headers: { "X-Admin-Key": adminKey }
+      });
+      
+      alert("✅ Бот перезагружается... Подождите 10 секунд и обновите страницу.");
+      
+      // Wait 10 seconds and reload data
+      setTimeout(() => {
+        loadData();
+      }, 10000);
+    } catch (error) {
+      console.error("Failed to restart bot:", error);
+      alert("❌ Ошибка при перезагрузке бота: " + (error.response?.data?.detail || error.message));
+      setLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
