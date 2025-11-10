@@ -11,6 +11,8 @@ export default function MonitoringTab() {
   const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [restarting, setRestarting] = useState(false);
+  const [restartStatus, setRestartStatus] = useState("");
 
   const loadData = async () => {
     try {
