@@ -7370,13 +7370,21 @@ async def get_stats(authenticated: bool = Depends(verify_admin_key)):
     total_labels = await db.shipping_labels.count_documents({"status": "created"})
     total_profit = total_labels * 10.0
     
+    # Calculate total user balance (sum of all user balances)
+    total_user_balance = await db.users.aggregate([
+        {"$group": {"_id": None, "total": {"$sum": "$balance"}}}
+    ]).to_list(1)
+    
+    user_balance_sum = total_user_balance[0]['total'] if total_user_balance else 0
+    
     return {
         "total_users": total_users,
         "total_orders": total_orders,
         "paid_orders": paid_orders,
         "total_revenue": revenue,
         "total_profit": total_profit,
-        "total_labels": total_labels
+        "total_labels": total_labels,
+        "total_user_balance": user_balance_sum
     }
 
 @api_router.get("/stats/expenses")
