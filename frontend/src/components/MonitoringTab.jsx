@@ -79,17 +79,33 @@ export default function MonitoringTab() {
   };
 
   const waitForBotRestart = async () => {
-    setRestartStatus("⏳ Перезагрузка бота...");
+    setRestartStatus("⏳ Отправка команды перезагрузки...");
     
-    // Wait 3 seconds for shutdown
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    // Wait 2 seconds for API response
+    await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // Poll for bot to come back online
-    let attempts = 0;
-    const maxAttempts = 20; // 20 * 2 seconds = 40 seconds max
+    // Step 1: Wait for bot to stop (check that it becomes unhealthy)
+    setRestartStatus("🛑 Ожидание остановки бота...");
+    let stopAttempts = 0;
+    const maxStopAttempts = 5; // 5 * 2 seconds = 10 seconds max
     
-    while (attempts < maxAttempts) {
-      setRestartStatus(`🔄 Ожидание запуска... (попытка ${attempts + 1}/${maxAttempts})`);
+    while (stopAttempts < maxStopAttempts) {
+      const isHealthy = await checkBotHealth();
+      if (!isHealthy) {
+        // Bot stopped!
+        setRestartStatus("✅ Бот остановлен, ожидание запуска...");
+        break;
+      }
+      stopAttempts++;
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+    
+    // Step 2: Wait for bot to start (check that it becomes healthy again)
+    let startAttempts = 0;
+    const maxStartAttempts = 15; // 15 * 2 seconds = 30 seconds max
+    
+    while (startAttempts < maxStartAttempts) {
+      setRestartStatus(`🔄 Ожидание запуска... (попытка ${startAttempts + 1}/${maxStartAttempts})`);
       
       const isHealthy = await checkBotHealth();
       if (isHealthy) {
@@ -98,7 +114,7 @@ export default function MonitoringTab() {
         return true;
       }
       
-      attempts++;
+      startAttempts++;
       await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds between attempts
     }
     
