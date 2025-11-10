@@ -112,6 +112,13 @@ export default function MonitoringTab() {
         </div>
         <div className="flex gap-2">
           <Button
+            onClick={handleRestartBot}
+            variant="destructive"
+            disabled={loading}
+          >
+            🔄 Перезагрузить бота
+          </Button>
+          <Button
             onClick={() => setAutoRefresh(!autoRefresh)}
             variant={autoRefresh ? "default" : "outline"}
           >
