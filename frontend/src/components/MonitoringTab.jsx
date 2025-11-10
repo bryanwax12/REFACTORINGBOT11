@@ -142,21 +142,33 @@ export default function MonitoringTab() {
   };
 
   const handleRestartBot = async () => {
+    console.log("=== RESTART BUTTON CLICKED ===");
+    
     if (!window.confirm("Вы уверены, что хотите перезагрузить бота? Это займёт 10-15 секунд.")) {
+      console.log("User cancelled restart");
       return;
     }
 
+    console.log("User confirmed restart");
+
     try {
+      console.log("Setting restarting state...");
       setRestarting(true);
       setAutoRefresh(false); // Stop auto-refresh during restart
       
       const adminKey = localStorage.getItem("adminKey");
-      await axios.post(`${API}/api/bot/restart`, {}, {
+      console.log("Admin key:", adminKey ? "present" : "missing");
+      
+      console.log("Sending restart request to API...");
+      const response = await axios.post(`${API}/api/bot/restart`, {}, {
         headers: { "X-Api-Key": adminKey }
       });
+      console.log("Restart API response:", response.data);
       
       // Wait for bot to restart
+      console.log("Starting waitForBotRestart...");
       const success = await waitForBotRestart();
+      console.log("waitForBotRestart result:", success);
       
       if (success) {
         // Reload all data
@@ -166,10 +178,11 @@ export default function MonitoringTab() {
       }
       
     } catch (error) {
-      console.error("Failed to restart bot:", error);
+      console.error("ERROR in handleRestartBot:", error);
       setRestartStatus("❌ Ошибка: " + (error.response?.data?.detail || error.message));
       setTimeout(() => setRestartStatus(""), 5000);
     } finally {
+      console.log("Cleaning up restart state...");
       setRestarting(false);
       setAutoRefresh(true); // Resume auto-refresh
     }
