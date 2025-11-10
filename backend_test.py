@@ -4554,7 +4554,7 @@ def run_shipstation_carrier_tests():
 
 if __name__ == "__main__":
     print("🚀 Starting Telegram Bot Backend Test Suite...")
-    print("🎯 CRITICAL FOCUS: Template Flow Issue Investigation")
+    print("🎯 CRITICAL FOCUS: Admin Notification for Label Creation")
     print("=" * 80)
     print(f"Backend URL: {BACKEND_URL}")
     print(f"API Base: {API_BASE}")
@@ -4562,13 +4562,15 @@ if __name__ == "__main__":
     # Track test results
     test_results = {}
     
-    # Run CRITICAL test for Template Flow Issue per review request
+    # Run CRITICAL test for Admin Notification per review request
     print("\n" + "="*80)
-    print("🎯 CRITICAL TEST: Template Flow Issue Investigation")
+    print("🎯 CRITICAL TEST: Admin Notification for Label Creation")
     print("="*80)
     
     test_results['api_health'] = test_api_health()
-    test_results['template_flow_critical_issue'] = test_template_flow_critical_issue()
+    test_results['admin_notification_for_label_creation'] = test_admin_notification_for_label_creation()
+    test_results['database_collections'] = test_database_collections()
+    test_results['backend_logs_for_notifications'] = test_backend_logs_for_notifications()
     
     # Additional backend infrastructure tests
     print("\n" + "="*80)
@@ -4577,8 +4579,11 @@ if __name__ == "__main__":
     
     test_results['telegram_bot_token'] = test_telegram_bot_token()
     test_results['telegram_bot_infrastructure'] = test_telegram_bot_infrastructure()
-    test_results['conversation_handler_functions'] = test_conversation_handler_functions()
-    test_results['balance_topup_flow_button_protection'] = test_balance_topup_flow_button_protection()
+    test_results['admin_telegram_id_environment'] = test_admin_telegram_id_environment()
+    test_results['admin_notification_function'] = test_admin_notification_function()
+    test_results['contact_admin_buttons'] = test_contact_admin_buttons()
+    test_results['backend_admin_id_loading'] = test_backend_admin_id_loading()
+    test_results['telegram_bot_admin_integration'] = test_telegram_bot_admin_integration()
     
     # ShipStation tests (supporting)
     print("\n" + "="*80)
