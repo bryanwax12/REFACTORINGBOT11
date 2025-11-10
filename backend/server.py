@@ -6992,8 +6992,15 @@ async def check_all_users_channel_status(authenticated: bool = Depends(verify_ad
         checked_count = 0
         member_count = 0
         failed_count = 0
+        consecutive_errors = 0
+        max_consecutive_errors = 5  # Stop if 5 errors in a row (may indicate blocking)
         
         for user in users:
+            # Stop if too many consecutive errors (channel may be blocking us)
+            if consecutive_errors >= max_consecutive_errors:
+                logger.warning(f"Stopped checking after {consecutive_errors} consecutive errors - possible rate limiting")
+                break
+            
             try:
                 chat_member = await bot_instance.get_chat_member(
                     chat_id=int(CHANNEL_ID),
