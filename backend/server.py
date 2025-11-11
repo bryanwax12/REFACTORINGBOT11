@@ -2899,7 +2899,7 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
         message_text,
         reply_markup=reply_markup,
         parse_mode='Markdown'
-    )
+    ))
     context.user_data['last_bot_message_id'] = bot_msg.message_id
     context.user_data['last_bot_message_text'] = message_text
     
