@@ -1134,8 +1134,8 @@ _Если вы оплатите другую сумму, деньги не по�
             
             bot_msg = await safe_telegram_call(update.message.reply_text(
             message_text,
-            reply_markup=reply_markup,),
-            parse_mode='Markdown',
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
         ))
             
             # Save last bot message context for button protection
@@ -2615,8 +2615,8 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
             message_text,
-            reply_markup=reply_markup,),
-            parse_mode='Markdown',
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
         ))
     
     # Save last bot message context for button protection
@@ -2685,8 +2685,8 @@ async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_T
         
         bot_msg = await safe_telegram_call(query.message.reply_text(
             message_text,
-            reply_markup=reply_markup,),
-            parse_mode='Markdown',
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
         ))
         
         # Save last bot message context for button protection
@@ -2753,8 +2753,8 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
             """📋 *Мои шаблоны*,
             У вас пока нет сохраненных шаблонов.,
             Создайте заказ и нажмите "*Сохранить как шаблон*" на экране проверки данных.""",
-            reply_markup=reply_markup,),
-            parse_mode='Markdown',
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
         ))
         return ConversationHandler.END
     
@@ -2890,8 +2890,8 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     bot_msg = await safe_telegram_call(query.message.reply_text(
             message_text,
-            reply_markup=reply_markup,),
-            parse_mode='Markdown',
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
         ))
     context.user_data['last_bot_message_id'] = bot_msg.message_id
     context.user_data['last_bot_message_text'] = message_text
@@ -2929,8 +2929,8 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
     # Send new message immediately without waiting for mark_message_as_selected
     bot_msg = await safe_telegram_call(query.message.reply_text(
             message_text,
-            reply_markup=reply_markup,),
-            parse_mode='Markdown',
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
         ))
     context.user_data['last_bot_message_id'] = bot_msg.message_id
     context.user_data['last_bot_message_text'] = message_text
@@ -2962,8 +2962,8 @@ async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await safe_telegram_call(query.message.reply_text(
             f"""⚠️ *Удалить шаблон "{template['name']}"?*,
             Это действие нельзя отменить.""",
-            reply_markup=reply_markup,),
-            parse_mode='Markdown',
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
         ))
     # Clear last_bot_message to prevent accidentally removing these buttons
     context.user_data.pop('last_bot_message_id', None)
@@ -3912,8 +3912,8 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     
     await safe_telegram_call(query.message.reply_text(
             message_text,
-            reply_markup=reply_markup,),
-            parse_mode='Markdown',
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
         ))
     
     # Delete pending order after restoring
@@ -3999,8 +3999,8 @@ _Если вы оплатите другую сумму, деньги НЕ по�
             
             bot_msg = await safe_telegram_call(update.message.reply_text(
             message_text,
-            reply_markup=reply_markup,),
-            parse_mode='Markdown',
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
         ))
             
             # Save message_id in payment for later removal of button
