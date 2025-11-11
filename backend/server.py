@@ -2320,7 +2320,7 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
             return PARCEL_HEIGHT
         
         if height > 108:
-            await safe_telegram_call(update.message.reply_text("❌ Высота слишком большая. Максимум 108 дюймов. Попробуйте еще раз:")
+            await safe_telegram_call(update.message.reply_text("❌ Высота слишком большая. Максимум 108 дюймов. Попробуйте еще раз:"))
             return PARCEL_HEIGHT
         
         context.user_data['height'] = height
