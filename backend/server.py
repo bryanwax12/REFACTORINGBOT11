@@ -7903,9 +7903,22 @@ async def startup_event():
                 menu_button=MenuButtonCommands()
             )
             
-            await application.updater.start_polling()
-            
-            logger.info("Telegram Bot started successfully!")
+            # Check if we should use webhook (production) or polling (preview)
+            webhook_url = os.environ.get('WEBHOOK_URL')
+            if webhook_url:
+                # Production: use webhook
+                logger.info(f"Starting Telegram Bot in WEBHOOK mode: {webhook_url}")
+                await application.bot.delete_webhook(drop_pending_updates=True)
+                await application.bot.set_webhook(
+                    url=f"{webhook_url}/api/telegram/webhook",
+                    allowed_updates=["message", "callback_query"]
+                )
+                logger.info("Telegram Bot webhook set successfully!")
+            else:
+                # Preview: use polling
+                logger.info("Starting Telegram Bot in POLLING mode (preview)")
+                await application.updater.start_polling()
+                logger.info("Telegram Bot polling started successfully!")
         except Exception as e:
             logger.error(f"Failed to start Telegram Bot: {e}")
             logger.warning("Application will continue without Telegram Bot")
