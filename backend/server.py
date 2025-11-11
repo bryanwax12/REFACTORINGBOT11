@@ -3065,7 +3065,7 @@ async def order_from_template_list(update: Update, context: ContextTypes.DEFAULT
     templates = await db.templates.find({"telegram_id": telegram_id}).sort("created_at", -1).to_list(10)
     
     if not templates:
-        await query.message.reply_text("❌ У вас нет сохраненных шаблонов")
+        await safe_telegram_call(query.message.reply_text("❌ У вас нет сохраненных шаблонов"))
         return ConversationHandler.END
     
     message = "📋 *Выберите шаблон:*\n\n"
