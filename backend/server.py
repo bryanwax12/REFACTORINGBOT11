@@ -264,7 +264,7 @@ async def check_shipstation_balance():
                             chat_id=ADMIN_TELEGRAM_ID,
                             text=message,
                             parse_mode='Markdown'
-                        )
+                        ))
                         logger.info(f"Low balance notification sent to admin {ADMIN_TELEGRAM_ID}")
                     except Exception as e:
                         logger.error(f"Failed to send low balance notification: {e}")
