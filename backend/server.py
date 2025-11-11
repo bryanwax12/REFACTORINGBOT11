@@ -876,7 +876,7 @@ async def handle_create_label_request(update: Update, context: ContextTypes.DEFA
         return
     
     if order['payment_status'] != 'paid':
-        await safe_telegram_call(query.message.reply_text("❌ Заказ не оплачен. Создание лейбла невозможно.")
+        await safe_telegram_call(query.message.reply_text("❌ Заказ не оплачен. Создание лейбла невозможно."))
         return
     
     # Show confirmation message
