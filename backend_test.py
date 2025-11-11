@@ -2217,37 +2217,6 @@ def test_backend_logs_for_notifications():
     except Exception as e:
         print(f"❌ Backend logs test error: {e}")
         return False
-                    'handled_in_return': handled_in_return,
-                    'overall_ok': state_ok
-                }
-                
-                status = '✅' if state_ok else '❌'
-                print(f"      {state_name}: {status}")
-                print(f"         Function exists: {'✅' if function_exists else '❌'}")
-                print(f"         Has cancel button: {'✅' if has_cancel_button else '❌'}")
-                print(f"         Return handling: {'✅' if handled_in_return else '❌'}")
-            
-            overall_results[category_name] = category_results
-        
-        # Calculate overall statistics
-        total_states = len(all_states)
-        states_with_functions = sum(1 for category in overall_results.values() 
-                                  for state in category.values() 
-                                  if state['function_exists'])
-        states_with_cancel = sum(1 for category in overall_results.values() 
-                               for state in category.values() 
-                               if state['has_cancel_button'])
-        states_with_return = sum(1 for category in overall_results.values() 
-                               for state in category.values() 
-                               if state['handled_in_return'])
-        states_overall_ok = sum(1 for category in overall_results.values() 
-                              for state in category.values() 
-                              if state['overall_ok'])
-        
-        print(f"\n📊 DETAILED CANCEL BUTTON STATE ANALYSIS:")
-        print(f"   Total states tested: {total_states}")
-        print(f"   States with functions: {states_with_functions}/{total_states} ({(states_with_functions/total_states)*100:.1f}%)")
-        print(f"   States with cancel buttons: {states_with_cancel}/{total_states} ({(states_with_cancel/total_states)*100:.1f}%)")
         print(f"   States with return handling: {states_with_return}/{total_states} ({(states_with_return/total_states)*100:.1f}%)")
         print(f"   States overall OK: {states_overall_ok}/{total_states} ({(states_overall_ok/total_states)*100:.1f}%)")
         
