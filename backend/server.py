@@ -2646,7 +2646,7 @@ async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_T
     # Get user
     user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
     if not user:
-        await safe_telegram_call(query.message.reply_text("❌ Ошибка: пользователь не найден")
+        await safe_telegram_call(query.message.reply_text("❌ Ошибка: пользователь не найден"))
         return ConversationHandler.END
     
     # Update template
