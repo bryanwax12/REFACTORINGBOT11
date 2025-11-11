@@ -556,7 +556,7 @@ async def test_error_message(update: Update, context: ContextTypes.DEFAULT_TYPE)
     keyboard.append([InlineKeyboardButton("🏠 Главное меню", callback_data='main_menu')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await update.message.reply_text(user_message, reply_markup=reply_markup)
+    await safe_telegram_call(update.message.reply_text(user_message, reply_markup=reply_markup)
 
 # Helper function to check if user is blocked
 async def check_user_blocked(telegram_id: int) -> bool:
@@ -573,7 +573,7 @@ async def send_blocked_message(update: Update):
 Для получения дополнительной информации, пожалуйста, свяжитесь с администратором."""
     
     if update.message:
-        await update.message.reply_text(message, parse_mode='Markdown')
+        await safe_telegram_call(update.message.reply_text(message, parse_mode='Markdown')
     elif update.callback_query:
         await update.callback_query.message.reply_text(message, parse_mode='Markdown')
 
@@ -1275,7 +1275,7 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ))
     
     if bot_msg is None:
-        await update.message.reply_text("❌ Ошибка отправки. Попробуйте еще раз:")
+        await safe_telegram_call(update.message.reply_text("❌ Ошибка отправки. Попробуйте еще раз:")
         return FROM_NAME
     
     context.user_data['last_bot_message_id'] = bot_msg.message_id
@@ -1346,12 +1346,12 @@ async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE
         
         # Check for Cyrillic or non-Latin characters
         if any(ord(c) >= 0x0400 and ord(c) <= 0x04FF for c in address2):
-            await update.message.reply_text("❌ Используйте только английские буквы (латиницу). Пример: Apt 5, Suite 201")
+            await safe_telegram_call(update.message.reply_text("❌ Используйте только английские буквы (латиницу). Пример: Apt 5, Suite 201")
             return FROM_ADDRESS2
         
         # Only Latin letters, numbers, spaces, and common address symbols
         if not all((ord(c) < 128 and (c.isalnum() or c.isspace() or c in ".-',#/")) for c in address2):
-            await update.message.reply_text("❌ Используйте только английские буквы и цифры. Разрешены: буквы, цифры, пробелы, дефисы, точки, запятые")
+            await safe_telegram_call(update.message.reply_text("❌ Используйте только английские буквы и цифры. Разрешены: буквы, цифры, пробелы, дефисы, точки, запятые")
             return FROM_ADDRESS2
         
         context.user_data['from_street2'] = address2
@@ -1653,7 +1653,7 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Check if phone starts with valid characters (+ or digit)
     if not phone or (phone[0] not in '0123456789+'):
-        await update.message.reply_text("❌ Неверный формат телефона. Телефон должен начинаться с + или цифры\nНапример: +1234567890 или 1234567890")
+        await safe_telegram_call(update.message.reply_text("❌ Неверный формат телефона. Телефон должен начинаться с + или цифры\nНапример: +1234567890 или 1234567890")
         return FROM_PHONE
     
     # Validate phone format
@@ -1813,12 +1813,12 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         # Check for Cyrillic or non-Latin characters
         if any(ord(c) >= 0x0400 and ord(c) <= 0x04FF for c in address2):
-            await update.message.reply_text("❌ Используйте только английские буквы (латиницу). Пример: Apt 12, Suite 305")
+            await safe_telegram_call(update.message.reply_text("❌ Используйте только английские буквы (латиницу). Пример: Apt 12, Suite 305")
             return TO_ADDRESS2
         
         # Only Latin letters, numbers, spaces, and common address symbols
         if not all((ord(c) < 128 and (c.isalnum() or c.isspace() or c in ".-',#/")) for c in address2):
-            await update.message.reply_text("❌ Используйте только английские буквы и цифры. Разрешены: буквы, цифры, пробелы, дефисы, точки, запятые")
+            await safe_telegram_call(update.message.reply_text("❌ Используйте только английские буквы и цифры. Разрешены: буквы, цифры, пробелы, дефисы, точки, запятые")
             return TO_ADDRESS2
         
         context.user_data['to_street2'] = address2
@@ -2079,11 +2079,11 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
         weight = float(update.message.text.strip())
         
         if weight <= 0:
-            await update.message.reply_text("❌ Вес должен быть больше 0. Попробуйте еще раз:")
+            await safe_telegram_call(update.message.reply_text("❌ Вес должен быть больше 0. Попробуйте еще раз:")
             return PARCEL_WEIGHT
         
         if weight > 150:
-            await update.message.reply_text("❌ Вес слишком большой. Максимум 150 фунтов. Попробуйте еще раз:")
+            await safe_telegram_call(update.message.reply_text("❌ Вес слишком большой. Максимум 150 фунтов. Попробуйте еще раз:")
             return PARCEL_WEIGHT
         
         context.user_data['weight'] = weight
@@ -2134,7 +2134,7 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
         
         # If message failed to send, return to previous state
         if bot_msg is None:
-            await update.message.reply_text("❌ Ошибка отправки. Попробуйте еще раз:")
+            await safe_telegram_call(update.message.reply_text("❌ Ошибка отправки. Попробуйте еще раз:")
             return PARCEL_WEIGHT
         
         context.user_data['last_bot_message_id'] = bot_msg.message_id
@@ -2143,10 +2143,10 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
             
     except asyncio.TimeoutError:
         logger.error(f"Timeout error in order_parcel_weight for user {update.effective_user.id}")
-        await update.message.reply_text("❌ Превышено время ожидания. Попробуйте еще раз:")
+        await safe_telegram_call(update.message.reply_text("❌ Превышено время ожидания. Попробуйте еще раз:")
         return PARCEL_WEIGHT
     except ValueError:
-        await update.message.reply_text("❌ Неверный формат. Введите число (например: 2 или 2.5):")
+        await safe_telegram_call(update.message.reply_text("❌ Неверный формат. Введите число (например: 2 или 2.5):")
         return PARCEL_WEIGHT
 
 
@@ -3029,7 +3029,7 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
     new_name = update.message.text.strip()[:30]
     
     if not new_name:
-        await update.message.reply_text("❌ Название не может быть пустым. Попробуйте еще раз:")
+        await safe_telegram_call(update.message.reply_text("❌ Название не может быть пустым. Попробуйте еще раз:")
         return TEMPLATE_RENAME
     
     template_id = context.user_data.get('renaming_template_id')
@@ -3042,7 +3042,7 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
     keyboard = [[InlineKeyboardButton("👁️ Просмотреть", callback_data=f'template_view_{template_id}')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await update.message.reply_text(
+    await safe_telegram_call(update.message.reply_text(
         f"""✅ Шаблон переименован в "{new_name}" """,
         reply_markup=reply_markup
     )
@@ -3946,20 +3946,20 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
         try:
             topup_amount = float(amount_text)
         except ValueError:
-            await update.message.reply_text(
+            await safe_telegram_call(update.message.reply_text(
                 "❌ Неверный формат суммы. Введите число, например: 50"
             )
             return TOPUP_AMOUNT
         
         # Check limits
         if topup_amount < 10:
-            await update.message.reply_text(
+            await safe_telegram_call(update.message.reply_text(
                 "❌ Минимальная сумма пополнения: $10"
             )
             return TOPUP_AMOUNT
         
         if topup_amount > 10000:
-            await update.message.reply_text(
+            await safe_telegram_call(update.message.reply_text(
                 "❌ Максимальная сумма пополнения: $10,000"
             )
             return TOPUP_AMOUNT
@@ -4010,7 +4010,7 @@ _Если вы оплатите другую сумму, деньги НЕ по�
 
 *После успешной оплаты баланс будет автоматически пополнен.*"""
             
-            bot_msg = await update.message.reply_text(
+            bot_msg = await safe_telegram_call(update.message.reply_text(
                 message_text,
                 reply_markup=reply_markup,
                 parse_mode='Markdown'
@@ -4032,12 +4032,12 @@ _Если вы оплатите другую сумму, деньги НЕ по�
             return ConversationHandler.END
         else:
             error_msg = invoice_result.get('error', 'Unknown error')
-            await update.message.reply_text(f"❌ *Ошибка создания инвойса:* {error_msg}", parse_mode='Markdown')
+            await safe_telegram_call(update.message.reply_text(f"❌ *Ошибка создания инвойса:* {error_msg}", parse_mode='Markdown')
             return ConversationHandler.END
         
     except Exception as e:
         logger.error(f"Top-up amount handling error: {e}")
-        await update.message.reply_text(f"❌ Ошибка: {str(e)}")
+        await safe_telegram_call(update.message.reply_text(f"❌ Ошибка: {str(e)}")
         return ConversationHandler.END
 
 async def handle_topup_crypto_selection(update: Update, context: ContextTypes.DEFAULT_TYPE):
