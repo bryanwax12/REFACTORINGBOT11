@@ -700,7 +700,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Handle both command and callback
     if update.callback_query:
         query = update.callback_query
-        await query.answer()
+        await safe_telegram_call(query.answer())
         
         # Mark previous message as selected (remove buttons and add "✅ Выбрано")
         asyncio.create_task(mark_message_as_selected(update, context))
@@ -785,7 +785,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Handle both command and callback
     if update.callback_query:
         query = update.callback_query
-        await query.answer()
+        await safe_telegram_call(query.answer())
         # Mark previous message as selected (remove buttons and add "✅ Выбрано")
         asyncio.create_task(mark_message_as_selected(update, context))
         send_method = query.message.reply_text
@@ -821,7 +821,7 @@ async def faq_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Handle both command and callback
     if update.callback_query:
         query = update.callback_query
-        await query.answer()
+        await safe_telegram_call(query.answer())
         # Mark previous message as selected (remove buttons and add "✅ Выбрано")
         asyncio.create_task(mark_message_as_selected(update, context))
         send_method = query.message.reply_text
@@ -921,7 +921,7 @@ async def handle_create_label_request(update: Update, context: ContextTypes.DEFA
 
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    await query.answer()
+    await safe_telegram_call(query.answer())
     
     if query.data == 'start' or query.data == 'main_menu':
         # Check if user has pending order
@@ -999,7 +999,7 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
     # Handle both command and callback
     if update.callback_query:
         query = update.callback_query
-        await query.answer()
+        await safe_telegram_call(query.answer())
         telegram_id = query.from_user.id
         
         # Load message context from database if this is a callback from payment screen
@@ -1154,7 +1154,7 @@ FROM_NAME, FROM_ADDRESS, FROM_ADDRESS2, FROM_CITY, FROM_STATE, FROM_ZIP, FROM_PH
 
 async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    await query.answer()
+    await safe_telegram_call(query.answer())
     
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
     asyncio.create_task(mark_message_as_selected(update, context))
@@ -1377,7 +1377,7 @@ async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE
 
 async def skip_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    await query.answer()
+    await safe_telegram_call(query.answer())
     context.user_data['from_street2'] = None
     return await order_from_address2(update, context)
 
@@ -1624,7 +1624,7 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Check if it's a callback query (skip phone button)
     if hasattr(update, 'callback_query') and update.callback_query:
         query = update.callback_query
-        await query.answer()
+        await safe_telegram_call(query.answer())
         
         if query.data == 'skip_from_phone':
             # Skip phone - generate random phone number
@@ -1850,7 +1850,7 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def skip_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    await query.answer()
+    await safe_telegram_call(query.answer())
     context.user_data['to_street2'] = None
     return await order_to_address2(update, context)
 
@@ -2003,7 +2003,7 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Check if it's a callback query (skip phone button)
     if hasattr(update, 'callback_query') and update.callback_query:
         query = update.callback_query
-        await query.answer()
+        await safe_telegram_call(query.answer())
         
         if query.data == 'skip_to_phone':
             # Skip phone - generate random phone number
@@ -2154,7 +2154,7 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
     # Check if it's a callback query (skip dimensions button)
     if hasattr(update, 'callback_query') and update.callback_query:
         query = update.callback_query
-        await query.answer()
+        await safe_telegram_call(query.answer())
         
         if query.data == 'skip_dimensions':
             # Use default dimensions 10x10x10
@@ -2232,7 +2232,7 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
     # Check if it's a callback query (skip dimensions button)
     if hasattr(update, 'callback_query') and update.callback_query:
         query = update.callback_query
-        await query.answer()
+        await safe_telegram_call(query.answer())
         
         if query.data == 'skip_dimensions':
             # Use default dimensions 10x10 for width and height
@@ -2309,7 +2309,7 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
     # Check if it's a callback query (skip height button)
     if hasattr(update, 'callback_query') and update.callback_query:
         query = update.callback_query
-        await query.answer()
+        await safe_telegram_call(query.answer())
         
         if query.data == 'skip_height':
             # Use default height 10
@@ -2418,7 +2418,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
     if await check_stale_interaction(query, context):
         return ConversationHandler.END
     
-    await query.answer()
+    await safe_telegram_call(query.answer())
     
     if query.data == 'cancel_order':
         return await cancel_order(update, context)
@@ -2635,7 +2635,7 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
 async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Update existing template with current order data"""
     query = update.callback_query
-    await query.answer()
+    await safe_telegram_call(query.answer())
     
     # Mark previous message as selected (non-blocking)
     asyncio.create_task(mark_message_as_selected(update, context))
@@ -2705,7 +2705,7 @@ async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_T
 async def handle_template_new_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Ask user to enter a new template name"""
     query = update.callback_query
-    await query.answer()
+    await safe_telegram_call(query.answer())
     
     # Mark previous message as selected (non-blocking)
     asyncio.create_task(mark_message_as_selected(update, context))
@@ -2724,7 +2724,7 @@ async def handle_template_new_name(update: Update, context: ContextTypes.DEFAULT
 async def continue_order_after_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Continue order creation after saving template - return to data confirmation"""
     query = update.callback_query
-    await query.answer()
+    await safe_telegram_call(query.answer())
     
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
     asyncio.create_task(mark_message_as_selected(update, context))
@@ -2736,7 +2736,7 @@ async def continue_order_after_template(update: Update, context: ContextTypes.DE
 async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Show user's templates list"""
     query = update.callback_query
-    await query.answer()
+    await safe_telegram_call(query.answer())
     
     # Mark previous message as selected (remove buttons from choice menu)
     asyncio.create_task(mark_message_as_selected(update, context))
@@ -2810,7 +2810,7 @@ async def view_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     template_id = query.data.replace('template_view_', '')
     
     # Execute in parallel: answer query, mark selected, fetch template
-    await query.answer()
+    await safe_telegram_call(query.answer())
     asyncio.create_task(mark_message_as_selected(update, context))
     template = await db.templates.find_one({"id": template_id}, {"_id": 0})
     
@@ -2853,7 +2853,7 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     template_id = query.data.replace('template_use_', '')
     
     # Execute in parallel: answer query and fetch template
-    await query.answer()
+    await safe_telegram_call(query.answer())
     template = await db.templates.find_one({"id": template_id}, {"_id": 0})
     
     if not template:
@@ -2928,7 +2928,7 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
 Например: 5.5"""
     
     # Execute answer and mark selected, then send new message
-    await query.answer()
+    await safe_telegram_call(query.answer())
     
     # Mark previous message as selected (blocking)
     asyncio.create_task(mark_message_as_selected(update, context))
@@ -2948,7 +2948,7 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
 async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Delete template with confirmation"""
     query = update.callback_query
-    await query.answer()
+    await safe_telegram_call(query.answer())
     
     # Mark previous message as selected (non-blocking)
     asyncio.create_task(mark_message_as_selected(update, context))
@@ -2981,7 +2981,7 @@ async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Confirm and delete template"""
     query = update.callback_query
-    await query.answer()
+    await safe_telegram_call(query.answer())
     
     # Mark previous message as selected (non-blocking)
     asyncio.create_task(mark_message_as_selected(update, context))
@@ -3008,7 +3008,7 @@ async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_
 async def rename_template_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Start template rename process"""
     query = update.callback_query
-    await query.answer()
+    await safe_telegram_call(query.answer())
     
     # Mark previous message as selected (non-blocking)
     asyncio.create_task(mark_message_as_selected(update, context))
@@ -3083,7 +3083,7 @@ async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def order_from_template_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Show template list for order creation"""
     query = update.callback_query
-    await query.answer()
+    await safe_telegram_call(query.answer())
     
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
     asyncio.create_task(mark_message_as_selected(update, context))
@@ -3136,7 +3136,7 @@ async def order_from_template_list(update: Update, context: ContextTypes.DEFAULT
 async def skip_address_validation(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Skip address validation and continue with rate fetching"""
     query = update.callback_query
-    await query.answer()
+    await safe_telegram_call(query.answer())
     
     # Set flag to skip validation
     context.user_data['skip_address_validation'] = True
@@ -3509,7 +3509,7 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if await check_stale_interaction(query, context):
         return ConversationHandler.END
     
-    await query.answer()
+    await safe_telegram_call(query.answer())
     
     if query.data == 'cancel_order':
         return await cancel_order(update, context)
@@ -3643,7 +3643,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if await check_stale_interaction(query, context):
         return ConversationHandler.END
     
-    await query.answer()
+    await safe_telegram_call(query.answer())
     
     if query.data == 'cancel_order':
         return await cancel_order(update, context)
@@ -3854,7 +3854,7 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     """Return user to payment screen after topping up balance"""
     logger.info(f"return_to_payment_after_topup called - user_id: {update.effective_user.id}")
     query = update.callback_query
-    await query.answer()
+    await safe_telegram_call(query.answer())
     
     telegram_id = query.from_user.id
     
@@ -4043,7 +4043,7 @@ _Если вы оплатите другую сумму, деньги НЕ по�
 async def handle_topup_crypto_selection(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle cryptocurrency selection for top-up"""
     query = update.callback_query
-    await query.answer()
+    await safe_telegram_call(query.answer())
     
     if query.data == 'cancel_order':
         return await cancel_order(update, context)
@@ -4484,7 +4484,7 @@ Label PDF: {label_download_url}
 async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.callback_query:
         query = update.callback_query
-        await query.answer()
+        await safe_telegram_call(query.answer())
     
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
     asyncio.create_task(mark_message_as_selected(update, context))
@@ -4524,7 +4524,7 @@ async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def confirm_cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Confirm order cancellation"""
     query = update.callback_query
-    await query.answer()
+    await safe_telegram_call(query.answer())
     
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
     asyncio.create_task(mark_message_as_selected(update, context))
@@ -4540,7 +4540,7 @@ async def confirm_cancel_order(update: Update, context: ContextTypes.DEFAULT_TYP
 async def check_data_from_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Return to data confirmation screen from cancel dialog"""
     query = update.callback_query
-    await query.answer()
+    await safe_telegram_call(query.answer())
     
     # Go back to data confirmation screen
     return await show_data_confirmation(update, context)
@@ -4549,7 +4549,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Return to order after cancel button - restore exact screen"""
     logger.info(f"return_to_order called - user_id: {update.effective_user.id}")
     query = update.callback_query
-    await query.answer()
+    await safe_telegram_call(query.answer())
     
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
     asyncio.create_task(mark_message_as_selected(update, context))
