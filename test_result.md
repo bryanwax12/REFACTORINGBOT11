@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Протестируй функционал уведомлений администратору при создании лейбла"
+user_problem_statement: "Комплексное Регрессионное Тестирование Telegram Бота после оборачивания всех 267 вызовов Telegram API в safe_telegram_call() с таймаутом 10 секунд"
 
 backend:
   - task: "Cancel Order Button - Consistent Confirmation Across All States"
