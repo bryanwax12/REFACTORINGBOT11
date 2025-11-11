@@ -7755,6 +7755,7 @@ async def startup_event():
     
     if TELEGRAM_BOT_TOKEN and TELEGRAM_BOT_TOKEN != "your_telegram_bot_token_here":
         try:
+            global application  # Use global application variable for webhook access
             logger.info("Initializing Telegram Bot...")
             # Build application with optimized settings for high load (5000+ concurrent users)
             application = (
