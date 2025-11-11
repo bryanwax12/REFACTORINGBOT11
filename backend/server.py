@@ -262,7 +262,7 @@ async def check_shipstation_balance():
                         
                         await safe_telegram_call(bot_instance.send_message(
                             chat_id=ADMIN_TELEGRAM_ID,
-                            text=message,
+                            text=message,)
                             parse_mode='Markdown'
                         ))
                         logger.info(f"Low balance notification sent to admin {ADMIN_TELEGRAM_ID}")
@@ -589,7 +589,7 @@ async def handle_orphaned_button(update: Update, context: ContextTypes.DEFAULT_T
     
     await query.answer("⚠️ Этот заказ уже завершён")
     await safe_telegram_call(query.message.reply_text(
-        "⚠️ *Этот заказ уже завершён или отменён.*\n\n"
+        "⚠️ *Этот заказ уже завершён или отменён.*\n\n")
         "Для создания нового заказа используйте меню в нижней части экрана.",
         parse_mode='Markdown'
     ))
@@ -603,7 +603,7 @@ async def check_stale_interaction(query, context: ContextTypes.DEFAULT_TYPE) -> 
         logger.info("Stale interaction detected - empty user_data")
         await safe_telegram_call(query.answer("⚠️ Этот заказ уже завершён"))
         await safe_telegram_call(query.message.reply_text(
-            "⚠️ *Этот заказ уже завершён или отменён.*\n\n"
+            "⚠️ *Этот заказ уже завершён или отменён.*\n\n")
             "Для создания нового заказа используйте меню в нижней части экрана.",
             parse_mode='Markdown'
         ))
@@ -614,7 +614,7 @@ async def check_stale_interaction(query, context: ContextTypes.DEFAULT_TYPE) -> 
         logger.info("Stale interaction detected - order_completed flag set")
         await safe_telegram_call(query.answer("⚠️ Этот заказ уже завершён"))
         await safe_telegram_call(query.message.reply_text(
-            "⚠️ *Этот заказ уже завершён.*\n\n"
+            "⚠️ *Этот заказ уже завершён.*\n\n")
             "Для создания нового заказа используйте меню в нижней части экрана.",
             parse_mode='Markdown'
         ))
@@ -905,7 +905,7 @@ async def handle_create_label_request(update: Update, context: ContextTypes.DEFA
         reply_markup = InlineKeyboardMarkup(keyboard)
         
         await safe_telegram_call(query.message.reply_text(
-            "✅ Shipping label успешно создан!",
+            "✅ Shipping label успешно создан!",)
             reply_markup=reply_markup
         ))
     else:
@@ -915,7 +915,7 @@ async def handle_create_label_request(update: Update, context: ContextTypes.DEFA
         reply_markup = InlineKeyboardMarkup(keyboard)
         
         await safe_telegram_call(query.message.reply_text(
-            "❌ Не удалось создать shipping label. Пожалуйста, свяжитесь с администратором.",
+            "❌ Не удалось создать shipping label. Пожалуйста, свяжитесь с администратором.",)
             reply_markup=reply_markup
         ))
 
@@ -948,7 +948,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
             bot_msg = await safe_telegram_call(query.message.reply_text(
                 warning_text,
-                reply_markup=reply_markup,
+                reply_markup=reply_markup,)
                 parse_mode='Markdown'
             ))
             
@@ -983,7 +983,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             logger.info(f"Orphaned cancel button detected from user {update.effective_user.id}")
             await safe_telegram_call(query.answer("⚠️ Этот заказ уже завершён"))
             await safe_telegram_call(query.message.reply_text(
-                "⚠️ *Этот заказ уже завершён или отменён.*\n\n"
+                "⚠️ *Этот заказ уже завершён или отменён.*\n\n")
                 "Для создания нового заказа используйте меню в нижней части экрана.",
                 parse_mode='Markdown'
             ))
@@ -1134,7 +1134,7 @@ _Если вы оплатите другую сумму, деньги не по�
             
             bot_msg = await safe_telegram_call(update.message.reply_text(
                 message_text,
-                reply_markup=reply_markup,
+                reply_markup=reply_markup,)
                 parse_mode='Markdown'
             ))
             
@@ -1172,7 +1172,7 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if await check_maintenance_mode(update):
         await safe_telegram_call(query.message.reply_text(
             "🔧 *Бот находится на техническом обслуживании.*\n\n"
-            "Пожалуйста, попробуйте позже.\n\n"
+            "Пожалуйста, попробуйте позже.\n\n")
             "Приносим извинения за неудобства.",
             parse_mode='Markdown'
         ))
@@ -1198,7 +1198,7 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await safe_telegram_call(query.message.reply_text(
             """📦 Создать заказ
 
-Выберите способ создания:""",
+Выберите способ создания:""",)
             reply_markup=reply_markup
         ))
         return FROM_NAME  # Waiting for choice
@@ -1212,7 +1212,7 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Шаг 1/13: Имя отправителя
 Например: John Smith"""
         bot_msg = await safe_telegram_call(query.message.reply_text(
-            message_text,
+            message_text,)
             reply_markup=reply_markup
         ))
         
@@ -1270,7 +1270,7 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_text = """Шаг 2/13: Адрес отправителя
 Например: 215 Clayton St."""
     bot_msg = await safe_telegram_call(update.message.reply_text(
-        message_text,
+        message_text,)
         reply_markup=reply_markup
     ))
     
@@ -1307,8 +1307,8 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE)
         logger.warning(f"Invalid characters in address: {invalid_chars} (ords: {[ord(c) for c in invalid_chars]})")
         await safe_telegram_call(update.message.reply_text(
             f"❌ Найдены недопустимые символы: {invalid_display}\n\n"
-            f"Используйте только:\n"
-            f"• Английские буквы (A-Z, a-z)\n"
+            f"Используйте только:\n")
+            f"• Английские буквы (A-Z, a-z)\n")
             f"• Цифры (0-9)\n"
             f"• Пробелы\n"
             f"• Спецсимволы: . - , ' # / &"
@@ -1330,7 +1330,7 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE)
 Например: Apt 5, Suite 201
 Или нажмите "Пропустить" """
     bot_msg = await safe_telegram_call(update.message.reply_text(
-        message_text,
+        message_text,)
         reply_markup=reply_markup
     ))
     
@@ -1414,7 +1414,7 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_text = """Шаг 5/13: Штат отправителя (2 буквы)
 Например: CA"""
     bot_msg = await safe_telegram_call(update.message.reply_text(
-        message_text,
+        message_text,)
         reply_markup=reply_markup
     ))
     
@@ -1461,7 +1461,7 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_text = """Шаг 6/13: ZIP код отправителя
 Например: 94117"""
     bot_msg = await safe_telegram_call(update.message.reply_text(
-        message_text,
+        message_text,)
         reply_markup=reply_markup
     ))
     
@@ -1572,7 +1572,7 @@ async def notify_admin_error(user_info: dict, error_type: str, error_details: st
         
         await safe_telegram_call(bot_instance.send_message(
             chat_id=ADMIN_TELEGRAM_ID,
-            text=message,
+            text=message,)
             parse_mode='HTML'
         ))
     except Exception as e:
@@ -1610,7 +1610,7 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_text = """Шаг 7/13: Телефон отправителя
 Например: +1234567890 или 1234567890"""
     bot_msg = await safe_telegram_call(update.message.reply_text(
-        message_text,
+        message_text,)
         reply_markup=reply_markup
     ))
     
@@ -1641,7 +1641,7 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
             message_text = """Шаг 8/13: Имя получателя
 Например: Jane Doe"""
             bot_msg = await safe_telegram_call(query.message.reply_text(
-                message_text,
+                message_text,)
                 reply_markup=reply_markup
             ))
             context.user_data['last_bot_message_id'] = bot_msg.message_id
@@ -1685,7 +1685,7 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_text = """Шаг 8/13: Имя получателя
 Например: Jane Doe"""
     bot_msg = await safe_telegram_call(update.message.reply_text(
-        message_text,
+        message_text,)
         reply_markup=reply_markup
     ))
     
@@ -1734,7 +1734,7 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Например: 123 Main St."""
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
-        message_text,
+        message_text,)
         reply_markup=reply_markup
     ))
     
@@ -1767,8 +1767,8 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
         invalid_display = ', '.join([f"'{c}'" for c in set(invalid_chars)])
         await safe_telegram_call(update.message.reply_text(
             f"❌ Найдены недопустимые символы: {invalid_display}\n\n"
-            f"Используйте только:\n"
-            f"• Английские буквы (A-Z, a-z)\n"
+            f"Используйте только:\n")
+            f"• Английские буквы (A-Z, a-z)\n")
             f"• Цифры (0-9)\n"
             f"• Пробелы\n"
             f"• Спецсимволы: . - , ' # / &"
@@ -1797,7 +1797,7 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Или нажмите "Пропустить" """
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
-        message_text,
+        message_text,)
         reply_markup=reply_markup
     ))
     
@@ -1893,7 +1893,7 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Например: NY"""
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
-        message_text,
+        message_text,)
         reply_markup=reply_markup
     ))
     
@@ -1946,7 +1946,7 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Например: 10007"""
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
-        message_text,
+        message_text,)
         reply_markup=reply_markup
     ))
     
@@ -1989,7 +1989,7 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Например: +1234567890 или 1234567890
 Или нажмите "Пропустить" """
     bot_msg = await safe_telegram_call(update.message.reply_text(
-        message_text,
+        message_text,)
         reply_markup=reply_markup
     ))
     
@@ -2020,7 +2020,7 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
             message_text = """Вес посылки в фунтах (lb)
 Например: 2"""
             bot_msg = await safe_telegram_call(query.message.reply_text(
-                message_text,
+                message_text,)
                 reply_markup=reply_markup
             ))
             context.user_data['last_bot_message_id'] = bot_msg.message_id
@@ -2064,7 +2064,7 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_text = """Вес посылки в фунтах (lb)
 Например: 2"""
     bot_msg = await safe_telegram_call(update.message.reply_text(
-        message_text,
+        message_text,)
         reply_markup=reply_markup
     ))
     
@@ -2466,7 +2466,7 @@ _Шаблон сохранит оба адреса для быстрого ис�
         keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         bot_msg = await safe_telegram_call(query.message.reply_text(
-            "📤 Редактирование адреса отправителя\n\nШаг 1/6: Имя отправителя\nНапример: John Smith",
+            "📤 Редактирование адреса отправителя\n\nШаг 1/6: Имя отправителя\nНапример: John Smith",)
             reply_markup=reply_markup
         ))
         if bot_msg:
@@ -2483,7 +2483,7 @@ _Шаблон сохранит оба адреса для быстрого ис�
         keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         bot_msg = await safe_telegram_call(query.message.reply_text(
-            "📥 Редактирование адреса получателя\n\nШаг 1/6: Имя получателя\nНапример: Jane Doe",
+            "📥 Редактирование адреса получателя\n\nШаг 1/6: Имя получателя\nНапример: Jane Doe",)
             reply_markup=reply_markup
         ))
         if bot_msg:
@@ -2500,7 +2500,7 @@ _Шаблон сохранит оба адреса для быстрого ис�
         keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         bot_msg = await safe_telegram_call(query.message.reply_text(
-            "📦 Редактирование посылки\n\nВведите вес посылки в фунтах:\nНапример: 5 или 2.5",
+            "📦 Редактирование посылки\n\nВведите вес посылки в фунтах:\nНапример: 5 или 2.5",)
             reply_markup=reply_markup
         ))
         if bot_msg:
@@ -2562,7 +2562,7 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
         bot_msg = await safe_telegram_call(update.message.reply_text(
             f"""⚠️ Шаблон с названием "{template_name}" уже существует.
 
-Что делать?""",
+Что делать?""",)
             reply_markup=reply_markup
         ))
         # Don't clear last_bot_message here - we need it for mark_message_as_selected
@@ -2619,7 +2619,7 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
-        reply_markup=reply_markup,
+        reply_markup=reply_markup,)
         parse_mode='Markdown'
     ))
     
@@ -2689,7 +2689,7 @@ async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_T
         
         bot_msg = await safe_telegram_call(query.message.reply_text(
             message_text,
-            reply_markup=reply_markup,
+            reply_markup=reply_markup,)
             parse_mode='Markdown'
         ))
         
@@ -2713,7 +2713,7 @@ async def handle_template_new_name(update: Update, context: ContextTypes.DEFAULT
     await safe_telegram_call(query.message.reply_text(
         """📝 Введите новое название для шаблона:
 
-Например: Доставка маме 2, Офис NY"""
+Например: Доставка маме 2, Офис NY""")
     ))
     # Clear last_bot_message to prevent interfering with text input
     context.user_data.pop('last_bot_message_id', None)
@@ -2760,7 +2760,7 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 У вас пока нет сохраненных шаблонов.
 
 Создайте заказ и нажмите "*Сохранить как шаблон*" на экране проверки данных.""",
-            reply_markup=reply_markup,
+            reply_markup=reply_markup,)
             parse_mode='Markdown'
         ))
         return ConversationHandler.END
@@ -2897,7 +2897,7 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     bot_msg = await safe_telegram_call(query.message.reply_text(
         message_text,
-        reply_markup=reply_markup,
+        reply_markup=reply_markup,)
         parse_mode='Markdown'
     ))
     context.user_data['last_bot_message_id'] = bot_msg.message_id
@@ -2936,7 +2936,7 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
     # Send new message immediately without waiting for mark_message_as_selected
     bot_msg = await safe_telegram_call(query.message.reply_text(
         message_text,
-        reply_markup=reply_markup,
+        reply_markup=reply_markup,)
         parse_mode='Markdown'
     ))
     context.user_data['last_bot_message_id'] = bot_msg.message_id
@@ -2970,7 +2970,7 @@ async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"""⚠️ *Удалить шаблон "{template['name']}"?*
 
 Это действие нельзя отменить.""",
-        reply_markup=reply_markup,
+        reply_markup=reply_markup,)
         parse_mode='Markdown'
     ))
     # Clear last_bot_message to prevent accidentally removing these buttons
@@ -2997,7 +2997,7 @@ async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_
         reply_markup = InlineKeyboardMarkup(keyboard)
         
         await safe_telegram_call(query.message.reply_text(
-            f"""✅ Шаблон "{template['name']}" удален""",
+            f"""✅ Шаблон "{template['name']}" удален""",)
             reply_markup=reply_markup
         ))
     else:
@@ -3043,7 +3043,7 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await safe_telegram_call(update.message.reply_text(
-        f"""✅ Шаблон переименован в "{new_name}" """,
+        f"""✅ Шаблон переименован в "{new_name}" """,)
         reply_markup=reply_markup
     ))
     
@@ -3069,7 +3069,7 @@ async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Шаг 1/13: Имя отправителя
 Например: John Smith"""
     bot_msg = await safe_telegram_call(query.message.reply_text(
-        message_text,
+        message_text,)
         reply_markup=reply_markup
     ))
     
@@ -3171,7 +3171,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
                 [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
-            await safe_telegram_call(query.message.reply_text(
+            await safe_telegram_call(query.message.reply_text()
                 f"❌ Отсутствуют обязательные данные: {', '.join(missing_fields)}\n\nПожалуйста, заполните все поля.",
                 reply_markup=reply_markup
             ))
@@ -3190,7 +3190,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await safe_telegram_call(query.message.reply_text(
-                "❌ Ошибка: не удалось загрузить список курьеров.\n\nПожалуйста, попробуйте позже.",
+                "❌ Ошибка: не удалось загрузить список курьеров.\n\nПожалуйста, попробуйте позже.",)
                 reply_markup=reply_markup
             ))
             return CONFIRM_DATA
@@ -3267,7 +3267,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             reply_markup = InlineKeyboardMarkup(keyboard)
             
             await safe_telegram_call(query.message.reply_text(
-                f"❌ Ошибка при получении тарифов:\n{error_msg}\n\nПроверьте правильность введенных адресов.",
+                f"❌ Ошибка при получении тарифов:\n{error_msg}\n\nПроверьте правильность введенных адресов.",)
                 reply_markup=reply_markup
             ))
             return CONFIRM_DATA  # Stay to handle callback
@@ -3335,7 +3335,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             reply_markup = InlineKeyboardMarkup(keyboard)
             
             await safe_telegram_call(query.message.reply_text(
-                f"❌ Нет доступных тарифов для данного направления.\n\nПроверьте правильность введенных адресов.",
+                f"❌ Нет доступных тарифов для данного направления.\n\nПроверьте правильность введенных адресов.",)
                 reply_markup=reply_markup
             ))
             return CONFIRM_DATA  # Stay to handle callback
@@ -3496,7 +3496,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
                 error_details=f"Exception: {str(e)}\n\nAddresses:\nFrom: {data.get('from_city')}, {data.get('from_state')}\nTo: {data.get('to_city')}, {data.get('to_state')}"
             )
         
-        await safe_telegram_call(query.message.reply_text(
+        await safe_telegram_call(query.message.reply_text()
             f"❌ Ошибка при получении тарифов:\n{str(e)}\n\nПроверьте корректность адресов и попробуйте снова.",
             reply_markup=reply_markup
         ))
@@ -3628,8 +3628,7 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ])
     
     reply_markup = InlineKeyboardMarkup(keyboard)
-    bot_msg = await safe_telegram_call(query.message.reply_text(confirmation_text, reply_markup=reply_markup)
-    
+    bot_msg = await safe_telegram_call(query.message.reply_text(confirmation_text, reply_markup=reply_markup))
     # Save last bot message context for button protection
     context.user_data['last_bot_message_id'] = bot_msg.message_id
     context.user_data['last_bot_message_text'] = confirmation_text
@@ -3678,7 +3677,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if query.data == 'pay_from_balance':
             # Pay from balance
             if user.get('balance', 0) < amount:
-                await safe_telegram_call(query.message.reply_text("❌ Недостаточно средств на балансе.")
+                await safe_telegram_call(query.message.reply_text("❌ Недостаточно средств на балансе."))
                 return ConversationHandler.END
             
             # Create order
@@ -3709,7 +3708,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
 💳 Списано: ${amount}
 💰 Новый баланс: ${new_balance:.2f}
 
-Shipping label создан успешно!""",
+Shipping label создан успешно!""",)
                     reply_markup=reply_markup
                 ))
                 
@@ -3731,7 +3730,7 @@ Shipping label создан успешно!""",
                     
 Оплата не списана. Ваш баланс не изменился.
 
-Пожалуйста, свяжитесь с администратором.""",
+Пожалуйста, свяжитесь с администратором.""",)
                     reply_markup=reply_markup
                 ))
                 
@@ -3781,8 +3780,7 @@ Shipping label создан успешно!""",
                 )
             else:
                 error_msg = invoice_result.get('error', 'Unknown error')
-                await safe_telegram_call(query.message.reply_text(f"❌ Ошибка создания инвойса: {error_msg}")
-                
+                await safe_telegram_call(query.message.reply_text(f"❌ Ошибка создания инвойса: {error_msg}"))
         elif query.data == 'top_up_balance':
             # Save order data to database before top-up so user can return to payment after
             pending_order = {
@@ -3832,7 +3830,7 @@ Shipping label создан успешно!""",
 Максимальная сумма: $1000"""
             
             bot_msg = await safe_telegram_call(query.message.reply_text(
-                message_text,
+                message_text,)
                 reply_markup=reply_markup
             ))
             
@@ -3872,7 +3870,7 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     
     if not pending_order or not pending_order.get('selected_rate'):
         await safe_telegram_call(query.message.reply_text(
-            "❌ Не найдены данные незавершенного заказа.\n\nПожалуйста, создайте новый заказ.",
+            "❌ Не найдены данные незавершенного заказа.\n\nПожалуйста, создайте новый заказ.",)
             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("📦 Создать заказ", callback_data='new_order')]]))
         )
         return ConversationHandler.END
@@ -3925,7 +3923,7 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     
     await safe_telegram_call(query.message.reply_text(
         message_text,
-        reply_markup=reply_markup,
+        reply_markup=reply_markup,)
         parse_mode='Markdown'
     ))
     
@@ -3947,20 +3945,20 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
             topup_amount = float(amount_text)
         except ValueError:
             await safe_telegram_call(update.message.reply_text(
-                "❌ Неверный формат суммы. Введите число, например: 50"
+                "❌ Неверный формат суммы. Введите число, например: 50")
             ))
             return TOPUP_AMOUNT
         
         # Check limits
         if topup_amount < 10:
             await safe_telegram_call(update.message.reply_text(
-                "❌ Минимальная сумма пополнения: $10"
+                "❌ Минимальная сумма пополнения: $10")
             ))
             return TOPUP_AMOUNT
         
         if topup_amount > 10000:
             await safe_telegram_call(update.message.reply_text(
-                "❌ Максимальная сумма пополнения: $10,000"
+                "❌ Максимальная сумма пополнения: $10,000")
             ))
             return TOPUP_AMOUNT
         
@@ -4012,7 +4010,7 @@ _Если вы оплатите другую сумму, деньги НЕ по�
             
             bot_msg = await safe_telegram_call(update.message.reply_text(
                 message_text,
-                reply_markup=reply_markup,
+                reply_markup=reply_markup,)
                 parse_mode='Markdown'
             ))
             
@@ -4032,7 +4030,7 @@ _Если вы оплатите другую сумму, деньги НЕ по�
             return ConversationHandler.END
         else:
             error_msg = invoice_result.get('error', 'Unknown error')
-            await safe_telegram_call(update.message.reply_text(f"❌ *Ошибка создания инвойса:* {error_msg}", parse_mode='Markdown')
+            await safe_telegram_call(update.message.reply_text(f"❌ *Ошибка создания инвойса:* {error_msg}", parse_mode='Markdown'))
             return ConversationHandler.END
         
     except Exception as e:
@@ -4060,7 +4058,7 @@ async def handle_topup_crypto_selection(update: Update, context: ContextTypes.DE
         topup_amount = context.user_data.get('topup_amount')
         
         if not topup_amount:
-            await safe_telegram_call(query.message.reply_text("❌ Ошибка: сумма не найдена. Начните заново.")
+            await safe_telegram_call(query.message.reply_text("❌ Ошибка: сумма не найдена. Начните заново."))
             return ConversationHandler.END
         
         telegram_id = query.from_user.id
@@ -4124,8 +4122,7 @@ _Если вы оплатите другую сумму, деньги НЕ по�
             )
         else:
             error_msg = invoice_result.get('error', 'Unknown error')
-            await safe_telegram_call(query.message.reply_text(f"❌ Ошибка создания инвойса: {error_msg}")
-        
+            await safe_telegram_call(query.message.reply_text(f"❌ Ошибка создания инвойса: {error_msg}"))
         context.user_data.clear()
         return ConversationHandler.END
         
@@ -4362,14 +4359,14 @@ Tracking: {tracking_number}
                     # Send tracking info without buttons
                     await safe_telegram_call(bot_instance.send_message(
                         chat_id=telegram_id,
-                        text=f"🔗 Трекинг номер:\n\n`{tracking_number}`",
+                        text=f"🔗 Трекинг номер:\n\n`{tracking_number}`",)
                         parse_mode='Markdown'
                     ))
                     
                     # Send AI-generated thank you message (ONCE)
                     logger.info(f"Sending thank you message to user {telegram_id}")
                     await safe_telegram_call(bot_instance.send_message(
-                        chat_id=telegram_id,
+                        chat_id=telegram_id,)
                         text=thank_you_msg
                     ))
                     logger.info(f"Thank you message sent successfully to user {telegram_id}")
@@ -4430,7 +4427,7 @@ Label PDF: {label_download_url}
                 
                 await safe_telegram_call(admin_bot.send_message(
                     chat_id=ADMIN_TELEGRAM_ID,
-                    text=admin_message,
+                    text=admin_message,)
                     parse_mode='Markdown'
                 ))
                 logger.info(f"Label creation notification sent to admin {ADMIN_TELEGRAM_ID}")
@@ -4475,7 +4472,7 @@ Label PDF: {label_download_url}
         elif bot_instance:
             await safe_telegram_call(bot_instance.send_message(
                 chat_id=telegram_id,
-                text=user_message,
+                text=user_message,)
                 reply_markup=reply_markup
             ))
         
@@ -4510,7 +4507,7 @@ async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_text = "⚠️ Вы уверены, что хотите отменить создание заказа?\n\nВсе введённые данные будут потеряны."
     
     bot_msg = await safe_telegram_call(query.message.reply_text(
-        message_text,
+        message_text,)
         reply_markup=reply_markup
     ))
     
@@ -4564,20 +4561,20 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # If no last_state - just continue
     if last_state is None:
         logger.warning("return_to_order: No last_state found!")
-        await safe_telegram_call(query.message.reply_text("Продолжаем оформление заказа...")
+        await safe_telegram_call(query.message.reply_text("Продолжаем оформление заказа..."))
         return FROM_NAME
     
     # Restore exact screen with instructions for each state
     if last_state == FROM_NAME:
         message_text = "Шаг 1/13: Имя отправителя\n\nНапример: Ivan Petrov"
-        bot_msg = await safe_telegram_call(query.message.reply_text(message_text)
+        bot_msg = await safe_telegram_call(query.message.reply_text(message_text))
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         return FROM_NAME
     
     elif last_state == FROM_ADDRESS:
         message_text = "Шаг 2/13: Адрес отправителя\n\nВведите улицу и номер дома\nНапример: 215 Clayton St"
-        bot_msg = await safe_telegram_call(query.message.reply_text(message_text)
+        bot_msg = await safe_telegram_call(query.message.reply_text(message_text))
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         return FROM_ADDRESS
@@ -4593,28 +4590,28 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Например: Apt 5, Suite 201
 
 Или нажмите "Пропустить" """
-        bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=reply_markup)
+        bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=reply_markup))
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         return FROM_ADDRESS2
     
     elif last_state == FROM_CITY:
         message_text = "Шаг 4/13: Город отправителя\n\nНапример: Los Angeles"
-        bot_msg = await safe_telegram_call(query.message.reply_text(message_text)
+        bot_msg = await safe_telegram_call(query.message.reply_text(message_text))
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         return FROM_CITY
     
     elif last_state == FROM_STATE:
         message_text = "Шаг 5/13: Штат отправителя\n\nВведите двухбуквенный код штата\nНапример: CA, NY, TX"
-        bot_msg = await safe_telegram_call(query.message.reply_text(message_text)
+        bot_msg = await safe_telegram_call(query.message.reply_text(message_text))
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         return FROM_STATE
     
     elif last_state == FROM_ZIP:
         message_text = "Шаг 6/13: ZIP код отправителя\n\nНапример: 90001"
-        bot_msg = await safe_telegram_call(query.message.reply_text(message_text)
+        bot_msg = await safe_telegram_call(query.message.reply_text(message_text))
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         return FROM_ZIP
@@ -4626,21 +4623,21 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         message_text = "Шаг 7/13: Телефон отправителя (необязательно)\n\nНапример: 5551234567\nИли нажмите 'Пропустить'"
-        bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=reply_markup)
+        bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=reply_markup))
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         return FROM_PHONE
     
     elif last_state == TO_NAME:
         message_text = "Шаг 8/13: Имя получателя\n\nНапример: John Smith"
-        bot_msg = await safe_telegram_call(query.message.reply_text(message_text)
+        bot_msg = await safe_telegram_call(query.message.reply_text(message_text))
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         return TO_NAME
     
     elif last_state == TO_ADDRESS:
         message_text = "Шаг 9/13: Адрес получателя\n\nВведите улицу и номер дома\nНапример: 123 Main St"
-        bot_msg = await safe_telegram_call(query.message.reply_text(message_text)
+        bot_msg = await safe_telegram_call(query.message.reply_text(message_text))
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         return TO_ADDRESS
@@ -4656,28 +4653,28 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Например: Apt 12, Suite 305
 
 Или нажмите "Пропустить" """
-        bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=reply_markup)
+        bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=reply_markup))
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         return TO_ADDRESS2
     
     elif last_state == TO_CITY:
         message_text = "Шаг 11/13: Город получателя\n\nНапример: New York"
-        bot_msg = await safe_telegram_call(query.message.reply_text(message_text)
+        bot_msg = await safe_telegram_call(query.message.reply_text(message_text))
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         return TO_CITY
     
     elif last_state == TO_STATE:
         message_text = "Шаг 11/13: Штат получателя\n\nВведите двухбуквенный код штата\nНапример: CA, NY, TX"
-        bot_msg = await safe_telegram_call(query.message.reply_text(message_text)
+        bot_msg = await safe_telegram_call(query.message.reply_text(message_text))
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         return TO_STATE
     
     elif last_state == TO_ZIP:
         message_text = "Шаг 12/13: ZIP код получателя\n\nНапример: 10001"
-        bot_msg = await safe_telegram_call(query.message.reply_text(message_text)
+        bot_msg = await safe_telegram_call(query.message.reply_text(message_text))
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         return TO_ZIP
@@ -4689,7 +4686,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         message_text = "Шаг 13/13: Телефон получателя (необязательно)\n\nНапример: 5559876543\nИли нажмите 'Пропустить'"
-        bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=reply_markup)
+        bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=reply_markup))
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         return TO_PHONE
@@ -4698,7 +4695,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         message_text = "Вес посылки в фунтах (lb)\nНапример: 2"
-        bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=reply_markup)
+        bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=reply_markup))
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         return PARCEL_WEIGHT
@@ -4710,7 +4707,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Например: 12
 
 Или нажмите кнопку ниже, чтобы использовать стандартные размеры (10x10x10 дюймов)"""
-        bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=reply_markup)
+        bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=reply_markup))
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         return PARCEL_LENGTH
@@ -4722,7 +4719,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Например: 10
 
 Или нажмите кнопку ниже, чтобы использовать стандартные размеры для ширины и высоты (10x10 дюймов)"""
-        bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=reply_markup)
+        bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=reply_markup))
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         return PARCEL_WIDTH
@@ -4734,7 +4731,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Например: 8
 
 Или нажмите кнопку ниже, чтобы использовать стандартную высоту (10 дюймов)"""
-        bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=reply_markup)
+        bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=reply_markup))
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         return PARCEL_HEIGHT
@@ -4758,12 +4755,12 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         if all(field in data for field in required_fields):
             # Have all data - can fetch rates
-            await safe_telegram_call(query.message.reply_text("Возвращаемся к выбору тарифа...")
+            await safe_telegram_call(query.message.reply_text("Возвращаемся к выбору тарифа..."))
             return await fetch_shipping_rates(update, context)
         else:
             # Missing data - just continue
             logger.warning(f"return_to_order: Missing data for SELECT_CARRIER. Has: {list(data.keys())}")
-            await safe_telegram_call(query.message.reply_text("Продолжаем оформление заказа...")
+            await safe_telegram_call(query.message.reply_text("Продолжаем оформление заказа..."))
             return last_state
     
     elif last_state == PAYMENT_METHOD:
@@ -4827,10 +4824,10 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 ])
             
             reply_markup = InlineKeyboardMarkup(keyboard)
-            await safe_telegram_call(query.message.reply_text(confirmation_text, reply_markup=reply_markup)
+            await safe_telegram_call(query.message.reply_text(confirmation_text, reply_markup=reply_markup))
             return PAYMENT_METHOD
         else:
-            await safe_telegram_call(query.message.reply_text("Продолжаем...")
+            await safe_telegram_call(query.message.reply_text("Продолжаем..."))
             return last_state
     
     elif last_state == TOPUP_AMOUNT:
@@ -4848,7 +4845,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Максимальная сумма: $1000"""
         
         bot_msg = await safe_telegram_call(query.message.reply_text(
-            message_text,
+            message_text,)
             reply_markup=reply_markup
         ))
         
@@ -4860,7 +4857,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     else:
         # Default fallback
-        await safe_telegram_call(query.message.reply_text("Продолжаем оформление заказа...")
+        await safe_telegram_call(query.message.reply_text("Продолжаем оформление заказа..."))
         return last_state if last_state else PAYMENT_METHOD
 
 # API Routes
@@ -4913,13 +4910,13 @@ async def create_order(order_data: OrderCreate):
             # Send payment link to user
             if bot_instance and pay_url:
                 await safe_telegram_call(bot_instance.send_message(
-                    chat_id=order_data.telegram_id,
+                    chat_id=order_data.telegram_id,)
                     text=f"""✅ Заказ создан!
 
 💰 Оплатите {order_data.amount} USDT:
 {pay_url}
 
-После оплаты мы автоматически создадим shipping label."""
+После оплаты мы автоматически создадим shipping label.""")
                 ))
             
             return {
@@ -5430,7 +5427,7 @@ async def refund_order(order_id: str, refund_reason: Optional[str] = None):
                 
                 await safe_telegram_call(bot_instance.send_message(
                     chat_id=order['telegram_id'],
-                    text=message,
+                    text=message,)
                     reply_markup=reply_markup
                 ))
             except Exception as e:
@@ -5592,7 +5589,7 @@ async def create_label_manually(order_id: str):
 Вы можете отслеживать посылку по номеру отслеживания."""
                     
                     await safe_telegram_call(bot_instance.send_message(
-                        chat_id=telegram_id,
+                        chat_id=telegram_id,)
                         text=message
                     ))
         except Exception as e:
@@ -5869,7 +5866,7 @@ async def oxapay_webhook(request: Request):
                         bot_msg = await safe_telegram_call(bot_instance.send_message(
                             chat_id=telegram_id,
                             text=message_text,
-                            reply_markup=reply_markup,
+                            reply_markup=reply_markup,)
                             parse_mode='Markdown'
                         ))
                         
@@ -5995,7 +5992,7 @@ async def block_user(telegram_id: int, authenticated: bool = Depends(verify_admi
                 try:
                     await safe_telegram_call(bot_instance.send_message(
                         chat_id=telegram_id,
-                        text="⛔️ *Вы были заблокированы администратором.*\n\nДоступ к боту ограничен.",
+                        text="⛔️ *Вы были заблокированы администратором.*\n\nДоступ к боту ограничен.",)
                         parse_mode='Markdown'
                     ))
                 except Exception as e:
@@ -6030,7 +6027,7 @@ async def unblock_user(telegram_id: int, authenticated: bool = Depends(verify_ad
                 try:
                     await safe_telegram_call(bot_instance.send_message(
                         chat_id=telegram_id,
-                        text="✅ *Вы были разблокированы!*\n\nТеперь вы можете снова использовать бот.",
+                        text="✅ *Вы были разблокированы!*\n\nТеперь вы можете снова использовать бот.",)
                         parse_mode='Markdown'
                     ))
                 except Exception as e:
@@ -6082,7 +6079,7 @@ async def invite_user_to_channel(telegram_id: int, authenticated: bool = Depends
             await safe_telegram_call(bot_instance.send_message(
                 chat_id=telegram_id,
                 text=message,
-                parse_mode='Markdown',
+                parse_mode='Markdown',)
                 reply_markup=inline_markup
             ))
             
@@ -6163,7 +6160,7 @@ async def invite_all_users_to_channel(authenticated: bool = Depends(verify_admin
                 await safe_telegram_call(bot_instance.send_message(
                     chat_id=user['telegram_id'],
                     text=message,
-                    parse_mode='Markdown',
+                    parse_mode='Markdown',)
                     reply_markup=reply_markup
                 ))
                 
@@ -6266,7 +6263,7 @@ async def broadcast_message(
                 else:
                     await safe_telegram_call(bot_instance.send_message(
                         chat_id=user['telegram_id'],
-                        text=message,
+                        text=message,)
                         parse_mode='Markdown'
                     ))
                 
@@ -6345,7 +6342,7 @@ async def enable_maintenance_mode(authenticated: bool = Depends(verify_admin_key
             try:
                 await safe_telegram_call(bot_instance.send_message(
                     chat_id=user['telegram_id'],
-                    text=maintenance_message,
+                    text=maintenance_message,)
                     parse_mode='Markdown'
                 ))
                 success_count += 1
@@ -6366,7 +6363,7 @@ async def enable_maintenance_mode(authenticated: bool = Depends(verify_admin_key
             try:
                 await safe_telegram_call(bot_instance.send_message(
                     chat_id=ADMIN_TELEGRAM_ID,
-                    text=admin_message,
+                    text=admin_message,)
                     parse_mode='Markdown'
                 ))
             except Exception as e:
@@ -6410,7 +6407,7 @@ async def disable_maintenance_mode(authenticated: bool = Depends(verify_admin_ke
             try:
                 await safe_telegram_call(bot_instance.send_message(
                     chat_id=user['telegram_id'],
-                    text=back_online_message,
+                    text=back_online_message,)
                     parse_mode='Markdown'
                 ))
                 success_count += 1
@@ -6431,7 +6428,7 @@ async def disable_maintenance_mode(authenticated: bool = Depends(verify_admin_ke
             try:
                 await safe_telegram_call(bot_instance.send_message(
                     chat_id=ADMIN_TELEGRAM_ID,
-                    text=admin_message,
+                    text=admin_message,)
                     parse_mode='Markdown'
                 ))
             except Exception as e:
@@ -6545,7 +6542,7 @@ ShipStation API: https://ssapi.shipstation.com/
                 
                 await safe_telegram_call(bot_instance.send_message(
                     chat_id=ADMIN_TELEGRAM_ID,
-                    text=notification_message,
+                    text=notification_message,)
                     parse_mode='Markdown'
                 ))
                 logger.info(f"API mode notification sent to admin {ADMIN_TELEGRAM_ID}")
@@ -7164,11 +7161,11 @@ async def add_balance(telegram_id: int, amount: float):
         # Notify user via Telegram
         if bot_instance:
             await safe_telegram_call(bot_instance.send_message(
-                chat_id=telegram_id,
+                chat_id=telegram_id,)
                 text=f"""💰 Баланс пополнен администратором!
 
 Зачислено: ${amount:.2f}
-Новый баланс: ${new_balance:.2f}"""
+Новый баланс: ${new_balance:.2f}""")
             ))
         
         return {"success": True, "new_balance": new_balance, "added": amount}
@@ -7201,11 +7198,11 @@ async def deduct_balance(telegram_id: int, amount: float):
         # Notify user via Telegram
         if bot_instance:
             await safe_telegram_call(bot_instance.send_message(
-                chat_id=telegram_id,
+                chat_id=telegram_id,)
                 text=f"""⚠️ Баланс изменен администратором!
 
 Списано: ${amount:.2f}
-Новый баланс: ${new_balance:.2f}"""
+Новый баланс: ${new_balance:.2f}""")
             ))
         
         return {"success": True, "new_balance": new_balance, "deducted": amount}
@@ -7246,7 +7243,7 @@ async def set_user_discount(telegram_id: int, discount: float):
 
 Вам предоставлена скидка {discount}% на все заказы!
 
-Скидка будет автоматически применена при создании следующих заказов.""",
+Скидка будет автоматически применена при создании следующих заказов.""",)
                     reply_markup=reply_markup
                 ))
             except Exception as e:
