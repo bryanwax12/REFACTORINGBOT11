@@ -7961,6 +7961,25 @@ async def startup_event():
             application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_topup_amount_input))
             application.add_handler(CallbackQueryHandler(button_callback))
             
+            
+            # Global error handler for catching all exceptions
+            async def global_error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+                """Log all errors"""
+                logger.error(f"🔥 GLOBAL ERROR HANDLER CAUGHT: {context.error}")
+                logger.error(f"Update: {update}")
+                logger.error(f"Traceback:", exc_info=context.error)
+                
+                # Try to send error message to user
+                try:
+                    if isinstance(update, Update) and update.effective_message:
+                        await safe_telegram_call(update.effective_message.reply_text(
+                            "❌ Произошла ошибка. Пожалуйста, попробуйте снова или используйте /start"
+                        ))
+                except Exception as e:
+                    logger.error(f"Failed to send error message to user: {e}")
+            
+            application.add_error_handler(global_error_handler)
+
             await application.initialize()
             await application.start()
             
