@@ -1653,7 +1653,7 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Check if phone starts with valid characters (+ or digit)
     if not phone or (phone[0] not in '0123456789+'):
-        await safe_telegram_call(update.message.reply_text("❌ Неверный формат телефона. Телефон должен начинаться с + или цифры\nНапример: +1234567890 или 1234567890")
+        await safe_telegram_call(update.message.reply_text("❌ Неверный формат телефона. Телефон должен начинаться с + или цифры\nНапример: +1234567890 или 1234567890"))
         return FROM_PHONE
     
     # Validate phone format
