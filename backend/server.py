@@ -627,6 +627,24 @@ def mark_message_as_selected_nonblocking(update: Update, context: ContextTypes.D
     """Non-blocking wrapper for mark_message_as_selected"""
     asyncio.create_task(mark_message_as_selected(update, context))
 
+async def safe_telegram_call(coro, timeout=10, error_message="❌ Превышено время ожидания. Попробуйте еще раз."):
+    """
+    Universal wrapper for all Telegram API calls with timeout protection
+    Prevents bot from hanging on any Telegram API operation
+    
+    Usage:
+        await safe_telegram_call(update.message.reply_text("Hello"))
+        await safe_telegram_call(context.bot.send_message(...), timeout=15)
+    """
+    try:
+        return await asyncio.wait_for(coro, timeout=timeout)
+    except asyncio.TimeoutError:
+        logger.error(f"Telegram API timeout after {timeout}s")
+        return None  # Return None on timeout
+    except Exception as e:
+        logger.error(f"Telegram API error: {e}")
+        return None
+
 async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     FAST: Add only emoji "✅" and remove buttons
