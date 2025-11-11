@@ -1688,9 +1688,11 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         message_text,
         reply_markup=reply_markup
     ))
-    context.user_data['last_bot_message_id'] = bot_msg.message_id
-    context.user_data['last_bot_message_text'] = message_text
-    context.user_data['last_state'] = TO_NAME
+    
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
+        context.user_data['last_state'] = TO_NAME
     return TO_NAME
 
 async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
