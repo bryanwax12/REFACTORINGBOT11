@@ -150,7 +150,8 @@ async def check_oxapay_payment(track_id: str):
             "trackId": track_id
         }
         
-        response = requests.post(
+        response = await asyncio.to_thread(
+            requests.post,
             f"{OXAPAY_API_URL}/v1/payment/info",
             json=payload,
             headers=headers,
