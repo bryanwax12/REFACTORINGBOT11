@@ -3771,7 +3771,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 После успешной оплаты мы автоматически создадим shipping label.""",
                     reply_markup=reply_markup
-                )
+                ))
             else:
                 error_msg = invoice_result.get('error', 'Unknown error')
                 await safe_telegram_call(query.message.reply_text(f"❌ Ошибка создания инвойса: {error_msg}"))
