@@ -6239,20 +6239,20 @@ async def broadcast_message(
                 # Send broadcast message (with image if provided)
                 if file_id:
                     # Use Telegram file_id (faster and more reliable)
-                    await bot_instance.send_photo(
+                    await safe_telegram_call(bot_instance.send_photo(
                         chat_id=user['telegram_id'],
                         photo=file_id,
                         caption=message,
                         parse_mode='Markdown'
-                    )
+                    ))
                 elif image_url:
                     # Use URL
-                    await bot_instance.send_photo(
+                    await safe_telegram_call(bot_instance.send_photo(
                         chat_id=user['telegram_id'],
                         photo=image_url,
                         caption=message,
                         parse_mode='Markdown'
-                    )
+                    ))
                 else:
                     await safe_telegram_call(bot_instance.send_message(
                         chat_id=user['telegram_id'],
