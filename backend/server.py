@@ -592,7 +592,7 @@ async def handle_orphaned_button(update: Update, context: ContextTypes.DEFAULT_T
         "⚠️ *Этот заказ уже завершён или отменён.*\n\n"
         "Для создания нового заказа используйте меню в нижней части экрана.",
         parse_mode='Markdown'
-    )
+    ))
 
 async def check_stale_interaction(query, context: ContextTypes.DEFAULT_TYPE) -> bool:
     """Check if button press is from an old/completed interaction"""
