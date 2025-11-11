@@ -1132,21 +1132,22 @@ _Если вы оплатите другую сумму, деньги не по�
 
 *После успешной оплаты баланс будет автоматически пополнен.*"""
             
-            bot_msg = await update.message.reply_text(
+            bot_msg = await safe_telegram_call(update.message.reply_text(
                 message_text,
                 reply_markup=reply_markup,
                 parse_mode='Markdown'
-            )
+            ))
             
             # Save last bot message context for button protection
-            context.user_data['last_bot_message_id'] = bot_msg.message_id
-            context.user_data['last_bot_message_text'] = message_text
+            if bot_msg:
+                context.user_data['last_bot_message_id'] = bot_msg.message_id
+                context.user_data['last_bot_message_text'] = message_text
         else:
             error_msg = invoice_result.get('error', 'Unknown error')
-            await update.message.reply_text(f"❌ *Ошибка создания инвойса:* {error_msg}", parse_mode='Markdown')
+            await safe_telegram_call(update.message.reply_text(f"❌ *Ошибка создания инвойса:* {error_msg}", parse_mode='Markdown'))
             
     except ValueError:
-        await update.message.reply_text("❌ *Неверный формат. Введите число (например: 10 или 25.50)*", parse_mode='Markdown')
+        await safe_telegram_call(update.message.reply_text("❌ *Неверный формат. Введите число (например: 10 или 25.50)*", parse_mode='Markdown'))
 
 # Conversation states for order creation
 FROM_NAME, FROM_ADDRESS, FROM_ADDRESS2, FROM_CITY, FROM_STATE, FROM_ZIP, FROM_PHONE, TO_NAME, TO_ADDRESS, TO_ADDRESS2, TO_CITY, TO_STATE, TO_ZIP, TO_PHONE, PARCEL_WEIGHT, PARCEL_LENGTH, PARCEL_WIDTH, PARCEL_HEIGHT, CONFIRM_DATA, EDIT_MENU, SELECT_CARRIER, PAYMENT_METHOD, TOPUP_AMOUNT, TEMPLATE_NAME, TEMPLATE_LIST, TEMPLATE_VIEW, TEMPLATE_RENAME, TEMPLATE_LOADED = range(28)
