@@ -4903,13 +4903,13 @@ async def create_order(order_data: OrderCreate):
             # Send payment link to user
             if bot_instance and pay_url:
                 await safe_telegram_call(bot_instance.send_message(
-                    chat_id=order_data.telegram_id,)
+                    chat_id=order_data.telegram_id,
                     text=f"""✅ Заказ создан!
 
 💰 Оплатите {order_data.amount} USDT:
 {pay_url}
 
-После оплаты мы автоматически создадим shipping label.""")
+После оплаты мы автоматически создадим shipping label."""
                 ))
             
             return {
