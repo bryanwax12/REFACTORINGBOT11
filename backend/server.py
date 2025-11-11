@@ -602,8 +602,8 @@ async def check_stale_interaction(query, context: ContextTypes.DEFAULT_TYPE) -> 
     if not context.user_data or len(context.user_data) == 0:
         logger.info("Stale interaction detected - empty user_data")
         await safe_telegram_call(query.answer("⚠️ Этот заказ уже завершён"))
-        await safe_telegram_call(query.message.reply_text()
-            "⚠️ *Этот заказ уже завершён или отменён.*\n\n")
+        await safe_telegram_call(query.message.reply_text(
+            "⚠️ *Этот заказ уже завершён или отменён.*\n\n"
             "Для создания нового заказа используйте меню в нижней части экрана.",
             parse_mode='Markdown'
         ))
