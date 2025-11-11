@@ -3313,7 +3313,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             await safe_telegram_call(query.message.reply_text(
                 f"❌ Нет доступных тарифов для данного направления.\n\nПроверьте правильность введенных адресов.",
                 reply_markup=reply_markup
-            )
+            ))
             return CONFIRM_DATA  # Stay to handle callback
         
         # Log carriers
