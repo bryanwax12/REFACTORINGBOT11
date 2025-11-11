@@ -2331,7 +2331,7 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
         # If we're editing parcel, mark as complete
         if context.user_data.get('editing_parcel'):
             context.user_data['editing_parcel'] = False
-            await safe_telegram_call(update.message.reply_text("✅ Размеры посылки обновлены!")
+            await safe_telegram_call(update.message.reply_text("✅ Размеры посылки обновлены!"))
         
         # Show data confirmation
         context.user_data['last_state'] = CONFIRM_DATA
