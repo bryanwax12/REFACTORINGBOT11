@@ -1749,30 +1749,30 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Check for Cyrillic or non-Latin characters
     if any(ord(c) >= 0x0400 and ord(c) <= 0x04FF for c in address):
-        await update.message.reply_text("❌ Используйте только английские буквы (латиницу). Пример: 123 Main St")
+        await safe_telegram_call(update.message.reply_text("❌ Используйте только английские буквы (латиницу). Пример: 123 Main St"))
         return TO_ADDRESS
     
     # Validate address
     if len(address) < 3:
-        await update.message.reply_text("❌ Адрес слишком короткий. Введите полный адрес:")
+        await safe_telegram_call(update.message.reply_text("❌ Адрес слишком короткий. Введите полный адрес:"))
         return TO_ADDRESS
     
     if len(address) > 100:
-        await update.message.reply_text("❌ Адрес слишком длинный. Максимум 100 символов:")
+        await safe_telegram_call(update.message.reply_text("❌ Адрес слишком длинный. Максимум 100 символов:"))
         return TO_ADDRESS
     
     # Only Latin letters, numbers, spaces, and common address symbols
     invalid_chars = [c for c in address if not (ord(c) < 128 and (c.isalnum() or c.isspace() or c in ".-',#/&"))]
     if invalid_chars:
         invalid_display = ', '.join([f"'{c}'" for c in set(invalid_chars)])
-        await update.message.reply_text(
+        await safe_telegram_call(update.message.reply_text(
             f"❌ Найдены недопустимые символы: {invalid_display}\n\n"
             f"Используйте только:\n"
             f"• Английские буквы (A-Z, a-z)\n"
             f"• Цифры (0-9)\n"
             f"• Пробелы\n"
             f"• Спецсимволы: . - , ' # / &"
-        )
+        ))
         return TO_ADDRESS
     
     context.user_data['to_street'] = address
