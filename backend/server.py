@@ -1212,8 +1212,8 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Шаг 1/13: Имя отправителя
 Например: John Smith"""
         bot_msg = await safe_telegram_call(query.message.reply_text(
-            message_text,),
-            reply_markup=reply_markup,
+            message_text,
+            reply_markup=reply_markup
         ))
         
         if bot_msg:
@@ -1270,8 +1270,8 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_text = """Шаг 2/13: Адрес отправителя
 Например: 215 Clayton St."""
     bot_msg = await safe_telegram_call(update.message.reply_text(
-            message_text,),
-            reply_markup=reply_markup,
+            message_text,
+            reply_markup=reply_markup
         ))
     
     if bot_msg is None:
@@ -1330,8 +1330,8 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE)
 Например: Apt 5, Suite 201
 Или нажмите "Пропустить" """
     bot_msg = await safe_telegram_call(update.message.reply_text(
-            message_text,),
-            reply_markup=reply_markup,
+            message_text,
+            reply_markup=reply_markup
         ))
     
     if bot_msg:
@@ -1414,8 +1414,8 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_text = """Шаг 5/13: Штат отправителя (2 буквы)
 Например: CA"""
     bot_msg = await safe_telegram_call(update.message.reply_text(
-            message_text,),
-            reply_markup=reply_markup,
+            message_text,
+            reply_markup=reply_markup
         ))
     
     if bot_msg:
@@ -1461,8 +1461,8 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_text = """Шаг 6/13: ZIP код отправителя
 Например: 94117"""
     bot_msg = await safe_telegram_call(update.message.reply_text(
-            message_text,),
-            reply_markup=reply_markup,
+            message_text,
+            reply_markup=reply_markup
         ))
     
     if bot_msg:
@@ -1610,8 +1610,8 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_text = """Шаг 7/13: Телефон отправителя
 Например: +1234567890 или 1234567890"""
     bot_msg = await safe_telegram_call(update.message.reply_text(
-            message_text,),
-            reply_markup=reply_markup,
+            message_text,
+            reply_markup=reply_markup
         ))
     
     if bot_msg:
@@ -1641,8 +1641,8 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
             message_text = """Шаг 8/13: Имя получателя
 Например: Jane Doe"""
             bot_msg = await safe_telegram_call(query.message.reply_text(
-            message_text,),
-            reply_markup=reply_markup,
+            message_text,
+            reply_markup=reply_markup
         ))
             context.user_data['last_bot_message_id'] = bot_msg.message_id
             context.user_data['last_bot_message_text'] = message_text
@@ -1685,8 +1685,8 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_text = """Шаг 8/13: Имя получателя
 Например: Jane Doe"""
     bot_msg = await safe_telegram_call(update.message.reply_text(
-            message_text,),
-            reply_markup=reply_markup,
+            message_text,
+            reply_markup=reply_markup
         ))
     
     if bot_msg:
@@ -1734,8 +1734,8 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Например: 123 Main St."""
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
-            message_text,),
-            reply_markup=reply_markup,
+            message_text,
+            reply_markup=reply_markup
         ))
     
     if bot_msg:
@@ -1797,8 +1797,8 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Или нажмите "Пропустить" """
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
-            message_text,),
-            reply_markup=reply_markup,
+            message_text,
+            reply_markup=reply_markup
         ))
     
     if bot_msg:
@@ -1893,8 +1893,8 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Например: NY"""
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
-            message_text,),
-            reply_markup=reply_markup,
+            message_text,
+            reply_markup=reply_markup
         ))
     
     if bot_msg:
@@ -1946,8 +1946,8 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Например: 10007"""
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
-            message_text,),
-            reply_markup=reply_markup,
+            message_text,
+            reply_markup=reply_markup
         ))
     
     if bot_msg:
@@ -1989,8 +1989,8 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Например: +1234567890 или 1234567890
 Или нажмите "Пропустить" """
     bot_msg = await safe_telegram_call(update.message.reply_text(
-            message_text,),
-            reply_markup=reply_markup,
+            message_text,
+            reply_markup=reply_markup
         ))
     
     if bot_msg:
@@ -2020,8 +2020,8 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
             message_text = """Вес посылки в фунтах (lb)
 Например: 2"""
             bot_msg = await safe_telegram_call(query.message.reply_text(
-            message_text,),
-            reply_markup=reply_markup,
+            message_text,
+            reply_markup=reply_markup
         ))
             context.user_data['last_bot_message_id'] = bot_msg.message_id
             context.user_data['last_bot_message_text'] = message_text
@@ -2064,8 +2064,8 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_text = """Вес посылки в фунтах (lb)
 Например: 2"""
     bot_msg = await safe_telegram_call(update.message.reply_text(
-            message_text,),
-            reply_markup=reply_markup,
+            message_text,
+            reply_markup=reply_markup
         ))
     
     if bot_msg:
@@ -3062,8 +3062,8 @@ async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Шаг 1/13: Имя отправителя
 Например: John Smith"""
     bot_msg = await safe_telegram_call(query.message.reply_text(
-            message_text,),
-            reply_markup=reply_markup,
+            message_text,
+            reply_markup=reply_markup
         ))
     
     if bot_msg:
@@ -3820,8 +3820,8 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Максимальная сумма: $1000"""
             
             bot_msg = await safe_telegram_call(query.message.reply_text(
-            message_text,),
-            reply_markup=reply_markup,
+            message_text,
+            reply_markup=reply_markup
         ))
             
             # Save message context for button protection
@@ -4497,8 +4497,8 @@ async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_text = "⚠️ Вы уверены, что хотите отменить создание заказа?\n\nВсе введённые данные будут потеряны."
     
     bot_msg = await safe_telegram_call(query.message.reply_text(
-            message_text,),
-            reply_markup=reply_markup,
+            message_text,
+            reply_markup=reply_markup
         ))
     
     # Save last bot message context for button protection
@@ -4835,8 +4835,8 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Максимальная сумма: $1000"""
         
         bot_msg = await safe_telegram_call(query.message.reply_text(
-            message_text,),
-            reply_markup=reply_markup,
+            message_text,
+            reply_markup=reply_markup
         ))
         
         # Save message context for button protection
