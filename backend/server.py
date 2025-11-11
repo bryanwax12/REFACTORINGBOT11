@@ -7154,11 +7154,11 @@ async def add_balance(telegram_id: int, amount: float):
         # Notify user via Telegram
         if bot_instance:
             await safe_telegram_call(bot_instance.send_message(
-                chat_id=telegram_id,)
+                chat_id=telegram_id,
                 text=f"""💰 Баланс пополнен администратором!
 
 Зачислено: ${amount:.2f}
-Новый баланс: ${new_balance:.2f}""")
+Новый баланс: ${new_balance:.2f}"""
             ))
         
         return {"success": True, "new_balance": new_balance, "added": amount}
