@@ -1413,11 +1413,13 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     message_text = """Шаг 5/13: Штат отправителя (2 буквы)
 Например: CA"""
-    bot_msg = await update.message.reply_text(
+    bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
         reply_markup=reply_markup
-    )
-    context.user_data['last_bot_message_id'] = bot_msg.message_id
+    ))
+    
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
     context.user_data['last_bot_message_text'] = message_text
     context.user_data['last_state'] = FROM_STATE
     return FROM_STATE
