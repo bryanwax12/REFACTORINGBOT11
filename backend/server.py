@@ -2538,7 +2538,7 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
     template_name = update.message.text.strip()[:30]  # Limit to 30 chars
     
     if not template_name:
-        await update.message.reply_text("❌ Название не может быть пустым. Попробуйте еще раз:")
+        await safe_telegram_call(update.message.reply_text("❌ Название не может быть пустым. Попробуйте еще раз:"))
         return TEMPLATE_NAME
     
     telegram_id = update.effective_user.id
