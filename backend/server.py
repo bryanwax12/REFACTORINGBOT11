@@ -2335,6 +2335,8 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return PARCEL_WIDTH
 
 async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    logger.info(f"🔍 order_parcel_height called - user: {update.effective_user.id}, message: {update.message.text if update.message else 'callback'}")
+    
     # Check if it's a callback query (skip height button)
     if hasattr(update, 'callback_query') and update.callback_query:
         query = update.callback_query
