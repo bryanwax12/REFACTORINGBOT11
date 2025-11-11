@@ -1572,7 +1572,7 @@ async def notify_admin_error(user_info: dict, error_type: str, error_details: st
         
         await safe_telegram_call(bot_instance.send_message(
             chat_id=ADMIN_TELEGRAM_ID,
-            text=message,)
+            text=message,
             parse_mode='HTML'
         ))
     except Exception as e:
