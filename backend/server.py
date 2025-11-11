@@ -2762,7 +2762,7 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Создайте заказ и нажмите "*Сохранить как шаблон*" на экране проверки данных.""",
             reply_markup=reply_markup,
             parse_mode='Markdown'
-        )
+        ))
         return ConversationHandler.END
     
     # Build template list message
