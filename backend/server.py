@@ -2201,7 +2201,7 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
             reply_markup = InlineKeyboardMarkup(keyboard)
             
             bot_msg = await safe_telegram_call(update.message.reply_text(
-        ))
+                """Ширина посылки в дюймах (in)
 
 Введите ширину в дюймах (например: 12):""",
                 reply_markup=reply_markup
