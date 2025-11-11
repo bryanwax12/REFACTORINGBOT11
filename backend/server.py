@@ -5227,7 +5227,12 @@ async def download_label(label_id: str):
         }
         
         # Download label from ShipStation
-        response = requests.get(label_url, headers=headers, timeout=30)
+        response = await asyncio.to_thread(
+            requests.get,
+            label_url,
+            headers=headers,
+            timeout=30
+        )
         
         if response.status_code == 200:
             from fastapi.responses import Response
