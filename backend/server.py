@@ -4444,13 +4444,13 @@ Label PDF: {label_download_url}
         reply_markup = InlineKeyboardMarkup(keyboard)
         
         if message:
-            await message.reply_text(user_message, reply_markup=reply_markup)
+            await safe_telegram_call(message.reply_text(user_message, reply_markup=reply_markup))
         elif bot_instance:
-            await bot_instance.send_message(
+            await safe_telegram_call(bot_instance.send_message(
                 chat_id=telegram_id,
                 text=user_message,
                 reply_markup=reply_markup
-            )
+            ))
         
         return False  # Failed
 
