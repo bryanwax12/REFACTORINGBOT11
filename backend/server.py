@@ -623,6 +623,10 @@ async def check_stale_interaction(query, context: ContextTypes.DEFAULT_TYPE) -> 
     logger.info("Interaction is valid - proceeding")
     return False
 
+def mark_message_as_selected_nonblocking(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Non-blocking wrapper for mark_message_as_selected"""
+    asyncio.create_task(mark_message_as_selected(update, context))
+
 async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Optimized: Remove buttons from previous message and add '✅ Выбрано' text
