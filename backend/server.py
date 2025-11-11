@@ -1963,7 +1963,7 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     import re
     # US ZIP format: 5 digits or 5-4 digits
     if not re.match(r'^\d{5}(-\d{4})?$', zip_code):
-        await update.message.reply_text("❌ Неверный формат ZIP кода. Используйте формат: 12345 или 12345-6789:")
+        await safe_telegram_call(update.message.reply_text("❌ Неверный формат ZIP кода. Используйте формат: 12345 или 12345-6789:"))
         return TO_ZIP
     
     context.user_data['to_zip'] = zip_code
