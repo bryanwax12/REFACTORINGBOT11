@@ -4184,7 +4184,8 @@ async def create_and_send_label(order_id, telegram_id, message):
         
         logger.info(f"Purchasing label with rate_id: {order['rate_id']}")
         
-        response = requests.post(
+        response = await asyncio.to_thread(
+            requests.post,
             'https://api.shipstation.com/v2/labels',
             headers=headers,
             json=label_request,
