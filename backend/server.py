@@ -907,7 +907,7 @@ async def handle_create_label_request(update: Update, context: ContextTypes.DEFA
         await safe_telegram_call(query.message.reply_text(
             "✅ Shipping label успешно создан!",
             reply_markup=reply_markup
-        )
+        ))
     else:
         keyboard = [[
             InlineKeyboardButton("🔙 Главное меню", callback_data='start')
@@ -917,7 +917,7 @@ async def handle_create_label_request(update: Update, context: ContextTypes.DEFA
         await safe_telegram_call(query.message.reply_text(
             "❌ Не удалось создать shipping label. Пожалуйста, свяжитесь с администратором.",
             reply_markup=reply_markup
-        )
+        ))
 
 async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
