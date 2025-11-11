@@ -2338,7 +2338,7 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
         return await show_data_confirmation(update, context)
             
     except ValueError:
-        await safe_telegram_call(update.message.reply_text("❌ Неверный формат. Введите число (например: 8 или 8.5):")
+        await safe_telegram_call(update.message.reply_text("❌ Неверный формат. Введите число (например: 8 или 8.5):"))
         return PARCEL_HEIGHT
 
 
