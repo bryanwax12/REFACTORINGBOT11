@@ -7196,7 +7196,8 @@ async def get_carriers():
         }
         
         # Get carrier accounts
-        response = requests.get(
+        response = await asyncio.to_thread(
+            requests.get,
             'https://api.shipstation.com/v2/carriers',
             headers=headers,
             timeout=10
