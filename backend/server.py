@@ -3141,7 +3141,7 @@ async def skip_address_validation(update: Update, context: ContextTypes.DEFAULT_
     # Set flag to skip validation
     context.user_data['skip_address_validation'] = True
     
-    await safe_telegram_call(query.message.reply_text("⚠️ Пропускаю валидацию адреса...\n⏳ Получаю доступные курьерские службы и тарифы...")
+    await safe_telegram_call(query.message.reply_text("⚠️ Пропускаю валидацию адреса...\n⏳ Получаю доступные курьерские службы и тарифы..."))
     
     # Call fetch_shipping_rates which will now skip validation
     return await fetch_shipping_rates(update, context)
