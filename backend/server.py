@@ -6072,7 +6072,7 @@ async def invite_user_to_channel(telegram_id: int, authenticated: bool = Depends
             await safe_telegram_call(bot_instance.send_message(
                 chat_id=telegram_id,
                 text=message,
-                parse_mode='Markdown',)
+                parse_mode='Markdown',
                 reply_markup=inline_markup
             ))
             
