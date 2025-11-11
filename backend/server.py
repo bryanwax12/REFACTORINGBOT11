@@ -5985,7 +5985,7 @@ async def block_user(telegram_id: int, authenticated: bool = Depends(verify_admi
                 try:
                     await safe_telegram_call(bot_instance.send_message(
                         chat_id=telegram_id,
-                        text="⛔️ *Вы были заблокированы администратором.*\n\nДоступ к боту ограничен.",)
+                        text="⛔️ *Вы были заблокированы администратором.*\n\nДоступ к боту ограничен.",
                         parse_mode='Markdown'
                     ))
                 except Exception as e:
