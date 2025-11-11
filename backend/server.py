@@ -904,8 +904,8 @@ async def handle_create_label_request(update: Update, context: ContextTypes.DEFA
         ]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
-        await safe_telegram_call(query.message.reply_text()
-            "✅ Shipping label успешно создан!",)
+        await safe_telegram_call(query.message.reply_text(
+            "✅ Shipping label успешно создан!",
             reply_markup=reply_markup
         ))
     else:
