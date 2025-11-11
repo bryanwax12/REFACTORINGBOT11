@@ -8005,10 +8005,13 @@ async def startup_event():
             webhook_url = os.environ.get('WEBHOOK_URL') or os.environ.get('WEBHOOK_BASE_URL')
             if webhook_url:
                 # Production: use webhook
-                logger.info(f"Starting Telegram Bot in WEBHOOK mode: {webhook_url}")
+                # Remove trailing slash from webhook_url to avoid double slashes
+                webhook_url = webhook_url.rstrip('/')
+                webhook_endpoint = f"{webhook_url}/api/telegram/webhook"
+                logger.info(f"Starting Telegram Bot in WEBHOOK mode: {webhook_endpoint}")
                 await application.bot.delete_webhook(drop_pending_updates=True)
                 await application.bot.set_webhook(
-                    url=f"{webhook_url}/api/telegram/webhook",
+                    url=webhook_endpoint,
                     allowed_updates=["message", "callback_query"]
                 )
                 logger.info("Telegram Bot webhook set successfully!")
