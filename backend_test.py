@@ -2217,17 +2217,6 @@ def test_backend_logs_for_notifications():
     except Exception as e:
         print(f"❌ Backend logs test error: {e}")
         return False
-                
-                # Check if state is handled in return_to_order
-                return_handling_pattern = rf'last_state == {state_name}'
-                handled_in_return = bool(re.search(return_handling_pattern, server_code))
-                
-                # Overall state assessment
-                state_ok = function_exists and (has_cancel_button or handled_in_return)
-                
-                category_results[state_name] = {
-                    'function_exists': function_exists,
-                    'has_cancel_button': has_cancel_button,
                     'handled_in_return': handled_in_return,
                     'overall_ok': state_ok
                 }
