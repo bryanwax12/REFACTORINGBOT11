@@ -2296,12 +2296,13 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
                 reply_markup=reply_markup
             ))
         
-        context.user_data['last_bot_message_id'] = bot_msg.message_id
-        context.user_data['last_state'] = PARCEL_HEIGHT
+        if bot_msg:
+            context.user_data['last_bot_message_id'] = bot_msg.message_id
+            context.user_data['last_state'] = PARCEL_HEIGHT
         return PARCEL_HEIGHT
             
     except ValueError:
-        await update.message.reply_text("❌ Неверный формат. Введите число (например: 10 или 10.5):")
+        await safe_telegram_call(update.message.reply_text("❌ Неверный формат. Введите число (например: 10 или 10.5):"))
         return PARCEL_WIDTH
 
 async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE):
