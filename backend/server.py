@@ -2301,7 +2301,7 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
             # Mark previous message as selected (non-blocking)
             asyncio.create_task(mark_message_as_selected(update, context))
             
-            await safe_telegram_call(query.message.reply_text("✅ Используется стандартная высота: 10 дюймов")
+            await safe_telegram_call(query.message.reply_text("✅ Используется стандартная высота: 10 дюймов"))
             
             # If we're editing parcel, mark as complete
             if context.user_data.get('editing_parcel'):
