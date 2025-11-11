@@ -3037,8 +3037,8 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await safe_telegram_call(update.message.reply_text(
-            f"""✅ Шаблон переименован в "{new_name}" """,),
-            reply_markup=reply_markup,
+            f"""✅ Шаблон переименован в "{new_name}" """,
+            reply_markup=reply_markup
         ))
     
     return ConversationHandler.END
