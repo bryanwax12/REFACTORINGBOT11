@@ -3029,7 +3029,7 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
     new_name = update.message.text.strip()[:30]
     
     if not new_name:
-        await safe_telegram_call(update.message.reply_text("❌ Название не может быть пустым. Попробуйте еще раз:")
+        await safe_telegram_call(update.message.reply_text("❌ Название не может быть пустым. Попробуйте еще раз:"))
         return TEMPLATE_RENAME
     
     template_id = context.user_data.get('renaming_template_id')
