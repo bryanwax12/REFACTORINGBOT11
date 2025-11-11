@@ -1288,16 +1288,16 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE)
     
     # Check for Cyrillic or non-Latin characters
     if any(ord(c) >= 0x0400 and ord(c) <= 0x04FF for c in address):
-        await update.message.reply_text("❌ Используйте только английские буквы (латиницу). Пример: 215 Clayton St")
+        await safe_telegram_call(update.message.reply_text("❌ Используйте только английские буквы (латиницу). Пример: 215 Clayton St"))
         return FROM_ADDRESS
     
     # Validate address
     if len(address) < 3:
-        await update.message.reply_text("❌ Адрес слишком короткий. Введите полный адрес:")
+        await safe_telegram_call(update.message.reply_text("❌ Адрес слишком короткий. Введите полный адрес:"))
         return FROM_ADDRESS
     
     if len(address) > 100:
-        await update.message.reply_text("❌ Адрес слишком длинный. Максимум 100 символов:")
+        await safe_telegram_call(update.message.reply_text("❌ Адрес слишком длинный. Максимум 100 символов:"))
         return FROM_ADDRESS
     
     # Only Latin letters, numbers, spaces, and common address symbols
