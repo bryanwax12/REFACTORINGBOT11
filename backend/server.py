@@ -3761,7 +3761,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                            [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 
-                await safe_telegram_call(query.message.reply_text()
+                await safe_telegram_call(query.message.reply_text(
                     f"""✅ Заказ создан!
 
 💰 Сумма к оплате: ${amount}
