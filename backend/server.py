@@ -2709,9 +2709,10 @@ async def handle_template_new_name(update: Update, context: ContextTypes.DEFAULT
     asyncio.create_task(mark_message_as_selected(update, context))
     
     await safe_telegram_call(query.message.reply_text(
-            """📝 Введите новое название для шаблона:,
-            Например: Доставка маме 2, Офис NY"""),
-        ))
+        """📝 Введите новое название для шаблона:
+
+Например: Доставка маме 2, Офис NY"""
+    ))
     # Clear last_bot_message to prevent interfering with text input
     context.user_data.pop('last_bot_message_id', None)
     context.user_data.pop('last_bot_message_text', None)
