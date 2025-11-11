@@ -556,7 +556,7 @@ async def test_error_message(update: Update, context: ContextTypes.DEFAULT_TYPE)
     keyboard.append([InlineKeyboardButton("🏠 Главное меню", callback_data='main_menu')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await safe_telegram_call(update.message.reply_text(user_message, reply_markup=reply_markup)
+    await safe_telegram_call(update.message.reply_text(user_message, reply_markup=reply_markup))
 
 # Helper function to check if user is blocked
 async def check_user_blocked(telegram_id: int) -> bool:
