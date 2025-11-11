@@ -8019,8 +8019,12 @@ async def startup_event():
             )
             
             # Check if we should use webhook (production) or polling (preview)
-            # Try WEBHOOK_URL first, fallback to WEBHOOK_BASE_URL for convenience
-            webhook_url = os.environ.get('WEBHOOK_URL') or os.environ.get('WEBHOOK_BASE_URL')
+            # Only use webhook if WEBHOOK_URL is explicitly set (not WEBHOOK_BASE_URL in preview)
+            webhook_url = os.environ.get('WEBHOOK_URL')
+            # In production, fallback to WEBHOOK_BASE_URL if WEBHOOK_URL not set
+            if not webhook_url and 'preview' not in os.environ.get('WEBHOOK_BASE_URL', '').lower():
+                webhook_url = os.environ.get('WEBHOOK_BASE_URL')
+            
             if webhook_url:
                 # Production: use webhook
                 # Remove trailing slash from webhook_url to avoid double slashes
