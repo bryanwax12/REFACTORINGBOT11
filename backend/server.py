@@ -2060,8 +2060,11 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
             await update.message.reply_text("✅ Вес посылки обновлен!")
             # Don't set editing_parcel to False yet - we need to edit dimensions too
         
-        # Mark previous message as selected (non-blocking)
-        asyncio.create_task(mark_message_as_selected(update, context))
+        # Mark previous message as selected (fire and forget)
+        try:
+            asyncio.create_task(mark_message_as_selected(update, context))
+        except:
+            pass  # Don't block on marking
         
         # Ask for length (with skip option only if weight <= 10 lb)
         if weight > 10:
