@@ -2134,7 +2134,7 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
         
         # If message failed to send, return to previous state
         if bot_msg is None:
-            await safe_telegram_call(update.message.reply_text("❌ Ошибка отправки. Попробуйте еще раз:")
+            await safe_telegram_call(update.message.reply_text("❌ Ошибка отправки. Попробуйте еще раз:"))
             return PARCEL_WEIGHT
         
         context.user_data['last_bot_message_id'] = bot_msg.message_id
