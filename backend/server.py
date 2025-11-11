@@ -2798,7 +2798,7 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard.append([InlineKeyboardButton("🔙 Главное меню", callback_data='start')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    bot_msg = await safe_telegram_call(query.message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown')
+    bot_msg = await safe_telegram_call(query.message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown'))
     # Save last message context for button protection
     context.user_data['last_bot_message_id'] = bot_msg.message_id
     context.user_data['last_bot_message_text'] = message
