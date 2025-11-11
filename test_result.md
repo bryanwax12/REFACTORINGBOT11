@@ -239,6 +239,9 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ OXAPAY ORDER_ID LENGTH FIX VERIFIED: Comprehensive testing confirms the fix is working perfectly. (1) ✅ Order ID generation format changed successfully - new format 'top_{timestamp}_{uuid[:8]}' generates 23 characters (well under 50 char limit), (2) ✅ Multiple generation tests confirm consistent length of 23 chars vs old format of 51+ chars, (3) ✅ Invoice creation test successful with $15 amount - returned trackId: 192105324 and payLink: https://pay.oxapay.com/10720216/192105324, (4) ✅ No 'order id field must not be greater than 50 characters' error - API returns status 200 instead of error 400, (5) ✅ Order ID format validation passed with pattern 'top_1761926916_8d831783', (6) ✅ Import time statement added correctly to support timestamp generation. The order_id length fix is working correctly and users should now be able to create invoices for balance top-up without the 50-character limit error."
+        - working: true
+          agent: "testing"
+          comment: "✅ КОМПЛЕКСНОЕ ТЕСТИРОВАНИЕ OXAPAY ЗАВЕРШЕНО: Проведено полное регрессионное тестирование после всех исправлений. РЕЗУЛЬТАТЫ: (1) ✅ API конфигурация корректна - URL: https://api.oxapay.com, endpoint: /v1/payment/invoice, API ключ в headers как merchant_api_key, все параметры в snake_case формате, (2) ✅ Создание инвойса успешно с суммой $15 - получен trackId: 141871818 и payLink: https://pay.oxapay.com/10720216/141871818, (3) ✅ Нет ошибки валидации (result code 101) - исправление устранило проблему, (4) ✅ Длина order_id корректна - новый формат 'top_{timestamp}_{uuid[:8]}' генерирует 23 символа (значительно меньше лимита 50), (5) ✅ Нет ошибки '50 characters' - API возвращает статус 200, (6) ✅ Все критические исправления работают. Oxapay интеграция полностью функциональна для пополнения баланса пользователей."
 
   - task: "ShipStation V2 API Rate Request Fix"
     implemented: true
