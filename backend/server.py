@@ -1069,11 +1069,11 @@ async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAUL
         amount = float(update.message.text.strip())
         
         if amount < 10:
-            await update.message.reply_text("❌ *Минимальная сумма для пополнения: $10*", parse_mode='Markdown')
+            await safe_telegram_call(update.message.reply_text("❌ *Минимальная сумма для пополнения: $10*", parse_mode='Markdown'))
             return
         
         if amount > 10000:
-            await update.message.reply_text("❌ *Максимальная сумма для пополнения: $10,000*", parse_mode='Markdown')
+            await safe_telegram_call(update.message.reply_text("❌ *Максимальная сумма для пополнения: $10,000*", parse_mode='Markdown'))
             return
         
         # Clear the waiting flag
