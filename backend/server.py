@@ -619,6 +619,14 @@ async def check_stale_interaction(query, context: ContextTypes.DEFAULT_TYPE) -> 
     """Check if button press is from an old/completed interaction"""
     logger.info(f"check_stale_interaction called - user_data keys: {list(context.user_data.keys())}")
     
+    # Check for rapid multiple clicks (debouncing)
+    user_id = query.from_user.id
+    button_data = query.data
+    
+    if not is_button_click_allowed(user_id, button_data):
+        await safe_telegram_call(query.answer("⚠️ Пожалуйста, подождите..."))
+        return True  # Block this interaction
+    
     # If user_data is empty or doesn't have active order data, it's likely stale
     if not context.user_data or len(context.user_data) == 0:
         logger.info("Stale interaction detected - empty user_data")
