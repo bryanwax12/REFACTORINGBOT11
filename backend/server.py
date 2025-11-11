@@ -3243,13 +3243,31 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         logger.info(f"ShipStation rate request: {rate_request}")
         
         # Get rates from ShipStation using async wrapper to prevent blocking
-        response = await asyncio.to_thread(
-            requests.post,
-            'https://api.shipstation.com/v2/rates',
-            headers=headers,
-            json=rate_request,
-            timeout=15
-        )
+        try:
+            response = await asyncio.wait_for(
+                asyncio.to_thread(
+                    requests.post,
+                    'https://api.shipstation.com/v2/rates',
+                    headers=headers,
+                    json=rate_request,
+                    timeout=15
+                ),
+                timeout=20  # Overall timeout including thread overhead
+            )
+        except asyncio.TimeoutError:
+            logger.error("ShipStation rate request timed out after 20 seconds")
+            keyboard = [
+                [InlineKeyboardButton("🔄 Попробовать снова", callback_data='continue_order')],
+                [InlineKeyboardButton("✏️ Редактировать адреса", callback_data='edit_addresses_error')],
+                [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            await safe_telegram_call(query.message.reply_text(
+                "❌ Превышено время ожидания ответа от ShipStation.\n\nПопробуйте еще раз или проверьте правильность адресов.",
+                reply_markup=reply_markup
+            ))
+            return CONFIRM_DATA
         
         if response.status_code != 200:
             error_data = response.json() if response.text else {}
