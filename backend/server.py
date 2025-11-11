@@ -2266,7 +2266,7 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 Введите высоту в дюймах (например: 10):""",
                 reply_markup=reply_markup
-            )
+            ))
         else:
             # Light parcel - can skip and use default dimensions
             keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартную высоту", callback_data='skip_height')]]
