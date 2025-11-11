@@ -1908,11 +1908,11 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Validate state
     if len(state) != 2:
-        await update.message.reply_text("❌ Код штата должен быть ровно 2 буквы. Например: CA, NY, TX:")
+        await safe_telegram_call(update.message.reply_text("❌ Код штата должен быть ровно 2 буквы. Например: CA, NY, TX:"))
         return TO_STATE
     
     if not state.isalpha():
-        await update.message.reply_text("❌ Код штата должен содержать только буквы:")
+        await safe_telegram_call(update.message.reply_text("❌ Код штата должен содержать только буквы:"))
         return TO_STATE
     
     # Valid US state codes
@@ -1926,7 +1926,7 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     }
     
     if state not in valid_states:
-        await update.message.reply_text("❌ Неверный код штата. Введите корректный код (например: CA, NY, TX):")
+        await safe_telegram_call(update.message.reply_text("❌ Неверный код штата. Введите корректный код (например: CA, NY, TX):"))
         return TO_STATE
     
     context.user_data['to_state'] = state
