@@ -2146,7 +2146,7 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
         await safe_telegram_call(update.message.reply_text("❌ Превышено время ожидания. Попробуйте еще раз:"))
         return PARCEL_WEIGHT
     except ValueError:
-        await safe_telegram_call(update.message.reply_text("❌ Неверный формат. Введите число (например: 2 или 2.5):")
+        await safe_telegram_call(update.message.reply_text("❌ Неверный формат. Введите число (например: 2 или 2.5):"))
         return PARCEL_WEIGHT
 
 
