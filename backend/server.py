@@ -4359,7 +4359,7 @@ Tracking: {tracking_number}
                     # Send AI-generated thank you message (ONCE)
                     logger.info(f"Sending thank you message to user {telegram_id}")
                     await safe_telegram_call(bot_instance.send_message(
-                        chat_id=telegram_id,)
+                        chat_id=telegram_id,
                         text=thank_you_msg
                     ))
                     logger.info(f"Thank you message sent successfully to user {telegram_id}")
