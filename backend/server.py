@@ -5610,7 +5610,8 @@ async def create_label_manual_form(request: Request):
         logger.info(f"Creating label manually from form")
         
         # Create label via ShipStation
-        response = requests.post(
+        response = await asyncio.to_thread(
+            requests.post,
             'https://api.shipstation.com/v2/labels',
             headers=headers,
             json=shipment_data,
