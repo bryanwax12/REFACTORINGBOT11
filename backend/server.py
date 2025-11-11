@@ -1275,7 +1275,7 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ))
     
     if bot_msg is None:
-        await safe_telegram_call(update.message.reply_text("❌ Ошибка отправки. Попробуйте еще раз:")
+        await safe_telegram_call(update.message.reply_text("❌ Ошибка отправки. Попробуйте еще раз:"))
         return FROM_NAME
     
     context.user_data['last_bot_message_id'] = bot_msg.message_id
