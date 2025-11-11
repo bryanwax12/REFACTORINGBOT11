@@ -5795,11 +5795,11 @@ async def oxapay_webhook(request: Request):
                     logger.info(f"Payment message_id for removal: {payment_message_id}")
                     if payment_message_id and bot_instance:
                         try:
-                            await bot_instance.edit_message_reply_markup(
+                            await safe_telegram_call(bot_instance.edit_message_reply_markup(
                                 chat_id=telegram_id,
                                 message_id=payment_message_id,
                                 reply_markup=None
-                            )
+                            ))
                             logger.info(f"Removed payment button from message {payment_message_id}")
                         except Exception as e:
                             logger.warning(f"Could not remove payment button: {e}")
