@@ -5154,7 +5154,8 @@ async def track_shipment(tracking_number: str, carrier: str):
         }
         
         # ShipStation V2 tracking endpoint
-        response = requests.get(
+        response = await asyncio.to_thread(
+            requests.get,
             f'https://api.shipstation.com/v2/tracking?tracking_number={tracking_number}&carrier_code={carrier}',
             headers=headers,
             timeout=10
