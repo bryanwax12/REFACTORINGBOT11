@@ -3091,13 +3091,14 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         
         data = context.user_data
         
-        # Validate required fields
+        # Validate required fields and check for None values
         required_fields = ['from_name', 'from_street', 'from_city', 'from_state', 'from_zip', 
                           'to_name', 'to_street', 'to_city', 'to_state', 'to_zip', 'weight']
-        missing_fields = [field for field in required_fields if not data.get(field)]
+        missing_fields = [field for field in required_fields if not data.get(field) or data.get(field) == 'None' or data.get(field) == '']
         
         if missing_fields:
-            logger.error(f"Missing required fields: {missing_fields}")
+            logger.error(f"Missing or invalid required fields: {missing_fields}")
+            logger.error(f"Current user_data: {data}")
             keyboard = [
                 [InlineKeyboardButton("✏️ Редактировать данные", callback_data='edit_data')],
                 [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
