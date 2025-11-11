@@ -1900,8 +1900,8 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     context.user_data['to_state'] = state
     
-    # Mark previous message as selected
-    await mark_message_as_selected(update, context)
+    # Mark previous message as selected (non-blocking)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
