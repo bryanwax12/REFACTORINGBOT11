@@ -4255,7 +4255,12 @@ async def create_and_send_label(order_id, telegram_id, message):
             try:
                 # Download label PDF
                 headers_download = {'API-Key': SHIPSTATION_API_KEY}
-                label_response_download = requests.get(label_download_url, headers=headers_download, timeout=30)
+                label_response_download = await asyncio.to_thread(
+                    requests.get,
+                    label_download_url,
+                    headers=headers_download,
+                    timeout=30
+                )
                 
                 if label_response_download.status_code == 200:
                     # Generate AI thank you message ONCE
