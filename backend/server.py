@@ -1467,7 +1467,8 @@ async def get_shipstation_carrier_ids():
             'Content-Type': 'application/json'
         }
         
-        response = requests.get(
+        response = await asyncio.to_thread(
+            requests.get,
             'https://api.shipstation.com/v2/carriers',
             headers=headers,
             timeout=10
