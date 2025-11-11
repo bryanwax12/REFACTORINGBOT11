@@ -2289,7 +2289,7 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
             reply_markup = InlineKeyboardMarkup(keyboard)
             
             bot_msg = await safe_telegram_call(update.message.reply_text(
-        ))
+                """Высота посылки в дюймах (in)
 Например: 8
 
 Или нажмите кнопку ниже, чтобы использовать стандартную высоту (10 дюймов)""",
