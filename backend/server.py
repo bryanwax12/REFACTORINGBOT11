@@ -6356,7 +6356,7 @@ async def enable_maintenance_mode(authenticated: bool = Depends(verify_admin_key
             try:
                 await safe_telegram_call(bot_instance.send_message(
                     chat_id=ADMIN_TELEGRAM_ID,
-                    text=admin_message,)
+                    text=admin_message,
                     parse_mode='Markdown'
                 ))
             except Exception as e:
@@ -6421,7 +6421,7 @@ async def disable_maintenance_mode(authenticated: bool = Depends(verify_admin_ke
             try:
                 await safe_telegram_call(bot_instance.send_message(
                     chat_id=ADMIN_TELEGRAM_ID,
-                    text=admin_message,)
+                    text=admin_message,
                     parse_mode='Markdown'
                 ))
             except Exception as e:
