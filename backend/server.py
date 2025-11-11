@@ -1305,14 +1305,14 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if invalid_chars:
         invalid_display = ', '.join([f"'{c}'" for c in set(invalid_chars)])
         logger.warning(f"Invalid characters in address: {invalid_chars} (ords: {[ord(c) for c in invalid_chars]})")
-        await update.message.reply_text(
+        await safe_telegram_call(update.message.reply_text(
             f"❌ Найдены недопустимые символы: {invalid_display}\n\n"
             f"Используйте только:\n"
             f"• Английские буквы (A-Z, a-z)\n"
             f"• Цифры (0-9)\n"
             f"• Пробелы\n"
             f"• Спецсимволы: . - , ' # / &"
-        )
+        ))
         return FROM_ADDRESS
     
     context.user_data['from_street'] = address
@@ -1329,10 +1329,10 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE)
     message_text = """Шаг 3/13: Квартира/Офис отправителя (необязательно)
 Например: Apt 5, Suite 201
 Или нажмите "Пропустить" """
-    bot_msg = await update.message.reply_text(
+    bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
         reply_markup=reply_markup
-    )
+    ))
     context.user_data['last_bot_message_id'] = bot_msg.message_id
     context.user_data['last_bot_message_text'] = message_text
     context.user_data['last_state'] = FROM_ADDRESS2
