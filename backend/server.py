@@ -883,11 +883,11 @@ async def handle_create_label_request(update: Update, context: ContextTypes.DEFA
     if order['shipping_status'] == 'label_created':
         await safe_telegram_call(query.message.reply_text(f"""⏳ Пересоздаю shipping label для заказа #{order_id[:8]}...
     
-Это может занять несколько секунд.""")
+Это может занять несколько секунд."""))
     else:
         await safe_telegram_call(query.message.reply_text(f"""⏳ Создаю shipping label для заказа #{order_id[:8]}...
     
-Это может занять несколько секунд.""")
+Это может занять несколько секунд."""))
     
     # Try to create label
     label_created = await create_and_send_label(order_id, telegram_id, query.message)
