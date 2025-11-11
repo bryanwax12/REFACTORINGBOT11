@@ -4361,7 +4361,7 @@ Service: {order['selected_service']}
 Label PDF: {label_download_url}
 
 Вы оплатили: ${order['amount']:.2f}"""
-                    )
+                    ))
                     logger.warning(f"Could not download label PDF, sent URL instead")
                     
             except Exception as e:
