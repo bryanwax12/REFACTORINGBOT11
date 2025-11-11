@@ -2108,7 +2108,7 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
             # Use universal timeout wrapper
             bot_msg = await safe_telegram_call(
                 update.message.reply_text(
-                    """📏 Длина посылки в дюймах (inches)
+                    """📏 Длина посылки в дюймах (inches))
 
 ⚠️ Для посылок тяжелее 10 фунтов необходимо указать точные размеры для корректного расчета стоимости.
 
@@ -2124,7 +2124,7 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
             # Use universal timeout wrapper
             bot_msg = await safe_telegram_call(
                 update.message.reply_text(
-                    """📏 Длина посылки в дюймах (inches)
+                    """📏 Длина посылки в дюймах (inches))
 Например: 12
 
 Или нажмите кнопку ниже, чтобы использовать стандартные размеры (10x10x10 дюймов)""",
@@ -2201,7 +2201,7 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
             reply_markup = InlineKeyboardMarkup(keyboard)
             
             bot_msg = await safe_telegram_call(update.message.reply_text(
-                """📏 Ширина посылки в дюймах (inches)
+                """📏 Ширина посылки в дюймах (inches))
 
 Введите ширину в дюймах (например: 12):""",
                 reply_markup=reply_markup
@@ -2212,7 +2212,7 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
             reply_markup = InlineKeyboardMarkup(keyboard)
             
             bot_msg = await safe_telegram_call(update.message.reply_text(
-                """📏 Ширина посылки в дюймах (inches)
+                """📏 Ширина посылки в дюймах (inches))
 Например: 10
 
 Или нажмите кнопку ниже, чтобы использовать стандартные размеры для ширины и высоты (10x10 дюймов)""",
@@ -2278,7 +2278,7 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
             reply_markup = InlineKeyboardMarkup(keyboard)
             
             bot_msg = await safe_telegram_call(update.message.reply_text(
-                """📏 Высота посылки в дюймах (inches)
+                """📏 Высота посылки в дюймах (inches))
 
 Введите высоту в дюймах (например: 10):""",
                 reply_markup=reply_markup
@@ -2289,7 +2289,7 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
             reply_markup = InlineKeyboardMarkup(keyboard)
             
             bot_msg = await safe_telegram_call(update.message.reply_text(
-                """📏 Высота посылки в дюймах (inches)
+                """📏 Высота посылки в дюймах (inches))
 Например: 8
 
 Или нажмите кнопку ниже, чтобы использовать стандартную высоту (10 дюймов)""",
@@ -2573,7 +2573,7 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
     templates_count = await db.templates.count_documents({"telegram_id": telegram_id})
     if templates_count >= 10:
         await safe_telegram_call(update.message.reply_text(
-            """❌ Достигнут лимит шаблонов (10)
+            """❌ Достигнут лимит шаблонов (10))
 
 Удалите старые шаблоны в меню "📋 Мои шаблоны" """,
             parse_mode='Markdown'
@@ -2972,7 +2972,7 @@ async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Это действие нельзя отменить.""",
         reply_markup=reply_markup,
         parse_mode='Markdown'
-    )
+    ))
     # Clear last_bot_message to prevent accidentally removing these buttons
     context.user_data.pop('last_bot_message_id', None)
     context.user_data.pop('last_bot_message_text', None)
@@ -2999,7 +2999,7 @@ async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_
         await safe_telegram_call(query.message.reply_text(
             f"""✅ Шаблон "{template['name']}" удален""",
             reply_markup=reply_markup
-        )
+        ))
     else:
         logger.warning(f"⚠️ Template {template_id} not found for deletion")
         await safe_telegram_call(query.message.reply_text("❌ Шаблон не найден"))
@@ -3018,7 +3018,7 @@ async def rename_template_start(update: Update, context: ContextTypes.DEFAULT_TY
     
     await safe_telegram_call(query.message.reply_text(
         """✏️ Введите новое название для шаблона (до 30 символов):"""
-    )
+    ))
     # Clear last_bot_message to not interfere with text input
     context.user_data.pop('last_bot_message_id', None)
     context.user_data.pop('last_bot_message_text', None)
@@ -3045,7 +3045,7 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
     await safe_telegram_call(update.message.reply_text(
         f"""✅ Шаблон переименован в "{new_name}" """,
         reply_markup=reply_markup
-    )
+    ))
     
     return ConversationHandler.END
 
@@ -3711,7 +3711,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 Shipping label создан успешно!""",
                     reply_markup=reply_markup
-                )
+                ))
                 
                 # Mark order as completed to prevent stale button interactions
                 context.user_data.clear()
@@ -3733,7 +3733,7 @@ Shipping label создан успешно!""",
 
 Пожалуйста, свяжитесь с администратором.""",
                     reply_markup=reply_markup
-                )
+                ))
                 
                 # Mark order as completed to prevent stale button interactions
                 context.user_data.clear()
@@ -3768,7 +3768,7 @@ Shipping label создан успешно!""",
                            [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 
-                await safe_telegram_call(query.message.reply_text(
+                await safe_telegram_call(query.message.reply_text())
                     f"""✅ Заказ создан!
 
 💰 Сумма к оплате: ${amount}
@@ -3834,7 +3834,7 @@ Shipping label создан успешно!""",
             bot_msg = await safe_telegram_call(query.message.reply_text(
                 message_text,
                 reply_markup=reply_markup
-            )
+            ))
             
             # Save message context for button protection
             context.user_data['last_bot_message_id'] = bot_msg.message_id
@@ -3873,7 +3873,7 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     if not pending_order or not pending_order.get('selected_rate'):
         await safe_telegram_call(query.message.reply_text(
             "❌ Не найдены данные незавершенного заказа.\n\nПожалуйста, создайте новый заказ.",
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("📦 Создать заказ", callback_data='new_order')]])
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("📦 Создать заказ", callback_data='new_order')]]))
         )
         return ConversationHandler.END
     
@@ -3927,7 +3927,7 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
         message_text,
         reply_markup=reply_markup,
         parse_mode='Markdown'
-    )
+    ))
     
     # Delete pending order after restoring
     await db.pending_orders.delete_one({"telegram_id": telegram_id})
@@ -3948,20 +3948,20 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
         except ValueError:
             await safe_telegram_call(update.message.reply_text(
                 "❌ Неверный формат суммы. Введите число, например: 50"
-            )
+            ))
             return TOPUP_AMOUNT
         
         # Check limits
         if topup_amount < 10:
             await safe_telegram_call(update.message.reply_text(
                 "❌ Минимальная сумма пополнения: $10"
-            )
+            ))
             return TOPUP_AMOUNT
         
         if topup_amount > 10000:
             await safe_telegram_call(update.message.reply_text(
                 "❌ Максимальная сумма пополнения: $10,000"
-            )
+            ))
             return TOPUP_AMOUNT
         
         telegram_id = update.effective_user.id
@@ -4014,7 +4014,7 @@ _Если вы оплатите другую сумму, деньги НЕ по�
                 message_text,
                 reply_markup=reply_markup,
                 parse_mode='Markdown'
-            )
+            ))
             
             # Save message_id in payment for later removal of button
             await db.payments.update_one(
@@ -4106,7 +4106,7 @@ async def handle_topup_crypto_selection(update: Update, context: ContextTypes.DE
             keyboard = [[InlineKeyboardButton("💳 Оплатить", url=pay_link)]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            await safe_telegram_call(query.message.reply_text(
+            await safe_telegram_call(query.message.reply_text())
                 f"""✅ *Счёт на пополнение создан!*
 
 💵 *Сумма: ${topup_amount}*
@@ -4377,7 +4377,7 @@ Tracking: {tracking_number}
                     logger.info(f"Label PDF sent to user {telegram_id}")
                 else:
                     # Fallback to text if PDF download fails
-                    await safe_telegram_call(bot_instance.send_message(
+                    await safe_telegram_call(bot_instance.send_message())
                         chat_id=telegram_id,
                         text=f"""📦 Shipping label создан!
 
@@ -4850,7 +4850,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         bot_msg = await safe_telegram_call(query.message.reply_text(
             message_text,
             reply_markup=reply_markup
-        )
+        ))
         
         # Save message context for button protection
         context.user_data['last_bot_message_id'] = bot_msg.message_id
@@ -4920,7 +4920,7 @@ async def create_order(order_data: OrderCreate):
 {pay_url}
 
 После оплаты мы автоматически создадим shipping label."""
-                )
+                ))
             
             return {
                 "order_id": order.id,
@@ -5432,7 +5432,7 @@ async def refund_order(order_id: str, refund_reason: Optional[str] = None):
                     chat_id=order['telegram_id'],
                     text=message,
                     reply_markup=reply_markup
-                )
+                ))
             except Exception as e:
                 logger.error(f"Failed to send refund notification: {e}")
         
@@ -5594,7 +5594,7 @@ async def create_label_manually(order_id: str):
                     await safe_telegram_call(bot_instance.send_message(
                         chat_id=telegram_id,
                         text=message
-                    )
+                    ))
         except Exception as e:
             logger.error(f"Failed to send label notification: {e}")
         
@@ -5871,7 +5871,7 @@ async def oxapay_webhook(request: Request):
                             text=message_text,
                             reply_markup=reply_markup,
                             parse_mode='Markdown'
-                        )
+                        ))
                         
                         # Save message context in pending_orders for button protection
                         await db.pending_orders.update_one(
@@ -5997,7 +5997,7 @@ async def block_user(telegram_id: int, authenticated: bool = Depends(verify_admi
                         chat_id=telegram_id,
                         text="⛔️ *Вы были заблокированы администратором.*\n\nДоступ к боту ограничен.",
                         parse_mode='Markdown'
-                    )
+                    ))
                 except Exception as e:
                     logger.error(f"Failed to send block notification: {e}")
             
@@ -6032,7 +6032,7 @@ async def unblock_user(telegram_id: int, authenticated: bool = Depends(verify_ad
                         chat_id=telegram_id,
                         text="✅ *Вы были разблокированы!*\n\nТеперь вы можете снова использовать бот.",
                         parse_mode='Markdown'
-                    )
+                    ))
                 except Exception as e:
                     logger.error(f"Failed to send unblock notification: {e}")
             
@@ -6084,7 +6084,7 @@ async def invite_user_to_channel(telegram_id: int, authenticated: bool = Depends
                 text=message,
                 parse_mode='Markdown',
                 reply_markup=inline_markup
-            )
+            ))
             
             # Update user record to track invitation
             await db.users.update_one(
@@ -6165,7 +6165,7 @@ async def invite_all_users_to_channel(authenticated: bool = Depends(verify_admin
                     text=message,
                     parse_mode='Markdown',
                     reply_markup=reply_markup
-                )
+                ))
                 
                 # Update user record
                 await db.users.update_one(
@@ -6268,7 +6268,7 @@ async def broadcast_message(
                         chat_id=user['telegram_id'],
                         text=message,
                         parse_mode='Markdown'
-                    )
+                    ))
                 
                 success_count += 1
                 # Small delay to avoid rate limiting
@@ -6347,7 +6347,7 @@ async def enable_maintenance_mode(authenticated: bool = Depends(verify_admin_key
                     chat_id=user['telegram_id'],
                     text=maintenance_message,
                     parse_mode='Markdown'
-                )
+                ))
                 success_count += 1
                 await asyncio.sleep(0.02)  # Rate limiting
             except Exception as e:
@@ -6368,7 +6368,7 @@ async def enable_maintenance_mode(authenticated: bool = Depends(verify_admin_key
                     chat_id=ADMIN_TELEGRAM_ID,
                     text=admin_message,
                     parse_mode='Markdown'
-                )
+                ))
             except Exception as e:
                 logger.error(f"Failed to send confirmation to admin: {e}")
         
@@ -6412,7 +6412,7 @@ async def disable_maintenance_mode(authenticated: bool = Depends(verify_admin_ke
                     chat_id=user['telegram_id'],
                     text=back_online_message,
                     parse_mode='Markdown'
-                )
+                ))
                 success_count += 1
                 await asyncio.sleep(0.02)  # Rate limiting
             except Exception as e:
@@ -6433,7 +6433,7 @@ async def disable_maintenance_mode(authenticated: bool = Depends(verify_admin_ke
                     chat_id=ADMIN_TELEGRAM_ID,
                     text=admin_message,
                     parse_mode='Markdown'
-                )
+                ))
             except Exception as e:
                 logger.error(f"Failed to send confirmation to admin: {e}")
         
@@ -6547,7 +6547,7 @@ ShipStation API: https://ssapi.shipstation.com/
                     chat_id=ADMIN_TELEGRAM_ID,
                     text=notification_message,
                     parse_mode='Markdown'
-                )
+                ))
                 logger.info(f"API mode notification sent to admin {ADMIN_TELEGRAM_ID}")
             except Exception as e:
                 logger.error(f"Failed to send API mode notification to admin: {e}")
@@ -7169,7 +7169,7 @@ async def add_balance(telegram_id: int, amount: float):
 
 Зачислено: ${amount:.2f}
 Новый баланс: ${new_balance:.2f}"""
-            )
+            ))
         
         return {"success": True, "new_balance": new_balance, "added": amount}
     except HTTPException:
@@ -7206,7 +7206,7 @@ async def deduct_balance(telegram_id: int, amount: float):
 
 Списано: ${amount:.2f}
 Новый баланс: ${new_balance:.2f}"""
-            )
+            ))
         
         return {"success": True, "new_balance": new_balance, "deducted": amount}
     except HTTPException:
@@ -7248,7 +7248,7 @@ async def set_user_discount(telegram_id: int, discount: float):
 
 Скидка будет автоматически применена при создании следующих заказов.""",
                     reply_markup=reply_markup
-                )
+                ))
             except Exception as e:
                 logger.error(f"Failed to notify user about discount: {e}")
         
