@@ -2316,7 +2316,7 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
         height = float(update.message.text.strip())
         
         if height <= 0:
-            await safe_telegram_call(update.message.reply_text("❌ Высота должна быть больше 0. Попробуйте еще раз:")
+            await safe_telegram_call(update.message.reply_text("❌ Высота должна быть больше 0. Попробуйте еще раз:"))
             return PARCEL_HEIGHT
         
         if height > 108:
