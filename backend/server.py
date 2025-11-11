@@ -1585,7 +1585,7 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     import re
     # US ZIP format: 5 digits or 5-4 digits
     if not re.match(r'^\d{5}(-\d{4})?$', zip_code):
-        await update.message.reply_text("❌ Неверный формат ZIP кода. Используйте формат: 12345 или 12345-6789:")
+        await safe_telegram_call(update.message.reply_text("❌ Неверный формат ZIP кода. Используйте формат: 12345 или 12345-6789:"))
         return FROM_ZIP
     
     context.user_data['from_zip'] = zip_code
@@ -1609,10 +1609,10 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     message_text = """Шаг 7/13: Телефон отправителя
 Например: +1234567890 или 1234567890"""
-    bot_msg = await update.message.reply_text(
+    bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
         reply_markup=reply_markup
-    )
+    ))
     context.user_data['last_bot_message_id'] = bot_msg.message_id
     context.user_data['last_bot_message_text'] = message_text
     context.user_data['last_state'] = FROM_PHONE
