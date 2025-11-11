@@ -262,7 +262,7 @@ async def check_shipstation_balance():
                         
                         await safe_telegram_call(bot_instance.send_message(
                             chat_id=ADMIN_TELEGRAM_ID,
-                            text=message,)
+                            text=message,
                             parse_mode='Markdown'
                         ))
                         logger.info(f"Low balance notification sent to admin {ADMIN_TELEGRAM_ID}")
