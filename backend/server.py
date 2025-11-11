@@ -4367,7 +4367,7 @@ Tracking: {tracking_number}
                     logger.info(f"Label PDF sent to user {telegram_id}")
                 else:
                     # Fallback to text if PDF download fails
-                    await safe_telegram_call(bot_instance.send_message())
+                    await safe_telegram_call(bot_instance.send_message(
                         chat_id=telegram_id,
                         text=f"""📦 Shipping label создан!
 
