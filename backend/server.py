@@ -2559,12 +2559,12 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
-        bot_msg = await update.message.reply_text(
+        bot_msg = await safe_telegram_call(update.message.reply_text(
             f"""⚠️ Шаблон с названием "{template_name}" уже существует.
 
 Что делать?""",
             reply_markup=reply_markup
-        )
+        ))
         # Don't clear last_bot_message here - we need it for mark_message_as_selected
         context.user_data['pending_template_name'] = template_name
         return TEMPLATE_NAME
