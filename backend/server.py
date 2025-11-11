@@ -4097,7 +4097,7 @@ async def handle_topup_crypto_selection(update: Update, context: ContextTypes.DE
             keyboard = [[InlineKeyboardButton("💳 Оплатить", url=pay_link)]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            await safe_telegram_call(query.message.reply_text()
+            await safe_telegram_call(query.message.reply_text(
                 f"""✅ *Счёт на пополнение создан!*
 
 💵 *Сумма: ${topup_amount}*
