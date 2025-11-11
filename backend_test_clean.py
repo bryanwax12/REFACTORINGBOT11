@@ -268,7 +268,7 @@ def test_shipstation_v2_integration():
             print(f"   Total rates returned: {len(rates)}")
             
             # Check for carrier diversity (key fix from review)
-            carrier_names = [r.get('carrier_friendly_name', '').upper() for r in rates]
+            carrier_names = [r.get('carrier', r.get('carrier_friendly_name', '')).upper() for r in rates]
             unique_carriers = set(carrier_names)
             
             # Check for specific carriers
