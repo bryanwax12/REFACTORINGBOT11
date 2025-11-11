@@ -1194,12 +1194,12 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
-        await query.message.reply_text(
+        await safe_telegram_call(query.message.reply_text(
             """📦 Создать заказ
 
 Выберите способ создания:""",
             reply_markup=reply_markup
-        )
+        ))
         return FROM_NAME  # Waiting for choice
     else:
         # No templates, go straight to new order
