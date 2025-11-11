@@ -1333,9 +1333,11 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE)
         message_text,
         reply_markup=reply_markup
     ))
-    context.user_data['last_bot_message_id'] = bot_msg.message_id
-    context.user_data['last_bot_message_text'] = message_text
-    context.user_data['last_state'] = FROM_ADDRESS2
+    
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
+        context.user_data['last_state'] = FROM_ADDRESS2
     return FROM_ADDRESS2
 
 async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
