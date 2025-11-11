@@ -62,6 +62,7 @@ CHANNEL_ID = os.environ.get('CHANNEL_ID', '')
 # Telegram Bot
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
 bot_instance = None
+application = None  # Global Telegram Application instance for webhook
 if TELEGRAM_BOT_TOKEN:
     bot_instance = Bot(token=TELEGRAM_BOT_TOKEN)
 
