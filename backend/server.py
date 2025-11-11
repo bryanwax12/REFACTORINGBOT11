@@ -3126,7 +3126,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
     """Fetch shipping rates from ShipStation"""
     query = update.callback_query
     
-    await safe_telegram_call(query.message.reply_text("⏳ Получаю доступные курьерские службы и тарифы...")
+    await safe_telegram_call(query.message.reply_text("⏳ Получаю доступные курьерские службы и тарифы..."))
     
     try:
         import requests
