@@ -629,37 +629,45 @@ def mark_message_as_selected_nonblocking(update: Update, context: ContextTypes.D
 
 async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
-    ULTRA FAST: Show popup notification + remove buttons
-    Fastest method - uses Telegram's native popup (0.1-0.3 sec)
+    FAST: Add only emoji "✅" and remove buttons
+    Faster than full text "✅ Выбрано" (0.5-1 sec)
     """
     try:
         # Handle callback query (button press)
         if update.callback_query:
-            query = update.callback_query
+            message = update.callback_query.message
+            current_text = message.text or message.caption or ""
             
-            # Show instant popup notification (non-blocking, ultra fast!)
-            try:
-                await query.answer("✅", show_alert=False)
-            except Exception:
-                pass
+            # Skip if already marked
+            if "✅" in current_text or "❌" in current_text:
+                return
             
-            # Remove buttons in parallel
             try:
-                await query.message.edit_reply_markup(reply_markup=None)
+                # Add only emoji - much faster than full text
+                new_text = current_text + "\n✅"
+                await message.edit_text(new_text, reply_markup=None)
             except Exception:
-                pass
+                # Fallback - just remove buttons
+                try:
+                    await message.edit_reply_markup(reply_markup=None)
+                except Exception:
+                    pass
             return
         
         # Handle text input messages
         if update.message and 'last_bot_message_id' in context.user_data:
             last_msg_id = context.user_data.get('last_bot_message_id')
+            last_msg_text = context.user_data.get('last_bot_message_text', '')
             
-            if not last_msg_id:
+            # Skip if no data or already marked
+            if not last_msg_text or "✅" in last_msg_text or "❌" in last_msg_text:
                 return
             
             try:
-                # Just remove buttons - fast
-                await context.bot.edit_message_reply_markup(
+                # Add only emoji - much faster than full text
+                new_text = last_msg_text + "\n✅"
+                await context.bot.edit_message_text(
+                    text=new_text,
                     chat_id=update.effective_chat.id,
                     message_id=last_msg_id,
                     reply_markup=None
@@ -668,7 +676,7 @@ async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT
                 pass
         
     except Exception:
-        pass  # Ultra silent - no logging for max speed
+        pass
 
 async def check_maintenance_mode(update: Update) -> bool:
     """Check if bot is in maintenance mode and user is not admin"""
