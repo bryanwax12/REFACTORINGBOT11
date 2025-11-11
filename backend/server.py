@@ -872,7 +872,7 @@ async def handle_create_label_request(update: Update, context: ContextTypes.DEFA
     order = await db.orders.find_one({"id": order_id, "telegram_id": telegram_id}, {"_id": 0})
     
     if not order:
-        await safe_telegram_call(query.message.reply_text("❌ Заказ не найден.")
+        await safe_telegram_call(query.message.reply_text("❌ Заказ не найден."))
         return
     
     if order['payment_status'] != 'paid':
