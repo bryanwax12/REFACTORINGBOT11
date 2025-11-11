@@ -6761,11 +6761,11 @@ async def upload_image(
             try:
                 # Send photo to a test chat (admin) to get file_id
                 if ADMIN_TELEGRAM_ID:
-                    message = await bot_instance.send_photo(
+                    message = await safe_telegram_call(bot_instance.send_photo(
                         chat_id=int(ADMIN_TELEGRAM_ID),
                         photo=open(temp_path, 'rb'),
                         caption="Uploaded image for broadcast (you can delete this message)"
-                    )
+                    ))
                     file_id = message.photo[-1].file_id  # Get largest photo
                     
                     # Clean up temp file
