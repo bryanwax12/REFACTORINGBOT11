@@ -1952,7 +1952,7 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['editing_to_address'] = False
         # Mark previous message as selected before returning to confirmation
         asyncio.create_task(mark_message_as_selected(update, context))
-        await update.message.reply_text("✅ Адрес получателя обновлен!")
+        await safe_telegram_call(update.message.reply_text("✅ Адрес получателя обновлен!"))
         return await show_data_confirmation(update, context)
     
     # Mark previous message as selected (non-blocking)
