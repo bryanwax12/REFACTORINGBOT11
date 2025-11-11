@@ -2257,11 +2257,11 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
         width = float(update.message.text.strip())
         
         if width <= 0:
-            await update.message.reply_text("❌ Ширина должна быть больше 0. Попробуйте еще раз:")
+            await safe_telegram_call(update.message.reply_text("❌ Ширина должна быть больше 0. Попробуйте еще раз:"))
             return PARCEL_WIDTH
         
         if width > 108:
-            await update.message.reply_text("❌ Ширина слишком большая. Максимум 108 дюймов. Попробуйте еще раз:")
+            await safe_telegram_call(update.message.reply_text("❌ Ширина слишком большая. Максимум 108 дюймов. Попробуйте еще раз:"))
             return PARCEL_WIDTH
         
         context.user_data['width'] = width
