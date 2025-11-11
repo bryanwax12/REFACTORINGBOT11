@@ -6335,7 +6335,7 @@ async def enable_maintenance_mode(authenticated: bool = Depends(verify_admin_key
             try:
                 await safe_telegram_call(bot_instance.send_message(
                     chat_id=user['telegram_id'],
-                    text=maintenance_message,)
+                    text=maintenance_message,
                     parse_mode='Markdown'
                 ))
                 success_count += 1
