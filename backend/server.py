@@ -7309,7 +7309,8 @@ async def calculate_shipping_rates(request: ShippingRateRequest):
             }
         }
         
-        response = requests.post(
+        response = await asyncio.to_thread(
+            requests.post,
             'https://api.shipstation.com/v2/rates',
             headers=headers,
             json=rate_request,
