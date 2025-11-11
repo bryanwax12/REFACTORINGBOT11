@@ -4535,7 +4535,7 @@ async def confirm_cancel_order(update: Update, context: ContextTypes.DEFAULT_TYP
     keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await query.message.reply_text("❌ Создание заказа отменено.", reply_markup=reply_markup)
+    await safe_telegram_call(query.message.reply_text("❌ Создание заказа отменено.", reply_markup=reply_markup))
     return ConversationHandler.END
 
 async def check_data_from_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
