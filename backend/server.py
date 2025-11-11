@@ -2180,11 +2180,11 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
         length = float(update.message.text.strip())
         
         if length <= 0:
-            await update.message.reply_text("❌ Длина должна быть больше 0. Попробуйте еще раз:")
+            await safe_telegram_call(update.message.reply_text("❌ Длина должна быть больше 0. Попробуйте еще раз:"))
             return PARCEL_LENGTH
         
         if length > 108:  # 9 feet max
-            await update.message.reply_text("❌ Длина слишком большая. Максимум 108 дюймов. Попробуйте еще раз:")
+            await safe_telegram_call(update.message.reply_text("❌ Длина слишком большая. Максимум 108 дюймов. Попробуйте еще раз:"))
             return PARCEL_LENGTH
         
         context.user_data['length'] = length
