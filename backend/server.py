@@ -1366,10 +1366,10 @@ async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE
     
     message_text = """Шаг 4/13: Город отправителя
 Например: San Francisco"""
-    bot_msg = await (update.message or update.callback_query.message).reply_text(
+    bot_msg = await safe_telegram_call((update.message or update.callback_query.message).reply_text(
         message_text,
         reply_markup=reply_markup
-    )
+    ))
     context.user_data['last_bot_message_id'] = bot_msg.message_id
     context.user_data['last_bot_message_text'] = message_text
     context.user_data['last_state'] = FROM_CITY
