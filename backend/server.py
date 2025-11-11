@@ -5859,7 +5859,7 @@ async def oxapay_webhook(request: Request):
                         bot_msg = await safe_telegram_call(bot_instance.send_message(
                             chat_id=telegram_id,
                             text=message_text,
-                            reply_markup=reply_markup,)
+                            reply_markup=reply_markup,
                             parse_mode='Markdown'
                         ))
                         
