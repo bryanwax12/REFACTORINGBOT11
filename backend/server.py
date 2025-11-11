@@ -2278,7 +2278,7 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 Или нажмите кнопку ниже, чтобы использовать стандартную высоту (10 дюймов)""",
                 reply_markup=reply_markup
-            )
+            ))
         
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_state'] = PARCEL_HEIGHT
