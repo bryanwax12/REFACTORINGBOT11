@@ -2212,7 +2212,7 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
             reply_markup = InlineKeyboardMarkup(keyboard)
             
             bot_msg = await safe_telegram_call(update.message.reply_text(
-        ))
+                """Ширина посылки в дюймах (in)
 Например: 10
 
 Или нажмите кнопку ниже, чтобы использовать стандартные размеры для ширины и высоты (10x10 дюймов)""",
