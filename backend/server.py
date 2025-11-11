@@ -7446,12 +7446,12 @@ async def calculate_shipping_rates(request: ShippingRateRequest):
                     'https://api.shipstation.com/v2/rates',
                     headers=headers,
                     json=rate_request,
-                    timeout=15
+                    timeout=30
                 ),
-                timeout=20  # Overall timeout including thread overhead
+                timeout=35  # Overall timeout including thread overhead
             )
         except asyncio.TimeoutError:
-            logger.error("ShipStation rate request timed out after 20 seconds (API endpoint)")
+            logger.error("ShipStation rate request timed out after 35 seconds (API endpoint)")
             raise HTTPException(status_code=504, detail="ShipStation API timeout. Please try again.")
         
         if response.status_code != 200:
