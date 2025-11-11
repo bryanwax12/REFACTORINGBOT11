@@ -5582,7 +5582,7 @@ async def create_label_manually(order_id: str):
 Вы можете отслеживать посылку по номеру отслеживания."""
                     
                     await safe_telegram_call(bot_instance.send_message(
-                        chat_id=telegram_id,)
+                        chat_id=telegram_id,
                         text=message
                     ))
         except Exception as e:
