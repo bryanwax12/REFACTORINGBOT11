@@ -3938,8 +3938,8 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
             topup_amount = float(amount_text)
         except ValueError:
             await safe_telegram_call(update.message.reply_text(
-            "❌ Неверный формат суммы. Введите число, например: 50"),
-        ))
+                "❌ Неверный формат суммы. Введите число, например: 50"
+            ))
             return TOPUP_AMOUNT
         
         # Check limits
