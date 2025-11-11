@@ -2032,7 +2032,7 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Check if phone starts with valid characters (+ or digit)
     if not phone or (phone[0] not in '0123456789+'):
-        await update.message.reply_text("❌ Неверный формат телефона. Телефон должен начинаться с + или цифры\nНапример: +1234567890 или 1234567890")
+        await safe_telegram_call(update.message.reply_text("❌ Неверный формат телефона. Телефон должен начинаться с + или цифры\nНапример: +1234567890 или 1234567890"))
         return TO_PHONE
     
     # Validate phone format
@@ -2042,7 +2042,7 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Check if it's a valid US phone number (10 or 11 digits)
     if len(digits_only) < 10 or len(digits_only) > 11:
-        await update.message.reply_text("❌ Неверный формат телефона. Введите 10 цифр (например: 1234567890):")
+        await safe_telegram_call(update.message.reply_text("❌ Неверный формат телефона. Введите 10 цифр (например: 1234567890):"))
         return TO_PHONE
     
     # Format phone number
