@@ -7957,8 +7957,10 @@ async def startup_event():
             application.add_handler(CallbackQueryHandler(my_templates_menu, pattern='^my_templates$'))
             application.add_handler(CallbackQueryHandler(order_from_template_list, pattern='^order_from_template$'))
             
-            # Handler for topup amount input (text messages)
-            application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_topup_amount_input))
+            # Handler for topup amount input (text messages) - only when not in conversation
+            # This handler should NOT interfere with ConversationHandler
+            # Removed to fix message processing issue - topup is handled in ConversationHandler
+            # application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_topup_amount_input))
             application.add_handler(CallbackQueryHandler(button_callback))
             
             
