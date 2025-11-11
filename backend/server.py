@@ -6020,7 +6020,7 @@ async def unblock_user(telegram_id: int, authenticated: bool = Depends(verify_ad
                 try:
                     await safe_telegram_call(bot_instance.send_message(
                         chat_id=telegram_id,
-                        text="✅ *Вы были разблокированы!*\n\nТеперь вы можете снова использовать бот.",)
+                        text="✅ *Вы были разблокированы!*\n\nТеперь вы можете снова использовать бот.",
                         parse_mode='Markdown'
                     ))
                 except Exception as e:
