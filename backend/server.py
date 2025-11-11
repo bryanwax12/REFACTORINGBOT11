@@ -2454,11 +2454,12 @@ _Шаблон сохранит оба адреса для быстрого ис�
         context.user_data['editing_to_address'] = True
         keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        bot_msg = await query.message.reply_text(
+        bot_msg = await safe_telegram_call(query.message.reply_text(
             "📥 Редактирование адреса получателя\n\nШаг 1/6: Имя получателя\nНапример: Jane Doe",
             reply_markup=reply_markup
-        )
-        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        ))
+        if bot_msg:
+            context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_state'] = TO_NAME
         return TO_NAME
     
