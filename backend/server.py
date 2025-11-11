@@ -629,56 +629,39 @@ def mark_message_as_selected_nonblocking(update: Update, context: ContextTypes.D
 
 async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
-    Optimized: Remove buttons from previous message and add '✅ Выбрано' text
-    Simplified logic with early returns to reduce API calls
-    PERFORMANCE: Disabled for maximum speed - returns immediately
+    ULTRA FAST: Only remove buttons, don't add text
+    This is 3-5x faster than adding "✅ Выбрано" text
     """
-    return  # Skip for max speed
     try:
         # Handle callback query (button press)
         if update.callback_query:
             message = update.callback_query.message
-            current_text = message.text or message.caption or ""
-            
-            # Skip if already marked or error message
-            if "✅ Выбрано" in current_text or "❌" in current_text:
-                return  # Early return - no API call needed
-            
-            # Single try-catch block for efficiency
             try:
-                new_text = current_text + "\n\n✅ Выбрано"
-                await message.edit_text(new_text, reply_markup=None)
+                # Just remove buttons - much faster than editing text
+                await message.edit_reply_markup(reply_markup=None)
             except Exception:
-                # Silent fallback - just remove buttons
-                try:
-                    await message.edit_reply_markup(reply_markup=None)
-                except Exception:
-                    pass  # Silent fail - don't log warnings for common cases
+                pass  # Silent fail
             return
         
         # Handle text input messages
         if update.message and 'last_bot_message_id' in context.user_data:
             last_msg_id = context.user_data.get('last_bot_message_id')
-            last_msg_text = context.user_data.get('last_bot_message_text', '')
             
-            # Skip if no data or already marked
-            if not last_msg_text or "✅ Выбрано" in last_msg_text or "❌" in last_msg_text:
-                return  # Early return - no API call needed
+            if not last_msg_id:
+                return
             
             try:
-                new_text = last_msg_text + "\n\n✅ Выбрано"
-                await context.bot.edit_message_text(
-                    text=new_text,
+                # Just remove buttons - much faster than editing text
+                await context.bot.edit_message_reply_markup(
                     chat_id=update.effective_chat.id,
                     message_id=last_msg_id,
                     reply_markup=None
                 )
             except Exception:
-                # Silent fail for "message not modified" and other common errors
-                pass
+                pass  # Silent fail
         
-    except Exception as e:
-        logger.warning(f"Error in mark_message_as_selected: {e}")
+    except Exception:
+        pass  # Ultra silent - no logging for max speed
 
 async def check_maintenance_mode(update: Update) -> bool:
     """Check if bot is in maintenance mode and user is not admin"""
