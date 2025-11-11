@@ -2105,6 +2105,10 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
         context.user_data['last_state'] = PARCEL_LENGTH  # Save state for next step
         return PARCEL_LENGTH
             
+    except asyncio.TimeoutError:
+        logger.error(f"Timeout error in order_parcel_weight for user {update.effective_user.id}")
+        await update.message.reply_text("❌ Превышено время ожидания. Попробуйте еще раз:")
+        return PARCEL_WEIGHT
     except ValueError:
         await update.message.reply_text("❌ Неверный формат. Введите число (например: 2 или 2.5):")
         return PARCEL_WEIGHT
