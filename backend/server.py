@@ -3951,8 +3951,8 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
         
         if topup_amount > 10000:
             await safe_telegram_call(update.message.reply_text(
-            "❌ Максимальная сумма пополнения: $10,000"),
-        ))
+                "❌ Максимальная сумма пополнения: $10,000"
+            ))
             return TOPUP_AMOUNT
         
         telegram_id = update.effective_user.id
