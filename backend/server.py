@@ -2691,7 +2691,7 @@ async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_T
             message_text,
             reply_markup=reply_markup,
             parse_mode='Markdown'
-        )
+        ))
         
         # Save last bot message context for button protection
         context.user_data['last_bot_message_id'] = bot_msg.message_id
