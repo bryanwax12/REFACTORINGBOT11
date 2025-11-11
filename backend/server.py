@@ -3282,12 +3282,12 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
                     'https://api.shipstation.com/v2/rates',
                     headers=headers,
                     json=rate_request,
-                    timeout=15
+                    timeout=30
                 ),
-                timeout=20  # Overall timeout including thread overhead
+                timeout=35  # Overall timeout including thread overhead
             )
         except asyncio.TimeoutError:
-            logger.error("ShipStation rate request timed out after 20 seconds")
+            logger.error("ShipStation rate request timed out after 35 seconds")
             keyboard = [
                 [InlineKeyboardButton("🔄 Попробовать снова", callback_data='continue_order')],
                 [InlineKeyboardButton("✏️ Редактировать адреса", callback_data='edit_addresses_error')],
