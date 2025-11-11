@@ -3125,7 +3125,7 @@ async def order_from_template_list(update: Update, context: ContextTypes.DEFAULT
     keyboard.append([InlineKeyboardButton("❌ Отмена", callback_data='start')])
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    bot_msg = await safe_telegram_call(query.message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown')
+    bot_msg = await safe_telegram_call(query.message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown'))
     
     # Save last bot message context for button protection
     context.user_data['last_bot_message_id'] = bot_msg.message_id
