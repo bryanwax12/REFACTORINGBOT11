@@ -2957,7 +2957,7 @@ async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     template = await db.templates.find_one({"id": template_id}, {"_id": 0})
     
     if not template:
-        await safe_telegram_call(query.message.reply_text("❌ Шаблон не найден")
+        await safe_telegram_call(query.message.reply_text("❌ Шаблон не найден"))
         return ConversationHandler.END
     
     keyboard = [
