@@ -1447,7 +1447,7 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     }
     
     if state not in valid_states:
-        await update.message.reply_text("❌ Неверный код штата. Введите корректный код (например: CA, NY, TX):")
+        await safe_telegram_call(update.message.reply_text("❌ Неверный код штата. Введите корректный код (например: CA, NY, TX):"))
         return FROM_STATE
     
     context.user_data['from_state'] = state
@@ -1460,7 +1460,7 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     message_text = """Шаг 6/13: ZIP код отправителя
 Например: 94117"""
-    bot_msg = await update.message.reply_text(
+    bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
         reply_markup=reply_markup
     )
