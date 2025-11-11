@@ -946,9 +946,9 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 Вы уверены?"""
             
-            bot_msg = await safe_telegram_call(query.message.reply_text()
+            bot_msg = await safe_telegram_call(query.message.reply_text(
                 warning_text,
-                reply_markup=reply_markup,)
+                reply_markup=reply_markup,
                 parse_mode='Markdown'
             ))
             
