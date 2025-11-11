@@ -2067,7 +2067,9 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         message_text,
         reply_markup=reply_markup
     ))
-    context.user_data['last_bot_message_id'] = bot_msg.message_id
+    
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
     context.user_data['last_bot_message_text'] = message_text
     context.user_data['last_state'] = PARCEL_WEIGHT
     return PARCEL_WEIGHT
