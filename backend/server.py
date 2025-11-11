@@ -2464,7 +2464,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         bot_msg = await safe_telegram_call(query.message.reply_text(
-            "📤 Редактирование адреса отправителя\n\nШаг 1/6: Имя отправителя\nНапример: John Smith",),
+            "📤 Редактирование адреса отправителя\n\nШаг 1/6: Имя отправителя\nНапример: John Smith",
             reply_markup=reply_markup,
         ))
         if bot_msg:
