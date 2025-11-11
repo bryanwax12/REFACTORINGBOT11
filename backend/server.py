@@ -2190,7 +2190,7 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
 
 Введите ширину в дюймах (например: 12):""",
                 reply_markup=reply_markup
-            )
+            ))
         else:
             # Light parcel - can skip and use default dimensions
             keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартные размеры", callback_data='skip_dimensions')]]
