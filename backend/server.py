@@ -1639,7 +1639,7 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
             message_text = """Шаг 8/13: Имя получателя
 Например: Jane Doe"""
-            bot_msg = await query.message.reply_text(
+            bot_msg = await safe_telegram_call(query.message.reply_text(
                 message_text,
                 reply_markup=reply_markup
             )
@@ -1683,7 +1683,7 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     message_text = """Шаг 8/13: Имя получателя
 Например: Jane Doe"""
-    bot_msg = await update.message.reply_text(
+    bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
         reply_markup=reply_markup
     )
@@ -2006,7 +2006,7 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
             message_text = """Вес посылки в фунтах (lb)
 Например: 2"""
-            bot_msg = await query.message.reply_text(
+            bot_msg = await safe_telegram_call(query.message.reply_text(
                 message_text,
                 reply_markup=reply_markup
             )
@@ -2050,7 +2050,7 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     message_text = """Вес посылки в фунтах (lb)
 Например: 2"""
-    bot_msg = await update.message.reply_text(
+    bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
         reply_markup=reply_markup
     )
@@ -2150,12 +2150,12 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
             # Mark previous message as selected (non-blocking)
             asyncio.create_task(mark_message_as_selected(update, context))
             
-            await query.message.reply_text("✅ Используются стандартные размеры: 10x10x10 дюймов")
+            await safe_telegram_call(query.message.reply_text("✅ Используются стандартные размеры: 10x10x10 дюймов")
             
             # If we're editing parcel, mark as complete
             if context.user_data.get('editing_parcel'):
                 context.user_data['editing_parcel'] = False
-                await query.message.reply_text("✅ Размеры посылки обновлены!")
+                await safe_telegram_call(query.message.reply_text("✅ Размеры посылки обновлены!")
             
             # Show data confirmation
             context.user_data['last_state'] = CONFIRM_DATA
@@ -2185,7 +2185,7 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
             keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            bot_msg = await update.message.reply_text(
+            bot_msg = await safe_telegram_call(update.message.reply_text(
                 """📏 Ширина посылки в дюймах (inches)
 
 Введите ширину в дюймах (например: 12):""",
@@ -2196,7 +2196,7 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
             keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартные размеры", callback_data='skip_dimensions')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            bot_msg = await update.message.reply_text(
+            bot_msg = await safe_telegram_call(update.message.reply_text(
                 """📏 Ширина посылки в дюймах (inches)
 Например: 10
 
@@ -2226,12 +2226,12 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
             # Mark previous message as selected (non-blocking)
             asyncio.create_task(mark_message_as_selected(update, context))
             
-            await query.message.reply_text("✅ Используются стандартные размеры для ширины и высоты: 10x10 дюймов")
+            await safe_telegram_call(query.message.reply_text("✅ Используются стандартные размеры для ширины и высоты: 10x10 дюймов")
             
             # If we're editing parcel, mark as complete
             if context.user_data.get('editing_parcel'):
                 context.user_data['editing_parcel'] = False
-                await query.message.reply_text("✅ Размеры посылки обновлены!")
+                await safe_telegram_call(query.message.reply_text("✅ Размеры посылки обновлены!")
             
             # Show data confirmation
             context.user_data['last_state'] = CONFIRM_DATA
@@ -2261,7 +2261,7 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
             keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            bot_msg = await update.message.reply_text(
+            bot_msg = await safe_telegram_call(update.message.reply_text(
                 """📏 Высота посылки в дюймах (inches)
 
 Введите высоту в дюймах (например: 10):""",
@@ -2272,7 +2272,7 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
             keyboard = [[InlineKeyboardButton("⏭️ Использовать стандартную высоту", callback_data='skip_height')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            bot_msg = await update.message.reply_text(
+            bot_msg = await safe_telegram_call(update.message.reply_text(
                 """📏 Высота посылки в дюймах (inches)
 Например: 8
 
@@ -2301,12 +2301,12 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
             # Mark previous message as selected (non-blocking)
             asyncio.create_task(mark_message_as_selected(update, context))
             
-            await query.message.reply_text("✅ Используется стандартная высота: 10 дюймов")
+            await safe_telegram_call(query.message.reply_text("✅ Используется стандартная высота: 10 дюймов")
             
             # If we're editing parcel, mark as complete
             if context.user_data.get('editing_parcel'):
                 context.user_data['editing_parcel'] = False
-                await query.message.reply_text("✅ Размеры посылки обновлены!")
+                await safe_telegram_call(query.message.reply_text("✅ Размеры посылки обновлены!")
             
             # Show data confirmation
             context.user_data['last_state'] = CONFIRM_DATA
@@ -2316,11 +2316,11 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
         height = float(update.message.text.strip())
         
         if height <= 0:
-            await update.message.reply_text("❌ Высота должна быть больше 0. Попробуйте еще раз:")
+            await safe_telegram_call(update.message.reply_text("❌ Высота должна быть больше 0. Попробуйте еще раз:")
             return PARCEL_HEIGHT
         
         if height > 108:
-            await update.message.reply_text("❌ Высота слишком большая. Максимум 108 дюймов. Попробуйте еще раз:")
+            await safe_telegram_call(update.message.reply_text("❌ Высота слишком большая. Максимум 108 дюймов. Попробуйте еще раз:")
             return PARCEL_HEIGHT
         
         context.user_data['height'] = height
@@ -2331,14 +2331,14 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
         # If we're editing parcel, mark as complete
         if context.user_data.get('editing_parcel'):
             context.user_data['editing_parcel'] = False
-            await update.message.reply_text("✅ Размеры посылки обновлены!")
+            await safe_telegram_call(update.message.reply_text("✅ Размеры посылки обновлены!")
         
         # Show data confirmation
         context.user_data['last_state'] = CONFIRM_DATA
         return await show_data_confirmation(update, context)
             
     except ValueError:
-        await update.message.reply_text("❌ Неверный формат. Введите число (например: 8 или 8.5):")
+        await safe_telegram_call(update.message.reply_text("❌ Неверный формат. Введите число (например: 8 или 8.5):")
         return PARCEL_HEIGHT
 
 
@@ -3126,7 +3126,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
     """Fetch shipping rates from ShipStation"""
     query = update.callback_query
     
-    await query.message.reply_text("⏳ Получаю доступные курьерские службы и тарифы...")
+    await safe_telegram_call(query.message.reply_text("⏳ Получаю доступные курьерские службы и тарифы...")
     
     try:
         import requests
@@ -3147,7 +3147,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
                 [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
-            await query.message.reply_text(
+            await safe_telegram_call(query.message.reply_text(
                 f"❌ Отсутствуют обязательные данные: {', '.join(missing_fields)}\n\nПожалуйста, заполните все поля.",
                 reply_markup=reply_markup
             )
@@ -3165,7 +3165,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
                 [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
-            await query.message.reply_text(
+            await safe_telegram_call(query.message.reply_text(
                 "❌ Ошибка: не удалось загрузить список курьеров.\n\nПожалуйста, попробуйте позже.",
                 reply_markup=reply_markup
             )
@@ -3242,7 +3242,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            await query.message.reply_text(
+            await safe_telegram_call(query.message.reply_text(
                 f"❌ Ошибка при получении тарифов:\n{error_msg}\n\nПроверьте правильность введенных адресов.",
                 reply_markup=reply_markup
             )
@@ -3310,7 +3310,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            await query.message.reply_text(
+            await safe_telegram_call(query.message.reply_text(
                 f"❌ Нет доступных тарифов для данного направления.\n\nПроверьте правильность введенных адресов.",
                 reply_markup=reply_markup
             )
@@ -3445,7 +3445,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         # Save state for cancel return - only when showing rates
         context.user_data['last_state'] = SELECT_CARRIER
         
-        bot_msg = await query.message.reply_text(message, reply_markup=reply_markup, parse_mode='HTML')
+        bot_msg = await safe_telegram_call(query.message.reply_text(message, reply_markup=reply_markup, parse_mode='HTML')
         
         # Save last bot message context for button protection
         context.user_data['last_bot_message_id'] = bot_msg.message_id
@@ -3472,7 +3472,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
                 error_details=f"Exception: {str(e)}\n\nAddresses:\nFrom: {data.get('from_city')}, {data.get('from_state')}\nTo: {data.get('to_city')}, {data.get('to_state')}"
             )
         
-        await query.message.reply_text(
+        await safe_telegram_call(query.message.reply_text(
             f"❌ Ошибка при получении тарифов:\n{str(e)}\n\nПроверьте корректность адресов и попробуйте снова.",
             reply_markup=reply_markup
         )
