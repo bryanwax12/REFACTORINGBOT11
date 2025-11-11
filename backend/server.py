@@ -3178,8 +3178,9 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         # Log the request for debugging
         logger.info(f"ShipStation rate request: {rate_request}")
         
-        # Get rates from ShipStation
-        response = requests.post(
+        # Get rates from ShipStation using async wrapper to prevent blocking
+        response = await asyncio.to_thread(
+            requests.post,
             'https://api.shipstation.com/v2/rates',
             headers=headers,
             json=rate_request,
