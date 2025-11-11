@@ -1429,11 +1429,11 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Validate state
     if len(state) != 2:
-        await update.message.reply_text("❌ Код штата должен быть ровно 2 буквы. Например: CA, NY, TX:")
+        await safe_telegram_call(update.message.reply_text("❌ Код штата должен быть ровно 2 буквы. Например: CA, NY, TX:"))
         return FROM_STATE
     
     if not state.isalpha():
-        await update.message.reply_text("❌ Код штата должен содержать только буквы:")
+        await safe_telegram_call(update.message.reply_text("❌ Код штата должен содержать только буквы:"))
         return FROM_STATE
     
     # Valid US state codes
