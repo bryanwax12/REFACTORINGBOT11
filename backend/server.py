@@ -5897,6 +5897,31 @@ async def get_users(authenticated: bool = Depends(verify_admin_key)):
     users = await db.users.find({}, {"_id": 0}).to_list(100)
     return users
 
+
+@api_router.post("/telegram/webhook")
+async def telegram_webhook(request: Request):
+    """Handle Telegram webhook updates"""
+    try:
+        from telegram import Update
+        
+        # Get update data
+        update_data = await request.json()
+        logger.info(f"Telegram webhook received update")
+        
+        # Process update through application
+        if application:
+            update = Update.de_json(update_data, application.bot)
+            await application.process_update(update)
+            return {"ok": True}
+        else:
+            logger.error("Telegram application not initialized")
+            return {"ok": False, "error": "Bot not initialized"}
+            
+    except Exception as e:
+        logger.error(f"Error processing Telegram webhook: {e}")
+        return {"ok": False, "error": str(e)}
+
+
 @api_router.get("/users/{telegram_id}/details")
 async def get_user_details(telegram_id: int):
     try:
