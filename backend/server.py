@@ -4352,7 +4352,7 @@ Tracking: {tracking_number}
                     # Send tracking info without buttons
                     await safe_telegram_call(bot_instance.send_message(
                         chat_id=telegram_id,
-                        text=f"🔗 Трекинг номер:\n\n`{tracking_number}`",)
+                        text=f"🔗 Трекинг номер:\n\n`{tracking_number}`",
                         parse_mode='Markdown'
                     ))
                     
