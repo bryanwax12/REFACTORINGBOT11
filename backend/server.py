@@ -1859,21 +1859,21 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Check for Cyrillic or non-Latin characters
     if any(ord(c) >= 0x0400 and ord(c) <= 0x04FF for c in city):
-        await update.message.reply_text("❌ Используйте только английские буквы (латиницу). Пример: New York")
+        await safe_telegram_call(update.message.reply_text("❌ Используйте только английские буквы (латиницу). Пример: New York"))
         return TO_CITY
     
     # Validate city
     if len(city) < 2:
-        await update.message.reply_text("❌ Название города слишком короткое:")
+        await safe_telegram_call(update.message.reply_text("❌ Название города слишком короткое:"))
         return TO_CITY
     
     if len(city) > 50:
-        await update.message.reply_text("❌ Название города слишком длинное. Максимум 50 символов:")
+        await safe_telegram_call(update.message.reply_text("❌ Название города слишком длинное. Максимум 50 символов:"))
         return TO_CITY
     
     # Only Latin letters, spaces, dots, hyphens, apostrophes
     if not all((ord(c) < 128 and (c.isalpha() or c.isspace() or c in ".-'")) for c in city):
-        await update.message.reply_text("❌ Используйте только английские буквы. Разрешены: буквы, пробелы, дефисы, точки")
+        await safe_telegram_call(update.message.reply_text("❌ Используйте только английские буквы. Разрешены: буквы, пробелы, дефисы, точки"))
         return TO_CITY
     
     context.user_data['to_city'] = city
