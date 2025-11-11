@@ -4112,7 +4112,7 @@ _Если вы оплатите другую сумму, деньги НЕ по�
 *После успешной оплаты баланс будет автоматически пополнен.*""",
                 reply_markup=reply_markup,
                 parse_mode='Markdown'
-            )
+            ))
         else:
             error_msg = invoice_result.get('error', 'Unknown error')
             await safe_telegram_call(query.message.reply_text(f"❌ Ошибка создания инвойса: {error_msg}"))
