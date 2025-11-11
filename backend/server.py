@@ -1574,7 +1574,7 @@ async def notify_admin_error(user_info: dict, error_type: str, error_details: st
             chat_id=ADMIN_TELEGRAM_ID,
             text=message,
             parse_mode='HTML'
-        )
+        ))
     except Exception as e:
         logger.error(f"Failed to send admin notification: {e}")
 
