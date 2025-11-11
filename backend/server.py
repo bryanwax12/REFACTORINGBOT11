@@ -3864,9 +3864,8 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     
     if not pending_order or not pending_order.get('selected_rate'):
         await safe_telegram_call(query.message.reply_text(
-            "❌ Не найдены данные незавершенного заказа.\n\nПожалуйста, создайте новый заказ.",
+            "❌ Не найдены данные незавершенного заказа.\n\nПожалуйста, создайте новый заказ."
         ))
-        )
         return ConversationHandler.END
     
     # Restore order data to context
