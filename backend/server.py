@@ -631,7 +631,9 @@ async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT
     """
     Optimized: Remove buttons from previous message and add '✅ Выбрано' text
     Simplified logic with early returns to reduce API calls
+    PERFORMANCE: Disabled for maximum speed - returns immediately
     """
+    return  # Skip for max speed
     try:
         # Handle callback query (button press)
         if update.callback_query:
