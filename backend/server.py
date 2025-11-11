@@ -2698,7 +2698,7 @@ async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_T
         context.user_data['last_bot_message_text'] = message_text
         context.user_data['saved_template_name'] = template_name
     else:
-        await safe_telegram_call(query.message.reply_text("❌ Не удалось обновить шаблон")
+        await safe_telegram_call(query.message.reply_text("❌ Не удалось обновить шаблон"))
         return ConversationHandler.END
 
 
