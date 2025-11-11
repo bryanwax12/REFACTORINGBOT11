@@ -7999,7 +7999,8 @@ async def startup_event():
             )
             
             # Check if we should use webhook (production) or polling (preview)
-            webhook_url = os.environ.get('WEBHOOK_URL')
+            # Try WEBHOOK_URL first, fallback to WEBHOOK_BASE_URL for convenience
+            webhook_url = os.environ.get('WEBHOOK_URL') or os.environ.get('WEBHOOK_BASE_URL')
             if webhook_url:
                 # Production: use webhook
                 logger.info(f"Starting Telegram Bot in WEBHOOK mode: {webhook_url}")
