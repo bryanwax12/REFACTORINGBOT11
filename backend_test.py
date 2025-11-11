@@ -2217,11 +2217,6 @@ def test_backend_logs_for_notifications():
     except Exception as e:
         print(f"❌ Backend logs test error: {e}")
         return False
-                function_exists = bool(re.search(function_pattern, server_code))
-                
-                # Check if function has cancel button
-                cancel_button_pattern = rf'async def {function_name}\(.*?❌ Отмена.*?cancel_order'
-                has_cancel_button = bool(re.search(cancel_button_pattern, server_code, re.DOTALL))
                 
                 # Check if state is handled in return_to_order
                 return_handling_pattern = rf'last_state == {state_name}'
