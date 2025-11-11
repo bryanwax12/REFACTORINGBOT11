@@ -3168,7 +3168,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             await safe_telegram_call(query.message.reply_text(
                 "❌ Ошибка: не удалось загрузить список курьеров.\n\nПожалуйста, попробуйте позже.",
                 reply_markup=reply_markup
-            )
+            ))
             return CONFIRM_DATA
         
         headers = {
