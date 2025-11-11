@@ -6256,7 +6256,7 @@ async def broadcast_message(
                 else:
                     await safe_telegram_call(bot_instance.send_message(
                         chat_id=user['telegram_id'],
-                        text=message,)
+                        text=message,
                         parse_mode='Markdown'
                     ))
                 
