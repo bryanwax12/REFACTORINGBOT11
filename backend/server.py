@@ -573,9 +573,9 @@ async def send_blocked_message(update: Update):
 Для получения дополнительной информации, пожалуйста, свяжитесь с администратором."""
     
     if update.message:
-        await safe_telegram_call(update.message.reply_text(message, parse_mode='Markdown')
+        await safe_telegram_call(update.message.reply_text(message, parse_mode='Markdown'))
     elif update.callback_query:
-        await safe_telegram_call(update.callback_query.message.reply_text(message, parse_mode='Markdown')
+        await safe_telegram_call(update.callback_query.message.reply_text(message, parse_mode='Markdown'))
 
 async def handle_orphaned_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle button presses that are not caught by any active handler (orphaned buttons)"""
