@@ -3168,10 +3168,10 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
                 [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
-            await safe_telegram_call(query.message.reply_text()
-            f"❌ Отсутствуют обязательные данные: {', '.join(missing_fields)}\n\nПожалуйста, заполните все поля.",
-            reply_markup=reply_markup,
-        ))
+            await safe_telegram_call(query.message.reply_text(
+                f"❌ Отсутствуют обязательные данные: {', '.join(missing_fields)}\n\nПожалуйста, заполните все поля.",
+                reply_markup=reply_markup
+            ))
             return CONFIRM_DATA
         
         # Get carrier IDs
