@@ -4465,7 +4465,7 @@ Label PDF: {label_download_url}
         elif bot_instance:
             await safe_telegram_call(bot_instance.send_message(
                 chat_id=telegram_id,
-                text=user_message,)
+                text=user_message,
                 reply_markup=reply_markup
             ))
         
