@@ -74,6 +74,27 @@ SETTINGS_CACHE = {
 }
 CACHE_TTL = 60  # Cache TTL in seconds
 
+
+# Button click debouncing - prevent multiple rapid clicks
+button_click_tracker = {}  # {user_id: {button_data: last_click_timestamp}}
+BUTTON_DEBOUNCE_SECONDS = 2  # Минимальное время между нажатиями одной кнопки
+
+def is_button_click_allowed(user_id: int, button_data: str) -> bool:
+    """Check if button click is allowed (debouncing)"""
+    current_time = datetime.now(timezone.utc).timestamp()
+    
+    if user_id not in button_click_tracker:
+        button_click_tracker[user_id] = {}
+    
+    last_click = button_click_tracker[user_id].get(button_data, 0)
+    
+    if current_time - last_click < BUTTON_DEBOUNCE_SECONDS:
+        logger.warning(f"Button click blocked for user {user_id}, button {button_data} - too fast")
+        return False
+    
+    button_click_tracker[user_id][button_data] = current_time
+    return True
+
 # Oxapay - Cryptocurrency Payment Gateway
 OXAPAY_API_KEY = os.environ.get('OXAPAY_API_KEY', '')
 OXAPAY_API_URL = 'https://api.oxapay.com'
