@@ -104,7 +104,8 @@ async def create_oxapay_invoice(amount: float, order_id: str, description: str =
             "order_id": order_id
         }
         
-        response = requests.post(
+        response = await asyncio.to_thread(
+            requests.post,
             f"{OXAPAY_API_URL}/v1/payment/invoice",
             json=payload,
             headers=headers,
