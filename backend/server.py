@@ -3699,10 +3699,10 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 
                 await safe_telegram_call(query.message.reply_text(
             f"""✅ Заказ оплачен с баланса!,
-            💳 Списано: ${amount},
-            💰 Новый баланс: ${new_balance:.2f},
-            Shipping label создан успешно!""",),
-            reply_markup=reply_markup,
+            💳 Списано: ${amount}
+            💰 Новый баланс: ${new_balance:.2f}
+            Shipping label создан успешно!""",
+            reply_markup=reply_markup
         ))
                 
                 # Mark order as completed to prevent stale button interactions
