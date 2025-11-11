@@ -5420,7 +5420,7 @@ async def refund_order(order_id: str, refund_reason: Optional[str] = None):
                 
                 await safe_telegram_call(bot_instance.send_message(
                     chat_id=order['telegram_id'],
-                    text=message,)
+                    text=message,
                     reply_markup=reply_markup
                 ))
             except Exception as e:
