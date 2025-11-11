@@ -3719,10 +3719,10 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 
                 await safe_telegram_call(query.message.reply_text(
-            """❌ Не удалось создать shipping label.,
-            Оплата не списана. Ваш баланс не изменился.,
-            Пожалуйста, свяжитесь с администратором.""",),
-            reply_markup=reply_markup,
+            """❌ Не удалось создать shipping label.
+            Оплата не списана. Ваш баланс не изменился.
+            Пожалуйста, свяжитесь с администратором.""",
+            reply_markup=reply_markup
         ))
                 
                 # Mark order as completed to prevent stale button interactions
