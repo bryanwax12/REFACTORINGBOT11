@@ -2481,7 +2481,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         bot_msg = await safe_telegram_call(query.message.reply_text(
-            "📥 Редактирование адреса получателя\n\nШаг 1/6: Имя получателя\nНапример: Jane Doe",),
+            "📥 Редактирование адреса получателя\n\nШаг 1/6: Имя получателя\nНапример: Jane Doe",
             reply_markup=reply_markup,
         ))
         if bot_msg:
@@ -2498,7 +2498,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         bot_msg = await safe_telegram_call(query.message.reply_text(
-            "📦 Редактирование посылки\n\nВведите вес посылки в фунтах:\nНапример: 5 или 2.5",),
+            "📦 Редактирование посылки\n\nВведите вес посылки в фунтах:\nНапример: 5 или 2.5",
             reply_markup=reply_markup,
         ))
         if bot_msg:
@@ -3186,7 +3186,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
             await safe_telegram_call(query.message.reply_text(
-            "❌ Ошибка: не удалось загрузить список курьеров.\n\nПожалуйста, попробуйте позже.",),
+            "❌ Ошибка: не удалось загрузить список курьеров.\n\nПожалуйста, попробуйте позже.",
             reply_markup=reply_markup,
         ))
             return CONFIRM_DATA
@@ -3263,7 +3263,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             reply_markup = InlineKeyboardMarkup(keyboard)
             
             await safe_telegram_call(query.message.reply_text(
-            f"❌ Ошибка при получении тарифов:\n{error_msg}\n\nПроверьте правильность введенных адресов.",),
+            f"❌ Ошибка при получении тарифов:\n{error_msg}\n\nПроверьте правильность введенных адресов.",
             reply_markup=reply_markup,
         ))
             return CONFIRM_DATA  # Stay to handle callback
@@ -3331,7 +3331,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             reply_markup = InlineKeyboardMarkup(keyboard)
             
             await safe_telegram_call(query.message.reply_text(
-            f"❌ Нет доступных тарифов для данного направления.\n\nПроверьте правильность введенных адресов.",),
+            f"❌ Нет доступных тарифов для данного направления.\n\nПроверьте правильность введенных адресов.",
             reply_markup=reply_markup,
         ))
             return CONFIRM_DATA  # Stay to handle callback
@@ -3863,7 +3863,7 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     
     if not pending_order or not pending_order.get('selected_rate'):
         await safe_telegram_call(query.message.reply_text(
-            "❌ Не найдены данные незавершенного заказа.\n\nПожалуйста, создайте новый заказ.",),
+            "❌ Не найдены данные незавершенного заказа.\n\nПожалуйста, создайте новый заказ.",
         ))
         )
         return ConversationHandler.END
