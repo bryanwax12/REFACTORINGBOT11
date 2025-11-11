@@ -2501,7 +2501,7 @@ async def show_edit_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await query.message.reply_text(message, reply_markup=reply_markup)
+    await safe_telegram_call(query.message.reply_text(message, reply_markup=reply_markup))
     return EDIT_MENU
 
 # Template Management Functions
