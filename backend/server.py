@@ -6153,7 +6153,7 @@ async def invite_all_users_to_channel(authenticated: bool = Depends(verify_admin
                 await safe_telegram_call(bot_instance.send_message(
                     chat_id=user['telegram_id'],
                     text=message,
-                    parse_mode='Markdown',)
+                    parse_mode='Markdown',
                     reply_markup=reply_markup
                 ))
                 
