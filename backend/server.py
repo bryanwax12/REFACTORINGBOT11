@@ -1733,11 +1733,13 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
         message_text = """Шаг 9/13: Адрес получателя
 Например: 123 Main St."""
     
-    bot_msg = await update.message.reply_text(
+    bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
         reply_markup=reply_markup
-    )
-    context.user_data['last_bot_message_id'] = bot_msg.message_id
+    ))
+    
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
     context.user_data['last_bot_message_text'] = message_text
     context.user_data['last_state'] = TO_ADDRESS
     return TO_ADDRESS
@@ -1794,11 +1796,13 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Например: Apt 12, Suite 305
 Или нажмите "Пропустить" """
     
-    bot_msg = await update.message.reply_text(
+    bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
         reply_markup=reply_markup
-    )
-    context.user_data['last_bot_message_id'] = bot_msg.message_id
+    ))
+    
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
     context.user_data['last_bot_message_text'] = message_text
     context.user_data['last_state'] = TO_ADDRESS2
     return TO_ADDRESS2
@@ -1888,11 +1892,13 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
         message_text = """Шаг 12/13: Штат получателя (2 буквы)
 Например: NY"""
     
-    bot_msg = await update.message.reply_text(
+    bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
         reply_markup=reply_markup
-    )
-    context.user_data['last_bot_message_id'] = bot_msg.message_id
+    ))
+    
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
     context.user_data['last_bot_message_text'] = message_text
     context.user_data['last_state'] = TO_STATE
     return TO_STATE
@@ -1939,11 +1945,13 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
         message_text = """Шаг 13/13: ZIP код получателя
 Например: 10007"""
     
-    bot_msg = await update.message.reply_text(
+    bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
         reply_markup=reply_markup
-    )
-    context.user_data['last_bot_message_id'] = bot_msg.message_id
+    ))
+    
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
     context.user_data['last_bot_message_text'] = message_text
     context.user_data['last_state'] = TO_ZIP
     return TO_ZIP
@@ -1980,11 +1988,13 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_text = """Телефон получателя (необязательно)
 Например: +1234567890 или 1234567890
 Или нажмите "Пропустить" """
-    bot_msg = await update.message.reply_text(
+    bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
         reply_markup=reply_markup
-    )
-    context.user_data['last_bot_message_id'] = bot_msg.message_id
+    ))
+    
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
     context.user_data['last_bot_message_text'] = message_text
     context.user_data['last_state'] = TO_PHONE
     return TO_PHONE
