@@ -981,12 +981,12 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Check if this is an orphaned cancel button (order already completed)
         if context.user_data.get('order_completed'):
             logger.info(f"Orphaned cancel button detected from user {update.effective_user.id}")
-            await query.answer("⚠️ Этот заказ уже завершён")
+            await safe_telegram_call(query.answer("⚠️ Этот заказ уже завершён"))
             await safe_telegram_call(query.message.reply_text(
                 "⚠️ *Этот заказ уже завершён или отменён.*\n\n"
                 "Для создания нового заказа используйте меню в нижней части экрана.",
                 parse_mode='Markdown'
-            )
+            ))
         else:
             # Always allow cancel - even if context is empty (user just started)
             await cancel_order(update, context)
