@@ -3945,8 +3945,8 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
         # Check limits
         if topup_amount < 10:
             await safe_telegram_call(update.message.reply_text(
-            "❌ Минимальная сумма пополнения: $10"),
-        ))
+                "❌ Минимальная сумма пополнения: $10"
+            ))
             return TOPUP_AMOUNT
         
         if topup_amount > 10000:
