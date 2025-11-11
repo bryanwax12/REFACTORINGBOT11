@@ -2714,7 +2714,7 @@ async def handle_template_new_name(update: Update, context: ContextTypes.DEFAULT
         """📝 Введите новое название для шаблона:
 
 Например: Доставка маме 2, Офис NY"""
-    )
+    ))
     # Clear last_bot_message to prevent interfering with text input
     context.user_data.pop('last_bot_message_id', None)
     context.user_data.pop('last_bot_message_text', None)
