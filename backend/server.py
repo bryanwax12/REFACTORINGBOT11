@@ -2991,8 +2991,8 @@ async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_
         reply_markup = InlineKeyboardMarkup(keyboard)
         
         await safe_telegram_call(query.message.reply_text(
-            f"""✅ Шаблон "{template['name']}" удален""",),
-            reply_markup=reply_markup,
+            f"""✅ Шаблон "{template['name']}" удален""",
+            reply_markup=reply_markup
         ))
     else:
         logger.warning(f"⚠️ Template {template_id} not found for deletion")
