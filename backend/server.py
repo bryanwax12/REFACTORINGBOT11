@@ -2143,7 +2143,7 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
             
     except asyncio.TimeoutError:
         logger.error(f"Timeout error in order_parcel_weight for user {update.effective_user.id}")
-        await safe_telegram_call(update.message.reply_text("❌ Превышено время ожидания. Попробуйте еще раз:")
+        await safe_telegram_call(update.message.reply_text("❌ Превышено время ожидания. Попробуйте еще раз:"))
         return PARCEL_WEIGHT
     except ValueError:
         await safe_telegram_call(update.message.reply_text("❌ Неверный формат. Введите число (например: 2 или 2.5):")
