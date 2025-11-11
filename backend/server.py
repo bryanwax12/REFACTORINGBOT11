@@ -3053,7 +3053,7 @@ async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Start new order (without template)"""
     logger.info(f"order_new called - user_id: {update.effective_user.id}")
     query = update.callback_query
-    await query.answer()
+    await safe_telegram_call(query.answer())
     
     # Clear topup flag to prevent conflict with order input
     context.user_data['awaiting_topup_amount'] = False
