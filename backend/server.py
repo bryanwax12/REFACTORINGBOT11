@@ -670,11 +670,11 @@ async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT
             
             try:
                 # Just remove buttons - ultra fast
-                await context.bot.edit_message_reply_markup(
+                await safe_telegram_call(context.bot.edit_message_reply_markup(
                     chat_id=update.effective_chat.id,
                     message_id=last_msg_id,
                     reply_markup=None
-                )
+                ))
             except Exception:
                 pass
         
