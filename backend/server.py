@@ -2065,7 +2065,7 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
         
         # Check if we're editing parcel weight - ask for dimensions too
         if context.user_data.get('editing_parcel'):
-            await update.message.reply_text("✅ Вес посылки обновлен!")
+            await safe_telegram_call(update.message.reply_text("✅ Вес посылки обновлен!"))
             # Don't set editing_parcel to False yet - we need to edit dimensions too
         
         # Mark previous message as selected (fire and forget)
