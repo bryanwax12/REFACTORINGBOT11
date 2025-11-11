@@ -1306,12 +1306,12 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE)
         invalid_display = ', '.join([f"'{c}'" for c in set(invalid_chars)])
         logger.warning(f"Invalid characters in address: {invalid_chars} (ords: {[ord(c) for c in invalid_chars]})")
         await safe_telegram_call(update.message.reply_text(
-            f"❌ Найдены недопустимые символы: {invalid_display}\n\n",
-            f"Используйте только:\n"),
-            f"• Английские буквы (A-Z, a-z)\n"),
-            f"• Цифры (0-9)\n",
-            f"• Пробелы\n",
-            f"• Спецсимволы: . - , ' # / &",
+            f"❌ Найдены недопустимые символы: {invalid_display}\n\n"
+            f"Используйте только:\n"
+            f"• Английские буквы (A-Z, a-z)\n"
+            f"• Цифры (0-9)\n"
+            f"• Пробелы\n"
+            f"• Спецсимволы: . - , ' # / &"
         ))
         return FROM_ADDRESS
     
@@ -1766,12 +1766,12 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if invalid_chars:
         invalid_display = ', '.join([f"'{c}'" for c in set(invalid_chars)])
         await safe_telegram_call(update.message.reply_text(
-            f"❌ Найдены недопустимые символы: {invalid_display}\n\n",
-            f"Используйте только:\n"),
-            f"• Английские буквы (A-Z, a-z)\n"),
-            f"• Цифры (0-9)\n",
-            f"• Пробелы\n",
-            f"• Спецсимволы: . - , ' # / &",
+            f"❌ Найдены недопустимые символы: {invalid_display}\n\n"
+            f"Используйте только:\n"
+            f"• Английские буквы (A-Z, a-z)\n"
+            f"• Цифры (0-9)\n"
+            f"• Пробелы\n"
+            f"• Спецсимволы: . - , ' # / &"
         ))
         return TO_ADDRESS
     
