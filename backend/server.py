@@ -4420,7 +4420,7 @@ Label PDF: {label_download_url}
                 
                 await safe_telegram_call(admin_bot.send_message(
                     chat_id=ADMIN_TELEGRAM_ID,
-                    text=admin_message,)
+                    text=admin_message,
                     parse_mode='Markdown'
                 ))
                 logger.info(f"Label creation notification sent to admin {ADMIN_TELEGRAM_ID}")
