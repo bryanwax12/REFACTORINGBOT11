@@ -7236,7 +7236,7 @@ async def set_user_discount(telegram_id: int, discount: float):
 
 Вам предоставлена скидка {discount}% на все заказы!
 
-Скидка будет автоматически применена при создании следующих заказов.""",)
+Скидка будет автоматически применена при создании следующих заказов.""",
                     reply_markup=reply_markup
                 ))
             except Exception as e:
