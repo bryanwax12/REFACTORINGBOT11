@@ -2079,11 +2079,11 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
         weight = float(update.message.text.strip())
         
         if weight <= 0:
-            await safe_telegram_call(update.message.reply_text("❌ Вес должен быть больше 0. Попробуйте еще раз:")
+            await safe_telegram_call(update.message.reply_text("❌ Вес должен быть больше 0. Попробуйте еще раз:"))
             return PARCEL_WEIGHT
         
         if weight > 150:
-            await safe_telegram_call(update.message.reply_text("❌ Вес слишком большой. Максимум 150 фунтов. Попробуйте еще раз:")
+            await safe_telegram_call(update.message.reply_text("❌ Вес слишком большой. Максимум 150 фунтов. Попробуйте еще раз:"))
             return PARCEL_WEIGHT
         
         context.user_data['weight'] = weight
