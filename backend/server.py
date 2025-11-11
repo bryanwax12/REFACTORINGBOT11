@@ -5956,20 +5956,29 @@ async def telegram_webhook(request: Request):
         
         # Get update data
         update_data = await request.json()
-        logger.info(f"Telegram webhook received update")
+        logger.info(f"Telegram webhook received update: {update_data.get('update_id', 'unknown')}")
+        
+        # Check if application is initialized
+        if not application:
+            logger.error("Telegram application not initialized yet")
+            # Return 200 OK to Telegram to avoid retries, but log the error
+            return {"ok": True}
         
         # Process update through application
-        if application:
+        try:
             update = Update.de_json(update_data, application.bot)
             await application.process_update(update)
+            logger.info(f"Telegram update {update_data.get('update_id')} processed successfully")
             return {"ok": True}
-        else:
-            logger.error("Telegram application not initialized")
-            return {"ok": False, "error": "Bot not initialized"}
+        except Exception as process_error:
+            logger.error(f"Error processing update: {process_error}", exc_info=True)
+            # Still return 200 OK to Telegram to avoid retries
+            return {"ok": True}
             
     except Exception as e:
-        logger.error(f"Error processing Telegram webhook: {e}")
-        return {"ok": False, "error": str(e)}
+        logger.error(f"Error in webhook endpoint: {e}", exc_info=True)
+        # Return 200 OK to prevent Telegram from retrying
+        return {"ok": True}
 
 
 @api_router.get("/users/{telegram_id}/details")
