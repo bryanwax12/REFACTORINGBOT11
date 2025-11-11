@@ -587,7 +587,7 @@ async def handle_orphaned_button(update: Update, context: ContextTypes.DEFAULT_T
     
     logger.info(f"Orphaned button detected: {query.data} from user {update.effective_user.id}")
     
-    await query.answer("⚠️ Этот заказ уже завершён")
+    await safe_telegram_call(query.answer("⚠️ Этот заказ уже завершён"))
     await safe_telegram_call(query.message.reply_text(
         "⚠️ *Этот заказ уже завершён или отменён.*\n\n"
         "Для создания нового заказа используйте меню в нижней части экрана.",
