@@ -700,7 +700,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.answer()
         
         # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-        await mark_message_as_selected(update, context)
+        asyncio.create_task(mark_message_as_selected(update, context))
         
         telegram_id = query.from_user.id
         username = query.from_user.username
@@ -784,7 +784,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         query = update.callback_query
         await query.answer()
         # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-        await mark_message_as_selected(update, context)
+        asyncio.create_task(mark_message_as_selected(update, context))
         send_method = query.message.reply_text
     else:
         # Mark previous message as selected (non-blocking)
@@ -820,7 +820,7 @@ async def faq_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         query = update.callback_query
         await query.answer()
         # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-        await mark_message_as_selected(update, context)
+        asyncio.create_task(mark_message_as_selected(update, context))
         send_method = query.message.reply_text
     else:
         # Mark previous message as selected (non-blocking)
@@ -927,7 +927,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         if pending_order and pending_order.get('selected_rate'):
             # Show warning about losing order data
-            await mark_message_as_selected(update, context)
+            asyncio.create_task(mark_message_as_selected(update, context))
             
             keyboard = [
                 [InlineKeyboardButton("✅ Да, в главное меню", callback_data='confirm_exit_to_menu')],
@@ -965,7 +965,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await faq_command(update, context)
     elif query.data == 'confirm_exit_to_menu':
         # User confirmed exit to main menu - clear pending order
-        await mark_message_as_selected(update, context)
+        asyncio.create_task(mark_message_as_selected(update, context))
         telegram_id = query.from_user.id
         await db.pending_orders.delete_one({"telegram_id": telegram_id})
         context.user_data.clear()
@@ -1015,7 +1015,7 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
         logger.info(f"Context before mark_message_as_selected: last_bot_message_id={context.user_data.get('last_bot_message_id')}")
         
         # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-        await mark_message_as_selected(update, context)
+        asyncio.create_task(mark_message_as_selected(update, context))
         
         send_method = query.message.reply_text
     else:
@@ -1060,7 +1060,7 @@ async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAUL
         return
     
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-    await mark_message_as_selected(update, context)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     try:
         amount = float(update.message.text.strip())
@@ -1153,7 +1153,7 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-    await mark_message_as_selected(update, context)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     telegram_id = query.from_user.id
     
@@ -1256,7 +1256,7 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     
     # Mark previous message as selected (remove buttons from step 1)
-    await mark_message_as_selected(update, context)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -1307,7 +1307,7 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE)
     context.user_data['from_street'] = address
     
     # Mark previous message as selected (remove buttons from step 2)
-    await mark_message_as_selected(update, context)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     keyboard = [
         [InlineKeyboardButton("⏭ Пропустить", callback_data='skip_from_address2')],
@@ -1345,8 +1345,8 @@ async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE
     else:
         context.user_data['from_street2'] = None
     
-    # Mark previous message as selected
-    await mark_message_as_selected(update, context)
+    # Mark previous message as selected (non-blocking)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -1392,8 +1392,8 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     context.user_data['from_city'] = city
     
-    # Mark previous message as selected
-    await mark_message_as_selected(update, context)
+    # Mark previous message as selected (non-blocking)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -1437,8 +1437,8 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     context.user_data['from_state'] = state
     
-    # Mark previous message as selected
-    await mark_message_as_selected(update, context)
+    # Mark previous message as selected (non-blocking)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -1577,12 +1577,12 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.user_data.get('editing_from_address'):
         context.user_data['editing_from_address'] = False
         # Mark previous message as selected before returning to confirmation
-        await mark_message_as_selected(update, context)
+        asyncio.create_task(mark_message_as_selected(update, context))
         await update.message.reply_text("✅ Адрес отправителя обновлен!")
         return await show_data_confirmation(update, context)
     
-    # Mark previous message as selected
-    await mark_message_as_selected(update, context)
+    # Mark previous message as selected (non-blocking)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     keyboard = [
         [InlineKeyboardButton("⏭️ Пропустить", callback_data='skip_from_phone')],
@@ -1613,8 +1613,8 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
             context.user_data['from_phone'] = random_phone
             logger.info(f"Generated random FROM phone: {random_phone}")
             
-            # Mark previous message as selected
-            await mark_message_as_selected(update, context)
+            # Mark previous message as selected (non-blocking)
+            asyncio.create_task(mark_message_as_selected(update, context))
             
             keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -1657,8 +1657,8 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     context.user_data['from_phone'] = formatted_phone
     
-    # Mark previous message as selected
-    await mark_message_as_selected(update, context)
+    # Mark previous message as selected (non-blocking)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -1698,8 +1698,8 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     context.user_data['to_name'] = name
     
-    # Mark previous message as selected
-    await mark_message_as_selected(update, context)
+    # Mark previous message as selected (non-blocking)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -1754,8 +1754,8 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     context.user_data['to_street'] = address
     
-    # Mark previous message as selected
-    await mark_message_as_selected(update, context)
+    # Mark previous message as selected (non-blocking)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     keyboard = [
         [InlineKeyboardButton("⏭ Пропустить", callback_data='skip_to_address2')],
@@ -1800,8 +1800,8 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         context.user_data['to_street2'] = None
     
-    # Mark previous message as selected
-    await mark_message_as_selected(update, context)
+    # Mark previous message as selected (non-blocking)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -1943,12 +1943,12 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.user_data.get('editing_to_address'):
         context.user_data['editing_to_address'] = False
         # Mark previous message as selected before returning to confirmation
-        await mark_message_as_selected(update, context)
+        asyncio.create_task(mark_message_as_selected(update, context))
         await update.message.reply_text("✅ Адрес получателя обновлен!")
         return await show_data_confirmation(update, context)
     
-    # Mark previous message as selected
-    await mark_message_as_selected(update, context)
+    # Mark previous message as selected (non-blocking)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     keyboard = [
         [InlineKeyboardButton("⏭️ Пропустить", callback_data='skip_to_phone')],
@@ -1980,8 +1980,8 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
             context.user_data['to_phone'] = random_phone
             logger.info(f"Generated random TO phone: {random_phone}")
             
-            # Mark previous message as selected
-            await mark_message_as_selected(update, context)
+            # Mark previous message as selected (non-blocking)
+            asyncio.create_task(mark_message_as_selected(update, context))
             
             keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -2024,8 +2024,8 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     context.user_data['to_phone'] = formatted_phone
     
-    # Mark previous message as selected
-    await mark_message_as_selected(update, context)
+    # Mark previous message as selected (non-blocking)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -2060,8 +2060,8 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
             await update.message.reply_text("✅ Вес посылки обновлен!")
             # Don't set editing_parcel to False yet - we need to edit dimensions too
         
-        # Mark previous message as selected
-        await mark_message_as_selected(update, context)
+        # Mark previous message as selected (non-blocking)
+        asyncio.create_task(mark_message_as_selected(update, context))
         
         # Ask for length (with skip option only if weight <= 10 lb)
         if weight > 10:
@@ -2111,8 +2111,8 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
             context.user_data['width'] = 10
             context.user_data['height'] = 10
             
-            # Mark previous message as selected
-            await mark_message_as_selected(update, context)
+            # Mark previous message as selected (non-blocking)
+            asyncio.create_task(mark_message_as_selected(update, context))
             
             await query.message.reply_text("✅ Используются стандартные размеры: 10x10x10 дюймов")
             
@@ -2138,8 +2138,8 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
         
         context.user_data['length'] = length
         
-        # Mark previous message as selected
-        await mark_message_as_selected(update, context)
+        # Mark previous message as selected (non-blocking)
+        asyncio.create_task(mark_message_as_selected(update, context))
         
         # Ask for width (with skip option only if weight <= 10 lb)
         weight = context.user_data.get('weight', 0)
@@ -2187,8 +2187,8 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
             context.user_data['width'] = 10
             context.user_data['height'] = 10
             
-            # Mark previous message as selected
-            await mark_message_as_selected(update, context)
+            # Mark previous message as selected (non-blocking)
+            asyncio.create_task(mark_message_as_selected(update, context))
             
             await query.message.reply_text("✅ Используются стандартные размеры для ширины и высоты: 10x10 дюймов")
             
@@ -2214,8 +2214,8 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
         
         context.user_data['width'] = width
         
-        # Mark previous message as selected
-        await mark_message_as_selected(update, context)
+        # Mark previous message as selected (non-blocking)
+        asyncio.create_task(mark_message_as_selected(update, context))
         
         # Ask for height (with skip option only if weight <= 10 lb)
         weight = context.user_data.get('weight', 0)
@@ -2262,8 +2262,8 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
             # Use default height 10
             context.user_data['height'] = 10
             
-            # Mark previous message as selected
-            await mark_message_as_selected(update, context)
+            # Mark previous message as selected (non-blocking)
+            asyncio.create_task(mark_message_as_selected(update, context))
             
             await query.message.reply_text("✅ Используется стандартная высота: 10 дюймов")
             
@@ -2289,8 +2289,8 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
         
         context.user_data['height'] = height
         
-        # Mark previous message as selected
-        await mark_message_as_selected(update, context)
+        # Mark previous message as selected (non-blocking)
+        asyncio.create_task(mark_message_as_selected(update, context))
         
         # If we're editing parcel, mark as complete
         if context.user_data.get('editing_parcel'):
@@ -2370,7 +2370,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         return await cancel_order(update, context)
     
     # Mark previous message as selected (remove buttons)
-    await mark_message_as_selected(update, context)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     if query.data == 'confirm_cancel':
         return await confirm_cancel_order(update, context)
@@ -2404,8 +2404,8 @@ _Шаблон сохранит оба адреса для быстрого ис�
         return await show_edit_menu(update, context)
     
     if query.data == 'edit_from_address':
-        # Mark previous message as selected
-        await mark_message_as_selected(update, context)
+        # Mark previous message as selected (non-blocking)
+        asyncio.create_task(mark_message_as_selected(update, context))
         
         # Edit from address
         context.user_data['editing_from_address'] = True
@@ -2420,8 +2420,8 @@ _Шаблон сохранит оба адреса для быстрого ис�
         return FROM_NAME
     
     if query.data == 'edit_to_address':
-        # Mark previous message as selected
-        await mark_message_as_selected(update, context)
+        # Mark previous message as selected (non-blocking)
+        asyncio.create_task(mark_message_as_selected(update, context))
         
         # Edit to address
         context.user_data['editing_to_address'] = True
@@ -2436,8 +2436,8 @@ _Шаблон сохранит оба адреса для быстрого ис�
         return TO_NAME
     
     if query.data == 'edit_parcel':
-        # Mark previous message as selected
-        await mark_message_as_selected(update, context)
+        # Mark previous message as selected (non-blocking)
+        asyncio.create_task(mark_message_as_selected(update, context))
         
         # Edit parcel dimensions
         context.user_data['editing_parcel'] = True
@@ -2459,8 +2459,8 @@ async def show_edit_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Show menu to select what to edit"""
     query = update.callback_query
     
-    # Mark previous message as selected
-    await mark_message_as_selected(update, context)
+    # Mark previous message as selected (non-blocking)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     message = "✏️ Что вы хотите изменить?"
     
@@ -2579,8 +2579,8 @@ async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_T
     query = update.callback_query
     await query.answer()
     
-    # Mark previous message as selected
-    await mark_message_as_selected(update, context)
+    # Mark previous message as selected (non-blocking)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     template_id = query.data.replace('template_update_', '')
     telegram_id = query.from_user.id
@@ -2649,8 +2649,8 @@ async def handle_template_new_name(update: Update, context: ContextTypes.DEFAULT
     query = update.callback_query
     await query.answer()
     
-    # Mark previous message as selected
-    await mark_message_as_selected(update, context)
+    # Mark previous message as selected (non-blocking)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     await query.message.reply_text(
         """📝 Введите новое название для шаблона:
@@ -2669,7 +2669,7 @@ async def continue_order_after_template(update: Update, context: ContextTypes.DE
     await query.answer()
     
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-    await mark_message_as_selected(update, context)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     # Since template was saved from CONFIRM_DATA screen, we have all data including weight/dimensions
     # Return to data confirmation screen
@@ -2681,7 +2681,7 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     
     # Mark previous message as selected (remove buttons from choice menu)
-    await mark_message_as_selected(update, context)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     telegram_id = query.from_user.id
     
@@ -2873,7 +2873,7 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
     await query.answer()
     
     # Mark previous message as selected (blocking)
-    await mark_message_as_selected(update, context)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     # Send new message immediately without waiting for mark_message_as_selected
     bot_msg = await query.message.reply_text(
@@ -2892,8 +2892,8 @@ async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     
-    # Mark previous message as selected
-    await mark_message_as_selected(update, context)
+    # Mark previous message as selected (non-blocking)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     template_id = query.data.replace('template_delete_', '')
     template = await db.templates.find_one({"id": template_id}, {"_id": 0})
@@ -2925,8 +2925,8 @@ async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_
     query = update.callback_query
     await query.answer()
     
-    # Mark previous message as selected
-    await mark_message_as_selected(update, context)
+    # Mark previous message as selected (non-blocking)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     template_id = query.data.replace('template_confirm_delete_', '')
     template = await db.templates.find_one({"id": template_id}, {"_id": 0})
@@ -2952,8 +2952,8 @@ async def rename_template_start(update: Update, context: ContextTypes.DEFAULT_TY
     query = update.callback_query
     await query.answer()
     
-    # Mark previous message as selected
-    await mark_message_as_selected(update, context)
+    # Mark previous message as selected (non-blocking)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     template_id = query.data.replace('template_rename_', '')
     context.user_data['renaming_template_id'] = template_id
@@ -3001,7 +3001,7 @@ async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['awaiting_topup_amount'] = False
     
     # Mark previous message as selected (remove buttons from choice screen)
-    await mark_message_as_selected(update, context)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -3026,7 +3026,7 @@ async def order_from_template_list(update: Update, context: ContextTypes.DEFAULT
     await query.answer()
     
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-    await mark_message_as_selected(update, context)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     telegram_id = query.from_user.id
     templates = await db.templates.find({"telegram_id": telegram_id}).sort("created_at", -1).to_list(10)
@@ -3462,18 +3462,18 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     if query.data == 'check_data':
         # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-        await mark_message_as_selected(update, context)
+        asyncio.create_task(mark_message_as_selected(update, context))
         # Return to data confirmation screen
         return await check_data_from_cancel(update, context)
     
     if query.data == 'refresh_rates':
         # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-        await mark_message_as_selected(update, context)
+        asyncio.create_task(mark_message_as_selected(update, context))
         # Refresh shipping rates
         return await fetch_shipping_rates(update, context)
     
     # Mark previous message as selected (remove buttons)
-    await mark_message_as_selected(update, context)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     # Get selected carrier index
     carrier_idx = int(query.data.split('_')[-1])
@@ -3597,12 +3597,12 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Handle back to rates
     if query.data == 'back_to_rates':
         # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-        await mark_message_as_selected(update, context)
+        asyncio.create_task(mark_message_as_selected(update, context))
         # Return to rate selection - call fetch_shipping_rates again
         return await fetch_shipping_rates(update, context)
     
     # Mark previous message as selected (remove buttons)
-    await mark_message_as_selected(update, context)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     telegram_id = query.from_user.id
     user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
@@ -3807,8 +3807,8 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
         context.user_data['last_bot_message_id'] = pending_order.get('topup_success_message_id')
         context.user_data['last_bot_message_text'] = pending_order.get('topup_success_message_text')
     
-    # Mark previous message as selected
-    await mark_message_as_selected(update, context)
+    # Mark previous message as selected (non-blocking)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     if not pending_order or not pending_order.get('selected_rate'):
         await query.message.reply_text(
@@ -3877,7 +3877,7 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
 async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle custom top-up amount input and create Oxapay invoice directly"""
     # Mark previous message as selected (remove "Отмена" button)
-    await mark_message_as_selected(update, context)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     try:
         amount_text = update.message.text.strip()
@@ -4427,7 +4427,7 @@ async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.answer()
     
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-    await mark_message_as_selected(update, context)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     # Check if we're on shipping rates screen
     last_state = context.user_data.get('last_state')
@@ -4467,7 +4467,7 @@ async def confirm_cancel_order(update: Update, context: ContextTypes.DEFAULT_TYP
     await query.answer()
     
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-    await mark_message_as_selected(update, context)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     context.user_data.clear()
     
@@ -4492,7 +4492,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-    await mark_message_as_selected(update, context)
+    asyncio.create_task(mark_message_as_selected(update, context))
     
     # Get the state we were in when cancel was pressed
     last_state = context.user_data.get('last_state')
