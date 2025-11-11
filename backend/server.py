@@ -2410,7 +2410,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
     
     if query.data == 'save_template':
         # Save current order data as template
-        await query.message.reply_text(
+        await safe_telegram_call(query.message.reply_text(
             """💾 Сохранить как шаблон
 
 Введите название для шаблона (до 30 символов):
@@ -2418,7 +2418,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
 
 _Шаблон сохранит оба адреса для быстрого использования в будущем._""",
             parse_mode='Markdown'
-        )
+        ))
         return TEMPLATE_NAME
     
     if query.data == 'edit_data':
