@@ -260,7 +260,7 @@ async def check_shipstation_balance():
                             from telegram import Bot
                             bot_instance = Bot(TELEGRAM_BOT_TOKEN)
                         
-                        await bot_instance.send_message(
+                        await safe_telegram_call(bot_instance.send_message(
                             chat_id=ADMIN_TELEGRAM_ID,
                             text=message,
                             parse_mode='Markdown'
@@ -1570,7 +1570,7 @@ async def notify_admin_error(user_info: dict, error_type: str, error_details: st
         if order_id:
             message += f"\n🔖 <b>Order ID:</b> {order_id}"
         
-        await bot_instance.send_message(
+        await safe_telegram_call(bot_instance.send_message(
             chat_id=ADMIN_TELEGRAM_ID,
             text=message,
             parse_mode='HTML'
@@ -4912,7 +4912,7 @@ async def create_order(order_data: OrderCreate):
             
             # Send payment link to user
             if bot_instance and pay_url:
-                await bot_instance.send_message(
+                await safe_telegram_call(bot_instance.send_message(
                     chat_id=order_data.telegram_id,
                     text=f"""✅ Заказ создан!
 
@@ -5428,7 +5428,7 @@ async def refund_order(order_id: str, refund_reason: Optional[str] = None):
                 keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 
-                await bot_instance.send_message(
+                await safe_telegram_call(bot_instance.send_message(
                     chat_id=order['telegram_id'],
                     text=message,
                     reply_markup=reply_markup
@@ -5591,7 +5591,7 @@ async def create_label_manually(order_id: str):
 
 Вы можете отслеживать посылку по номеру отслеживания."""
                     
-                    await bot_instance.send_message(
+                    await safe_telegram_call(bot_instance.send_message(
                         chat_id=telegram_id,
                         text=message
                     )
@@ -5866,7 +5866,7 @@ async def oxapay_webhook(request: Request):
                         keyboard.append([InlineKeyboardButton("🔙 Главное меню", callback_data='start')])
                         reply_markup = InlineKeyboardMarkup(keyboard)
                         
-                        bot_msg = await bot_instance.send_message(
+                        bot_msg = await safe_telegram_call(bot_instance.send_message(
                             chat_id=telegram_id,
                             text=message_text,
                             reply_markup=reply_markup,
@@ -5993,7 +5993,7 @@ async def block_user(telegram_id: int, authenticated: bool = Depends(verify_admi
             # Notify user via Telegram
             if bot_instance:
                 try:
-                    await bot_instance.send_message(
+                    await safe_telegram_call(bot_instance.send_message(
                         chat_id=telegram_id,
                         text="⛔️ *Вы были заблокированы администратором.*\n\nДоступ к боту ограничен.",
                         parse_mode='Markdown'
@@ -6028,7 +6028,7 @@ async def unblock_user(telegram_id: int, authenticated: bool = Depends(verify_ad
             # Notify user via Telegram
             if bot_instance:
                 try:
-                    await bot_instance.send_message(
+                    await safe_telegram_call(bot_instance.send_message(
                         chat_id=telegram_id,
                         text="✅ *Вы были разблокированы!*\n\nТеперь вы можете снова использовать бот.",
                         parse_mode='Markdown'
@@ -6079,7 +6079,7 @@ async def invite_user_to_channel(telegram_id: int, authenticated: bool = Depends
 👇 Нажмите кнопку ниже, чтобы присоединиться:"""
         
         try:
-            await bot_instance.send_message(
+            await safe_telegram_call(bot_instance.send_message(
                 chat_id=telegram_id,
                 text=message,
                 parse_mode='Markdown',
@@ -6160,7 +6160,7 @@ async def invite_all_users_to_channel(authenticated: bool = Depends(verify_admin
             
             try:
                 # Send invitation with inline button
-                await bot_instance.send_message(
+                await safe_telegram_call(bot_instance.send_message(
                     chat_id=user['telegram_id'],
                     text=message,
                     parse_mode='Markdown',
@@ -6264,7 +6264,7 @@ async def broadcast_message(
                         parse_mode='Markdown'
                     )
                 else:
-                    await bot_instance.send_message(
+                    await safe_telegram_call(bot_instance.send_message(
                         chat_id=user['telegram_id'],
                         text=message,
                         parse_mode='Markdown'
@@ -6343,7 +6343,7 @@ async def enable_maintenance_mode(authenticated: bool = Depends(verify_admin_key
         
         for user in users:
             try:
-                await bot_instance.send_message(
+                await safe_telegram_call(bot_instance.send_message(
                     chat_id=user['telegram_id'],
                     text=maintenance_message,
                     parse_mode='Markdown'
@@ -6364,7 +6364,7 @@ async def enable_maintenance_mode(authenticated: bool = Depends(verify_admin_key
 Вы можете продолжать работу с ботом для тестирования и исправлений."""
             
             try:
-                await bot_instance.send_message(
+                await safe_telegram_call(bot_instance.send_message(
                     chat_id=ADMIN_TELEGRAM_ID,
                     text=admin_message,
                     parse_mode='Markdown'
@@ -6408,7 +6408,7 @@ async def disable_maintenance_mode(authenticated: bool = Depends(verify_admin_ke
         
         for user in users:
             try:
-                await bot_instance.send_message(
+                await safe_telegram_call(bot_instance.send_message(
                     chat_id=user['telegram_id'],
                     text=back_online_message,
                     parse_mode='Markdown'
@@ -6429,7 +6429,7 @@ async def disable_maintenance_mode(authenticated: bool = Depends(verify_admin_ke
 Бот снова доступен для всех пользователей."""
             
             try:
-                await bot_instance.send_message(
+                await safe_telegram_call(bot_instance.send_message(
                     chat_id=ADMIN_TELEGRAM_ID,
                     text=admin_message,
                     parse_mode='Markdown'
@@ -6543,7 +6543,7 @@ ShipStation API: https://ssapi.shipstation.com/
 
 ⏰ Время: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')} UTC"""
                 
-                await bot_instance.send_message(
+                await safe_telegram_call(bot_instance.send_message(
                     chat_id=ADMIN_TELEGRAM_ID,
                     text=notification_message,
                     parse_mode='Markdown'
@@ -7163,7 +7163,7 @@ async def add_balance(telegram_id: int, amount: float):
         
         # Notify user via Telegram
         if bot_instance:
-            await bot_instance.send_message(
+            await safe_telegram_call(bot_instance.send_message(
                 chat_id=telegram_id,
                 text=f"""💰 Баланс пополнен администратором!
 
@@ -7200,7 +7200,7 @@ async def deduct_balance(telegram_id: int, amount: float):
         
         # Notify user via Telegram
         if bot_instance:
-            await bot_instance.send_message(
+            await safe_telegram_call(bot_instance.send_message(
                 chat_id=telegram_id,
                 text=f"""⚠️ Баланс изменен администратором!
 
@@ -7240,7 +7240,7 @@ async def set_user_discount(telegram_id: int, discount: float):
                 keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 
-                await bot_instance.send_message(
+                await safe_telegram_call(bot_instance.send_message(
                     chat_id=telegram_id,
                     text=f"""🎉 Поздравляем!
 
