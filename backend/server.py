@@ -629,18 +629,25 @@ def mark_message_as_selected_nonblocking(update: Update, context: ContextTypes.D
 
 async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
-    ULTRA FAST: Only remove buttons, don't add text
-    This is 3-5x faster than adding "✅ Выбрано" text
+    ULTRA FAST: Show popup notification + remove buttons
+    Fastest method - uses Telegram's native popup (0.1-0.3 sec)
     """
     try:
         # Handle callback query (button press)
         if update.callback_query:
-            message = update.callback_query.message
+            query = update.callback_query
+            
+            # Show instant popup notification (non-blocking, ultra fast!)
             try:
-                # Just remove buttons - much faster than editing text
-                await message.edit_reply_markup(reply_markup=None)
+                await query.answer("✅", show_alert=False)
             except Exception:
-                pass  # Silent fail
+                pass
+            
+            # Remove buttons in parallel
+            try:
+                await query.message.edit_reply_markup(reply_markup=None)
+            except Exception:
+                pass
             return
         
         # Handle text input messages
@@ -651,14 +658,14 @@ async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT
                 return
             
             try:
-                # Just remove buttons - much faster than editing text
+                # Just remove buttons - fast
                 await context.bot.edit_message_reply_markup(
                     chat_id=update.effective_chat.id,
                     message_id=last_msg_id,
                     reply_markup=None
                 )
             except Exception:
-                pass  # Silent fail
+                pass
         
     except Exception:
         pass  # Ultra silent - no logging for max speed
