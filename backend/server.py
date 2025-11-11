@@ -2471,11 +2471,12 @@ _Шаблон сохранит оба адреса для быстрого ис�
         context.user_data['editing_parcel'] = True
         keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        bot_msg = await query.message.reply_text(
+        bot_msg = await safe_telegram_call(query.message.reply_text(
             "📦 Редактирование посылки\n\nВведите вес посылки в фунтах:\nНапример: 5 или 2.5",
             reply_markup=reply_markup
-        )
-        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        ))
+        if bot_msg:
+            context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_state'] = PARCEL_WEIGHT
         return PARCEL_WEIGHT
     
