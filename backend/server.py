@@ -3002,7 +3002,7 @@ async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_
         )
     else:
         logger.warning(f"⚠️ Template {template_id} not found for deletion")
-        await safe_telegram_call(query.message.reply_text("❌ Шаблон не найден")
+        await safe_telegram_call(query.message.reply_text("❌ Шаблон не найден"))
     # Don't return state - deleted successfully
 
 async def rename_template_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
