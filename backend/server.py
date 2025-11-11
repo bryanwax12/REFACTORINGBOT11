@@ -1281,10 +1281,15 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     message_text = """Шаг 2/13: Адрес отправителя
 Например: 215 Clayton St."""
-    bot_msg = await update.message.reply_text(
+    bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
         reply_markup=reply_markup
-    )
+    ))
+    
+    if bot_msg is None:
+        await update.message.reply_text("❌ Ошибка отправки. Попробуйте еще раз:")
+        return FROM_NAME
+    
     context.user_data['last_bot_message_id'] = bot_msg.message_id
     context.user_data['last_bot_message_text'] = message_text  # Save text for editing
     context.user_data['last_state'] = FROM_ADDRESS  # Save state for next step
