@@ -2963,8 +2963,9 @@ async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     await safe_telegram_call(query.message.reply_text(
-            f"""⚠️ *Удалить шаблон "{template['name']}"?*,
-            Это действие нельзя отменить.""",
+            f"""⚠️ *Удалить шаблон "{template['name']}"?*
+
+Это действие нельзя отменить.""",
             reply_markup=reply_markup,
             parse_mode='Markdown'
         ))
