@@ -6535,7 +6535,7 @@ ShipStation API: https://ssapi.shipstation.com/
                 
                 await safe_telegram_call(bot_instance.send_message(
                     chat_id=ADMIN_TELEGRAM_ID,
-                    text=notification_message,)
+                    text=notification_message,
                     parse_mode='Markdown'
                 ))
                 logger.info(f"API mode notification sent to admin {ADMIN_TELEGRAM_ID}")
