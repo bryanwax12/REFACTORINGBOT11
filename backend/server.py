@@ -2616,10 +2616,10 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
 *Продолжить создание этого заказа?*"""
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
-            message_text,
-            reply_markup=reply_markup,
-            parse_mode='Markdown'
-        ))
+        message_text,
+        reply_markup=reply_markup,
+        parse_mode='Markdown'
+    ))
     
     # Save last bot message context for button protection
     if bot_msg:
