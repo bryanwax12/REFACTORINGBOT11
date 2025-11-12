@@ -1775,6 +1775,7 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return TO_ADDRESS
 
 async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    logger.info(f"🔍 order_to_address called - user: {update.effective_user.id}, text: {update.message.text if update.message else 'no message'}")
     address = update.message.text.strip()
     
     # Check for Cyrillic or non-Latin characters
