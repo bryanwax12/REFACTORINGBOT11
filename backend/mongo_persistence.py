@@ -10,8 +10,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+# GLOBAL cache shared across all requests (survives HTTP request lifecycle)
+_GLOBAL_CONVERSATIONS_CACHE = {}
+_GLOBAL_USER_DATA_CACHE = {}
+_GLOBAL_CHAT_DATA_CACHE = {}
+
 class MongoPersistence(BasePersistence):
-    """MongoDB-based persistence for ConversationHandler state with in-memory caching"""
+    """MongoDB-based persistence for ConversationHandler state with GLOBAL caching"""
     
     def __init__(self, db, update_interval: float = 60):
         super().__init__(
@@ -21,12 +26,7 @@ class MongoPersistence(BasePersistence):
         self.db = db
         self.collection = db['bot_persistence']
         
-        # In-memory cache for fast access
-        self._conversations_cache = {}
-        self._user_data_cache = {}
-        self._chat_data_cache = {}
-        
-        logger.info("✅ MongoPersistence initialized with in-memory caching")
+        logger.info("✅ MongoPersistence initialized with GLOBAL caching (survives HTTP requests)")
     
     async def get_user_data(self) -> Dict[int, Dict]:
         """Load user_data from MongoDB"""
