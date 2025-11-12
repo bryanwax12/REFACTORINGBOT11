@@ -57,8 +57,14 @@ class MongoPersistence(BasePersistence):
         try:
             doc = await self.collection.find_one({"_id": f"conversation_{name}"})
             if doc and 'data' in doc:
-                logger.info(f"📥 Loaded conversation state for {name}: {doc['data']}")
-                return doc['data']
+                # Convert string keys back to tuples
+                conversations = {}
+                for key_str, state in doc['data'].items():
+                    # Parse string back to tuple: "(123, 456)" -> (123, 456)
+                    key = eval(key_str)  # Safe here as we control the format
+                    conversations[key] = state
+                logger.info(f"📥 Loaded conversation state for {name}: {conversations}")
+                return conversations
             logger.info(f"📭 No conversation state found for {name}")
             return {}
         except Exception as e:
