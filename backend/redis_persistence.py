@@ -186,7 +186,7 @@ class RedisPersistence(BasePersistence):
         except Exception as e:
             logger.error(f"Error dropping chat_data for {chat_id}: {e}")
     
-    def refresh_user_data(self, user_id: int, user_data: Dict) -> None:
+    async def refresh_user_data(self, user_id: int, user_data: Dict) -> None:
         """Refresh user_data (called by framework) (SYNC)"""
         pass
     
