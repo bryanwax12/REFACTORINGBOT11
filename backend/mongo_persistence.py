@@ -127,13 +127,13 @@ class MongoPersistence(BasePersistence):
         pass
     
     async def update_conversation(self, name: str, key: Tuple, new_state: Optional[int]) -> None:
-        """Save conversation state to cache and MongoDB"""
+        """Save conversation state to GLOBAL cache and MongoDB"""
         try:
-            # Get current conversations (from cache if available)
-            if name not in self._conversations_cache:
-                self._conversations_cache[name] = await self.get_conversations(name)
+            # Get current conversations (from GLOBAL cache if available)
+            if name not in _GLOBAL_CONVERSATIONS_CACHE:
+                _GLOBAL_CONVERSATIONS_CACHE[name] = await self.get_conversations(name)
             
-            conversations = self._conversations_cache[name]
+            conversations = _GLOBAL_CONVERSATIONS_CACHE[name]
             
             # Convert key tuple to string for MongoDB storage
             key_str = str(key)
@@ -144,12 +144,12 @@ class MongoPersistence(BasePersistence):
                     del conversations[key]
                     logger.info(f"🗑️ PERSISTENCE: Removed conversation state for {name}, key: {key}")
             else:
-                # Update conversation (use tuple key in cache)
+                # Update conversation (use tuple key in GLOBAL cache)
                 conversations[key] = new_state
-                logger.info(f"💾 PERSISTENCE: Saved to CACHE - name: {name}, key: {key}, state: {new_state}, cache_size: {len(conversations)}")
+                logger.info(f"💾 PERSISTENCE: Saved to GLOBAL CACHE - name: {name}, key: {key}, state: {new_state}, cache_size: {len(conversations)}")
             
-            # Update cache immediately
-            self._conversations_cache[name] = conversations
+            # Update GLOBAL cache immediately
+            _GLOBAL_CONVERSATIONS_CACHE[name] = conversations
             
             # Prepare for MongoDB (convert keys to strings)
             conversations_for_db = {str(k): v for k, v in conversations.items()}
