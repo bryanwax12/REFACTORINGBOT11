@@ -53,8 +53,8 @@ class RedisPersistence(BasePersistence):
             return None
         return pickle.loads(data)
     
-    async def get_user_data(self) -> Dict[int, Dict]:
-        """Load user_data from Redis"""
+    def get_user_data(self) -> Dict[int, Dict]:
+        """Load user_data from Redis (SYNC)"""
         try:
             data = self.redis_client.get("bot:user_data")
             if data:
@@ -66,8 +66,8 @@ class RedisPersistence(BasePersistence):
             logger.error(f"Error loading user_data: {e}")
             return {}
     
-    async def get_chat_data(self) -> Dict[int, Dict]:
-        """Load chat_data from Redis"""
+    def get_chat_data(self) -> Dict[int, Dict]:
+        """Load chat_data from Redis (SYNC)"""
         try:
             data = self.redis_client.get("bot:chat_data")
             if data:
@@ -79,12 +79,12 @@ class RedisPersistence(BasePersistence):
             logger.error(f"Error loading chat_data: {e}")
             return {}
     
-    async def get_bot_data(self) -> Dict:
-        """Load bot_data from Redis"""
+    def get_bot_data(self) -> Dict:
+        """Load bot_data from Redis (SYNC)"""
         return {}
     
-    async def get_callback_data(self) -> Optional[Tuple]:
-        """Load callback_data from Redis"""
+    def get_callback_data(self) -> Optional[Tuple]:
+        """Load callback_data from Redis (SYNC)"""
         return None
     
     def get_conversations(self, name: str) -> Dict:
