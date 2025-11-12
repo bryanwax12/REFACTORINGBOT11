@@ -70,12 +70,12 @@ is_production_env = 'crypto-shipping.emergent.host' in webhook_base_url
 if is_production_env:
     # Production: use production bot @whitelabel_shipping_bot
     TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN_PRODUCTION', '')
-    logger.info(f"🟢 PRODUCTION BOT SELECTED: @whitelabel_shipping_bot")
+    print(f"🟢 PRODUCTION BOT SELECTED: @whitelabel_shipping_bot")
 else:
     # Preview: use preview bot @whitelabel_shipping_bot_test_bot
     TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN_PREVIEW', 
                                        os.environ.get('TELEGRAM_BOT_TOKEN', ''))
-    logger.info(f"🔵 PREVIEW BOT SELECTED: @whitelabel_shipping_bot_test_bot")
+    print(f"🔵 PREVIEW BOT SELECTED: @whitelabel_shipping_bot_test_bot")
 
 bot_instance = None
 application = None  # Global Telegram Application instance for webhook
