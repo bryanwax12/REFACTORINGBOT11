@@ -1523,7 +1523,7 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    message_text = """Шаг 6/13: ZIP код отправителя
+    message_text = """Шаг 6/13: 📬 ZIP код отправителя
 Например: 94117"""
     bot_msg = await safe_telegram_call(update.message.reply_text(
             message_text,
