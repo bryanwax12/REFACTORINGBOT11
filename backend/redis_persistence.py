@@ -66,7 +66,7 @@ class RedisPersistence(BasePersistence):
             logger.error(f"Error loading user_data: {e}")
             return {}
     
-    def get_chat_data(self) -> Dict[int, Dict]:
+    async def get_chat_data(self) -> Dict[int, Dict]:
         """Load chat_data from Redis (SYNC)"""
         try:
             data = self.redis_client.get("bot:chat_data")
