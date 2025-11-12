@@ -8064,12 +8064,37 @@ async def startup_event():
                 menu_button=MenuButtonCommands()
             )
             
-            # Check if we should use webhook (production) or polling (preview)
-            # Only use webhook if WEBHOOK_URL is explicitly set (not WEBHOOK_BASE_URL in preview)
-            webhook_url = os.environ.get('WEBHOOK_URL')
-            # In production, fallback to WEBHOOK_BASE_URL if WEBHOOK_URL not set
-            if not webhook_url and 'preview' not in os.environ.get('WEBHOOK_BASE_URL', '').lower():
-                webhook_url = os.environ.get('WEBHOOK_BASE_URL')
+            # Auto-detect environment and choose correct bot token + mode
+            # Preview: POLLING mode with preview bot token
+            # Production: WEBHOOK mode with production bot token
+            webhook_base_url = os.environ.get('WEBHOOK_BASE_URL', '')
+            is_production = 'crypto-shipping.emergent.host' in webhook_base_url
+            
+            if is_production:
+                # Production environment detected - use production bot + webhook
+                production_token = os.environ.get('TELEGRAM_BOT_TOKEN_PRODUCTION')
+                if production_token:
+                    # Update bot token to production
+                    logger.info("🟢 PRODUCTION ENVIRONMENT DETECTED - Using production bot token")
+                    TELEGRAM_BOT_TOKEN = production_token
+                    # Reinitialize application with production token
+                    application = ApplicationBuilder().token(production_token).build()
+                    bot_instance = application.bot
+                    
+                    # Add all handlers again
+                    await setup_handlers(application)
+                    
+                    await application.initialize()
+                    await application.start()
+                    
+                    # Set commands
+                    await application.bot.set_my_commands(commands)
+                    await application.bot.set_chat_menu_button(menu_button=MenuButtonCommands())
+                
+                webhook_url = webhook_base_url
+            else:
+                # Preview environment - use polling with preview token
+                webhook_url = None
             
             if webhook_url:
                 # Production: use webhook
