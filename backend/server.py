@@ -73,9 +73,6 @@ ADMIN_TELEGRAM_ID = os.environ.get('ADMIN_TELEGRAM_ID', '')
 CHANNEL_INVITE_LINK = os.environ.get('CHANNEL_INVITE_LINK', '')
 CHANNEL_ID = os.environ.get('CHANNEL_ID', '')
 
-# Global persistence for manual flushing
-redis_persistence = None
-
 # Telegram Bot - Auto-select token based on environment
 # Detect environment from WEBHOOK_BASE_URL
 webhook_base_url = os.environ.get('WEBHOOK_BASE_URL', '')
