@@ -7960,7 +7960,8 @@ async def startup_event():
                 ],
                 per_chat=True,
                 per_user=True,
-                per_message=False
+                per_message=False,
+                name="template_rename_handler"  # CRITICAL: Required for persistence!
             )
             
             order_conv_handler = ConversationHandler(
