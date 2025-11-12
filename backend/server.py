@@ -22,6 +22,47 @@ import asyncio
 import hashlib
 import hmac
 
+# In-Memory Log Handler for Debug Endpoint
+from collections import deque
+import threading
+
+class InMemoryLogHandler(logging.Handler):
+    """Handler that stores logs in memory for debug endpoint"""
+    def __init__(self, max_logs=200):
+        super().__init__()
+        self.logs = deque(maxlen=max_logs)
+        self.lock = threading.Lock()
+    
+    def emit(self, record):
+        try:
+            log_entry = {
+                "timestamp": datetime.fromtimestamp(record.created).isoformat(),
+                "level": record.levelname,
+                "logger": record.name,
+                "message": self.format(record),
+                "function": record.funcName,
+                "line": record.lineno
+            }
+            with self.lock:
+                self.logs.append(log_entry)
+        except Exception:
+            self.handleError(record)
+    
+    def get_logs(self, level=None, limit=100):
+        with self.lock:
+            logs = list(self.logs)
+            if level:
+                logs = [log for log in logs if log['level'] == level]
+            return logs[-limit:]
+
+# Create and add in-memory handler
+memory_handler = InMemoryLogHandler(max_logs=200)
+memory_handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+memory_handler.setFormatter(formatter)
+logging.getLogger().addHandler(memory_handler)
+
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
