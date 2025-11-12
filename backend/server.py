@@ -7883,10 +7883,10 @@ async def startup_event():
                 .token(TELEGRAM_BOT_TOKEN)
                 .persistence(persistence)  # CRITICAL for webhook mode!
                 .concurrent_updates(True)  # Process updates concurrently
-                .connect_timeout(5)  # Ultra fast connection
-                .read_timeout(5)  # Ultra fast read
-                .write_timeout(5)  # Ultra fast write
-                .pool_timeout(2)  # Ultra fast pool acquisition
+                .connect_timeout(3)  # Super fast connection
+                .read_timeout(3)  # Super fast read
+                .write_timeout(3)  # Super fast write
+                .pool_timeout(1)  # Super fast pool acquisition
                 .rate_limiter(rate_limiter=None)  # Disable rate limiter for max speed
                 .build()
             )
