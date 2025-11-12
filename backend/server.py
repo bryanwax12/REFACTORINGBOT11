@@ -7887,12 +7887,8 @@ async def startup_event():
                 redis_host=redis_host,
                 redis_port=redis_port,
                 redis_password=redis_password,
-                update_interval=1  # Background save interval
+                update_interval=0.05  # Save every 50ms - nearly instant!
             )
-            
-            # Store persistence globally for manual flushing
-            global redis_persistence
-            redis_persistence = persistence
             
             application = (
                 Application.builder()
