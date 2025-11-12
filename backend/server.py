@@ -1795,7 +1795,7 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
         message_text = """Шаг 2/6: Адрес получателя
 Например: 123 Main St."""
     else:
-        message_text = """Шаг 9/13: Адрес получателя
+        message_text = """Шаг 9/13: 🏠 Адрес получателя
 Например: 123 Main St."""
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
