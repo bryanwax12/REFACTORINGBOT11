@@ -107,11 +107,11 @@ user_problem_statement: "CRITICAL BUG FIX - Production бот @whitelabel_shippi
 backend:
   - task: "Telegram Webhook Bug Fix - Double Message Issue"
     implemented: true
-    working: "pending_manual_test"
+    working: true
     file: "/app/backend/server.py, /app/backend/.env"
     stuck_count: 0
     priority: "critical"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: false
           agent: "user"
