@@ -1374,6 +1374,9 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE)
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         context.user_data['last_state'] = FROM_ADDRESS2
+    
+    logger.info(f"🔍 order_from_address COMPLETED - returning FROM_ADDRESS2")
+    logger.info(f"🔍 user_data after: {list(context.user_data.keys())}")
     return FROM_ADDRESS2
 
 async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
