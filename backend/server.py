@@ -705,16 +705,23 @@ async def safe_telegram_call(coro, timeout=10, error_message="❌ Превыше
 
 async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
-    ULTRA FAST: Only remove buttons, no text added
-    Maximum speed - 0.1-0.3 seconds (3x faster than adding emoji)
+    Add checkmark ✅ to selected message and remove buttons
+    Runs async - doesn't block bot response
     """
     try:
         # Handle callback query (button press)
         if update.callback_query:
             message = update.callback_query.message
             try:
-                # Just remove buttons - ultra fast
-                await message.edit_reply_markup(reply_markup=None)
+                # Get current text and add checkmark if not already there
+                current_text = message.text or ""
+                if not current_text.startswith("✅"):
+                    new_text = f"✅ {current_text}"
+                    # Edit message with checkmark and remove buttons
+                    await message.edit_text(text=new_text, reply_markup=None)
+                else:
+                    # Just remove buttons if checkmark already exists
+                    await message.edit_reply_markup(reply_markup=None)
             except Exception:
                 pass
             return
@@ -722,17 +729,28 @@ async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT
         # Handle text input messages
         if update.message and 'last_bot_message_id' in context.user_data:
             last_msg_id = context.user_data.get('last_bot_message_id')
+            last_text = context.user_data.get('last_bot_message_text', '')
             
             if not last_msg_id:
                 return
             
             try:
-                # Just remove buttons - ultra fast
-                await safe_telegram_call(context.bot.edit_message_reply_markup(
-                    chat_id=update.effective_chat.id,
-                    message_id=last_msg_id,
-                    reply_markup=None
-                ))
+                # Add checkmark to last bot message
+                if not last_text.startswith("✅"):
+                    new_text = f"✅ {last_text}"
+                    await safe_telegram_call(context.bot.edit_message_text(
+                        chat_id=update.effective_chat.id,
+                        message_id=last_msg_id,
+                        text=new_text,
+                        reply_markup=None
+                    ))
+                else:
+                    # Just remove buttons if checkmark already exists
+                    await safe_telegram_call(context.bot.edit_message_reply_markup(
+                        chat_id=update.effective_chat.id,
+                        message_id=last_msg_id,
+                        reply_markup=None
+                    ))
             except Exception:
                 pass
         
