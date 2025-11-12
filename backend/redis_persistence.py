@@ -129,7 +129,7 @@ class RedisPersistence(BasePersistence):
         except Exception as e:
             logger.error(f"Error saving chat_data for {chat_id}: {e}")
     
-    def update_bot_data(self, data: Dict) -> None:
+    async def update_bot_data(self, data: Dict) -> None:
         """Save bot_data to Redis (SYNC)"""
         pass
     
