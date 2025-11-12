@@ -53,7 +53,7 @@ class RedisPersistence(BasePersistence):
             return None
         return pickle.loads(data)
     
-    def get_user_data(self) -> Dict[int, Dict]:
+    async def get_user_data(self) -> Dict[int, Dict]:
         """Load user_data from Redis (SYNC)"""
         try:
             data = self.redis_client.get("bot:user_data")
