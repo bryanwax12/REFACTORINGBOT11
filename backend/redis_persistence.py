@@ -117,10 +117,10 @@ class RedisPersistence(BasePersistence):
         except Exception as e:
             logger.error(f"Error saving user_data for {user_id}: {e}")
     
-    def update_chat_data(self, chat_id: int, data: Dict) -> None:
-        """Save chat_data to Redis (SYNC)"""
+    async def update_chat_data(self, chat_id: int, data: Dict) -> None:
+        """Save chat_data to Redis (ASYNC wrapper)"""
         try:
-            all_chat_data = self.get_chat_data()
+            all_chat_data = await self.get_chat_data()
             all_chat_data[chat_id] = data
             
             self.redis_client.set("bot:chat_data", self._serialize(all_chat_data))
