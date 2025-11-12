@@ -105,10 +105,10 @@ class RedisPersistence(BasePersistence):
             logger.error(f"❌ REDIS ERROR loading conversations for {name}: {e}")
             return {}
     
-    async def update_user_data(self, user_id: int, data: Dict) -> None:
-        """Save user_data to Redis"""
+    def update_user_data(self, user_id: int, data: Dict) -> None:
+        """Save user_data to Redis (SYNC)"""
         try:
-            all_user_data = await self.get_user_data()
+            all_user_data = self.get_user_data()
             all_user_data[user_id] = data
             
             self.redis_client.set("bot:user_data", self._serialize(all_user_data))
@@ -117,10 +117,10 @@ class RedisPersistence(BasePersistence):
         except Exception as e:
             logger.error(f"Error saving user_data for {user_id}: {e}")
     
-    async def update_chat_data(self, chat_id: int, data: Dict) -> None:
-        """Save chat_data to Redis"""
+    def update_chat_data(self, chat_id: int, data: Dict) -> None:
+        """Save chat_data to Redis (SYNC)"""
         try:
-            all_chat_data = await self.get_chat_data()
+            all_chat_data = self.get_chat_data()
             all_chat_data[chat_id] = data
             
             self.redis_client.set("bot:chat_data", self._serialize(all_chat_data))
@@ -129,12 +129,12 @@ class RedisPersistence(BasePersistence):
         except Exception as e:
             logger.error(f"Error saving chat_data for {chat_id}: {e}")
     
-    async def update_bot_data(self, data: Dict) -> None:
-        """Save bot_data to Redis"""
+    def update_bot_data(self, data: Dict) -> None:
+        """Save bot_data to Redis (SYNC)"""
         pass
     
-    async def update_callback_data(self, data: Tuple) -> None:
-        """Save callback_data to Redis"""
+    def update_callback_data(self, data: Tuple) -> None:
+        """Save callback_data to Redis (SYNC)"""
         pass
     
     def update_conversation(self, name: str, key: Tuple, new_state: Optional[int]) -> None:
