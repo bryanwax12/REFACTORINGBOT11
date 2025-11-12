@@ -1747,7 +1747,7 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    message_text = """Шаг 8/13: Имя получателя
+    message_text = """Шаг 8/13: 👤 Имя получателя
 Например: Jane Doe"""
     bot_msg = await safe_telegram_call(update.message.reply_text(
             message_text,
