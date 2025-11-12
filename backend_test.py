@@ -4709,9 +4709,10 @@ def test_oxapay_webhook_success_message():
         return False
 
 def main():
-    """Run all tests - Focus on Check All Bot Access Feature"""
-    print("🚀 Testing Check All Bot Access Feature")
-    print("🎯 Focus: Review Request - Check All Bot Access endpoint testing")
+    """Run all tests - Focus on Telegram Webhook Bug Fix"""
+    print("🚀 Testing Telegram Webhook Bug Fix")
+    print("🎯 Focus: Review Request - Double message bug fix verification")
+    print("🔧 CRITICAL BUG FIX: Bot switched from polling to webhook mode")
     print("=" * 80)
     
     # Test results
@@ -4720,32 +4721,36 @@ def main():
     # 1. Test API Health
     results['api_health'] = test_api_health()
     
-    # 2. Test CHECK ALL BOT ACCESS (Main Focus)
-    results['check_all_bot_access'] = test_check_all_bot_access()
+    # 2. CRITICAL WEBHOOK TESTS (Main Focus)
+    results['webhook_status'] = test_telegram_webhook_status()
+    results['webhook_environment'] = test_webhook_environment_variables()
+    results['webhook_logs'] = test_webhook_logs_verification()
+    results['double_message_fix'] = test_double_message_bug_fix()
     
     # 3. Test Supporting Infrastructure
     results['telegram_infrastructure'] = test_telegram_bot_infrastructure()
     results['bot_token'] = test_telegram_bot_token()
+    results['admin_integration'] = test_telegram_bot_admin_integration()
     
     # 4. Check Backend Logs
     check_backend_logs()
     
     # Summary
     print("\n" + "=" * 80)
-    print("📊 CHECK ALL BOT ACCESS TEST SUMMARY")
+    print("📊 TELEGRAM WEBHOOK BUG FIX TEST SUMMARY")
     print("=" * 80)
     
     # Priority order for tests
-    main_tests = [
-        'check_all_bot_access'
+    critical_webhook_tests = [
+        'webhook_status', 'webhook_environment', 'webhook_logs', 'double_message_fix'
     ]
     supporting_tests = [
-        'api_health', 'telegram_infrastructure', 'bot_token'
+        'api_health', 'telegram_infrastructure', 'bot_token', 'admin_integration'
     ]
     
     # Show results by category
-    print("\n🎯 CHECK ALL BOT ACCESS TEST:")
-    for test_name in main_tests:
+    print("\n🎯 CRITICAL WEBHOOK TESTS:")
+    for test_name in critical_webhook_tests:
         if test_name in results:
             passed = results[test_name]
             status = "✅ PASS" if passed else "❌ FAIL"
@@ -4759,36 +4764,37 @@ def main():
             print(f"   {test_name.replace('_', ' ').title()}: {status}")
     
     # Overall Assessment
-    main_passed = all(results.get(test, False) for test in main_tests if test in results)
+    critical_webhook_passed = all(results.get(test, False) for test in critical_webhook_tests if test in results)
     supporting_passed = all(results.get(test, False) for test in supporting_tests if test in results)
     all_passed = all(results.values())
     
-    print(f"\n🎯 Check All Bot Access Status: {'✅ SUCCESS' if main_passed else '❌ FAILED'}")
+    print(f"\n🎯 Critical Webhook Tests Status: {'✅ SUCCESS' if critical_webhook_passed else '❌ FAILED'}")
     print(f"🔧 Supporting Infrastructure Status: {'✅ SUCCESS' if supporting_passed else '❌ FAILED'}")
     print(f"📊 Overall Result: {'✅ ALL TESTS PASSED' if all_passed else '❌ SOME TESTS FAILED'}")
     
-    # Critical Assessment for Check All Bot Access
-    critical_tests = ['check_all_bot_access']
-    critical_passed = all(results.get(test, False) for test in critical_tests if test in results)
-    
-    print("\n🎯 Check All Bot Access Analysis:")
-    if critical_passed:
-        print(f"   ✅ REVIEW SUCCESS: Check All Bot Access feature is working correctly!")
-        print(f"   ✅ POST /api/users/check-all-bot-access endpoint accessible with admin auth")
-        print(f"   ✅ Returns success with counts: checked_count, accessible_count, blocked_count, failed_count")
-        print(f"   ✅ Updates bot_blocked_by_user field in database for all users")
-        print(f"   ✅ Sets bot_access_checked_at timestamp correctly")
-        print(f"   ✅ Handles errors gracefully (bot blocked by user detection)")
-        print(f"   ✅ Admin API key authentication working properly")
+    # Critical Assessment for Webhook Bug Fix
+    print("\n🎯 WEBHOOK BUG FIX ANALYSIS:")
+    if critical_webhook_passed:
+        print(f"   ✅ CRITICAL BUG FIX SUCCESS: Double message issue resolved!")
+        print(f"   ✅ GET /api/telegram/status shows application_running: true")
+        print(f"   ✅ WEBHOOK_URL configured in backend .env")
+        print(f"   ✅ Logs show webhook setup success, no polling conflicts")
+        print(f"   ✅ Bot running in webhook mode (not polling)")
+        print(f"   ✅ No 'Conflict: terminated by other getUpdates' errors")
+        print(f"   ✅ Infrastructure ready for single-message processing")
+        print(f"\n   📝 MANUAL VERIFICATION NEEDED:")
+        print(f"   Test with @whitelabel_shipping_bot_test_bot:")
+        print(f"   1. Start order creation")
+        print(f"   2. Reach text input (FROM_ADDRESS)")
+        print(f"   3. Send '123 Main Street' ONCE")
+        print(f"   4. Verify bot processes immediately (no double sending)")
     else:
-        print(f"   ❌ REVIEW FAILURE: Check All Bot Access feature has issues!")
-        print(f"   ❌ Check POST /api/users/check-all-bot-access endpoint implementation")
-        print(f"   ❌ Verify admin API key authentication (X-Admin-Key header)")
-        print(f"   ❌ Check response structure includes all required counts")
-        print(f"   ❌ Verify database updates for bot_blocked_by_user field")
-        print(f"   ❌ Check error handling for blocked users and other failures")
-        print(f"   ❌ Ensure Telegram bot instance is properly initialized")
-    
+        print(f"   ❌ CRITICAL BUG FIX FAILURE: Double message issue may persist!")
+        print(f"   ❌ Check GET /api/telegram/status endpoint")
+        print(f"   ❌ Verify WEBHOOK_URL in backend .env")
+        print(f"   ❌ Check logs for webhook setup and polling conflicts")
+        print(f"   ❌ Ensure bot is in webhook mode, not polling")
+        print(f"   ❌ Bot may still require double message sending")
     
     return critical_webhook_passed
 
