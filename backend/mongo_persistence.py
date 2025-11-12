@@ -63,10 +63,11 @@ class MongoPersistence(BasePersistence):
         try:
             # Check cache first (instant!)
             if name in self._conversations_cache:
-                logger.debug(f"⚡ Cache hit for {name}")
+                logger.info(f"⚡ PERSISTENCE: Cache HIT for {name}, entries: {len(self._conversations_cache[name])}")
                 return self._conversations_cache[name]
             
             # Load from MongoDB
+            logger.info(f"📥 PERSISTENCE: Cache MISS for {name}, loading from MongoDB...")
             doc = await self.collection.find_one({"_id": f"conversation_{name}"})
             if doc and 'data' in doc:
                 # Convert string keys back to tuples
@@ -78,15 +79,15 @@ class MongoPersistence(BasePersistence):
                 
                 # Cache it
                 self._conversations_cache[name] = conversations
-                logger.info(f"📥 Loaded & cached conversation state for {name}: {conversations}")
+                logger.info(f"📥 PERSISTENCE: Loaded from MongoDB & cached for {name}: {len(conversations)} entries, states: {conversations}")
                 return conversations
             
             # Empty state
             self._conversations_cache[name] = {}
-            logger.info(f"📭 No conversation state found for {name}")
+            logger.info(f"📭 PERSISTENCE: No conversation state in MongoDB for {name}, starting fresh")
             return {}
         except Exception as e:
-            logger.error(f"Error loading conversations for {name}: {e}")
+            logger.error(f"❌ PERSISTENCE ERROR loading conversations for {name}: {e}")
             return {}
     
     async def update_user_data(self, user_id: int, data: Dict) -> None:
