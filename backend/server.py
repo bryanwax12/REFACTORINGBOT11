@@ -3131,7 +3131,7 @@ async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     message_text = """📦 Создание нового заказа
 
-Шаг 1/13: Имя отправителя
+Шаг 1/13: 👤 Имя отправителя
 Например: John Smith"""
     bot_msg = await safe_telegram_call(query.message.reply_text(
             message_text,
