@@ -7866,16 +7866,19 @@ async def startup_event():
             global application  # Use global application variable for webhook access
             logger.info("Initializing Telegram Bot...")
             # Build application with optimized settings for high load (5000+ concurrent users)
-            # CRITICAL: Use PicklePersistence for webhook mode to preserve ConversationHandler state
-            from telegram.ext import PicklePersistence
+            # CRITICAL: Use RedisPersistence for webhook mode - multi-pod safe, ultra-fast
+            from redis_persistence import RedisPersistence
             
-            # Use PicklePersistence with INSTANT save (update_interval=0 = save immediately)
-            persistence_file = "/app/backend/bot_persistence.pickle"
-            persistence = PicklePersistence(
-                filepath=persistence_file, 
-                update_interval=0,  # Save IMMEDIATELY after each update
-                single_file=True,   # Use single file for better performance
-                on_flush=False      # Don't wait for flush
+            # Use Redis for instant, multi-pod safe persistence
+            redis_host = os.environ.get('REDIS_HOST', 'localhost')
+            redis_port = int(os.environ.get('REDIS_PORT', 6379))
+            redis_password = os.environ.get('REDIS_PASSWORD', '')
+            
+            persistence = RedisPersistence(
+                redis_host=redis_host,
+                redis_port=redis_port,
+                redis_password=redis_password,
+                update_interval=0  # Save IMMEDIATELY (instant persistence)
             )
             
             application = (
