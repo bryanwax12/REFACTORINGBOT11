@@ -661,9 +661,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Telegram Webhook Bug Fix - Double Message Issue"
+    []
   stuck_tasks:
-    - "Telegram Webhook Bug Fix - Double Message Issue"
+    []
   test_all: false
   test_priority: "high_first"
   manual_testing_required:
