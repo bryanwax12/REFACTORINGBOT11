@@ -2127,7 +2127,7 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    message_text = """Вес посылки в фунтах (lb)
+    message_text = """📦 Вес посылки в фунтах (lb)
 Например: 2"""
     bot_msg = await safe_telegram_call(update.message.reply_text(
             message_text,
