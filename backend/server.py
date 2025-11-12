@@ -1388,7 +1388,7 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE)
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    message_text = """Шаг 3/13: Квартира/Офис отправителя (необязательно)
+    message_text = """Шаг 3/13: 🚪 Квартира/Офис отправителя (необязательно)
 Например: Apt 5, Suite 201
 Или нажмите "Пропустить" """
     bot_msg = await safe_telegram_call(update.message.reply_text(
