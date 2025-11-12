@@ -3366,6 +3366,13 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
                 pass
         except asyncio.TimeoutError:
             logger.error("ShipStation rate request timed out after 35 seconds")
+            
+            # Delete progress message
+            try:
+                await safe_telegram_call(progress_msg.delete())
+            except Exception:
+                pass
+            
             keyboard = [
                 [InlineKeyboardButton("🔄 Попробовать снова", callback_data='continue_order')],
                 [InlineKeyboardButton("✏️ Редактировать адреса", callback_data='edit_addresses_error')],
