@@ -176,10 +176,10 @@ class RedisPersistence(BasePersistence):
         except Exception as e:
             logger.error(f"Error dropping user_data for {user_id}: {e}")
     
-    def drop_chat_data(self, chat_id: int) -> None:
-        """Delete chat_data from Redis (SYNC)"""
+    async def drop_chat_data(self, chat_id: int) -> None:
+        """Delete chat_data from Redis (ASYNC wrapper)"""
         try:
-            all_chat_data = self.get_chat_data()
+            all_chat_data = await self.get_chat_data()
             if chat_id in all_chat_data:
                 del all_chat_data[chat_id]
                 self.redis_client.set("bot:chat_data", self._serialize(all_chat_data))
