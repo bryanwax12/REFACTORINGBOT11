@@ -2008,7 +2008,7 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
         message_text = """Шаг 6/6: ZIP код получателя
 Например: 10007"""
     else:
-        message_text = """Шаг 13/13: ZIP код получателя
+        message_text = """Шаг 13/13: 📬 ZIP код получателя
 Например: 10007"""
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
