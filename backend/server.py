@@ -4647,7 +4647,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Restore exact screen with instructions for each state
     if last_state == FROM_NAME:
-        message_text = "Шаг 1/13: Имя отправителя\n\nНапример: Ivan Petrov"
+        message_text = "Шаг 1/13: 👤 Имя отправителя\n\nНапример: Ivan Petrov"
         bot_msg = await safe_telegram_call(query.message.reply_text(message_text))
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
