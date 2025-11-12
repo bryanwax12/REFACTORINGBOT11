@@ -61,8 +61,22 @@ ADMIN_TELEGRAM_ID = os.environ.get('ADMIN_TELEGRAM_ID', '')
 CHANNEL_INVITE_LINK = os.environ.get('CHANNEL_INVITE_LINK', '')
 CHANNEL_ID = os.environ.get('CHANNEL_ID', '')
 
-# Telegram Bot
-TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+# Telegram Bot - Auto-select token based on environment
+# Detect environment from WEBHOOK_BASE_URL
+webhook_base_url = os.environ.get('WEBHOOK_BASE_URL', '')
+is_production_env = 'crypto-shipping.emergent.host' in webhook_base_url
+
+# Choose correct token
+if is_production_env:
+    # Production: use production bot @whitelabel_shipping_bot
+    TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN_PRODUCTION', '')
+    logger.info(f"🟢 PRODUCTION BOT SELECTED: @whitelabel_shipping_bot")
+else:
+    # Preview: use preview bot @whitelabel_shipping_bot_test_bot
+    TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN_PREVIEW', 
+                                       os.environ.get('TELEGRAM_BOT_TOKEN', ''))
+    logger.info(f"🔵 PREVIEW BOT SELECTED: @whitelabel_shipping_bot_test_bot")
+
 bot_instance = None
 application = None  # Global Telegram Application instance for webhook
 if TELEGRAM_BOT_TOKEN:
