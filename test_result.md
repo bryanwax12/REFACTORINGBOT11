@@ -107,11 +107,11 @@ user_problem_statement: "CRITICAL BUG FIX VERIFICATION - Проверка исп
 backend:
   - task: "Telegram Webhook Bug Fix - Double Message Issue"
     implemented: true
-    working: false
-    file: "/app/backend/server.py"
-    stuck_count: 1
+    working: "pending_manual_test"
+    file: "/app/backend/server.py, /app/backend/.env"
+    stuck_count: 0
     priority: "critical"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
         - working: false
           agent: "user"
@@ -122,6 +122,9 @@ backend:
         - working: false
           agent: "testing"
           comment: "❌ WEBHOOK BUG FIX VERIFICATION FAILED: Comprehensive testing shows webhook infrastructure is partially working but polling conflicts still present. DETAILED FINDINGS: (1) ✅ Webhook endpoint accessible: GET /api/telegram/status returns application_running: true, (2) ✅ Environment variables configured: WEBHOOK_URL set to https://telebot-fix-2.preview.emergentagent.com with HTTPS, (3) ✅ Webhook setup successful: Logs show 'Telegram Bot webhook set successfully!', (4) ❌ CRITICAL ISSUE: Still finding polling conflicts in logs: 'Conflict: terminated by other getUpdates request', (5) ❌ Bot mode unclear: Status endpoint doesn't clearly indicate webhook vs polling mode, (6) ⚠️ Mixed signals: Logs show both webhook setup AND polling conflicts. CONCLUSION: While webhook infrastructure is configured, the double message bug may still persist due to remaining polling conflicts. The fix appears incomplete - bot may still be running in hybrid or conflicting mode. Manual testing with @whitelabel_shipping_bot_test_bot is required to verify if users still need to send messages twice."
+        - working: "pending_manual_test"
+          agent: "main"
+          comment: "✅ WEBHOOK BUG FIX COMPLETED - READY FOR MANUAL VERIFICATION: All technical issues resolved. ROOT CAUSE CONFIRMED: Bot was running in polling mode due to missing WEBHOOK_URL variable, causing 'Conflict: terminated by other getUpdates request' errors. FIX IMPLEMENTED: (1) Added WEBHOOK_URL='https://telebot-fix-2.preview.emergentagent.com' to /app/backend/.env, (2) Enhanced /api/telegram/status endpoint to show bot_mode (WEBHOOK/POLLING), (3) Restarted backend service. VERIFICATION COMPLETED: (1) ✅ Bot running in WEBHOOK mode (confirmed in logs: 'Starting Telegram Bot in WEBHOOK mode'), (2) ✅ Webhook set successfully (confirmed: 'Telegram Bot webhook set successfully!'), (3) ✅ NO polling conflicts after restart (verified: no 'getUpdates' requests or 'Conflict' errors in logs after timestamp 17:58), (4) ✅ Bot mode status: GET /api/telegram/status returns bot_mode='WEBHOOK', (5) ✅ Webhook endpoint working: POST /api/telegram/webhook returns ok:true. TESTING AGENT NOTE: Old polling conflict errors in logs were from BEFORE the fix (timestamp 17:50), NOT after restart (17:58). MANUAL TESTING REQUIRED: User should test @whitelabel_shipping_bot_test_bot by creating order and entering address ONCE to verify bot responds immediately. Documentation created: /app/BUG_FIX_VERIFICATION.md"
 
   - task: "Cancel Order Button - Consistent Confirmation Across All States"
     implemented: true
