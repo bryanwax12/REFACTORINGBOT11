@@ -15,12 +15,7 @@ class MongoPersistence(BasePersistence):
     
     def __init__(self, db, update_interval: float = 60):
         super().__init__(
-            store_data={
-                'user_data': True,
-                'chat_data': True,
-                'bot_data': False,
-                'callback_data': False
-            },
+            store_data=None,  # Store all data
             update_interval=update_interval
         )
         self.db = db
