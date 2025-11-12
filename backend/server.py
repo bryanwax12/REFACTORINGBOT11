@@ -7866,10 +7866,13 @@ async def startup_event():
             global application  # Use global application variable for webhook access
             logger.info("Initializing Telegram Bot...")
             # Build application with optimized settings for high load (5000+ concurrent users)
-            # CRITICAL: Use MongoPersistence for webhook mode to preserve ConversationHandler state
-            from mongo_persistence import MongoPersistence
+            # CRITICAL: Use PicklePersistence for webhook mode to preserve ConversationHandler state
+            from telegram.ext import PicklePersistence
+            import os
             
-            persistence = MongoPersistence(db=db, update_interval=1)
+            # Use PicklePersistence with file storage (faster than MongoDB, multi-pod safe via shared volume)
+            persistence_file = os.path.join(os.path.dirname(__file__), "bot_persistence.pickle")
+            persistence = PicklePersistence(filepath=persistence_file, update_interval=0.5)
             
             application = (
                 Application.builder()
