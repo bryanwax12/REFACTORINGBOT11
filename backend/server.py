@@ -7839,12 +7839,7 @@ async def startup_event():
             # CRITICAL: Use DictPersistence for webhook mode to preserve ConversationHandler state
             from telegram.ext import DictPersistence
             
-            persistence = DictPersistence(store_data={
-                'user_data': True,
-                'chat_data': True,
-                'bot_data': False,
-                'callback_data': False
-            })
+            persistence = DictPersistence()
             
             application = (
                 Application.builder()
