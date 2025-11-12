@@ -6116,6 +6116,21 @@ async def telegram_webhook(request: Request):
         return {"ok": True}
 
 
+@api_router.get("/telegram/status")
+async def telegram_status():
+    """Check Telegram bot application status (NO AUTH REQUIRED FOR DEBUG)"""
+    return {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "application_initialized": application is not None,
+        "application_running": application.running if application else False,
+        "bot_instance": bot_instance is not None,
+        "telegram_token_set": bool(TELEGRAM_BOT_TOKEN),
+        "webhook_url_env": os.environ.get('WEBHOOK_URL', 'Not set'),
+        "webhook_base_url_env": os.environ.get('WEBHOOK_BASE_URL', 'Not set'),
+    }
+
+
+
 @api_router.get("/users/{telegram_id}/details")
 async def get_user_details(telegram_id: int):
     try:
