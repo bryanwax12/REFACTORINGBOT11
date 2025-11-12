@@ -3329,7 +3329,23 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         # Log the request for debugging
         logger.info(f"ShipStation rate request: {rate_request}")
         
-        # Get rates from ShipStation using async wrapper to prevent blocking
+        # Get rates from ShipStation with progress updates
+        async def update_progress():
+            """Update progress message every 5 seconds"""
+            start_time = datetime.now(timezone.utc)
+            while True:
+                await asyncio.sleep(5)
+                elapsed = int((datetime.now(timezone.utc) - start_time).total_seconds())
+                try:
+                    await safe_telegram_call(progress_msg.edit_text(
+                        f"⏳ Получаю доступные курьерские службы и тарифы... ({elapsed} сек)"
+                    ))
+                except Exception:
+                    break  # Stop if message was deleted or can't be edited
+        
+        # Start progress update task
+        progress_task = asyncio.create_task(update_progress())
+        
         try:
             response = await asyncio.wait_for(
                 asyncio.to_thread(
@@ -3341,6 +3357,13 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
                 ),
                 timeout=35  # Overall timeout including thread overhead
             )
+        finally:
+            # Stop progress updates
+            progress_task.cancel()
+            try:
+                await progress_task
+            except asyncio.CancelledError:
+                pass
         except asyncio.TimeoutError:
             logger.error("ShipStation rate request timed out after 35 seconds")
             keyboard = [
