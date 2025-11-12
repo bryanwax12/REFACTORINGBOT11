@@ -190,7 +190,7 @@ class RedisPersistence(BasePersistence):
         """Refresh user_data (called by framework) (SYNC)"""
         pass
     
-    def refresh_chat_data(self, chat_id: int, chat_data: Dict) -> None:
+    async def refresh_chat_data(self, chat_id: int, chat_data: Dict) -> None:
         """Refresh chat_data (called by framework) (SYNC)"""
         pass
     
