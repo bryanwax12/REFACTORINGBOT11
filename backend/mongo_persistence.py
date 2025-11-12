@@ -59,8 +59,14 @@ class MongoPersistence(BasePersistence):
         return None
     
     async def get_conversations(self, name: str) -> Dict:
-        """Load conversation state from MongoDB"""
+        """Load conversation state from cache or MongoDB"""
         try:
+            # Check cache first (instant!)
+            if name in self._conversations_cache:
+                logger.debug(f"⚡ Cache hit for {name}")
+                return self._conversations_cache[name]
+            
+            # Load from MongoDB
             doc = await self.collection.find_one({"_id": f"conversation_{name}"})
             if doc and 'data' in doc:
                 # Convert string keys back to tuples
@@ -69,8 +75,14 @@ class MongoPersistence(BasePersistence):
                     # Parse string back to tuple: "(123, 456)" -> (123, 456)
                     key = eval(key_str)  # Safe here as we control the format
                     conversations[key] = state
-                logger.info(f"📥 Loaded conversation state for {name}: {conversations}")
+                
+                # Cache it
+                self._conversations_cache[name] = conversations
+                logger.info(f"📥 Loaded & cached conversation state for {name}: {conversations}")
                 return conversations
+            
+            # Empty state
+            self._conversations_cache[name] = {}
             logger.info(f"📭 No conversation state found for {name}")
             return {}
         except Exception as e:
