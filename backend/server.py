@@ -3591,6 +3591,12 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         
         reply_markup = InlineKeyboardMarkup(keyboard)
         
+        # Delete progress message
+        try:
+            await safe_telegram_call(progress_msg.delete())
+        except Exception:
+            pass  # Ignore if already deleted
+        
         # Save state for cancel return - only when showing rates
         context.user_data['last_state'] = SELECT_CARRIER
         
