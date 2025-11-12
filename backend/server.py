@@ -5998,14 +5998,26 @@ async def telegram_webhook(request: Request):
 @api_router.get("/telegram/status")
 async def telegram_status():
     """Check Telegram bot application status (NO AUTH REQUIRED FOR DEBUG)"""
+    webhook_url = os.environ.get('WEBHOOK_URL', '')
+    webhook_base_url = os.environ.get('WEBHOOK_BASE_URL', '')
+    
+    # Determine bot mode
+    bot_mode = "UNKNOWN"
+    if webhook_url or (webhook_base_url and 'preview' not in webhook_base_url.lower()):
+        bot_mode = "WEBHOOK"
+    else:
+        bot_mode = "POLLING"
+    
     return {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "application_initialized": application is not None,
         "application_running": application.running if application else False,
         "bot_instance": bot_instance is not None,
         "telegram_token_set": bool(TELEGRAM_BOT_TOKEN),
-        "webhook_url_env": os.environ.get('WEBHOOK_URL', 'Not set'),
-        "webhook_base_url_env": os.environ.get('WEBHOOK_BASE_URL', 'Not set'),
+        "webhook_url_env": webhook_url or 'Not set',
+        "webhook_base_url_env": webhook_base_url or 'Not set',
+        "bot_mode": bot_mode,
+        "mode_description": "WEBHOOK mode eliminates double message bug. POLLING mode may cause conflicts.",
     }
 
 
