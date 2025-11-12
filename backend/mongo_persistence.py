@@ -59,12 +59,12 @@ class MongoPersistence(BasePersistence):
         return None
     
     async def get_conversations(self, name: str) -> Dict:
-        """Load conversation state from cache or MongoDB"""
+        """Load conversation state from GLOBAL cache or MongoDB"""
         try:
-            # Check cache first (instant!)
-            if name in self._conversations_cache:
-                logger.info(f"⚡ PERSISTENCE: Cache HIT for {name}, entries: {len(self._conversations_cache[name])}")
-                return self._conversations_cache[name]
+            # Check GLOBAL cache first (instant!)
+            if name in _GLOBAL_CONVERSATIONS_CACHE:
+                logger.info(f"⚡ PERSISTENCE: GLOBAL Cache HIT for {name}, entries: {len(_GLOBAL_CONVERSATIONS_CACHE[name])}")
+                return _GLOBAL_CONVERSATIONS_CACHE[name]
             
             # Load from MongoDB
             logger.info(f"📥 PERSISTENCE: Cache MISS for {name}, loading from MongoDB...")
@@ -77,13 +77,13 @@ class MongoPersistence(BasePersistence):
                     key = eval(key_str)  # Safe here as we control the format
                     conversations[key] = state
                 
-                # Cache it
-                self._conversations_cache[name] = conversations
-                logger.info(f"📥 PERSISTENCE: Loaded from MongoDB & cached for {name}: {len(conversations)} entries, states: {conversations}")
+                # Cache it in GLOBAL cache
+                _GLOBAL_CONVERSATIONS_CACHE[name] = conversations
+                logger.info(f"📥 PERSISTENCE: Loaded from MongoDB & cached GLOBALLY for {name}: {len(conversations)} entries, states: {conversations}")
                 return conversations
             
             # Empty state
-            self._conversations_cache[name] = {}
+            _GLOBAL_CONVERSATIONS_CACHE[name] = {}
             logger.info(f"📭 PERSISTENCE: No conversation state in MongoDB for {name}, starting fresh")
             return {}
         except Exception as e:
