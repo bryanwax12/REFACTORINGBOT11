@@ -87,8 +87,8 @@ class RedisPersistence(BasePersistence):
         """Load callback_data from Redis"""
         return None
     
-    async def get_conversations(self, name: str) -> Dict:
-        """Load conversation state from Redis - INSTANT ACCESS"""
+    def get_conversations(self, name: str) -> Dict:
+        """Load conversation state from Redis - INSTANT ACCESS (SYNC)"""
         try:
             key = f"bot:conversation:{name}"
             data = self.redis_client.get(key)
