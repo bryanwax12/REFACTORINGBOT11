@@ -79,8 +79,8 @@ def test_conversation_handler_persistence():
             server_code = f.read()
         
         # Find ConversationHandler definitions
-        conv_handler_pattern = r'(\w+)\s*=\s*ConversationHandler\((.*?)\)'
-        conv_handlers = re.findall(conv_handler_pattern, server_code, re.DOTALL)
+        conv_handler_pattern = r'(\w+)\s*=\s*ConversationHandler\('
+        conv_handlers = re.findall(conv_handler_pattern, server_code)
         
         print(f"   Found {len(conv_handlers)} ConversationHandler definitions")
         
@@ -89,14 +89,14 @@ def test_conversation_handler_persistence():
         persistence_results = {}
         
         for handler_name in handlers_to_check:
-            # Find the specific handler definition
-            handler_pattern = rf'{handler_name}\s*=\s*ConversationHandler\((.*?)\)'
+            # Find the specific handler definition with more flexible pattern
+            handler_pattern = rf'{handler_name}\s*=\s*ConversationHandler\((.*?)(?=\n\s*\w+\s*=|\n\s*application\.add_handler|\Z)'
             handler_match = re.search(handler_pattern, server_code, re.DOTALL)
             
             if handler_match:
                 handler_config = handler_match.group(1)
                 
-                # Check if persistent=True is present
+                # Check if persistent=True is present in the handler configuration
                 has_persistent = 'persistent=True' in handler_config
                 persistence_results[handler_name] = has_persistent
                 
@@ -107,6 +107,10 @@ def test_conversation_handler_persistence():
                 # Show the line number for debugging
                 lines_before = server_code[:handler_match.start()].count('\n')
                 print(f"      Line: ~{lines_before + 1}")
+                
+                # Show a snippet of the configuration for debugging
+                config_snippet = handler_config.replace('\n', ' ').strip()[:100] + "..."
+                print(f"      Config snippet: {config_snippet}")
                 
             else:
                 print(f"   {handler_name}: ❌ Not found")
