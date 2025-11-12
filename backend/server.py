@@ -1424,12 +1424,6 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE)
     
     logger.info(f"🔍 order_from_address COMPLETED - returning FROM_ADDRESS2")
     logger.info(f"🔍 user_data after: {list(context.user_data.keys())}")
-    
-    # Force immediate save to Redis
-    if redis_persistence:
-        await redis_persistence.flush()
-        logger.debug("💾 Forced flush to Redis")
-    
     return FROM_ADDRESS2
 
 async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
