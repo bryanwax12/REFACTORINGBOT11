@@ -1955,7 +1955,7 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
         message_text = """Шаг 5/6: Штат получателя (2 буквы)
 Например: NY"""
     else:
-        message_text = """Шаг 12/13: Штат получателя (2 буквы)
+        message_text = """Шаг 12/13: 📍 Штат получателя (2 буквы)
 Например: NY"""
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
