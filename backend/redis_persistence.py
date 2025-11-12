@@ -83,7 +83,7 @@ class RedisPersistence(BasePersistence):
         """Load bot_data from Redis (SYNC)"""
         return {}
     
-    def get_callback_data(self) -> Optional[Tuple]:
+    async def get_callback_data(self) -> Optional[Tuple]:
         """Load callback_data from Redis (SYNC)"""
         return None
     
