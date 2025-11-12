@@ -1672,7 +1672,7 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    message_text = """Шаг 7/13: Телефон отправителя
+    message_text = """Шаг 7/13: 📱 Телефон отправителя
 Например: +1234567890 или 1234567890"""
     bot_msg = await safe_telegram_call(update.message.reply_text(
             message_text,
