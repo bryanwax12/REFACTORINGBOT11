@@ -7836,9 +7836,20 @@ async def startup_event():
             global application  # Use global application variable for webhook access
             logger.info("Initializing Telegram Bot...")
             # Build application with optimized settings for high load (5000+ concurrent users)
+            # CRITICAL: Use DictPersistence for webhook mode to preserve ConversationHandler state
+            from telegram.ext import DictPersistence
+            
+            persistence = DictPersistence(store_data={
+                'user_data': True,
+                'chat_data': True,
+                'bot_data': False,
+                'callback_data': False
+            })
+            
             application = (
                 Application.builder()
                 .token(TELEGRAM_BOT_TOKEN)
+                .persistence(persistence)  # CRITICAL for webhook mode!
                 .concurrent_updates(True)  # Process updates concurrently
                 .connect_timeout(5)  # Ultra fast connection
                 .read_timeout(5)  # Ultra fast read
