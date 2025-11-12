@@ -105,10 +105,10 @@ class RedisPersistence(BasePersistence):
             logger.error(f"❌ REDIS ERROR loading conversations for {name}: {e}")
             return {}
     
-    def update_user_data(self, user_id: int, data: Dict) -> None:
-        """Save user_data to Redis (SYNC)"""
+    async def update_user_data(self, user_id: int, data: Dict) -> None:
+        """Save user_data to Redis (ASYNC wrapper)"""
         try:
-            all_user_data = self.get_user_data()
+            all_user_data = await self.get_user_data()
             all_user_data[user_id] = data
             
             self.redis_client.set("bot:user_data", self._serialize(all_user_data))
