@@ -133,7 +133,7 @@ class RedisPersistence(BasePersistence):
         """Save bot_data to Redis (SYNC)"""
         pass
     
-    def update_callback_data(self, data: Tuple) -> None:
+    async def update_callback_data(self, data: Tuple) -> None:
         """Save callback_data to Redis (SYNC)"""
         pass
     
