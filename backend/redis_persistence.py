@@ -143,7 +143,7 @@ class RedisPersistence(BasePersistence):
             redis_key = f"bot:conversation:{name}"
             
             # Load current conversations
-            conversations = self.get_conversations(name)
+            conversations = await self.get_conversations(name)
             
             if new_state is None:
                 # Remove conversation
