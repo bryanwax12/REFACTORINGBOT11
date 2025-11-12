@@ -166,38 +166,38 @@ class RedisPersistence(BasePersistence):
         except Exception as e:
             logger.error(f"❌ REDIS ERROR saving conversation for {name}: {e}")
     
-    async def drop_user_data(self, user_id: int) -> None:
-        """Delete user_data from Redis"""
+    def drop_user_data(self, user_id: int) -> None:
+        """Delete user_data from Redis (SYNC)"""
         try:
-            all_user_data = await self.get_user_data()
+            all_user_data = self.get_user_data()
             if user_id in all_user_data:
                 del all_user_data[user_id]
                 self.redis_client.set("bot:user_data", self._serialize(all_user_data))
         except Exception as e:
             logger.error(f"Error dropping user_data for {user_id}: {e}")
     
-    async def drop_chat_data(self, chat_id: int) -> None:
-        """Delete chat_data from Redis"""
+    def drop_chat_data(self, chat_id: int) -> None:
+        """Delete chat_data from Redis (SYNC)"""
         try:
-            all_chat_data = await self.get_chat_data()
+            all_chat_data = self.get_chat_data()
             if chat_id in all_chat_data:
                 del all_chat_data[chat_id]
                 self.redis_client.set("bot:chat_data", self._serialize(all_chat_data))
         except Exception as e:
             logger.error(f"Error dropping chat_data for {chat_id}: {e}")
     
-    async def refresh_user_data(self, user_id: int, user_data: Dict) -> None:
-        """Refresh user_data (called by framework)"""
+    def refresh_user_data(self, user_id: int, user_data: Dict) -> None:
+        """Refresh user_data (called by framework) (SYNC)"""
         pass
     
-    async def refresh_chat_data(self, chat_id: int, chat_data: Dict) -> None:
-        """Refresh chat_data (called by framework)"""
+    def refresh_chat_data(self, chat_id: int, chat_data: Dict) -> None:
+        """Refresh chat_data (called by framework) (SYNC)"""
         pass
     
-    async def refresh_bot_data(self, bot_data: Dict) -> None:
-        """Refresh bot_data (called by framework)"""
+    def refresh_bot_data(self, bot_data: Dict) -> None:
+        """Refresh bot_data (called by framework) (SYNC)"""
         pass
     
-    async def flush(self) -> None:
-        """Flush all data to Redis (already done on each update)"""
+    def flush(self) -> None:
+        """Flush all data to Redis (already done on each update) (SYNC)"""
         logger.debug("💾 Redis flush (no-op, data already saved)")
