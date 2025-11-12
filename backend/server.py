@@ -3392,6 +3392,12 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             logger.error(f"ShipStation rate request failed: {error_msg}")
             logger.error(f"Response body: {response.text}")
             
+            # Delete progress message
+            try:
+                await safe_telegram_call(progress_msg.delete())
+            except Exception:
+                pass
+            
             keyboard = [
                 [InlineKeyboardButton("✏️ Редактировать адреса", callback_data='edit_addresses_error')],
                 [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
