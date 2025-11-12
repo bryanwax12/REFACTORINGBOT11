@@ -113,16 +113,10 @@ class MongoPersistence(BasePersistence):
         pass
     
     async def update_conversation(self, name: str, key: Tuple, new_state: Optional[int]) -> None:
-        """Save conversation state to GLOBAL cache and MongoDB"""
+        """Save conversation state directly to MongoDB (no cache, multi-pod safe)"""
         try:
-            # Get current conversations (from GLOBAL cache if available)
-            if name not in _GLOBAL_CONVERSATIONS_CACHE:
-                _GLOBAL_CONVERSATIONS_CACHE[name] = await self.get_conversations(name)
-            
-            conversations = _GLOBAL_CONVERSATIONS_CACHE[name]
-            
-            # Convert key tuple to string for MongoDB storage
-            key_str = str(key)
+            # Load current conversations from MongoDB
+            conversations = await self.get_conversations(name)
             
             if new_state is None:
                 # Remove conversation
@@ -130,23 +124,20 @@ class MongoPersistence(BasePersistence):
                     del conversations[key]
                     logger.info(f"🗑️ PERSISTENCE: Removed conversation state for {name}, key: {key}")
             else:
-                # Update conversation (use tuple key in GLOBAL cache)
+                # Update conversation
                 conversations[key] = new_state
-                logger.info(f"💾 PERSISTENCE: Saved to GLOBAL CACHE - name: {name}, key: {key}, state: {new_state}, cache_size: {len(conversations)}")
-            
-            # Update GLOBAL cache immediately
-            _GLOBAL_CONVERSATIONS_CACHE[name] = conversations
+                logger.info(f"💾 PERSISTENCE: Updating conversation - name: {name}, key: {key}, state: {new_state}")
             
             # Prepare for MongoDB (convert keys to strings)
             conversations_for_db = {str(k): v for k, v in conversations.items()}
             
-            # Save to MongoDB (async, doesn't block)
+            # Save to MongoDB IMMEDIATELY (blocking for consistency)
             await self.collection.update_one(
                 {"_id": f"conversation_{name}"},
                 {"$set": {"data": conversations_for_db, "updated_at": datetime.now(timezone.utc)}},
                 upsert=True
             )
-            logger.info(f"💾 PERSISTENCE: Saved to MONGODB - name: {name}, entries: {len(conversations_for_db)}")
+            logger.info(f"💾 PERSISTENCE: Saved to MONGODB - name: {name}, entries: {len(conversations_for_db)}, all_states: {conversations_for_db}")
         except Exception as e:
             logger.error(f"❌ PERSISTENCE ERROR saving conversation for {name}: {e}")
     
