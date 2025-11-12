@@ -8064,37 +8064,21 @@ async def startup_event():
                 menu_button=MenuButtonCommands()
             )
             
-            # Auto-detect environment and choose correct bot token + mode
-            # Preview: POLLING mode with preview bot token
-            # Production: WEBHOOK mode with production bot token
+            # Auto-detect environment based on WEBHOOK_BASE_URL
+            # Preview: contains "preview" → POLLING mode
+            # Production: contains "crypto-shipping.emergent.host" → WEBHOOK mode
             webhook_base_url = os.environ.get('WEBHOOK_BASE_URL', '')
             is_production = 'crypto-shipping.emergent.host' in webhook_base_url
             
+            # Choose webhook URL based on environment
             if is_production:
-                # Production environment detected - use production bot + webhook
-                production_token = os.environ.get('TELEGRAM_BOT_TOKEN_PRODUCTION')
-                if production_token:
-                    # Update bot token to production
-                    logger.info("🟢 PRODUCTION ENVIRONMENT DETECTED - Using production bot token")
-                    TELEGRAM_BOT_TOKEN = production_token
-                    # Reinitialize application with production token
-                    application = ApplicationBuilder().token(production_token).build()
-                    bot_instance = application.bot
-                    
-                    # Add all handlers again
-                    await setup_handlers(application)
-                    
-                    await application.initialize()
-                    await application.start()
-                    
-                    # Set commands
-                    await application.bot.set_my_commands(commands)
-                    await application.bot.set_chat_menu_button(menu_button=MenuButtonCommands())
-                
+                # Production: use webhook mode
                 webhook_url = webhook_base_url
+                logger.info(f"🟢 PRODUCTION ENVIRONMENT: {webhook_base_url}")
             else:
-                # Preview environment - use polling with preview token
+                # Preview: use polling mode
                 webhook_url = None
+                logger.info(f"🔵 PREVIEW ENVIRONMENT: {webhook_base_url}")
             
             if webhook_url:
                 # Production: use webhook
