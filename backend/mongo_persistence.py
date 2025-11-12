@@ -10,23 +10,18 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# GLOBAL cache shared across all requests (survives HTTP request lifecycle)
-_GLOBAL_CONVERSATIONS_CACHE = {}
-_GLOBAL_USER_DATA_CACHE = {}
-_GLOBAL_CHAT_DATA_CACHE = {}
-
 class MongoPersistence(BasePersistence):
-    """MongoDB-based persistence for ConversationHandler state with GLOBAL caching"""
+    """MongoDB-based persistence for ConversationHandler state - NO CACHE (multi-pod safe)"""
     
-    def __init__(self, db, update_interval: float = 60):
+    def __init__(self, db, update_interval: float = 0.1):
         super().__init__(
             store_data=None,  # Store all data
-            update_interval=update_interval
+            update_interval=update_interval  # Update every 0.1s for fast persistence
         )
         self.db = db
         self.collection = db['bot_persistence']
         
-        logger.info("✅ MongoPersistence initialized with GLOBAL caching (survives HTTP requests)")
+        logger.info("✅ MongoPersistence initialized - Direct MongoDB (multi-pod safe, no cache)")
     
     async def get_user_data(self) -> Dict[int, Dict]:
         """Load user_data from MongoDB"""
