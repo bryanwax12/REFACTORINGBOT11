@@ -54,15 +54,9 @@ class MongoPersistence(BasePersistence):
         return None
     
     async def get_conversations(self, name: str) -> Dict:
-        """Load conversation state from GLOBAL cache or MongoDB"""
+        """Load conversation state directly from MongoDB (no cache, multi-pod safe)"""
         try:
-            # Check GLOBAL cache first (instant!)
-            if name in _GLOBAL_CONVERSATIONS_CACHE:
-                logger.info(f"⚡ PERSISTENCE: GLOBAL Cache HIT for {name}, entries: {len(_GLOBAL_CONVERSATIONS_CACHE[name])}")
-                return _GLOBAL_CONVERSATIONS_CACHE[name]
-            
-            # Load from MongoDB
-            logger.info(f"📥 PERSISTENCE: Cache MISS for {name}, loading from MongoDB...")
+            # Always load from MongoDB for consistency across pods
             doc = await self.collection.find_one({"_id": f"conversation_{name}"})
             if doc and 'data' in doc:
                 # Convert string keys back to tuples
@@ -72,13 +66,10 @@ class MongoPersistence(BasePersistence):
                     key = eval(key_str)  # Safe here as we control the format
                     conversations[key] = state
                 
-                # Cache it in GLOBAL cache
-                _GLOBAL_CONVERSATIONS_CACHE[name] = conversations
-                logger.info(f"📥 PERSISTENCE: Loaded from MongoDB & cached GLOBALLY for {name}: {len(conversations)} entries, states: {conversations}")
+                logger.info(f"📥 PERSISTENCE: Loaded from MongoDB for {name}: {len(conversations)} entries, states: {conversations}")
                 return conversations
             
             # Empty state
-            _GLOBAL_CONVERSATIONS_CACHE[name] = {}
             logger.info(f"📭 PERSISTENCE: No conversation state in MongoDB for {name}, starting fresh")
             return {}
         except Exception as e:
