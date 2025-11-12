@@ -3360,6 +3360,13 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         except asyncio.TimeoutError:
             logger.error("ShipStation rate request timed out after 35 seconds")
             
+            # Stop progress task
+            progress_task.cancel()
+            try:
+                await progress_task
+            except asyncio.CancelledError:
+                pass
+            
             # Delete progress message
             try:
                 await safe_telegram_call(progress_msg.delete())
