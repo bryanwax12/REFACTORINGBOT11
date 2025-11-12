@@ -1429,7 +1429,7 @@ async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    message_text = """Шаг 4/13: Город отправителя
+    message_text = """Шаг 4/13: 🌆 Город отправителя
 Например: San Francisco"""
     bot_msg = await safe_telegram_call((update.message or update.callback_query.message).reply_text(
         message_text,
