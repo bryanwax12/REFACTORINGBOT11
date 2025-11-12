@@ -78,39 +78,49 @@ def test_conversation_handler_persistence():
         with open('/app/backend/server.py', 'r') as f:
             server_code = f.read()
         
+        # Split into lines for easier analysis
+        lines = server_code.split('\n')
+        
         # Find ConversationHandler definitions
         conv_handler_pattern = r'(\w+)\s*=\s*ConversationHandler\('
         conv_handlers = re.findall(conv_handler_pattern, server_code)
         
-        print(f"   Found {len(conv_handlers)} ConversationHandler definitions")
+        print(f"   Found {len(conv_handlers)} ConversationHandler definitions: {conv_handlers}")
         
         # Check specific handlers mentioned in review request
         handlers_to_check = ['template_rename_handler', 'order_conv_handler']
         persistence_results = {}
         
         for handler_name in handlers_to_check:
-            # Find the specific handler definition with more flexible pattern
-            handler_pattern = rf'{handler_name}\s*=\s*ConversationHandler\((.*?)(?=\n\s*\w+\s*=|\n\s*application\.add_handler|\Z)'
-            handler_match = re.search(handler_pattern, server_code, re.DOTALL)
+            # Find the line where the handler is defined
+            handler_line = None
+            for i, line in enumerate(lines):
+                if f'{handler_name} = ConversationHandler(' in line:
+                    handler_line = i
+                    break
             
-            if handler_match:
-                handler_config = handler_match.group(1)
+            if handler_line is not None:
+                print(f"   {handler_name}:")
+                print(f"      Found: ✅ (line {handler_line + 1})")
                 
-                # Check if persistent=True is present in the handler configuration
-                has_persistent = 'persistent=True' in handler_config
+                # Look for persistent=True in the next 200 lines (within the handler definition)
+                has_persistent = False
+                persistent_line = None
+                
+                for j in range(handler_line, min(handler_line + 200, len(lines))):
+                    if 'persistent=True' in lines[j]:
+                        has_persistent = True
+                        persistent_line = j + 1
+                        break
+                    # Stop if we hit the end of the handler (closing parenthesis at start of line)
+                    if j > handler_line and lines[j].strip() == ')':
+                        break
+                
                 persistence_results[handler_name] = has_persistent
                 
-                print(f"   {handler_name}:")
-                print(f"      Found: ✅")
                 print(f"      persistent=True: {'✅' if has_persistent else '❌'}")
-                
-                # Show the line number for debugging
-                lines_before = server_code[:handler_match.start()].count('\n')
-                print(f"      Line: ~{lines_before + 1}")
-                
-                # Show a snippet of the configuration for debugging
-                config_snippet = handler_config.replace('\n', ' ').strip()[:100] + "..."
-                print(f"      Config snippet: {config_snippet}")
+                if persistent_line:
+                    print(f"      persistent=True found at line: {persistent_line}")
                 
             else:
                 print(f"   {handler_name}: ❌ Not found")
