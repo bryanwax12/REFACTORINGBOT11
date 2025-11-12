@@ -126,26 +126,37 @@ class MongoPersistence(BasePersistence):
         pass
     
     async def update_conversation(self, name: str, key: Tuple, new_state: Optional[int]) -> None:
-        """Save conversation state to MongoDB"""
+        """Save conversation state to cache and MongoDB"""
         try:
-            conversations = await self.get_conversations(name)
+            # Get current conversations (from cache if available)
+            if name not in self._conversations_cache:
+                self._conversations_cache[name] = await self.get_conversations(name)
+            
+            conversations = self._conversations_cache[name]
             
             # Convert key tuple to string for MongoDB storage
             key_str = str(key)
             
             if new_state is None:
                 # Remove conversation
-                if key_str in conversations:
-                    del conversations[key_str]
-                    logger.info(f"🗑️ Removed conversation state for {name}, key: {key_str}")
+                if key in conversations:
+                    del conversations[key]
+                    logger.info(f"🗑️ Removed conversation state for {name}, key: {key}")
             else:
-                # Update conversation
-                conversations[key_str] = new_state
-                logger.info(f"💾 Saved conversation state for {name}, key: {key_str}, state: {new_state}")
+                # Update conversation (use tuple key in cache)
+                conversations[key] = new_state
+                logger.info(f"💾 Saved conversation state for {name}, key: {key}, state: {new_state}")
             
+            # Update cache immediately
+            self._conversations_cache[name] = conversations
+            
+            # Prepare for MongoDB (convert keys to strings)
+            conversations_for_db = {str(k): v for k, v in conversations.items()}
+            
+            # Save to MongoDB (async, doesn't block)
             await self.collection.update_one(
                 {"_id": f"conversation_{name}"},
-                {"$set": {"data": conversations, "updated_at": datetime.now(timezone.utc)}},
+                {"$set": {"data": conversations_for_db, "updated_at": datetime.now(timezone.utc)}},
                 upsert=True
             )
         except Exception as e:
