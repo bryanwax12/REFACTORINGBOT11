@@ -7887,7 +7887,7 @@ async def startup_event():
                 .read_timeout(3)  # Super fast read
                 .write_timeout(3)  # Super fast write
                 .pool_timeout(1)  # Super fast pool acquisition
-                .rate_limiter(rate_limiter=None)  # Disable rate limiter for max speed
+                # Keep default rate limiter to prevent Telegram ban
                 .build()
             )
             
