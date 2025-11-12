@@ -3401,7 +3401,20 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             f"❌ Ошибка при получении тарифов:\n{error_msg}\n\nПроверьте правильность введенных адресов.",
             reply_markup=reply_markup,
         ))
+            # Stop progress task on error
+            progress_task.cancel()
+            try:
+                await progress_task
+            except asyncio.CancelledError:
+                pass
             return CONFIRM_DATA  # Stay to handle callback
+        
+        # Stop progress updates on success (will be deleted later)
+        progress_task.cancel()
+        try:
+            await progress_task
+        except asyncio.CancelledError:
+            pass
         
         rate_response = response.json()
         all_rates = rate_response.get('rate_response', {}).get('rates', [])
