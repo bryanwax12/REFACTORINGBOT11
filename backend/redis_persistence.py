@@ -137,7 +137,7 @@ class RedisPersistence(BasePersistence):
         """Save callback_data to Redis (SYNC)"""
         pass
     
-    def update_conversation(self, name: str, key: Tuple, new_state: Optional[int]) -> None:
+    async def update_conversation(self, name: str, key: Tuple, new_state: Optional[int]) -> None:
         """Save conversation state to Redis - INSTANT SAVE (SYNC)"""
         try:
             redis_key = f"bot:conversation:{name}"
