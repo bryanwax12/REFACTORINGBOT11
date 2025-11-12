@@ -198,6 +198,6 @@ class RedisPersistence(BasePersistence):
         """Refresh bot_data (called by framework) (SYNC)"""
         pass
     
-    def flush(self) -> None:
+    async def flush(self) -> None:
         """Flush all data to Redis (already done on each update) (SYNC)"""
         logger.debug("💾 Redis flush (no-op, data already saved)")
