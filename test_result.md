@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Комплексное Регрессионное Тестирование Telegram Бота после оборачивания всех 267 вызовов Telegram API в safe_telegram_call() с таймаутом 10 секунд"
+user_problem_statement: "CRITICAL BUG FIX VERIFICATION - Проверка исправления бага с двойной отправкой текстовых сообщений. До исправления: пользователю приходилось отправлять текстовые сообщения дважды. После исправления: бот должен обрабатывать текстовые сообщения с первого раза. Бот переключен с polling mode на webhook mode."
 
 backend:
   - task: "Telegram Webhook Bug Fix - Double Message Issue"
