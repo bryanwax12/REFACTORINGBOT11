@@ -106,7 +106,7 @@ CACHE_TTL = 60  # Cache TTL in seconds
 
 # Button click debouncing - prevent multiple rapid clicks
 button_click_tracker = {}  # {user_id: {button_data: last_click_timestamp}}
-BUTTON_DEBOUNCE_SECONDS = 2  # Минимальное время между нажатиями одной кнопки
+BUTTON_DEBOUNCE_SECONDS = 0.5  # Минимальное время между нажатиями одной кнопки (500ms)
 
 def is_button_click_allowed(user_id: int, button_data: str) -> bool:
     """Check if button click is allowed (debouncing)"""
