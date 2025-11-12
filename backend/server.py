@@ -7869,9 +7869,14 @@ async def startup_event():
             # CRITICAL: Use PicklePersistence for webhook mode to preserve ConversationHandler state
             from telegram.ext import PicklePersistence
             
-            # Use PicklePersistence with file storage (faster than MongoDB, multi-pod safe via shared volume)
+            # Use PicklePersistence with INSTANT save (update_interval=0 = save immediately)
             persistence_file = "/app/backend/bot_persistence.pickle"
-            persistence = PicklePersistence(filepath=persistence_file, update_interval=0.5)
+            persistence = PicklePersistence(
+                filepath=persistence_file, 
+                update_interval=0,  # Save IMMEDIATELY after each update
+                single_file=True,   # Use single file for better performance
+                on_flush=False      # Don't wait for flush
+            )
             
             application = (
                 Application.builder()
