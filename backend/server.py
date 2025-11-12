@@ -1902,7 +1902,7 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
         message_text = """Шаг 4/6: Город получателя
 Например: New York"""
     else:
-        message_text = """Шаг 11/13: Город получателя
+        message_text = """Шаг 11/13: 🌆 Город получателя
 Например: New York"""
     
     bot_msg = await safe_telegram_call((update.message or update.callback_query.message).reply_text(
