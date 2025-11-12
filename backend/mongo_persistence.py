@@ -141,11 +141,11 @@ class MongoPersistence(BasePersistence):
                 # Remove conversation
                 if key in conversations:
                     del conversations[key]
-                    logger.info(f"🗑️ Removed conversation state for {name}, key: {key}")
+                    logger.info(f"🗑️ PERSISTENCE: Removed conversation state for {name}, key: {key}")
             else:
                 # Update conversation (use tuple key in cache)
                 conversations[key] = new_state
-                logger.info(f"💾 Saved conversation state for {name}, key: {key}, state: {new_state}")
+                logger.info(f"💾 PERSISTENCE: Saved to CACHE - name: {name}, key: {key}, state: {new_state}, cache_size: {len(conversations)}")
             
             # Update cache immediately
             self._conversations_cache[name] = conversations
@@ -159,8 +159,9 @@ class MongoPersistence(BasePersistence):
                 {"$set": {"data": conversations_for_db, "updated_at": datetime.now(timezone.utc)}},
                 upsert=True
             )
+            logger.info(f"💾 PERSISTENCE: Saved to MONGODB - name: {name}, entries: {len(conversations_for_db)}")
         except Exception as e:
-            logger.error(f"Error saving conversation for {name}: {e}")
+            logger.error(f"❌ PERSISTENCE ERROR saving conversation for {name}: {e}")
     
     async def drop_user_data(self, user_id: int) -> None:
         """Delete user_data from MongoDB"""
