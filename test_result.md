@@ -105,6 +105,24 @@
 user_problem_statement: "Комплексное Регрессионное Тестирование Telegram Бота после оборачивания всех 267 вызовов Telegram API в safe_telegram_call() с таймаутом 10 секунд"
 
 backend:
+  - task: "Telegram Webhook Bug Fix - Double Message Issue"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 1
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "❌ CRITICAL BUG REPORTED: Bot requires users to send text messages twice. First message is ignored, second message is processed. Issue occurs during order creation when entering text data like addresses."
+        - working: "NA"
+          agent: "main"
+          comment: "🔧 CRITICAL FIX APPLIED: Switched bot from polling mode to webhook mode to eliminate double message bug. CHANGES: (1) Added WEBHOOK_URL variable to /app/backend/.env with value 'https://telebot-fix-2.preview.emergentagent.com', (2) Modified bot initialization to use webhook mode instead of polling, (3) Bot now uses webhook endpoint /api/telegram/webhook for receiving updates, (4) Eliminated 'Conflict: terminated by other getUpdates request' errors that caused double message requirement. Expected behavior: Users should now be able to send text messages once and have them processed immediately without needing to send twice."
+        - working: false
+          agent: "testing"
+          comment: "❌ WEBHOOK BUG FIX VERIFICATION FAILED: Comprehensive testing shows webhook infrastructure is partially working but polling conflicts still present. DETAILED FINDINGS: (1) ✅ Webhook endpoint accessible: GET /api/telegram/status returns application_running: true, (2) ✅ Environment variables configured: WEBHOOK_URL set to https://telebot-fix-2.preview.emergentagent.com with HTTPS, (3) ✅ Webhook setup successful: Logs show 'Telegram Bot webhook set successfully!', (4) ❌ CRITICAL ISSUE: Still finding polling conflicts in logs: 'Conflict: terminated by other getUpdates request', (5) ❌ Bot mode unclear: Status endpoint doesn't clearly indicate webhook vs polling mode, (6) ⚠️ Mixed signals: Logs show both webhook setup AND polling conflicts. CONCLUSION: While webhook infrastructure is configured, the double message bug may still persist due to remaining polling conflicts. The fix appears incomplete - bot may still be running in hybrid or conflicting mode. Manual testing with @whitelabel_shipping_bot_test_bot is required to verify if users still need to send messages twice."
+
   - task: "Cancel Order Button - Consistent Confirmation Across All States"
     implemented: true
     working: true
