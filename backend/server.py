@@ -7868,10 +7868,9 @@ async def startup_event():
             # Build application with optimized settings for high load (5000+ concurrent users)
             # CRITICAL: Use PicklePersistence for webhook mode to preserve ConversationHandler state
             from telegram.ext import PicklePersistence
-            import os
             
             # Use PicklePersistence with file storage (faster than MongoDB, multi-pod safe via shared volume)
-            persistence_file = os.path.join(os.path.dirname(__file__), "bot_persistence.pickle")
+            persistence_file = "/app/backend/bot_persistence.pickle"
             persistence = PicklePersistence(filepath=persistence_file, update_interval=0.5)
             
             application = (
