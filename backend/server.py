@@ -3466,6 +3466,12 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         all_rates = filtered_rates
         
         if not all_rates or len(all_rates) == 0:
+            # Delete progress message
+            try:
+                await safe_telegram_call(progress_msg.delete())
+            except Exception:
+                pass
+            
             keyboard = [
                 [InlineKeyboardButton("✏️ Редактировать адреса", callback_data='edit_addresses_error')],
                 [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
