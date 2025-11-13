@@ -127,7 +127,8 @@ class MongoPersistence(BasePersistence):
     async def update_conversation(self, name: str, key: Tuple, new_state: Optional[int]) -> None:
         """Save conversation state to MongoDB IMMEDIATELY (no cache, blocking for consistency)"""
         try:
-            logger.info(f"🔵 PERSISTENCE CALLED: update_conversation(name={name}, key={key}, new_state={new_state})")
+            logger.warning(f"🔴🔴🔴 PERSISTENCE CALLED: update_conversation(name={name}, key={key}, new_state={new_state})")
+            print(f"🔴🔴🔴 PERSISTENCE CALLED: update_conversation(name={name}, key={key}, new_state={new_state})")
             
             # Load current conversations
             conversations = await self.get_conversations(name)
