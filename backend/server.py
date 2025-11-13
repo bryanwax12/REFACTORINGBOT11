@@ -2660,7 +2660,7 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
     
     template_dict = template.model_dump()
     template_dict['created_at'] = template_dict['created_at'].isoformat()
-    await db.templates.insert_one(template_dict)
+    await insert_template(template_dict)
     
     keyboard = [
         [InlineKeyboardButton("📦 Продолжить создание заказа", callback_data='continue_order')],
