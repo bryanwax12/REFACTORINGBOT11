@@ -53,6 +53,10 @@ else:
 
 db = client[db_name]
 
+# Initialize Session Manager for state management
+from session_manager import SessionManager
+session_manager = SessionManager(db)
+
 # In-memory cache for frequently accessed data
 from functools import lru_cache
 import asyncio
