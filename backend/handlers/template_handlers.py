@@ -2,6 +2,7 @@
 Template Handlers
 Manages address templates for quick order creation
 """
+import asyncio
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
