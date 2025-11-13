@@ -724,3 +724,53 @@ def get_retry_edit_cancel_keyboard() -> InlineKeyboardMarkup:
         [InlineKeyboardButton(ButtonTexts.CANCEL, callback_data='cancel_order')]
     ]
     return InlineKeyboardMarkup(keyboard)
+
+
+def get_back_to_rates_keyboard() -> InlineKeyboardMarkup:
+    """
+    Keyboard with back to rates and cancel buttons
+    
+    Returns:
+        InlineKeyboardMarkup with back/cancel buttons
+    """
+    keyboard = [
+        [
+            InlineKeyboardButton("◀️ Назад к тарифам", callback_data='back_to_rates'),
+            InlineKeyboardButton(ButtonTexts.CANCEL, callback_data='cancel_order')
+        ]
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
+def get_payment_keyboard(balance: float, amount: float) -> InlineKeyboardMarkup:
+    """
+    Build payment keyboard based on balance
+    
+    Args:
+        balance: User's current balance
+        amount: Order amount
+    
+    Returns:
+        InlineKeyboardMarkup with appropriate payment options
+    """
+    keyboard = []
+    
+    if balance >= amount:
+        # Sufficient funds - show pay from balance button
+        keyboard.append([InlineKeyboardButton(
+            f"💳 Оплатить с баланса (${balance:.2f})",
+            callback_data='pay_from_balance'
+        )])
+    else:
+        # Insufficient funds - show top-up button
+        keyboard.append([InlineKeyboardButton(
+            "💵 Пополнить баланс",
+            callback_data='top_up_balance'
+        )])
+    
+    keyboard.append([
+        InlineKeyboardButton("◀️ Назад к тарифам", callback_data='back_to_rates'),
+        InlineKeyboardButton(ButtonTexts.CANCEL, callback_data='cancel_order')
+    ])
+    
+    return InlineKeyboardMarkup(keyboard)
