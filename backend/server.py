@@ -168,8 +168,8 @@ def with_typing_indicator(func):
         # INSTANT visual feedback
         try:
             await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
-        except:
-            pass
+        except Exception as e:
+            logger.debug(f"Failed to send typing action: {e}")
         return await func(update, context)
     return wrapper
 
