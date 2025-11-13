@@ -791,7 +791,7 @@ async def test_error_message(update: Update, context: ContextTypes.DEFAULT_TYPE)
 # Helper function to check if user is blocked
 async def check_user_blocked(telegram_id: int) -> bool:
     """Check if user is blocked"""
-    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0, "blocked": 1})
+    user = await find_user_by_telegram_id(telegram_id, {"_id": 0, "blocked": 1})
     return user.get('blocked', False) if user else False
 
 async def send_blocked_message(update: Update):
