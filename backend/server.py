@@ -3518,6 +3518,14 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         except asyncio.TimeoutError:
             logger.error("ShipStation rate request timed out after 35 seconds")
             
+            # Log error to session for debugging
+            user_id = update.effective_user.id
+            await session_manager.update_session(user_id, data={
+                'last_error': 'ShipStation API timeout (35s)',
+                'error_step': 'FETCH_RATES',
+                'error_timestamp': datetime.now(timezone.utc).isoformat()
+            })
+            
             # Stop progress task
             progress_task.cancel()
             try:
