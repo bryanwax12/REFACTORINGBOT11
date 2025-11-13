@@ -7948,7 +7948,7 @@ async def startup_event():
             # Use MongoPersistence - MongoDB-based persistence (stable in production)
             persistence = MongoPersistence(
                 db=db,
-                update_interval=0.1  # Save every 100ms
+                update_interval=1.0  # Save every 1 second (more stable)
             )
             logger.info(f"✅ MongoPersistence configured with database: {db_name}")
             
