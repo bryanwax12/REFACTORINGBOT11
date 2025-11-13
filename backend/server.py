@@ -1916,7 +1916,9 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await safe_telegram_call(update.message.reply_text("❌ Используйте только английские буквы. Разрешены: буквы, пробелы, дефисы, точки"))
         return TO_NAME
     
-    context.user_data['to_name'] = name
+    # Save to session
+    user_id = update.effective_user.id
+    await save_to_session(user_id, "TO_ADDRESS", {'to_name': name}, context)
     
     # Mark previous message as selected (non-blocking)
     asyncio.create_task(mark_message_as_selected(update, context))
