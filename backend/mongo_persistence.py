@@ -15,8 +15,15 @@ class MongoPersistence(BasePersistence):
     """MongoDB-based persistence for ConversationHandler state - NO CACHE (multi-pod safe)"""
     
     def __init__(self, db, update_interval: float = 0.1):
+        from telegram.ext import PersistenceInput
+        
         super().__init__(
-            store_data=None,  # Store all data
+            store_data=PersistenceInput(
+                user_data=True,
+                chat_data=True,
+                bot_data=True,
+                callback_data=True
+            ),
             update_interval=update_interval  # Update every 0.1s for fast persistence
         )
         self.db = db
