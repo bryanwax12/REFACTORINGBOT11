@@ -306,21 +306,12 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         if pending_order and pending_order.get('selected_rate'):
             # Show warning about losing order data
+            from utils.ui_utils import MessageTemplates, get_exit_confirmation_keyboard
             asyncio.create_task(mark_message_as_selected(update, context))
             
-            keyboard = [
-                [InlineKeyboardButton("✅ Да, в главное меню", callback_data='confirm_exit_to_menu')],
-                [InlineKeyboardButton("❌ Отмена, вернуться", callback_data='return_to_payment')]
-            ]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            
-            warning_text = """⚠️ *Внимание!*
-
-У вас есть неоплаченный заказ.
-
-Если вы перейдете в главное меню, все данные заказа будут удалены и вам придется создавать заказ заново.
-
-Вы уверены?"""
+            order_amount = pending_order.get('selected_rate', {}).get('shipmentCost', 0.0)
+            warning_text = MessageTemplates.exit_warning(order_amount)
+            reply_markup = get_exit_confirmation_keyboard()
             
             bot_msg = await safe_telegram_call(query.message.reply_text(
                 warning_text,
