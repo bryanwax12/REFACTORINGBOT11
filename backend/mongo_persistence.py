@@ -24,7 +24,7 @@ class MongoPersistence(BasePersistence):
                 bot_data=True,
                 callback_data=True
             ),
-            update_interval=update_interval  # Update every 0.1s for fast persistence
+            update_interval=1.0  # Save immediately on every change
         )
         self.db = db
         self.collection = db['bot_persistence']
