@@ -2910,7 +2910,7 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Execute in parallel: answer query and fetch template
     await safe_telegram_call(query.answer())
-    template = await db.templates.find_one({"id": template_id}, {"_id": 0})
+    template = await find_template_by_id(template_id)
     
     if not template:
         await safe_telegram_call(query.message.reply_text("❌ Шаблон не найден"))
@@ -3010,7 +3010,7 @@ async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     asyncio.create_task(mark_message_as_selected(update, context))
     
     template_id = query.data.replace('template_delete_', '')
-    template = await db.templates.find_one({"id": template_id}, {"_id": 0})
+    template = await find_template_by_id(template_id)
     
     if not template:
         await safe_telegram_call(query.message.reply_text("❌ Шаблон не найден"))
@@ -3043,7 +3043,7 @@ async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_
     asyncio.create_task(mark_message_as_selected(update, context))
     
     template_id = query.data.replace('template_confirm_delete_', '')
-    template = await db.templates.find_one({"id": template_id}, {"_id": 0})
+    template = await find_template_by_id(template_id)
     
     if template:
         result = await db.templates.delete_one({"id": template_id})
