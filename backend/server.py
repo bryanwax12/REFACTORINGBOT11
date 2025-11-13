@@ -656,27 +656,7 @@ class SecurityLogger:
 # Admin API Key Dependency
 from fastapi import Header, HTTPException
 
-async def verify_admin_key(x_api_key: Optional[str] = Header(None)):
-    """Verify admin API key for protected endpoints"""
-    if not ADMIN_API_KEY:
-        # If no admin key is set, allow access (for development)
-        logging.warning("ADMIN_API_KEY not set - admin endpoints are unprotected!")
-        return True
-    
-    if not x_api_key:
-        raise HTTPException(status_code=401, detail="API key required")
-    
-    if x_api_key != ADMIN_API_KEY:
-        # Log failed authentication
-        await SecurityLogger.log_action(
-            "admin_auth_failed",
-            None,
-            {"provided_key": x_api_key[:10] + "..."},
-            "failure"
-        )
-        raise HTTPException(status_code=403, detail="Invalid API key")
-    
-    return True
+# verify_admin_key moved to handlers/admin_handlers.py
 
 # Request logging middleware
 @app.middleware("http")
