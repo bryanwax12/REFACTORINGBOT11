@@ -1344,10 +1344,24 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Check if user has active session
     existing_session = await session_manager.get_session(user_id)
     if existing_session:
-        # Resume from existing session
-        logger.info(f"🔄 Resuming session for user {user_id} from step {existing_session.get('current_step')}")
-        # Load session data into context.user_data for compatibility
-        context.user_data.update(existing_session.get('temp_data', {}))
+        # Check if session expired (>15 minutes old)
+        timestamp = existing_session.get('timestamp')
+        if timestamp:
+            age = datetime.now(timezone.utc) - timestamp
+            if age.total_seconds() > 900:  # 15 minutes
+                logger.info(f"⏰ Session expired for user {user_id} (age: {age.total_seconds()}s)")
+                await session_manager.clear_session(user_id)
+                await session_manager.create_session(user_id, initial_data={})
+                context.user_data.clear()
+            else:
+                # Resume from existing session
+                logger.info(f"🔄 Resuming session for user {user_id} from step {existing_session.get('current_step')}")
+                # Load session data into context.user_data for compatibility
+                context.user_data.update(existing_session.get('temp_data', {}))
+        else:
+            # No timestamp - treat as new
+            await session_manager.create_session(user_id, initial_data={})
+            context.user_data.clear()
     else:
         # Create new session
         await session_manager.create_session(user_id, initial_data={})
