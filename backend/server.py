@@ -3460,6 +3460,8 @@ async def check_data_from_cancel(update: Update, context: ContextTypes.DEFAULT_T
 
 async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Return to order after cancel button - restore exact screen"""
+    from utils.ui_utils import OrderStepMessages
+    
     logger.info(f"return_to_order called - user_id: {update.effective_user.id}")
     query = update.callback_query
     await safe_telegram_call(query.answer())
@@ -3478,6 +3480,23 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.warning("return_to_order: No last_state found!")
         await safe_telegram_call(query.message.reply_text("Продолжаем оформление заказа..."))
         return FROM_NAME
+    
+    # Use centralized helper to get keyboard and message for this state
+    keyboard, message_text = OrderStepMessages.get_step_keyboard_and_message(last_state)
+    
+    # Send message with or without keyboard
+    if keyboard:
+        bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=keyboard))
+    else:
+        bot_msg = await safe_telegram_call(query.message.reply_text(message_text))
+    
+    # Save context
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
+    
+    # Return the state we were in
+    return globals()[last_state]
     
     # Restore exact screen with instructions for each state
     if last_state == FROM_NAME:
