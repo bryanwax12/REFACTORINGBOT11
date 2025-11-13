@@ -236,6 +236,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     Handles both direct command and callback query
     """
     from server import ADMIN_TELEGRAM_ID
+    from utils.ui_utils import MessageTemplates, get_help_keyboard
     
     # Handle both command and callback
     if update.callback_query:
@@ -249,22 +250,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         asyncio.create_task(mark_message_as_selected(update, context))
         send_method = update.message.reply_text
     
-    help_text = """
-
-
-*Если у вас возникли вопросы или проблемы, нажмите кнопку ниже:*
-
-
-"""
-    
-    keyboard = []
-    # Add contact administrator button if ADMIN_TELEGRAM_ID is configured
-    if ADMIN_TELEGRAM_ID:
-        keyboard.append([InlineKeyboardButton("💬 Связаться с администратором", url=f"tg://user?id={ADMIN_TELEGRAM_ID}")])
-    # Add main menu button on separate row at the bottom
-    keyboard.append([InlineKeyboardButton("🔙 Главное меню", callback_data='start')])
-    
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    help_text = MessageTemplates.help_text()
+    reply_markup = get_help_keyboard(ADMIN_TELEGRAM_ID)
     bot_msg = await send_method(help_text, reply_markup=reply_markup, parse_mode='Markdown')
     
     # Save message ID and text for button protection
