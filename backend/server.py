@@ -8435,11 +8435,15 @@ async def clear_conversations_direct(admin_key: str = None):
 
 
 @app.get("/api/performance/stats")
-async def get_performance_statistics():
+async def get_performance_statistics(admin_key: str = None):
     """
-    Get performance statistics for DB queries and API calls
+    Get performance statistics - Admin only
     Useful for monitoring and identifying bottlenecks
     """
+    # Verify admin key
+    if admin_key != ADMIN_API_KEY:
+        raise HTTPException(status_code=403, detail="Invalid admin key")
+    
     try:
         from utils.performance import get_performance_stats
         stats = get_performance_stats()
