@@ -2438,7 +2438,10 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
             await safe_telegram_call(update.message.reply_text("❌ Длина слишком большая. Максимум 108 дюймов. Попробуйте еще раз:"))
             return PARCEL_LENGTH
         
+        # Save to session AND context
+        user_id = update.effective_user.id
         context.user_data['length'] = length
+        await session_manager.update_session(user_id, step="PARCEL_WIDTH", data={'length': length})
         
         # Mark previous message as selected (non-blocking)
         asyncio.create_task(mark_message_as_selected(update, context))
