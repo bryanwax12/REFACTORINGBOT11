@@ -155,3 +155,54 @@ class SessionManager:
         except Exception as e:
             logger.error(f"Error getting user labels: {e}")
             return []
+    
+    async def revert_to_previous_step(self, user_id: int, current_step: str, error_message: str = None) -> Optional[str]:
+        """
+        Revert session to previous step when error occurs
+        Returns the previous step to return to
+        """
+        # Step progression mapping (current_step -> previous_step)
+        step_map = {
+            "FROM_ADDRESS": "FROM_NAME",
+            "FROM_ADDRESS2": "FROM_ADDRESS",
+            "FROM_CITY": "FROM_ADDRESS2",
+            "FROM_STATE": "FROM_CITY",
+            "FROM_ZIP": "FROM_STATE",
+            "FROM_PHONE": "FROM_ZIP",
+            "TO_NAME": "FROM_PHONE",
+            "TO_ADDRESS": "TO_NAME",
+            "TO_ADDRESS2": "TO_ADDRESS",
+            "TO_CITY": "TO_ADDRESS2",
+            "TO_STATE": "TO_CITY",
+            "TO_ZIP": "TO_STATE",
+            "TO_PHONE": "TO_ZIP",
+            "PARCEL_WEIGHT": "TO_PHONE",
+            "PARCEL_LENGTH": "PARCEL_WEIGHT",
+            "PARCEL_WIDTH": "PARCEL_LENGTH",
+            "PARCEL_HEIGHT": "PARCEL_WIDTH",
+            "CONFIRM_DATA": "PARCEL_HEIGHT",
+            "CARRIER_SELECTION": "CONFIRM_DATA",  # After rates fetched
+            "PAYMENT_METHOD": "CARRIER_SELECTION"
+        }
+        
+        try:
+            previous_step = step_map.get(current_step, "START")
+            
+            # Save error information in session
+            error_data = {
+                'last_error': error_message or 'Unknown error',
+                'error_step': current_step,
+                'error_timestamp': datetime.now(timezone.utc).isoformat(),
+                'reverted_from': current_step,
+                'reverted_to': previous_step
+            }
+            
+            # Update session to previous step
+            await self.update_session(user_id, step=previous_step, data=error_data)
+            
+            logger.warning(f"🔙 Session reverted for user {user_id}: {current_step} → {previous_step} (error: {error_message})")
+            return previous_step
+            
+        except Exception as e:
+            logger.error(f"Error reverting session: {e}")
+            return None
