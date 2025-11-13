@@ -184,13 +184,11 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['to_state'] = state
     await session_manager.update_session_atomic(user_id, step="TO_ZIP", data={'to_state': state})
     
+    from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
     asyncio.create_task(mark_message_as_selected(update, context))
     
-    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    message_text = """Шаг 13/13: 📮 ZIP код получателя
-Например: 90001"""
+    reply_markup = get_cancel_keyboard()
+    message_text = OrderStepMessages.TO_ZIP
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
