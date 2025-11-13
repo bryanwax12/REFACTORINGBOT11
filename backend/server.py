@@ -1588,6 +1588,7 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['last_state'] = FROM_STATE
     return FROM_STATE
 
+@with_typing_indicator
 async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     state = update.message.text.strip().upper()
     
