@@ -441,74 +441,7 @@ def clear_settings_cache():
     SETTINGS_CACHE['maintenance_mode'] = None
     SETTINGS_CACHE['maintenance_timestamp'] = None
 
-async def check_shipstation_balance():
-    """Check ShipStation carrier balances and notify admin if any balance is below $50"""
-    try:
-        headers = {
-            'API-Key': SHIPSTATION_API_KEY,
-            'Content-Type': 'application/json'
-        }
-        
-        # Get all carriers
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                "https://api.shipstation.com/v2/carriers",
-                headers=headers,
-                timeout=10
-            )
-            
-            if response.status_code == 200:
-                carriers_data = response.json()
-                
-                low_balance_carriers = []
-                for carrier in carriers_data.get('carriers', []):
-                    # Check if carrier requires funded account and has low balance
-                    if carrier.get('requires_funded_account', False):
-                        balance = float(carrier.get('balance', 0))
-                        carrier_name = carrier.get('friendly_name', carrier.get('name', 'Unknown'))
-                        
-                        logger.info(f"Carrier {carrier_name} balance: ${balance:.2f}")
-                        
-                        if balance < 50.0:
-                            low_balance_carriers.append({
-                                'name': carrier_name,
-                                'balance': balance
-                            })
-                
-                # Notify admin if any carrier has low balance
-                if low_balance_carriers and ADMIN_TELEGRAM_ID:
-                    message = "⚠️ *Внимание! Низкий баланс в ShipStation*\n\n"
-                    for carrier in low_balance_carriers:
-                        message += f"📦 *{carrier['name']}*: ${carrier['balance']:.2f}\n"
-                    message += "\n💰 *Необходимо пополнить баланс для продолжения создания лейблов*"
-                    
-                    # Send notification to admin
-                    try:
-                        # Get global bot instance or create new one
-                        if 'application' in globals() and hasattr(application, 'bot'):
-                            bot_instance = application.bot
-                        else:
-                            # Import here to avoid circular imports
-                            from telegram import Bot
-                            bot_instance = Bot(TELEGRAM_BOT_TOKEN)
-                        
-                        await safe_telegram_call(bot_instance.send_message(
-                            chat_id=ADMIN_TELEGRAM_ID,
-                            text=message,
-                            parse_mode='Markdown'
-                        ))
-                        logger.info(f"Low balance notification sent to admin {ADMIN_TELEGRAM_ID}")
-                    except Exception as e:
-                        logger.error(f"Failed to send low balance notification: {e}")
-                        
-                return low_balance_carriers
-            else:
-                logger.error(f"Failed to check ShipStation balance: {response.status_code}")
-                return None
-                
-    except Exception as e:
-        logger.error(f"Error checking ShipStation balance: {e}")
-        return None
+# check_shipstation_balance - imported from services/api_services.py
 
 async def generate_thank_you_message():
     """Generate a unique thank you message using AI"""
