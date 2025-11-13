@@ -773,6 +773,24 @@ async def check_maintenance_mode(update: Update) -> bool:
         return False
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # CRITICAL: Clear old conversation state for this user to prevent stuck dialogs
+    try:
+        user_id = update.effective_user.id
+        chat_id = update.effective_chat.id
+        conv_key = str((chat_id, user_id))
+        
+        # Clear from MongoDB
+        doc = await db.bot_persistence.find_one({"_id": "conversation_order_conv_handler"})
+        if doc and 'data' in doc and conv_key in doc['data']:
+            del doc['data'][conv_key]
+            await db.bot_persistence.update_one(
+                {"_id": "conversation_order_conv_handler"},
+                {"$set": {"data": doc['data'], "updated_at": datetime.now(timezone.utc)}}
+            )
+            logger.info(f"🧹 Cleared old conversation state for user {user_id}")
+    except Exception as e:
+        logger.error(f"Error clearing conversation state: {e}")
+    
     # Handle both command and callback
     if update.callback_query:
         query = update.callback_query
