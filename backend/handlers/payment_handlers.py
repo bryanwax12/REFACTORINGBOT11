@@ -141,6 +141,8 @@ async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAUL
         await db.payments.insert_one(payment_record)
         
         # Show payment link
+        from utils.ui_utils import ButtonTexts, CallbackData
+        
         message = f"""✅ Счёт на пополнение создан!
 
 💰 Сумма: ${amount:.2f}
@@ -152,8 +154,8 @@ async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAUL
 После оплаты баланс будет автоматически пополнен."""
         
         keyboard = [
-            [InlineKeyboardButton("💳 Перейти к оплате", url=invoice_result.get('payLink'))],
-            [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]
+            [InlineKeyboardButton(ButtonTexts.GO_TO_PAYMENT, url=invoice_result.get('payLink'))],
+            [InlineKeyboardButton(ButtonTexts.BACK_TO_MENU, callback_data=CallbackData.START)]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
