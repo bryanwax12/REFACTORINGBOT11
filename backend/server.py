@@ -3558,6 +3558,15 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             logger.error(f"ShipStation rate request failed: {error_msg}")
             logger.error(f"Response body: {response.text}")
             
+            # Log error to session for debugging
+            user_id = update.effective_user.id
+            await session_manager.update_session(user_id, data={
+                'last_error': f'ShipStation API error: {error_msg}',
+                'error_step': 'FETCH_RATES',
+                'error_timestamp': datetime.now(timezone.utc).isoformat(),
+                'error_response': response.text[:500]  # First 500 chars of error
+            })
+            
             # Delete progress message
             try:
                 await safe_telegram_call(progress_msg.delete())
