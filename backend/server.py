@@ -294,18 +294,6 @@ class RateLimiter:
 
 rate_limiter = RateLimiter()
 
-# Decorator for instant typing feedback on text input
-def with_typing_indicator(func):
-    """Show 'typing...' indicator immediately when user sends text"""
-    async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):
-        # INSTANT visual feedback
-        try:
-            await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
-        except Exception as e:
-            logger.debug(f"Failed to send typing action: {e}")
-        return await func(update, context)
-    return wrapper
-
 # Helper function for session management
 async def save_to_session(user_id: int, next_step: str, data: dict, context: ContextTypes.DEFAULT_TYPE):
     """Save data to both context.user_data and session manager (V2 - atomic)"""
