@@ -71,6 +71,32 @@ from handlers.webhook_handlers import (
     handle_telegram_webhook
 )
 
+# Order flow handlers
+from handlers.order_flow.from_address import (
+    order_from_name,
+    order_from_address,
+    order_from_address2,
+    order_from_city,
+    order_from_state,
+    order_from_zip,
+    order_from_phone
+)
+from handlers.order_flow.to_address import (
+    order_to_name,
+    order_to_address,
+    order_to_address2,
+    order_to_city,
+    order_to_state,
+    order_to_zip,
+    order_to_phone
+)
+from handlers.order_flow.parcel import (
+    order_parcel_weight,
+    order_parcel_length,
+    order_parcel_width,
+    order_parcel_height
+)
+
 # Profiled DB operations (most frequently used)
 @profile_db_query("find_user_by_telegram_id")
 async def find_user_by_telegram_id(telegram_id: int, projection: dict = None):
