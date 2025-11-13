@@ -7977,11 +7977,20 @@ async def startup_event():
             global application  # Use global application variable for webhook access
             logger.info("Initializing Telegram Bot...")
             # Build application with optimized settings for high load (5000+ concurrent users)
+            # CRITICAL: Use MongoPersistence for webhook mode - stable in Kubernetes/Emergent
+            from mongo_persistence import MongoPersistence
+            
+            # Use MongoPersistence - MongoDB-based persistence (stable in production)
+            persistence = MongoPersistence(
+                db=db,
+                update_interval=1.0  # Save every 1 second (more stable)
+            )
+            logger.info(f"✅ MongoPersistence configured with database: {db_name}")
             
             application = (
                 Application.builder()
                 .token(TELEGRAM_BOT_TOKEN)
-                # NO PERSISTENCE - use in-memory (works for single pod)
+                .persistence(persistence)  # CRITICAL for webhook mode!
                 .concurrent_updates(True)  # Process updates concurrently
                 .connect_timeout(3)  # Super fast connection
                 .read_timeout(3)  # Super fast read
