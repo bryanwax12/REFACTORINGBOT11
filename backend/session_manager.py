@@ -166,7 +166,9 @@ class SessionManager:
     
     async def save_completed_label(self, user_id: int, label_data: Dict[str, Any]) -> bool:
         """
-        Сохранить готовый лейбл и удалить сессию (атомарно через транзакцию)
+        Сохранить готовый лейбл и удалить сессию
+        
+        Использует транзакции если Replica Set, иначе fallback на последовательные операции
         
         Args:
             user_id: ID пользователя
@@ -182,17 +184,38 @@ class SessionManager:
                 "created_at": datetime.now(timezone.utc)
             }
             
-            # MongoDB транзакция для атомарности
-            async with await self.db.client.start_session() as session:
-                async with session.start_transaction():
+            # Попытка использовать транзакции (работает только с Replica Set)
+            try:
+                async with await self.db.client.start_session() as session:
+                    async with session.start_transaction():
+                        # 1. Сохранить лейбл
+                        await self.completed_labels.insert_one(label_record, session=session)
+                        
+                        # 2. Удалить сессию
+                        await self.sessions.delete_one({"user_id": user_id}, session=session)
+                
+                logger.info(f"✅ Label saved and session cleared with TRANSACTION for user {user_id}")
+                return True
+                
+            except Exception as tx_error:
+                # Fallback для Standalone mode (нет Replica Set)
+                if "Transaction numbers are only allowed on a replica set" in str(tx_error) or \
+                   "Standalone mode" in str(tx_error):
+                    
+                    logger.warning(f"⚠️ Transactions not supported (Standalone mode) - using fallback for user {user_id}")
+                    
+                    # Fallback: Последовательные операции (не атомарные, но лучше чем ничего)
                     # 1. Сохранить лейбл
-                    await self.completed_labels.insert_one(label_record, session=session)
+                    await self.completed_labels.insert_one(label_record)
                     
                     # 2. Удалить сессию
-                    await self.sessions.delete_one({"user_id": user_id}, session=session)
-            
-            logger.info(f"✅ Label saved and session cleared atomically for user {user_id}")
-            return True
+                    await self.sessions.delete_one({"user_id": user_id})
+                    
+                    logger.info(f"✅ Label saved and session cleared with FALLBACK for user {user_id}")
+                    return True
+                else:
+                    # Другая ошибка - пробросить
+                    raise
             
         except Exception as e:
             logger.error(f"Error saving completed label: {e}")
