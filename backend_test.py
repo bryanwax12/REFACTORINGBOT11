@@ -1337,6 +1337,479 @@ def test_telegram_bot_admin_integration():
         print(f"❌ Telegram bot admin integration test error: {e}")
         return False
 
+
+def test_telegram_webhook_endpoint():
+    """Test Telegram webhook endpoint - CRITICAL TEST per review request"""
+    print("\n🔍 Testing Telegram Webhook Endpoint...")
+    print("🎯 CRITICAL: Testing /api/telegram/webhook endpoint after refactoring")
+    
+    try:
+        # Test 1: GET request to webhook endpoint (should return method not allowed or basic info)
+        print("   Test 1: GET /api/telegram/webhook")
+        response = requests.get(f"{API_BASE}/telegram/webhook", timeout=10)
+        print(f"   Status Code: {response.status_code}")
+        
+        # Webhook endpoints typically don't support GET, so 405 is expected
+        if response.status_code in [405, 200]:
+            print(f"   ✅ Webhook endpoint accessible")
+        else:
+            print(f"   ❌ Webhook endpoint not accessible: {response.status_code}")
+            return False
+        
+        # Test 2: POST request with invalid data (should handle gracefully)
+        print("   Test 2: POST /api/telegram/webhook with invalid data")
+        invalid_payload = {"invalid": "data"}
+        
+        response = requests.post(
+            f"{API_BASE}/telegram/webhook",
+            json=invalid_payload,
+            headers={'Content-Type': 'application/json'},
+            timeout=10
+        )
+        
+        print(f"   Status Code: {response.status_code}")
+        
+        # Should handle invalid data gracefully (200 or 400 are both acceptable)
+        if response.status_code in [200, 400]:
+            print(f"   ✅ Webhook handles invalid data gracefully")
+        else:
+            print(f"   ❌ Webhook error handling issue: {response.status_code}")
+            return False
+        
+        # Test 3: POST request with valid Telegram Update structure
+        print("   Test 3: POST /api/telegram/webhook with valid Update structure")
+        
+        # Create a valid Telegram Update object for /start command
+        valid_update = {
+            "update_id": 123456789,
+            "message": {
+                "message_id": 1,
+                "from": {
+                    "id": 999999999,
+                    "is_bot": False,
+                    "first_name": "Test",
+                    "username": "testuser",
+                    "language_code": "en"
+                },
+                "chat": {
+                    "id": 999999999,
+                    "first_name": "Test",
+                    "username": "testuser",
+                    "type": "private"
+                },
+                "date": int(time.time()),
+                "text": "/start"
+            }
+        }
+        
+        response = requests.post(
+            f"{API_BASE}/telegram/webhook",
+            json=valid_update,
+            headers={'Content-Type': 'application/json'},
+            timeout=15
+        )
+        
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            print(f"   ✅ Webhook processes valid Telegram updates")
+            
+            # Check response format
+            try:
+                response_data = response.json()
+                if response_data.get('ok') == True:
+                    print(f"   ✅ Webhook returns correct response format")
+                else:
+                    print(f"   ⚠️ Webhook response format: {response_data}")
+            except:
+                print(f"   ⚠️ Webhook response not JSON (may be expected)")
+        else:
+            print(f"   ❌ Webhook failed to process valid update: {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"      Error: {error_data}")
+            except:
+                print(f"      Error: {response.text}")
+            return False
+        
+        return True
+        
+    except Exception as e:
+        print(f"❌ Telegram webhook endpoint test error: {e}")
+        return False
+
+
+def test_telegram_bot_commands():
+    """Test Telegram bot commands via webhook simulation - CRITICAL TEST per review request"""
+    print("\n🔍 Testing Telegram Bot Commands via Webhook...")
+    print("🎯 CRITICAL: Testing /start and /help commands after handlers refactoring")
+    
+    try:
+        # Test 1: /start command
+        print("   Test 1: /start command simulation")
+        
+        start_update = {
+            "update_id": 123456790,
+            "message": {
+                "message_id": 2,
+                "from": {
+                    "id": 999999998,
+                    "is_bot": False,
+                    "first_name": "TestUser",
+                    "username": "testuser2",
+                    "language_code": "ru"
+                },
+                "chat": {
+                    "id": 999999998,
+                    "first_name": "TestUser",
+                    "username": "testuser2",
+                    "type": "private"
+                },
+                "date": int(time.time()),
+                "text": "/start"
+            }
+        }
+        
+        response = requests.post(
+            f"{API_BASE}/telegram/webhook",
+            json=start_update,
+            headers={'Content-Type': 'application/json'},
+            timeout=15
+        )
+        
+        print(f"   /start Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            print(f"   ✅ /start command processed successfully")
+        else:
+            print(f"   ❌ /start command failed: {response.status_code}")
+            return False
+        
+        # Test 2: /help command
+        print("   Test 2: /help command simulation")
+        
+        help_update = {
+            "update_id": 123456791,
+            "message": {
+                "message_id": 3,
+                "from": {
+                    "id": 999999998,
+                    "is_bot": False,
+                    "first_name": "TestUser",
+                    "username": "testuser2",
+                    "language_code": "ru"
+                },
+                "chat": {
+                    "id": 999999998,
+                    "first_name": "TestUser",
+                    "username": "testuser2",
+                    "type": "private"
+                },
+                "date": int(time.time()),
+                "text": "/help"
+            }
+        }
+        
+        response = requests.post(
+            f"{API_BASE}/telegram/webhook",
+            json=help_update,
+            headers={'Content-Type': 'application/json'},
+            timeout=15
+        )
+        
+        print(f"   /help Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            print(f"   ✅ /help command processed successfully")
+        else:
+            print(f"   ❌ /help command failed: {response.status_code}")
+            return False
+        
+        return True
+        
+    except Exception as e:
+        print(f"❌ Telegram bot commands test error: {e}")
+        return False
+
+
+def test_telegram_callback_buttons():
+    """Test Telegram callback buttons via webhook simulation - CRITICAL TEST per review request"""
+    print("\n🔍 Testing Telegram Callback Buttons...")
+    print("🎯 CRITICAL: Testing inline keyboard callback buttons after refactoring")
+    
+    try:
+        # Test callback buttons mentioned in review request
+        callback_tests = [
+            ('start', 'Main menu callback'),
+            ('help', 'Help callback'),
+            ('faq', 'FAQ callback'),
+            ('my_balance', 'Balance callback'),
+            ('my_templates', 'Templates callback')
+        ]
+        
+        for callback_data, description in callback_tests:
+            print(f"   Testing: {description} (callback_data: '{callback_data}')")
+            
+            callback_update = {
+                "update_id": 123456792 + hash(callback_data) % 1000,
+                "callback_query": {
+                    "id": f"callback_{callback_data}_{int(time.time())}",
+                    "from": {
+                        "id": 999999997,
+                        "is_bot": False,
+                        "first_name": "CallbackTest",
+                        "username": "callbacktest",
+                        "language_code": "ru"
+                    },
+                    "message": {
+                        "message_id": 10,
+                        "from": {
+                            "id": 123456789,
+                            "is_bot": True,
+                            "first_name": "TestBot",
+                            "username": "testbot"
+                        },
+                        "chat": {
+                            "id": 999999997,
+                            "first_name": "CallbackTest",
+                            "username": "callbacktest",
+                            "type": "private"
+                        },
+                        "date": int(time.time()),
+                        "text": "Test message with buttons"
+                    },
+                    "chat_instance": "test_chat_instance",
+                    "data": callback_data
+                }
+            }
+            
+            response = requests.post(
+                f"{API_BASE}/telegram/webhook",
+                json=callback_update,
+                headers={'Content-Type': 'application/json'},
+                timeout=15
+            )
+            
+            print(f"      Status Code: {response.status_code}")
+            
+            if response.status_code == 200:
+                print(f"      ✅ {description} processed successfully")
+            else:
+                print(f"      ❌ {description} failed: {response.status_code}")
+                try:
+                    error_data = response.json()
+                    print(f"         Error: {error_data}")
+                except:
+                    print(f"         Error: {response.text}")
+                return False
+        
+        print(f"   ✅ All callback buttons processed successfully")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Telegram callback buttons test error: {e}")
+        return False
+
+
+def test_admin_api_endpoints():
+    """Test Admin API endpoints with authentication - CRITICAL TEST per review request"""
+    print("\n🔍 Testing Admin API Endpoints...")
+    print("🎯 CRITICAL: Testing admin endpoints with X-Api-Key authentication after refactoring")
+    
+    try:
+        # Load admin API key from environment
+        load_dotenv('/app/backend/.env')
+        admin_api_key = os.environ.get('ADMIN_API_KEY')
+        
+        if not admin_api_key:
+            print("   ❌ ADMIN_API_KEY not found in environment")
+            return False
+        
+        print(f"   Admin API key loaded: ✅")
+        
+        # Test 1: GET /api/admin/stats with correct API key
+        print("   Test 1: GET /api/admin/stats with valid API key")
+        
+        headers = {
+            'X-Api-Key': admin_api_key,
+            'Content-Type': 'application/json'
+        }
+        
+        response = requests.get(f"{API_BASE}/admin/stats", headers=headers, timeout=15)
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            stats_data = response.json()
+            print(f"   ✅ Admin stats endpoint working")
+            print(f"   📊 Stats data keys: {list(stats_data.keys())}")
+            
+            # Verify expected stats fields
+            expected_fields = ['total_users', 'total_orders', 'paid_orders', 'total_revenue']
+            for field in expected_fields:
+                if field in stats_data:
+                    print(f"      {field}: ✅ ({stats_data[field]})")
+                else:
+                    print(f"      {field}: ❌ (missing)")
+        else:
+            print(f"   ❌ Admin stats failed: {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"      Error: {error_data}")
+            except:
+                print(f"      Error: {response.text}")
+            return False
+        
+        # Test 2: GET /api/admin/performance/stats with correct API key
+        print("   Test 2: GET /api/admin/performance/stats with valid API key")
+        
+        response = requests.get(f"{API_BASE}/admin/performance/stats", headers=headers, timeout=15)
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            perf_data = response.json()
+            print(f"   ✅ Admin performance stats endpoint working")
+            print(f"   📊 Performance data keys: {list(perf_data.keys())}")
+        else:
+            print(f"   ❌ Admin performance stats failed: {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"      Error: {error_data}")
+            except:
+                print(f"      Error: {response.text}")
+            return False
+        
+        # Test 3: Test without API key (should fail)
+        print("   Test 3: GET /api/admin/stats without API key (should fail)")
+        
+        response = requests.get(f"{API_BASE}/admin/stats", timeout=15)
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code in [401, 403]:
+            print(f"   ✅ Correctly rejected request without API key")
+        else:
+            print(f"   ❌ Should have rejected request without API key: {response.status_code}")
+            return False
+        
+        # Test 4: Test with wrong API key (should fail)
+        print("   Test 4: GET /api/admin/stats with wrong API key (should fail)")
+        
+        wrong_headers = {
+            'X-Api-Key': 'wrong_api_key_12345',
+            'Content-Type': 'application/json'
+        }
+        
+        response = requests.get(f"{API_BASE}/admin/stats", headers=wrong_headers, timeout=15)
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code in [401, 403]:
+            print(f"   ✅ Correctly rejected request with wrong API key")
+        else:
+            print(f"   ❌ Should have rejected request with wrong API key: {response.status_code}")
+            return False
+        
+        print(f"   ✅ All admin API endpoint tests passed")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Admin API endpoints test error: {e}")
+        return False
+
+
+def test_handlers_import_verification():
+    """Test handlers module imports - CRITICAL TEST per review request"""
+    print("\n🔍 Testing Handlers Module Imports...")
+    print("🎯 CRITICAL: Verifying functions moved to handlers modules import correctly")
+    
+    try:
+        # Test 1: Check if handlers modules exist
+        print("   Test 1: Handlers modules existence")
+        
+        import os
+        handlers_dir = '/app/backend/handlers'
+        expected_modules = [
+            'common_handlers.py',
+            'admin_handlers.py',
+            'payment_handlers.py',
+            'template_handlers.py',
+            'order_handlers.py'
+        ]
+        
+        for module in expected_modules:
+            module_path = os.path.join(handlers_dir, module)
+            exists = os.path.exists(module_path)
+            print(f"      {module}: {'✅' if exists else '❌'}")
+            if not exists:
+                return False
+        
+        # Test 2: Test imports from server.py
+        print("   Test 2: Server.py imports from handlers modules")
+        
+        with open('/app/backend/server.py', 'r') as f:
+            server_code = f.read()
+        
+        expected_imports = [
+            'from handlers.common_handlers import',
+            'from handlers.admin_handlers import',
+            'start_command',
+            'help_command',
+            'faq_command',
+            'button_callback',
+            'verify_admin_key',
+            'notify_admin_error'
+        ]
+        
+        for import_item in expected_imports:
+            found = import_item in server_code
+            print(f"      {import_item}: {'✅' if found else '❌'}")
+            if not found:
+                return False
+        
+        # Test 3: Test specific function imports
+        print("   Test 3: Critical function imports verification")
+        
+        try:
+            # Import functions from handlers modules
+            import sys
+            sys.path.append('/app/backend')
+            
+            from handlers.common_handlers import start_command, help_command, faq_command, button_callback
+            print(f"      common_handlers functions: ✅")
+            
+            from handlers.admin_handlers import verify_admin_key, notify_admin_error
+            print(f"      admin_handlers functions: ✅")
+            
+        except ImportError as e:
+            print(f"      ❌ Import error: {e}")
+            return False
+        
+        # Test 4: Check for import errors in backend logs
+        print("   Test 4: Backend logs import error check")
+        
+        log_result = os.popen("tail -n 100 /var/log/supervisor/backend.err.log | grep -i 'import\\|module'").read()
+        
+        # Look for import-related errors
+        import_errors = []
+        for line in log_result.split('\n'):
+            line_lower = line.lower()
+            if any(error in line_lower for error in ['importerror', 'modulenotfounderror', 'cannot import']):
+                import_errors.append(line.strip())
+        
+        if import_errors:
+            print(f"      ❌ Import errors found in logs:")
+            for error in import_errors[-3:]:  # Show last 3 import errors
+                if error:
+                    print(f"         {error}")
+            return False
+        else:
+            print(f"      ✅ No import errors in backend logs")
+        
+        print(f"   ✅ All handlers import tests passed")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Handlers import verification test error: {e}")
+        return False
+
 def test_session_manager_v2_migration():
     """Test SessionManager V2 Migration - CRITICAL REGRESSION TEST per review request"""
     print("\n🔍 РЕГРЕССИОННОЕ ТЕСТИРОВАНИЕ SessionManager V2 Migration...")
