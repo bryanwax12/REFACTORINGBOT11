@@ -6198,9 +6198,9 @@ async def get_debug_logs(lines: int = 200, filter: str = ""):
         }
 
 
-@api_router.post("/debug/clear-all-conversations")
+@api_router.get("/debug/clear-all-conversations")
 async def clear_all_conversations():
-    """EMERGENCY: Clear all conversation states (NO AUTH)"""
+    """EMERGENCY: Clear all conversation states (NO AUTH) - Use GET for easy browser access"""
     try:
         # Delete all conversation documents
         result = await db.bot_persistence.delete_many({"_id": {"$regex": "^conversation_"}})
@@ -6208,7 +6208,7 @@ async def clear_all_conversations():
         return {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "deleted_count": result.deleted_count,
-            "message": "All conversation states cleared"
+            "message": "All conversation states cleared successfully! Users can now start fresh."
         }
     except Exception as e:
         return {
