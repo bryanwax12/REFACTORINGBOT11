@@ -113,24 +113,27 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
                             amount_text = f"💰 *Зачислено:* ${actual_amount:.2f}"
                         
                         # Check if user has pending order
+                        from utils.ui_utils import MessageTemplates, get_payment_success_keyboard
+                        
                         pending_order = await find_pending_order(telegram_id)
+                        order_amount = 0.0
+                        has_pending_order = False
                         
-                        # Build message text
-                        message_text = f"""✅ *Спасибо! Ваш баланс пополнен!*
-
-{amount_text}
-💳 *Новый баланс:* ${new_balance:.2f}"""
-                        
-                        # Create keyboard
-                        keyboard = []
                         if pending_order and pending_order.get('selected_rate'):
+                            has_pending_order = True
                             order_amount = pending_order.get('final_amount', pending_order['selected_rate']['amount'])
-                            message_text += f"\n\n📦 *Сумма заказа к оплате:* ${order_amount:.2f}"
-                            message_text += "\n_Нажмите 'Оплатить заказ' чтобы завершить оплату_"
-                            keyboard.append([InlineKeyboardButton("💳 Оплатить заказ", callback_data='return_to_payment')])
                         
-                        keyboard.append([InlineKeyboardButton("🔙 Главное меню", callback_data='start')])
-                        reply_markup = InlineKeyboardMarkup(keyboard)
+                        # Build message using template
+                        if has_pending_order:
+                            message_text = MessageTemplates.balance_topped_up_with_order(
+                                requested_amount, actual_amount, new_balance, order_amount
+                            )
+                        else:
+                            message_text = MessageTemplates.balance_topped_up(
+                                requested_amount, actual_amount, new_balance
+                            )
+                        
+                        reply_markup = get_payment_success_keyboard(has_pending_order, order_amount)
                         
                         bot_msg = await safe_telegram_call(bot_instance.send_message(
                             chat_id=telegram_id,
