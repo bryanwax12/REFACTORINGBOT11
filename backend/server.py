@@ -1064,8 +1064,8 @@ async def skip_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE)
     
     # Save skipped field
     user_id = update.effective_user.id
-    await session_manager.update_session(user_id, {'from_street2': None})
     context.user_data['from_street2'] = None
+    await session_manager.update_session_atomic(user_id, step="FROM_CITY", data={'from_street2': None})
     
     # Show next step (FROM_CITY)
     reply_markup = get_cancel_keyboard()
