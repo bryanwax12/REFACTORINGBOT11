@@ -1291,13 +1291,6 @@ _Если вы оплатите другую сумму, деньги не по�
 FROM_NAME, FROM_ADDRESS, FROM_ADDRESS2, FROM_CITY, FROM_STATE, FROM_ZIP, FROM_PHONE, TO_NAME, TO_ADDRESS, TO_ADDRESS2, TO_CITY, TO_STATE, TO_ZIP, TO_PHONE, PARCEL_WEIGHT, PARCEL_LENGTH, PARCEL_WIDTH, PARCEL_HEIGHT, CONFIRM_DATA, EDIT_MENU, SELECT_CARRIER, PAYMENT_METHOD, TOPUP_AMOUNT, TEMPLATE_NAME, TEMPLATE_LIST, TEMPLATE_VIEW, TEMPLATE_RENAME, TEMPLATE_LOADED = range(28)
 
 async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # CRITICAL: Create unique session ID for this order to isolate from old conversations
-    import time
-    order_session_id = f"{int(time.time() * 1000)}"  # Millisecond timestamp
-    context.user_data['order_session_id'] = order_session_id
-    
-    logger.warning(f"🆕 NEW ORDER SESSION: {order_session_id} for user {update.effective_user.id}")
-    
     # Handle both command and callback
     if update.callback_query:
         query = update.callback_query
