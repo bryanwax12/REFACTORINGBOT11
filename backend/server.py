@@ -2879,6 +2879,8 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
 
 async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Start new order (without template)"""
+    from utils.ui_utils import get_cancel_keyboard, OrderFlowMessages
+    
     logger.info(f"order_new called - user_id: {update.effective_user.id}")
     query = update.callback_query
     await safe_telegram_call(query.answer())
@@ -2889,13 +2891,9 @@ async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Mark previous message as selected (remove buttons from choice screen)
     asyncio.create_task(mark_message_as_selected(update, context))
     
-    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    reply_markup = get_cancel_keyboard()
+    message_text = OrderFlowMessages.new_order_start()
     
-    message_text = """📦 Создание нового заказа
-
-Шаг 1/13: 👤 Имя отправителя
-Например: John Smith"""
     bot_msg = await safe_telegram_call(query.message.reply_text(
             message_text,
             reply_markup=reply_markup
