@@ -81,10 +81,7 @@ from handlers.order_flow import (
     order_to_state, order_to_zip, order_to_phone,
     # Parcel handlers
     order_parcel_weight, order_parcel_length,
-    order_parcel_width, order_parcel_height,
-    # Skip handlers
-    skip_from_address2, skip_to_address2,
-    skip_from_phone, skip_to_phone
+    order_parcel_width, order_parcel_height
 )
 
 # Profiled DB operations (most frequently used)
