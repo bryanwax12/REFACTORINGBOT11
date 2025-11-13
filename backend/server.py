@@ -1643,7 +1643,9 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await safe_telegram_call(update.message.reply_text("❌ Неверный код штата. Введите корректный код (например: CA, NY, TX):"))
         return FROM_STATE
     
-    context.user_data['from_state'] = state
+    # Save to session
+    user_id = update.effective_user.id
+    await save_to_session(user_id, "FROM_ZIP", {'from_state': state}, context)
     
     # Mark previous message as selected (non-blocking)
     asyncio.create_task(mark_message_as_selected(update, context))
