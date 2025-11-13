@@ -2246,6 +2246,7 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['last_state'] = PARCEL_WEIGHT
     return PARCEL_WEIGHT
 
+@with_typing_indicator
 async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         weight = float(update.message.text.strip())
