@@ -881,59 +881,7 @@ def mark_message_as_selected_nonblocking(update: Update, context: ContextTypes.D
 
 # safe_telegram_call moved to handlers/common_handlers.py
 
-async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """
-    Add checkmark ✅ to selected message and remove buttons
-    Runs async - doesn't block bot response
-    """
-    try:
-        # Handle callback query (button press)
-        if update.callback_query:
-            message = update.callback_query.message
-            try:
-                # Get current text and add checkmark if not already there
-                current_text = message.text or ""
-                if not current_text.startswith("✅"):
-                    new_text = f"✅ {current_text}"
-                    # Edit message with checkmark and remove buttons
-                    await message.edit_text(text=new_text, reply_markup=None)
-                else:
-                    # Just remove buttons if checkmark already exists
-                    await message.edit_reply_markup(reply_markup=None)
-            except Exception:
-                pass
-            return
-        
-        # Handle text input messages
-        if update.message and 'last_bot_message_id' in context.user_data:
-            last_msg_id = context.user_data.get('last_bot_message_id')
-            last_text = context.user_data.get('last_bot_message_text', '')
-            
-            if not last_msg_id:
-                return
-            
-            try:
-                # Add checkmark to last bot message
-                if not last_text.startswith("✅"):
-                    new_text = f"✅ {last_text}"
-                    await safe_telegram_call(context.bot.edit_message_text(
-                        chat_id=update.effective_chat.id,
-                        message_id=last_msg_id,
-                        text=new_text,
-                        reply_markup=None
-                    ))
-                else:
-                    # Just remove buttons if checkmark already exists
-                    await safe_telegram_call(context.bot.edit_message_reply_markup(
-                        chat_id=update.effective_chat.id,
-                        message_id=last_msg_id,
-                        reply_markup=None
-                    ))
-            except Exception:
-                pass
-        
-    except Exception:
-        pass
+# mark_message_as_selected moved to handlers/common_handlers.py
 
 async def check_maintenance_mode(update: Update) -> bool:
     """Check if bot is in maintenance mode and user is not admin"""
