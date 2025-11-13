@@ -98,10 +98,12 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE, db, f
     
     template_id = query.data.replace('template_use_', '')
     
+    from utils.ui_utils import TemplateMessages, get_cancel_keyboard
+    
     template = await find_template_by_id(template_id)
     
     if not template:
-        await query.message.reply_text("❌ Шаблон не найден")
+        await query.message.reply_text(TemplateMessages.template_not_found())
         return
     
     # Load template data into context
@@ -121,13 +123,8 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE, db, f
     context.user_data['to_zip'] = template.get('to_zip')
     context.user_data['to_phone'] = template.get('to_phone')
     
-    message = f"""✅ Шаблон "{template.get('name')}" загружен!
-
-Адреса заполнены автоматически.
-Введите вес посылки в фунтах (lb):"""
-    
-    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    message = TemplateMessages.template_loaded(template.get('name'))
+    reply_markup = get_cancel_keyboard()
     
     await query.message.reply_text(message, reply_markup=reply_markup)
     
