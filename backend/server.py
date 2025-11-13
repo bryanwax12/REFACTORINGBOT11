@@ -8642,7 +8642,8 @@ async def startup_event():
                 ],
                 per_chat=True,
                 per_user=True,
-                per_message=True  # Track each message for proper callback handling under load
+                per_message=False,  # False is correct: we use MessageHandler (not only CallbackQueryHandler)
+                allow_reentry=True
             )
             
             application.add_handler(template_rename_handler)
