@@ -102,18 +102,10 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
                     
                     # Notify user
                     if bot_instance:
+                        from utils.ui_utils import MessageTemplates, get_payment_success_keyboard
+                        
                         user = await find_user_by_telegram_id(telegram_id)
                         new_balance = user.get('balance', 0)
-                        
-                        # Show requested vs actual amount if different
-                        if abs(actual_amount - requested_amount) > 0.01:
-                            amount_text = f"""💰 *Запрошено:* ${requested_amount:.2f}
-💰 *Зачислено:* ${actual_amount:.2f}"""
-                        else:
-                            amount_text = f"💰 *Зачислено:* ${actual_amount:.2f}"
-                        
-                        # Check if user has pending order
-                        from utils.ui_utils import MessageTemplates, get_payment_success_keyboard
                         
                         pending_order = await find_pending_order(telegram_id)
                         order_amount = 0.0
