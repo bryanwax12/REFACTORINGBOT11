@@ -110,11 +110,8 @@ async def check_user_blocked(telegram_id: int) -> bool:
 
 async def send_blocked_message(update: Update):
     """Send blocked message to user"""
-    message = """⛔️ *Вы заблокированы*
-
-Ваш доступ к боту был ограничен администратором.
-
-Для получения дополнительной информации, пожалуйста, свяжитесь с администратором."""
+    from utils.ui_utils import MessageTemplates
+    message = MessageTemplates.user_blocked()
     
     if update.message:
         await safe_telegram_call(update.message.reply_text(message, parse_mode='Markdown'))
