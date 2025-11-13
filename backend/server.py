@@ -2372,9 +2372,8 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_discount = user.get('discount', 0.0)  # Get user discount percentage
     
     # Show payment options
-    amount = selected_rate['amount']  # Amount with markup
+    amount = selected_rate['amount']
     original_amount = selected_rate['original_amount']  # GoShippo price
-    markup = amount - original_amount
     
     # Apply discount if user has one
     discount_amount = 0
