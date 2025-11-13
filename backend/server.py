@@ -150,9 +150,9 @@ def with_typing_indicator(func):
 
 # Helper function for session management
 async def save_to_session(user_id: int, next_step: str, data: dict, context: ContextTypes.DEFAULT_TYPE):
-    """Save data to both context.user_data and session manager"""
+    """Save data to both context.user_data and session manager (V2 - atomic)"""
     context.user_data.update(data)
-    await session_manager.update_session(user_id, step=next_step, data=data)
+    await session_manager.update_session_atomic(user_id, step=next_step, data=data)
 
 async def handle_step_error(user_id: int, error: Exception, current_step: str, context: ContextTypes.DEFAULT_TYPE):
     """Handle errors during step processing - save error and allow retry"""
@@ -164,7 +164,7 @@ async def handle_step_error(user_id: int, error: Exception, current_step: str, c
         'error_step': current_step,
         'error_timestamp': datetime.now(timezone.utc).isoformat()
     }
-    await session_manager.update_session(user_id, data=error_data)
+    await session_manager.update_session_atomic(user_id, data=error_data)
     
     # Don't change step - let user retry from same step
     return current_step
