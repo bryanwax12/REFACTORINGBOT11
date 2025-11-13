@@ -1362,77 +1362,7 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return FROM_ZIP
 
 
-async def get_shipstation_carrier_ids():
-    """Get and cache ShipStation carrier IDs"""
-    global SHIPSTATION_CARRIER_IDS
-    
-    # Return cached IDs if available
-    if SHIPSTATION_CARRIER_IDS:
-        return SHIPSTATION_CARRIER_IDS
-    
-    try:
-        if not SHIPSTATION_API_KEY:
-            logger.error("ShipStation API key not configured")
-            return []
-        
-        headers = {
-            'API-Key': SHIPSTATION_API_KEY,
-            'Content-Type': 'application/json'
-        }
-        
-        response = await asyncio.to_thread(
-            requests.get,
-            'https://api.shipstation.com/v2/carriers',
-            headers=headers,
-            timeout=10
-        )
-        
-        if response.status_code == 200:
-            data = response.json()
-            carriers = data.get('carriers', [])
-            
-            # Exclude only GlobalPost (Stamps.com is USPS, keep it)
-            excluded_carriers = ['globalpost']
-            
-            # Extract carrier IDs from active carriers, excluding unwanted ones
-            carrier_ids = [
-                c['carrier_id'] 
-                for c in carriers 
-                if c.get('carrier_id') and c.get('carrier_code', '').lower() not in excluded_carriers
-            ]
-            
-            SHIPSTATION_CARRIER_IDS = carrier_ids
-            logger.info(f"Loaded {len(carrier_ids)} ShipStation carriers (excluded: {excluded_carriers}): {carrier_ids}")
-            return carrier_ids
-        else:
-            logger.error(f"Failed to get carriers: {response.status_code} - {response.text}")
-            return []
-            
-    except Exception as e:
-        logger.error(f"Error getting carrier IDs: {e}")
-        return []
-
-
-async def validate_address_with_shipstation(name, street1, street2, city, state, zip_code):
-    """Validate address using ShipStation API V2
-    Note: ShipStation V2 does not have address validation endpoint,
-    so we always return valid to allow order to proceed
-    """
-    try:
-        # ShipStation V2 doesn't have address validation
-        # Return success to allow order creation
-        logger.info(f"Address validation skipped (not available in ShipStation V2): {street1}, {city}, {state} {zip_code}")
-        return {
-            'is_valid': True,
-            'message': 'Адрес принят (валидация недоступна в ShipStation)'
-        }
-            
-    except Exception as e:
-        logger.error(f"Error validating address: {e}")
-        return {
-            'is_valid': True,  # Fallback to allow order if validation fails
-            'message': 'Проверка недоступна, продолжаем'
-        }
+# get_shipstation_carrier_ids and validate_address_with_shipstation - imported from services/api_services.py
 
 # notify_admin_error moved to handlers/admin_handlers.py
 
