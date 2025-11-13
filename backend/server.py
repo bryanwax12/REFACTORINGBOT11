@@ -3918,10 +3918,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 )
                 
                 # Update order as paid
-                await db.orders.update_one(
-                    {"id": order['id']},
-                    {"$set": {"payment_status": "paid"}}
-                )
+                await update_order(order['id'], {"payment_status": "paid"})
                 
                 keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
