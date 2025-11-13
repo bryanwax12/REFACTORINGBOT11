@@ -923,3 +923,44 @@ agent_communication:
     - agent: "main"
       message: "🚀 CRITICAL FIX READY FOR TESTING: Added persistent=True to template_rename_handler. This was the missing piece preventing ALL persistence mechanisms from working. RedisPersistence is fully configured and connected. TESTING REQUIREMENTS: (1) Test on PRODUCTION bot (@whitelabel_shipping_bot) in webhook mode - это критично! Preview бот работает в polling режиме, а проблема была именно в webhook. (2) Complete full order creation flow (all 13 steps) - проверить, что состояние сохраняется между запросами. (3) Test template rename flow. (4) Verify no 'зависания' (hanging), no repeated messages needed. (5) Check Redis logs to confirm state is being saved/loaded. This is attempt #5 at fixing this critical issue - needs thorough validation before declaring success."
 
+
+## Debug Logging Session - Bot Hanging Investigation
+
+backend:
+  - task: "Telegram Bot Hanging - User message not processed"
+    implemented: true
+    working: "investigating"
+    file: "/app/backend/server.py"
+    stuck_count: 6
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "❌ USER REPORT: Bot still hangs after persistent=True fix. User enters 'John Smith' at step 1/13 (FROM_NAME), bot does NOT respond and does NOT proceed to step 2. Screenshot shows message sent at 0:22 but no bot response."
+        - working: "NA"
+          agent: "main"
+          comment: "🔧 INVESTIGATION IN PROGRESS: Added debug logging to key functions (new_order_start, order_from_name) to track message flow. Logs will show: (1) If new_order_start is called when user clicks button, (2) If order_from_name is called when user sends text, (3) What name is being processed, (4) What state is returned. Backend restarted. Waiting for user to retry test to collect logs."
+        - working: "NA"
+          agent: "troubleshoot"
+          comment: "🔍 TROUBLESHOOT FINDINGS: (1) No bot crashes - bot running correctly, (2) RedisPersistence connected successfully, (3) No webhook conflicts in polling mode, (4) Debug logging was disabled causing lack of visibility, (5) PTBUserWarning about per_message=False may affect tracking, (6) No logs showing message processing - this is the core issue."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 7
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Debug why order_from_name handler is not being called"
+    - "Check if messages are reaching the bot at all"
+  stuck_tasks:
+    - "ConversationHandler Persistence (stuck_count: 6, multiple failed approaches)"
+  test_all: false
+  test_priority: "critical_first"
+
+agent_communication:
+    - agent: "main"
+      message: "🔍 DEBUG LOGGING ADDED: Added explicit logging to new_order_start() and order_from_name() handlers. Next step: User needs to retry the test (start new order -> enter 'John Smith'). Logs will reveal if handlers are being called and where the flow breaks. This is stuck_count #6 - if this approach fails, may need to consider fundamental architecture issue with polling vs webhook or ConversationHandler configuration."
+
