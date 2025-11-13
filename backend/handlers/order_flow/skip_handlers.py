@@ -74,9 +74,10 @@ async def handle_skip_field(
         context.user_data['last_bot_message_text'] = next_message
         context.user_data['last_state'] = next_step
     
-    # Return next state dynamically
-    from server import globals as server_globals
-    return getattr(server_globals(), next_step, next_step)
+    # Return next state - it's already passed as parameter
+    # The calling function imports the actual constant (FROM_CITY, TO_CITY, etc.)
+    # and passes it here, so we just return it
+    return eval(next_step) if isinstance(next_step, str) else next_step
 
 
 @with_typing_indicator
