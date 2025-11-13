@@ -425,6 +425,55 @@ class OrderStepMessages:
         """Format step message"""
         return f"Шаг {step_num}/{total_steps}: {prompt}"
     
+    @staticmethod
+    def get_step_keyboard_and_message(state: str):
+        """
+        Get keyboard and message for a given state (for order restoration)
+        
+        Args:
+            state: State constant (e.g., 'FROM_NAME', 'FROM_ADDRESS2')
+        
+        Returns:
+            Tuple of (keyboard, message_text) or (None, message_text) if no keyboard
+        """
+        from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+        
+        # Map states to their messages and keyboards
+        state_mapping = {
+            'FROM_NAME': (None, OrderStepMessages.FROM_NAME),
+            'FROM_ADDRESS': (None, OrderStepMessages.FROM_ADDRESS),
+            'FROM_ADDRESS2': (
+                get_skip_and_cancel_keyboard(CallbackData.SKIP_FROM_ADDRESS2),
+                OrderStepMessages.FROM_ADDRESS2
+            ),
+            'FROM_CITY': (None, OrderStepMessages.FROM_CITY),
+            'FROM_STATE': (None, OrderStepMessages.FROM_STATE),
+            'FROM_ZIP': (None, OrderStepMessages.FROM_ZIP),
+            'FROM_PHONE': (
+                get_skip_and_cancel_keyboard(CallbackData.SKIP_FROM_PHONE),
+                OrderStepMessages.FROM_PHONE
+            ),
+            'TO_NAME': (None, OrderStepMessages.TO_NAME),
+            'TO_ADDRESS': (None, OrderStepMessages.TO_ADDRESS),
+            'TO_ADDRESS2': (
+                get_skip_and_cancel_keyboard(CallbackData.SKIP_TO_ADDRESS2),
+                OrderStepMessages.TO_ADDRESS2
+            ),
+            'TO_CITY': (None, OrderStepMessages.TO_CITY),
+            'TO_STATE': (None, OrderStepMessages.TO_STATE),
+            'TO_ZIP': (None, OrderStepMessages.TO_ZIP),
+            'TO_PHONE': (
+                get_skip_and_cancel_keyboard(CallbackData.SKIP_TO_PHONE),
+                OrderStepMessages.TO_PHONE
+            ),
+            'PARCEL_WEIGHT': (None, OrderStepMessages.PARCEL_WEIGHT),
+            'PARCEL_LENGTH': (None, OrderStepMessages.PARCEL_LENGTH),
+            'PARCEL_WIDTH': (None, OrderStepMessages.PARCEL_WIDTH),
+            'PARCEL_HEIGHT': (None, OrderStepMessages.PARCEL_HEIGHT),
+        }
+        
+        return state_mapping.get(state, (None, "Продолжаем оформление заказа..."))
+    
     # FROM address steps
     FROM_NAME = step_message.__func__(1, 13, "👤 Имя отправителя\nНапример: John Smith")
     FROM_ADDRESS = step_message.__func__(2, 13, "🏠 Адрес отправителя\nНапример: 215 Clayton St.")
