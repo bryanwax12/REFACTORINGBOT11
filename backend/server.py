@@ -960,10 +960,7 @@ async def handle_create_label_request(update: Update, context: ContextTypes.DEFA
     
     if label_created:
         # Update order payment status to paid (if it was failed before)
-        await db.orders.update_one(
-            {"id": order_id},
-            {"$set": {"payment_status": "paid"}}
-        )
+        await update_order(order_id, {"payment_status": "paid"})
         
         keyboard = [[
             InlineKeyboardButton("🔙 Главное меню", callback_data='start')
