@@ -8029,6 +8029,20 @@ async def get_topups(authenticated: bool = Depends(verify_admin_key)):
 
 app.include_router(api_router)
 
+# Direct endpoint for clearing conversations (easier access)
+@app.get("/clear-conversations")
+async def clear_conversations_direct():
+    """Clear all stuck conversation states - Direct endpoint"""
+    try:
+        result = await db.bot_persistence.delete_many({"_id": {"$regex": "^conversation_"}})
+        return {
+            "success": True,
+            "deleted": result.deleted_count,
+            "message": f"Cleared {result.deleted_count} conversation states"
+        }
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
