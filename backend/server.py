@@ -3164,6 +3164,13 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
 async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Start new order (without template)"""
     logger.info(f"order_new called - user_id: {update.effective_user.id}")
+    
+    # CRITICAL: Create unique session ID for this new order
+    import time
+    order_session_id = f"{int(time.time() * 1000)}"
+    context.user_data['order_session_id'] = order_session_id
+    logger.warning(f"🆕 NEW ORDER SESSION (order_new): {order_session_id} for user {update.effective_user.id}")
+    
     query = update.callback_query
     await safe_telegram_call(query.answer())
     
