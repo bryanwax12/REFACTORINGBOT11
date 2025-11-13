@@ -87,6 +87,10 @@ from handlers.order_flow import (
     skip_from_phone, skip_to_phone
 )
 
+# Import address2 handlers directly since they're not in __init__.py yet
+from handlers.order_flow.from_address import order_from_address2
+from handlers.order_flow.to_address import order_to_address2
+
 # Profiled DB operations (most frequently used)
 @profile_db_query("find_user_by_telegram_id")
 async def find_user_by_telegram_id(telegram_id: int, projection: dict = None):
