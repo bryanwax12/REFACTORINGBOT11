@@ -1451,7 +1451,7 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # STEP 3: Store in session AND context
     user_id = update.effective_user.id
     context.user_data['from_name'] = name
-    await session_manager.update_session(user_id, step="FROM_ADDRESS", data={'from_name': name})
+    await session_manager.update_session_atomic(user_id, step="FROM_ADDRESS", data={'from_name': name})
     
     # Log action
     await SecurityLogger.log_action(
@@ -2324,7 +2324,7 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
         # Save to session AND context
         user_id = update.effective_user.id
         context.user_data['weight'] = weight
-        await session_manager.update_session(user_id, step="PARCEL_LENGTH", data={'weight': weight})
+        await session_manager.update_session_atomic(user_id, step="PARCEL_LENGTH", data={'weight': weight})
         
         # Check if we're editing parcel weight - ask for dimensions too
         if context.user_data.get('editing_parcel'):
@@ -2400,7 +2400,7 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
             context.user_data['length'] = 10
             context.user_data['width'] = 10
             context.user_data['height'] = 10
-            await session_manager.update_session(user_id, step="CONFIRM_DATA", data={
+            await session_manager.update_session_atomic(user_id, step="CONFIRM_DATA", data={
                 'length': 10,
                 'width': 10,
                 'height': 10
@@ -2434,7 +2434,7 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
         # Save to session AND context
         user_id = update.effective_user.id
         context.user_data['length'] = length
-        await session_manager.update_session(user_id, step="PARCEL_WIDTH", data={'length': length})
+        await session_manager.update_session_atomic(user_id, step="PARCEL_WIDTH", data={'length': length})
         
         # Mark previous message as selected (non-blocking)
         asyncio.create_task(mark_message_as_selected(update, context))
@@ -2486,7 +2486,7 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
             user_id = query.from_user.id
             context.user_data['width'] = 10
             context.user_data['height'] = 10
-            await session_manager.update_session(user_id, step="CONFIRM_DATA", data={
+            await session_manager.update_session_atomic(user_id, step="CONFIRM_DATA", data={
                 'width': 10,
                 'height': 10
             })
@@ -2519,7 +2519,7 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
         # Save to session AND context
         user_id = update.effective_user.id
         context.user_data['width'] = width
-        await session_manager.update_session(user_id, step="PARCEL_HEIGHT", data={'width': width})
+        await session_manager.update_session_atomic(user_id, step="PARCEL_HEIGHT", data={'width': width})
         
         # Mark previous message as selected (non-blocking)
         asyncio.create_task(mark_message_as_selected(update, context))
@@ -2572,7 +2572,7 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
             # Use default height 10
             user_id = query.from_user.id
             context.user_data['height'] = 10
-            await session_manager.update_session(user_id, step="CONFIRM_DATA", data={'height': 10})
+            await session_manager.update_session_atomic(user_id, step="CONFIRM_DATA", data={'height': 10})
             
             # Mark previous message as selected (non-blocking)
             asyncio.create_task(mark_message_as_selected(update, context))
@@ -2602,7 +2602,7 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
         # Save to session AND context
         user_id = update.effective_user.id
         context.user_data['height'] = height
-        await session_manager.update_session(user_id, step="CONFIRM_DATA", data={'height': height})
+        await session_manager.update_session_atomic(user_id, step="CONFIRM_DATA", data={'height': height})
         
         # Mark previous message as selected (non-blocking)
         asyncio.create_task(mark_message_as_selected(update, context))
@@ -3553,7 +3553,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             
             # Log error to session for debugging
             user_id = update.effective_user.id
-            await session_manager.update_session(user_id, data={
+            await session_manager.update_session_atomic(user_id, data={
                 'last_error': f'Missing required fields: {", ".join(missing_fields)}',
                 'error_step': 'FETCH_RATES',
                 'error_timestamp': datetime.now(timezone.utc).isoformat()
@@ -3671,7 +3671,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             
             # Log error to session for debugging
             user_id = update.effective_user.id
-            await session_manager.update_session(user_id, data={
+            await session_manager.update_session_atomic(user_id, data={
                 'last_error': 'ShipStation API timeout (35s)',
                 'error_step': 'FETCH_RATES',
                 'error_timestamp': datetime.now(timezone.utc).isoformat()
@@ -3711,7 +3711,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             
             # Log error to session for debugging
             user_id = update.effective_user.id
-            await session_manager.update_session(user_id, data={
+            await session_manager.update_session_atomic(user_id, data={
                 'last_error': f'ShipStation API error: {error_msg}',
                 'error_step': 'FETCH_RATES',
                 'error_timestamp': datetime.now(timezone.utc).isoformat(),
@@ -4689,7 +4689,7 @@ async def create_and_send_label(order_id, telegram_id, message):
             logger.error(f"Response: {response.text}")
             
             # Log error to session for debugging
-            await session_manager.update_session(telegram_id, data={
+            await session_manager.update_session_atomic(telegram_id, data={
                 'last_error': f'ShipStation label API error: {error_msg}',
                 'error_step': 'CREATE_LABEL_API',
                 'error_timestamp': datetime.now(timezone.utc).isoformat(),
@@ -4887,7 +4887,7 @@ Label PDF: {label_download_url}
         logger.error(f"Error creating label: {e}", exc_info=True)
         
         # Log error to session for debugging
-        await session_manager.update_session(telegram_id, data={
+        await session_manager.update_session_atomic(telegram_id, data={
             'last_error': f'Label creation failed: {str(e)[:200]}',
             'error_step': 'CREATE_LABEL',
             'error_timestamp': datetime.now(timezone.utc).isoformat(),
