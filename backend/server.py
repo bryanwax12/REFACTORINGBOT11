@@ -2725,6 +2725,7 @@ async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_T
         "updated_at": datetime.now(timezone.utc)
     }
     
+    # Note: update_template only supports template_id filter, manual query needed for telegram_id check
     result = await db.templates.update_one(
         {"id": template_id, "telegram_id": telegram_id},
         {"$set": update_data}
