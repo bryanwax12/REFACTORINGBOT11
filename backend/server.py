@@ -3413,17 +3413,52 @@ async def skip_address_validation(update: Update, context: ContextTypes.DEFAULT_
     return await fetch_shipping_rates(update, context)
 
 async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Fetch shipping rates from ShipStation"""
+    """Fetch shipping rates from ShipStation with caching"""
     query = update.callback_query
     
+    # Import cache
+    from services.shipstation_cache import shipstation_cache
+    
+    data = context.user_data
+    
+    # Check cache first (before showing progress message)
+    cached_rates = shipstation_cache.get(
+        from_zip=data['from_zip'],
+        to_zip=data['to_zip'],
+        weight=data['weight'],
+        length=data.get('length', 10),
+        width=data.get('width', 10),
+        height=data.get('height', 10)
+    )
+    
+    if cached_rates:
+        # Cache HIT - используем закэшированные тарифы
+        logger.info(f"✅ Using cached rates for {data['from_zip']} → {data['to_zip']}")
+        
+        # Immediately show rates (no API call needed)
+        await safe_telegram_call(query.answer("✅ Тарифы загружены из кэша"))
+        
+        # Prepare rate data
+        context.user_data['rates'] = cached_rates
+        
+        # Save to session
+        user_id = update.effective_user.id
+        await save_to_session(user_id, "CARRIER_SELECTION", {
+            'rates': cached_rates,
+            'cached': True,
+            'cache_timestamp': datetime.now(timezone.utc).isoformat()
+        }, context)
+        
+        # Display rates (reuse display logic)
+        return await display_shipping_rates(update, context, cached_rates)
+    
+    # Cache MISS - need to fetch from API
     # Send initial progress message
     progress_msg = await safe_telegram_call(query.message.reply_text("⏳ Получаю доступные курьерские службы и тарифы... (0 сек)"))
     
     try:
         import requests
         import asyncio
-        
-        data = context.user_data
         
         # Validate required fields and check for None values
         required_fields = ['from_name', 'from_street', 'from_city', 'from_state', 'from_zip', 
