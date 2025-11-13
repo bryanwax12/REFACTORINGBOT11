@@ -205,10 +205,12 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
     """
     Save new template name
     """
+    from utils.ui_utils import TemplateMessages
+    
     new_name = update.message.text.strip()
     
     if len(new_name) > 50:
-        await update.message.reply_text("❌ Название слишком длинное (максимум 50 символов)")
+        await update.message.reply_text(TemplateMessages.name_too_long())
         return
     
     template_id = context.user_data.get('renaming_template_id')
