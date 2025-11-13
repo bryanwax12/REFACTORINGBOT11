@@ -3910,7 +3910,6 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         
         # Display rates using reusable function
         return await display_shipping_rates(update, context, context.user_data['rates'])
- 
         
     except Exception as e:
         logger.error(f"Error getting rates: {e}", exc_info=True)
