@@ -2143,12 +2143,8 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             except Exception:
                 pass
             
-            keyboard = [
-                [InlineKeyboardButton("🔄 Попробовать снова", callback_data='continue_order')],
-                [InlineKeyboardButton("✏️ Редактировать адреса", callback_data='edit_addresses_error')],
-                [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
-            ]
-            reply_markup = InlineKeyboardMarkup(keyboard)
+            from utils.ui_utils import get_retry_edit_cancel_keyboard
+            reply_markup = get_retry_edit_cancel_keyboard()
             
             await safe_telegram_call(query.message.reply_text(
                 "❌ Превышено время ожидания ответа от ShipStation.\n\nПопробуйте еще раз или проверьте правильность адресов.",
