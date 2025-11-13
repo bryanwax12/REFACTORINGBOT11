@@ -1203,8 +1203,8 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         
         # Edit from address
         context.user_data['editing_from_address'] = True
-        keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
+        from utils.ui_utils import get_cancel_keyboard
+    reply_markup = get_cancel_keyboard()
         bot_msg = await safe_telegram_call(query.message.reply_text(
             "📤 Редактирование адреса отправителя\n\nШаг 1/6: Имя отправителя\nНапример: John Smith",
             reply_markup=reply_markup,
@@ -1220,8 +1220,8 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         
         # Edit to address
         context.user_data['editing_to_address'] = True
-        keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
+        from utils.ui_utils import get_cancel_keyboard
+    reply_markup = get_cancel_keyboard()
         bot_msg = await safe_telegram_call(query.message.reply_text(
             "📥 Редактирование адреса получателя\n\nШаг 1/6: Имя получателя\nНапример: Jane Doe",
             reply_markup=reply_markup,
@@ -1237,8 +1237,8 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         
         # Edit parcel dimensions
         context.user_data['editing_parcel'] = True
-        keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
+        from utils.ui_utils import get_cancel_keyboard
+    reply_markup = get_cancel_keyboard()
         bot_msg = await safe_telegram_call(query.message.reply_text(
             "📦 Редактирование посылки\n\nВведите вес посылки в фунтах:\nНапример: 5 или 2.5",
             reply_markup=reply_markup,
@@ -1655,8 +1655,8 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
     
     # Template data already loaded in context.user_data
     # Ask for parcel weight (first thing not in template)
-    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    from utils.ui_utils import get_cancel_keyboard
+    reply_markup = get_cancel_keyboard()
     
     template_name = context.user_data.get('template_name', 'шаблон')
     
@@ -2667,8 +2667,8 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
             context.user_data['last_state'] = TOPUP_AMOUNT  # Save state for cancel return
             
-            keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
+            from utils.ui_utils import get_cancel_keyboard
+    reply_markup = get_cancel_keyboard()
             
             message_text = """💵 Пополнение баланса
 
