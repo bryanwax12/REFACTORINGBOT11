@@ -6551,7 +6551,7 @@ async def startup_event():
                     ],
                     TO_PHONE: [
                         MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_phone),
-                        CallbackQueryHandler(order_to_phone, pattern='^skip_to_phone$'),
+                        CallbackQueryHandler(skip_to_phone, pattern='^skip_to_phone$'),
                         CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
                         CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
                     ],
