@@ -4614,6 +4614,14 @@ async def create_and_send_label(order_id, telegram_id, message):
             logger.error(f"Label creation failed: {error_msg}")
             logger.error(f"Response: {response.text}")
             
+            # Log error to session for debugging
+            await session_manager.update_session(telegram_id, data={
+                'last_error': f'ShipStation label API error: {error_msg}',
+                'error_step': 'CREATE_LABEL_API',
+                'error_timestamp': datetime.now(timezone.utc).isoformat(),
+                'error_response': response.text[:500]
+            })
+            
             # Notify admin about label creation error
             user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
             if user:
