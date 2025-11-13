@@ -1755,3 +1755,96 @@ All handler files in `/handlers` and `/handlers/order_flow` have been successful
 
 All template management UI has been successfully refactored and centralized.
 
+
+---
+
+## Server.py Refactoring Phase - $(date +"%Y-%m-%d %H:%M")
+
+### 🎯 Task: Begin server.py UI Refactoring
+
+**Objective:** Start refactoring UI elements in server.py, which contains 136 InlineKeyboardButton instances and 20 hardcoded message texts.
+
+### ✅ Completed Work
+
+#### 1. Analysis
+- **Total UI elements in server.py:** 136 InlineKeyboardButton + ~20 message texts
+- **Duplicated functions:** 18 functions (order_from_*, order_to_*, order_parcel_*)
+- **Unique functions:** 6 functions requiring refactoring
+
+**Key Finding:**
+- Functions in server.py have `@with_typing_indicator` decorator
+- Imported functions from handlers/order_flow/ don't have this decorator
+- Local definitions in server.py override imports
+- ConversationHandler uses local versions
+
+#### 2. Enhanced `/app/backend/utils/ui_utils.py`
+
+**New Message Class: OrderFlowMessages**
+- `create_order_choice()` - Choose new order or from template
+- `new_order_start()` - Start new order message  
+- `select_template()` - Select template header
+- `no_templates_error()` - No templates error
+- `template_item(i, template)` - Format template for list
+
+**New Keyboard Functions:**
+- `get_new_order_choice_keyboard()` - New/Template/Cancel
+- `get_template_selection_keyboard(templates)` - Template list with cancel
+
+#### 3. Refactored Functions in server.py
+
+**Unique functions (non-duplicates):**
+- ✅ `new_order_start()` - Entry point for order creation
+- ✅ `order_new()` - Start new order without template
+- ✅ `order_from_template_list()` - Show template list for order
+
+**UI Elements Replaced:**
+- Maintenance mode message → `MessageTemplates.maintenance_mode()`
+- Order choice keyboard → `get_new_order_choice_keyboard()`
+- New order message → `OrderFlowMessages.new_order_start()`
+- Cancel keyboard → `get_cancel_keyboard()`
+- Template selection → `get_template_selection_keyboard()`
+
+### 📊 Progress Metrics
+
+| Metric | Total | Refactored | Remaining | Progress |
+|--------|-------|------------|-----------|----------|
+| server.py UI elements | 136 | ~10 | ~126 | 7% |
+| Unique functions | 6 | 3 | 3 | 50% |
+| Duplicated functions | 18 | 0 | 18 | 0% |
+
+### 🔍 Findings & Challenges
+
+**Challenge: Function Duplication**
+- 18 order flow functions exist in BOTH server.py AND handlers/order_flow/
+- server.py versions have `@with_typing_indicator` decorator
+- handlers/order_flow/ versions already have UI refactored
+- Removing server.py duplicates would lose decorator functionality
+
+**Recommended Solution:**
+1. Add `@with_typing_indicator` to handlers/order_flow/ functions
+2. Remove duplicates from server.py
+3. Update ConversationHandler to use handlers/order_flow/ versions
+4. This requires careful testing to ensure no regressions
+
+### ✅ Testing
+
+**Linter:**
+- Status: ⚠️ 22 redefinition warnings (expected due to duplicates)
+- 2 unused variables (minor issues)
+
+**Backend Service:**
+- Status: ✅ RUNNING
+- Errors: ✅ None in logs  
+- Hot Reload: ✅ Working
+
+### 📌 Status: ⏸️ PAUSED
+
+Partial refactoring complete. Major challenge identified: function duplication with different decorators.
+
+**Next Steps:**
+1. Complete refactoring of remaining 3 unique functions
+2. Decide strategy for duplicated functions:
+   - Option A: Add decorator to handlers/order_flow/ and remove duplicates
+   - Option B: Refactor UI in server.py duplicates (keep both)
+   - Option C: Keep as-is (duplicates remain)
+
