@@ -264,6 +264,8 @@ async def faq_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     FAQ command handler
     Handles both direct command and callback query
     """
+    from utils.ui_utils import MessageTemplates, get_back_to_menu_keyboard
+    
     # Handle both command and callback
     if update.callback_query:
         query = update.callback_query
@@ -276,31 +278,8 @@ async def faq_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         asyncio.create_task(mark_message_as_selected(update, context))
         send_method = update.message.reply_text
     
-    faq_text = """📦 *White Label Shipping Bot*
-
-*Создавайте профессиональные shipping labels за минуты!*
-
-✅ *Что я умею:*
-• Создание shipping labels для любых посылок
-• Поддержка всех популярных курьеров (UPS, FedEx, USPS)
-• Точный расчёт стоимости доставки
-• Оплата криптовалютой (BTC, ETH, USDT, LTC)
-• Индивидуальные скидки
-
-🌍 *Доставка:*
-Отправляйте посылки из любой точки США
-
-💰 *Преимущества:*
-• Быстрое оформление
-• Прозрачные цены
-• Безопасные платежи
-• Поддержка 24/7"""
-    
-    keyboard = [
-        [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]
-    ]
-    
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    faq_text = MessageTemplates.faq_text()
+    reply_markup = get_back_to_menu_keyboard()
     bot_msg = await send_method(faq_text, reply_markup=reply_markup, parse_mode='Markdown')
     
     # Save message ID and text for button protection
