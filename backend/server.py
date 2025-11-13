@@ -1376,7 +1376,7 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 Шаг 1/13: 👤 Имя отправителя
 Например: John Smith"""
-        bot_msg = await safe_telegram_call(query.message.reply_text(
+        bot_msg = await safe_telegram_call(send_method(
             message_text,
             reply_markup=reply_markup
         ))
