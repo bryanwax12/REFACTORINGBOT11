@@ -1911,6 +1911,7 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['last_state'] = TO_ADDRESS
     return TO_ADDRESS
 
+@with_typing_indicator
 async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.info(f"🔍 order_to_address called - user: {update.effective_user.id}, text: {update.message.text if update.message else 'no message'}")
     address = update.message.text.strip()
