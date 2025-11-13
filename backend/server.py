@@ -2238,7 +2238,6 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         logger.info(f"Got {len(all_rates)} rates from carriers: {carriers}")
         
         # Balance rates across carriers - show best rates from each carrier
-        markup = 10.00  # Markup in USD
         context.user_data['rates'] = []
         
         # Group rates by carrier
