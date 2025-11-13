@@ -819,23 +819,7 @@ async def test_error_message(update: Update, context: ContextTypes.DEFAULT_TYPE)
     await safe_telegram_call(update.message.reply_text(user_message, reply_markup=reply_markup))
 
 # Helper function to check if user is blocked
-async def check_user_blocked(telegram_id: int) -> bool:
-    """Check if user is blocked"""
-    user = await find_user_by_telegram_id(telegram_id, {"_id": 0, "blocked": 1})
-    return user.get('blocked', False) if user else False
-
-async def send_blocked_message(update: Update):
-    """Send blocked message to user"""
-    message = """⛔️ *Вы заблокированы*
-
-Ваш доступ к боту был ограничен администратором.
-
-Для получения дополнительной информации, пожалуйста, свяжитесь с администратором."""
-    
-    if update.message:
-        await safe_telegram_call(update.message.reply_text(message, parse_mode='Markdown'))
-    elif update.callback_query:
-        await safe_telegram_call(update.callback_query.message.reply_text(message, parse_mode='Markdown'))
+# check_user_blocked and send_blocked_message moved to handlers/common_handlers.py
 
 async def handle_orphaned_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle button presses that are not caught by any active handler (orphaned buttons)"""
