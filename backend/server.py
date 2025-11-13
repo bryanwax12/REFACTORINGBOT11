@@ -8173,7 +8173,8 @@ async def startup_event():
                 per_chat=True,
                 per_user=True,
                 per_message=False,
-                name="order_conv_handler"
+                name="order_conv_handler",  # CRITICAL: Required for persistence!
+                persistent=True  # CRITICAL: Activates persistence in webhook mode!
             )
             
             application.add_handler(template_rename_handler)
