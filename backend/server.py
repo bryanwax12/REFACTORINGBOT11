@@ -1372,10 +1372,8 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             context.user_data['last_state'] = FROM_NAME
         return FROM_NAME
 
+@with_typing_indicator
 async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # IMMEDIATE feedback: show typing indicator
-    await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
-    
     logger.info(f"🔵 order_from_name called - User: {update.effective_user.id}, Message: {update.message.text}")
     # Skip if user is in topup flow
     if context.user_data.get('awaiting_topup_amount'):
