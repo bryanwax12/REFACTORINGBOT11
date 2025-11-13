@@ -107,7 +107,7 @@ CACHE_TTL = 60  # Cache TTL in seconds
 
 # Button click debouncing - prevent multiple rapid clicks
 button_click_tracker = {}  # {user_id: {button_data: last_click_timestamp}}
-BUTTON_DEBOUNCE_SECONDS = 0.3  # Быстрый отклик: 300ms между нажатиями
+BUTTON_DEBOUNCE_SECONDS = 0.1  # Максимально быстрый: 100ms между нажатиями
 
 # Rate limiting для защиты от Telegram бана
 # Telegram API limits: 30 msg/sec per chat, burst of 20
