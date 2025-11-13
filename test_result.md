@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "CRITICAL BUG FIX - Production бот @whitelabel_shipping_bot требует двойной отправки текстовых сообщений. Preview бот @whitelabel_shipping_bot_test_bot работает нормально. Production должен работать в webhook режиме на https://crypto-shipping.emergent.host/"
+user_problem_statement: "ПОЛНОЕ РЕГРЕССИОННОЕ ТЕСТИРОВАНИЕ после завершения миграции на кастомный Session Manager. Встроенный persistence от python-telegram-bot полностью отключен. Вместо этого используется SessionManager (/app/backend/session_manager.py) для ручного управления состоянием диалогов в MongoDB."
 
 backend:
   - task: "Telegram Webhook Bug Fix - Double Message Issue"
