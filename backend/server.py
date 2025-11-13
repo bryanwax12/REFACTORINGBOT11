@@ -3091,10 +3091,7 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
     
     template_id = context.user_data.get('renaming_template_id')
     
-    await db.templates.update_one(
-        {"id": template_id},
-        {"$set": {"name": new_name}}
-    )
+    await update_template(template_id, {"name": new_name})
     
     keyboard = [[InlineKeyboardButton("👁️ Просмотреть", callback_data=f'template_view_{template_id}')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
