@@ -1360,6 +1360,7 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['last_bot_message_id'] = bot_msg.message_id
     context.user_data['last_bot_message_text'] = message_text  # Save text for editing
     context.user_data['last_state'] = FROM_ADDRESS  # Save state for next step
+    logger.info(f"✅ order_from_name completed - Saved name: '{name}', Returning state: FROM_ADDRESS")
     return FROM_ADDRESS
 
 async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
