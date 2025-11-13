@@ -8384,6 +8384,25 @@ async def clear_conversations_direct():
     except Exception as e:
         return {"success": False, "error": str(e)}
 
+
+@app.get("/api/performance/stats")
+async def get_performance_statistics():
+    """
+    Get performance statistics for DB queries and API calls
+    Useful for monitoring and identifying bottlenecks
+    """
+    try:
+        from utils.performance import get_performance_stats
+        stats = get_performance_stats()
+        return {
+            "success": True,
+            "stats": stats,
+            "threshold_ms": 100,
+            "message": "Performance statistics retrieved"
+        }
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
