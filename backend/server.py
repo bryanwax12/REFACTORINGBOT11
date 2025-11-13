@@ -5788,10 +5788,7 @@ async def oxapay_webhook(request: Request):
         create_and_send_label
     )
 
-@api_router.get("/users")
-async def get_users(authenticated: bool = Depends(verify_admin_key)):
-    users = await db.users.find({}, {"_id": 0}).to_list(100)
-    return users
+# get_users moved to routers/admin_router.py
 
 
 @api_router.post("/telegram/webhook")
