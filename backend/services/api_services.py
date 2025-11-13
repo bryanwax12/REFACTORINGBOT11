@@ -36,7 +36,7 @@ async def create_oxapay_invoice(amount: float, order_id: str, description: str =
             "lifeTime": 30,  # 30 minutes
             "fee_paid_by_payer": 0,  # Merchant pays fees
             "under_paid_coverage": 2,  # Accept 2% underpayment
-            "callback_url": f"{os.environ.get('WEBHOOK_BASE_URL', 'https://dialogflow-23.preview.emergentagent.com')}/api/oxapay/webhook",
+            "callback_url": f"{os.environ.get('WEBHOOK_BASE_URL', 'https://telebot-refactor.preview.emergentagent.com')}/api/oxapay/webhook",
             "return_url": f"https://t.me/{os.environ.get('BOT_USERNAME', '')}",
             "description": description,
             "order_id": order_id

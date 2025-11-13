@@ -32,7 +32,7 @@ payload = {
 
 print('🔍 Testing Cross-Country Shipping (CA to NY)...')
 response = requests.post(
-    'https://dialogflow-23.preview.emergentagent.com/api/calculate-shipping',
+    'https://telebot-refactor.preview.emergentagent.com/api/calculate-shipping',
     json=payload,
     timeout=30
 )

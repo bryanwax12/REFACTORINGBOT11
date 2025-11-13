@@ -1,150 +1,839 @@
 <analysis>**original_problem_statement:**
-Изначально бот зависал и путал шаги в production (webhook), что было связано с потерей состояния . После многочисленных неудачных попыток исправить встроенный механизм  (Redis, Pickle, Mongo), пользователь предоставил четкий план по созданию кастомной системы управления сессиями с нуля, чтобы обеспечить стабильность.
+Изначально бот зависал и путал шаги в production, что было связано с потерей состояния . Пользователь предоставил четкий план по созданию кастомной системы управления сессиями с нуля, чтобы обеспечить стабильность. Впоследствии пользователь запросил полный аудит кода, рефакторинг и оптимизацию производительности.
 
-PRODUCT REQUIREMENTS (на основе плана пользователя):
-1.  **Структура БД:**
-    *   Создать коллекцию  для хранения активных сессий (, , , ).
-    *   Создать коллекцию  для хранения готовых результатов.
-2.  **Логика сессий:**
-    *   При старте нового заказа проверять наличие активной сессии для . Если есть — продолжать, если нет — создавать новую.
-    *   Каждый шаг диалога должен читать и обновлять сессию в БД.
-3.  **Обработка ошибок и API:**
-    *   При ошибках API или таймаутах корректно обрабатывать ситуацию (возврат к предыдущему шагу или очистка сессии).
-    *   Результаты API-вызовов (например, тарифы ShipStation) сохранять в  сессии.
-4.  **Финализация и очистка:**
-    *   После успешного создания лейбла сохранять результат в  и удалять активную сессию.
-    *   Реализовать автоматическую очистку зависших сессий по таймауту (15 минут).
+PRODUCT REQUIREMENTS:
+1.  **Стабильность сессий:** Заменить встроенный механизм  на кастомный , работающий напрямую с MongoDB, чтобы решить проблему потери состояний.
+2.  **Атомарность и надежность:** Использовать атомарные операции MongoDB () и TTL-индексы для автоматической очистки сессий.
+3.  **Оптимизация:** Ускорить медленные запросы к API (например, ShipStation) с помощью кэширования.
+4.  **Качество кода:** Провести полный аудит кода, удалить мертвый код, исправить баги и начать рефакторинг монолитного файла  (8800+ строк) в модульную структуру.
+5.  **Мониторинг:** Добавить систему профилирования для отслеживания производительности запросов к БД и внешним API.
 
 **what currently exists?** (give crisp summary)
-Встроенный механизм  от  был **полностью отключен** ( удалено,  больше не используется) из-за неразрешимых проблем со смешиванием и зависанием состояний пользователей. Вместо этого начата реализация кастомной системы управления сессиями на основе плана пользователя. Создан новый файл , который напрямую работает с MongoDB, управляя сессиями в коллекции . Большинство обработчиков текстовых сообщений в  были обновлены для использования этого нового менеджера сессий.
+Бот полностью переведен на стабильную архитектуру с кастомным , использующим атомарные операции MongoDB и TTL-индексы, что решило исходную проблему с зависаниями. Проведен полный аудит и чистка кода: удалены мертвые файлы, исправлены критические баги (включая проблемы с транзакциями в Standalone-режиме MongoDB и целостностью данных в коллекции ), добавлена система кэширования для API ShipStation и внедрен детальный мониторинг производительности с API-эндпоинтом. Начался масштабный рефакторинг монолитного : создана модульная структура (, , ) и уже выделены несколько модулей (, , ).
 
 **Last working item**: (Tell about what agent was working on and its readiness in terms of completion and testing)
-    - Last item agent was working: Агент начал реализацию оставшихся пунктов из плана пользователя. В частности, он приступил к **пункту Обработка ошибок с возвратом к предыдущему шагу**, создав для этого вспомогательную функцию  в .
+    - Last item agent was working: Агент продолжал постепенный рефакторинг . Он создал модуль , который должен был содержать общие обработчики (такие как , GNU bash, version 5.2.15(1)-release (aarch64-unknown-linux-gnu)
+These shell commands are defined internally.  Type `help' to see this list.
+Type `help name' to find out more about the function `name'.
+Use `info bash' to find out more about the shell in general.
+Use `man -k' or `info' to find out more about commands not in this list.
+
+A star (*) next to a name means that the command is disabled.
+
+ job_spec [&]                            history [-c] [-d offset] [n] or hist>
+ (( expression ))                        if COMMANDS; then COMMANDS; [ elif C>
+ . filename [arguments]                  jobs [-lnprs] [jobspec ...] or jobs >
+ :                                       kill [-s sigspec | -n signum | -sigs>
+ [ arg... ]                              let arg [arg ...]
+ [[ expression ]]                        local [option] name[=value] ...
+ alias [-p] [name[=value] ... ]          logout [n]
+ bg [job_spec ...]                       mapfile [-d delim] [-n count] [-O or>
+ bind [-lpsvPSVX] [-m keymap] [-f file>  popd [-n] [+N | -N]
+ break [n]                               printf [-v var] format [arguments]
+ builtin [shell-builtin [arg ...]]       pushd [-n] [+N | -N | dir]
+ caller [expr]                           pwd [-LP]
+ case WORD in [PATTERN [| PATTERN]...)>  read [-ers] [-a array] [-d delim] [->
+ cd [-L|[-P [-e]] [-@]] [dir]            readarray [-d delim] [-n count] [-O >
+ command [-pVv] command [arg ...]        readonly [-aAf] [name[=value] ...] o>
+ compgen [-abcdefgjksuv] [-o option] [>  return [n]
+ complete [-abcdefgjksuv] [-pr] [-DEI]>  select NAME [in WORDS ... ;] do COMM>
+ compopt [-o|+o option] [-DEI] [name .>  set [-abefhkmnptuvxBCEHPT] [-o optio>
+ continue [n]                            shift [n]
+ coproc [NAME] command [redirections]    shopt [-pqsu] [-o] [optname ...]
+ declare [-aAfFgiIlnrtux] [name[=value>  source filename [arguments]
+ dirs [-clpv] [+N] [-N]                  suspend [-f]
+ disown [-h] [-ar] [jobspec ... | pid >  test [expr]
+ echo [-neE] [arg ...]                   time [-p] pipeline
+ enable [-a] [-dnps] [-f filename] [na>  times
+ eval [arg ...]                          trap [-lp] [[arg] signal_spec ...]
+ exec [-cl] [-a name] [command [argume>  true
+ exit [n]                                type [-afptP] name [name ...]
+ export [-fn] [name[=value] ...] or ex>  typeset [-aAfFgiIlnrtux] name[=value>
+ false                                   ulimit [-SHabcdefiklmnpqrstuvxPRT] [>
+ fc [-e ename] [-lnr] [first] [last] o>  umask [-p] [-S] [mode]
+ fg [job_spec]                           unalias [-a] name [name ...]
+ for NAME [in WORDS ... ] ; do COMMAND>  unset [-f] [-v] [-n] [name ...]
+ for (( exp1; exp2; exp3 )); do COMMAN>  until COMMANDS; do COMMANDS-2; done
+ function name { COMMANDS ; } or name >  variables - Names and meanings of so>
+ getopts optstring name [arg ...]        wait [-fn] [-p var] [id ...]
+ hash [-lr] [-p pathname] [-dt] [name >  while COMMANDS; do COMMANDS-2; done
+ help [-dms] [pattern ...]               { COMMANDS ; }, обработка ошибок). Работа была прервана сразу после создания этого файла, до его наполнения кодом и интеграции.
     - Status: IN PROGRESS
     - Agent Testing Done: N
-    - Which testing method agent to use? backend testing agent (после завершения миграции на кастомный session manager потребуется полное регрессионное тестирование).
+    - Which testing method agent to use? backend testing agent (после завершения всего этапа рефакторинга).
     - User Testing Done: N
 
 **All Pending/In progress Issue list**: (List down all issues plus pending 
-wtmp begins Wed Nov 12 23:42:55 2025 issues (if present) with PRIORITY. This includes issue on which agent was lastly working on and not yet resolved, issues work in progress or pending, issues mentioned by users but not yet resolved,  issues main agent introduced or missed while working. IMPORTANT: Most recent working item that is pending or in progress by default is of HIGHEST priority, ie P0)
+wtmp begins Thu Nov 13 17:41:17 2025 issues (if present) with PRIORITY. This includes issue on which agent was lastly working on and not yet resolved, issues work in progress or pending, issues mentioned by users but not yet resolved,  issues main agent introduced or missed while working. IMPORTANT: Most recent working item that is pending or in progress by default is of HIGHEST priority, ie P0)
 
-  Issue 1:  (P0) Бот неработоспособен, так как находится в процессе миграции на новую систему управления сессиями.
-  Issue 2:  (P2) Медленное получение тарифов от ShipStation API (старая проблема, не решена).
+  Issue 1:  (P1) Профилирующие функции созданы, но не используются для всех DB-запросов.
   
   Issues Detail:
   - Issue 1: 
-     - **Описание:** Переход на кастомный  не завершен. Некоторые обработчики могут все еще использовать старую логику (), что приводит к неконсистентному поведению. Критически важные части, такие как обработка ошибок и сохранение API-ответов в сессию, еще не реализованы.
-     - **Attempted fixes:** N/A (это новая архитектура).
+     - **Описание:** Были созданы оберточные функции для профилирования DB-запросов (например, ). Агент заменил 32 прямых вызова , но могут оставаться другие прямые вызовы к другим коллекциям, которые не проходят через систему профилирования.
+     - **Attempted fixes:** Частичная замена вызовов.
      - **Next debug checklist:**
-       1. Завершить реализацию пунктов 2 и 3 из **In progress Task List** ниже.
-       2. Проверить **ВСЕ** обработчики в , чтобы убедиться, что они используют исключительно , а не  для хранения состояния.
-       3. Провести полное тестирование всего флоу создания заказа.
-     - **Why fix this issue and what will be achieved with the fix?** Это завершит переход на новую, стабильную архитектуру управления состоянием, что должно решить все проблемы с зависанием, перескакиванием шагов и смешиванием состояний пользователей.
+       1. С помощью  найти все прямые вызовы методов , ,  и т.д. к коллекциям ,  и другим в .
+       2. Создать для них аналогичные оберточные функции в .
+       3. Заменить прямые вызовы на вызовы оберточных функций.
+     - **Why fix this issue and what will be achieved with the fix?** Это обеспечит 100% покрытие мониторингом производительности, что позволит точно определять узкие места в работе с базой данных.
      - **Status:**  IN PROGRESS
-     - **Is recurring issue?** Y (проблемы с состоянием — recurring, но решаются новым подходом).
+     - **Is recurring issue?** N
      - **Should Test frontend/backend/both after fix?** backend
      - **Blocked on other issue:** нет
 
 **In progress Task List**: (Tasks that were started but were not finished)
-  Task 1:  (P0) Завершить внедрение кастомного Session Manager
+  Task 1:  (P0) Завершить рефакторинг  в модульную структуру.
 
  Task Detail:
   - Task 1: 
-     - **Where to resume:** Агент создал функцию  в . Теперь нужно интегрировать её вызов в  блоки в хендлерах, где происходят API вызовы (например, ).
-     - **What will be achieved with this?** Завершение миграции на стабильную, предсказуемую систему управления состоянием.
+     - **Where to resume:** 
+       1. Наполнить кодом созданный, но пустой файл , переместив туда функции , GNU bash, version 5.2.15(1)-release (aarch64-unknown-linux-gnu)
+These shell commands are defined internally.  Type `help' to see this list.
+Type `help name' to find out more about the function `name'.
+Use `info bash' to find out more about the shell in general.
+Use `man -k' or `info' to find out more about commands not in this list.
+
+A star (*) next to a name means that the command is disabled.
+
+ job_spec [&]                            history [-c] [-d offset] [n] or hist>
+ (( expression ))                        if COMMANDS; then COMMANDS; [ elif C>
+ . filename [arguments]                  jobs [-lnprs] [jobspec ...] or jobs >
+ :                                       kill [-s sigspec | -n signum | -sigs>
+ [ arg... ]                              let arg [arg ...]
+ [[ expression ]]                        local [option] name[=value] ...
+ alias [-p] [name[=value] ... ]          logout [n]
+ bg [job_spec ...]                       mapfile [-d delim] [-n count] [-O or>
+ bind [-lpsvPSVX] [-m keymap] [-f file>  popd [-n] [+N | -N]
+ break [n]                               printf [-v var] format [arguments]
+ builtin [shell-builtin [arg ...]]       pushd [-n] [+N | -N | dir]
+ caller [expr]                           pwd [-LP]
+ case WORD in [PATTERN [| PATTERN]...)>  read [-ers] [-a array] [-d delim] [->
+ cd [-L|[-P [-e]] [-@]] [dir]            readarray [-d delim] [-n count] [-O >
+ command [-pVv] command [arg ...]        readonly [-aAf] [name[=value] ...] o>
+ compgen [-abcdefgjksuv] [-o option] [>  return [n]
+ complete [-abcdefgjksuv] [-pr] [-DEI]>  select NAME [in WORDS ... ;] do COMM>
+ compopt [-o|+o option] [-DEI] [name .>  set [-abefhkmnptuvxBCEHPT] [-o optio>
+ continue [n]                            shift [n]
+ coproc [NAME] command [redirections]    shopt [-pqsu] [-o] [optname ...]
+ declare [-aAfFgiIlnrtux] [name[=value>  source filename [arguments]
+ dirs [-clpv] [+N] [-N]                  suspend [-f]
+ disown [-h] [-ar] [jobspec ... | pid >  test [expr]
+ echo [-neE] [arg ...]                   time [-p] pipeline
+ enable [-a] [-dnps] [-f filename] [na>  times
+ eval [arg ...]                          trap [-lp] [[arg] signal_spec ...]
+ exec [-cl] [-a name] [command [argume>  true
+ exit [n]                                type [-afptP] name [name ...]
+ export [-fn] [name[=value] ...] or ex>  typeset [-aAfFgiIlnrtux] name[=value>
+ false                                   ulimit [-SHabcdefiklmnpqrstuvxPRT] [>
+ fc [-e ename] [-lnr] [first] [last] o>  umask [-p] [-S] [mode]
+ fg [job_spec]                           unalias [-a] name [name ...]
+ for NAME [in WORDS ... ] ; do COMMAND>  unset [-f] [-v] [-n] [name ...]
+ for (( exp1; exp2; exp3 )); do COMMAN>  until COMMANDS; do COMMANDS-2; done
+ function name { COMMANDS ; } or name >  variables - Names and meanings of so>
+ getopts optstring name [arg ...]        wait [-fn] [-p var] [id ...]
+ hash [-lr] [-p pathname] [-dt] [name >  while COMMANDS; do COMMANDS-2; done
+ help [-dms] [pattern ...]               { COMMANDS ; }, ,  и другие общие обработчики из .
+       2. Создать оставшиеся модули хендлеров (например, ).
+       3. В  заменить оригинальный код хендлеров на импорты из новых модулей ().
+       4. После успешной интеграции и тестирования, удалить дублирующийся код из .
+     - **What will be achieved with this?** Превращение монолитного файла  в поддерживаемую, модульную структуру, что упростит дальнейшую разработку и отладку.
      - **Status:**  IN PROGRESS
-     - **Sub-tasks remaining:**
-         1.  **(P0.1) Обработка ошибок:** Интегрировать  в обработчики, которые делают внешние вызовы.
-         2.  **(P0.2) Сохранение результатов API:** Модифицировать , чтобы результаты (тарифы) сохранялись в  сессии через .
-         3.  **(P0.3) Обработка таймаутов:** В  уже добавлена логика проверки . Необходимо убедиться, что она корректно обрабатывает просроченные сессии (например, возвращает , чтобы диалог начался заново).
      - **Should Test frontend/backend/both after fix?** backend
      - **Blocked on something:** нет
 
 **Upcoming and Future Tasks**
  Upcoming Tasks:
-    - (P1) Провести полное регрессионное тестирование бота после завершения миграции на .
+    - (P1) **Добавить тесты (pytest):** Написать unit-тесты для уже выделенных, изолированных модулей (, , ). Начать с .
  
  Future Tasks:
-    - (P2) Оптимизировать медленные запросы к ShipStation API (возможно, кэшированием).
-    - (P3) Провести рефакторинг  в модульную структуру.
+    - (P2) **Документация:** Создать или дополнить  с описанием новой модульной архитектуры, ключевых файлов и инструкций по добавлению новых функций.
 
 **Completed work in this session**
-- **Полный отказ от  Persistence:** После многочисленных сбоев с Redis, Pickle и Mongo persistence было принято архитектурное решение отказаться от встроенного механизма.
-- **Создан кастомный Session Manager:** Разработан  для ручного управления состоянием диалогов в MongoDB.
-- **Создана новая схема БД:** Внедрены коллекции  и .
-- **Миграция обработчиков:** Большинство хендлеров создания заказа переписаны для использования нового .
-- **Автоматическая очистка сессий:** Реализована периодическая очистка старых (неактивных более 15 минут) сессий.
-- **Улучшения UX:** Добавлен индикатор печатает... во все текстовые обработчики для мгновенной обратной связи.
-- **Исправление багов:** Устранен критический баг с  импортом.
-- **Исправление конфигурации:** Устранены многочисленные ошибки в  файлах (неправильные URL, токены, имена БД), что позволило production-окружению работать в правильном режиме (webhook).
-
-**Earlier issues found/mentioned but not fixed**
-   - Нет.
+- **Полная стабилизация бота:** Исходная проблема с потерей состояния решена путем миграции на  с атомарными операциями () и TTL-индексами для автоочистки сессий.
+- **Исправление критических багов:**
+    - Устранена проблема с транзакциями в MongoDB Standalone mode, что предотвратило утечки сессий.
+    - Исправлена целостность данных: удалены 58 некорректных записей в коллекции , блокировавшие создание индексов.
+- **Оптимизация производительности:**
+    - Реализовано кэширование запросов к ShipStation API (), что ускорило получение тарифов.
+    - Внедрена система мониторинга производительности () с API-эндпоинтом () для отслеживания медленных запросов.
+- **Масштабный рефакторинг и чистка кода:**
+    - Проведен полный аудит кода, удалено 4 файла с мертвым кодом (,  и др.).
+    - Начато разделение монолитного  (8800+ строк) на модули:
+        - 
+        - 
+        - 
+        -  (скелет)
+        -  (скелет)
+    - Исправлены все голые  и подавлены информационные .
+    - Устранены дубликаты кода (32 вызова  заменены на одну helper-функцию).
+- **Безопасность:** Добавлена авторизация по admin-ключу ко всем отладочным API-эндпоинтам.
 
 **Known issue recurrence from previous fork**
   - **Issue:** Проблема с потерей состояния .
-  - **Recurrence count:** Проявлялась на протяжении всей сессии в разных формах.
-  - **Status:** RESOLVED (архитектурно). Текущая реализация кастомного  полностью заменяет проблемный механизм, но требует завершения.
+  - **Recurrence count:** Многократно.
+  - **Status:** RESOLVED (архитектурно, путем миграции на кастомный ).
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Ручное управление состоянием (FSM):** Ключевой концепт. Вместо использования библиотечного , состояние (шаг, данные) явно сохраняется и загружается из MongoDB на каждом шаге.
-- **MongoDB:** Используется как основное хранилище для кастомных сессий и готовых лейблов.
-- **FastAPI:** Основа бэкенда.
-- **python-telegram-bot:** Используется для основной логики бота, но его механизм  теперь работает в режиме  (без ).
+- **Ручное управление состоянием (FSM):** Состояние диалога явно сохраняется в MongoDB на каждом шаге.
+- **Асинхронность:**  +  (асинхронный драйвер MongoDB) для неблокирующей обработки запросов.
+- **Атомарные операции MongoDB:** Использование  для избежания race conditions.
+- **TTL-индексы:** Автоматическое удаление просроченных сессий на стороне MongoDB.
+- **Постепенный рефакторинг (Gradual Refactoring):** Стратегия разделения монолита на модули без остановки работы приложения.
+- **Кэширование:** In-memory кэш для ускорения ответов от внешних API.
+- **Профилирование:** Декораторы и глобальный сборщик статистики для мониторинга производительности.
 
 **key DB schema**
-  - **user_sessions:** 
+  - **user_sessions:**  (с TTL-индексом на )
   - **completed_labels:** 
+  - **orders:** 
 
 **changes in tech stack**
-  - Зависимость  удалена.
+  - Нет.
 
-**All files**
-- : (НОВЫЙ) Реализует всю логику для создания, обновления, получения и удаления сессий пользователей в MongoDB.
-- : (СИЛЬНО ИЗМЕНЕН) Все хендлеры создания заказа были переписаны для вызова . Встроенный  полностью отключен. Добавлены UX-улучшения (typing indicator).
-- : (УСТАРЕЛ) Этот файл больше не используется и должен быть удален.
+**All files** (list a.) all created or updated files in this session and why do they exists?  2. Any other important files)
+- **Созданы (новые):**
+  - : (V2) Полностью переписан для использования атомарных операций и TTL-индексов, решил проблему стабильности.
+  - : Выделен из  для инкапсуляции логики работы с API.
+  - : Реализует кэширование для ускорения API-запросов.
+  - : Новые модули, созданные в рамках рефакторинга .
+  - : Реализует систему мониторинга производительности.
+  - : Централизованное хранилище для кэша настроек.
+  - : Выделен из  для хранения Pydantic моделей.
+  - : Создана структура для будущих ============================= test session starts ==============================
+platform linux -- Python 3.11.14, pytest-8.4.2, pluggy-1.6.0
+rootdir: /app
+plugins: anyio-4.11.0
+collected 76 items
+
+admin_notification_test.py ...                                           [  3%]
+backend/tests/test_session_manager.py FFFFFFF                            [ 13%]
+backend_test.py .....................................................    [ 82%]
+return_to_order_test.py ..                                               [ 85%]
+telegram_persistence_test.py ......                                      [ 93%]
+template_test.py FF..                                                    [ 98%]
+test_admin_notification_direct.py F                                      [100%]
+
+=================================== FAILURES ===================================
+________________________ test_get_or_create_session_new ________________________
+async def functions are not natively supported.
+You need to install a suitable plugin for your async framework, for example:
+  - anyio
+  - pytest-asyncio
+  - pytest-tornasync
+  - pytest-trio
+  - pytest-twisted
+_____________________ test_get_or_create_session_existing ______________________
+async def functions are not natively supported.
+You need to install a suitable plugin for your async framework, for example:
+  - anyio
+  - pytest-asyncio
+  - pytest-tornasync
+  - pytest-trio
+  - pytest-twisted
+__________________________ test_update_session_atomic __________________________
+async def functions are not natively supported.
+You need to install a suitable plugin for your async framework, for example:
+  - anyio
+  - pytest-asyncio
+  - pytest-tornasync
+  - pytest-trio
+  - pytest-twisted
+__________________ test_update_session_atomic_multiple_fields __________________
+async def functions are not natively supported.
+You need to install a suitable plugin for your async framework, for example:
+  - anyio
+  - pytest-asyncio
+  - pytest-tornasync
+  - pytest-trio
+  - pytest-twisted
+______________________________ test_clear_session ______________________________
+async def functions are not natively supported.
+You need to install a suitable plugin for your async framework, for example:
+  - anyio
+  - pytest-asyncio
+  - pytest-tornasync
+  - pytest-trio
+  - pytest-twisted
+______________________ test_save_completed_label_fallback ______________________
+async def functions are not natively supported.
+You need to install a suitable plugin for your async framework, for example:
+  - anyio
+  - pytest-asyncio
+  - pytest-tornasync
+  - pytest-trio
+  - pytest-twisted
+_________________________ test_revert_to_previous_step _________________________
+async def functions are not natively supported.
+You need to install a suitable plugin for your async framework, for example:
+  - anyio
+  - pytest-asyncio
+  - pytest-tornasync
+  - pytest-trio
+  - pytest-twisted
+_______________________ test_template_database_structure _______________________
+async def functions are not natively supported.
+You need to install a suitable plugin for your async framework, for example:
+  - anyio
+  - pytest-asyncio
+  - pytest-tornasync
+  - pytest-trio
+  - pytest-twisted
+_________________________ test_template_data_integrity _________________________
+async def functions are not natively supported.
+You need to install a suitable plugin for your async framework, for example:
+  - anyio
+  - pytest-asyncio
+  - pytest-tornasync
+  - pytest-trio
+  - pytest-twisted
+___________________________ test_admin_notification ____________________________
+async def functions are not natively supported.
+You need to install a suitable plugin for your async framework, for example:
+  - anyio
+  - pytest-asyncio
+  - pytest-tornasync
+  - pytest-trio
+  - pytest-twisted
+=============================== warnings summary ===============================
+backend/tests/test_session_manager.py:39
+  /app/backend/tests/test_session_manager.py:39: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.asyncio
+
+backend/tests/test_session_manager.py:54
+  /app/backend/tests/test_session_manager.py:54: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.asyncio
+
+backend/tests/test_session_manager.py:70
+  /app/backend/tests/test_session_manager.py:70: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.asyncio
+
+backend/tests/test_session_manager.py:90
+  /app/backend/tests/test_session_manager.py:90: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.asyncio
+
+backend/tests/test_session_manager.py:107
+  /app/backend/tests/test_session_manager.py:107: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.asyncio
+
+backend/tests/test_session_manager.py:124
+  /app/backend/tests/test_session_manager.py:124: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.asyncio
+
+backend/tests/test_session_manager.py:152
+  /app/backend/tests/test_session_manager.py:152: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.asyncio
+
+admin_notification_test.py::test_admin_notification_for_label_creation
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but admin_notification_test.py::test_admin_notification_for_label_creation returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+admin_notification_test.py::test_database_collections
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but admin_notification_test.py::test_database_collections returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+admin_notification_test.py::test_backend_logs_for_notifications
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but admin_notification_test.py::test_backend_logs_for_notifications returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend/tests/test_session_manager.py::test_get_or_create_session_new
+  /root/.venv/lib/python3.11/site-packages/_pytest/fixtures.py:1182: PytestRemovedIn9Warning: 'test_get_or_create_session_new' requested an async fixture 'session_manager', with no plugin or hook that handled it. This is usually an error, as pytest does not natively support it. This will turn into an error in pytest 9.
+  See: https://docs.pytest.org/en/stable/deprecations.html#sync-test-depending-on-async-fixture
+    warnings.warn(
+
+backend/tests/test_session_manager.py::test_get_or_create_session_existing
+  /root/.venv/lib/python3.11/site-packages/_pytest/fixtures.py:1182: PytestRemovedIn9Warning: 'test_get_or_create_session_existing' requested an async fixture 'session_manager', with no plugin or hook that handled it. This is usually an error, as pytest does not natively support it. This will turn into an error in pytest 9.
+  See: https://docs.pytest.org/en/stable/deprecations.html#sync-test-depending-on-async-fixture
+    warnings.warn(
+
+backend/tests/test_session_manager.py::test_update_session_atomic
+  /root/.venv/lib/python3.11/site-packages/_pytest/fixtures.py:1182: PytestRemovedIn9Warning: 'test_update_session_atomic' requested an async fixture 'session_manager', with no plugin or hook that handled it. This is usually an error, as pytest does not natively support it. This will turn into an error in pytest 9.
+  See: https://docs.pytest.org/en/stable/deprecations.html#sync-test-depending-on-async-fixture
+    warnings.warn(
+
+backend/tests/test_session_manager.py::test_update_session_atomic_multiple_fields
+  /root/.venv/lib/python3.11/site-packages/_pytest/fixtures.py:1182: PytestRemovedIn9Warning: 'test_update_session_atomic_multiple_fields' requested an async fixture 'session_manager', with no plugin or hook that handled it. This is usually an error, as pytest does not natively support it. This will turn into an error in pytest 9.
+  See: https://docs.pytest.org/en/stable/deprecations.html#sync-test-depending-on-async-fixture
+    warnings.warn(
+
+backend/tests/test_session_manager.py::test_clear_session
+  /root/.venv/lib/python3.11/site-packages/_pytest/fixtures.py:1182: PytestRemovedIn9Warning: 'test_clear_session' requested an async fixture 'session_manager', with no plugin or hook that handled it. This is usually an error, as pytest does not natively support it. This will turn into an error in pytest 9.
+  See: https://docs.pytest.org/en/stable/deprecations.html#sync-test-depending-on-async-fixture
+    warnings.warn(
+
+backend/tests/test_session_manager.py::test_save_completed_label_fallback
+  /root/.venv/lib/python3.11/site-packages/_pytest/fixtures.py:1182: PytestRemovedIn9Warning: 'test_save_completed_label_fallback' requested an async fixture 'session_manager', with no plugin or hook that handled it. This is usually an error, as pytest does not natively support it. This will turn into an error in pytest 9.
+  See: https://docs.pytest.org/en/stable/deprecations.html#sync-test-depending-on-async-fixture
+    warnings.warn(
+
+backend/tests/test_session_manager.py::test_revert_to_previous_step
+  /root/.venv/lib/python3.11/site-packages/_pytest/fixtures.py:1182: PytestRemovedIn9Warning: 'test_revert_to_previous_step' requested an async fixture 'session_manager', with no plugin or hook that handled it. This is usually an error, as pytest does not natively support it. This will turn into an error in pytest 9.
+  See: https://docs.pytest.org/en/stable/deprecations.html#sync-test-depending-on-async-fixture
+    warnings.warn(
+
+backend_test.py::test_api_health
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_api_health returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_carriers
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_carriers returned <class 'tuple'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_shipstation_production_api_key
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_shipstation_production_api_key returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_shipstation_carrier_ids
+  /root/.venv/lib/python3.11/site-packages/starlette/formparsers.py:12: PendingDeprecationWarning: Please use `import python_multipart` instead.
+    import multipart
+
+backend_test.py::test_shipstation_carrier_ids
+  /app/backend_test.py:234: RuntimeWarning: coroutine 'SessionManager._create_indexes' was never awaited
+    return False
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+backend_test.py::test_shipstation_carrier_ids
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_shipstation_carrier_ids returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_carrier_exclusion_fix
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_carrier_exclusion_fix returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_shipping_rates_production
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_shipping_rates_production returned <class 'tuple'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_shipping_rates
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_shipping_rates returned <class 'tuple'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_telegram_bot_infrastructure
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_telegram_bot_infrastructure returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_conversation_handler_functions
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_conversation_handler_functions returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_return_to_order_functionality
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_return_to_order_functionality returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_telegram_bot_token
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_telegram_bot_token returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_admin_search_orders
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_admin_search_orders returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_admin_refund_order
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_admin_refund_order returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_admin_export_csv
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_admin_export_csv returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_admin_telegram_id_environment
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_admin_telegram_id_environment returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_admin_notification_function
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_admin_notification_function returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_contact_admin_buttons
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_contact_admin_buttons returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_backend_admin_id_loading
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_backend_admin_id_loading returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_telegram_bot_admin_integration
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_telegram_bot_admin_integration returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_session_manager_v2_migration
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_session_manager_v2_migration returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_mongodb_ttl_index
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_mongodb_ttl_index returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_mongodb_session_collection
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_mongodb_session_collection returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_session_cleanup_mechanism
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_session_cleanup_mechanism returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_order_creation_session_flow
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_order_creation_session_flow returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_session_cancel_order_cleanup
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_session_cancel_order_cleanup returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_telegram_webhook_status
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_telegram_webhook_status returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_webhook_environment_variables
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_webhook_environment_variables returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_webhook_logs_verification
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_webhook_logs_verification returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_double_message_bug_fix
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_double_message_bug_fix returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_template_flow_critical_issue
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_template_flow_critical_issue returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_balance_topup_flow_button_protection
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_balance_topup_flow_button_protection returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_cancel_button_functionality
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_cancel_button_functionality returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_cancel_button_conversation_states
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_cancel_button_conversation_states returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_admin_notification_label_creation
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_admin_notification_label_creation returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_database_collections
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_database_collections returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_backend_logs_for_notifications
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_backend_logs_for_notifications returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_admin_notification_sending
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_admin_notification_sending returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_help_command_implementation
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_help_command_implementation returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_telegram_bot_help_infrastructure
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_telegram_bot_help_infrastructure returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_help_command_url_generation
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_help_command_url_generation returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_template_based_order_creation
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_template_based_order_creation returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_check_all_bot_access
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_check_all_bot_access returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_continue_order_after_template_save
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_continue_order_after_template_save returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_template_rename_functionality
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_template_rename_functionality returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_templates_feature_use_template
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_templates_feature_use_template returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_telegram_bot_shipping_rates
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_telegram_bot_shipping_rates returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_help_command_formatting_improvements
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_help_command_formatting_improvements returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_oxapay_order_id_length_fix
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_oxapay_order_id_length_fix returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_oxapay_invoice_creation
+  /app/backend_test.py:5051: RuntimeWarning: coroutine 'SessionManager._create_indexes' was never awaited
+    return False
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+backend_test.py::test_oxapay_invoice_creation
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_oxapay_invoice_creation returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_oxapay_payment_check
+  /app/backend_test.py:5098: RuntimeWarning: coroutine 'SessionManager._create_indexes' was never awaited
+    return False
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+backend_test.py::test_oxapay_payment_check
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_oxapay_payment_check returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_oxapay_api_configuration
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_oxapay_api_configuration returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_oxapay_webhook_success_message
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_oxapay_webhook_success_message returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+backend_test.py::test_atomic_operations_flow
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_atomic_operations_flow returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+return_to_order_test.py::test_critical_fix
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but return_to_order_test.py::test_critical_fix returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+return_to_order_test.py::test_scenario_simulation
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but return_to_order_test.py::test_scenario_simulation returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+telegram_persistence_test.py::test_redis_persistence_configuration
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but telegram_persistence_test.py::test_redis_persistence_configuration returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+telegram_persistence_test.py::test_conversation_handler_persistence
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but telegram_persistence_test.py::test_conversation_handler_persistence returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+telegram_persistence_test.py::test_production_bot_configuration
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but telegram_persistence_test.py::test_production_bot_configuration returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+telegram_persistence_test.py::test_webhook_vs_polling_mode
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but telegram_persistence_test.py::test_webhook_vs_polling_mode returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+telegram_persistence_test.py::test_backend_logs_for_persistence
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but telegram_persistence_test.py::test_backend_logs_for_persistence returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+telegram_persistence_test.py::test_telegram_bot_infrastructure
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but telegram_persistence_test.py::test_telegram_bot_infrastructure returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+template_test.py::test_conversation_handler_registration
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but template_test.py::test_conversation_handler_registration returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+template_test.py::test_template_function_implementation
+  /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but template_test.py::test_template_function_implementation returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_session_manager.py::test_get_or_create_session_new
+FAILED backend/tests/test_session_manager.py::test_get_or_create_session_existing
+FAILED backend/tests/test_session_manager.py::test_update_session_atomic - Fa...
+FAILED backend/tests/test_session_manager.py::test_update_session_atomic_multiple_fields
+FAILED backend/tests/test_session_manager.py::test_clear_session - Failed: as...
+FAILED backend/tests/test_session_manager.py::test_save_completed_label_fallback
+FAILED backend/tests/test_session_manager.py::test_revert_to_previous_step - ...
+FAILED template_test.py::test_template_database_structure - Failed: async def...
+FAILED template_test.py::test_template_data_integrity - Failed: async def fun...
+FAILED test_admin_notification_direct.py::test_admin_notification - Failed: a...
+================= 10 failed, 66 passed, 84 warnings in 42.11s ================== тестов.
+- **Сильно изменены:**
+  - : Переведен на , добавлена интеграция с новыми модулями, начат процесс удаления старого кода.
+- **Удалены (мертвый код):**
+  - 
+  - 
+  - 
+  - 
 
 **Areas that need refactoring**:
-- Файл  является мертвым кодом и должен быть удален вместе с любыми оставшимися вызовами в .
--  по-прежнему является монолитом и нуждается в рефакторинге.
+- Файл  все еще содержит большую часть логики. Необходимо завершить перенос функций в соответствующие модули в директориях  и , а затем удалить дублирующийся код.
 
 **key api endpoints**
 - : Основной эндпоинт для Telegram.
--  и другие debug-эндпоинты: Были созданы для отладки, но с новой архитектурой могут быть не нужны. Следует пересмотреть их необходимость.
+- : (НОВЫЙ) Возвращает статистику производительности (защищен admin-ключом).
+- : (НОВЫЙ) Отладочный эндпоинт для очистки сессий (защищен admin-ключом).
 
 **Critical Info for New Agent**
-- **НЕ ВОЗВРАЩАЙТЕСЬ к !** Встроенный механизм  был источником всех проблем. Новая архитектура основана на ручном управлении сессиями через . Вся дальнейшая работа должна продолжаться в рамках этой новой архитектуры.
-- **План пользователя — это закон:** Руководствуйтесь планом, изложенным в сообщении #795. Следующая задача — реализовать недостающие пункты из этого плана (см. **In progress Task List**).
--  больше не используется для хранения состояния между шагами. Вместо него используется  из .
-
-**documents created in this job**
-  - /app/backend/session_manager.py
+- **Рефакторинг в процессе:** Основная задача — продолжить начатый рефакторинг . Новые модули в  и  уже созданы. Следующий шаг — наполнить их кодом из , импортировать в  и удалить дубликаты. Действуйте постепенно.
+- **Архитектура стабильна:** Не пытайтесь возвращаться к  или менять логику . Текущая архитектура  надежна и решает все исходные проблемы.
+- **Используйте хелперы:** При работе с БД используйте уже созданные оберточные функции (например, ), чтобы все запросы проходили через систему мониторинга производительности.
 
 **Last 5 User Messages and any pending user messages**
- - **User:** Спрашивает, все ли пункты из его плана реализованы. **Status:** Не все. Агент подтвердил, что 3 пункта (обработка ошибок, сохранение API-ответов, таймауты) не сделаны.
- - **User:** Дает команду доделать оставшиеся 3 пункта. **Status:** IN_PROGRESS.
- - **User:** Спрашивает, что происходит при отмене заказа. **Status:** COMPLETED. Агент проанализировал и подтвердил, что логика отмены работает корректно с новой системой сессий.
- - **User:** Просит увеличить скорость отклика. **Status:** COMPLETED. Агент внес несколько оптимизаций, включая typing indicator и асинхронное сохранение, но последнее привело к багам и было отменено.
- - **User:** Сообщает о смешивании шагов и зависаниях у разных пользователей. **Status:** Это привело к финальному решению отказаться от  и создать .
+- **User:** Запросил полный аудит бота на наличие багов, мертвого кода и ошибок. **Status:** COMPLETED. Агент провел аудит и предоставил подробный отчет.
+- **User:** Дал команду исправить все найденные проблемы, кроме рефакторинга монолита. **Status:** COMPLETED. Агент исправил 8 из 9 проблем.
+- **User:** Согласился с планом постепенного рефакторинга . **Status:** IN_PROGRESS.
+- **User:** Дал команду создать 3 модуля для хендлеров (, , ). **Status:** COMPLETED. Агент создал эти модули.
+- **User:** Дал команду делай дальше, чтобы продолжить рефакторинг. **Status:** IN_PROGRESS. Агент приступил к созданию .
 
 **Project Health Check:**
-- **Broken:** Бот находится в состоянии рефакторинга. Основной флоу создания заказа не будет работать до тех пор, пока миграция на  не будет полностью завершена и протестирована.
+- **Broken:** Нет.
+- **Mocked:** Нет.
+- **Refactoring in Progress:** Да. Основной файл  находится в процессе разделения на модули.
 
 **Testing status**
-  - Testing agent used after significant changes: NO
-  - Troubleshoot agent used after agent stuck in loop: YES (многократно, помог выявить несколько корневых причин)
-  - Test files created: []
+  - Testing agent used after significant changes: YES (после миграции на SessionManager V2, результат — успех).
+  - Troubleshoot agent used after agent stuck in loop: NO
+  - Test files created: ['/app/backend/tests/test_session_manager.py'] (скелет)
   - Known regressions: Нет.
 
 **Credentials to test flow:**
-- N/A. Все необходимые credentials (Telegram, ShipStation, DB) находятся в  файле.
+- Все необходимые credentials находятся в  файле. Для доступа к админ-эндпоинтам () используйте значение  из  в заголовке .
 
 **What agent forgot to execute**
-- Агент был в процессе реализации трех оставшихся пунктов из плана пользователя по созданию кастомного session manager'a:
-    1. Обработка ошибок с возвратом к предыдущему шагу.
-    2. Сохранение результатов API (ShipStation) в  сессии.
-    3. Полная реализация логики обработки таймаутов сессий.
-Он только начал работу над первым пунктом.</analysis>
+- Агент не забыл ничего, он был прерван в середине выполнения большой задачи по рефакторингу, которую сам же и спланировал.</analysis>
