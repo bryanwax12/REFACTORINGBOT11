@@ -1,25 +1,160 @@
 """
 Order Flow: Parcel Information Handlers
-Handles collection of parcel dimensions and weight
+Handles collection of parcel dimensions and weight (4 steps)
 """
+import asyncio
 import logging
-from telegram import Update
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
 logger = logging.getLogger(__name__)
 
-# These handlers will be imported from server.py initially
-# Full refactoring will happen in future iteration
+# Import shared utilities
+from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
+from utils.validators import validate_weight, validate_dimension
 
-# Note: Due to the complexity and interdependencies of order flow handlers,
-# this module currently serves as a placeholder for future refactoring.
-# 
-# The order flow in server.py includes:
-# - order_parcel_weight (PARCEL_WEIGHT step)
-# - order_parcel_length (PARCEL_LENGTH step)
-# - order_parcel_width (PARCEL_WIDTH step)
-# - order_parcel_height (PARCEL_HEIGHT step)
-#
-# Each handler validates numeric input and saves to session
-#
-# Future refactoring will move these handlers here with proper imports
+
+# ============================================================
+# PARCEL INFORMATION HANDLERS (4 steps)
+# ============================================================
+
+async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Step 15/17: Collect parcel weight"""
+    from server import session_manager, PARCEL_WEIGHT, PARCEL_LENGTH
+    
+    weight_str = update.message.text.strip()
+    
+    # Validate
+    is_valid, error_msg, weight = validate_weight(weight_str)
+    if not is_valid:
+        await safe_telegram_call(update.message.reply_text(error_msg))
+        return PARCEL_WEIGHT
+    
+    # Store
+    user_id = update.effective_user.id
+    context.user_data['parcel_weight'] = weight
+    await session_manager.update_session_atomic(user_id, step="PARCEL_LENGTH", data={'parcel_weight': weight})
+    
+    asyncio.create_task(mark_message_as_selected(update, context))
+    
+    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    message_text = """📏 Длина посылки (в дюймах)
+Например: 10 или 10.5
+Минимум: 0.1 дюйма
+Максимум: 108 дюймов"""
+    
+    bot_msg = await safe_telegram_call(update.message.reply_text(
+        message_text,
+        reply_markup=reply_markup
+    ))
+    
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
+        context.user_data['last_state'] = PARCEL_LENGTH
+    
+    return PARCEL_LENGTH
+
+
+async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Step 16/17: Collect parcel length"""
+    from server import session_manager, PARCEL_LENGTH, PARCEL_WIDTH
+    
+    length_str = update.message.text.strip()
+    
+    # Validate
+    is_valid, error_msg, length = validate_dimension(length_str, "Длина")
+    if not is_valid:
+        await safe_telegram_call(update.message.reply_text(error_msg))
+        return PARCEL_LENGTH
+    
+    # Store
+    user_id = update.effective_user.id
+    context.user_data['parcel_length'] = length
+    await session_manager.update_session_atomic(user_id, step="PARCEL_WIDTH", data={'parcel_length': length})
+    
+    asyncio.create_task(mark_message_as_selected(update, context))
+    
+    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    message_text = """📐 Ширина посылки (в дюймах)
+Например: 8 или 8.5"""
+    
+    bot_msg = await safe_telegram_call(update.message.reply_text(
+        message_text,
+        reply_markup=reply_markup
+    ))
+    
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
+        context.user_data['last_state'] = PARCEL_WIDTH
+    
+    return PARCEL_WIDTH
+
+
+async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Step 17/17: Collect parcel width"""
+    from server import session_manager, PARCEL_WIDTH, PARCEL_HEIGHT
+    
+    width_str = update.message.text.strip()
+    
+    # Validate
+    is_valid, error_msg, width = validate_dimension(width_str, "Ширина")
+    if not is_valid:
+        await safe_telegram_call(update.message.reply_text(error_msg))
+        return PARCEL_WIDTH
+    
+    # Store
+    user_id = update.effective_user.id
+    context.user_data['parcel_width'] = width
+    await session_manager.update_session_atomic(user_id, step="PARCEL_HEIGHT", data={'parcel_width': width})
+    
+    asyncio.create_task(mark_message_as_selected(update, context))
+    
+    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    message_text = """📦 Высота посылки (в дюймах)
+Например: 6 или 6.5"""
+    
+    bot_msg = await safe_telegram_call(update.message.reply_text(
+        message_text,
+        reply_markup=reply_markup
+    ))
+    
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
+        context.user_data['last_state'] = PARCEL_HEIGHT
+    
+    return PARCEL_HEIGHT
+
+
+async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Step 18/18: Collect parcel height and trigger rate calculation"""
+    from server import session_manager, PARCEL_HEIGHT, fetch_shipping_rates
+    
+    height_str = update.message.text.strip()
+    
+    # Validate
+    is_valid, error_msg, height = validate_dimension(height_str, "Высота")
+    if not is_valid:
+        await safe_telegram_call(update.message.reply_text(error_msg))
+        return PARCEL_HEIGHT
+    
+    # Store
+    user_id = update.effective_user.id
+    context.user_data['parcel_height'] = height
+    await session_manager.update_session_atomic(user_id, step="CALCULATING_RATES", data={'parcel_height': height})
+    
+    asyncio.create_task(mark_message_as_selected(update, context))
+    
+    # All parcel info collected - proceed to rate calculation
+    logger.info(f"✅ All parcel info collected for user {user_id}, fetching rates...")
+    
+    # Call fetch_shipping_rates which will validate and get rates
+    return await fetch_shipping_rates(update, context)
