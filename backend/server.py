@@ -74,14 +74,17 @@ from handlers.webhook_handlers import (
 # Order flow handlers
 from handlers.order_flow import (
     # FROM address handlers
-    order_from_name, order_from_address, order_from_address2, order_from_city,
+    order_from_name, order_from_address, order_from_city,
     order_from_state, order_from_zip, order_from_phone,
     # TO address handlers
-    order_to_name, order_to_address, order_to_address2, order_to_city,
+    order_to_name, order_to_address, order_to_city,
     order_to_state, order_to_zip, order_to_phone,
     # Parcel handlers
     order_parcel_weight, order_parcel_length,
-    order_parcel_width, order_parcel_height
+    order_parcel_width, order_parcel_height,
+    # Skip handlers (NEW - refactored)
+    skip_from_address2, skip_to_address2,
+    skip_from_phone, skip_to_phone
 )
 
 # Profiled DB operations (most frequently used)
