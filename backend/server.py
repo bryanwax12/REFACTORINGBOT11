@@ -3047,7 +3047,7 @@ async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_
     template = await find_template_by_id(template_id)
     
     if template:
-        result = await db.templates.delete_one({"id": template_id})
+        result = await delete_template(template_id)
         logger.info(f"🗑️ Deleted template '{template['name']}' (id: {template_id}) - deleted_count: {result.deleted_count}")
         
         keyboard = [[InlineKeyboardButton("🔙 К списку шаблонов", callback_data='my_templates')]]
