@@ -62,33 +62,34 @@ class MongoPersistence(BasePersistence):
         return None
     
     async def get_conversations(self, name: str) -> Dict:
-        """Load conversation state directly from MongoDB (no cache, multi-pod safe)"""
+        """Load conversation states from MongoDB with new per-user document structure"""
         try:
             logger.warning(f"🔵🔵🔵 GET_CONVERSATIONS CALLED for {name}")
-            # Always load from MongoDB for consistency across pods
-            doc = await self.collection.find_one({"_id": f"conversation_{name}"})
-            if doc and 'data' in doc:
-                logger.warning(f"🟡 FOUND MongoDB doc: {doc}")
-                # Convert string keys back to tuples
-                conversations = {}
-                for key_str, state in doc['data'].items():
-                    # Parse string back to tuple safely: "(123, 456)" -> (123, 456)
-                    try:
-                        key = ast.literal_eval(key_str)  # Safe parsing
-                        conversations[key] = state
-                        logger.warning(f"🟢 Parsed key: {key_str} -> {key}, state: {state}")
-                    except (ValueError, SyntaxError) as e:
-                        logger.error(f"Failed to parse key '{key_str}': {e}")
-                        continue
-                
-                logger.warning(f"📥 PERSISTENCE: Loaded from MongoDB for {name}: {len(conversations)} entries, states: {conversations}")
-                return conversations
             
-            # Empty state
-            logger.warning(f"📭 PERSISTENCE: No conversation state in MongoDB for {name}, starting fresh")
-            return {}
+            # Find all conversation documents for this handler
+            cursor = self.collection.find({"_id": {"$regex": f"^conversation_{name}_"}})
+            conversations = {}
+            
+            async for doc in cursor:
+                try:
+                    # Extract chat_id and user_id from document
+                    chat_id = doc.get('chat_id')
+                    user_id = doc.get('user_id')
+                    state = doc.get('state')
+                    
+                    if chat_id is not None and user_id is not None and state is not None:
+                        key = (chat_id, user_id)
+                        conversations[key] = state
+                        logger.warning(f"🟢 Loaded: key={key}, state={state}")
+                except Exception as e:
+                    logger.error(f"Error parsing conversation doc: {e}")
+                    continue
+            
+            logger.warning(f"📥 PERSISTENCE: Loaded {len(conversations)} conversations for {name}")
+            return conversations
+            
         except Exception as e:
-            logger.error(f"❌ PERSISTENCE ERROR loading conversations for {name}: {e}")
+            logger.error(f"❌ PERSISTENCE ERROR loading conversations: {e}")
             return {}
     
     async def update_user_data(self, user_id: int, data: Dict) -> None:
