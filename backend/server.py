@@ -119,7 +119,7 @@ class RateLimiter:
     def __init__(self):
         self.locks = defaultdict(asyncio.Lock)
         self.last_call = defaultdict(float)
-        self.min_interval = 0.03  # 30ms minimum between calls (allows 33 msg/sec)
+        self.min_interval = 0.01  # 10ms minimum between calls (allows 100 msg/sec - максимум)
     
     async def acquire(self, chat_id: int):
         """Acquire lock with minimal delay for fast responses"""
