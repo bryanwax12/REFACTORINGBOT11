@@ -25,8 +25,12 @@ import hmac
 import warnings
 
 # Suppress PTBUserWarning about per_message settings (expected behavior)
-from telegram.warnings import PTBUserWarning
-warnings.filterwarnings("ignore", category=PTBUserWarning, message=".*per_message.*")
+try:
+    from telegram.warnings import PTBUserWarning
+    warnings.filterwarnings("ignore", category=PTBUserWarning)
+except ImportError:
+    # Fallback if PTBUserWarning not available
+    warnings.filterwarnings("ignore", message=".*per_message.*")
 
 # Performance monitoring
 from utils.performance import profile_db_query, profile_api_call, QueryTimer
