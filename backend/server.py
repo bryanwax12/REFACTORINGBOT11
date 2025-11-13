@@ -28,6 +28,9 @@ import warnings
 from telegram.warnings import PTBUserWarning
 warnings.filterwarnings("ignore", category=PTBUserWarning, message=".*per_message.*")
 
+# Performance monitoring
+from utils.performance import profile_db_query, profile_api_call, QueryTimer
+
 # Debug logging removed - was causing startup issues
 
 ROOT_DIR = Path(__file__).parent
