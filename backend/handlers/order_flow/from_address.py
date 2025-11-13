@@ -62,14 +62,12 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     
     # Mark previous message as selected
+    from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
     asyncio.create_task(mark_message_as_selected(update, context))
     
     # Show next step
-    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    message_text = """Шаг 2/13: 🏠 Адрес отправителя
-Например: 215 Clayton St."""
+    reply_markup = get_cancel_keyboard()
+    message_text = OrderStepMessages.FROM_ADDRESS
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
