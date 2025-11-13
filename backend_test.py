@@ -5077,24 +5077,43 @@ def test_oxapay_webhook_success_message():
         print(f"❌ Oxapay webhook success message test error: {e}")
         return False
 
+def run_session_manager_tests():
+    """Run comprehensive session manager regression tests"""
+    print("\n" + "🔄" * 40)
+    print("🔄 ПОЛНОЕ РЕГРЕССИОННОЕ ТЕСТИРОВАНИЕ - SESSION MANAGER MIGRATION")
+    print("🔄" * 40)
+    print("🎯 КОНТЕКСТ: Завершена миграция на кастомную систему управления сессиями")
+    print("🎯 ЦЕЛЬ: Проверить что SessionManager заменил встроенный persistence")
+    print("🔄" * 40)
+    
+    session_tests = {}
+    
+    # Core Session Manager Tests
+    session_tests['session_infrastructure'] = test_session_manager_infrastructure()
+    session_tests['mongodb_collection'] = test_mongodb_session_collection()
+    session_tests['session_cleanup'] = test_session_cleanup_mechanism()
+    session_tests['order_flow_integration'] = test_order_creation_session_flow()
+    session_tests['cancel_cleanup'] = test_session_cancel_order_cleanup()
+    
+    return session_tests
+
 def main():
-    """Run all tests - Focus on Telegram Webhook Bug Fix"""
-    print("🚀 Testing Telegram Webhook Bug Fix")
-    print("🎯 Focus: Review Request - Double message bug fix verification")
-    print("🔧 CRITICAL BUG FIX: Bot switched from polling to webhook mode")
+    """Run comprehensive regression tests - Focus on Session Manager Migration"""
+    print("🚀 ПОЛНОЕ РЕГРЕССИОННОЕ ТЕСТИРОВАНИЕ - SESSION MANAGER MIGRATION")
+    print("🎯 Focus: Custom SessionManager replacing built-in persistence")
+    print("🔧 CRITICAL: Manual state management in MongoDB user_sessions collection")
     print("=" * 80)
     
     # Test results
     results = {}
     
-    # 1. Test API Health
-    results['api_health'] = test_api_health()
+    # 1. SESSION MANAGER REGRESSION TESTS - CRITICAL per review request
+    print("\n🔄 RUNNING SESSION MANAGER REGRESSION TESTS...")
+    session_results = run_session_manager_tests()
+    results.update(session_results)
     
-    # 2. CRITICAL WEBHOOK TESTS (Main Focus)
-    results['webhook_status'] = test_telegram_webhook_status()
-    results['webhook_environment'] = test_webhook_environment_variables()
-    results['webhook_logs'] = test_webhook_logs_verification()
-    results['double_message_fix'] = test_double_message_bug_fix()
+    # 2. Test API Health (prerequisite)
+    results['api_health'] = test_api_health()
     
     # 3. Test Supporting Infrastructure
     results['telegram_infrastructure'] = test_telegram_bot_infrastructure()
@@ -5106,24 +5125,34 @@ def main():
     
     # Summary
     print("\n" + "=" * 80)
-    print("📊 TELEGRAM WEBHOOK BUG FIX TEST SUMMARY")
+    print("📊 SESSION MANAGER MIGRATION TEST SUMMARY")
     print("=" * 80)
     
-    # Priority order for tests
-    critical_webhook_tests = [
-        'webhook_status', 'webhook_environment', 'webhook_logs', 'double_message_fix'
+    # SESSION MANAGER CRITICAL TESTS from review request
+    session_critical_tests = [
+        'session_infrastructure',
+        'mongodb_collection',
+        'session_cleanup',
+        'order_flow_integration',
+        'cancel_cleanup'
     ]
+    
     supporting_tests = [
         'api_health', 'telegram_infrastructure', 'bot_token', 'admin_integration'
     ]
     
     # Show results by category
-    print("\n🎯 CRITICAL WEBHOOK TESTS:")
-    for test_name in critical_webhook_tests:
+    print("\n🔄 SESSION MANAGER MIGRATION TESTS:")
+    session_passed = 0
+    for test_name in session_critical_tests:
         if test_name in results:
             passed = results[test_name]
+            if passed:
+                session_passed += 1
             status = "✅ PASS" if passed else "❌ FAIL"
             print(f"   {test_name.replace('_', ' ').title()}: {status}")
+    
+    print(f"\n   Session Tests Passed: {session_passed}/{len(session_critical_tests)}")
     
     print("\n🔧 SUPPORTING INFRASTRUCTURE:")
     for test_name in supporting_tests:
@@ -5133,39 +5162,40 @@ def main():
             print(f"   {test_name.replace('_', ' ').title()}: {status}")
     
     # Overall Assessment
-    critical_webhook_passed = all(results.get(test, False) for test in critical_webhook_tests if test in results)
+    session_migration_success = session_passed == len(session_critical_tests)
     supporting_passed = all(results.get(test, False) for test in supporting_tests if test in results)
     all_passed = all(results.values())
     
-    print(f"\n🎯 Critical Webhook Tests Status: {'✅ SUCCESS' if critical_webhook_passed else '❌ FAILED'}")
+    print(f"\n🔄 Session Manager Migration Status: {'✅ SUCCESS' if session_migration_success else '❌ FAILED'}")
     print(f"🔧 Supporting Infrastructure Status: {'✅ SUCCESS' if supporting_passed else '❌ FAILED'}")
     print(f"📊 Overall Result: {'✅ ALL TESTS PASSED' if all_passed else '❌ SOME TESTS FAILED'}")
     
-    # Critical Assessment for Webhook Bug Fix
-    print("\n🎯 WEBHOOK BUG FIX ANALYSIS:")
-    if critical_webhook_passed:
-        print(f"   ✅ CRITICAL BUG FIX SUCCESS: Double message issue resolved!")
-        print(f"   ✅ GET /api/telegram/status shows application_running: true")
-        print(f"   ✅ WEBHOOK_URL configured in backend .env")
-        print(f"   ✅ Logs show webhook setup success, no polling conflicts")
-        print(f"   ✅ Bot running in webhook mode (not polling)")
-        print(f"   ✅ No 'Conflict: terminated by other getUpdates' errors")
-        print(f"   ✅ Infrastructure ready for single-message processing")
-        print(f"\n   📝 MANUAL VERIFICATION NEEDED:")
+    # SESSION MANAGER MIGRATION SUMMARY
+    print(f"\n🔄 SESSION MANAGER MIGRATION ANALYSIS:")
+    if session_migration_success:
+        print(f"   ✅ MIGRATION SUCCESSFUL: Custom SessionManager fully operational")
+        print(f"   ✅ Built-in persistence successfully replaced")
+        print(f"   ✅ MongoDB user_sessions collection working correctly")
+        print(f"   ✅ All 13 order creation steps save data to session")
+        print(f"   ✅ Session cleanup mechanism (>15 minutes) working")
+        print(f"   ✅ Order cancellation clears session properly")
+        print(f"   ✅ Error handling with revert_to_previous_step implemented")
+        print(f"   ✅ API errors logged in session temp_data")
+        print(f"\n   📝 MANUAL VERIFICATION RECOMMENDED:")
         print(f"   Test with @whitelabel_shipping_bot_test_bot:")
-        print(f"   1. Start order creation")
-        print(f"   2. Reach text input (FROM_ADDRESS)")
-        print(f"   3. Send '123 Main Street' ONCE")
-        print(f"   4. Verify bot processes immediately (no double sending)")
+        print(f"   1. Create order through all 13 steps")
+        print(f"   2. Verify data persists at each step in MongoDB")
+        print(f"   3. Test order cancellation clears session")
+        print(f"   4. Test error handling and step reversion")
     else:
-        print(f"   ❌ CRITICAL BUG FIX FAILURE: Double message issue may persist!")
-        print(f"   ❌ Check GET /api/telegram/status endpoint")
-        print(f"   ❌ Verify WEBHOOK_URL in backend .env")
-        print(f"   ❌ Check logs for webhook setup and polling conflicts")
-        print(f"   ❌ Ensure bot is in webhook mode, not polling")
-        print(f"   ❌ Bot may still require double message sending")
+        print(f"   ❌ MIGRATION ISSUES: {len(session_critical_tests) - session_passed} session tests failed")
+        print(f"   ❌ Custom SessionManager may not be fully operational")
+        print(f"   ❌ Check MongoDB user_sessions collection structure")
+        print(f"   ❌ Verify session management functions integration")
+        print(f"   ❌ Check session cleanup and error handling")
+        print(f"   ⚠️ Manual verification required for session functionality")
     
-    return critical_webhook_passed
+    return session_migration_success
 
 def run_shipstation_carrier_tests():
     """Run ShipStation carrier-specific tests per review request"""
