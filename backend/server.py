@@ -1115,6 +1115,80 @@ async def skip_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['last_state'] = TO_CITY
     
     return TO_CITY
+
+
+async def skip_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Skip FROM phone - generate random phone number"""
+    from server import session_manager, TO_NAME
+    from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
+    
+    query = update.callback_query
+    await safe_telegram_call(query.answer())
+    
+    # Mark previous message as selected
+    asyncio.create_task(mark_message_as_selected(update, context))
+    
+    # Generate random phone
+    user_id = update.effective_user.id
+    random_phone = generate_random_phone()
+    context.user_data['from_phone'] = random_phone
+    await session_manager.update_session_atomic(user_id, step="TO_NAME", data={'from_phone': random_phone})
+    
+    logger.info(f"Generated random FROM phone: {random_phone}")
+    
+    # Show next step (TO_NAME)
+    reply_markup = get_cancel_keyboard()
+    message_text = OrderStepMessages.TO_NAME
+    
+    bot_msg = await safe_telegram_call(query.message.reply_text(
+        message_text,
+        reply_markup=reply_markup
+    ))
+    
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
+        context.user_data['last_state'] = TO_NAME
+    
+    return TO_NAME
+
+
+async def skip_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Skip TO phone - generate random phone number"""
+    from server import session_manager, PARCEL_WEIGHT
+    from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
+    
+    query = update.callback_query
+    await safe_telegram_call(query.answer())
+    
+    # Mark previous message as selected
+    asyncio.create_task(mark_message_as_selected(update, context))
+    
+    # Generate random phone
+    user_id = update.effective_user.id
+    random_phone = generate_random_phone()
+    context.user_data['to_phone'] = random_phone
+    await session_manager.update_session_atomic(user_id, step="PARCEL_WEIGHT", data={'to_phone': random_phone})
+    
+    logger.info(f"Generated random TO phone: {random_phone}")
+    
+    # Show next step (PARCEL_WEIGHT)
+    reply_markup = get_cancel_keyboard()
+    message_text = OrderStepMessages.PARCEL_WEIGHT
+    
+    bot_msg = await safe_telegram_call(query.message.reply_text(
+        message_text,
+        reply_markup=reply_markup
+    ))
+    
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
+        context.user_data['last_state'] = PARCEL_WEIGHT
+    
+    return PARCEL_WEIGHT
+
+
 async def show_data_confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Show summary of entered data with edit option"""
     data = context.user_data
