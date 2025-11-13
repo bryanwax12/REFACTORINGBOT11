@@ -2266,7 +2266,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
                 'service': rate['service_type'],
                 'service_code': rate['service_code'],
                 'original_amount': float(rate['shipping_amount']['amount']),
-                'amount': float(rate['shipping_amount']['amount']) + markup,
+                'amount': float(rate['shipping_amount']['amount']),  # No markup applied
                 'currency': rate['shipping_amount']['currency'],
                 'days': rate.get('delivery_days')
             }
