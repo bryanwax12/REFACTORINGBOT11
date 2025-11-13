@@ -1335,7 +1335,7 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Check if bot is in maintenance mode
     if await check_maintenance_mode(update):
-        await safe_telegram_call(query.message.reply_text(
+        await safe_telegram_call(send_method(
             "🔧 *Бот находится на техническом обслуживании.*\n\n"
             "Пожалуйста, попробуйте позже.\n\n"
             "Приносим извинения за неудобства.",
