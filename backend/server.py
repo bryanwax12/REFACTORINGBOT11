@@ -96,6 +96,66 @@ async def find_template_by_id(template_id: str, projection: dict = None):
         projection = {"_id": 0}
     return await db.templates.find_one({"id": template_id}, projection)
 
+# Additional profiled DB operations for performance monitoring
+@profile_db_query("find_payment_by_invoice")
+async def find_payment_by_invoice(invoice_id: int, projection: dict = None):
+    """Профилируемый поиск платежа по invoice_id"""
+    if projection is None:
+        projection = {"_id": 0}
+    return await db.payments.find_one({"invoice_id": invoice_id}, projection)
+
+@profile_db_query("find_pending_order")
+async def find_pending_order(telegram_id: int, projection: dict = None):
+    """Профилируемый поиск незавершенного заказа"""
+    if projection is None:
+        projection = {"_id": 0}
+    return await db.pending_orders.find_one({"telegram_id": telegram_id}, projection)
+
+@profile_db_query("count_user_templates")
+async def count_user_templates(telegram_id: int):
+    """Профилируемый подсчет шаблонов пользователя"""
+    return await db.templates.count_documents({"telegram_id": telegram_id})
+
+@profile_db_query("find_user_templates")
+async def find_user_templates(telegram_id: int, limit: int = 10):
+    """Профилируемый поиск шаблонов пользователя"""
+    return await db.templates.find({"telegram_id": telegram_id}).sort("created_at", -1).to_list(limit)
+
+@profile_db_query("update_order")
+async def update_order(order_id: str, update_data: dict):
+    """Профилируемое обновление заказа"""
+    return await db.orders.update_one({"id": order_id}, {"$set": update_data})
+
+@profile_db_query("insert_payment")
+async def insert_payment(payment_dict: dict):
+    """Профилируемая вставка платежа"""
+    return await db.payments.insert_one(payment_dict)
+
+@profile_db_query("insert_pending_order")
+async def insert_pending_order(order_dict: dict):
+    """Профилируемая вставка незавершенного заказа"""
+    return await db.pending_orders.insert_one(order_dict)
+
+@profile_db_query("delete_pending_order")
+async def delete_pending_order(telegram_id: int):
+    """Профилируемое удаление незавершенного заказа"""
+    return await db.pending_orders.delete_one({"telegram_id": telegram_id})
+
+@profile_db_query("insert_template")
+async def insert_template(template_dict: dict):
+    """Профилируемая вставка шаблона"""
+    return await db.templates.insert_one(template_dict)
+
+@profile_db_query("update_template")
+async def update_template(template_id: str, update_data: dict):
+    """Профилируемое обновление шаблона"""
+    return await db.templates.update_one({"id": template_id}, {"$set": update_data})
+
+@profile_db_query("delete_template")
+async def delete_template(template_id: str):
+    """Профилируемое удаление шаблона"""
+    return await db.templates.delete_one({"id": template_id})
+
 # Debug logging removed - was causing startup issues
 
 ROOT_DIR = Path(__file__).parent
