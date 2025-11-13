@@ -3763,6 +3763,8 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         progress_task = asyncio.create_task(update_progress())
         
         try:
+            # Profile ShipStation API call
+            api_start_time = time.perf_counter()
             response = await asyncio.wait_for(
                 asyncio.to_thread(
                     requests.post,
@@ -3773,6 +3775,8 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
                 ),
                 timeout=35  # Overall timeout including thread overhead
             )
+            api_duration_ms = (time.perf_counter() - api_start_time) * 1000
+            logger.info(f"⚡ ShipStation /rates API took {api_duration_ms:.2f}ms")
         except asyncio.TimeoutError:
             logger.error("ShipStation rate request timed out after 35 seconds")
             
