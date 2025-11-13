@@ -2073,6 +2073,7 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['last_state'] = TO_STATE
     return TO_STATE
 
+@with_typing_indicator
 async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     state = update.message.text.strip().upper()
     
