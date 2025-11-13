@@ -31,6 +31,28 @@ warnings.filterwarnings("ignore", category=PTBUserWarning, message=".*per_messag
 # Performance monitoring
 from utils.performance import profile_db_query, profile_api_call, QueryTimer
 
+# Profiled DB operations (most frequently used)
+@profile_db_query("find_user_by_telegram_id")
+async def find_user_by_telegram_id(telegram_id: int, projection: dict = None):
+    """Профилируемый поиск пользователя по telegram_id"""
+    if projection is None:
+        projection = {"_id": 0}
+    return await db.users.find_one({"telegram_id": telegram_id}, projection)
+
+@profile_db_query("find_order_by_id")
+async def find_order_by_id(order_id: str, projection: dict = None):
+    """Профилируемый поиск заказа по ID"""
+    if projection is None:
+        projection = {"_id": 0}
+    return await db.orders.find_one({"id": order_id}, projection)
+
+@profile_db_query("find_template_by_id")
+async def find_template_by_id(template_id: str, projection: dict = None):
+    """Профилируемый поиск шаблона по ID"""
+    if projection is None:
+        projection = {"_id": 0}
+    return await db.templates.find_one({"id": template_id}, projection)
+
 # Debug logging removed - was causing startup issues
 
 ROOT_DIR = Path(__file__).parent
