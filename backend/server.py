@@ -1286,9 +1286,14 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     logger.warning(f"🆕 NEW ORDER SESSION: {order_session_id} for user {update.effective_user.id}")
     
-    logger.info(f"🔵 new_order_start called - User: {update.effective_user.id}")
-    query = update.callback_query
-    await safe_telegram_call(query.answer())
+    # Handle both command and callback
+    if update.callback_query:
+        query = update.callback_query
+        # INSTANT feedback: answer immediately without wrapper
+        try:
+            await query.answer()
+        except:
+            pass
     
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
     asyncio.create_task(mark_message_as_selected(update, context))
