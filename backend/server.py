@@ -22,6 +22,11 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Cont
 import asyncio
 import hashlib
 import hmac
+import warnings
+
+# Suppress PTBUserWarning about per_message settings (expected behavior)
+from telegram.warnings import PTBUserWarning
+warnings.filterwarnings("ignore", category=PTBUserWarning, message=".*per_message.*")
 
 # Debug logging removed - was causing startup issues
 
