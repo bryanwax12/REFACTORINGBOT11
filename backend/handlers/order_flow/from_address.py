@@ -110,18 +110,12 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE)
         "success"
     )
     
+    from utils.ui_utils import get_skip_and_cancel_keyboard, OrderStepMessages, CallbackData
     asyncio.create_task(mark_message_as_selected(update, context))
     
     # Show next step with SKIP option
-    keyboard = [
-        [InlineKeyboardButton("⏭️ Пропустить", callback_data='skip_from_address2')],
-        [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    message_text = """Шаг 3/13: 🏢 Адрес 2 (опционально)
-Например: Apt 4B или Suite 200
-Или нажмите "Пропустить" """
+    reply_markup = get_skip_and_cancel_keyboard(CallbackData.SKIP_FROM_ADDRESS2)
+    message_text = OrderStepMessages.FROM_ADDRESS2
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
