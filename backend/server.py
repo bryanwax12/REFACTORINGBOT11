@@ -3145,7 +3145,7 @@ async def order_from_template_list(update: Update, context: ContextTypes.DEFAULT
     asyncio.create_task(mark_message_as_selected(update, context))
     
     telegram_id = query.from_user.id
-    templates = await db.templates.find({"telegram_id": telegram_id}).sort("created_at", -1).to_list(10)
+    templates = await find_user_templates(telegram_id, limit=10)
     
     if not templates:
         await safe_telegram_call(query.message.reply_text("❌ У вас нет сохраненных шаблонов"))
