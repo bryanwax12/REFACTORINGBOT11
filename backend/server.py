@@ -6174,6 +6174,35 @@ async def get_debug_logs(lines: int = 200, filter: str = ""):
         }
 
 
+@api_router.get("/debug/active-conversations")
+async def debug_active_conversations():
+    """Check active conversations in memory (NO AUTH)"""
+    try:
+        if not application or not application.persistence:
+            return {"error": "Application or persistence not initialized"}
+        
+        # Get conversations from persistence
+        order_convs = await application.persistence.get_conversations("order_conv_handler")
+        template_convs = await application.persistence.get_conversations("template_rename_handler")
+        
+        return {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "order_conversations": {
+                "count": len(order_convs),
+                "data": {str(k): v for k, v in order_convs.items()}
+            },
+            "template_conversations": {
+                "count": len(template_convs),
+                "data": {str(k): v for k, v in template_convs.items()}
+            }
+        }
+    except Exception as e:
+        return {
+            "error": str(e),
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+
+
 @api_router.get("/debug/persistence")
 async def debug_persistence():
     """Check MongoDB persistence state (NO AUTH)"""
