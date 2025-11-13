@@ -1533,39 +1533,7 @@ async def validate_address_with_shipstation(name, street1, street2, city, state,
             'message': 'Проверка недоступна, продолжаем'
         }
 
-async def notify_admin_error(user_info: dict, error_type: str, error_details: str, order_id: str = None):
-    """Send error notification to admin"""
-    if not ADMIN_TELEGRAM_ID or not bot_instance:
-        return
-    
-    try:
-        username = user_info.get('username', 'N/A')
-        telegram_id = user_info.get('telegram_id', 'N/A')
-        first_name = user_info.get('first_name', 'N/A')
-        
-        message = f"""🚨 <b>ОШИБКА В БОТЕ</b> 🚨
-
-👤 <b>Пользователь:</b>
-   • ID: {telegram_id}
-   • Имя: {first_name}
-   • Username: @{username if username != 'N/A' else 'не указан'}
-
-❌ <b>Тип ошибки:</b> {error_type}
-
-📋 <b>Детали:</b>
-{error_details}
-"""
-        
-        if order_id:
-            message += f"\n🔖 <b>Order ID:</b> {order_id}"
-        
-        await safe_telegram_call(bot_instance.send_message(
-            chat_id=ADMIN_TELEGRAM_ID,
-            text=message,
-            parse_mode='HTML'
-        ))
-    except Exception as e:
-        logger.error(f"Failed to send admin notification: {e}")
+# notify_admin_error moved to handlers/admin_handlers.py
 
 @with_typing_indicator
 async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
