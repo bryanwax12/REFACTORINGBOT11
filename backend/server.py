@@ -708,20 +708,28 @@ def mark_message_as_selected_nonblocking(update: Update, context: ContextTypes.D
     """Non-blocking wrapper for mark_message_as_selected"""
     asyncio.create_task(mark_message_as_selected(update, context))
 
-async def safe_telegram_call(coro, timeout=10, error_message="❌ Превышено время ожидания. Попробуйте еще раз."):
+async def safe_telegram_call(coro, timeout=10, error_message="❌ Превышено время ожидания. Попробуйте еще раз.", chat_id=None):
     """
-    Universal wrapper for all Telegram API calls with timeout protection
-    Prevents bot from hanging on any Telegram API operation
+    Universal wrapper with rate limiting and timeout protection
+    Fast responses + ban prevention
     
     Usage:
-        await safe_telegram_call(update.message.reply_text("Hello"))
-        await safe_telegram_call(context.bot.send_message(...), timeout=15)
+        await safe_telegram_call(update.message.reply_text("Hello"), chat_id=update.effective_chat.id)
     """
     try:
+        # Apply rate limiting if chat_id provided
+        if chat_id:
+            await rate_limiter.acquire(chat_id)
+        
         return await asyncio.wait_for(coro, timeout=timeout)
     except asyncio.TimeoutError:
         logger.error(f"Telegram API timeout after {timeout}s")
-        return None  # Return None on timeout
+        return None
+    except telegram.error.RetryAfter as e:
+        # Telegram rate limit hit - wait and retry
+        logger.warning(f"Telegram rate limit: waiting {e.retry_after}s")
+        await asyncio.sleep(e.retry_after)
+        return await asyncio.wait_for(coro, timeout=timeout)
     except Exception as e:
         logger.error(f"Telegram API error: {e}")
         return None
