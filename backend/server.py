@@ -38,7 +38,16 @@ from utils.performance import profile_db_query, profile_api_call, QueryTimer
 # Profiled DB operations (most frequently used)
 @profile_db_query("find_user_by_telegram_id")
 async def find_user_by_telegram_id(telegram_id: int, projection: dict = None):
-    """Профилируемый поиск пользователя по telegram_id"""
+    """
+    Профилируемый поиск пользователя по telegram_id
+    
+    Args:
+        telegram_id: Telegram user ID
+        projection: Optional projection dict (default: {"_id": 0})
+    
+    Returns:
+        User document or None
+    """
     if projection is None:
         projection = {"_id": 0}
     return await db.users.find_one({"telegram_id": telegram_id}, projection)
