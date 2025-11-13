@@ -187,13 +187,13 @@ async def rename_template_start(update: Update, context: ContextTypes.DEFAULT_TY
     
     template_id = query.data.replace('template_rename_', '')
     
+    from utils.ui_utils import TemplateMessages, get_template_rename_keyboard
+    
     # Save template ID for next step
     context.user_data['renaming_template_id'] = template_id
     
-    message = "📝 Введите новое название для шаблона:"
-    
-    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data=f'template_view_{template_id}')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    message = TemplateMessages.rename_prompt()
+    reply_markup = get_template_rename_keyboard(template_id)
     
     await query.message.reply_text(message, reply_markup=reply_markup)
     
