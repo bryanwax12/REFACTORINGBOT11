@@ -387,3 +387,82 @@ def add_back_button(keyboard: List[List[InlineKeyboardButton]],
     """
     keyboard.append([InlineKeyboardButton(ButtonTexts.BACK_TO_MENU, callback_data=callback_data)])
     return keyboard
+
+
+# ============================================================
+# TEMPLATE-SPECIFIC KEYBOARDS
+# ============================================================
+
+def get_template_view_keyboard(template_id: str) -> InlineKeyboardMarkup:
+    """
+    Keyboard for template detail view with action buttons
+    
+    Args:
+        template_id: ID of the template
+    
+    Returns:
+        InlineKeyboardMarkup with use/edit/delete buttons
+    """
+    keyboard = [
+        [InlineKeyboardButton("✅ Использовать шаблон", callback_data=f'template_use_{template_id}')],
+        [InlineKeyboardButton("✏️ Переименовать", callback_data=f'template_rename_{template_id}')],
+        [InlineKeyboardButton("🗑 Удалить", callback_data=f'template_delete_{template_id}')],
+        [InlineKeyboardButton("🔙 К списку шаблонов", callback_data=CallbackData.MY_TEMPLATES)]
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
+def get_template_delete_confirmation_keyboard(template_id: str) -> InlineKeyboardMarkup:
+    """
+    Confirmation keyboard for template deletion
+    
+    Args:
+        template_id: ID of the template to delete
+    
+    Returns:
+        InlineKeyboardMarkup with confirm/cancel buttons
+    """
+    keyboard = [
+        [InlineKeyboardButton("✅ Да, удалить", callback_data=f'template_confirm_delete_{template_id}')],
+        [InlineKeyboardButton("❌ Отмена", callback_data=f'template_view_{template_id}')]
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
+def get_template_rename_keyboard(template_id: str) -> InlineKeyboardMarkup:
+    """
+    Keyboard for template rename flow
+    
+    Args:
+        template_id: ID of the template being renamed
+    
+    Returns:
+        InlineKeyboardMarkup with cancel button
+    """
+    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data=f'template_view_{template_id}')]]
+    return InlineKeyboardMarkup(keyboard)
+
+
+def get_templates_list_keyboard(templates: List[dict]) -> InlineKeyboardMarkup:
+    """
+    Build keyboard with list of user's templates
+    
+    Args:
+        templates: List of template dicts with 'name' and 'id' fields
+    
+    Returns:
+        InlineKeyboardMarkup with template buttons + back to menu
+    """
+    keyboard = []
+    
+    for template in templates:
+        template_name = template.get('name', 'Без названия')
+        template_id = template.get('id')
+        keyboard.append([InlineKeyboardButton(
+            f"📄 {template_name}",
+            callback_data=f'template_view_{template_id}'
+        )])
+    
+    keyboard.append([InlineKeyboardButton(ButtonTexts.BACK_TO_MENU, callback_data=CallbackData.START)])
+    
+    return InlineKeyboardMarkup(keyboard)
