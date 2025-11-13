@@ -2176,7 +2176,9 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await safe_telegram_call(update.message.reply_text("❌ Неверный формат ZIP кода. Используйте формат: 12345 или 12345-6789:"))
         return TO_ZIP
     
-    context.user_data['to_zip'] = zip_code
+    # Save to session  
+    user_id = update.effective_user.id
+    await save_to_session(user_id, "TO_PHONE", {'to_zip': zip_code}, context)
     
     # Check if we're editing to address
     if context.user_data.get('editing_to_address'):
