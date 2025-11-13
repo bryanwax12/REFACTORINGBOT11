@@ -142,21 +142,16 @@ async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE, db
     
     template_id = query.data.replace('template_delete_', '')
     
+    from utils.ui_utils import TemplateMessages, get_template_delete_confirmation_keyboard
+    
     template = await find_template_by_id(template_id)
     
     if not template:
-        await query.message.reply_text("❌ Шаблон не найден")
+        await query.message.reply_text(TemplateMessages.template_not_found())
         return
     
-    message = f"""⚠️ Вы уверены, что хотите удалить шаблон "{template.get('name')}"?
-
-Это действие нельзя отменить."""
-    
-    keyboard = [
-        [InlineKeyboardButton("✅ Да, удалить", callback_data=f'template_confirm_delete_{template_id}')],
-        [InlineKeyboardButton("❌ Отмена", callback_data=f'template_view_{template_id}')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    message = TemplateMessages.confirm_delete(template.get('name'))
+    reply_markup = get_template_delete_confirmation_keyboard(template_id)
     
     await query.message.reply_text(message, reply_markup=reply_markup)
 
