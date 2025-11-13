@@ -7687,6 +7687,10 @@ async def get_topups(authenticated: bool = Depends(verify_admin_key)):
 
 app.include_router(api_router)
 
+# Include admin router
+from routers.admin_router import admin_router
+app.include_router(admin_router)
+
 # Direct endpoint for clearing conversations (easier access)
 @app.get("/clear-conversations")
 async def clear_conversations_direct(admin_key: str = None):
