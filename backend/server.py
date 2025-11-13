@@ -8329,7 +8329,9 @@ async def startup_event():
                 ],
                 per_chat=True,
                 per_user=True,
-                per_message=False
+                per_message=False,
+                name="order_conv_handler",
+                persistent=True
             )
             
             application.add_handler(template_rename_handler)
