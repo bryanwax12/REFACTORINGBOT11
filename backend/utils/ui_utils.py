@@ -261,7 +261,7 @@ class MessageTemplates:
     @staticmethod
     def exit_warning(order_amount: float) -> str:
         """Warning when user tries to exit with pending order"""
-        return f"""⚠️ *Внимание!*
+        return """⚠️ *Внимание!*
 
 У вас есть неоплаченный заказ.
 
