@@ -107,13 +107,11 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
     context.user_data['parcel_width'] = width
     await session_manager.update_session_atomic(user_id, step="PARCEL_HEIGHT", data={'parcel_width': width})
     
+    from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
     asyncio.create_task(mark_message_as_selected(update, context))
     
-    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    message_text = """📦 Высота посылки (в дюймах)
-Например: 6 или 6.5"""
+    reply_markup = get_cancel_keyboard()
+    message_text = OrderStepMessages.PARCEL_HEIGHT
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
