@@ -128,39 +128,44 @@ class MongoPersistence(BasePersistence):
         pass
     
     async def update_conversation(self, name: str, key: Tuple, new_state: Optional[int]) -> None:
-        """Save conversation state to MongoDB IMMEDIATELY (no cache, blocking for consistency)"""
+        """Save conversation state to MongoDB with session isolation and auto-cleanup"""
         try:
             logger.warning(f"🔴🔴🔴 PERSISTENCE CALLED: update_conversation(name={name}, key={key}, new_state={new_state})")
-            print(f"🔴🔴🔴 PERSISTENCE CALLED: update_conversation(name={name}, key={key}, new_state={new_state})")
             
-            # Load current conversations
-            conversations = await self.get_conversations(name)
-            logger.info(f"📖 PERSISTENCE: Loaded {len(conversations)} existing conversations")
+            # Auto-cleanup old conversations (older than 1 hour)
+            cutoff_time = datetime.now(timezone.utc) - timedelta(hours=1)
             
             if new_state is None:
-                # Remove conversation
-                if key in conversations:
-                    del conversations[key]
-                    logger.info(f"🗑️ PERSISTENCE: Removed conversation state for {name}, key: {key}")
+                # Remove conversation - delete entire document for this key
+                await self.collection.delete_one({
+                    "_id": f"conversation_{name}_{key[0]}_{key[1]}"
+                })
+                logger.info(f"🗑️ PERSISTENCE: Removed conversation for {name}, key: {key}")
             else:
-                # Update conversation
-                conversations[key] = new_state
-                logger.info(f"💾 PERSISTENCE: Updating conversation - name: {name}, key: {key}, state: {new_state}")
-            
-            # Prepare for MongoDB (convert keys to strings)
-            conversations_for_db = {str(k): v for k, v in conversations.items()}
-            logger.info(f"🔄 PERSISTENCE: Converting to DB format - {len(conversations_for_db)} entries")
-            
-            # Save to MongoDB IMMEDIATELY (blocking for consistency)
-            result = await self.collection.update_one(
-                {"_id": f"conversation_{name}"},
-                {"$set": {"data": conversations_for_db, "updated_at": datetime.now(timezone.utc)}},
-                upsert=True
-            )
-            logger.info(f"✅ PERSISTENCE: Saved to MONGODB - name: {name}, matched={result.matched_count}, modified={result.modified_count}, upserted_id={result.upserted_id}")
-            logger.info(f"📊 PERSISTENCE: Final state - {conversations_for_db}")
+                # Save conversation with timestamp for auto-cleanup
+                doc_id = f"conversation_{name}_{key[0]}_{key[1]}"
+                await self.collection.update_one(
+                    {"_id": doc_id},
+                    {
+                        "$set": {
+                            "state": new_state,
+                            "updated_at": datetime.now(timezone.utc),
+                            "chat_id": key[0],
+                            "user_id": key[1]
+                        }
+                    },
+                    upsert=True
+                )
+                logger.info(f"💾 PERSISTENCE: Saved conversation {doc_id} with state {new_state}")
+                
+                # Cleanup old documents (background task)
+                await self.collection.delete_many({
+                    "_id": {"$regex": f"^conversation_{name}_"},
+                    "updated_at": {"$lt": cutoff_time}
+                })
+                
         except Exception as e:
-            logger.error(f"❌ PERSISTENCE ERROR saving conversation for {name}: {e}", exc_info=True)
+            logger.error(f"❌ PERSISTENCE ERROR: {e}", exc_info=True)
     
     async def drop_user_data(self, user_id: int) -> None:
         """Delete user_data from MongoDB"""
