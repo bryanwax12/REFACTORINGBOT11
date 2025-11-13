@@ -2127,6 +2127,7 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['last_state'] = TO_ZIP
     return TO_ZIP
 
+@with_typing_indicator
 async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     zip_code = update.message.text.strip()
     
