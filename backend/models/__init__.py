@@ -1,16 +1,26 @@
-"""
-Pydantic models for data validation
-"""
-from .user import User, UserBalance
-from .order import Order, OrderCreate
-from .payment import Payment
-from .label import ShippingLabel
+"""Models package"""
+from .models import (
+    User,
+    Address,
+    Parcel,
+    ShippingLabel,
+    Payment,
+    Order,
+    OrderCreate,
+    Template,
+    BroadcastRequest,
+    ShippingRateRequest
+)
 
 __all__ = [
     'User',
-    'UserBalance',
+    'Address',
+    'Parcel',
+    'ShippingLabel',
+    'Payment',
     'Order',
     'OrderCreate',
-    'Payment',
-    'ShippingLabel'
+    'Template',
+    'BroadcastRequest',
+    'ShippingRateRequest'
 ]
