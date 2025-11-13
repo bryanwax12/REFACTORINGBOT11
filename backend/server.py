@@ -4784,6 +4784,8 @@ async def create_and_send_label(order_id, telegram_id, message):
         
         logger.info(f"Purchasing label with rate_id: {order['rate_id']}")
         
+        # Profile label creation API call
+        api_start_time = time.perf_counter()
         response = await asyncio.to_thread(
             requests.post,
             'https://api.shipstation.com/v2/labels',
@@ -4791,6 +4793,8 @@ async def create_and_send_label(order_id, telegram_id, message):
             json=label_request,
             timeout=30
         )
+        api_duration_ms = (time.perf_counter() - api_start_time) * 1000
+        logger.info(f"⚡ ShipStation create label API took {api_duration_ms:.2f}ms")
         
         # ShipStation API returns 200 or 201 for success
         if response.status_code not in [200, 201]:
