@@ -681,3 +681,46 @@ def get_template_selection_keyboard(templates: List[dict]) -> InlineKeyboardMark
     keyboard.append([InlineKeyboardButton(ButtonTexts.CANCEL, callback_data=CallbackData.START)])
     
     return InlineKeyboardMarkup(keyboard)
+
+
+def get_edit_data_keyboard() -> InlineKeyboardMarkup:
+    """
+    Keyboard for editing data when there's an error
+    
+    Returns:
+        InlineKeyboardMarkup with edit/cancel buttons
+    """
+    keyboard = [
+        [InlineKeyboardButton("✏️ Редактировать данные", callback_data='edit_data')],
+        [InlineKeyboardButton(ButtonTexts.CANCEL, callback_data='cancel_order')]
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
+def get_edit_addresses_keyboard() -> InlineKeyboardMarkup:
+    """
+    Keyboard for editing addresses when there's an error
+    
+    Returns:
+        InlineKeyboardMarkup with edit addresses/cancel buttons
+    """
+    keyboard = [
+        [InlineKeyboardButton("✏️ Редактировать адреса", callback_data='edit_addresses_error')],
+        [InlineKeyboardButton(ButtonTexts.CANCEL, callback_data='cancel_order')]
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
+def get_retry_edit_cancel_keyboard() -> InlineKeyboardMarkup:
+    """
+    Keyboard with retry, edit addresses, and cancel options
+    
+    Returns:
+        InlineKeyboardMarkup with retry/edit/cancel buttons
+    """
+    keyboard = [
+        [InlineKeyboardButton("🔄 Попробовать снова", callback_data='continue_order')],
+        [InlineKeyboardButton("✏️ Редактировать адреса", callback_data='edit_addresses_error')],
+        [InlineKeyboardButton(ButtonTexts.CANCEL, callback_data='cancel_order')]
+    ]
+    return InlineKeyboardMarkup(keyboard)
