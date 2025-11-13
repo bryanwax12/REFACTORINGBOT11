@@ -2627,7 +2627,7 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return TEMPLATE_NAME
     
     # Check template limit (10 templates max)
-    templates_count = await db.templates.count_documents({"telegram_id": telegram_id})
+    templates_count = await count_user_templates(telegram_id)
     if templates_count >= 10:
         await safe_telegram_call(update.message.reply_text(
             """❌ *Достигнут лимит шаблонов (10)*
