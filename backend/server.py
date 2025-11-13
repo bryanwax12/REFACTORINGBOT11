@@ -7345,8 +7345,8 @@ async def get_bot_health(authenticated: bool = Depends(verify_admin_key)):
             if 'bot_instance' in globals() and bot_instance is not None:
                 # Bot instance exists, check if we can interact with it
                 bot_is_running = True
-        except:
-            pass
+        except Exception as e:
+            logger.debug(f"Bot check failed: {e}")
         
         if not bot_is_running:
             return {
