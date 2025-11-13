@@ -590,3 +590,45 @@ def get_templates_list_keyboard(templates: List[dict]) -> InlineKeyboardMarkup:
     keyboard.append([InlineKeyboardButton(ButtonTexts.BACK_TO_MENU, callback_data=CallbackData.START)])
     
     return InlineKeyboardMarkup(keyboard)
+
+
+# ============================================================
+# ORDER FLOW KEYBOARDS
+# ============================================================
+
+def get_new_order_choice_keyboard() -> InlineKeyboardMarkup:
+    """
+    Keyboard for choosing new order or from template
+    
+    Returns:
+        InlineKeyboardMarkup with new/template/cancel buttons
+    """
+    keyboard = [
+        [InlineKeyboardButton("📝 Новый заказ", callback_data='order_new')],
+        [InlineKeyboardButton("📋 Из шаблона", callback_data='order_from_template')],
+        [InlineKeyboardButton(ButtonTexts.CANCEL, callback_data=CallbackData.START)]
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
+def get_template_selection_keyboard(templates: List[dict]) -> InlineKeyboardMarkup:
+    """
+    Build keyboard with templates for order creation
+    
+    Args:
+        templates: List of template dicts with 'name' and 'id' fields
+    
+    Returns:
+        InlineKeyboardMarkup with template buttons + cancel
+    """
+    keyboard = []
+    
+    for i, template in enumerate(templates, 1):
+        keyboard.append([InlineKeyboardButton(
+            f"{i}. {template['name']}", 
+            callback_data=f"template_use_{template['id']}"
+        )])
+    
+    keyboard.append([InlineKeyboardButton(ButtonTexts.CANCEL, callback_data=CallbackData.START)])
+    
+    return InlineKeyboardMarkup(keyboard)
