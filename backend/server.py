@@ -1292,7 +1292,7 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # INSTANT feedback: answer immediately without wrapper
         try:
             await query.answer()
-        except:
+        except Exception:
             pass
     
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
