@@ -5454,7 +5454,7 @@ async def root():
 async def create_order(order_data: OrderCreate):
     try:
         # Check user exists
-        user = await db.users.find_one({"telegram_id": order_data.telegram_id}, {"_id": 0})
+        user = await find_user_by_telegram_id(order_data.telegram_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found. Please /start the bot first.")
         
@@ -5570,7 +5570,7 @@ async def search_orders(
             ).sort("created_at", -1).to_list(100)
             
             # Get user info once
-            user = await db.users.find_one({"telegram_id": order['telegram_id']}, {"_id": 0})
+            user = await find_user_by_telegram_id(order["telegram_id"])
             user_name = user.get('first_name', 'Unknown') if user else 'Unknown'
             user_username = user.get('username', '') if user else ''
             
@@ -5718,7 +5718,7 @@ async def get_orders(telegram_id: Optional[int] = None):
         ).sort("created_at", -1).to_list(100)
         
         # Get user info once
-        user = await db.users.find_one({"telegram_id": order['telegram_id']}, {"_id": 0})
+        user = await find_user_by_telegram_id(order["telegram_id"])
         user_name = user.get('first_name', 'Unknown') if user else 'Unknown'
         user_username = user.get('username', '') if user else ''
         
@@ -5963,7 +5963,7 @@ async def refund_order(order_id: str, refund_reason: Optional[str] = None):
         logger.info(f"Updated all labels for order {order_id} to status='refunded'")
         
         # Get user
-        user = await db.users.find_one({"telegram_id": order['telegram_id']}, {"_id": 0})
+        user = await find_user_by_telegram_id(order["telegram_id"])
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
@@ -6769,7 +6769,7 @@ async def get_user_details(telegram_id: int):
 async def block_user(telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
     """Block a user from using the bot"""
     try:
-        user = await db.users.find_one({"telegram_id": telegram_id})
+        user = await find_user_by_telegram_id(telegram_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
@@ -6804,7 +6804,7 @@ async def block_user(telegram_id: int, authenticated: bool = Depends(verify_admi
 async def unblock_user(telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
     """Unblock a user to allow bot usage"""
     try:
-        user = await db.users.find_one({"telegram_id": telegram_id})
+        user = await find_user_by_telegram_id(telegram_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
@@ -6839,7 +6839,7 @@ async def unblock_user(telegram_id: int, authenticated: bool = Depends(verify_ad
 async def invite_user_to_channel(telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
     """Send channel invitation to a specific user"""
     try:
-        user = await db.users.find_one({"telegram_id": telegram_id})
+        user = await find_user_by_telegram_id(telegram_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
@@ -7600,7 +7600,7 @@ async def upload_image(
 async def check_bot_access(telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
     """Check if bot can send messages to user"""
     try:
-        user = await db.users.find_one({"telegram_id": telegram_id})
+        user = await find_user_by_telegram_id(telegram_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
@@ -7796,7 +7796,7 @@ async def check_user_channel_status(telegram_id: int, authenticated: bool = Depe
         if not bot_instance:
             raise HTTPException(status_code=500, detail="Bot not initialized")
         
-        user = await db.users.find_one({"telegram_id": telegram_id})
+        user = await find_user_by_telegram_id(telegram_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
