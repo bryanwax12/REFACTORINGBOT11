@@ -4662,6 +4662,16 @@ Label PDF: {label_download_url}
                     
             except Exception as e:
                 logger.error(f"Error sending label to user: {e}")
+            
+            # STEP 4: Save completed label and clear session
+            await session_manager.save_completed_label(telegram_id, {
+                'order_id': order_id,
+                'tracking_number': tracking_number,
+                'carrier': order['selected_carrier'],
+                'label_url': label_download_url,
+                'amount': order['amount']
+            })
+            logger.info(f"✅ Label saved and session cleared for user {telegram_id}")
                 
         # Send notification to admin about new label
         if ADMIN_TELEGRAM_ID:
