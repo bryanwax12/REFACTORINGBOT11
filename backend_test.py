@@ -2452,6 +2452,74 @@ def test_session_cancel_order_cleanup():
         print(f"❌ Session cancel order cleanup test error: {e}")
         return False
 
+
+def test_refactoring_handlers_regression():
+    """MAIN REGRESSION TEST - Test handlers refactoring per review request"""
+    print("\n🔍 РЕГРЕССИОННОЕ ТЕСТИРОВАНИЕ HANDLERS REFACTORING...")
+    print("🎯 ЦЕЛЬ: Проверить работоспособность бота после рефакторинга модульной архитектуры")
+    print("📋 КРИТИЧНЫЕ КОМПОНЕНТЫ: Telegram webhook, команды бота, callback кнопки, админские API")
+    
+    # Track individual test results for this regression test
+    regression_results = {}
+    
+    # Test 1: Telegram Webhook Endpoint
+    print(f"\n{'='*60}")
+    print("ТЕСТ 1: TELEGRAM WEBHOOK ENDPOINT")
+    print(f"{'='*60}")
+    regression_results['telegram_webhook'] = test_telegram_webhook_endpoint()
+    
+    # Test 2: Bot Commands via Webhook
+    print(f"\n{'='*60}")
+    print("ТЕСТ 2: ОСНОВНЫЕ КОМАНДЫ БОТА")
+    print(f"{'='*60}")
+    regression_results['bot_commands'] = test_telegram_bot_commands()
+    
+    # Test 3: Callback Buttons
+    print(f"\n{'='*60}")
+    print("ТЕСТ 3: CALLBACK КНОПКИ")
+    print(f"{'='*60}")
+    regression_results['callback_buttons'] = test_telegram_callback_buttons()
+    
+    # Test 4: Admin API Endpoints
+    print(f"\n{'='*60}")
+    print("ТЕСТ 4: АДМИНСКИЕ API ЭНДПОИНТЫ")
+    print(f"{'='*60}")
+    regression_results['admin_api'] = test_admin_api_endpoints()
+    
+    # Test 5: Handlers Import Verification
+    print(f"\n{'='*60}")
+    print("ТЕСТ 5: ПРОВЕРКА ИМПОРТОВ И МОДУЛЕЙ")
+    print(f"{'='*60}")
+    regression_results['handlers_imports'] = test_handlers_import_verification()
+    
+    # Calculate regression test results
+    passed_regression = sum(regression_results.values())
+    total_regression = len(regression_results)
+    success_rate = (passed_regression / total_regression) * 100
+    
+    print(f"\n{'='*80}")
+    print("📊 РЕЗУЛЬТАТЫ РЕГРЕССИОННОГО ТЕСТИРОВАНИЯ")
+    print(f"{'='*80}")
+    
+    for test_name, result in regression_results.items():
+        status = "✅ ПРОЙДЕН" if result else "❌ ПРОВАЛЕН"
+        print(f"   {test_name}: {status}")
+    
+    print(f"\n📈 ОБЩИЕ РЕЗУЛЬТАТЫ РЕГРЕССИИ:")
+    print(f"   Всего тестов: {total_regression}")
+    print(f"   Пройдено: {passed_regression} ✅")
+    print(f"   Провалено: {total_regression - passed_regression} ❌")
+    print(f"   Процент успеха: {success_rate:.1f}%")
+    
+    if success_rate >= 80:
+        print(f"\n✅ РЕГРЕССИОННОЕ ТЕСТИРОВАНИЕ УСПЕШНО ЗАВЕРШЕНО")
+        print(f"   Рефакторинг модульной архитектуры работает корректно")
+    else:
+        print(f"\n❌ РЕГРЕССИОННОЕ ТЕСТИРОВАНИЕ ВЫЯВИЛО ПРОБЛЕМЫ")
+        print(f"   Требуется исправление ошибок рефакторинга")
+    
+    return success_rate >= 80
+
 def test_telegram_webhook_status():
     """Test Telegram webhook status endpoint - CRITICAL TEST per review request"""
     print("\n🔍 Testing Telegram Webhook Status...")
