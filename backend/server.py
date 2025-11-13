@@ -4040,7 +4040,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # Delete any existing pending order for this user
             await db.pending_orders.delete_many({"telegram_id": telegram_id})
             # Save new pending order
-            await db.pending_orders.insert_one(pending_order)
+            await insert_pending_order(pending_order)
             
             context.user_data['last_state'] = TOPUP_AMOUNT  # Save state for cancel return
             
