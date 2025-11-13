@@ -4809,7 +4809,11 @@ async def confirm_cancel_order(update: Update, context: ContextTypes.DEFAULT_TYP
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
     asyncio.create_task(mark_message_as_selected(update, context))
     
+    # Clear session and context data
+    user_id = update.effective_user.id
+    await session_manager.clear_session(user_id)
     context.user_data.clear()
+    logger.info(f"🗑️ Session cleared after order cancellation for user {user_id}")
     
     keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
