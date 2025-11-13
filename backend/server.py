@@ -5833,7 +5833,8 @@ async def get_debug_logs(lines: int = 200, filter: str = ""):
                     result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=5)
                     if result.stdout:
                         all_logs.extend([f"[{log_file}] {line}" for line in result.stdout.split('\n') if line])
-                except:
+                except Exception as e:
+                    logger.warning(f"Error reading log file {log_file}: {e}")
                     pass
         
         # Filter if requested
