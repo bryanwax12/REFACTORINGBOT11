@@ -6135,6 +6135,18 @@ async def telegram_status():
         "webhook_base_url_env": webhook_base_url or 'Not set',
         "bot_mode": bot_mode,
         "mode_description": "WEBHOOK mode eliminates double message bug. POLLING mode may cause conflicts.",
+        "persistence": {
+            "type": type(application.persistence).__name__ if application and application.persistence else "None",
+            "store_data": str(application.persistence.store_data) if application and application.persistence else "None"
+        },
+        "conversation_handlers": [
+            {
+                "name": getattr(h, 'name', 'unnamed'),
+                "persistent": getattr(h, 'persistent', False)
+            }
+            for h in (application.handlers.get(0, []) if application else [])
+            if hasattr(h, '__class__') and 'ConversationHandler' in h.__class__.__name__
+        ]
     }
 
 
