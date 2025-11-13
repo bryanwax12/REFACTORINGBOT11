@@ -2173,11 +2173,8 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             except Exception:
                 pass
             
-            keyboard = [
-                [InlineKeyboardButton("✏️ Редактировать адреса", callback_data='edit_addresses_error')],
-                [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
-            ]
-            reply_markup = InlineKeyboardMarkup(keyboard)
+            from utils.ui_utils import get_edit_addresses_keyboard
+            reply_markup = get_edit_addresses_keyboard()
             
             await safe_telegram_call(query.message.reply_text(
             f"❌ Ошибка при получении тарифов:\n{error_msg}\n\nПроверьте правильность введенных адресов.",
@@ -2260,11 +2257,8 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             except Exception:
                 pass
             
-            keyboard = [
-                [InlineKeyboardButton("✏️ Редактировать адреса", callback_data='edit_addresses_error')],
-                [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
-            ]
-            reply_markup = InlineKeyboardMarkup(keyboard)
+            from utils.ui_utils import get_edit_addresses_keyboard
+            reply_markup = get_edit_addresses_keyboard()
             
             await safe_telegram_call(query.message.reply_text(
             "❌ Нет доступных тарифов для данного направления.\n\nПроверьте правильность введенных адресов.",
