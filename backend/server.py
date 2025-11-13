@@ -8018,7 +8018,8 @@ async def startup_event():
                 per_chat=True,
                 per_user=True,
                 per_message=False,
-                name="template_rename_handler"
+                name="template_rename_handler",  # CRITICAL: Required for persistence!
+                persistent=True  # CRITICAL: Activates persistence in webhook mode!
             )
             
             order_conv_handler = ConversationHandler(
