@@ -3902,7 +3902,14 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         }, context)
         logger.info(f"💾 ShipStation rates saved to session for user {user_id}")
         
-        # Create buttons for carrier selection
+        # Delete progress message
+        try:
+            await safe_telegram_call(progress_msg.delete())
+        except Exception:
+            pass
+        
+        # Display rates using reusable function
+        return await display_shipping_rates(update, context, context.user_data['rates'])
         # Carrier logos/icons - узнаваемые символы
         carrier_icons = {
             'UPS': '🛡 UPS',  # Щит - фирменный логотип UPS (коричнево-золотой щит)
