@@ -35,6 +35,15 @@ except ImportError:
 # Performance monitoring
 from utils.performance import profile_db_query, profile_api_call, QueryTimer
 
+# API Services
+from services.api_services import (
+    create_oxapay_invoice,
+    check_oxapay_payment,
+    check_shipstation_balance,
+    get_shipstation_carrier_ids,
+    validate_address_with_shipstation
+)
+
 # Profiled DB operations (most frequently used)
 @profile_db_query("find_user_by_telegram_id")
 async def find_user_by_telegram_id(telegram_id: int, projection: dict = None):
