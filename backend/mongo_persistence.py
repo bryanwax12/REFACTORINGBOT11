@@ -64,9 +64,11 @@ class MongoPersistence(BasePersistence):
     async def get_conversations(self, name: str) -> Dict:
         """Load conversation state directly from MongoDB (no cache, multi-pod safe)"""
         try:
+            logger.warning(f"🔵🔵🔵 GET_CONVERSATIONS CALLED for {name}")
             # Always load from MongoDB for consistency across pods
             doc = await self.collection.find_one({"_id": f"conversation_{name}"})
             if doc and 'data' in doc:
+                logger.warning(f"🟡 FOUND MongoDB doc: {doc}")
                 # Convert string keys back to tuples
                 conversations = {}
                 for key_str, state in doc['data'].items():
@@ -74,15 +76,16 @@ class MongoPersistence(BasePersistence):
                     try:
                         key = ast.literal_eval(key_str)  # Safe parsing
                         conversations[key] = state
+                        logger.warning(f"🟢 Parsed key: {key_str} -> {key}, state: {state}")
                     except (ValueError, SyntaxError) as e:
                         logger.error(f"Failed to parse key '{key_str}': {e}")
                         continue
                 
-                logger.info(f"📥 PERSISTENCE: Loaded from MongoDB for {name}: {len(conversations)} entries, states: {conversations}")
+                logger.warning(f"📥 PERSISTENCE: Loaded from MongoDB for {name}: {len(conversations)} entries, states: {conversations}")
                 return conversations
             
             # Empty state
-            logger.info(f"📭 PERSISTENCE: No conversation state in MongoDB for {name}, starting fresh")
+            logger.warning(f"📭 PERSISTENCE: No conversation state in MongoDB for {name}, starting fresh")
             return {}
         except Exception as e:
             logger.error(f"❌ PERSISTENCE ERROR loading conversations for {name}: {e}")
