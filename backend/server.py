@@ -2801,7 +2801,7 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     telegram_id = query.from_user.id
     
     # Get user templates
-    templates = await db.templates.find({"telegram_id": telegram_id}).sort("created_at", -1).to_list(10)
+    templates = await find_user_templates(telegram_id, limit=10)
     logger.info(f"📋 my_templates_menu: user {telegram_id} has {len(templates)} templates")
     
     if not templates:
