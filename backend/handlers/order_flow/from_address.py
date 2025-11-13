@@ -292,13 +292,11 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['from_phone'] = formatted_phone
     await session_manager.update_session_atomic(user_id, step="TO_NAME", data={'from_phone': formatted_phone})
     
+    from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
     asyncio.create_task(mark_message_as_selected(update, context))
     
-    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    message_text = """Шаг 8/13: 👤 Имя получателя
-Например: Jane Doe"""
+    reply_markup = get_cancel_keyboard()
+    message_text = OrderStepMessages.TO_NAME
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
