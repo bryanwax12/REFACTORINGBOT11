@@ -2523,7 +2523,10 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
             await safe_telegram_call(update.message.reply_text("❌ Ширина слишком большая. Максимум 108 дюймов. Попробуйте еще раз:"))
             return PARCEL_WIDTH
         
+        # Save to session AND context
+        user_id = update.effective_user.id
         context.user_data['width'] = width
+        await session_manager.update_session(user_id, step="PARCEL_HEIGHT", data={'width': width})
         
         # Mark previous message as selected (non-blocking)
         asyncio.create_task(mark_message_as_selected(update, context))
