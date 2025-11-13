@@ -6177,11 +6177,12 @@ async def telegram_webhook(request: Request):
             logger.info(f"🔵 UPDATE PARSED: Starting process_update for {update_id}")
             await application.process_update(update)
             
-            # CRITICAL: Flush persistence to save conversation state BEFORE returning response
+            # INSTANT RESPONSE: Return OK immediately, save persistence in background
+            # This prevents delays in button clicks and message processing
             if application.persistence:
-                logger.info(f"💾 FLUSHING PERSISTENCE for update {update_id}")
-                await application.update_persistence()
-                logger.info(f"✅ PERSISTENCE FLUSHED for update {update_id}")
+                # Non-blocking: save persistence in background without waiting
+                asyncio.create_task(application.update_persistence())
+                logger.info(f"🚀 PERSISTENCE QUEUED (non-blocking) for update {update_id}")
             
             logger.info(f"🟢 UPDATE PROCESSED SUCCESSFULLY: {update_id}")
             return {"ok": True}
