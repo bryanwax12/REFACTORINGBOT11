@@ -1303,11 +1303,16 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.answer()
         except Exception:
             pass
-    
-    # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-    asyncio.create_task(mark_message_as_selected(update, context))
-    
-    telegram_id = query.from_user.id
+        
+        # Mark previous message as selected (remove buttons and add "✅ Выбрано")
+        asyncio.create_task(mark_message_as_selected(update, context))
+        
+        telegram_id = query.from_user.id
+    else:
+        # Mark previous message as selected (non-blocking)
+        asyncio.create_task(mark_message_as_selected(update, context))
+        
+        telegram_id = update.effective_user.id
     logger.info(f"📝 User {telegram_id} starting new order flow")
     
     # STEP 2: Check for existing session or create new one
