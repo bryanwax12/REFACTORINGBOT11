@@ -6112,6 +6112,41 @@ async def telegram_webhook(request: Request):
         return {"ok": True}
 
 
+@api_router.get("/debug/logs")
+async def get_debug_logs(lines: int = 200, filter: str = ""):
+    """Get recent backend logs for debugging (NO AUTH)
+    
+    Usage:
+    - /api/debug/logs?lines=200 - get last 200 lines
+    - /api/debug/logs?filter=PERSISTENCE - filter by keyword
+    - /api/debug/logs?lines=500&filter=ERROR - get 500 lines with ERROR
+    """
+    try:
+        import subprocess
+        
+        # Read logs
+        cmd = f"tail -n {lines} /var/log/supervisor/backend.err.log"
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=5)
+        
+        log_lines = result.stdout.split('\n')
+        
+        # Filter if requested
+        if filter:
+            log_lines = [line for line in log_lines if filter.upper() in line.upper()]
+        
+        return {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "total_lines": len(log_lines),
+            "filter": filter or "none",
+            "logs": log_lines[-100:]  # Return max 100 lines for readability
+        }
+    except Exception as e:
+        return {
+            "error": str(e),
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+
+
 @api_router.get("/telegram/status")
 async def telegram_status():
     """Check Telegram bot application status (NO AUTH REQUIRED FOR DEBUG)"""
