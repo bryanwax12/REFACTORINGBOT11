@@ -1052,10 +1052,36 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def skip_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Skip FROM address line 2 - directly proceed to next step"""
+    from server import session_manager, FROM_CITY
+    from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
+    
     query = update.callback_query
     await safe_telegram_call(query.answer())
+    
+    # Mark previous message as selected
+    asyncio.create_task(mark_message_as_selected(update, context))
+    
+    # Save skipped field
+    user_id = update.effective_user.id
+    await session_manager.update_session(user_id, {'from_street2': None})
     context.user_data['from_street2'] = None
-    return await order_from_address2(update, context)
+    
+    # Show next step (FROM_CITY)
+    reply_markup = get_cancel_keyboard()
+    message_text = OrderStepMessages.FROM_CITY
+    
+    bot_msg = await safe_telegram_call(query.message.reply_text(
+        message_text,
+        reply_markup=reply_markup
+    ))
+    
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
+        context.user_data['last_state'] = FROM_CITY
+    
+    return FROM_CITY
 
 
 async def skip_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
