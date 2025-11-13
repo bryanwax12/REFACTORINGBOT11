@@ -74,36 +74,17 @@ async def view_template(update: Update, context: ContextTypes.DEFAULT_TYPE, db, 
     template_id = query.data.replace('template_view_', '')
     
     # Get template from database
+    from utils.ui_utils import TemplateMessages, get_template_view_keyboard
+    
     template = await find_template_by_id(template_id)
     
     if not template:
-        await query.message.reply_text("❌ Шаблон не найден")
+        await query.message.reply_text(TemplateMessages.template_not_found())
         return
     
     # Format template info
-    message = f"""📄 Шаблон: {template.get('name', 'Без названия')}
-
-📍 Адрес отправителя:
-{template.get('from_name')}
-{template.get('from_street1')}
-{template.get('from_street2') or ''}
-{template.get('from_city')}, {template.get('from_state')} {template.get('from_zip')}
-📞 {template.get('from_phone') or 'Не указан'}
-
-📍 Адрес получателя:
-{template.get('to_name')}
-{template.get('to_street1')}
-{template.get('to_street2') or ''}
-{template.get('to_city')}, {template.get('to_state')} {template.get('to_zip')}
-📞 {template.get('to_phone') or 'Не указан'}"""
-    
-    keyboard = [
-        [InlineKeyboardButton("✅ Использовать шаблон", callback_data=f'template_use_{template_id}')],
-        [InlineKeyboardButton("✏️ Переименовать", callback_data=f'template_rename_{template_id}')],
-        [InlineKeyboardButton("🗑 Удалить", callback_data=f'template_delete_{template_id}')],
-        [InlineKeyboardButton("🔙 К списку шаблонов", callback_data='my_templates')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    message = TemplateMessages.template_details(template)
+    reply_markup = get_template_view_keyboard(template_id)
     
     await query.message.reply_text(message, reply_markup=reply_markup)
 
