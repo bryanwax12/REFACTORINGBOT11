@@ -2328,7 +2328,10 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
             await safe_telegram_call(update.message.reply_text("❌ Вес слишком большой. Максимум 150 фунтов. Попробуйте еще раз:"))
             return PARCEL_WEIGHT
         
+        # Save to session AND context
+        user_id = update.effective_user.id
         context.user_data['weight'] = weight
+        await session_manager.update_session(user_id, step="PARCEL_LENGTH", data={'weight': weight})
         
         # Check if we're editing parcel weight - ask for dimensions too
         if context.user_data.get('editing_parcel'):
