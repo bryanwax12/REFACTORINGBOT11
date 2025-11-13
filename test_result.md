@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "ПОЛНОЕ РЕГРЕССИОННОЕ ТЕСТИРОВАНИЕ после завершения миграции на кастомный Session Manager. Встроенный persistence от python-telegram-bot полностью отключен. Вместо этого используется SessionManager (/app/backend/session_manager.py) для ручного управления состоянием диалогов в MongoDB."
+user_problem_statement: "РЕГРЕССИОННОЕ ТЕСТИРОВАНИЕ после рефакторинга модульной архитектуры (вынос функций в handlers/common_handlers.py и handlers/admin_handlers.py). Проверка работоспособности Telegram webhook, команд бота, callback кнопок и админских API эндпоинтов."
 
 backend:
   - task: "SessionManager V2 Migration - MongoDB-Optimized with TTL and Atomic Operations"
