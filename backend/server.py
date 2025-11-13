@@ -8316,24 +8316,13 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-async def cleanup_sessions_periodically():
-    """Периодическая очистка старых сессий"""
-    while True:
-        try:
-            await asyncio.sleep(600)  # Каждые 10 минут
-            deleted = await session_manager.cleanup_old_sessions(timeout_minutes=15)
-            if deleted > 0:
-                logger.info(f"🧹 Auto-cleanup: removed {deleted} expired sessions")
-        except Exception as e:
-            logger.error(f"Error in periodic cleanup: {e}")
-
 @app.on_event("startup")
 async def startup_event():
     logger.info("Starting application...")
     
-    # Start periodic session cleanup
-    asyncio.create_task(cleanup_sessions_periodically())
-    logger.info("🧹 Started periodic session cleanup (every 10 minutes)")
+    # V2: TTL index автоматически очищает сессии старше 15 минут
+    # Периодическая очистка больше не нужна
+    logger.info("✅ Session cleanup: TTL index (automatic, no manual cleanup needed)")
     
     # Load correct API key based on api_mode in database
     global SHIPSTATION_API_KEY
