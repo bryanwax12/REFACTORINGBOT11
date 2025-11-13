@@ -165,12 +165,14 @@ async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_
     
     template_id = query.data.replace('template_confirm_delete_', '')
     
+    from utils.ui_utils import TemplateMessages
+    
     result = await db.templates.delete_one({"id": template_id})
     
     if result.deleted_count > 0:
-        await query.message.reply_text("✅ Шаблон удалён")
+        await query.message.reply_text(TemplateMessages.template_deleted())
     else:
-        await query.message.reply_text("❌ Ошибка при удалении шаблона")
+        await query.message.reply_text(TemplateMessages.delete_error())
     
     # Return to templates menu
     await my_templates_menu(update, context, db, safe_telegram_call, None, None, None)
