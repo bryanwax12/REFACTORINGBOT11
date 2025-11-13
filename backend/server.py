@@ -1087,87 +1087,20 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             context.user_data['last_bot_message_text'] = message_text
             context.user_data['last_state'] = FROM_NAME
         return FROM_NAME
-async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.message:
-        address2 = update.message.text.strip()
-        
-        # Check for Cyrillic or non-Latin characters
-        if any(ord(c) >= 0x0400 and ord(c) <= 0x04FF for c in address2):
-            await safe_telegram_call(update.message.reply_text("❌ Используйте только английские буквы (латиницу). Пример: Apt 5, Suite 201"))
-            return FROM_ADDRESS2
-        
-        # Only Latin letters, numbers, spaces, and common address symbols
-        if not all((ord(c) < 128 and (c.isalnum() or c.isspace() or c in ".-',#/")) for c in address2):
-            await safe_telegram_call(update.message.reply_text("❌ Используйте только английские буквы и цифры. Разрешены: буквы, цифры, пробелы, дефисы, точки, запятые"))
-            return FROM_ADDRESS2
-        
-        context.user_data['from_street2'] = address2
-    else:
-        context.user_data['from_street2'] = None
-    
-    # Mark previous message as selected (non-blocking)
-    asyncio.create_task(mark_message_as_selected(update, context))
-    
-    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    message_text = """Шаг 4/13: 🌆 Город отправителя
-Например: San Francisco"""
-    bot_msg = await safe_telegram_call((update.message or update.callback_query.message).reply_text(
-        message_text,
-        reply_markup=reply_markup
-    ))
-    context.user_data['last_bot_message_id'] = bot_msg.message_id
-    context.user_data['last_bot_message_text'] = message_text
-    context.user_data['last_state'] = FROM_CITY
-    return FROM_CITY
+
 
 async def skip_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.message:
-        address2 = update.message.text.strip()
-        
-        # Check for Cyrillic or non-Latin characters
-        if any(ord(c) >= 0x0400 and ord(c) <= 0x04FF for c in address2):
-            await safe_telegram_call(update.message.reply_text("❌ Используйте только английские буквы (латиницу). Пример: Apt 12, Suite 305"))
-            return TO_ADDRESS2
-        
-        # Only Latin letters, numbers, spaces, and common address symbols
-        if not all((ord(c) < 128 and (c.isalnum() or c.isspace() or c in ".-',#/")) for c in address2):
-            await safe_telegram_call(update.message.reply_text("❌ Используйте только английские буквы и цифры. Разрешены: буквы, цифры, пробелы, дефисы, точки, запятые"))
-            return TO_ADDRESS2
-        
-        context.user_data['to_street2'] = address2
-    else:
-        context.user_data['to_street2'] = None
-    
-    # Mark previous message as selected (non-blocking)
-    asyncio.create_task(mark_message_as_selected(update, context))
-    
-    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    # Check if we're in editing mode
-    if context.user_data.get('editing_to_address'):
-        message_text = """Шаг 4/6: Город получателя
-Например: New York"""
-    else:
-        message_text = """Шаг 11/13: 🌆 Город получателя
-Например: New York"""
-    
-    bot_msg = await safe_telegram_call((update.message or update.callback_query.message).reply_text(
-        message_text,
-        reply_markup=reply_markup
-    ))
-    context.user_data['last_bot_message_id'] = bot_msg.message_id
-    context.user_data['last_bot_message_text'] = message_text
-    context.user_data['last_state'] = TO_CITY
-    return TO_CITY
+    await safe_telegram_call(query.answer())
+    context.user_data['from_street2'] = None
+    return await order_from_address2(update, context)
+
 
 async def skip_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await safe_telegram_call(query.answer())
+    context.user_data['to_street2'] = None
+    return await order_to_address2(update, context)
 async def show_data_confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Show summary of entered data with edit option"""
     data = context.user_data
