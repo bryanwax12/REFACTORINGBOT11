@@ -29,7 +29,20 @@ class MongoPersistence(BasePersistence):
         self.db = db
         self.collection = db['bot_persistence']
         
+        # Create indexes for fast queries (async, non-blocking)
+        import asyncio
+        asyncio.create_task(self._create_indexes())
+        
         logger.info("✅ MongoPersistence initialized - Direct MongoDB (multi-pod safe, no cache)")
+    
+    async def _create_indexes(self):
+        """Create MongoDB indexes for performance"""
+        try:
+            await self.collection.create_index("updated_at")
+            await self.collection.create_index([("chat_id", 1), ("user_id", 1)])
+            logger.info("📊 MongoDB indexes created for fast persistence")
+        except Exception as e:
+            logger.error(f"Error creating indexes: {e}")
     
     async def get_user_data(self) -> Dict[int, Dict]:
         """Load user_data from MongoDB"""
