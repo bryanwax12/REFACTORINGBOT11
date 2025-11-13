@@ -60,13 +60,8 @@ OXAPAY_API_KEY = os.environ.get('OXAPAY_API_KEY', '')
 OXAPAY_API_URL = 'https://api.oxapay.com'
 
 # Cache Configuration
+# NOTE: SETTINGS_CACHE moved to utils/cache.py to avoid duplication
 CACHE_TTL = 60  # seconds
-SETTINGS_CACHE = {
-    'api_mode': None,
-    'api_mode_timestamp': None,
-    'maintenance_mode': None,
-    'maintenance_timestamp': None
-}
 
 # Rate Limiting
 BUTTON_DEBOUNCE_SECONDS = 0.1
