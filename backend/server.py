@@ -106,7 +106,30 @@ CACHE_TTL = 60  # Cache TTL in seconds
 
 # Button click debouncing - prevent multiple rapid clicks
 button_click_tracker = {}  # {user_id: {button_data: last_click_timestamp}}
-BUTTON_DEBOUNCE_SECONDS = 0.5  # Минимальное время между нажатиями одной кнопки (500ms)
+BUTTON_DEBOUNCE_SECONDS = 0.3  # Быстрый отклик: 300ms между нажатиями
+
+# Rate limiting для защиты от Telegram бана
+# Telegram API limits: 30 msg/sec per chat, burst of 20
+from collections import defaultdict
+import asyncio
+
+class RateLimiter:
+    """Smart rate limiter: fast responses, prevents Telegram bans"""
+    def __init__(self):
+        self.locks = defaultdict(asyncio.Lock)
+        self.last_call = defaultdict(float)
+        self.min_interval = 0.03  # 30ms minimum between calls (allows 33 msg/sec)
+    
+    async def acquire(self, chat_id: int):
+        """Acquire lock with minimal delay for fast responses"""
+        async with self.locks[chat_id]:
+            now = time.time()
+            elapsed = now - self.last_call[chat_id]
+            if elapsed < self.min_interval:
+                await asyncio.sleep(self.min_interval - elapsed)
+            self.last_call[chat_id] = time.time()
+
+rate_limiter = RateLimiter()
 
 def is_button_click_allowed(user_id: int, button_data: str) -> bool:
     """Check if button click is allowed (debouncing)"""
