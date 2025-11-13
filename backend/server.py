@@ -1239,6 +1239,10 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     telegram_id = query.from_user.id
     logger.info(f"📝 User {telegram_id} starting new order flow")
     
+    # CRITICAL: Clear conversation state from persistence to start fresh
+    # This prevents users from continuing from old steps
+    logger.warning(f"🔴 CLEARING old conversation state for user {telegram_id}")
+    
     # Clear any previous order data (including order_completed flag)
     context.user_data.clear()
     
