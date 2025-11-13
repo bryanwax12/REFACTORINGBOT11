@@ -85,6 +85,7 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return FROM_ADDRESS
 
 
+@with_typing_indicator
 async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 2/13: Collect sender street address"""
     from server import session_manager, SecurityLogger, sanitize_string, FROM_ADDRESS, FROM_ADDRESS2
@@ -132,6 +133,7 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE)
     return FROM_ADDRESS2
 
 
+@with_typing_indicator
 async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 3/13: Collect sender address line 2 (optional)"""
     from server import session_manager, sanitize_string, FROM_ADDRESS2, FROM_CITY
@@ -167,6 +169,7 @@ async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE
     return FROM_CITY
 
 
+@with_typing_indicator
 async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 4/13: Collect sender city"""
     from server import session_manager, sanitize_string, FROM_CITY, FROM_STATE
@@ -204,6 +207,7 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return FROM_STATE
 
 
+@with_typing_indicator
 async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 5/13: Collect sender state"""
     from server import session_manager, FROM_STATE, FROM_ZIP
@@ -240,6 +244,7 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return FROM_ZIP
 
 
+@with_typing_indicator
 async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 6/13: Collect sender ZIP code"""
     from server import session_manager, FROM_ZIP, FROM_PHONE
@@ -277,6 +282,7 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return FROM_PHONE
 
 
+@with_typing_indicator
 async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 7/13: Collect sender phone (optional)"""
     from server import session_manager, FROM_PHONE, TO_NAME

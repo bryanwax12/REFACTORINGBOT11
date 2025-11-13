@@ -18,6 +18,7 @@ from utils.validators import validate_weight, validate_dimension
 # PARCEL INFORMATION HANDLERS (4 steps)
 # ============================================================
 
+@with_typing_indicator
 async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 15/17: Collect parcel weight"""
     from server import session_manager, PARCEL_WEIGHT, PARCEL_LENGTH
@@ -54,6 +55,7 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
     return PARCEL_LENGTH
 
 
+@with_typing_indicator
 async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 16/17: Collect parcel length"""
     from server import session_manager, PARCEL_LENGTH, PARCEL_WIDTH
@@ -90,6 +92,7 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
     return PARCEL_WIDTH
 
 
+@with_typing_indicator
 async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 17/17: Collect parcel width"""
     from server import session_manager, PARCEL_WIDTH, PARCEL_HEIGHT
@@ -126,6 +129,7 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
     return PARCEL_HEIGHT
 
 
+@with_typing_indicator
 async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 18/18: Collect parcel height and trigger rate calculation"""
     from server import session_manager, PARCEL_HEIGHT, fetch_shipping_rates

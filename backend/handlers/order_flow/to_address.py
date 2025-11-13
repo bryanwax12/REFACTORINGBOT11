@@ -21,6 +21,7 @@ from utils.validators import (
 # TO ADDRESS HANDLERS (7 steps)
 # ============================================================
 
+@with_typing_indicator
 async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 8/13: Collect recipient name"""
     from server import session_manager, sanitize_string, TO_NAME, TO_ADDRESS, with_typing_indicator
@@ -58,6 +59,7 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return TO_ADDRESS
 
 
+@with_typing_indicator
 async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 9/13: Collect recipient street address"""
     from server import session_manager, sanitize_string, TO_ADDRESS, TO_ADDRESS2
@@ -130,6 +132,7 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return TO_CITY
 
 
+@with_typing_indicator
 async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 11/13: Collect recipient city"""
     from server import session_manager, sanitize_string, TO_CITY, TO_STATE
@@ -167,6 +170,7 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return TO_STATE
 
 
+@with_typing_indicator
 async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 12/13: Collect recipient state"""
     from server import session_manager, TO_STATE, TO_ZIP
@@ -203,6 +207,7 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return TO_ZIP
 
 
+@with_typing_indicator
 async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 13/13: Collect recipient ZIP code"""
     from server import session_manager, TO_ZIP, TO_PHONE
@@ -240,6 +245,7 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return TO_PHONE
 
 
+@with_typing_indicator
 async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 14/14: Collect recipient phone (optional) and move to parcel info"""
     from server import session_manager, TO_PHONE, PARCEL_WEIGHT
