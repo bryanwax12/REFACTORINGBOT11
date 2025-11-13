@@ -4154,7 +4154,7 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
         ))
     
     # Delete pending order after restoring
-    await db.pending_orders.delete_one({"telegram_id": telegram_id})
+    await delete_pending_order(telegram_id)
     
     return PAYMENT_METHOD
 
