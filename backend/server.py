@@ -1204,7 +1204,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         # Edit from address
         context.user_data['editing_from_address'] = True
         from utils.ui_utils import get_cancel_keyboard
-    reply_markup = get_cancel_keyboard()
+        reply_markup = get_cancel_keyboard()
         bot_msg = await safe_telegram_call(query.message.reply_text(
             "📤 Редактирование адреса отправителя\n\nШаг 1/6: Имя отправителя\nНапример: John Smith",
             reply_markup=reply_markup,
