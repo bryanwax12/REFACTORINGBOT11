@@ -7750,8 +7750,6 @@ async def get_expense_stats(date_from: Optional[str] = None, date_to: Optional[s
     Get expenses statistics (money spent on ShipStation labels)
     """
     try:
-        from datetime import datetime, timezone, timedelta
-        
         # Build query for paid orders with labels
         query = {"payment_status": "paid"}
         
