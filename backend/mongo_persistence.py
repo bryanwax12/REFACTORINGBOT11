@@ -6,6 +6,7 @@ from telegram.ext import BasePersistence
 from typing import Optional, Dict, Tuple
 from datetime import datetime, timezone
 import logging
+import ast
 
 logger = logging.getLogger(__name__)
 
