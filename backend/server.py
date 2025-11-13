@@ -1247,6 +1247,13 @@ _Если вы оплатите другую сумму, деньги не по�
 FROM_NAME, FROM_ADDRESS, FROM_ADDRESS2, FROM_CITY, FROM_STATE, FROM_ZIP, FROM_PHONE, TO_NAME, TO_ADDRESS, TO_ADDRESS2, TO_CITY, TO_STATE, TO_ZIP, TO_PHONE, PARCEL_WEIGHT, PARCEL_LENGTH, PARCEL_WIDTH, PARCEL_HEIGHT, CONFIRM_DATA, EDIT_MENU, SELECT_CARRIER, PAYMENT_METHOD, TOPUP_AMOUNT, TEMPLATE_NAME, TEMPLATE_LIST, TEMPLATE_VIEW, TEMPLATE_RENAME, TEMPLATE_LOADED = range(28)
 
 async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # CRITICAL: Create unique session ID for this order to isolate from old conversations
+    import time
+    order_session_id = f"{int(time.time() * 1000)}"  # Millisecond timestamp
+    context.user_data['order_session_id'] = order_session_id
+    
+    logger.warning(f"🆕 NEW ORDER SESSION: {order_session_id} for user {update.effective_user.id}")
+    
     logger.info(f"🔵 new_order_start called - User: {update.effective_user.id}")
     query = update.callback_query
     await safe_telegram_call(query.answer())
@@ -1257,36 +1264,10 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     telegram_id = query.from_user.id
     logger.info(f"📝 User {telegram_id} starting new order flow")
     
-    # CRITICAL: Clear conversation state from persistence to start fresh
-    # This prevents users from continuing from old steps
-    logger.warning(f"🔴 CLEARING old conversation state for user {telegram_id}")
-    
-    # Manually delete old conversation state from MongoDB
-    try:
-        # Get the conversation key (chat_id, user_id)
-        conv_key = (update.effective_chat.id, update.effective_user.id)
-        
-        # Load current conversations
-        doc = await db.bot_persistence.find_one({"_id": "conversation_order_conv_handler"})
-        if doc and 'data' in doc:
-            # Remove this user's conversation
-            key_str = str(conv_key)
-            if key_str in doc['data']:
-                del doc['data'][key_str]
-                await db.bot_persistence.update_one(
-                    {"_id": "conversation_order_conv_handler"},
-                    {"$set": {"data": doc['data'], "updated_at": datetime.now(timezone.utc)}}
-                )
-                logger.warning(f"✅ DELETED old conversation state for key {key_str}")
-    except Exception as e:
-        logger.error(f"Error clearing conversation state: {e}")
-    
     # Clear any previous order data (including order_completed flag)
     context.user_data.clear()
-    
-    # DON'T set active_order flag here - too early!
-    # User is just choosing between "New order" or "From template"
-    # Flag will be set when they actually start (order_new or start_order_with_template)
+    # Re-add the session ID after clearing
+    context.user_data['order_session_id'] = order_session_id
     
     # Check if bot is in maintenance mode
     if await check_maintenance_mode(update):
