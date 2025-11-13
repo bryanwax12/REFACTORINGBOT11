@@ -1544,6 +1544,7 @@ async def skip_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE)
     context.user_data['from_street2'] = None
     return await order_from_address2(update, context)
 
+@with_typing_indicator
 async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     city = update.message.text.strip()
     
