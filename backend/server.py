@@ -518,21 +518,7 @@ def sanitize_string(text: str, max_length: int = 200) -> str:
     
     return text.strip()
 
-def sanitize_address(address: str) -> str:
-    """Sanitize address fields"""
-    if not address:
-        return ""
-    # Allow letters, numbers, spaces, common punctuation, & symbol
-    sanitized = re.sub(r'[^a-zA-Z0-9\s\.,\-#&/]', '', address)
-    return sanitized[:200].strip()
-
-def sanitize_phone(phone: str) -> str:
-    """Sanitize phone number"""
-    if not phone:
-        return ""
-    # Allow only digits, +, -, (, ), spaces
-    sanitized = re.sub(r'[^\d\+\-\(\)\s]', '', phone)
-    return sanitized[:20].strip()
+# sanitize_address and sanitize_phone removed - unused functions
 
 # Security Logging
 class SecurityLogger:
