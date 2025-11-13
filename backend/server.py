@@ -8144,9 +8144,10 @@ async def startup_event():
                 .token(TELEGRAM_BOT_TOKEN)
                 .persistence(persistence)  # CRITICAL for webhook mode!
                 .concurrent_updates(True)  # Process updates concurrently
-                .connect_timeout(3)  # Super fast connection
-                .read_timeout(3)  # Super fast read
-                .write_timeout(3)  # Super fast write
+                .connect_timeout(10)  # Balanced: fast but stable
+                .read_timeout(10)   # Prevents premature timeout
+                .write_timeout(10)  # Reliable message delivery
+                .pool_timeout(5)    # Connection pool optimization
                 .pool_timeout(1)  # Super fast pool acquisition
                 # Keep default rate limiter to prevent Telegram ban
                 .build()
