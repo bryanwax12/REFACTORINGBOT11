@@ -293,6 +293,79 @@ class MessageTemplates:
 _Нажмите 'Оплатить заказ' чтобы завершить оплату_"""
 
 
+class TemplateMessages:
+    """Messages for template management"""
+    
+    @staticmethod
+    def no_templates() -> str:
+        """Message when user has no templates"""
+        return "📋 У вас пока нет сохранённых шаблонов.\n\nШаблоны создаются автоматически после успешного создания заказа."
+    
+    @staticmethod
+    def templates_list(count: int) -> str:
+        """Message for templates list"""
+        return f"📋 Ваши шаблоны ({count}):\n\nВыберите шаблон для просмотра или использования:"
+    
+    @staticmethod
+    def template_details(template: dict) -> str:
+        """Format template details message"""
+        return f"""📄 Шаблон: {template.get('name', 'Без названия')}
+
+📍 Адрес отправителя:
+{template.get('from_name')}
+{template.get('from_street1')}
+{template.get('from_street2') or ''}
+{template.get('from_city')}, {template.get('from_state')} {template.get('from_zip')}
+📞 {template.get('from_phone') or 'Не указан'}
+
+📍 Адрес получателя:
+{template.get('to_name')}
+{template.get('to_street1')}
+{template.get('to_street2') or ''}
+{template.get('to_city')}, {template.get('to_state')} {template.get('to_zip')}
+📞 {template.get('to_phone') or 'Не указан'}"""
+    
+    @staticmethod
+    def template_loaded(template_name: str) -> str:
+        """Message when template is loaded"""
+        return f"""✅ Шаблон "{template_name}" загружен!
+
+Адреса заполнены автоматически.
+Введите вес посылки в фунтах (lb):"""
+    
+    @staticmethod
+    def confirm_delete(template_name: str) -> str:
+        """Confirmation message for template deletion"""
+        return f"""⚠️ Вы уверены, что хотите удалить шаблон "{template_name}"?
+
+Это действие нельзя отменить."""
+    
+    @staticmethod
+    def rename_prompt() -> str:
+        """Prompt for template rename"""
+        return "📝 Введите новое название для шаблона:"
+    
+    @staticmethod
+    def template_deleted() -> str:
+        """Success message after deletion"""
+        return "✅ Шаблон удалён"
+    
+    @staticmethod
+    def template_not_found() -> str:
+        """Error message when template not found"""
+        return "❌ Шаблон не найден"
+    
+    @staticmethod
+    def delete_error() -> str:
+        """Error message on deletion failure"""
+        return "❌ Ошибка при удалении шаблона"
+    
+    @staticmethod
+    def name_too_long() -> str:
+        """Error when template name is too long"""
+        return "❌ Название слишком длинное (максимум 50 символов)"
+
+
 class OrderStepMessages:
     """Messages for order creation steps"""
     
