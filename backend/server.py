@@ -8106,6 +8106,17 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+async def cleanup_sessions_periodically():
+    """Периодическая очистка старых сессий"""
+    while True:
+        try:
+            await asyncio.sleep(600)  # Каждые 10 минут
+            deleted = await session_manager.cleanup_old_sessions(timeout_minutes=15)
+            if deleted > 0:
+                logger.info(f"🧹 Auto-cleanup: removed {deleted} expired sessions")
+        except Exception as e:
+            logger.error(f"Error in periodic cleanup: {e}")
+
 @app.on_event("startup")
 async def startup_event():
     logger.info("Starting application...")
