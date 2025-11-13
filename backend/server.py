@@ -3693,6 +3693,14 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             }
             context.user_data['rates'].append(rate_data)
         
+        # Save ShipStation API results to session
+        user_id = update.effective_user.id
+        await save_to_session(user_id, "CARRIER_SELECTION", {
+            'rates': context.user_data['rates'],
+            'shipstation_api_called': datetime.now(timezone.utc).isoformat()
+        }, context)
+        logger.info(f"💾 ShipStation rates saved to session for user {user_id}")
+        
         # Create buttons for carrier selection
         # Carrier logos/icons - узнаваемые символы
         carrier_icons = {
