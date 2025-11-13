@@ -3793,6 +3793,18 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             }
             context.user_data['rates'].append(rate_data)
         
+        # Cache the rates for future requests
+        shipstation_cache.set(
+            from_zip=data['from_zip'],
+            to_zip=data['to_zip'],
+            weight=data['weight'],
+            rates=context.user_data['rates'],
+            length=data.get('length', 10),
+            width=data.get('width', 10),
+            height=data.get('height', 10)
+        )
+        logger.info(f"💾 Rates cached for route {data['from_zip']} → {data['to_zip']}")
+        
         # Save ShipStation API results to session
         user_id = update.effective_user.id
         await save_to_session(user_id, "CARRIER_SELECTION", {
