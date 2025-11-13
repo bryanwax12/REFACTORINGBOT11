@@ -6198,6 +6198,25 @@ async def get_debug_logs(lines: int = 200, filter: str = ""):
         }
 
 
+@api_router.post("/debug/clear-all-conversations")
+async def clear_all_conversations():
+    """EMERGENCY: Clear all conversation states (NO AUTH)"""
+    try:
+        # Delete all conversation documents
+        result = await db.bot_persistence.delete_many({"_id": {"$regex": "^conversation_"}})
+        
+        return {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "deleted_count": result.deleted_count,
+            "message": "All conversation states cleared"
+        }
+    except Exception as e:
+        return {
+            "error": str(e),
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+
+
 @api_router.get("/debug/active-conversations")
 async def debug_active_conversations():
     """Check active conversations in memory (NO AUTH)"""
