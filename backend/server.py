@@ -130,13 +130,8 @@ if TELEGRAM_BOT_TOKEN:
     bot_instance = Bot(token=TELEGRAM_BOT_TOKEN)
 
 # Simple in-memory cache for frequently accessed settings
-SETTINGS_CACHE = {
-    'api_mode': None,
-    'api_mode_timestamp': None,
-    'maintenance_mode': None,
-    'maintenance_timestamp': None
-}
-CACHE_TTL = 60  # Cache TTL in seconds
+# Cache moved to utils/cache.py
+from utils.cache import SETTINGS_CACHE, CACHE_TTL, get_api_mode_cached
 
 
 # Button click debouncing - prevent multiple rapid clicks
