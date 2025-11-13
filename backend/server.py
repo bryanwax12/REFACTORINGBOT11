@@ -2029,11 +2029,8 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         }
         carrier_ids = await get_shipstation_carrier_ids()
         if not carrier_ids:
-            keyboard = [
-                [InlineKeyboardButton("✏️ Редактировать адреса", callback_data='edit_addresses_error')],
-                [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
-            ]
-            reply_markup = InlineKeyboardMarkup(keyboard)
+            from utils.ui_utils import get_edit_addresses_keyboard
+            reply_markup = get_edit_addresses_keyboard()
             await safe_telegram_call(query.message.reply_text(
             "❌ Ошибка: не удалось загрузить список курьеров.\n\nПожалуйста, попробуйте позже.",
             reply_markup=reply_markup,
