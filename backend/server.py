@@ -745,9 +745,7 @@ async def check_stale_interaction(query, context: ContextTypes.DEFAULT_TYPE) -> 
     logger.info("Interaction is valid - proceeding")
     return False
 
-def mark_message_as_selected_nonblocking(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Non-blocking wrapper for mark_message_as_selected"""
-    asyncio.create_task(mark_message_as_selected(update, context))
+# mark_message_as_selected_nonblocking removed - unused function (mark_message_as_selected is called directly)
 
 # safe_telegram_call moved to handlers/common_handlers.py
 
