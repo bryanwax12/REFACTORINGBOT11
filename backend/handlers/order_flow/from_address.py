@@ -183,13 +183,11 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['from_city'] = city
     await session_manager.update_session_atomic(user_id, step="FROM_STATE", data={'from_city': city})
     
+    from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
     asyncio.create_task(mark_message_as_selected(update, context))
     
-    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    message_text = """Шаг 5/13: 📍 Штат отправителя (2 буквы)
-Например: CA, NY, TX, FL"""
+    reply_markup = get_cancel_keyboard()
+    message_text = OrderStepMessages.FROM_STATE
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
