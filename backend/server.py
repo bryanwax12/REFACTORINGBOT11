@@ -6023,142 +6023,15 @@ async def create_label_manual_form(request: Request):
 @api_router.post("/oxapay/webhook")
 async def oxapay_webhook(request: Request):
     """Handle Oxapay payment webhooks"""
-    try:
-        body = await request.json()
-        logger.info(f"Oxapay webhook received: {body}")
-        
-        # Extract payment info - Oxapay sends snake_case keys
-        track_id = body.get('track_id') or body.get('trackId')  # Support both formats
-        status = body.get('status')  # Waiting, Confirming, Paying, Paid, Expired, etc.
-        order_id = body.get('order_id') or body.get('orderId')  # Support both formats
-        paid_amount = body.get('paidAmount') or body.get('paid_amount') or body.get('amount', 0)  # Actual paid amount
-        
-        # Convert track_id to int if it's a string number
-        if track_id and isinstance(track_id, str) and track_id.isdigit():
-            track_id = int(track_id)
-        
-        if status == 'Paid':
-            payment = await db.payments.find_one({"invoice_id": track_id}, {"_id": 0})
-            if payment:
-                # Update payment status
-                await db.payments.update_one(
-                    {"invoice_id": track_id},
-                    {"$set": {"status": "paid", "paid_amount": paid_amount}}
-                )
-                
-                # Check if it's a top-up
-                if payment.get('type') == 'topup':
-                    # Add to balance - use actual paid amount
-                    telegram_id = payment.get('telegram_id')
-                    requested_amount = payment.get('amount', 0)
-                    actual_amount = paid_amount if paid_amount > 0 else requested_amount
-                    
-                    await db.users.update_one(
-                        {"telegram_id": telegram_id},
-                        {"$inc": {"balance": actual_amount}}
-                    )
-                    
-                    # Remove "Оплатить" button from payment message
-                    payment_message_id = payment.get('payment_message_id')
-                    logger.info(f"Payment message_id for removal: {payment_message_id}")
-                    if payment_message_id and bot_instance:
-                        try:
-                            await safe_telegram_call(bot_instance.edit_message_reply_markup(
-                                chat_id=telegram_id,
-                                message_id=payment_message_id,
-                                reply_markup=None
-                            ))
-                            logger.info(f"Removed payment button from message {payment_message_id}")
-                        except Exception as e:
-                            logger.warning(f"Could not remove payment button: {e}")
-                    
-                    # Remove "Назад" and "Главное меню" buttons from topup input message
-                    topup_input_message_id = payment.get('topup_input_message_id')
-                    logger.info(f"Topup input message_id for removal: {topup_input_message_id}")
-                    if topup_input_message_id and bot_instance:
-                        try:
-                            await safe_telegram_call(bot_instance.edit_message_reply_markup(
-                                chat_id=telegram_id,
-                                message_id=topup_input_message_id,
-                                reply_markup=None
-                            ))
-                            logger.info(f"Removed topup input buttons from message {topup_input_message_id}")
-                        except Exception as e:
-                            # Ignore "message not modified" error (buttons already removed)
-                            if "message is not modified" in str(e).lower():
-                                logger.info(f"Topup input buttons already removed from message {topup_input_message_id}")
-                            else:
-                                logger.warning(f"Could not remove topup input buttons: {e}")
-                    else:
-                        logger.warning("No topup_input_message_id found in payment record")
-                    
-                    # Notify user
-                    if bot_instance:
-                        user = await find_user_by_telegram_id(telegram_id)
-                        new_balance = user.get('balance', 0)
-                        
-                        # Show requested vs actual amount if different
-                        if abs(actual_amount - requested_amount) > 0.01:
-                            amount_text = f"""💰 *Запрошено:* ${requested_amount:.2f}
-💰 *Зачислено:* ${actual_amount:.2f}"""
-                        else:
-                            amount_text = f"💰 *Зачислено:* ${actual_amount:.2f}"
-                        
-                        # Check if user has pending order
-                        pending_order = await find_pending_order(telegram_id)
-                        
-                        # Build message text
-                        message_text = f"""✅ *Спасибо! Ваш баланс пополнен!*
-
-{amount_text}
-💳 *Новый баланс:* ${new_balance:.2f}"""
-                        
-                        # Create keyboard
-                        keyboard = []
-                        if pending_order and pending_order.get('selected_rate'):
-                            order_amount = pending_order.get('final_amount', pending_order['selected_rate']['amount'])
-                            message_text += f"\n\n📦 *Сумма заказа к оплате:* ${order_amount:.2f}"
-                            message_text += "\n_Нажмите 'Оплатить заказ' чтобы завершить оплату_"
-                            keyboard.append([InlineKeyboardButton("💳 Оплатить заказ", callback_data='return_to_payment')])
-                        
-                        keyboard.append([InlineKeyboardButton("🔙 Главное меню", callback_data='start')])
-                        reply_markup = InlineKeyboardMarkup(keyboard)
-                        
-                        bot_msg = await safe_telegram_call(bot_instance.send_message(
-                            chat_id=telegram_id,
-                            text=message_text,
-                            reply_markup=reply_markup,
-                            parse_mode='Markdown'
-                        ))
-                        
-                        # Save message context in pending_orders for button protection
-                        await db.pending_orders.update_one(
-                            {"telegram_id": telegram_id},
-                            {"$set": {
-                                "topup_success_message_id": bot_msg.message_id,
-                                "topup_success_message_text": message_text
-                            }}
-                        )
-                else:
-                    # Regular order payment
-                    # Update order
-                    await db.orders.update_one(
-                        {"id": payment['order_id']},
-                        {"$set": {"payment_status": "paid"}}
-                    )
-                    
-                    # Auto-create shipping label
-                    try:
-                        order = await db.orders.find_one({"id": payment['order_id']}, {"_id": 0})
-                        if order:
-                            await create_and_send_label(payment['order_id'], order['telegram_id'], None)
-                    except Exception as e:
-                        logger.error(f"Failed to create label: {e}")
-        
-        return {"status": "ok"}
-    except Exception as e:
-        logger.error(f"Oxapay webhook error: {e}")
-        return {"status": "error", "message": str(e)}
+    return await handle_oxapay_webhook(
+        request, 
+        db, 
+        bot_instance, 
+        safe_telegram_call, 
+        find_user_by_telegram_id, 
+        find_pending_order, 
+        create_and_send_label
+    )
 
 @api_router.get("/users")
 async def get_users(authenticated: bool = Depends(verify_admin_key)):
