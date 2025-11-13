@@ -3020,6 +3020,13 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def start_order_with_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Start order creation with pre-loaded template data"""
+    
+    # CRITICAL: Create unique session ID for this order from template
+    import time
+    order_session_id = f"{int(time.time() * 1000)}"
+    context.user_data['order_session_id'] = order_session_id
+    logger.warning(f"🆕 NEW ORDER SESSION (from template): {order_session_id} for user {update.effective_user.id}")
+    
     query = update.callback_query
     
     # Clear topup flag to prevent conflict with parcel weight input
