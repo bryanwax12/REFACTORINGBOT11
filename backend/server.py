@@ -3408,6 +3408,15 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         if missing_fields:
             logger.error(f"Missing or invalid required fields: {missing_fields}")
             logger.error(f"Current user_data: {data}")
+            
+            # Log error to session for debugging
+            user_id = update.effective_user.id
+            await session_manager.update_session(user_id, data={
+                'last_error': f'Missing required fields: {", ".join(missing_fields)}',
+                'error_step': 'FETCH_RATES',
+                'error_timestamp': datetime.now(timezone.utc).isoformat()
+            })
+            
             keyboard = [
                 [InlineKeyboardButton("✏️ Редактировать данные", callback_data='edit_data')],
                 [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
