@@ -1338,34 +1338,27 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         send_method = update.message.reply_text
     logger.info(f"📝 User {telegram_id} starting new order flow")
     
-    # STEP 2: Check for existing session or create new one
+    # STEP 2: Get or create session (V2 - atomic with TTL)
     user_id = update.effective_user.id
     
-    # Check if user has active session
-    existing_session = await session_manager.get_session(user_id)
-    if existing_session:
-        # Check if session expired (>15 minutes old)
-        timestamp = existing_session.get('timestamp')
-        if timestamp:
-            age = datetime.now(timezone.utc) - timestamp
-            if age.total_seconds() > 900:  # 15 minutes
-                logger.info(f"⏰ Session expired for user {user_id} (age: {age.total_seconds()}s)")
-                await session_manager.clear_session(user_id)
-                await session_manager.create_session(user_id, initial_data={})
-                context.user_data.clear()
-            else:
-                # Resume from existing session
-                logger.info(f"🔄 Resuming session for user {user_id} from step {existing_session.get('current_step')}")
-                # Load session data into context.user_data for compatibility
-                context.user_data.update(existing_session.get('temp_data', {}))
+    # Атомарно получить существующую сессию или создать новую
+    # TTL индекс автоматически удаляет сессии старше 15 минут
+    session = await session_manager.get_or_create_session(user_id, initial_data={})
+    
+    if session:
+        current_step = session.get('current_step', 'START')
+        temp_data = session.get('temp_data', {})
+        
+        if current_step != 'START' and temp_data:
+            # Есть незавершенная сессия - продолжить
+            logger.info(f"🔄 Resuming session for user {user_id} from step {current_step}")
+            context.user_data.update(temp_data)
         else:
-            # No timestamp - treat as new
-            await session_manager.create_session(user_id, initial_data={})
+            # Новая сессия
+            logger.info(f"🆕 New session for user {user_id}")
             context.user_data.clear()
     else:
-        # Create new session
-        await session_manager.create_session(user_id, initial_data={})
-        logger.info(f"🆕 New session created for user {user_id}")
+        logger.error(f"❌ Failed to get/create session for user {user_id}")
         context.user_data.clear()
     
     # Check if bot is in maintenance mode
