@@ -1015,7 +1015,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await send_blocked_message(update)
         return ConversationHandler.END
     
-    existing_user = await db.users.find_one({"telegram_id": telegram_id})
+    existing_user = await find_user_by_telegram_id(telegram_id)
     
     if not existing_user:
         user = User(
