@@ -6123,22 +6123,42 @@ async def get_debug_logs(lines: int = 200, filter: str = ""):
     """
     try:
         import subprocess
+        import os
         
-        # Read logs
-        cmd = f"tail -n {lines} /var/log/supervisor/backend.err.log"
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=5)
+        # Try multiple log locations
+        log_files = [
+            "/var/log/supervisor/backend.err.log",
+            "/var/log/supervisor/backend.out.log",
+            "/var/log/backend.log",
+            "/app/backend.log",
+            "backend.log"
+        ]
         
-        log_lines = result.stdout.split('\n')
+        all_logs = []
+        found_files = []
+        
+        for log_file in log_files:
+            if os.path.exists(log_file):
+                found_files.append(log_file)
+                try:
+                    cmd = f"tail -n {lines} {log_file}"
+                    result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=5)
+                    if result.stdout:
+                        all_logs.extend([f"[{log_file}] {line}" for line in result.stdout.split('\n') if line])
+                except:
+                    pass
         
         # Filter if requested
         if filter:
-            log_lines = [line for line in log_lines if filter.upper() in line.upper()]
+            all_logs = [line for line in all_logs if filter.upper() in line.upper()]
         
         return {
             "timestamp": datetime.now(timezone.utc).isoformat(),
-            "total_lines": len(log_lines),
+            "total_lines": len(all_logs),
             "filter": filter or "none",
-            "logs": log_lines[-100:]  # Return max 100 lines for readability
+            "log_files_checked": log_files,
+            "log_files_found": found_files,
+            "logs": all_logs[-100:]  # Return max 100 lines for readability
         }
     except Exception as e:
         return {
