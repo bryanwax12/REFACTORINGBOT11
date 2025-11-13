@@ -1061,31 +1061,22 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Check if user has templates
     templates_count = await count_user_templates(telegram_id)
     
+    from utils.ui_utils import get_new_order_choice_keyboard, get_cancel_keyboard, OrderFlowMessages
+    
     if templates_count > 0:
         # Show choice: New order or From template
-        keyboard = [
-            [InlineKeyboardButton("📝 Новый заказ", callback_data='order_new')],
-            [InlineKeyboardButton("📋 Из шаблона", callback_data='order_from_template')],
-            [InlineKeyboardButton("❌ Отмена", callback_data='start')]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
+        reply_markup = get_new_order_choice_keyboard()
         
         await safe_telegram_call(send_method(
-            """📦 Создать заказ
-
-Выберите способ создания:""",
+            OrderFlowMessages.create_order_choice(),
             reply_markup=reply_markup
         ))
         return FROM_NAME  # Waiting for choice
     else:
         # No templates, go straight to new order
-        keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
+        reply_markup = get_cancel_keyboard()
         
-        message_text = """📦 Создание нового заказа
-
-Шаг 1/13: 👤 Имя отправителя
-Например: John Smith"""
+        message_text = OrderFlowMessages.new_order_start()
         bot_msg = await safe_telegram_call(send_method(
             message_text,
             reply_markup=reply_markup
