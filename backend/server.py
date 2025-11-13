@@ -4919,12 +4919,12 @@ async def create_order(order_data: OrderCreate):
         order_dict['created_at'] = order_dict['created_at'].isoformat()
         await db.orders.insert_one(order_dict)
         
-        # Create crypto payment invoice
-        if crypto:
-            invoice = await crypto.create_invoice(
-                asset="USDT",
-                amount=order_data.amount
-            )
+        # Create crypto payment invoice - DISABLED (crypto variable not defined, legacy code)
+        # if crypto:
+        #     invoice = await crypto.create_invoice(
+        #         asset="USDT",
+        #         amount=order_data.amount
+        #     )
             
             # Get payment URL from bot_invoice_url or mini_app_invoice_url
             pay_url = getattr(invoice, 'bot_invoice_url', None) or getattr(invoice, 'mini_app_invoice_url', None)
