@@ -2440,8 +2440,8 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
         # Mark previous message as selected (fire and forget)
         try:
             asyncio.create_task(mark_message_as_selected(update, context))
-        except:
-            pass  # Don't block on marking
+        except Exception as e:
+            logger.debug(f"Failed to mark message: {e}")
         
         # Ask for length (with skip option only if weight <= 10 lb)
         if weight > 10:
