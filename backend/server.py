@@ -1685,39 +1685,6 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
     context.user_data['last_state'] = PARCEL_WEIGHT
     return PARCEL_WEIGHT
 
-async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Delete template with confirmation"""
-    query = update.callback_query
-    await safe_telegram_call(query.answer())
-    
-    # Mark previous message as selected (non-blocking)
-    asyncio.create_task(mark_message_as_selected(update, context))
-    
-    template_id = query.data.replace('template_delete_', '')
-    template = await find_template_by_id(template_id)
-    
-    if not template:
-        await safe_telegram_call(query.message.reply_text("❌ Шаблон не найден"))
-        return ConversationHandler.END
-    
-    keyboard = [
-        [InlineKeyboardButton("✅ Да, удалить", callback_data=f'template_confirm_delete_{template_id}')],
-        [InlineKeyboardButton("❌ Отмена", callback_data=f'template_view_{template_id}')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    await safe_telegram_call(query.message.reply_text(
-            f"""⚠️ *Удалить шаблон "{template['name']}"?*
-
-Это действие нельзя отменить.""",
-            reply_markup=reply_markup,
-            parse_mode='Markdown'
-        ))
-    # Clear last_bot_message to prevent accidentally removing these buttons
-    context.user_data.pop('last_bot_message_id', None)
-    context.user_data.pop('last_bot_message_text', None)
-    # Don't return state - working outside ConversationHandler
-
 async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Confirm and delete template"""
     query = update.callback_query
