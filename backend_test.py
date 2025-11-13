@@ -5362,7 +5362,7 @@ def run_session_manager_tests():
     session_tests = {}
     
     # Core Session Manager Tests
-    session_tests['session_infrastructure'] = test_session_manager_infrastructure()
+    session_tests['session_v2_migration'] = test_session_manager_v2_migration()
     session_tests['mongodb_collection'] = test_mongodb_session_collection()
     session_tests['session_cleanup'] = test_session_cleanup_mechanism()
     session_tests['order_flow_integration'] = test_order_creation_session_flow()
