@@ -63,9 +63,13 @@ class MongoPersistence(BasePersistence):
                 # Convert string keys back to tuples
                 conversations = {}
                 for key_str, state in doc['data'].items():
-                    # Parse string back to tuple: "(123, 456)" -> (123, 456)
-                    key = eval(key_str)  # Safe here as we control the format
-                    conversations[key] = state
+                    # Parse string back to tuple safely: "(123, 456)" -> (123, 456)
+                    try:
+                        key = ast.literal_eval(key_str)  # Safe parsing
+                        conversations[key] = state
+                    except (ValueError, SyntaxError) as e:
+                        logger.error(f"Failed to parse key '{key_str}': {e}")
+                        continue
                 
                 logger.info(f"📥 PERSISTENCE: Loaded from MongoDB for {name}: {len(conversations)} entries, states: {conversations}")
                 return conversations
