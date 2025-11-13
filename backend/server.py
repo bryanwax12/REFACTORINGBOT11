@@ -1424,6 +1424,9 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return FROM_ADDRESS
 
 async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # IMMEDIATE feedback: show typing indicator
+    await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
+    
     logger.info(f"🔍 order_from_address CALLED - user_id: {update.effective_user.id}, message_id: {update.message.message_id}")
     logger.info(f"🔍 Text received: '{update.message.text}'")
     logger.info(f"🔍 user_data before: {list(context.user_data.keys())}")
