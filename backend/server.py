@@ -1314,7 +1314,7 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
         await send_blocked_message(update)
         return
     
-    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    user = await find_user_by_telegram_id(telegram_id)
     balance = user.get('balance', 0.0) if user else 0.0
     
     message = f"""*💳 Ваш баланс: ${balance:.2f}*
@@ -1362,7 +1362,7 @@ async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAUL
         context.user_data['awaiting_topup_amount'] = False
         
         telegram_id = update.effective_user.id
-        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        user = await find_user_by_telegram_id(telegram_id)
         
         # Create Oxapay invoice (order_id must be <= 50 chars)
         # Generate short order_id: "top_" (4) + timestamp (10) + "_" (1) + random (8) = 23 chars
@@ -2921,7 +2921,7 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return TEMPLATE_NAME
     
     telegram_id = update.effective_user.id
-    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    user = await find_user_by_telegram_id(telegram_id)
     
     # Check if template with this name already exists
     existing = await db.templates.find_one({
@@ -3023,7 +3023,7 @@ async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_T
     telegram_id = query.from_user.id
     
     # Get user
-    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    user = await find_user_by_telegram_id(telegram_id)
     if not user:
         await safe_telegram_call(query.message.reply_text("❌ Ошибка: пользователь не найден"))
         return ConversationHandler.END
@@ -3587,7 +3587,7 @@ async def display_shipping_rates(update: Update, context: ContextTypes.DEFAULT_T
     
     # Add user balance info
     telegram_id = query.from_user.id
-    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    user = await find_user_by_telegram_id(telegram_id)
     user_balance = user.get('balance', 0.0) if user else 0.0
     
     message += f"\n{'='*30}\n"
@@ -4038,7 +4038,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         
         # Notify admin about rate fetch error
         telegram_id = query.from_user.id
-        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        user = await find_user_by_telegram_id(telegram_id)
         if user:
             await notify_admin_error(
                 user_info=user,
@@ -4093,7 +4093,7 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Get user balance
     telegram_id = query.from_user.id
-    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    user = await find_user_by_telegram_id(telegram_id)
     balance = user.get('balance', 0.0)
     user_discount = user.get('discount', 0.0)  # Get user discount percentage
     
@@ -4214,7 +4214,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     asyncio.create_task(mark_message_as_selected(update, context))
     
     telegram_id = query.from_user.id
-    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    user = await find_user_by_telegram_id(telegram_id)
     data = context.user_data
     selected_rate = data['selected_rate']
     amount = context.user_data.get('final_amount', selected_rate['amount'])  # Use discounted amount
@@ -4426,7 +4426,7 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     # Restore order data to context
     context.user_data.update(pending_order)
     
-    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    user = await find_user_by_telegram_id(telegram_id)
     selected_rate = pending_order['selected_rate']
     logger.info(f"Selected rate keys: {selected_rate.keys()}")
     amount = pending_order.get('final_amount', selected_rate.get('amount', selected_rate.get('totalAmount', 0)))
@@ -4511,7 +4511,7 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
             return TOPUP_AMOUNT
         
         telegram_id = update.effective_user.id
-        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        user = await find_user_by_telegram_id(telegram_id)
         
         # Create Oxapay invoice directly (order_id must be <= 50 chars)
         # Generate short order_id: "top_" (4) + timestamp (10) + "_" (1) + random (8) = 23 chars
@@ -4610,7 +4610,7 @@ async def handle_topup_crypto_selection(update: Update, context: ContextTypes.DE
             return ConversationHandler.END
         
         telegram_id = query.from_user.id
-        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        user = await find_user_by_telegram_id(telegram_id)
         
         # Crypto names for display
         crypto_names = {
@@ -4824,7 +4824,7 @@ async def create_and_send_label(order_id, telegram_id, message):
             })
             
             # Notify admin about label creation error
-            user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+            user = await find_user_by_telegram_id(telegram_id)
             if user:
                 error_details = f"ShipStation API Error:\n{response.text[:500]}"
                 await notify_admin_error(
@@ -4965,7 +4965,7 @@ Label PDF: {label_download_url}
         if ADMIN_TELEGRAM_ID:
             try:
                 # Get user info
-                user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+                user = await find_user_by_telegram_id(telegram_id)
                 user_name = user.get('first_name', 'Unknown') if user else 'Unknown'
                 username = user.get('username', '') if user else ''
                 user_display = f"{user_name}" + (f" (@{username})" if username else f" (ID: {telegram_id})")
@@ -5022,7 +5022,7 @@ Label PDF: {label_download_url}
         })
         
         # Notify admin about error
-        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        user = await find_user_by_telegram_id(telegram_id)
         if user:
             await notify_admin_error(
                 user_info=user,
@@ -5352,7 +5352,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         if selected_rate:
             telegram_id = query.from_user.id
-            user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+            user = await find_user_by_telegram_id(telegram_id)
             balance = user.get('balance', 0)
             amount = selected_rate['amount']
             
@@ -6418,7 +6418,7 @@ async def oxapay_webhook(request: Request):
                     
                     # Notify user
                     if bot_instance:
-                        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+                        user = await find_user_by_telegram_id(telegram_id)
                         new_balance = user.get('balance', 0)
                         
                         # Show requested vs actual amount if different
@@ -6701,7 +6701,7 @@ async def telegram_status():
 async def get_user_details(telegram_id: int):
     try:
         # Get user
-        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        user = await find_user_by_telegram_id(telegram_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
@@ -7940,7 +7940,7 @@ async def add_balance(telegram_id: int, amount: float):
         if amount <= 0:
             raise HTTPException(status_code=400, detail="Amount must be positive")
         
-        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        user = await find_user_by_telegram_id(telegram_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
@@ -7973,7 +7973,7 @@ async def deduct_balance(telegram_id: int, amount: float):
         if amount <= 0:
             raise HTTPException(status_code=400, detail="Amount must be positive")
         
-        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        user = await find_user_by_telegram_id(telegram_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
@@ -8014,7 +8014,7 @@ async def set_user_discount(telegram_id: int, discount: float):
         if discount < 0 or discount > 100:
             raise HTTPException(status_code=400, detail="Discount must be between 0 and 100")
         
-        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        user = await find_user_by_telegram_id(telegram_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
@@ -8395,7 +8395,7 @@ async def get_topups(authenticated: bool = Depends(verify_admin_key)):
         for topup in topups:
             telegram_id = topup.get('telegram_id')
             if telegram_id:
-                user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+                user = await find_user_by_telegram_id(telegram_id)
                 if user:
                     enriched_topups.append({
                         "id": topup.get('id'),
