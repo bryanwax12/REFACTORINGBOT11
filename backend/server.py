@@ -1206,7 +1206,7 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return ConversationHandler.END
     
     # Check if user has templates
-    templates_count = await db.templates.count_documents({"telegram_id": telegram_id})
+    templates_count = await count_user_templates(telegram_id)
     
     if templates_count > 0:
         # Show choice: New order or From template
