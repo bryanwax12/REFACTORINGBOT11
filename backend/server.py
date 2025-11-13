@@ -4084,7 +4084,7 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     telegram_id = query.from_user.id
     
     # Get pending order data from database to load message context
-    pending_order = await db.pending_orders.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    pending_order = await find_pending_order(telegram_id)
     logger.info(f"Pending order data found: {pending_order is not None}")
     
     # Load message context for button protection
@@ -6107,7 +6107,7 @@ async def oxapay_webhook(request: Request):
                             amount_text = f"💰 *Зачислено:* ${actual_amount:.2f}"
                         
                         # Check if user has pending order
-                        pending_order = await db.pending_orders.find_one({"telegram_id": telegram_id}, {"_id": 0})
+                        pending_order = await find_pending_order(telegram_id)
                         
                         # Build message text
                         message_text = f"""✅ *Спасибо! Ваш баланс пополнен!*
