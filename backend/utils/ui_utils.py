@@ -366,6 +366,57 @@ class TemplateMessages:
         return "❌ Название слишком длинное (максимум 50 символов)"
 
 
+class OrderFlowMessages:
+    """Messages for order flow (non-step messages)"""
+    
+    @staticmethod
+    def create_order_choice() -> str:
+        """Choice between new order or from template"""
+        return """📦 Создать заказ
+
+Выберите способ создания:"""
+    
+    @staticmethod
+    def new_order_start() -> str:
+        """Start new order message"""
+        return """📦 Создание нового заказа
+
+Шаг 1/13: 👤 Имя отправителя
+Например: John Smith"""
+    
+    @staticmethod
+    def select_template() -> str:
+        """Select template for order"""
+        return "📋 *Выберите шаблон:*\n\n"
+    
+    @staticmethod
+    def no_templates_error() -> str:
+        """Error when no templates available"""
+        return "❌ У вас нет сохраненных шаблонов"
+    
+    @staticmethod
+    def template_item(i: int, template: dict) -> str:
+        """Format single template for list"""
+        from_name = template.get('from_name', '')
+        from_street = template.get('from_street1', '')
+        from_city = template.get('from_city', '')
+        from_state = template.get('from_state', '')
+        from_zip = template.get('from_zip', '')
+        to_name = template.get('to_name', '')
+        to_street = template.get('to_street1', '')
+        to_city = template.get('to_city', '')
+        to_state = template.get('to_state', '')
+        to_zip = template.get('to_zip', '')
+        
+        return f"""*{i}. {template['name']}*
+📤 От: {from_name}
+   {from_street}, {from_city}, {from_state} {from_zip}
+📥 Кому: {to_name}
+   {to_street}, {to_city}, {to_state} {to_zip}
+
+"""
+
+
 class OrderStepMessages:
     """Messages for order creation steps"""
     
