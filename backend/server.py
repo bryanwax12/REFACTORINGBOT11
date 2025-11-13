@@ -1499,7 +1499,9 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE)
         ))
         return FROM_ADDRESS
     
-    context.user_data['from_street'] = address
+    # Save to session
+    user_id = update.effective_user.id
+    await save_to_session(user_id, "FROM_ADDRESS2", {'from_street': address}, context)
     
     # Mark previous message as selected (remove buttons from step 2)
     asyncio.create_task(mark_message_as_selected(update, context))
