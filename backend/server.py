@@ -4957,11 +4957,11 @@ async def create_order(order_data: OrderCreate):
             #     "amount": order_data.amount,
             #     "currency": "USDT"
             # }
-        else:
-            return {
-                "order_id": order.id,
-                "message": "Order created but payment system not configured"
-            }
+        
+        return {
+            "order_id": order.id,
+            "message": "Order created successfully"
+        }
             
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
