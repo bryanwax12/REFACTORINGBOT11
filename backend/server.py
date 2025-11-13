@@ -4927,36 +4927,36 @@ async def create_order(order_data: OrderCreate):
         #     )
             
             # Get payment URL from bot_invoice_url or mini_app_invoice_url
-            pay_url = getattr(invoice, 'bot_invoice_url', None) or getattr(invoice, 'mini_app_invoice_url', None)
-            
-            payment = Payment(
-                order_id=order.id,
-                amount=order_data.amount,
-                invoice_id=invoice.invoice_id,
-                pay_url=pay_url
-            )
-            payment_dict = payment.model_dump()
-            payment_dict['created_at'] = payment_dict['created_at'].isoformat()
-            await insert_payment(payment_dict)
-            
-            # Send payment link to user
-            if bot_instance and pay_url:
-                await safe_telegram_call(bot_instance.send_message(
-                    chat_id=order_data.telegram_id,
-                    text=f"""✅ Заказ создан!
-
-💰 Оплатите {order_data.amount} USDT:
-{pay_url}
-
-После оплаты мы автоматически создадим shipping label."""
-                ))
-            
-            return {
-                "order_id": order.id,
-                "payment_url": pay_url,
-                "amount": order_data.amount,
-                "currency": "USDT"
-            }
+            # pay_url = getattr(invoice, 'bot_invoice_url', None) or getattr(invoice, 'mini_app_invoice_url', None)
+            # 
+            # payment = Payment(
+            #     order_id=order.id,
+            #     amount=order_data.amount,
+            #     invoice_id=invoice.invoice_id,
+            #     pay_url=pay_url
+            # )
+            # payment_dict = payment.model_dump()
+            # payment_dict['created_at'] = payment_dict['created_at'].isoformat()
+            # await insert_payment(payment_dict)
+            # 
+            # # Send payment link to user
+            # if bot_instance and pay_url:
+            #     await safe_telegram_call(bot_instance.send_message(
+            #         chat_id=order_data.telegram_id,
+            #         text=f"""✅ Заказ создан!
+            # 
+            # 💰 Оплатите {order_data.amount} USDT:
+            # {pay_url}
+            # 
+            # После оплаты мы автоматически создадим shipping label."""
+            #     ))
+            # 
+            # return {
+            #     "order_id": order.id,
+            #     "payment_url": pay_url,
+            #     "amount": order_data.amount,
+            #     "currency": "USDT"
+            # }
         else:
             return {
                 "order_id": order.id,
