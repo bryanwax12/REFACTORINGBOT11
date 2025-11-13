@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Request, Header, Header, Depends, UploadFile, File, BackgroundTasks
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Header, Depends, UploadFile, File, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -132,7 +132,6 @@ session_manager = SessionManager(db)
 
 # In-memory cache for frequently accessed data
 from functools import lru_cache
-import asyncio
 
 user_balance_cache = {}  # Cache user balances
 cache_ttl = 60  # Cache TTL in seconds
@@ -160,12 +159,12 @@ is_production_env = 'crypto-shipping.emergent.host' in webhook_base_url
 if is_production_env:
     # Production: use production bot @whitelabel_shipping_bot
     TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN_PRODUCTION', '')
-    print(f"🟢 PRODUCTION BOT SELECTED: @whitelabel_shipping_bot")
+    print("🟢 PRODUCTION BOT SELECTED: @whitelabel_shipping_bot")
 else:
     # Preview: use preview bot @whitelabel_shipping_bot_test_bot
     TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN_PREVIEW', 
                                        os.environ.get('TELEGRAM_BOT_TOKEN', ''))
-    print(f"🔵 PREVIEW BOT SELECTED: @whitelabel_shipping_bot_test_bot")
+    print("🔵 PREVIEW BOT SELECTED: @whitelabel_shipping_bot_test_bot")
 
 bot_instance = None
 application = None  # Global Telegram Application instance for webhook
@@ -184,7 +183,6 @@ BUTTON_DEBOUNCE_SECONDS = 0.1  # Максимально быстрый: 100ms м
 # Rate limiting для защиты от Telegram бана
 # Telegram API limits: 30 msg/sec per chat, burst of 20
 from collections import defaultdict
-import asyncio
 
 class RateLimiter:
     """Smart rate limiter: fast responses, prevents Telegram bans"""
@@ -654,7 +652,6 @@ class SecurityLogger:
             logging.error(f"Failed to log security action: {e}")
 
 # Admin API Key Dependency
-from fastapi import Header, HTTPException
 
 # verify_admin_key moved to handlers/admin_handlers.py
 
@@ -1192,7 +1189,7 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.info(f"🔵 order_from_name called - User: {update.effective_user.id}, Message: {update.message.text}")
     # Skip if user is in topup flow
     if context.user_data.get('awaiting_topup_amount'):
-        logger.info(f"⏭️ Skipping - user in topup flow")
+        logger.info("⏭️ Skipping - user in topup flow")
         return ConversationHandler.END
     
     name = update.message.text.strip()
@@ -1319,7 +1316,7 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE)
         context.user_data['last_bot_message_text'] = message_text
         context.user_data['last_state'] = FROM_ADDRESS2
     
-    logger.info(f"🔍 order_from_address COMPLETED - returning FROM_ADDRESS2")
+    logger.info("🔍 order_from_address COMPLETED - returning FROM_ADDRESS2")
     logger.info(f"🔍 user_data after: {list(context.user_data.keys())}")
     return FROM_ADDRESS2
 
@@ -2765,7 +2762,7 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return ConversationHandler.END
     
     # Build template list message
-    message = f"📋 *Выберите шаблон:*\n\n"
+    message = "📋 *Выберите шаблон:*\n\n"
     
     keyboard = []
     for i, template in enumerate(templates, 1):
@@ -3076,7 +3073,7 @@ async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         context.user_data['last_state'] = FROM_NAME
-    logger.info(f"order_new returning FROM_NAME state")
+    logger.info("order_new returning FROM_NAME state")
     return FROM_NAME
 
 async def order_from_template_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -3562,7 +3559,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             reply_markup = InlineKeyboardMarkup(keyboard)
             
             await safe_telegram_call(query.message.reply_text(
-            f"❌ Нет доступных тарифов для данного направления.\n\nПроверьте правильность введенных адресов.",
+            "❌ Нет доступных тарифов для данного направления.\n\nПроверьте правильность введенных адресов.",
             reply_markup=reply_markup,
         ))
             return CONFIRM_DATA  # Stay to handle callback
@@ -3790,7 +3787,7 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
         shortage = amount - balance
         confirmation_text += f"\n⚠️ Недостаточно средств. Необходимо: ${shortage:.2f}"
         keyboard.append([InlineKeyboardButton(
-            f"💵 Пополнить баланс",
+            "💵 Пополнить баланс",
             callback_data='top_up_balance'
         )])
         keyboard.append([
@@ -4567,7 +4564,7 @@ Label PDF: {label_download_url}
 
 Вы оплатили: ${order['amount']:.2f}"""
                     ))
-                    logger.warning(f"Could not download label PDF, sent URL instead")
+                    logger.warning("Could not download label PDF, sent URL instead")
                     
             except Exception as e:
                 logger.error(f"Error sending label to user: {e}")
@@ -5018,7 +5015,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 shortage = amount - balance
                 confirmation_text += f"\n⚠️ Недостаточно средств. Необходимо: ${shortage:.2f}"
                 keyboard.append([InlineKeyboardButton(
-                    f"💵 Пополнить баланс",
+                    "💵 Пополнить баланс",
                     callback_data='top_up_balance'
                 )])
                 keyboard.append([
@@ -5881,7 +5878,7 @@ async def create_label_manual_form(request: Request):
             }
         }
         
-        logger.info(f"Creating label manually from form")
+        logger.info("Creating label manually from form")
         
         # Create label via ShipStation
         response = await asyncio.to_thread(
@@ -6035,7 +6032,7 @@ async def oxapay_webhook(request: Request):
                             else:
                                 logger.warning(f"Could not remove topup input buttons: {e}")
                     else:
-                        logger.warning(f"No topup_input_message_id found in payment record")
+                        logger.warning("No topup_input_message_id found in payment record")
                     
                     # Notify user
                     if bot_instance:
@@ -6478,7 +6475,7 @@ async def invite_user_to_channel(telegram_id: int, authenticated: bool = Depends
         inline_keyboard = [[InlineKeyboardButton("📣 Присоединиться к каналу", url=CHANNEL_INVITE_LINK)]]
         inline_markup = InlineKeyboardMarkup(inline_keyboard)
         
-        message = f"""🎉 *Приглашение в наш канал!*
+        message = """🎉 *Приглашение в наш канал!*
 
 Присоединяйтесь к нашему каналу и получайте:
 
@@ -6536,7 +6533,7 @@ async def invite_all_users_to_channel(authenticated: bool = Depends(verify_admin
         keyboard = [[InlineKeyboardButton("📣 Присоединиться к каналу", url=CHANNEL_INVITE_LINK)]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
-        message = f"""🎉 *Приглашение в наш канал!*
+        message = """🎉 *Приглашение в наш канал!*
 
 Присоединяйтесь к нашему каналу и получайте:
 
@@ -8107,10 +8104,10 @@ async def startup_event():
         
         if api_mode == "test":
             SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY_TEST', SHIPSTATION_API_KEY)
-            logger.info(f"🧪 Loaded TEST API key from environment")
+            logger.info("🧪 Loaded TEST API key from environment")
         else:
             SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY_PROD', SHIPSTATION_API_KEY)
-            logger.info(f"🚀 Loaded PRODUCTION API key from environment")
+            logger.info("🚀 Loaded PRODUCTION API key from environment")
         
         logger.info(f"✅ ShipStation API mode: {api_mode.upper()}")
         
@@ -8372,7 +8369,7 @@ async def startup_event():
                 """Log all errors"""
                 logger.error(f"🔥 GLOBAL ERROR HANDLER CAUGHT: {context.error}")
                 logger.error(f"Update: {update}")
-                logger.error(f"Traceback:", exc_info=context.error)
+                logger.error("Traceback:", exc_info=context.error)
                 
                 # Try to send error message to user
                 try:
