@@ -29,6 +29,7 @@ from utils.decorators import with_typing_indicator
 # FROM ADDRESS HANDLERS (7 steps)
 # ============================================================
 
+@with_typing_indicator
 async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 1/13: Collect sender name"""
     from server import session_manager, SecurityLogger, sanitize_string, FROM_NAME, FROM_ADDRESS
