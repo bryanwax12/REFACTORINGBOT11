@@ -38,7 +38,6 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
         # Extract payment info - Oxapay sends snake_case keys
         track_id = body.get('track_id') or body.get('trackId')  # Support both formats
         status = body.get('status')  # Waiting, Confirming, Paying, Paid, Expired, etc.
-        order_id = body.get('order_id') or body.get('orderId')  # Support both formats
         paid_amount = body.get('paidAmount') or body.get('paid_amount') or body.get('amount', 0)  # Actual paid amount
         
         # Convert track_id to int if it's a string number
