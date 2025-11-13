@@ -1525,6 +1525,163 @@ def test_session_manager_v2_migration():
         print(f"   Traceback: {traceback.format_exc()}")
         return False
 
+def test_mongodb_ttl_index():
+    """Test MongoDB TTL Index - CRITICAL TEST per review request"""
+    print("\n🔍 Testing MongoDB TTL Index...")
+    print("🎯 КРИТИЧЕСКИ ВАЖНО: TTL индекс должен автоматически удалять сессии старше 15 минут")
+    
+    try:
+        # Import MongoDB connection
+        import sys
+        sys.path.append('/app/backend')
+        
+        import asyncio
+        from motor.motor_asyncio import AsyncIOMotorClient
+        import os
+        
+        # Load environment
+        load_dotenv('/app/backend/.env')
+        mongo_url = os.environ.get('MONGO_URL')
+        
+        if not mongo_url:
+            print("   ❌ MONGO_URL not found in environment")
+            return False
+        
+        print(f"   MongoDB URL configured: ✅")
+        
+        # Connect to MongoDB and test TTL index
+        async def test_ttl_index():
+            try:
+                client = AsyncIOMotorClient(mongo_url)
+                
+                # Auto-select database name based on environment
+                webhook_base_url = os.environ.get('WEBHOOK_BASE_URL', '')
+                if 'crypto-shipping.emergent.host' in webhook_base_url:
+                    db_name = os.environ.get('DB_NAME_PRODUCTION', 'telegram_shipping_bot')
+                else:
+                    db_name = os.environ.get('DB_NAME_PREVIEW', 'telegram_shipping_bot')
+                
+                db = client[db_name]
+                sessions_collection = db['user_sessions']
+                
+                print(f"   Database: {db_name}")
+                print(f"   Collection: user_sessions")
+                
+                # Test 1: Check if collection exists
+                collections = await db.list_collection_names()
+                collection_exists = 'user_sessions' in collections
+                print(f"   user_sessions collection exists: {'✅' if collection_exists else '❌'}")
+                
+                # Test 2: Get indexes
+                indexes = await sessions_collection.list_indexes().to_list(length=None)
+                print(f"   Total indexes: {len(indexes)}")
+                
+                # Test 3: Check for TTL index
+                ttl_index_found = False
+                user_id_index_found = False
+                
+                for index in indexes:
+                    index_name = index.get('name', '')
+                    index_keys = index.get('key', {})
+                    expire_after = index.get('expireAfterSeconds')
+                    
+                    print(f"   Index: {index_name}")
+                    print(f"      Keys: {index_keys}")
+                    if expire_after is not None:
+                        print(f"      TTL: {expire_after} seconds ({expire_after/60:.1f} minutes)")
+                    
+                    # Check for timestamp TTL index
+                    if 'timestamp' in index_keys and expire_after == 900:
+                        ttl_index_found = True
+                        print(f"      ✅ TTL INDEX FOUND: 15 minutes (900 seconds)")
+                    
+                    # Check for user_id unique index
+                    if 'user_id' in index_keys and index.get('unique'):
+                        user_id_index_found = True
+                        print(f"      ✅ UNIQUE INDEX on user_id")
+                
+                # Test 4: Verify TTL index configuration
+                print(f"\n   📋 TTL INDEX VERIFICATION:")
+                print(f"   TTL index on timestamp (900s): {'✅' if ttl_index_found else '❌'}")
+                print(f"   Unique index on user_id: {'✅' if user_id_index_found else '❌'}")
+                
+                # Test 5: Test session document structure
+                print(f"\n   📋 SESSION DOCUMENT STRUCTURE:")
+                
+                # Get a sample session document
+                sample_session = await sessions_collection.find_one()
+                
+                if sample_session:
+                    required_fields = ['user_id', 'timestamp', 'current_step', 'temp_data']
+                    
+                    print(f"   Sample session found: ✅")
+                    for field in required_fields:
+                        has_field = field in sample_session
+                        print(f"   Field '{field}': {'✅' if has_field else '❌'}")
+                    
+                    # Check timestamp format
+                    timestamp = sample_session.get('timestamp')
+                    if timestamp:
+                        from datetime import datetime
+                        is_datetime = isinstance(timestamp, datetime)
+                        print(f"   Timestamp is datetime: {'✅' if is_datetime else '❌'}")
+                        
+                        if is_datetime:
+                            # Check if timestamp is recent (within last hour)
+                            from datetime import timezone, timedelta
+                            now = datetime.now(timezone.utc)
+                            age = now - timestamp.replace(tzinfo=timezone.utc)
+                            is_recent = age < timedelta(hours=1)
+                            print(f"   Timestamp is recent (<1h): {'✅' if is_recent else '❌'}")
+                else:
+                    print(f"   No session documents found (normal if no active sessions)")
+                
+                # Test 6: Test collection stats
+                try:
+                    stats = await db.command("collStats", "user_sessions")
+                    doc_count = stats.get('count', 0)
+                    print(f"\n   📊 COLLECTION STATISTICS:")
+                    print(f"   Document count: {doc_count}")
+                    print(f"   Collection size: {stats.get('size', 0)} bytes")
+                except Exception as e:
+                    print(f"   ⚠️ Could not get collection stats: {e}")
+                
+                await client.close()
+                
+                # Overall TTL assessment
+                ttl_working = ttl_index_found and user_id_index_found and collection_exists
+                
+                print(f"\n   🎯 TTL INDEX ASSESSMENT:")
+                print(f"   Collection exists: {'✅' if collection_exists else '❌'}")
+                print(f"   TTL index (15 min): {'✅' if ttl_index_found else '❌'}")
+                print(f"   Unique user_id index: {'✅' if user_id_index_found else '❌'}")
+                
+                if ttl_working:
+                    print(f"   ✅ TTL INDEX CONFIGURATION CORRECT")
+                    print(f"   📋 Sessions older than 15 minutes will be automatically deleted")
+                else:
+                    print(f"   ❌ TTL INDEX CONFIGURATION ISSUES")
+                
+                return ttl_working
+                
+            except Exception as e:
+                print(f"   ❌ MongoDB TTL test error: {e}")
+                return False
+        
+        # Run async test
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        result = loop.run_until_complete(test_ttl_index())
+        loop.close()
+        
+        return result
+        
+    except Exception as e:
+        print(f"❌ TTL index test error: {e}")
+        import traceback
+        print(f"   Traceback: {traceback.format_exc()}")
+        return False
+
 def test_mongodb_session_collection():
     """Test MongoDB user_sessions collection structure"""
     print("\n🔍 Testing MongoDB Session Collection Structure...")
