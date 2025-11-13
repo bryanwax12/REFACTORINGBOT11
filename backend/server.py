@@ -4804,6 +4804,14 @@ Label PDF: {label_download_url}
     except Exception as e:
         logger.error(f"Error creating label: {e}", exc_info=True)
         
+        # Log error to session for debugging
+        await session_manager.update_session(telegram_id, data={
+            'last_error': f'Label creation failed: {str(e)[:200]}',
+            'error_step': 'CREATE_LABEL',
+            'error_timestamp': datetime.now(timezone.utc).isoformat(),
+            'error_order_id': order_id
+        })
+        
         # Notify admin about error
         user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
         if user:
