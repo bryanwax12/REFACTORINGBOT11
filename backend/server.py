@@ -8488,7 +8488,8 @@ async def startup_event():
                 ],
                 per_chat=True,
                 per_user=True,
-                per_message=True  # Track each message for proper callback handling
+                per_message=False,  # False is correct: we use MessageHandler (not only CallbackQueryHandler)
+                allow_reentry=True
             )
             
             order_conv_handler = ConversationHandler(
