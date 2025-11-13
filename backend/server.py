@@ -154,6 +154,21 @@ async def save_to_session(user_id: int, next_step: str, data: dict, context: Con
     context.user_data.update(data)
     await session_manager.update_session(user_id, step=next_step, data=data)
 
+async def handle_step_error(user_id: int, error: Exception, current_step: str, context: ContextTypes.DEFAULT_TYPE):
+    """Handle errors during step processing - save error and allow retry"""
+    logger.error(f"❌ Error at step {current_step} for user {user_id}: {error}")
+    
+    # Save error info to session for debugging
+    error_data = {
+        'last_error': str(error),
+        'error_step': current_step,
+        'error_timestamp': datetime.now(timezone.utc).isoformat()
+    }
+    await session_manager.update_session(user_id, data=error_data)
+    
+    # Don't change step - let user retry from same step
+    return current_step
+
 def is_button_click_allowed(user_id: int, button_data: str) -> bool:
     """Check if button click is allowed (debouncing)"""
     current_time = datetime.now(timezone.utc).timestamp()
