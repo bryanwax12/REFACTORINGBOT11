@@ -148,6 +148,12 @@ def with_typing_indicator(func):
         return await func(update, context)
     return wrapper
 
+# Helper function for session management
+async def save_to_session(user_id: int, next_step: str, data: dict, context: ContextTypes.DEFAULT_TYPE):
+    """Save data to both context.user_data and session manager"""
+    context.user_data.update(data)
+    await session_manager.update_session(user_id, step=next_step, data=data)
+
 def is_button_click_allowed(user_id: int, button_data: str) -> bool:
     """Check if button click is allowed (debouncing)"""
     current_time = datetime.now(timezone.utc).timestamp()
