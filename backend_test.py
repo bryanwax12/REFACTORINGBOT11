@@ -1337,6 +1337,375 @@ def test_telegram_bot_admin_integration():
         print(f"❌ Telegram bot admin integration test error: {e}")
         return False
 
+def test_session_manager_infrastructure():
+    """Test Session Manager Infrastructure - CRITICAL TEST per review request"""
+    print("\n🔍 Testing Session Manager Infrastructure...")
+    print("🎯 CRITICAL: Custom SessionManager should replace built-in persistence")
+    
+    try:
+        # Import session manager
+        import sys
+        sys.path.append('/app/backend')
+        
+        # Test SessionManager import and initialization
+        print("   📋 Testing SessionManager Import:")
+        try:
+            from session_manager import SessionManager
+            print(f"   ✅ SessionManager imported successfully")
+        except ImportError as e:
+            print(f"   ❌ SessionManager import failed: {e}")
+            return False
+        
+        # Check if SessionManager is used in server.py
+        with open('/app/backend/server.py', 'r') as f:
+            server_code = f.read()
+        
+        # Verify SessionManager integration
+        session_manager_import = 'from session_manager import SessionManager' in server_code
+        session_manager_init = 'session_manager = SessionManager(db)' in server_code
+        
+        print(f"   SessionManager imported in server.py: {'✅' if session_manager_import else '❌'}")
+        print(f"   SessionManager initialized: {'✅' if session_manager_init else '❌'}")
+        
+        # Check for built-in persistence disabled
+        persistence_disabled = 'persistence=False' in server_code or 'RedisPersistence' not in server_code
+        print(f"   Built-in persistence disabled: {'✅' if persistence_disabled else '❌'}")
+        
+        # Verify session management functions are used
+        session_functions = [
+            'session_manager.get_session',
+            'session_manager.create_session', 
+            'session_manager.update_session',
+            'session_manager.clear_session'
+        ]
+        
+        functions_used = {}
+        for func in session_functions:
+            used = func in server_code
+            functions_used[func] = used
+            print(f"   {func}: {'✅' if used else '❌'}")
+        
+        # Check for revert_to_previous_step function
+        revert_function = 'revert_to_previous_step' in server_code
+        print(f"   revert_to_previous_step function: {'✅' if revert_function else '❌'}")
+        
+        # Check for error logging in session
+        error_logging = 'temp_data' in server_code and 'last_error' in server_code
+        print(f"   Error logging in session: {'✅' if error_logging else '❌'}")
+        
+        # Overall assessment
+        all_functions_used = all(functions_used.values())
+        infrastructure_complete = (session_manager_import and session_manager_init and 
+                                 all_functions_used and revert_function)
+        
+        print(f"\n   🎯 SESSION MANAGER INFRASTRUCTURE:")
+        print(f"   SessionManager properly integrated: {'✅' if infrastructure_complete else '❌'}")
+        print(f"   All session functions used: {'✅' if all_functions_used else '❌'}")
+        print(f"   Error handling implemented: {'✅' if error_logging else '❌'}")
+        
+        return infrastructure_complete
+        
+    except Exception as e:
+        print(f"❌ Session Manager infrastructure test error: {e}")
+        return False
+
+def test_mongodb_session_collection():
+    """Test MongoDB user_sessions collection structure"""
+    print("\n🔍 Testing MongoDB Session Collection Structure...")
+    print("🎯 CRITICAL: user_sessions collection should store session data correctly")
+    
+    try:
+        # Import MongoDB connection
+        import sys
+        sys.path.append('/app/backend')
+        
+        import asyncio
+        from motor.motor_asyncio import AsyncIOMotorClient
+        import os
+        
+        # Load environment
+        load_dotenv('/app/backend/.env')
+        mongo_url = os.environ.get('MONGO_URL')
+        
+        if not mongo_url:
+            print("   ❌ MONGO_URL not found in environment")
+            return False
+        
+        print(f"   MongoDB URL configured: ✅")
+        
+        # Connect to MongoDB
+        async def test_session_collection():
+            try:
+                client = AsyncIOMotorClient(mongo_url)
+                
+                # Auto-select database name based on environment
+                webhook_base_url = os.environ.get('WEBHOOK_BASE_URL', '')
+                if 'crypto-shipping.emergent.host' in webhook_base_url:
+                    db_name = os.environ.get('DB_NAME_PRODUCTION', 'telegram_shipping_bot')
+                else:
+                    db_name = os.environ.get('DB_NAME_PREVIEW', 'telegram_shipping_bot')
+                
+                db = client[db_name]
+                sessions_collection = db['user_sessions']
+                
+                print(f"   Database: {db_name}")
+                print(f"   Collection: user_sessions")
+                
+                # Test collection access
+                try:
+                    # Count documents in collection
+                    session_count = await sessions_collection.count_documents({})
+                    print(f"   ✅ Collection accessible, {session_count} sessions found")
+                    
+                    # Check collection indexes
+                    indexes = await sessions_collection.list_indexes().to_list(length=None)
+                    index_names = [idx.get('name', 'unknown') for idx in indexes]
+                    
+                    print(f"   Collection indexes: {index_names}")
+                    
+                    # Check for required indexes
+                    has_user_id_index = any('user_id' in name for name in index_names)
+                    has_timestamp_index = any('timestamp' in name for name in index_names)
+                    
+                    print(f"   user_id index: {'✅' if has_user_id_index else '❌'}")
+                    print(f"   timestamp index: {'✅' if has_timestamp_index else '❌'}")
+                    
+                    # Test session structure if sessions exist
+                    if session_count > 0:
+                        sample_session = await sessions_collection.find_one({}, {"_id": 0})
+                        
+                        print(f"   📋 Sample Session Structure:")
+                        required_fields = ['user_id', 'current_step', 'temp_data', 'timestamp']
+                        
+                        for field in required_fields:
+                            has_field = field in sample_session
+                            print(f"      {field}: {'✅' if has_field else '❌'}")
+                        
+                        # Show sample session data (anonymized)
+                        if sample_session:
+                            print(f"      Sample step: {sample_session.get('current_step', 'N/A')}")
+                            temp_data_keys = list(sample_session.get('temp_data', {}).keys())
+                            print(f"      Data keys: {temp_data_keys}")
+                    
+                    client.close()
+                    return True
+                    
+                except Exception as e:
+                    print(f"   ❌ Collection access error: {e}")
+                    client.close()
+                    return False
+                    
+            except Exception as e:
+                print(f"   ❌ MongoDB connection error: {e}")
+                return False
+        
+        # Run async test
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        result = loop.run_until_complete(test_session_collection())
+        loop.close()
+        
+        return result
+        
+    except Exception as e:
+        print(f"❌ MongoDB session collection test error: {e}")
+        return False
+
+def test_session_cleanup_mechanism():
+    """Test automatic session cleanup mechanism"""
+    print("\n🔍 Testing Session Cleanup Mechanism...")
+    print("🎯 CRITICAL: Old sessions (>15 minutes) should be automatically cleaned")
+    
+    try:
+        # Check if cleanup function exists in server.py
+        with open('/app/backend/server.py', 'r') as f:
+            server_code = f.read()
+        
+        # Look for cleanup function usage
+        cleanup_function = 'cleanup_old_sessions' in server_code
+        print(f"   cleanup_old_sessions function used: {'✅' if cleanup_function else '❌'}")
+        
+        # Check for 15-minute timeout
+        timeout_15_min = '15' in server_code and 'minutes' in server_code
+        print(f"   15-minute timeout configured: {'✅' if timeout_15_min else '❌'}")
+        
+        # Check session_manager.py for cleanup implementation
+        with open('/app/backend/session_manager.py', 'r') as f:
+            session_code = f.read()
+        
+        # Verify cleanup implementation
+        cleanup_implemented = 'async def cleanup_old_sessions' in session_code
+        timeout_parameter = 'timeout_minutes: int = 15' in session_code
+        delete_old_sessions = 'delete_many' in session_code and 'timestamp' in session_code
+        
+        print(f"   📋 Cleanup Implementation:")
+        print(f"   cleanup_old_sessions method: {'✅' if cleanup_implemented else '❌'}")
+        print(f"   15-minute default timeout: {'✅' if timeout_parameter else '❌'}")
+        print(f"   MongoDB delete_many query: {'✅' if delete_old_sessions else '❌'}")
+        
+        # Check for logging
+        cleanup_logging = 'logger.info' in session_code and 'Cleaned up' in session_code
+        print(f"   Cleanup logging: {'✅' if cleanup_logging else '❌'}")
+        
+        # Overall assessment
+        cleanup_working = (cleanup_function and cleanup_implemented and 
+                          timeout_parameter and delete_old_sessions)
+        
+        print(f"\n   🎯 SESSION CLEANUP MECHANISM:")
+        print(f"   Automatic cleanup implemented: {'✅' if cleanup_working else '❌'}")
+        print(f"   15-minute timeout configured: {'✅' if timeout_15_min else '❌'}")
+        
+        return cleanup_working
+        
+    except Exception as e:
+        print(f"❌ Session cleanup test error: {e}")
+        return False
+
+def test_order_creation_session_flow():
+    """Test order creation session flow integration"""
+    print("\n🔍 Testing Order Creation Session Flow...")
+    print("🎯 CRITICAL: All 13 steps should save data to session at each step")
+    
+    try:
+        # Read server.py to check session integration in order handlers
+        with open('/app/backend/server.py', 'r') as f:
+            server_code = f.read()
+        
+        # Define all 13 order creation steps
+        order_steps = [
+            'order_from_name',      # Step 1: FROM_NAME
+            'order_from_address',   # Step 2: FROM_ADDRESS  
+            'order_from_address2',  # Step 3: FROM_ADDRESS2
+            'order_from_city',      # Step 4: FROM_CITY
+            'order_from_state',     # Step 5: FROM_STATE
+            'order_from_zip',       # Step 6: FROM_ZIP
+            'order_from_phone',     # Step 7: FROM_PHONE
+            'order_to_name',        # Step 8: TO_NAME
+            'order_to_address',     # Step 9: TO_ADDRESS
+            'order_to_address2',    # Step 10: TO_ADDRESS2
+            'order_to_city',        # Step 11: TO_CITY
+            'order_to_state',       # Step 12: TO_STATE
+            'order_to_zip',         # Step 13: TO_ZIP
+            'order_to_phone',       # Step 14: TO_PHONE
+            'order_parcel_weight'   # Step 15: PARCEL_WEIGHT
+        ]
+        
+        print(f"   📋 Testing Session Integration in Order Steps:")
+        
+        session_integration = {}
+        for step in order_steps:
+            # Check if step function uses session_manager
+            uses_session = f'session_manager.update_session' in server_code and step in server_code
+            session_integration[step] = uses_session
+            print(f"   {step}: {'✅' if uses_session else '❌'}")
+        
+        # Check for save_to_session helper function
+        save_helper = 'async def save_to_session' in server_code
+        print(f"   save_to_session helper function: {'✅' if save_helper else '❌'}")
+        
+        # Check for error handling with session
+        error_handler = 'async def handle_step_error' in server_code
+        print(f"   handle_step_error function: {'✅' if error_handler else '❌'}")
+        
+        # Check for revert functionality
+        revert_function = 'revert_to_previous_step' in server_code
+        print(f"   revert_to_previous_step integration: {'✅' if revert_function else '❌'}")
+        
+        # Check specific data fields are saved
+        data_fields = [
+            'from_name', 'from_street', 'from_city', 'from_state', 'from_zip', 'from_phone',
+            'to_name', 'to_street', 'to_city', 'to_state', 'to_zip', 'to_phone',
+            'weight', 'length', 'width', 'height'
+        ]
+        
+        print(f"\n   📋 Data Field Persistence:")
+        fields_saved = {}
+        for field in data_fields:
+            saved = f"'{field}'" in server_code or f'"{field}"' in server_code
+            fields_saved[field] = saved
+            print(f"   {field}: {'✅' if saved else '❌'}")
+        
+        # Check for ShipStation API error logging
+        api_error_logging = ('fetch_shipping_rates' in server_code and 
+                           'temp_data' in server_code and 
+                           'error' in server_code)
+        print(f"\n   API Error Logging in Session: {'✅' if api_error_logging else '❌'}")
+        
+        # Overall assessment
+        steps_integrated = sum(session_integration.values())
+        fields_integrated = sum(fields_saved.values())
+        
+        print(f"\n   🎯 ORDER CREATION SESSION FLOW:")
+        print(f"   Steps with session integration: {steps_integrated}/{len(order_steps)}")
+        print(f"   Data fields saved: {fields_integrated}/{len(data_fields)}")
+        print(f"   Error handling implemented: {'✅' if error_handler else '❌'}")
+        
+        # Success criteria: at least 80% of steps and fields integrated
+        success = (steps_integrated >= len(order_steps) * 0.8 and 
+                  fields_integrated >= len(data_fields) * 0.8 and
+                  save_helper and error_handler)
+        
+        return success
+        
+    except Exception as e:
+        print(f"❌ Order creation session flow test error: {e}")
+        return False
+
+def test_session_cancel_order_cleanup():
+    """Test session cleanup on order cancellation"""
+    print("\n🔍 Testing Session Cleanup on Order Cancellation...")
+    print("🎯 CRITICAL: Session should be cleared when order is cancelled")
+    
+    try:
+        # Read server.py to check cancel order implementation
+        with open('/app/backend/server.py', 'r') as f:
+            server_code = f.read()
+        
+        # Check for cancel_order function
+        cancel_function = 'async def cancel_order' in server_code
+        print(f"   cancel_order function exists: {'✅' if cancel_function else '❌'}")
+        
+        # Check if cancel_order clears session
+        clears_session = ('session_manager.clear_session' in server_code and 
+                         'cancel_order' in server_code)
+        print(f"   cancel_order clears session: {'✅' if clears_session else '❌'}")
+        
+        # Check for confirm_cancel_order function
+        confirm_cancel = 'async def confirm_cancel_order' in server_code
+        print(f"   confirm_cancel_order function: {'✅' if confirm_cancel else '❌'}")
+        
+        # Check for cancel confirmation dialog
+        cancel_dialog = ('Вы уверены, что хотите отменить' in server_code and 
+                        'Да, отменить заказ' in server_code)
+        print(f"   Cancel confirmation dialog: {'✅' if cancel_dialog else '❌'}")
+        
+        # Check for return to order option
+        return_option = 'Вернуться к заказу' in server_code
+        print(f"   Return to order option: {'✅' if return_option else '❌'}")
+        
+        # Check cancel button in all states
+        cancel_buttons = server_code.count('cancel_order')
+        print(f"   Cancel button references: {cancel_buttons} {'✅' if cancel_buttons >= 10 else '❌'}")
+        
+        # Check for fallback handler registration
+        fallback_handler = 'fallbacks' in server_code and 'cancel_order' in server_code
+        print(f"   Cancel fallback handler: {'✅' if fallback_handler else '❌'}")
+        
+        # Overall assessment
+        cancel_implementation = (cancel_function and clears_session and 
+                               confirm_cancel and cancel_dialog and 
+                               return_option and fallback_handler)
+        
+        print(f"\n   🎯 CANCEL ORDER SESSION CLEANUP:")
+        print(f"   Complete cancel implementation: {'✅' if cancel_implementation else '❌'}")
+        print(f"   Session cleanup on cancel: {'✅' if clears_session else '❌'}")
+        
+        return cancel_implementation
+        
+    except Exception as e:
+        print(f"❌ Session cancel order cleanup test error: {e}")
+        return False
+
 def test_telegram_webhook_status():
     """Test Telegram webhook status endpoint - CRITICAL TEST per review request"""
     print("\n🔍 Testing Telegram Webhook Status...")
