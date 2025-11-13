@@ -132,6 +132,18 @@ class RateLimiter:
 
 rate_limiter = RateLimiter()
 
+# Decorator for instant typing feedback on text input
+def with_typing_indicator(func):
+    """Show 'typing...' indicator immediately when user sends text"""
+    async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        # INSTANT visual feedback
+        try:
+            await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
+        except:
+            pass
+        return await func(update, context)
+    return wrapper
+
 def is_button_click_allowed(user_id: int, button_data: str) -> bool:
     """Check if button click is allowed (debouncing)"""
     current_time = datetime.now(timezone.utc).timestamp()
