@@ -5605,6 +5605,9 @@ def main():
     session_results = run_session_manager_tests()
     results.update(session_results)
     
+    # 1.1 ATOMIC OPERATIONS FLOW TEST - CRITICAL
+    results['atomic_operations_flow'] = test_atomic_operations_flow()
+    
     # 2. Test API Health (prerequisite)
     results['api_health'] = test_api_health()
     
