@@ -77,16 +77,10 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await session_manager.update_session_atomic(user_id, step="TO_ADDRESS2", data={'to_address': address})
     
     asyncio.create_task(mark_message_as_selected(update, context))
+    from utils.ui_utils import get_skip_and_cancel_keyboard, OrderStepMessages, CallbackData
     
-    keyboard = [
-        [InlineKeyboardButton("⏭️ Пропустить", callback_data='skip_to_address2')],
-        [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    message_text = """Шаг 10/13: 🏢 Адрес 2 получателя (опционально)
-Например: Apt 4B
-Или нажмите "Пропустить" """
+    reply_markup = get_skip_and_cancel_keyboard(CallbackData.SKIP_TO_ADDRESS2)
+    message_text = OrderStepMessages.TO_ADDRESS2
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
