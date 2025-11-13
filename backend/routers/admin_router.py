@@ -304,5 +304,176 @@ async def set_api_mode(request: dict, authenticated: bool = Depends(verify_admin
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# Note: Additional endpoints (health, logs, metrics, bot access checks, etc.)
-# can be added here following the same pattern
+# ============================================================
+# DEBUGGING & LOGGING
+# ============================================================
+
+@admin_router.get("/logs")
+async def get_debug_logs(
+    lines: int = Query(200),
+    filter: str = Query(""),
+    authenticated: bool = Depends(verify_admin_key)
+):
+    """Get recent backend logs for debugging"""
+    import subprocess
+    import os
+    from datetime import datetime, timezone
+    
+    try:
+        log_files = [
+            "/var/log/supervisor/backend.err.log",
+            "/var/log/supervisor/backend.out.log",
+            "/var/log/backend.log",
+            "/app/backend.log",
+            "backend.log"
+        ]
+        
+        all_logs = []
+        found_files = []
+        
+        for log_file in log_files:
+            if os.path.exists(log_file):
+                found_files.append(log_file)
+                try:
+                    cmd = f"tail -n {lines} {log_file}"
+                    result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=5)
+                    if result.stdout:
+                        all_logs.extend([f"[{log_file}] {line}" for line in result.stdout.split('\n') if line])
+                except Exception as e:
+                    logger.warning(f"Error reading log file {log_file}: {e}")
+        
+        # Filter if requested
+        if filter:
+            all_logs = [line for line in all_logs if filter.upper() in line.upper()]
+        
+        return {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "total_lines": len(all_logs),
+            "filter": filter or "none",
+            "log_files_found": found_files,
+            "logs": all_logs[-100:]  # Max 100 lines
+        }
+    except Exception as e:
+        logger.error(f"Error getting logs: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@admin_router.get("/health")
+async def get_bot_health(authenticated: bool = Depends(verify_admin_key)):
+    """Get bot health status"""
+    from server import bot_instance, db, application
+    from datetime import datetime, timezone
+    
+    try:
+        health_status = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "bot_instance": bot_instance is not None,
+            "application": application is not None,
+            "database": False
+        }
+        
+        # Test database connection
+        try:
+            await db.command('ping')
+            health_status["database"] = True
+        except Exception as e:
+            health_status["database_error"] = str(e)
+        
+        # Get bot info if available
+        if bot_instance:
+            try:
+                me = await bot_instance.get_me()
+                health_status["bot_username"] = me.username
+                health_status["bot_id"] = me.id
+            except Exception as e:
+                health_status["bot_error"] = str(e)
+        
+        return health_status
+    except Exception as e:
+        logger.error(f"Error getting health: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@admin_router.get("/metrics")
+async def get_bot_metrics(authenticated: bool = Depends(verify_admin_key)):
+    """Get bot metrics and statistics"""
+    from server import db
+    from datetime import datetime, timezone, timedelta
+    
+    try:
+        # Get counts
+        total_users = await db.users.count_documents({})
+        total_orders = await db.orders.count_documents({})
+        paid_orders = await db.orders.count_documents({"payment_status": "paid"})
+        
+        # Get recent activity (last 24 hours)
+        yesterday = datetime.now(timezone.utc) - timedelta(days=1)
+        yesterday_str = yesterday.isoformat()
+        
+        recent_users = await db.users.count_documents({"created_at": {"$gte": yesterday_str}})
+        recent_orders = await db.orders.count_documents({"created_at": {"$gte": yesterday_str}})
+        
+        # Get active sessions
+        active_sessions = await db.user_sessions.count_documents({})
+        
+        return {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "users": {
+                "total": total_users,
+                "recent_24h": recent_users
+            },
+            "orders": {
+                "total": total_orders,
+                "paid": paid_orders,
+                "recent_24h": recent_orders
+            },
+            "sessions": {
+                "active": active_sessions
+            }
+        }
+    except Exception as e:
+        logger.error(f"Error getting metrics: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============================================================
+# SHIPSTATION INTEGRATION
+# ============================================================
+
+@admin_router.post("/shipstation/check-balance")
+async def check_shipstation_balance_endpoint(authenticated: bool = Depends(verify_admin_key)):
+    """Check ShipStation carrier balances"""
+    from services.api_services import check_shipstation_balance
+    
+    try:
+        low_balance_carriers = await check_shipstation_balance()
+        
+        if low_balance_carriers is None:
+            return {
+                "success": False,
+                "message": "Failed to check ShipStation balance"
+            }
+        
+        if len(low_balance_carriers) == 0:
+            return {
+                "success": True,
+                "message": "All carriers have sufficient balance",
+                "carriers": []
+            }
+        
+        return {
+            "success": True,
+            "message": f"Found {len(low_balance_carriers)} carriers with low balance",
+            "carriers": low_balance_carriers
+        }
+    except Exception as e:
+        logger.error(f"Error checking ShipStation balance: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Note: Additional endpoints can be added here following the same pattern
+# - invite_user_to_channel
+# - invite_all_users_to_channel  
+# - broadcast
+# - check_bot_access
+# - check_user_channel_status
