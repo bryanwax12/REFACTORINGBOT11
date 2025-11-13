@@ -1,5 +1,5 @@
 """
-Session Manager V2 for Telegram Bot
+Session Manager for Telegram Bot
 MongoDB-optimized with atomic operations and TTL index
 """
 from datetime import datetime, timezone, timedelta
@@ -9,7 +9,7 @@ from typing import Optional, Dict, Any
 logger = logging.getLogger(__name__)
 
 
-class SessionManagerV2:
+class SessionManager:
     """
     MongoDB-оптимизированный Session Manager
     
