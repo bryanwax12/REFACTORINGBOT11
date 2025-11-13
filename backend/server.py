@@ -1229,6 +1229,7 @@ _Если вы оплатите другую сумму, деньги не по�
 FROM_NAME, FROM_ADDRESS, FROM_ADDRESS2, FROM_CITY, FROM_STATE, FROM_ZIP, FROM_PHONE, TO_NAME, TO_ADDRESS, TO_ADDRESS2, TO_CITY, TO_STATE, TO_ZIP, TO_PHONE, PARCEL_WEIGHT, PARCEL_LENGTH, PARCEL_WIDTH, PARCEL_HEIGHT, CONFIRM_DATA, EDIT_MENU, SELECT_CARRIER, PAYMENT_METHOD, TOPUP_AMOUNT, TEMPLATE_NAME, TEMPLATE_LIST, TEMPLATE_VIEW, TEMPLATE_RENAME, TEMPLATE_LOADED = range(28)
 
 async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    logger.info(f"🔵 new_order_start called - User: {update.effective_user.id}")
     query = update.callback_query
     await safe_telegram_call(query.answer())
     
@@ -1236,6 +1237,7 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     asyncio.create_task(mark_message_as_selected(update, context))
     
     telegram_id = query.from_user.id
+    logger.info(f"📝 User {telegram_id} starting new order flow")
     
     # Clear any previous order data (including order_completed flag)
     context.user_data.clear()
