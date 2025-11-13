@@ -185,10 +185,9 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Check if bot is in maintenance mode
     if await check_maintenance_mode(update):
+        from utils.ui_utils import MessageTemplates
         await send_method(
-            "🔧 *Бот находится на техническом обслуживании.*\n\n"
-            "Пожалуйста, попробуйте позже.\n\n"
-            "Приносим извинения за неудобства.",
+            MessageTemplates.maintenance_mode(),
             parse_mode='Markdown'
         )
         return ConversationHandler.END
