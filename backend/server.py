@@ -3412,6 +3412,95 @@ async def skip_address_validation(update: Update, context: ContextTypes.DEFAULT_
     # Call fetch_shipping_rates which will now skip validation
     return await fetch_shipping_rates(update, context)
 
+async def display_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYPE, rates: list) -> int:
+    """
+    Display shipping rates to user (reusable for both cached and fresh rates)
+    
+    Args:
+        update: Telegram update
+        context: Telegram context
+        rates: List of rate dictionaries
+    
+    Returns:
+        int: SELECT_CARRIER state
+    """
+    query = update.callback_query
+    
+    # Carrier logos/icons
+    carrier_icons = {
+        'UPS': '🛡 UPS',
+        'USPS': '🦅 USPS',
+        'Stamps.com': '🦅 USPS',
+        'FedEx One Balance': '⚡ FedEx',
+        'FedEx': '⚡ FedEx'
+    }
+    
+    # Group rates by carrier for display
+    rates_by_carrier_display = {}
+    for i, rate in enumerate(rates):
+        carrier = rate['carrier']
+        if carrier not in rates_by_carrier_display:
+            rates_by_carrier_display[carrier] = []
+        rates_by_carrier_display[carrier].append((i, rate))
+    
+    # Count unique carriers
+    unique_carriers = set([r['carrier'] for r in rates])
+    
+    message = f"📦 Найдено {len(rates)} тарифов от {len(unique_carriers)} курьеров:\n\n"
+    keyboard = []
+    
+    # Display rates grouped by carrier
+    for carrier in sorted(rates_by_carrier_display.keys()):
+        carrier_icon = carrier_icons.get(carrier, '📦')
+        message += f"{'='*30}\n<b>{carrier_icon}</b>\n{'='*30}\n\n"
+        
+        carrier_rates = rates_by_carrier_display[carrier]
+        for idx, rate in carrier_rates:
+            days_text = f" ({rate['days']} дней)" if rate['days'] else ""
+            
+            # Calculate estimated delivery date
+            if rate['days']:
+                delivery_date = datetime.now(timezone.utc) + timedelta(days=rate['days'])
+                date_text = f" → {delivery_date.strftime('%d.%m')}"
+            else:
+                date_text = ""
+            
+            message += f"• {rate['service']}{days_text}{date_text}\n  💰 ${rate['amount']:.2f}\n\n"
+            
+            button_text = f"{carrier} - {rate['service']} - ${rate['amount']:.2f}"
+            keyboard.append([InlineKeyboardButton(
+                button_text,
+                callback_data=f'select_carrier_{idx}'
+            )])
+    
+    # Add user balance info
+    telegram_id = query.from_user.id
+    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    user_balance = user.get('balance', 0.0) if user else 0.0
+    
+    message += f"\n{'='*30}\n"
+    message += f"💰 <b>Ваш баланс: ${user_balance:.2f}</b>\n"
+    message += f"{'='*30}\n"
+    
+    # Add refresh and cancel buttons
+    keyboard.append([InlineKeyboardButton("🔄 Обновить тарифы", callback_data='refresh_rates')])
+    keyboard.append([InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')])
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    # Save state
+    context.user_data['last_state'] = SELECT_CARRIER
+    
+    # Send message
+    bot_msg = await safe_telegram_call(query.message.reply_text(message, reply_markup=reply_markup, parse_mode='HTML'))
+    
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message
+    
+    return SELECT_CARRIER
+
+
 async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Fetch shipping rates from ShipStation with caching"""
     query = update.callback_query
