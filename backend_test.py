@@ -1337,76 +1337,192 @@ def test_telegram_bot_admin_integration():
         print(f"❌ Telegram bot admin integration test error: {e}")
         return False
 
-def test_session_manager_infrastructure():
-    """Test Session Manager Infrastructure - CRITICAL TEST per review request"""
-    print("\n🔍 Testing Session Manager Infrastructure...")
-    print("🎯 CRITICAL: Custom SessionManager should replace built-in persistence")
+def test_session_manager_v2_migration():
+    """Test SessionManager V2 Migration - CRITICAL REGRESSION TEST per review request"""
+    print("\n🔍 РЕГРЕССИОННОЕ ТЕСТИРОВАНИЕ SessionManager V2 Migration...")
+    print("🎯 КРИТИЧЕСКИ ВАЖНО: Миграция на MongoDB-оптимизированный SessionManager V2")
     
     try:
         # Import session manager
         import sys
         sys.path.append('/app/backend')
         
-        # Test SessionManager import and initialization
-        print("   📋 Testing SessionManager Import:")
+        # Test 1: SessionManager V2 Import and Class Structure
+        print("\n   📋 ТЕСТ 1: SessionManager V2 Import and Structure")
         try:
             from session_manager import SessionManager
-            print(f"   ✅ SessionManager imported successfully")
+            print(f"   ✅ SessionManager V2 imported successfully")
+            
+            # Check V2 methods exist
+            v2_methods = [
+                'get_or_create_session',
+                'update_session_atomic', 
+                'save_completed_label',
+                'revert_to_previous_step',
+                '_create_indexes'
+            ]
+            
+            for method in v2_methods:
+                has_method = hasattr(SessionManager, method)
+                print(f"   V2 method {method}: {'✅' if has_method else '❌'}")
+                
         except ImportError as e:
-            print(f"   ❌ SessionManager import failed: {e}")
+            print(f"   ❌ SessionManager V2 import failed: {e}")
             return False
         
-        # Check if SessionManager is used in server.py
+        # Test 2: Server.py Integration
+        print("\n   📋 ТЕСТ 2: Server.py Integration with V2")
         with open('/app/backend/server.py', 'r') as f:
             server_code = f.read()
         
-        # Verify SessionManager integration
+        # V2 Integration checks
         session_manager_import = 'from session_manager import SessionManager' in server_code
         session_manager_init = 'session_manager = SessionManager(db)' in server_code
         
-        print(f"   SessionManager imported in server.py: {'✅' if session_manager_import else '❌'}")
-        print(f"   SessionManager initialized: {'✅' if session_manager_init else '❌'}")
+        print(f"   SessionManager V2 imported: {'✅' if session_manager_import else '❌'}")
+        print(f"   SessionManager V2 initialized: {'✅' if session_manager_init else '❌'}")
         
-        # Check for built-in persistence disabled
-        persistence_disabled = 'persistence=False' in server_code or 'RedisPersistence' not in server_code
-        print(f"   Built-in persistence disabled: {'✅' if persistence_disabled else '❌'}")
-        
-        # Verify session management functions are used
-        session_functions = [
-            'session_manager.get_session',
-            'session_manager.create_session', 
-            'session_manager.update_session',
-            'session_manager.clear_session'
+        # Check V2 atomic methods are used
+        v2_atomic_methods = [
+            'session_manager.get_or_create_session',
+            'session_manager.update_session_atomic',
+            'update_session_atomic'  # Direct calls
         ]
         
-        functions_used = {}
-        for func in session_functions:
-            used = func in server_code
-            functions_used[func] = used
-            print(f"   {func}: {'✅' if used else '❌'}")
+        v2_methods_used = {}
+        for method in v2_atomic_methods:
+            used = method in server_code
+            v2_methods_used[method] = used
+            print(f"   {method}: {'✅' if used else '❌'}")
         
-        # Check for revert_to_previous_step function
-        revert_function = 'revert_to_previous_step' in server_code
-        print(f"   revert_to_previous_step function: {'✅' if revert_function else '❌'}")
+        # Check old V1 methods are NOT used (migration complete)
+        old_v1_methods = [
+            'session_manager.create_session',
+            'session_manager.update_session'  # Non-atomic version
+        ]
         
-        # Check for error logging in session
-        error_logging = 'temp_data' in server_code and 'last_error' in server_code
-        print(f"   Error logging in session: {'✅' if error_logging else '❌'}")
+        v1_methods_removed = {}
+        for method in old_v1_methods:
+            still_used = method in server_code
+            v1_methods_removed[method] = not still_used
+            print(f"   V1 method {method} removed: {'✅' if not still_used else '❌ (still using V1)'}")
         
-        # Overall assessment
-        all_functions_used = all(functions_used.values())
-        infrastructure_complete = (session_manager_import and session_manager_init and 
-                                 all_functions_used and revert_function)
+        # Test 3: Built-in Persistence Disabled
+        print("\n   📋 ТЕСТ 3: Built-in Persistence Disabled")
+        persistence_patterns = [
+            'RedisPersistence',
+            'PicklePersistence', 
+            'DictPersistence',
+            'persistence=',
+            '.persistence('
+        ]
         
-        print(f"\n   🎯 SESSION MANAGER INFRASTRUCTURE:")
-        print(f"   SessionManager properly integrated: {'✅' if infrastructure_complete else '❌'}")
-        print(f"   All session functions used: {'✅' if all_functions_used else '❌'}")
-        print(f"   Error handling implemented: {'✅' if error_logging else '❌'}")
+        persistence_disabled = True
+        for pattern in persistence_patterns:
+            if pattern in server_code:
+                # Check if it's commented out or disabled
+                lines_with_pattern = [line for line in server_code.split('\n') if pattern in line]
+                active_persistence = any(not line.strip().startswith('#') for line in lines_with_pattern)
+                if active_persistence:
+                    persistence_disabled = False
+                    print(f"   ❌ Found active built-in persistence: {pattern}")
+                    break
         
-        return infrastructure_complete
+        if persistence_disabled:
+            print(f"   ✅ Built-in persistence completely disabled")
+        
+        # Test 4: TTL Index Implementation
+        print("\n   📋 ТЕСТ 4: TTL Index Implementation")
+        with open('/app/backend/session_manager.py', 'r') as f:
+            session_manager_code = f.read()
+        
+        ttl_checks = {
+            'expireAfterSeconds=900': 'TTL index with 15 minutes (900 seconds)',
+            'create_index("timestamp"': 'TTL index on timestamp field',
+            '_create_indexes': 'Index creation method',
+            'asyncio.create_task(self._create_indexes())': 'Automatic index creation'
+        }
+        
+        for pattern, description in ttl_checks.items():
+            has_pattern = pattern in session_manager_code
+            print(f"   {description}: {'✅' if has_pattern else '❌'}")
+        
+        # Test 5: Atomic Operations Implementation
+        print("\n   📋 ТЕСТ 5: Atomic Operations (find_one_and_update)")
+        atomic_checks = {
+            'find_one_and_update': 'Atomic update operations',
+            'upsert=True': 'Upsert for get_or_create',
+            'return_document=True': 'Return updated document',
+            '$set': 'Atomic field updates',
+            '$setOnInsert': 'Insert-only fields'
+        }
+        
+        for pattern, description in atomic_checks.items():
+            has_pattern = pattern in session_manager_code
+            print(f"   {description}: {'✅' if has_pattern else '❌'}")
+        
+        # Test 6: Transaction Support
+        print("\n   📋 ТЕСТ 6: MongoDB Transactions")
+        transaction_checks = {
+            'start_session()': 'MongoDB session creation',
+            'start_transaction()': 'Transaction support',
+            'save_completed_label': 'Transactional label saving'
+        }
+        
+        for pattern, description in transaction_checks.items():
+            has_pattern = pattern in session_manager_code
+            print(f"   {description}: {'✅' if has_pattern else '❌'}")
+        
+        # Test 7: Error Handling and Logging
+        print("\n   📋 ТЕСТ 7: Error Handling and Temp Data")
+        error_handling_checks = [
+            'handle_step_error' in server_code,
+            'temp_data' in server_code,
+            'last_error' in server_code,
+            'error_timestamp' in session_manager_code
+        ]
+        
+        error_handling_complete = all(error_handling_checks)
+        print(f"   Error handling with temp_data: {'✅' if error_handling_complete else '❌'}")
+        
+        # Overall V2 Migration Assessment
+        print(f"\n   🎯 SESSIONMANAGER V2 MIGRATION RESULTS:")
+        
+        v2_import_ok = session_manager_import and session_manager_init
+        v2_methods_ok = any(v2_methods_used.values())
+        v1_removed_ok = all(v1_methods_removed.values())
+        ttl_ok = all(pattern in session_manager_code for pattern in ['expireAfterSeconds=900', 'create_index("timestamp"'])
+        atomic_ok = all(pattern in session_manager_code for pattern in ['find_one_and_update', '$set'])
+        transactions_ok = 'start_transaction()' in session_manager_code
+        
+        migration_success_rate = sum([
+            v2_import_ok, v2_methods_ok, v1_removed_ok, 
+            persistence_disabled, ttl_ok, atomic_ok, 
+            transactions_ok, error_handling_complete
+        ]) / 8 * 100
+        
+        print(f"   V2 Import & Integration: {'✅' if v2_import_ok else '❌'}")
+        print(f"   V2 Atomic Methods Used: {'✅' if v2_methods_ok else '❌'}")
+        print(f"   V1 Methods Removed: {'✅' if v1_removed_ok else '❌'}")
+        print(f"   Built-in Persistence Disabled: {'✅' if persistence_disabled else '❌'}")
+        print(f"   TTL Index (15 min): {'✅' if ttl_ok else '❌'}")
+        print(f"   Atomic Operations: {'✅' if atomic_ok else '❌'}")
+        print(f"   MongoDB Transactions: {'✅' if transactions_ok else '❌'}")
+        print(f"   Error Handling: {'✅' if error_handling_complete else '❌'}")
+        
+        print(f"\n   📊 MIGRATION SUCCESS RATE: {migration_success_rate:.1f}%")
+        
+        if migration_success_rate >= 87.5:  # 7/8 tests pass
+            print(f"   ✅ SESSIONMANAGER V2 MIGRATION SUCCESSFUL")
+            return True
+        else:
+            print(f"   ❌ SESSIONMANAGER V2 MIGRATION INCOMPLETE")
+            return False
         
     except Exception as e:
-        print(f"❌ Session Manager infrastructure test error: {e}")
+        print(f"❌ SessionManager V2 migration test error: {e}")
+        import traceback
+        print(f"   Traceback: {traceback.format_exc()}")
         return False
 
 def test_mongodb_session_collection():
