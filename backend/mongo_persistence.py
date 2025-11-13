@@ -125,10 +125,13 @@ class MongoPersistence(BasePersistence):
         pass
     
     async def update_conversation(self, name: str, key: Tuple, new_state: Optional[int]) -> None:
-        """Save conversation state directly to MongoDB (no cache, multi-pod safe)"""
+        """Save conversation state to MongoDB IMMEDIATELY (no cache, blocking for consistency)"""
         try:
-            # Load current conversations from MongoDB
+            logger.info(f"🔵 PERSISTENCE CALLED: update_conversation(name={name}, key={key}, new_state={new_state})")
+            
+            # Load current conversations
             conversations = await self.get_conversations(name)
+            logger.info(f"📖 PERSISTENCE: Loaded {len(conversations)} existing conversations")
             
             if new_state is None:
                 # Remove conversation
@@ -142,16 +145,18 @@ class MongoPersistence(BasePersistence):
             
             # Prepare for MongoDB (convert keys to strings)
             conversations_for_db = {str(k): v for k, v in conversations.items()}
+            logger.info(f"🔄 PERSISTENCE: Converting to DB format - {len(conversations_for_db)} entries")
             
             # Save to MongoDB IMMEDIATELY (blocking for consistency)
-            await self.collection.update_one(
+            result = await self.collection.update_one(
                 {"_id": f"conversation_{name}"},
                 {"$set": {"data": conversations_for_db, "updated_at": datetime.now(timezone.utc)}},
                 upsert=True
             )
-            logger.info(f"💾 PERSISTENCE: Saved to MONGODB - name: {name}, entries: {len(conversations_for_db)}, all_states: {conversations_for_db}")
+            logger.info(f"✅ PERSISTENCE: Saved to MONGODB - name: {name}, matched={result.matched_count}, modified={result.modified_count}, upserted_id={result.upserted_id}")
+            logger.info(f"📊 PERSISTENCE: Final state - {conversations_for_db}")
         except Exception as e:
-            logger.error(f"❌ PERSISTENCE ERROR saving conversation for {name}: {e}")
+            logger.error(f"❌ PERSISTENCE ERROR saving conversation for {name}: {e}", exc_info=True)
     
     async def drop_user_data(self, user_id: int) -> None:
         """Delete user_data from MongoDB"""
