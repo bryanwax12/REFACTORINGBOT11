@@ -883,20 +883,7 @@ def mark_message_as_selected_nonblocking(update: Update, context: ContextTypes.D
 
 # mark_message_as_selected moved to handlers/common_handlers.py
 
-async def check_maintenance_mode(update: Update) -> bool:
-    """Check if bot is in maintenance mode and user is not admin"""
-    try:
-        settings = await db.settings.find_one({"key": "maintenance_mode"})
-        is_maintenance = settings.get("value", False) if settings else False
-        
-        # Allow admin to use bot even in maintenance mode
-        if is_maintenance and str(update.effective_user.id) != ADMIN_TELEGRAM_ID:
-            return True
-        
-        return False
-    except Exception as e:
-        logger.error(f"Error checking maintenance mode: {e}")
-        return False
+# check_maintenance_mode moved to handlers/common_handlers.py
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # CRITICAL: Clear old conversation state for this user to prevent stuck dialogs
