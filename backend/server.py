@@ -1656,7 +1656,7 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
     # Template data already loaded in context.user_data
     # Ask for parcel weight (first thing not in template)
     from utils.ui_utils import get_cancel_keyboard
-        reply_markup = get_cancel_keyboard()
+    reply_markup = get_cancel_keyboard()
     
     template_name = context.user_data.get('template_name', 'шаблон')
     
