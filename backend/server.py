@@ -1420,7 +1420,10 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await safe_telegram_call(update.message.reply_text("❌ Используйте только английские буквы. Разрешены: буквы, пробелы, дефисы, точки"))
         return FROM_NAME
     
+    # STEP 3: Store in session AND context
+    user_id = update.effective_user.id
     context.user_data['from_name'] = name
+    await session_manager.update_session(user_id, step="FROM_ADDRESS", data={'from_name': name})
     
     # Log action
     await SecurityLogger.log_action(
