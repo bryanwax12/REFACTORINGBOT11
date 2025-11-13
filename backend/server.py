@@ -8121,6 +8121,10 @@ async def cleanup_sessions_periodically():
 async def startup_event():
     logger.info("Starting application...")
     
+    # Start periodic session cleanup
+    asyncio.create_task(cleanup_sessions_periodically())
+    logger.info("🧹 Started periodic session cleanup (every 10 minutes)")
+    
     # Load correct API key based on api_mode in database
     global SHIPSTATION_API_KEY
     try:
