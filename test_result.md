@@ -694,7 +694,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Session Manager Migration - Custom SessionManager Implementation"
+    - "Handlers Refactoring - Modular Architecture Migration"
   stuck_tasks:
     []
   test_all: false
