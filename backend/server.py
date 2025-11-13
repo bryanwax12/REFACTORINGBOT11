@@ -1360,7 +1360,7 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
-        await safe_telegram_call(query.message.reply_text(
+        await safe_telegram_call(send_method(
             """📦 Создать заказ
 
 Выберите способ создания:""",
