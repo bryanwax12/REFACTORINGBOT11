@@ -1861,6 +1861,7 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['last_state'] = TO_NAME
     return TO_NAME
 
+@with_typing_indicator
 async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     name = update.message.text.strip()
     
