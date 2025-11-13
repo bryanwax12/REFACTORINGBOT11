@@ -6198,13 +6198,6 @@ async def telegram_webhook(request: Request):
             update = Update.de_json(update_data, application.bot)
             logger.info(f"🔵 UPDATE PARSED: Starting process_update for {update_id}")
             await application.process_update(update)
-            
-            # CRITICAL: Must wait for persistence to save conversation state correctly
-            # Fast persistence (optimized MongoDB with per-user documents)
-            if application.persistence:
-                await application.update_persistence()
-                logger.info(f"✅ PERSISTENCE SAVED for update {update_id}")
-            
             logger.info(f"🟢 UPDATE PROCESSED SUCCESSFULLY: {update_id}")
             return {"ok": True}
         except Exception as process_error:
