@@ -220,31 +220,11 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         user_balance = existing_user.get('balance', 0.0)
         
-    welcome_message = f"""*Добро пожаловать, {first_name}! 🚀*
-
-*Я помогу вам создать shipping labels.*
-
-*Выберите действие:*"""
+    # Import UI utilities
+    from utils.ui_utils import MessageTemplates, get_main_menu_keyboard
     
-    # Create keyboard with buttons
-    keyboard = [
-        [
-            InlineKeyboardButton("📦 Создать заказ", callback_data='new_order')
-        ],
-        [
-            InlineKeyboardButton(f"💳 Мой баланс (${user_balance:.2f})", callback_data='my_balance')
-        ],
-        [
-            InlineKeyboardButton("📋 Мои шаблоны", callback_data='my_templates')
-        ],
-        [
-            InlineKeyboardButton("❓ Помощь", callback_data='help')
-        ],
-        [
-            InlineKeyboardButton("📖 FAQ", callback_data='faq')
-        ]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    welcome_message = MessageTemplates.welcome(first_name)
+    reply_markup = get_main_menu_keyboard(user_balance)
     
     # Send welcome message with inline keyboard
     bot_msg = await send_method(welcome_message, reply_markup=reply_markup, parse_mode='Markdown')
