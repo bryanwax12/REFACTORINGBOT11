@@ -222,15 +222,10 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     asyncio.create_task(mark_message_as_selected(update, context))
     
-    keyboard = [
-        [InlineKeyboardButton("⏭️ Пропустить", callback_data='skip_to_phone')],
-        [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    from utils.ui_utils import get_skip_and_cancel_keyboard, OrderStepMessages, CallbackData
     
-    message_text = """📞 Телефон получателя (опционально)
-Например: +11234567890
-Или нажмите "Пропустить" """
+    reply_markup = get_skip_and_cancel_keyboard(CallbackData.SKIP_TO_PHONE)
+    message_text = OrderStepMessages.TO_PHONE
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
