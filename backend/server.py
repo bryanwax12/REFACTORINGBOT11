@@ -17,6 +17,7 @@ from datetime import datetime, timezone, timedelta
 import uuid
 import time
 from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup, BotCommand, MenuButtonCommands
+import telegram.error
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes, MessageHandler, filters, ConversationHandler
 import asyncio
 import hashlib
