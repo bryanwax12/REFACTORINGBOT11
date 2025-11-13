@@ -3550,8 +3550,6 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             context.user_data['rates'].append(rate_data)
         
         # Create buttons for carrier selection
-        from datetime import datetime, timedelta, timezone
-        
         # Carrier logos/icons - узнаваемые символы
         carrier_icons = {
             'UPS': '🛡 UPS',  # Щит - фирменный логотип UPS (коричнево-золотой щит)
