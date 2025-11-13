@@ -676,7 +676,7 @@ metadata:
 
 test_plan:
   current_focus:
-    []
+    - "Session Manager Migration - Custom SessionManager Implementation"
   stuck_tasks:
     []
   test_all: false
