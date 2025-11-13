@@ -1743,6 +1743,7 @@ async def notify_admin_error(user_info: dict, error_type: str, error_details: st
     except Exception as e:
         logger.error(f"Failed to send admin notification: {e}")
 
+@with_typing_indicator
 async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     zip_code = update.message.text.strip()
     
