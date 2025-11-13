@@ -2577,7 +2577,9 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
         
         if query.data == 'skip_height':
             # Use default height 10
+            user_id = query.from_user.id
             context.user_data['height'] = 10
+            await session_manager.update_session(user_id, step="CONFIRM_DATA", data={'height': 10})
             
             # Mark previous message as selected (non-blocking)
             asyncio.create_task(mark_message_as_selected(update, context))
