@@ -1310,10 +1310,21 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     telegram_id = query.from_user.id
     logger.info(f"📝 User {telegram_id} starting new order flow")
     
-    # Clear any previous order data (including order_completed flag)
-    context.user_data.clear()
-    # Re-add the session ID after clearing
-    context.user_data['order_session_id'] = order_session_id
+    # STEP 2: Check for existing session or create new one
+    user_id = update.effective_user.id
+    
+    # Check if user has active session
+    existing_session = await session_manager.get_session(user_id)
+    if existing_session:
+        # Resume from existing session
+        logger.info(f"🔄 Resuming session for user {user_id} from step {existing_session.get('current_step')}")
+        # Load session data into context.user_data for compatibility
+        context.user_data.update(existing_session.get('temp_data', {}))
+    else:
+        # Create new session
+        await session_manager.create_session(user_id, initial_data={})
+        logger.info(f"🆕 New session created for user {user_id}")
+        context.user_data.clear()
     
     # Check if bot is in maintenance mode
     if await check_maintenance_mode(update):
