@@ -185,16 +185,34 @@ async def handle_telegram_webhook(request: Request, application):
     try:
         from telegram import Update
         
-        # Get update from request
-        update_dict = await request.json()
+        # Get update data
+        update_data = await request.json()
+        update_id = update_data.get('update_id', 'unknown')
+        logger.info(f"🔵 WEBHOOK RECEIVED: update_id={update_id}")
         
-        # Create Update object
-        update = Update.de_json(update_dict, application.bot)
+        # Log message details if present
+        if 'message' in update_data:
+            msg = update_data['message']
+            logger.info(f"🔵 MESSAGE: user={msg.get('from',{}).get('id')}, text={msg.get('text','no text')}")
         
-        # Process update
-        await application.process_update(update)
+        # Check if application is initialized
+        if not application:
+            logger.error("🔴 WEBHOOK ERROR: Telegram application not initialized yet")
+            return {"ok": True}
         
-        return {"ok": True}
+        logger.info(f"🔵 APPLICATION READY: Processing update {update_id}")
+        
+        # Process update through application
+        try:
+            update = Update.de_json(update_data, application.bot)
+            logger.info(f"🔵 UPDATE PARSED: Starting process_update for {update_id}")
+            await application.process_update(update)
+            logger.info(f"🟢 UPDATE PROCESSED SUCCESSFULLY: {update_id}")
+            return {"ok": True}
+        except Exception as process_error:
+            logger.error(f"🔴 PROCESSING ERROR for update {update_id}: {process_error}", exc_info=True)
+            return {"ok": True}
+            
     except Exception as e:
-        logger.error(f"Telegram webhook error: {e}")
-        return {"ok": False, "error": str(e)}
+        logger.error(f"🔴 WEBHOOK ENDPOINT ERROR: {e}", exc_info=True)
+        return {"ok": True}
