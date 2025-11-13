@@ -65,6 +65,12 @@ from handlers.admin_handlers import (
     get_expense_stats_data
 )
 
+# Webhook handlers
+from handlers.webhook_handlers import (
+    handle_oxapay_webhook,
+    handle_telegram_webhook
+)
+
 # Profiled DB operations (most frequently used)
 @profile_db_query("find_user_by_telegram_id")
 async def find_user_by_telegram_id(telegram_id: int, projection: dict = None):
