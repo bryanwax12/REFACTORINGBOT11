@@ -1299,11 +1299,14 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return FROM_NAME
 
 async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    logger.info(f"🔵 order_from_name called - User: {update.effective_user.id}, Message: {update.message.text}")
     # Skip if user is in topup flow
     if context.user_data.get('awaiting_topup_amount'):
+        logger.info(f"⏭️ Skipping - user in topup flow")
         return ConversationHandler.END
     
     name = update.message.text.strip()
+    logger.info(f"📝 Processing name: '{name}'")
     
     # Sanitize input
     name = sanitize_string(name, max_length=50)
