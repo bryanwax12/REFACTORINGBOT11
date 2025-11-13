@@ -43,26 +43,16 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, 
         return
     
     # Get user's templates
+    from utils.ui_utils import TemplateMessages, get_back_to_menu_keyboard, get_templates_list_keyboard
+    
     templates = await db.templates.find({"telegram_id": telegram_id}).to_list(100)
     
     if not templates:
-        message = "📋 У вас пока нет сохранённых шаблонов.\n\nШаблоны создаются автоматически после успешного создания заказа."
-        keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+        message = TemplateMessages.no_templates()
+        reply_markup = get_back_to_menu_keyboard()
     else:
-        message = f"📋 Ваши шаблоны ({len(templates)}):\n\nВыберите шаблон для просмотра или использования:"
-        
-        keyboard = []
-        for template in templates:
-            template_name = template.get('name', 'Без названия')
-            template_id = template.get('id')
-            keyboard.append([InlineKeyboardButton(
-                f"📄 {template_name}",
-                callback_data=f'template_view_{template_id}'
-            )])
-        
-        keyboard.append([InlineKeyboardButton("🔙 Главное меню", callback_data='start')])
-    
-    reply_markup = InlineKeyboardMarkup(keyboard)
+        message = TemplateMessages.templates_list(len(templates))
+        reply_markup = get_templates_list_keyboard(templates)
     
     bot_message = await send_method(message, reply_markup=reply_markup)
     
