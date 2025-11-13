@@ -1243,6 +1243,26 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # This prevents users from continuing from old steps
     logger.warning(f"🔴 CLEARING old conversation state for user {telegram_id}")
     
+    # Manually delete old conversation state from MongoDB
+    try:
+        # Get the conversation key (chat_id, user_id)
+        conv_key = (update.effective_chat.id, update.effective_user.id)
+        
+        # Load current conversations
+        doc = await db.bot_persistence.find_one({"_id": "conversation_order_conv_handler"})
+        if doc and 'data' in doc:
+            # Remove this user's conversation
+            key_str = str(conv_key)
+            if key_str in doc['data']:
+                del doc['data'][key_str]
+                await db.bot_persistence.update_one(
+                    {"_id": "conversation_order_conv_handler"},
+                    {"$set": {"data": doc['data'], "updated_at": datetime.now(timezone.utc)}}
+                )
+                logger.warning(f"✅ DELETED old conversation state for key {key_str}")
+    except Exception as e:
+        logger.error(f"Error clearing conversation state: {e}")
+    
     # Clear any previous order data (including order_completed flag)
     context.user_data.clear()
     
