@@ -44,6 +44,27 @@ from services.api_services import (
     validate_address_with_shipstation
 )
 
+# Common handlers (start, help, faq, button routing)
+from handlers.common_handlers import (
+    start_command,
+    help_command,
+    faq_command,
+    button_callback,
+    mark_message_as_selected,
+    safe_telegram_call,
+    check_user_blocked,
+    send_blocked_message,
+    check_maintenance_mode
+)
+
+# Admin handlers
+from handlers.admin_handlers import (
+    verify_admin_key,
+    notify_admin_error,
+    get_stats_data,
+    get_expense_stats_data
+)
+
 # Profiled DB operations (most frequently used)
 @profile_db_query("find_user_by_telegram_id")
 async def find_user_by_telegram_id(telegram_id: int, projection: dict = None):
