@@ -1102,7 +1102,7 @@ async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAUL
             payment_dict['telegram_id'] = telegram_id
             payment_dict['type'] = 'topup'
             payment_dict['topup_input_message_id'] = topup_input_message_id  # Save for later button removal
-            await db.payments.insert_one(payment_dict)
+            await insert_payment(payment_dict)
             
             keyboard = [
                 [InlineKeyboardButton("💳 Оплатить", url=pay_link)],
@@ -3988,7 +3988,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 )
                 payment_dict = payment.model_dump()
                 payment_dict['created_at'] = payment_dict['created_at'].isoformat()
-                await db.payments.insert_one(payment_dict)
+                await insert_payment(payment_dict)
                 
                 keyboard = [[InlineKeyboardButton("💳 Оплатить", url=pay_link)],
                            [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
@@ -4216,7 +4216,7 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
             payment_dict['created_at'] = payment_dict['created_at'].isoformat()
             payment_dict['telegram_id'] = telegram_id
             payment_dict['type'] = 'topup'
-            await db.payments.insert_one(payment_dict)
+            await insert_payment(payment_dict)
             
             keyboard = [[InlineKeyboardButton("💳 Оплатить", url=pay_link)]]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -4325,7 +4325,7 @@ async def handle_topup_crypto_selection(update: Update, context: ContextTypes.DE
             payment_dict['created_at'] = payment_dict['created_at'].isoformat()
             payment_dict['telegram_id'] = telegram_id
             payment_dict['type'] = 'topup'
-            await db.payments.insert_one(payment_dict)
+            await insert_payment(payment_dict)
             
             keyboard = [[InlineKeyboardButton("💳 Оплатить", url=pay_link)]]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -5168,7 +5168,7 @@ async def create_order(order_data: OrderCreate):
             )
             payment_dict = payment.model_dump()
             payment_dict['created_at'] = payment_dict['created_at'].isoformat()
-            await db.payments.insert_one(payment_dict)
+            await insert_payment(payment_dict)
             
             # Send payment link to user
             if bot_instance and pay_url:
