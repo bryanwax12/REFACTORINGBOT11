@@ -86,7 +86,8 @@ class SessionManager:
             )
             
             if session:
-                logger.info(f"📖 Session loaded/created for user {user_id}: step {session.get('current_step')}")
+                order_id_display = session.get('order_id', 'N/A')
+                logger.info(f"📖 Session loaded/created for user {user_id}: step {session.get('current_step')}, order_id {order_id_display[:12]}")
             
             return session
             
