@@ -257,6 +257,148 @@ def build_shipstation_rates_request(order_data: Dict[str, Any], carrier_ids: Lis
             'carrier_ids': carrier_ids
         },
         'shipment': {
+
+
+
+def get_allowed_services_config() -> Dict[str, List[str]]:
+    """
+    Get configuration for allowed shipping services per carrier
+    
+    Returns:
+        Dictionary mapping carrier codes to allowed service codes
+    """
+    return {
+        'ups': [
+            'ups_ground',
+            'ups_3_day_select',
+            'ups_2nd_day_air',
+            'ups_next_day_air',
+            'ups_next_day_air_saver'
+        ],
+        'fedex_walleted': [
+            'fedex_ground',
+            'fedex_economy',  # FedEx Express Saver - 3-day
+            'fedex_2day',
+            'fedex_standard_overnight',
+            'fedex_priority_overnight'
+        ],
+        'usps': [
+            'usps_ground_advantage',
+            'usps_priority_mail',
+            'usps_priority_mail_express'
+        ],
+        'stamps_com': [
+            'usps_ground_advantage',
+            'usps_priority_mail',
+            'usps_priority_mail_express',
+            'usps_first_class_mail',
+            'usps_media_mail'
+        ]
+    }
+
+
+def apply_service_filter(
+    rates: List[Dict],
+    allowed_services: Optional[Dict[str, List[str]]] = None
+) -> List[Dict]:
+    """
+    Filter rates to only allowed services per carrier
+    
+    Args:
+        rates: List of rate dictionaries from ShipStation
+        allowed_services: Optional dict of allowed services per carrier
+                         If None, uses default configuration
+    
+    Returns:
+        Filtered rates list
+    """
+    if allowed_services is None:
+        allowed_services = get_allowed_services_config()
+    
+    filtered_rates = []
+    
+    for rate in rates:
+        carrier_code = rate.get('carrier_code', '').lower()
+        service_code = rate.get('service_code', '').lower()
+        
+        if carrier_code in allowed_services:
+            if service_code in allowed_services[carrier_code]:
+                filtered_rates.append(rate)
+        else:
+            # Keep rates from unlisted carriers
+            filtered_rates.append(rate)
+    
+    return filtered_rates
+
+
+def balance_and_deduplicate_rates(
+    rates: List[Dict],
+    max_per_carrier: int = 5
+) -> List[Dict[str, Any]]:
+    """
+    Balance rates across carriers and deduplicate by service type
+    
+    Takes top N rates from each carrier, deduplicates by service,
+    and formats for display.
+    
+    Args:
+        rates: Raw rates from ShipStation
+        max_per_carrier: Maximum rates to show per carrier
+    
+    Returns:
+        Balanced and formatted rates list
+    """
+    # Group rates by carrier
+    rates_by_carrier = {}
+    for rate in rates:
+        carrier = rate.get('carrier_friendly_name', 'Unknown')
+        if carrier not in rates_by_carrier:
+            rates_by_carrier[carrier] = []
+        rates_by_carrier[carrier].append(rate)
+    
+    # Process each carrier's rates
+    balanced_rates = []
+    
+    for carrier, carrier_rates in rates_by_carrier.items():
+        # Sort by price (ascending)
+        sorted_rates = sorted(
+            carrier_rates,
+            key=lambda r: float(r.get('shipping_amount', {}).get('amount', 0))
+        )
+        
+        # Deduplicate by service_type - keep only cheapest for each service
+        seen_services = {}
+        deduplicated_rates = []
+        
+        for rate in sorted_rates:
+            service_type = rate.get('service_type', 'Unknown')
+            if service_type not in seen_services:
+                seen_services[service_type] = True
+                deduplicated_rates.append(rate)
+        
+        # Take top N rates per carrier
+        top_rates = deduplicated_rates[:max_per_carrier]
+        
+        # Format rates
+        for rate in top_rates:
+            formatted_rate = {
+                'carrier': carrier,
+                'carrier_code': rate.get('carrier_code'),
+                'service': rate.get('service_type', 'Standard'),
+                'service_code': rate.get('service_code'),
+                'amount': float(rate.get('shipping_amount', {}).get('amount', 0)),
+                'days': rate.get('delivery_days'),
+                'carrier_delivery_days': rate.get('carrier_delivery_days'),
+                'guaranteed_service': rate.get('guaranteed_service', False),
+                'rate_id': rate.get('rate_id')
+            }
+            balanced_rates.append(formatted_rate)
+    
+    # Final sort by price across all carriers
+    balanced_rates.sort(key=lambda x: x['amount'])
+    
+    return balanced_rates
+
             'ship_to': {
                 'name': order_data['to_name'],
                 'phone': order_data.get('to_phone') or '+15551234567',
