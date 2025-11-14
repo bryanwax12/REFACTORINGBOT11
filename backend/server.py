@@ -1265,41 +1265,24 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
         context.user_data['pending_template_name'] = template_name
         return TEMPLATE_NAME
     
-    # Check template limit (10 templates max)
-    templates_count = await count_user_templates(telegram_id)
-    if templates_count >= 10:
+    # Create template using template service
+    success, template_id, error = await template_service.create_template(
+        telegram_id=telegram_id,
+        template_name=template_name,
+        order_data=context.user_data,
+        insert_template_func=insert_template,
+        count_user_templates_func=count_user_templates,
+        max_templates=10
+    )
+    
+    if not success:
         await safe_telegram_call(update.message.reply_text(
-            """❌ *Достигнут лимит шаблонов (10)*
+            f"""❌ *Ошибка сохранения шаблона*
 
-Удалите старые шаблоны в меню "📋 Мои шаблоны" """,
+{error}""",
             parse_mode='Markdown'
         ))
         return ConversationHandler.END
-    
-    # Create template
-    template = Template(
-        user_id=user['id'],
-        telegram_id=telegram_id,
-        name=template_name,
-        from_name=context.user_data.get('from_name', ''),
-        from_street1=context.user_data.get('from_street', ''),  # Use 'from_street' not 'from_address'
-        from_street2=context.user_data.get('from_street2', ''),
-        from_city=context.user_data.get('from_city', ''),
-        from_state=context.user_data.get('from_state', ''),
-        from_zip=context.user_data.get('from_zip', ''),
-        from_phone=context.user_data.get('from_phone', ''),
-        to_name=context.user_data.get('to_name', ''),
-        to_street1=context.user_data.get('to_street', ''),  # Use 'to_street' not 'to_address'
-        to_street2=context.user_data.get('to_street2', ''),
-        to_city=context.user_data.get('to_city', ''),
-        to_state=context.user_data.get('to_state', ''),
-        to_zip=context.user_data.get('to_zip', ''),
-        to_phone=context.user_data.get('to_phone', '')
-    )
-    
-    template_dict = template.model_dump()
-    template_dict['created_at'] = template_dict['created_at'].isoformat()
-    await insert_template(template_dict)
     
     keyboard = [
         [InlineKeyboardButton("📦 Продолжить создание заказа", callback_data='continue_order')],
