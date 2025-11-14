@@ -259,10 +259,18 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return FROM_STATE
 
 
-@with_typing_indicator
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_typing_action()
+@with_user_session(create_user=False, require_session=True)
 async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Step 5/13: Collect sender state"""
-    from server import session_manager, FROM_STATE, FROM_ZIP, STATE_NAMES
+    """
+    Step 5/13: Collect sender state
+    
+    Decorators handle: User session + error handling + typing indicator
+    """
+    from server import FROM_STATE, FROM_ZIP, STATE_NAMES
+    from repositories.session_repository import SessionRepository
+    from server import db
     
     state = update.message.text.strip().upper()
     
