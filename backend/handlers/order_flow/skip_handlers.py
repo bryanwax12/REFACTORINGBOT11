@@ -72,9 +72,10 @@ async def handle_skip_field(
     ))
     
     if bot_msg:
+        from server import STATE_NAMES
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = next_message
-        context.user_data['last_state'] = next_step_name
+        context.user_data['last_state'] = STATE_NAMES[next_step_const]
     
     # Return next state constant
     return next_step_const
