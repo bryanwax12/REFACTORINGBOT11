@@ -241,7 +241,7 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if bot_msg:
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
-        context.user_data['last_state'] = TO_PHONE
+        context.user_data['last_state'] = STATE_NAMES[TO_PHONE]
     
     return TO_PHONE
 
@@ -249,7 +249,7 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
 @with_typing_indicator
 async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 14/14: Collect recipient phone (optional) and move to parcel info"""
-    from server import session_manager, TO_PHONE, PARCEL_WEIGHT
+    from server import session_manager, TO_PHONE, PARCEL_WEIGHT, STATE_NAMES
     
     phone = update.message.text.strip()
     
