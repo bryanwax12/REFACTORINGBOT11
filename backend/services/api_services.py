@@ -91,13 +91,12 @@ async def check_oxapay_payment(track_id: str):
             "trackId": track_id
         }
         
-        response = await asyncio.to_thread(
-            requests.post,
-            f"{OXAPAY_API_URL}/v1/payment/info",
-            json=payload,
-            headers=headers,
-            timeout=30
-        )
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                f"{OXAPAY_API_URL}/v1/payment/info",
+                json=payload,
+                headers=headers
+            )
         
         if response.status_code == 200:
             data = response.json()
