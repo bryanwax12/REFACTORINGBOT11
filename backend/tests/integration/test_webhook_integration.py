@@ -240,10 +240,13 @@ class TestExternalAPIIntegration:
             mock_client_instance.post = AsyncMock(return_value=mock_response)
             mock_client.return_value.__aenter__.return_value = mock_client_instance
             
+            headers = {"API-Key": "test"}
+            api_url = "https://api.shipengine.com/v1/rates/estimate"
+            
             success, rates, error = await fetch_rates_from_shipstation(
                 request_data,
-                api_key="test",
-                api_secret="test"
+                headers,
+                api_url
             )
             
             # Should handle error
