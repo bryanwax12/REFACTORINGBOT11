@@ -40,7 +40,11 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
     # Store
     user_id = update.effective_user.id
     context.user_data['parcel_weight'] = weight
-    await session_manager.update_session_atomic(user_id, step="PARCEL_LENGTH", data={'parcel_weight': weight})
+    
+    # Update session via repository
+    session_repo = SessionRepository(db)
+    await session_repo.update_temp_data(user_id, {'parcel_weight': weight})
+    await session_repo.update_step(user_id, "PARCEL_LENGTH")
     
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
     asyncio.create_task(mark_message_as_selected(update, context))
