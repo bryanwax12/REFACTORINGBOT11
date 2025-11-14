@@ -3474,3 +3474,108 @@ pytest tests/ -v
 
 Приложение готово к следующему этапу: исправление 7 падающих unit-тестов (P1).
 
+
+
+---
+
+## ✅ Unit Tests Fix - test_session_manager.py - ЗАВЕРШЕНО
+**Дата**: 2025-11-14  
+**Агент**: Fork Agent (E1)  
+**Приоритет**: P1
+
+### 🎯 Проблема
+
+7 unit-тестов в `/app/backend/tests/test_session_manager.py` стабильно падали:
+- `test_get_or_create_session_new`
+- `test_get_or_create_session_existing`
+- `test_update_session_atomic`
+- `test_update_session_atomic_multiple_fields`
+- `test_clear_session`
+- `test_save_completed_label_fallback`
+- `test_revert_to_previous_step`
+
+**Ошибка**:
+```
+AttributeError: 'async_generator' object has no attribute 'get_or_create_session'
+```
+
+**Предупреждение**:
+```
+PytestDeprecationWarning: asyncio test 'test_get_or_create_session_new' 
+requested async @pytest.fixture 'session_manager' in strict mode.
+```
+
+### 🔍 Корневая Причина
+
+Фикстура `session_manager` была определена как `@pytest.fixture`, но использовалась в async тестах. Pytest не может правильно обработать async фикстуру без специального декоратора `@pytest_asyncio.fixture`.
+
+### ✅ Решение
+
+**Файл**: `/app/backend/tests/test_session_manager.py`
+
+**Изменение на строке 4-5**:
+```python
+# Добавлен импорт
+import pytest_asyncio
+```
+
+**Изменение на строке 20**:
+```python
+# Было:
+@pytest.fixture
+async def session_manager():
+
+# Стало:
+@pytest_asyncio.fixture
+async def session_manager():
+```
+
+### 🧪 Результаты Тестирования
+
+**До исправления**:
+```
+======================== 
+158 passed, 7 failed
+========================
+```
+
+**После исправления**:
+```bash
+pytest tests/test_session_manager.py -v
+```
+
+**Результат**:
+```
+========================
+7 passed in 3.67s
+========================
+```
+
+**Полное тестирование**:
+```bash
+pytest tests/ -v
+```
+
+**Результат**:
+```
+========================
+165 passed, 18 warnings in 5.04s
+========================
+```
+
+### 📊 Impact
+
+| Метрика | До | После |
+|---------|-----|-------|
+| Unit Tests Passing | 158/165 (95.8%) | 165/165 (100%) ✅ |
+| test_session_manager.py | 0/7 (0%) | 7/7 (100%) ✅ |
+
+### 🎯 Заключение
+
+**100% unit-тестов теперь проходят успешно!**
+
+Это повышает уверенность в:
+- Стабильности модуля управления сессиями
+- Корректности работы с MongoDB
+- Надежности async операций
+
