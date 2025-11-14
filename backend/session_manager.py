@@ -63,6 +63,9 @@ class SessionManager:
             dict: Сессия (существующая или новая)
         """
         try:
+            # Generate unique order_id for new sessions
+            order_id = generate_order_id(telegram_id=user_id)
+            
             # Атомарная операция: найти и обновить timestamp ИЛИ создать новую
             session = await self.sessions.find_one_and_update(
                 {"user_id": user_id},  # Фильтр
@@ -72,6 +75,7 @@ class SessionManager:
                     },
                     "$setOnInsert": {  # Только при создании нового документа
                         "user_id": user_id,
+                        "order_id": order_id,  # Unique order ID
                         "current_step": "START",
                         "temp_data": initial_data or {},
                         "created_at": datetime.now(timezone.utc)
