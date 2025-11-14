@@ -187,6 +187,8 @@ async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_T
         return ConversationHandler.END
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=False, require_session=True)
 async def handle_template_new_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Ask user to enter a new template name"""
     from server import TEMPLATE_NAME, safe_telegram_call, mark_message_as_selected
