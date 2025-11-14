@@ -6225,6 +6225,12 @@ async def get_topups(authenticated: bool = Depends(verify_admin_key)):
 
 app.include_router(api_router)
 
+# Include new modular routers
+from routers.webhooks import router as webhooks_router
+from routers.shipping import router as shipping_router
+app.include_router(webhooks_router, prefix="/api")
+app.include_router(shipping_router, prefix="/api")
+
 # Include admin routers (v1 and v2)
 from routers.admin_router import admin_router  # Legacy
 from routers.admin import admin_router_v2  # New modular
