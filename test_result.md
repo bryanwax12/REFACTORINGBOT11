@@ -2495,3 +2495,62 @@ Request Flow:
 2. **P2**: Load testing and monitoring setup
 3. **P3**: Documentation updates
 
+
+---
+
+## Integration Tests Refactoring - Phase 1
+**Date**: 2025-11-14
+**Agent**: Fork Agent (E1)
+
+### 🧪 Integration Tests Fixed
+
+#### test_order_flow_e2e.py: ✅ ALL PASSED (8/8 tests)
+
+**Changes Made**:
+1. Replaced `MagicMock` with `AsyncMock` for session operations
+2. Fixed `session_manager.update_session` → `session_manager.update_session_atomic`
+3. Fixed async `reply_text` mocks to return objects with `message_id` attribute
+4. Fixed `safe_telegram_call` mocks to return proper message objects
+
+**Tests Passing**:
+- ✅ test_new_order_flow_basic
+- ✅ test_template_order_flow
+- ✅ test_cancel_order_flow
+- ✅ test_data_confirmation_flow
+- ✅ test_payment_flow_sufficient_balance
+- ✅ test_missing_user_in_database
+- ✅ test_maintenance_mode_active
+- ✅ test_blocked_user_attempt
+
+#### Remaining Test Files (Need Similar Fixes):
+
+**test_payment_integration.py**: 2 PASSED, 6 FAILED
+- Issue: Wrong patch paths (e.g., `services.payment_service.find_user_by_telegram_id` should be `server.find_user_by_telegram_id`)
+- Similar AsyncMock issues
+- Status: Needs refactoring (same patterns as fixed tests)
+
+**test_simple_integration.py**: 7 PASSED, 5 FAILED
+- Partially working
+- Needs AsyncMock fixes for service tests
+
+**test_webhook_integration.py**: 4 PASSED, 4 FAILED  
+- External API integration tests failing
+- Need proper mocking of httpx/requests
+
+### 📊 Overall Integration Test Status:
+- **Total Tests**: 36
+- **Passing**: 21 (58%)
+- **Failing**: 15 (42%)
+- **Fixed in this session**: 8 tests (test_order_flow_e2e.py)
+
+### 🔧 Common Patterns Identified for Remaining Fixes:
+1. Replace `MagicMock()` → `AsyncMock()` for all async functions
+2. Fix patch paths: Use `server.function_name` instead of `services.module.function_name`
+3. Mock message objects with `message_id` attribute
+4. Mock external API calls properly (httpx.AsyncClient, requests)
+
+### ✅ Next Steps for Complete Integration Test Fix:
+1. Apply same fixes to test_payment_integration.py (6 tests)
+2. Fix test_simple_integration.py service tests (5 tests)
+3. Fix test_webhook_integration.py external API tests (4 tests)
+
