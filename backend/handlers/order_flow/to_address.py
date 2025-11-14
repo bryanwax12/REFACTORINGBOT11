@@ -26,7 +26,8 @@ from telegram.ext import ConversationHandler
 @safe_handler(fallback_state=ConversationHandler.END)
 @with_typing_action()
 @with_user_session(create_user=False, require_session=True)
-async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
+@with_services(session_service=True)
+async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE, session_service):
     """Step 8/13: Collect recipient name"""
     from server import sanitize_string, TO_NAME, TO_ADDRESS, STATE_NAMES
     
@@ -72,7 +73,8 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
 @safe_handler(fallback_state=ConversationHandler.END)
 @with_typing_action()
 @with_user_session(create_user=False, require_session=True)
-async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
+@with_services(session_service=True)
+async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE, session_service):
     """Step 9/13: Collect recipient street address"""
     from server import sanitize_string, TO_ADDRESS, TO_ADDRESS2, STATE_NAMES
     
@@ -118,7 +120,8 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
 @safe_handler(fallback_state=ConversationHandler.END)
 @with_typing_action()
 @with_user_session(create_user=False, require_session=True)
-async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
+@with_services(session_service=True)
+async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE, session_service):
     """Step 10/13: Collect recipient address line 2 (optional)"""
     from server import sanitize_string, TO_ADDRESS2, TO_CITY, STATE_NAMES
     
@@ -162,7 +165,8 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
 @safe_handler(fallback_state=ConversationHandler.END)
 @with_typing_action()
 @with_user_session(create_user=False, require_session=True)
-async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
+@with_services(session_service=True)
+async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE, session_service):
     """Step 11/13: Collect recipient city"""
     from server import sanitize_string, TO_CITY, TO_STATE, STATE_NAMES
     
@@ -208,7 +212,8 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
 @safe_handler(fallback_state=ConversationHandler.END)
 @with_typing_action()
 @with_user_session(create_user=False, require_session=True)
-async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
+@with_services(session_service=True)
+async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE, session_service):
     """Step 12/13: Collect recipient state"""
     from server import TO_STATE, TO_ZIP, STATE_NAMES
     
@@ -253,7 +258,8 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
 @safe_handler(fallback_state=ConversationHandler.END)
 @with_typing_action()
 @with_user_session(create_user=False, require_session=True)
-async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
+@with_services(session_service=True)
+async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, session_service):
     """Step 13/13: Collect recipient ZIP code"""
     from server import TO_ZIP, TO_PHONE, STATE_NAMES
     
@@ -299,7 +305,8 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
 @safe_handler(fallback_state=ConversationHandler.END)
 @with_typing_action()
 @with_user_session(create_user=False, require_session=True)
-async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
+@with_services(session_service=True)
+async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, session_service):
     """Step 14/13: Collect recipient phone (optional)"""
     from server import TO_PHONE, PARCEL_WEIGHT, STATE_NAMES
     

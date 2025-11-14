@@ -23,7 +23,8 @@ from telegram.ext import ConversationHandler
 @safe_handler(fallback_state=ConversationHandler.END)
 @with_typing_action()
 @with_user_session(create_user=False, require_session=True)
-async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE):
+@with_services(session_service=True)
+async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE, session_service):
     """Step 15/17: Collect parcel weight"""
     from server import PARCEL_WEIGHT, PARCEL_LENGTH, STATE_NAMES
     
@@ -68,7 +69,8 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
 @safe_handler(fallback_state=ConversationHandler.END)
 @with_typing_action()
 @with_user_session(create_user=False, require_session=True)
-async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE):
+@with_services(session_service=True)
+async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE, session_service):
     """Step 16/17: Collect parcel length"""
     from server import PARCEL_LENGTH, PARCEL_WIDTH, STATE_NAMES
     
@@ -113,7 +115,8 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
 @safe_handler(fallback_state=ConversationHandler.END)
 @with_typing_action()
 @with_user_session(create_user=False, require_session=True)
-async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE):
+@with_services(session_service=True)
+async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE, session_service):
     """Step 17/17: Collect parcel width"""
     from server import PARCEL_WIDTH, PARCEL_HEIGHT, STATE_NAMES
     
@@ -158,7 +161,8 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
 @safe_handler(fallback_state=ConversationHandler.END)
 @with_typing_action()
 @with_user_session(create_user=False, require_session=True)
-async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE):
+@with_services(session_service=True)
+async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE, session_service):
     """Step 18/17: Collect parcel height and calculate shipping rates"""
     from server import PARCEL_HEIGHT, CALCULATING_RATES, STATE_NAMES
     
