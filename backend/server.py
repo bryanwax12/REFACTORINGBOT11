@@ -2841,15 +2841,14 @@ async def create_and_send_label(order_id, telegram_id, message):
         
         logger.info(f"Purchasing label with rate_id: {selected_rate['rate_id']}")
         
-        # Profile label creation API call
+        # Profile label creation API call (now truly async!)
         api_start_time = time.perf_counter()
-        response = await asyncio.to_thread(
-            requests.post,
-            'https://api.shipstation.com/v2/labels',
-            headers=headers,
-            json=label_request,
-            timeout=30
-        )
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                'https://api.shipstation.com/v2/labels',
+                headers=headers,
+                json=label_request
+            )
         api_duration_ms = (time.perf_counter() - api_start_time) * 1000
         logger.info(f"⚡ ShipStation create label API took {api_duration_ms:.2f}ms")
         
