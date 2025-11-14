@@ -2825,7 +2825,10 @@ async def create_order_in_db(user, data, selected_rate, amount, discount_percent
 
 async def create_and_send_label(order_id, telegram_id, message):
     try:
-        order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+        # Get order using Repository Pattern
+        from repositories import get_repositories
+        repos = get_repositories()
+        order = await repos.orders.find_by_id(order_id)
         
         logger.info(f"Creating label for order {order_id}")
         
