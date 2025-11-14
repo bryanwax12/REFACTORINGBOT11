@@ -40,26 +40,31 @@
 
 ---
 
-### Phase 5: API Endpoints ✅ ЧАСТИЧНО ЗАВЕРШЕНО  
-- [x] User Management Endpoints:
-  - [x] `POST /users/{telegram_id}/block` → `UserRepository.block_user()`
-  - [x] `POST /users/{telegram_id}/unblock` → `UserRepository.unblock_user()`
-  - [x] `GET /users/{telegram_id}/details` → `UserRepository.find_by_telegram_id()`
-  - [x] `POST /users/{telegram_id}/invite-channel` → `UserRepository.find_by_telegram_id()`
-- [x] Order Endpoints:
-  - [x] `POST /orders` → `UserRepository.find_by_telegram_id()`
-- [x] Server.py Handlers:
-  - [x] `my_balance_command()` - 2 места обновлено
+### Phase 5: Server.py - Полный рефакторинг ✅ ЗАВЕРШЕНО
+- [x] **Все handlers и API endpoints**:
+  - [x] User Management Endpoints (block, unblock, details, invite, check-bot-access, channel-status)
+  - [x] Order Endpoints (create, search, export, get orders)
+  - [x] Refund Endpoint → `UserRepository.update_balance()` для возврата средств
+  - [x] Label Creation Handlers - error notifications
+  - [x] Top-up Handlers (3 функции)
+  - [x] Payment Flow Handlers
+  - [x] Template Update Handler
+  - [x] Shipping Rates Handler
+  - [x] Discount Management
+  - [x] Topups Listing
 
-**Результат**: Убрано ещё 10 обращений к `find_user_by_telegram_id()` и `db.users`
+**Результат**: 
+- ✅ **ВСЕ обращения к `find_user_by_telegram_id()`** заменены на Repository Pattern (18 обращений в server.py)
+- ✅ Прямое обновление баланса через `db.users.update_one()` заменено на `UserRepository.update_balance()`
+- ✅ 0 прямых обращений к БД для user operations в server.py
 
 ---
 
 ## 🔄 В работе
 
-### Осталось в server.py:
-- [ ] ~15 обращений в других handlers и API endpoints
-- [ ] Refund, label creation, order management endpoints
+### Осталось:
+- [ ] Admin handlers - статистические запросы (агрегации)
+- [ ] Некоторые обращения к `db.orders`, `db.payments` - можно заменить на OrderRepository/PaymentRepository
 
 ---
 
