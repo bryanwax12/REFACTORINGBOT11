@@ -3,6 +3,7 @@ Shipping Service Module
 Handles all shipping-related operations including rate calculations and label creation
 """
 import logging
+import httpx
 from typing import Optional, Dict, List, Any, Tuple
 from telegram import Update
 from telegram.ext import ContextTypes
