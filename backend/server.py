@@ -2497,11 +2497,14 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     # Restore order data to context
     context.user_data.update(pending_order)
     
-    user = await find_user_by_telegram_id(telegram_id)
+    # Get user balance using Repository Pattern
+    from repositories import get_user_repo
+    user_repo = get_user_repo()
+    user_balance = await user_repo.get_balance(telegram_id)
+    
     selected_rate = pending_order['selected_rate']
     logger.info(f"Selected rate keys: {selected_rate.keys()}")
     amount = pending_order.get('final_amount', selected_rate.get('amount', selected_rate.get('totalAmount', 0)))
-    user_balance = user.get('balance', 0)
     
     # Handle different rate structures - use correct keys
     carrier_name = selected_rate.get('carrier') or selected_rate.get('carrier_name') or selected_rate.get('carrierName', 'Unknown Carrier')
