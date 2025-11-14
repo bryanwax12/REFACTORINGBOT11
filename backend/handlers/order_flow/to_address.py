@@ -93,14 +93,14 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if bot_msg:
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
-        context.user_data['last_state'] = TO_ADDRESS2
+        context.user_data['last_state'] = STATE_NAMES[TO_ADDRESS2]
     
     return TO_ADDRESS2
 
 
 async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 10/13: Collect recipient address line 2 (optional)"""
-    from server import session_manager, sanitize_string, TO_ADDRESS2, TO_CITY
+    from server import session_manager, sanitize_string, TO_ADDRESS2, TO_CITY, STATE_NAMES
     
     address2 = update.message.text.strip()
     address2 = sanitize_string(address2, max_length=100)
