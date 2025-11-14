@@ -45,18 +45,18 @@ class TestPaymentIntegration:
         mock_find = AsyncMock(return_value=mock_user)
         mock_deduct = AsyncMock(return_value=(True, None))
             
-            # Process payment
-            success, new_balance, error = await process_balance_payment(
-                telegram_id=telegram_id,
-                amount=amount,
-                find_user_func=mock_find,
-                deduct_balance_func=mock_deduct
-            )
-            
-            # Verify: Payment successful
-            assert success is True
-            assert error is None
-            assert new_balance == 100.0 - amount
+        # Process payment
+        success, new_balance, error = await process_balance_payment(
+            telegram_id=telegram_id,
+            amount=amount,
+            find_user_func=mock_find,
+            deduct_balance_func=mock_deduct
+        )
+        
+        # Verify: Payment successful
+        assert success is True
+        assert error is None
+        assert new_balance == 100.0 - amount
     
     
     async def test_insufficient_balance_payment(
