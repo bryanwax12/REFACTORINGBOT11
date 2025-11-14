@@ -2991,11 +2991,10 @@ async def create_and_send_label(order_id, telegram_id, message):
         label_dict['original_amount'] = order.get('original_amount')  # ShipStation price
         await db.shipping_labels.insert_one(label_dict)
         
-        # Update order
-        await db.orders.update_one(
-            {"id": order_id},
-            {"$set": {"shipping_status": "label_created"}}
-        )
+        # Update order using Repository Pattern
+        from repositories import get_repositories
+        repos = get_repositories()
+        await repos.orders.update_by_id(order_id, {"shipping_status": "label_created"})
         
         # Send label to user
         if bot_instance:
