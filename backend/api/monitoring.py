@@ -16,14 +16,30 @@ router = APIRouter(prefix="/api/monitoring", tags=["monitoring"])
 async def health_check() -> Dict:
     """
     Basic health check endpoint
-    Returns service status and uptime
+    Returns service status, uptime and database connection status
     """
-    return {
+    from server import db
+    
+    health_status = {
         "status": "healthy",
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "service": "telegram-shipping-bot",
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "database": {}
     }
+    
+    # Check MongoDB connection
+    try:
+        await db.command('ping')
+        health_status["database"]["status"] = "healthy"
+        health_status["database"]["connected"] = True
+    except Exception as e:
+        health_status["database"]["status"] = "unhealthy"
+        health_status["database"]["connected"] = False
+        health_status["database"]["error"] = str(e)
+        health_status["status"] = "degraded"
+    
+    return health_status
 
 
 @router.get("/metrics")
