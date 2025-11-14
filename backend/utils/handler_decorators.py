@@ -540,22 +540,17 @@ def with_services(
             factory = get_service_factory()
             
             # Inject requested services
-            repos = get_repositories()
-            
-            # Create services
-            notification_svc = NotificationService(context.bot) if context.bot else None
+            if user_service:
+                kwargs['user_service'] = factory.get_user_service()
             
             if order_service:
-                kwargs['order_service'] = create_order_service(repos)
+                kwargs['order_service'] = factory.get_order_service()
             
-            if user_service:
-                kwargs['user_service'] = create_user_service(
-                    repos.users,
-                    notification_svc
-                )
+            if session_service:
+                kwargs['session_service'] = factory.get_session_service()
             
-            if inject_repos:
-                kwargs['repos'] = repos
+            if payment_service:
+                kwargs['payment_service'] = factory.get_payment_service()
             
             return await func(update, context, *args, **kwargs)
         
