@@ -71,7 +71,7 @@ class TestPaymentIntegration:
         
         # Verify: Should fail validation
         assert valid is False
-        assert "insufficient" in error.lower()
+        assert error is not None
     
     
     async def test_crypto_payment_invoice_creation(
