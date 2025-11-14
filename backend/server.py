@@ -6229,8 +6229,12 @@ app.include_router(api_router)
 # Include new modular routers
 from routers.webhooks import router as webhooks_router
 from routers.shipping import router as shipping_router
+from routers.orders import router as orders_router
+from routers.debug import router as debug_router
 app.include_router(webhooks_router, prefix="/api")
 app.include_router(shipping_router, prefix="/api")
+app.include_router(orders_router, prefix="/api")
+app.include_router(debug_router, prefix="/api")
 
 # Include admin routers (v1 and v2)
 from routers.admin_router import admin_router  # Legacy
