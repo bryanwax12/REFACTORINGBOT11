@@ -187,3 +187,367 @@ BENEFITS:
 - Reusability: Functions can be used across handlers
 - Maintainability: Changes to shipping logic isolated here
 """
+
+
+
+
+# ============================================================
+# FETCH SHIPPING RATES - HELPER FUNCTIONS
+# ============================================================
+
+async def validate_order_data_for_rates(order_data: Dict[str, Any]) -> Tuple[bool, List[str]]:
+    """
+    Validate order data before fetching rates
+    
+    Args:
+        order_data: Context user_data with order info
+    
+    Returns:
+        (is_valid, missing_fields_list)
+    """
+    required_fields = [
+        'from_name', 'from_street', 'from_city', 'from_state', 'from_zip',
+        'to_name', 'to_street', 'to_city', 'to_state', 'to_zip',
+        'weight'
+    ]
+    
+    missing_fields = [
+        field for field in required_fields
+        if not order_data.get(field) or order_data.get(field) == 'None' or order_data.get(field) == ''
+    ]
+    
+    return (len(missing_fields) == 0, missing_fields)
+
+
+def build_shipstation_rates_request(order_data: Dict[str, Any], carrier_ids: List[str]) -> Dict[str, Any]:
+    """
+    Build ShipStation V2 rate request payload
+    
+    Args:
+        order_data: Context user_data with order info
+        carrier_ids: List of carrier IDs to request rates from
+    
+    Returns:
+        ShipStation API request dictionary
+    """
+    return {
+        'rate_options': {
+            'carrier_ids': carrier_ids
+        },
+        'shipment': {
+            'ship_to': {
+                'name': order_data['to_name'],
+                'phone': order_data.get('to_phone') or '+15551234567',
+                'address_line1': order_data['to_street'],
+                'address_line2': order_data.get('to_street2', ''),
+                'city_locality': order_data['to_city'],
+                'state_province': order_data['to_state'],
+                'postal_code': order_data['to_zip'],
+                'country_code': 'US',
+                'address_residential_indicator': 'unknown'
+            },
+            'ship_from': {
+                'name': order_data['from_name'],
+                'phone': order_data.get('from_phone') or '+15551234567',
+                'address_line1': order_data['from_street'],
+                'address_line2': order_data.get('from_street2', ''),
+                'city_locality': order_data['from_city'],
+                'state_province': order_data['from_state'],
+                'postal_code': order_data['from_zip'],
+                'country_code': 'US'
+            },
+            'packages': [{
+                'weight': {
+                    'value': float(order_data['weight']),
+                    'unit': 'pound'
+                },
+                'dimensions': {
+                    'length': float(order_data.get('length', 10)),
+                    'width': float(order_data.get('width', 10)),
+                    'height': float(order_data.get('height', 10)),
+                    'unit': 'inch'
+                }
+            }]
+        }
+    }
+
+
+async def fetch_rates_from_shipstation(
+    rate_request: Dict[str, Any],
+    headers: Dict[str, str],
+    api_url: str,
+    timeout: int = 30
+) -> Tuple[bool, Optional[List[Dict]], Optional[str]]:
+    """
+    Make API call to ShipStation to fetch rates
+    
+    Args:
+        rate_request: Rate request payload
+        headers: API headers with auth
+        api_url: ShipStation API URL
+        timeout: Request timeout in seconds
+    
+    Returns:
+        (success, rates_list, error_message)
+    """
+    import requests
+    
+    try:
+        response = requests.post(
+            api_url,
+            json=rate_request,
+            headers=headers,
+            timeout=timeout
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            rates = data.get('rate_response', {}).get('rates', [])
+            
+            if not rates:
+                return False, None, "No rates returned from ShipStation"
+            
+            return True, rates, None
+            
+        else:
+            error_msg = f"ShipStation API error: {response.status_code} - {response.text}"
+            logger.error(error_msg)
+            return False, None, error_msg
+            
+    except requests.exceptions.Timeout:
+        return False, None, "Request timeout - ShipStation API took too long to respond"
+    except requests.exceptions.RequestException as e:
+        return False, None, f"Network error: {str(e)}"
+    except Exception as e:
+        return False, None, f"Unexpected error: {str(e)}"
+
+
+def filter_and_sort_rates(
+    rates: List[Dict],
+    excluded_carriers: Optional[List[str]] = None
+) -> List[Dict[str, Any]]:
+    """
+    Filter, format and sort shipping rates
+    
+    Args:
+        rates: Raw rates from ShipStation
+        excluded_carriers: List of carrier codes to exclude
+    
+    Returns:
+        Formatted and sorted rates list
+    """
+    if excluded_carriers is None:
+        excluded_carriers = []
+    
+    formatted_rates = []
+    
+    for rate in rates:
+        # Skip excluded carriers
+        carrier_code = rate.get('carrier_code', '').lower()
+        if carrier_code in excluded_carriers:
+            continue
+        
+        # Extract rate info
+        formatted_rate = {
+            'carrier': rate.get('carrier_friendly_name', rate.get('carrier_code', 'Unknown')),
+            'carrier_code': rate.get('carrier_code'),
+            'service': rate.get('service_type', 'Standard'),
+            'service_code': rate.get('service_code'),
+            'amount': float(rate.get('shipping_amount', {}).get('amount', 0)),
+            'days': rate.get('delivery_days'),
+            'carrier_delivery_days': rate.get('carrier_delivery_days'),
+            'guaranteed_service': rate.get('guaranteed_service', False),
+            'rate_id': rate.get('rate_id')
+        }
+        
+        formatted_rates.append(formatted_rate)
+    
+    # Sort by price (lowest first)
+    formatted_rates.sort(key=lambda x: x['amount'])
+    
+    return formatted_rates
+
+
+async def save_rates_to_cache_and_session(
+    rates: List[Dict],
+    order_data: Dict[str, Any],
+    user_id: int,
+    context,
+    shipstation_cache,
+    session_manager
+) -> None:
+    """
+    Save rates to cache and session
+    
+    Args:
+        rates: Formatted rates list
+        order_data: Order data for cache key
+        user_id: Telegram user ID
+        context: Telegram context
+        shipstation_cache: Cache instance
+        session_manager: Session manager instance
+    """
+    from datetime import datetime, timezone
+    
+    # Save to cache
+    shipstation_cache.set(
+        from_zip=order_data['from_zip'],
+        to_zip=order_data['to_zip'],
+        weight=order_data['weight'],
+        length=order_data.get('length', 10),
+        width=order_data.get('width', 10),
+        height=order_data.get('height', 10),
+        rates=rates
+    )
+    
+    # Save to session
+    await session_manager.update_session_atomic(user_id, data={
+        'rates': rates,
+        'cached': False,
+        'fetch_timestamp': datetime.now(timezone.utc).isoformat()
+    })
+    
+    # Store in context
+    context.user_data['rates'] = rates
+
+
+# ============================================================
+# CREATE AND SEND LABEL - HELPER FUNCTIONS
+# ============================================================
+
+def build_shipstation_label_request(
+    order: Dict[str, Any],
+    selected_rate: Dict[str, Any]
+) -> Dict[str, Any]:
+    """
+    Build ShipStation label creation request
+    
+    Args:
+        order: Order data from database
+        selected_rate: Selected shipping rate
+    
+    Returns:
+        ShipStation API request dictionary
+    """
+    from datetime import datetime, timezone
+    
+    return {
+        'shipment': {
+            'service_code': selected_rate.get('service_code'),
+            'carrier_id': selected_rate.get('carrier_id'),
+            'ship_to': {
+                'name': order.get('to_name'),
+                'phone': order.get('to_phone', '+15551234567'),
+                'address_line1': order.get('to_street'),
+                'address_line2': order.get('to_street2', ''),
+                'city_locality': order.get('to_city'),
+                'state_province': order.get('to_state'),
+                'postal_code': order.get('to_zip'),
+                'country_code': 'US'
+            },
+            'ship_from': {
+                'name': order.get('from_name'),
+                'phone': order.get('from_phone', '+15551234567'),
+                'address_line1': order.get('from_street'),
+                'address_line2': order.get('from_street2', ''),
+                'city_locality': order.get('from_city'),
+                'state_province': order.get('from_state'),
+                'postal_code': order.get('from_zip'),
+                'country_code': 'US'
+            },
+            'packages': [{
+                'weight': {
+                    'value': float(order.get('weight', 1)),
+                    'unit': 'pound'
+                },
+                'dimensions': {
+                    'length': float(order.get('length', 10)),
+                    'width': float(order.get('width', 10)),
+                    'height': float(order.get('height', 10)),
+                    'unit': 'inch'
+                }
+            }]
+        },
+        'label_format': 'pdf',
+        'label_download_type': 'url'
+    }
+
+
+async def download_label_pdf(label_url: str, timeout: int = 30) -> Tuple[bool, Optional[bytes], Optional[str]]:
+    """
+    Download label PDF from URL
+    
+    Args:
+        label_url: URL to download PDF from
+        timeout: Request timeout
+    
+    Returns:
+        (success, pdf_bytes, error_message)
+    """
+    import requests
+    
+    try:
+        response = requests.get(label_url, timeout=timeout)
+        
+        if response.status_code == 200:
+            return True, response.content, None
+        else:
+            return False, None, f"Failed to download label: HTTP {response.status_code}"
+            
+    except requests.exceptions.Timeout:
+        return False, None, "Timeout downloading label"
+    except Exception as e:
+        return False, None, f"Error downloading label: {str(e)}"
+
+
+async def send_label_to_user(
+    bot_instance,
+    telegram_id: int,
+    pdf_bytes: bytes,
+    order_id: str,
+    tracking_number: str,
+    carrier: str,
+    safe_telegram_call_func
+) -> Tuple[bool, Optional[str]]:
+    """
+    Send label PDF to user via Telegram
+    
+    Args:
+        bot_instance: Telegram bot instance
+        telegram_id: User's telegram ID
+        pdf_bytes: PDF file content
+        order_id: Order ID
+        tracking_number: Tracking number
+        carrier: Carrier name
+        safe_telegram_call_func: Safe telegram call wrapper
+    
+    Returns:
+        (success, error_message)
+    """
+    import io
+    
+    try:
+        # Create file-like object
+        pdf_file = io.BytesIO(pdf_bytes)
+        pdf_file.name = f"label_{order_id[:8]}.pdf"
+        
+        # Caption message
+        caption = f"""✅ Shipping Label
+
+Order: #{order_id[:8]}
+Carrier: {carrier}
+Tracking: {tracking_number}"""
+        
+        # Send document
+        await safe_telegram_call_func(
+            bot_instance.send_document(
+                chat_id=telegram_id,
+                document=pdf_file,
+                caption=caption
+            )
+        )
+        
+        return True, None
+        
+    except Exception as e:
+        return False, f"Error sending label: {str(e)}"
