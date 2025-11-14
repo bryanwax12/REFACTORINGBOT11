@@ -226,14 +226,19 @@ class TestExternalAPIIntegration:
         """
         from services.shipping_service import fetch_rates_from_shipstation, build_shipstation_rates_request
         
-        request_data = build_shipstation_rates_request(sample_order_data)
+        sample_order_data['weight'] = 5.5
+        carrier_ids = ["se-123456"]
+        request_data = build_shipstation_rates_request(sample_order_data, carrier_ids)
         
-        with patch('aiohttp.ClientSession.post') as mock_post:
+        with patch('httpx.AsyncClient') as mock_client:
             # Simulate 500 error
             mock_response = AsyncMock()
-            mock_response.status = 500
-            mock_response.text = AsyncMock(return_value="Internal Server Error")
-            mock_post.return_value.__aenter__.return_value = mock_response
+            mock_response.status_code = 500
+            mock_response.text = "Internal Server Error"
+            
+            mock_client_instance = AsyncMock()
+            mock_client_instance.post = AsyncMock(return_value=mock_response)
+            mock_client.return_value.__aenter__.return_value = mock_client_instance
             
             success, rates, error = await fetch_rates_from_shipstation(
                 request_data,
