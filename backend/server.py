@@ -2116,7 +2116,9 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         
         # Notify admin about rate fetch error
         telegram_id = query.from_user.id
-        user = await find_user_by_telegram_id(telegram_id)
+        from repositories import get_user_repo
+        user_repo = get_user_repo()
+        user = await user_repo.find_by_telegram_id(telegram_id)
         if user:
             await notify_admin_error(
                 user_info=user,
