@@ -4,7 +4,7 @@ Tests all 19 functions in services/shipping_service_new.py
 """
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
-from services.shipping_service_new import (
+from services.shipping_service import (
     validate_order_data_for_rates,
     build_shipstation_rates_request,
     fetch_rates_from_shipstation,
