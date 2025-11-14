@@ -89,7 +89,8 @@ async def skip_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE)
         update, context,
         field_name='from_street2',
         field_value=None,
-        next_step='FROM_CITY',
+        next_step_const=FROM_CITY,
+        next_step_name='FROM_CITY',
         next_message=OrderStepMessages.FROM_CITY
     )
 
@@ -103,7 +104,8 @@ async def skip_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
         update, context,
         field_name='to_street2',
         field_value=None,
-        next_step='TO_CITY',
+        next_step_const=TO_CITY,
+        next_step_name='TO_CITY',
         next_message=OrderStepMessages.TO_CITY
     )
 
@@ -120,7 +122,8 @@ async def skip_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         update, context,
         field_name='from_phone',
         field_value=random_phone,
-        next_step='TO_NAME',
+        next_step_const=TO_NAME,
+        next_step_name='TO_NAME',
         next_message=OrderStepMessages.TO_NAME
     )
 
@@ -137,6 +140,7 @@ async def skip_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         update, context,
         field_name='to_phone',
         field_value=random_phone,
-        next_step='PARCEL_WEIGHT',
+        next_step_const=PARCEL_WEIGHT,
+        next_step_name='PARCEL_WEIGHT',
         next_message=OrderStepMessages.PARCEL_WEIGHT
     )
