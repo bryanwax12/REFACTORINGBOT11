@@ -3332,7 +3332,11 @@ async def create_order(order_data: OrderCreate):
         
         order_dict = order.model_dump()
         order_dict['created_at'] = order_dict['created_at'].isoformat()
-        await db.orders.insert_one(order_dict)
+        
+        # Insert order using Repository Pattern
+        from repositories import get_repositories
+        repos = get_repositories()
+        await repos.orders.collection.insert_one(order_dict)
         
         # Create crypto payment invoice - DISABLED (crypto variable not defined, legacy code)
         # if crypto:
