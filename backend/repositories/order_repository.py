@@ -45,12 +45,24 @@ class OrderRepository(BaseRepository):
         
         return await self.insert_one(order_data)
     
-    async def find_by_order_id(self, order_id: str) -> Optional[Dict]:
+    async def find_by_id(self, order_id: str) -> Optional[Dict]:
         """
-        Найти заказ по order_id
+        Найти заказ по UUID id
         
         Args:
-            order_id: ID заказа
+            order_id: UUID заказа (поле 'id' в БД)
+            
+        Returns:
+            Документ заказа или None
+        """
+        return await self.find_one({"id": order_id})
+    
+    async def find_by_order_id(self, order_id: str) -> Optional[Dict]:
+        """
+        Найти заказ по order_id (tracking ID)
+        
+        Args:
+            order_id: ID заказа (поле 'order_id' в БД)
             
         Returns:
             Документ заказа или None
