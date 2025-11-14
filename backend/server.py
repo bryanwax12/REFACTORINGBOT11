@@ -852,11 +852,15 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
         telegram_id = query.from_user.id
         
         # Load message context from database if this is a callback from payment screen
-        payment_record = await db.payments.find_one(
+        from repositories import get_repositories
+        repos = get_repositories()
+        # Get latest pending topup payment
+        pending_payments = await repos.payments.find_many(
             {"telegram_id": telegram_id, "type": "topup", "status": "pending"},
-            {"_id": 0},
-            sort=[("created_at", -1)]  # Get latest pending payment
+            sort=[("created_at", -1)],
+            limit=1
         )
+        payment_record = pending_payments[0] if pending_payments else None
         
         logger.info(f"Payment record found: {payment_record is not None}")
         if payment_record and payment_record.get('payment_message_id'):
