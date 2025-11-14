@@ -61,8 +61,8 @@ class TestOrderFlowE2E:
         mock_update_message.message.reply_text = AsyncMock()
         mock_update_message.effective_user = mock_update_callback.effective_user
         
-        with patch('handlers.order_flow.from_address.safe_telegram_call') as mock_safe_call, \
-             patch('handlers.order_flow.from_address.session_manager') as mock_session:
+        with patch('server.safe_telegram_call') as mock_safe_call, \
+             patch('server.session_manager') as mock_session:
             
             mock_safe_call.side_effect = lambda x: x
             mock_session.update_session = AsyncMock()
