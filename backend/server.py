@@ -5810,11 +5810,8 @@ async def set_user_discount(telegram_id: int, discount: float):
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
-        # Update discount
-        await db.users.update_one(
-            {"telegram_id": telegram_id},
-            {"$set": {"discount": discount}}
-        )
+        # Update discount using Repository Pattern
+        await user_repo.update_user_field(telegram_id, "discount", discount)
         
         # Notify user if bot is available and discount is set
         if bot_instance and discount > 0:
