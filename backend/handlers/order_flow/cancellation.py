@@ -64,7 +64,8 @@ async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 @safe_handler(fallback_state=ConversationHandler.END)
 @with_user_session(create_user=False, require_session=True)
-async def confirm_cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
+@with_services(session_service=True)
+async def confirm_cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE, session_service):
     """Confirm order cancellation"""
     from server import safe_telegram_call, mark_message_as_selected
     from repositories.session_repository import SessionRepository
