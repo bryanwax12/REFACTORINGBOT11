@@ -182,6 +182,196 @@ def with_typing_action():
 
 
 # ============================================================
+# REPOSITORY DECORATORS (New Phase 3)
+# ============================================================
+
+def with_user_check(create_if_missing=True):
+    """
+    Decorator to ensure user exists in database
+    
+    Automatically creates user if missing (optional)
+    Injects user object into context.user_data['db_user']
+    
+    Usage:
+        @with_user_check(create_if_missing=True)
+        async def my_handler(update, context):
+            user = context.user_data['db_user']
+            # User guaranteed to exist
+    """
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
+            from repositories import get_user_repo
+            
+            user_id = update.effective_user.id
+            username = update.effective_user.username
+            first_name = update.effective_user.first_name
+            last_name = update.effective_user.last_name
+            
+            user_repo = get_user_repo()
+            
+            if create_if_missing:
+                # Get or create user
+                user = await user_repo.get_or_create_user(
+                    telegram_id=user_id,
+                    username=username,
+                    first_name=first_name,
+                    last_name=last_name
+                )
+            else:
+                # Just find
+                user = await user_repo.find_by_telegram_id(user_id)
+                
+                if not user:
+                    logger.warning(f"⚠️ User {user_id} not found in database")
+                    if update.message:
+                        await update.message.reply_text("❌ Пользователь не найден. Используйте /start")
+                    return ConversationHandler.END
+            
+            # Store in context
+            context.user_data['db_user'] = user
+            
+            return await func(update, context, *args, **kwargs)
+        
+        return wrapper
+    return decorator
+
+
+def with_session(session_type="conversation", create_if_missing=True):
+    """
+    Decorator to ensure session exists using SessionRepository
+    
+    Injects session into context.user_data['session']
+    
+    Usage:
+        @with_session(session_type="order")
+        async def order_handler(update, context):
+            session = context.user_data['session']
+            # Session guaranteed to exist
+    """
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
+            from repositories import get_session_repo
+            
+            user_id = update.effective_user.id
+            session_repo = get_session_repo()
+            
+            if create_if_missing:
+                session = await session_repo.get_or_create_session(user_id, session_type)
+            else:
+                session = await session_repo.get_session(user_id, session_type)
+                
+                if not session:
+                    logger.warning(f"⚠️ Session not found for user {user_id}, type {session_type}")
+                    if update.message:
+                        await update.message.reply_text("❌ Сессия истекла. Используйте /start")
+                    return ConversationHandler.END
+            
+            # Store in context
+            context.user_data['session'] = session
+            
+            return await func(update, context, *args, **kwargs)
+        
+        return wrapper
+    return decorator
+
+
+def with_logging(log_level=logging.INFO):
+    """
+    Decorator to log handler execution
+    
+    Logs:
+    - Handler entry with user info
+    - Handler exit with result
+    - Execution time
+    
+    Usage:
+        @with_logging(log_level=logging.INFO)
+        async def my_handler(update, context):
+            ...
+    """
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
+            import time
+            
+            handler_name = func.__name__
+            user_id = update.effective_user.id if update.effective_user else "Unknown"
+            
+            # Log entry
+            logger.log(
+                log_level,
+                f"▶️ Handler '{handler_name}' START (user_id={user_id})"
+            )
+            
+            start_time = time.perf_counter()
+            
+            try:
+                result = await func(update, context, *args, **kwargs)
+                elapsed = time.perf_counter() - start_time
+                
+                # Log exit
+                logger.log(
+                    log_level,
+                    f"✅ Handler '{handler_name}' END (user_id={user_id}, time={elapsed:.2f}s, result={result})"
+                )
+                
+                return result
+                
+            except Exception as e:
+                elapsed = time.perf_counter() - start_time
+                
+                logger.log(
+                    log_level,
+                    f"❌ Handler '{handler_name}' ERROR (user_id={user_id}, time={elapsed:.2f}s, error={e})"
+                )
+                
+                raise
+        
+        return wrapper
+    return decorator
+
+
+def with_admin_check(send_error_message=True):
+    """
+    Decorator to ensure user is admin
+    
+    Checks is_admin flag in database
+    
+    Usage:
+        @with_admin_check()
+        async def admin_handler(update, context):
+            # Only admins can reach here
+    """
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
+            from repositories import get_user_repo
+            
+            user_id = update.effective_user.id
+            user_repo = get_user_repo()
+            
+            is_admin = await user_repo.is_admin(user_id)
+            
+            if not is_admin:
+                logger.warning(f"⚠️ Non-admin user {user_id} attempted to access admin handler '{func.__name__}'")
+                
+                if send_error_message:
+                    if update.message:
+                        await update.message.reply_text("❌ У вас нет прав для этой команды")
+                    elif update.callback_query:
+                        await update.callback_query.answer("❌ Нет прав", show_alert=True)
+                
+                return ConversationHandler.END
+            
+            return await func(update, context, *args, **kwargs)
+        
+        return wrapper
+    return decorator
+
+
+# ============================================================
 # COMBINED DECORATORS
 # ============================================================
 
