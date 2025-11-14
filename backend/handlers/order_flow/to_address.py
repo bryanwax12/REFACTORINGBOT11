@@ -23,10 +23,14 @@ from telegram.ext import ConversationHandler
 # TO ADDRESS HANDLERS (7 steps)
 # ============================================================
 
-@with_typing_indicator
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_typing_action()
+@with_user_session(create_user=False, require_session=True)
 async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 8/13: Collect recipient name"""
-    from server import session_manager, sanitize_string, TO_NAME, TO_ADDRESS, with_typing_indicator, STATE_NAMES
+    from server import sanitize_string, TO_NAME, TO_ADDRESS, STATE_NAMES
+    from repositories.session_repository import SessionRepository
+    from server import db
     
     name = update.message.text.strip()
     name = sanitize_string(name, max_length=50)
