@@ -495,3 +495,145 @@ async def continue_order(update, context):
     session = context.user_data['session']
     ...
 """
+
+
+# ============================================================
+# SERVICE LAYER DECORATORS (Phase 1 Integration)
+# ============================================================
+
+def with_services(
+    order_service=True,
+    user_service=True,
+    inject_repos=False
+):
+    """
+    Decorator to inject services into handler
+    
+    Automatically provides:
+    - OrderService instance
+    - UserService instance
+    - Repositories (optional)
+    
+    Services are passed as keyword arguments to handler
+    
+    Usage:
+        @with_services(order_service=True, user_service=True)
+        async def my_handler(update, context, order_service, user_service):
+            # Services ready to use
+            user = await user_service.get_user(telegram_id)
+            order = await order_service.get_order(order_id)
+    
+    Args:
+        order_service: Inject OrderService
+        user_service: Inject UserService  
+        inject_repos: Also inject repositories
+    """
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
+            from repositories import get_repositories
+            from services.order_service import create_order_service
+            from services.user_service import create_user_service
+            from services.notification_service import NotificationService
+            
+            # Get repositories
+            repos = get_repositories()
+            
+            # Create services
+            notification_svc = NotificationService(context.bot) if context.bot else None
+            
+            if order_service:
+                kwargs['order_service'] = create_order_service(repos)
+            
+            if user_service:
+                kwargs['user_service'] = create_user_service(
+                    repos.users,
+                    notification_svc
+                )
+            
+            if inject_repos:
+                kwargs['repos'] = repos
+            
+            return await func(update, context, *args, **kwargs)
+        
+        return wrapper
+    return decorator
+
+
+def with_user_session(create_user=True, require_session=False):
+    """
+    Combined decorator for user + session management
+    
+    Provides both user and session in one decorator
+    Replaces common pattern of checking user + session
+    
+    Usage:
+        @with_user_session(create_user=True, require_session=True)
+        async def order_handler(update, context):
+            user = context.user_data['db_user']
+            session = context.user_data['session']
+            # Both guaranteed to exist
+    
+    Args:
+        create_user: Create user if missing
+        require_session: Require session to exist
+    """
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
+            from repositories import get_user_repo
+            from repositories.session_repository import SessionRepository
+            from server import db
+            
+            user_id = update.effective_user.id
+            username = update.effective_user.username
+            first_name = update.effective_user.first_name
+            
+            user_repo = get_user_repo()
+            session_repo = SessionRepository(db)
+            
+            # Handle user
+            if create_user:
+                user = await user_repo.get_or_create_user(
+                    telegram_id=user_id,
+                    username=username,
+                    first_name=first_name
+                )
+            else:
+                user = await user_repo.find_by_telegram_id(user_id)
+                
+                if not user:
+                    if update.message:
+                        await update.message.reply_text("❌ Пользователь не найден. Используйте /start")
+                    return ConversationHandler.END
+            
+            # Check if blocked
+            if user.get('blocked', False):
+                if update.message:
+                    await update.message.reply_text("❌ Вы заблокированы")
+                return ConversationHandler.END
+            
+            context.user_data['db_user'] = user
+            
+            # Handle session
+            session = await session_repo.get_session(user_id)
+            
+            if require_session and not session:
+                logger.warning(f"⚠️ Session required but missing for user {user_id}")
+                if update.message:
+                    await update.message.reply_text("⚠️ Сессия истекла. Используйте /start")
+                return ConversationHandler.END
+            
+            if not session:
+                session = await session_repo.create_session(
+                    user_id,
+                    session_type="conversation"
+                )
+            
+            context.user_data['session'] = session
+            
+            return await func(update, context, *args, **kwargs)
+        
+        return wrapper
+    return decorator
+
