@@ -6036,8 +6036,9 @@ from routers.admin import admin_router_v2  # New modular
 app.include_router(admin_router)  # Keep for backward compatibility
 app.include_router(admin_router_v2)  # New modular admin API
 
-# Include monitoring router
-from api.monitoring import router as monitoring_router
+# Include monitoring routers
+from api.monitoring import router as monitoring_router_old
+from routers.monitoring_router import router as monitoring_router
 app.include_router(monitoring_router)
 
 # Include alerting router
