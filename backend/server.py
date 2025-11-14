@@ -3629,7 +3629,9 @@ async def get_order(order_id: str):
 @api_router.post("/shipping/create-label")
 async def create_shipping_label(order_id: str):
     try:
-        order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+        from repositories import get_repositories
+        repos = get_repositories()
+        order = await repos.orders.find_by_id(order_id)
         if not order:
             raise HTTPException(status_code=404, detail="Order not found")
         
