@@ -3079,6 +3079,8 @@ async def create_and_send_label(order_id, telegram_id, message):
                         thank_you_msg = "Спасибо за использование нашего сервиса!"
                     
                     # Send label as document
+                    from utils.ui_utils import LabelCreationUI
+                    
                     message_text = f"""✅ Shipping Label создан!
 
 Order: #{order_id[:8]}
