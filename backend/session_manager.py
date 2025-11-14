@@ -5,6 +5,7 @@ MongoDB-optimized with atomic operations and TTL index
 from datetime import datetime, timezone, timedelta
 import logging
 from typing import Optional, Dict, Any
+from utils.order_utils import generate_order_id
 
 logger = logging.getLogger(__name__)
 
