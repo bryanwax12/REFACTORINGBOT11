@@ -43,8 +43,6 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     - Typing indicator
     """
     from server import SecurityLogger, sanitize_string, FROM_NAME, FROM_ADDRESS, STATE_NAMES
-    from repositories.session_repository import SessionRepository
-    from server import db
     
     logger.info(f"🔵 order_from_name - User: {update.effective_user.id}")
     
