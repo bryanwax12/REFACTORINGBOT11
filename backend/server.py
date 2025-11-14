@@ -6172,20 +6172,25 @@ async def startup_event():
                 allow_reentry=True
             )
             
-            order_conv_handler = ConversationHandler(
-                entry_points=[
-                    CallbackQueryHandler(new_order_start, pattern='^new_order$'),
-                    CallbackQueryHandler(start_order_with_template, pattern='^start_order_with_template$'),
-                    CallbackQueryHandler(return_to_payment_after_topup, pattern='^return_to_payment$')
-                ],
-                states={
-                    FROM_NAME: [
-                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_name),
-                        CallbackQueryHandler(order_new, pattern='^order_new$'),
-                        CallbackQueryHandler(order_from_template_list, pattern='^order_from_template$'),
-                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
-                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
-                    ],
+            # Import order conversation handler from modular setup
+            from handlers.order_flow.conversation_setup import setup_order_conversation_handler
+            order_conv_handler = setup_order_conversation_handler()
+            
+            # Old conversation handler definition replaced with modular setup above
+            # order_conv_handler = ConversationHandler(
+            #     entry_points=[
+            #         CallbackQueryHandler(new_order_start, pattern='^new_order$'),
+            #         CallbackQueryHandler(start_order_with_template, pattern='^start_order_with_template$'),
+            #         CallbackQueryHandler(return_to_payment_after_topup, pattern='^return_to_payment$')
+            #     ],
+            #     states={
+            #         FROM_NAME: [
+            #             MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_name),
+            #             CallbackQueryHandler(order_new, pattern='^order_new$'),
+            #             CallbackQueryHandler(order_from_template_list, pattern='^order_from_template$'),
+            #             CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
+            #             CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
+            #         ],
                     FROM_ADDRESS: [
                         MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_address),
                         CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
