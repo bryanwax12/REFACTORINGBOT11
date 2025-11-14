@@ -159,7 +159,9 @@ async def find_user_templates(telegram_id: int, limit: int = 10):
 @profile_db_query("update_order")
 async def update_order(order_id: str, update_data: dict):
     """Профилируемое обновление заказа"""
-    return await db.orders.update_one({"id": order_id}, {"$set": update_data})
+    from repositories import get_repositories
+    repos = get_repositories()
+    return await repos.orders.update_by_id(order_id, update_data)
 
 @profile_db_query("insert_payment")
 async def insert_payment(payment_dict: dict):
