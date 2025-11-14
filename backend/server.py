@@ -3815,19 +3815,16 @@ async def refund_order(order_id: str, refund_reason: Optional[str] = None):
         )
         logger.info(f"Updated all labels for order {order_id} to status='refunded'")
         
-        # Get user
-        user = await find_user_by_telegram_id(order["telegram_id"])
+        # Get user and refund using Repository Pattern
+        from repositories import get_user_repo
+        user_repo = get_user_repo()
+        user = await user_repo.find_by_telegram_id(order["telegram_id"])
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
         # Return amount to user balance
         refund_amount = order['amount']
-        new_balance = user.get('balance', 0) + refund_amount
-        
-        await db.users.update_one(
-            {"telegram_id": order['telegram_id']},
-            {"$set": {"balance": new_balance}}
-        )
+        await user_repo.update_balance(order['telegram_id'], refund_amount, operation="add")
         
         # Update order status
         await db.orders.update_one(
