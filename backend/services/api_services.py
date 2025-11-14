@@ -154,6 +154,7 @@ async def check_shipstation_balance():
         return {"success": False, "error": str(e)}
 
 
+@retry_on_api_error(max_attempts=2, min_wait=1, max_wait=5)
 async def get_shipstation_carrier_ids():
     """
     Get carrier IDs from ShipStation
