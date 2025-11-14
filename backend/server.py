@@ -5494,7 +5494,10 @@ async def check_user_channel_status(telegram_id: int, authenticated: bool = Depe
         if not bot_instance:
             raise HTTPException(status_code=500, detail="Bot not initialized")
         
-        user = await find_user_by_telegram_id(telegram_id)
+        # Check if user exists using Repository Pattern
+        from repositories import get_user_repo
+        user_repo = get_user_repo()
+        user = await user_repo.find_by_telegram_id(telegram_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
