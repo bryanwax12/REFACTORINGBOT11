@@ -107,9 +107,9 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
 async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Update existing template with current order data"""
     from server import (
-        db, safe_telegram_call, mark_message_as_selected,
-        find_user_by_telegram_id
+        db, safe_telegram_call, mark_message_as_selected
     )
+    from repositories import get_user_repo
     
     query = update.callback_query
     await safe_telegram_call(query.answer())
@@ -120,8 +120,9 @@ async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_T
     template_id = query.data.replace('template_update_', '')
     telegram_id = query.from_user.id
     
-    # Get user
-    user = await find_user_by_telegram_id(telegram_id)
+    # Check if user exists using Repository Pattern
+    user_repo = get_user_repo()
+    user = await user_repo.find_by_telegram_id(telegram_id)
     if not user:
         await safe_telegram_call(query.message.reply_text("❌ Ошибка: пользователь не найден"))
         return ConversationHandler.END
