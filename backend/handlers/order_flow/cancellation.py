@@ -9,7 +9,11 @@ from telegram.ext import ContextTypes, ConversationHandler
 
 logger = logging.getLogger(__name__)
 
+from utils.handler_decorators import with_user_session, safe_handler
 
+
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=False, require_session=True)
 async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Show cancellation confirmation"""
     from server import (
