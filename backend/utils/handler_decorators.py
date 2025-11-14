@@ -379,32 +379,60 @@ def robust_handler(
     fallback_state=ConversationHandler.END,
     error_message="❌ Произошла ошибка. Попробуйте позже.",
     track_performance=True,
-    show_typing=True
+    show_typing=True,
+    require_user=True,
+    require_session=False,
+    session_type="conversation",
+    enable_logging=False
 ):
     """
-    All-in-one decorator combining multiple protections
+    All-in-one decorator combining multiple protections (Phase 3 Enhanced)
     
     Features:
     - Error handling
     - Performance tracking
     - Typing indicator
+    - User check (from DB)
     - Session validation (optional)
+    - Automatic logging (optional)
     
     Usage:
-        @robust_handler(fallback_state=CONFIRM_DATA)
+        @robust_handler(
+            fallback_state=CONFIRM_DATA,
+            require_user=True,
+            require_session=True,
+            session_type="order"
+        )
         async def my_handler(update, context):
+            user = context.user_data['db_user']  # Auto-injected
+            session = context.user_data['session']  # Auto-injected
             ...
     """
     def decorator(func):
         # Apply decorators in reverse order (inside-out)
         wrapped = func
         
+        # Session check (innermost if enabled)
+        if require_session:
+            wrapped = with_session(session_type=session_type)(wrapped)
+        
+        # User check
+        if require_user:
+            wrapped = with_user_check(create_if_missing=True)(wrapped)
+        
+        # Logging
+        if enable_logging:
+            wrapped = with_logging(log_level=logging.INFO)(wrapped)
+        
+        # Typing action
         if show_typing:
             wrapped = with_typing_action()(wrapped)
         
+        # Performance tracking
         if track_performance:
             wrapped = track_handler_performance(threshold_seconds=2.0)(wrapped)
         
+        # Error handling (outermost)
         wrapped = safe_handler(fallback_state, error_message)(wrapped)
         
         return wrapped
