@@ -60,11 +60,26 @@
 
 ---
 
+### Phase 6: OrderRepository Integration ✅ НАЧАТО
+- [x] **Методы добавлены**:
+  - [x] `find_by_id()` - поиск по UUID
+  - [x] `update_by_id()` - обновление по UUID
+- [x] **Обращения заменены**:
+  - [x] `handle_create_label_request()` - поиск заказа
+  - [x] Label creation success handler - обновление статуса
+  - [x] `create_and_send_label()` - поиск и обновление
+  - [x] API endpoint `/orders` - создание заказа
+  
+**Результат**: 6 обращений к `db.orders` заменено на OrderRepository
+
+---
+
 ## 🔄 В работе
 
 ### Осталось:
+- [ ] ~27 обращений к `db.orders` в server.py (find, update, count, aggregate)
 - [ ] Admin handlers - статистические запросы (агрегации)
-- [ ] Некоторые обращения к `db.orders`, `db.payments` - можно заменить на OrderRepository/PaymentRepository
+- [ ] Обращения к `db.payments`, `db.shipping_labels` - можно заменить на PaymentRepository
 
 ---
 
