@@ -40,7 +40,26 @@
 
 ---
 
+### Phase 5: API Endpoints ✅ ЧАСТИЧНО ЗАВЕРШЕНО  
+- [x] User Management Endpoints:
+  - [x] `POST /users/{telegram_id}/block` → `UserRepository.block_user()`
+  - [x] `POST /users/{telegram_id}/unblock` → `UserRepository.unblock_user()`
+  - [x] `GET /users/{telegram_id}/details` → `UserRepository.find_by_telegram_id()`
+  - [x] `POST /users/{telegram_id}/invite-channel` → `UserRepository.find_by_telegram_id()`
+- [x] Order Endpoints:
+  - [x] `POST /orders` → `UserRepository.find_by_telegram_id()`
+- [x] Server.py Handlers:
+  - [x] `my_balance_command()` - 2 места обновлено
+
+**Результат**: Убрано ещё 10 обращений к `find_user_by_telegram_id()` и `db.users`
+
+---
+
 ## 🔄 В работе
+
+### Осталось в server.py:
+- [ ] ~15 обращений в других handlers и API endpoints
+- [ ] Refund, label creation, order management endpoints
 
 ---
 
