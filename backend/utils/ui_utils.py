@@ -1078,3 +1078,108 @@ class DataConfirmationUI:
             [InlineKeyboardButton("◀️ Назад", callback_data='back_to_confirmation')]
         ]
         return InlineKeyboardMarkup(keyboard)
+
+
+
+# ============================================================
+# PAYMENT FLOW UI COMPONENTS
+# ============================================================
+
+class PaymentFlowUI:
+    """UI components for payment and balance management"""
+    
+    @staticmethod
+    def balance_screen(balance: float) -> str:
+        """Display current balance with topup prompt"""
+        return f"""*💳 Ваш баланс: ${balance:.2f}*
+
+*Вы можете использовать баланс для оплаты заказов.*
+
+*Введите сумму для пополнения (минимум $10):*"""
+    
+    @staticmethod
+    def insufficient_balance_error() -> str:
+        """Error when balance is too low"""
+        return "❌ Недостаточно средств на балансе."
+    
+    @staticmethod
+    def payment_success_balance(amount: float, new_balance: float) -> str:
+        """Success message after paying from balance"""
+        return f"""✅ Заказ оплачен с баланса!
+
+💳 Списано: ${amount:.2f}
+💰 Новый баланс: ${new_balance:.2f}
+
+Label будет создан и отправлен вам в течение минуты."""
+    
+    @staticmethod
+    def topup_amount_too_small() -> str:
+        """Error for minimum topup amount"""
+        return "❌ *Минимальная сумма для пополнения: $10*"
+    
+    @staticmethod
+    def topup_amount_too_large() -> str:
+        """Error for maximum topup amount"""
+        return "❌ *Максимальная сумма для пополнения: $10,000*"
+    
+    @staticmethod
+    def topup_invalid_format() -> str:
+        """Error for invalid number format"""
+        return "❌ *Неверный формат. Введите число (например: 10 или 25.50)*"
+    
+    @staticmethod
+    def topup_invoice_error(error_msg: str) -> str:
+        """Error creating payment invoice"""
+        return f"❌ *Ошибка создания инвойса:* {error_msg}"
+    
+    @staticmethod
+    def topup_payment_link(amount: float, pay_link: str) -> str:
+        """Payment link message for topup"""
+        return f"""💳 Ссылка для оплаты ${amount:.2f}:
+
+{pay_link}
+
+После оплаты средства будут зачислены автоматически."""
+    
+    @staticmethod
+    def topup_crypto_selection(amount: float) -> str:
+        """Crypto selection message"""
+        return f"""💰 Выберите криптовалюту для пополнения на ${amount:.2f}:"""
+    
+    @staticmethod
+    def payment_method_selection(amount: float, balance: float) -> str:
+        """Payment method selection screen"""
+        if balance >= amount:
+            return f"""💳 Выберите способ оплаты:
+
+Сумма к оплате: ${amount:.2f}
+Ваш баланс: ${balance:.2f}"""
+        else:
+            deficit = amount - balance
+            return f"""💳 Выберите способ оплаты:
+
+Сумма к оплате: ${amount:.2f}
+Ваш баланс: ${balance:.2f}
+Не хватает: ${deficit:.2f}"""
+    
+    @staticmethod
+    def build_balance_keyboard() -> InlineKeyboardMarkup:
+        """Keyboard for balance screen"""
+        keyboard = [
+            [InlineKeyboardButton("❌ Отмена", callback_data='start')],
+            [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]
+        ]
+        return InlineKeyboardMarkup(keyboard)
+    
+    @staticmethod
+    def build_crypto_selection_keyboard() -> InlineKeyboardMarkup:
+        """Keyboard for cryptocurrency selection"""
+        keyboard = [
+            [InlineKeyboardButton("₿ Bitcoin (BTC)", callback_data='crypto_btc')],
+            [InlineKeyboardButton("Ξ Ethereum (ETH)", callback_data='crypto_eth')],
+            [InlineKeyboardButton("₮ Tether (USDT)", callback_data='crypto_usdt')],
+            [InlineKeyboardButton("Ł Litecoin (LTC)", callback_data='crypto_ltc')],
+            [InlineKeyboardButton("❌ Отмена", callback_data='start')]
+        ]
+        return InlineKeyboardMarkup(keyboard)
+
