@@ -2171,11 +2171,13 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['selected_rate'] = selected_rate
     context.user_data['last_state'] = STATE_NAMES[PAYMENT_METHOD]  # Save state for cancel return
     
-    # Get user balance
+    # Get user balance using Repository Pattern
     telegram_id = query.from_user.id
-    user = await find_user_by_telegram_id(telegram_id)
-    balance = user.get('balance', 0.0)
-    user_discount = user.get('discount', 0.0)  # Get user discount percentage
+    from repositories import get_user_repo
+    user_repo = get_user_repo()
+    user = await user_repo.find_by_telegram_id(telegram_id)
+    balance = user.get('balance', 0.0) if user else 0.0
+    user_discount = user.get('discount', 0.0) if user else 0.0  # Get user discount percentage
     
     # Show payment options
     amount = selected_rate['amount']
