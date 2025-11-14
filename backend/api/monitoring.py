@@ -43,28 +43,11 @@ async def health_check() -> Dict:
 
 
 @router.get("/metrics")
-async def get_metrics(authenticated: bool = Depends(lambda: None)) -> Dict:
+async def get_metrics() -> Dict:
     """
     Get application performance metrics
-    Requires admin authentication via X-API-Key header
     """
     from server import db
-    from handlers.admin_handlers import verify_admin_key
-    
-    # Verify admin authentication
-    # Note: Using direct import to avoid circular dependency
-    import os
-    from fastapi import Header, HTTPException
-    
-    async def check_auth(x_api_key: str = Header(None)):
-        admin_key = os.environ.get('ADMIN_API_KEY')
-        if not x_api_key or x_api_key != admin_key:
-            raise HTTPException(status_code=403, detail="Unauthorized")
-        return True
-    
-    # Check authentication
-    from starlette.requests import Request
-    # Note: This is a simplified check - in production use proper Depends
     
     # System metrics
     cpu_percent = psutil.cpu_percent(interval=0.1)
