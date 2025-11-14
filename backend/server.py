@@ -4496,7 +4496,10 @@ async def unblock_user(telegram_id: int, authenticated: bool = Depends(verify_ad
 async def invite_user_to_channel(telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
     """Send channel invitation to a specific user"""
     try:
-        user = await find_user_by_telegram_id(telegram_id)
+        # Get user using Repository Pattern
+        from repositories import get_user_repo
+        user_repo = get_user_repo()
+        user = await user_repo.find_by_telegram_id(telegram_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
