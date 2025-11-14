@@ -292,8 +292,8 @@ async def get_slow_queries(authenticated: bool = Depends(verify_admin_key)) -> D
 
 
 @router.get("/performance/cache-stats")
-async def get_cache_stats() -> Dict:
-    """Get caching statistics (if implemented)"""
+async def get_cache_stats(authenticated: bool = Depends(verify_admin_key)) -> Dict:
+    """Get caching statistics (requires admin authentication)"""
     return {
         "note": "Cache statistics not yet implemented",
         "suggestion": "Consider implementing Redis for caching (if available on platform)"
