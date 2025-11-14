@@ -314,6 +314,6 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if bot_msg:
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
-        context.user_data['last_state'] = TO_NAME
+        context.user_data['last_state'] = STATE_NAMES[TO_NAME]
     
     return TO_NAME
