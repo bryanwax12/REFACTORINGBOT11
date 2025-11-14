@@ -5478,12 +5478,15 @@ async def get_leaderboard():
     try:
         users = await db.users.find({}, {"_id": 0}).to_list(1000)
         
+        from repositories import get_repositories
+        repos = get_repositories()
+        
         leaderboard = []
         for user in users:
-            orders = await db.orders.find(
+            orders = await repos.orders.find_with_filter(
                 {"telegram_id": user['telegram_id'], "payment_status": "paid"},
-                {"_id": 0}
-            ).to_list(100)
+                limit=100
+            )
             
             total_orders = len(orders)
             total_spent = sum([o.get('amount', 0) for o in orders])
