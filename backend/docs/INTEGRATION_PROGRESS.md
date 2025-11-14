@@ -25,22 +25,26 @@
 
 ---
 
+### Phase 4: Handlers - Order Flow ✅ ЧАСТИЧНО ЗАВЕРШЕНО
+- [x] `handlers/order_flow/entry_points.py`:
+  - [x] `return_to_payment_after_topup()` - использует `UserRepository.get_balance()`
+- [x] `handlers/order_flow/payment.py`:
+  - [x] `ask_payment_method()` - использует `UserRepository.get_balance()`
+- [x] `handlers/order_flow/template_save.py`:
+  - [x] `save_template_name()` - импорт обновлен
+  - [x] `handle_template_update()` - использует `UserRepository.find_by_telegram_id()`
+  - [x] `handle_topup_amount()` - импорт обновлен
+- [ ] Остальные файлы (при необходимости)
+
+**Результат**: Убрано ещё 5 обращений к `find_user_by_telegram_id()`
+
+---
+
 ## 🔄 В работе
 
 ---
 
 ## 📋 Предстоит
-
-### Phase 4: Handlers - Order Flow
-- [ ] Все файлы в `handlers/order_flow/`:
-  - [ ] `entry_points.py`
-  - [ ] `from_address.py`
-  - [ ] `to_address.py`
-  - [ ] `parcel.py`
-  - [ ] `payment.py`
-  - [ ] `confirmation.py`
-  - [ ] `template_save.py`
-  - [ ] `cancellation.py`
 
 ### Phase 5: Handlers - Admin & Orders
 - [ ] `handlers/admin_handlers.py`
