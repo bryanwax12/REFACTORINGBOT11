@@ -436,6 +436,7 @@ def balance_and_deduplicate_rates(
     return balanced_rates
 
 
+@retry_on_api_error(max_attempts=2, min_wait=1, max_wait=5)
 async def fetch_rates_from_shipstation(
     rate_request: Dict[str, Any],
     headers: Dict[str, str],
