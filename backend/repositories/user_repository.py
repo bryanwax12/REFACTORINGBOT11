@@ -312,6 +312,18 @@ class UserRepository(BaseRepository):
             # No limit - get all
             return await self.collection.find(filter_dict, {"_id": 0}).to_list(None)
     
+    async def aggregate_users(self, pipeline: List[Dict]) -> List[Dict]:
+        """
+        Агрегация пользователей
+        
+        Args:
+            pipeline: Pipeline для агрегации
+            
+        Returns:
+            Результат агрегации
+        """
+        return await self.collection.aggregate(pipeline).to_list(None)
+    
     async def update_user_field(self, telegram_id: int, field: str, value: any) -> bool:
         """
         Обновить поле пользователя
