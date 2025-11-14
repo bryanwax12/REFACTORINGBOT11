@@ -86,6 +86,11 @@ def get_order_repo() -> OrderRepository:
     return get_repositories().orders
 
 
+def get_session_repo() -> SessionRepository:
+    """Получить session repository"""
+    return get_repositories().sessions
+
+
 """
 ИСПОЛЬЗОВАНИЕ:
 =============
