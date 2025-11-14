@@ -4035,7 +4035,6 @@ async def create_label_manually(order_id: str):
                 'carrier': carrier_code,
                 'shipping_status': 'label_created',
                 'label_created_at': datetime.now(timezone.utc).isoformat()
-                }
             }
         )
         
