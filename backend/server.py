@@ -3494,8 +3494,10 @@ async def export_orders_csv(
         if shipping_status:
             query["shipping_status"] = shipping_status
         
-        # Get all orders
-        orders = await db.orders.find(query, {"_id": 0}).sort("created_at", -1).to_list(1000)
+        # Get all orders using Repository Pattern
+        from repositories import get_repositories
+        repos = get_repositories()
+        orders = await repos.orders.find_with_filter(query, limit=1000)
         
         # Enrich with tracking info
         for order in orders:
