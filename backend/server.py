@@ -1883,7 +1883,7 @@ async def display_shipping_rates(update: Update, context: ContextTypes.DEFAULT_T
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     # Save state
-    context.user_data['last_state'] = SELECT_CARRIER
+    context.user_data['last_state'] = STATE_NAMES[SELECT_CARRIER]
     
     # Send message
     bot_msg = await safe_telegram_call(query.message.reply_text(message, reply_markup=reply_markup, parse_mode='HTML'))
