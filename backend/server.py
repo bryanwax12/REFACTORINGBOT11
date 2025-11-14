@@ -5777,18 +5777,21 @@ async def calculate_shipping_rates(request: ShippingRateRequest):
         }
         
         try:
-            response = await asyncio.wait_for(
-                asyncio.to_thread(
-                    requests.post,
-                    'https://api.shipstation.com/v2/rates',
-                    headers=headers,
-                    json=rate_request,
-                    timeout=30
-                ),
-                timeout=35  # Overall timeout including thread overhead
-            )
+            # Async HTTP call with timeout protection
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await asyncio.wait_for(
+                    client.post(
+                        'https://api.shipstation.com/v2/rates',
+                        headers=headers,
+                        json=rate_request
+                    ),
+                    timeout=35  # Overall timeout
+                )
         except asyncio.TimeoutError:
             logger.error("ShipStation rate request timed out after 35 seconds (API endpoint)")
+            raise HTTPException(status_code=504, detail="ShipStation API timeout. Please try again.")
+        except httpx.TimeoutException:
+            logger.error("httpx timeout during rate request")
             raise HTTPException(status_code=504, detail="ShipStation API timeout. Please try again.")
         
         if response.status_code != 200:
