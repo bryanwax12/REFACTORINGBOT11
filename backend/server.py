@@ -6022,6 +6022,10 @@ app.include_router(admin_router)
 from api.monitoring import router as monitoring_router
 app.include_router(monitoring_router)
 
+# Include alerting router
+from api.alerting import router as alerting_router
+app.include_router(alerting_router)
+
 # Direct endpoint for clearing conversations (easier access)
 @app.get("/clear-conversations")
 async def clear_conversations_direct(admin_key: str = None):
