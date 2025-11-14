@@ -6100,10 +6100,14 @@ async def get_topups(authenticated: bool = Depends(verify_admin_key)):
         
         # Enrich with user information
         enriched_topups = []
+        # Get user repository once
+        from repositories import get_user_repo
+        user_repo = get_user_repo()
+        
         for topup in topups:
             telegram_id = topup.get('telegram_id')
             if telegram_id:
-                user = await find_user_by_telegram_id(telegram_id)
+                user = await user_repo.find_by_telegram_id(telegram_id)
                 if user:
                     enriched_topups.append({
                         "id": topup.get('id'),
