@@ -784,10 +784,13 @@ async def handle_create_label_request(update: Update, context: ContextTypes.DEFA
     query = update.callback_query
     telegram_id = query.from_user.id
     
-    # Get order details
-    order = await db.orders.find_one({"id": order_id, "telegram_id": telegram_id}, {"_id": 0})
+    # Get order details using Repository Pattern
+    from repositories import get_repositories
+    repos = get_repositories()
+    order = await repos.orders.find_by_id(order_id)
     
-    if not order:
+    # Check if order belongs to user
+    if not order or order.get('telegram_id') != telegram_id:
         await safe_telegram_call(query.message.reply_text("❌ Заказ не найден."))
         return
     
