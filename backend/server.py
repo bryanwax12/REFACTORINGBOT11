@@ -5410,7 +5410,7 @@ async def check_bot_access(telegram_id: int, authenticated: bool = Depends(verif
             if "bot was blocked by the user" in error_msg.lower() or "forbidden" in error_msg.lower():
                 logger.warning(f"User {telegram_id} has blocked the bot")
                 
-                await db.users.update_one(
+                await user_repo.collection.update_one(
                     {"telegram_id": telegram_id},
                     {"$set": {
                         "bot_blocked_by_user": True,
