@@ -230,7 +230,17 @@ from functools import lru_cache
 user_balance_cache = {}  # Cache user balances
 cache_ttl = 60  # Cache TTL in seconds
 
-# ShipStation API
+# ============================================================
+# API CONFIGURATION (Refactored with APIConfigManager)
+# ============================================================
+from utils.api_config import get_api_config, init_api_config
+
+# Инициализировать API Config Manager
+# Окружение определяется автоматически на основе api_mode из БД (см. startup)
+api_config_manager = init_api_config('production')
+
+# Legacy переменные для обратной совместимости
+# Получаются из APIConfigManager
 SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY', '')
 SHIPSTATION_CARRIER_IDS = []  # Cache for carrier IDs
 
