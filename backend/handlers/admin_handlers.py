@@ -14,29 +14,14 @@ logger = logging.getLogger(__name__)
 # ==================== AUTHENTICATION ====================
 
 async def verify_admin_key(x_api_key: Optional[str] = Header(None)):
-    """Verify admin API key for protected endpoints"""
-    from server import ADMIN_API_KEY
-    from server import SecurityLogger
+    """
+    Verify admin API key for protected endpoints
+    SECURITY: Denies access if ADMIN_API_KEY not set
+    """
+    from middleware.security import security_manager
     
-    if not ADMIN_API_KEY:
-        # If no admin key is set, allow access (for development)
-        logging.warning("ADMIN_API_KEY not set - admin endpoints are unprotected!")
-        return True
-    
-    if not x_api_key:
-        raise HTTPException(status_code=401, detail="API key required")
-    
-    if x_api_key != ADMIN_API_KEY:
-        # Log failed authentication
-        await SecurityLogger.log_action(
-            "admin_auth_failed",
-            None,
-            {"provided_key": x_api_key[:10] + "..."},
-            "failure"
-        )
-        raise HTTPException(status_code=403, detail="Invalid API key")
-    
-    return True
+    # Use centralized security manager (fixes critical vulnerability)
+    return security_manager.verify_admin_api_key(x_api_key)
 
 
 # ==================== ADMIN NOTIFICATIONS ====================
