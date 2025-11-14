@@ -112,8 +112,6 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE,
     Decorators handle: User session + error handling + typing indicator
     """
     from server import SecurityLogger, sanitize_string, FROM_ADDRESS, FROM_ADDRESS2, STATE_NAMES
-    from repositories.session_repository import SessionRepository
-    from server import db
     
     logger.info(f"🔵 order_from_address - User: {update.effective_user.id}")
     
