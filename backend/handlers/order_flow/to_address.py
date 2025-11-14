@@ -296,10 +296,14 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return TO_PHONE
 
 
-@with_typing_indicator
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_typing_action()
+@with_user_session(create_user=False, require_session=True)
 async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Step 14/14: Collect recipient phone (optional) and move to parcel info"""
-    from server import session_manager, TO_PHONE, PARCEL_WEIGHT, STATE_NAMES
+    """Step 14/13: Collect recipient phone (optional)"""
+    from server import TO_PHONE, PARCEL_WEIGHT, STATE_NAMES
+    from repositories.session_repository import SessionRepository
+    from server import db
     
     phone = update.message.text.strip()
     
