@@ -46,12 +46,14 @@ class TestDatabaseIntegration:
         telegram_id = 888888888
         
         # Insert test orders
+        import time
+        unique_timestamp = int(time.time() * 1000)
         for i in range(5):
             await test_db.orders.insert_one({
-                "id": f"order_{i}",
-                "order_id": f"test_order_{telegram_id}_{i}",  # Add unique order_id
+                "id": f"order_{unique_timestamp}_{i}",
+                "order_id": f"test_order_{unique_timestamp}_{i}",  # Add unique order_id
                 "telegram_id": telegram_id,
-                "order_number": f"ORD-{i}",
+                "order_number": f"ORD-{unique_timestamp}-{i}",
                 "created_at": f"2025-01-0{i+1}T00:00:00Z",
                 "payment_status": "paid",
                 "amount": 10.0 + i
