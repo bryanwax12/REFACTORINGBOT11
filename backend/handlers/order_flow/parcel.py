@@ -175,12 +175,27 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
     # Store
     user_id = update.effective_user.id
     context.user_data['parcel_height'] = height
-    await session_manager.update_session_atomic(user_id, step="CALCULATING_RATES", data={'parcel_height': height})
+    
+    # Update session via repository
+    session_repo = SessionRepository(db)
+    await session_repo.update_temp_data(user_id, {'parcel_height': height})
+    await session_repo.update_step(user_id, "CALCULATING_RATES")
     
     asyncio.create_task(mark_message_as_selected(update, context))
     
-    # All parcel info collected - proceed to rate calculation
-    logger.info(f"✅ All parcel info collected for user {user_id}, fetching rates...")
+    from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
     
-    # Call fetch_shipping_rates which will validate and get rates
-    return await fetch_shipping_rates(update, context)
+    reply_markup = get_cancel_keyboard()
+    message_text = OrderStepMessages.CALCULATING_RATES
+    
+    bot_msg = await safe_telegram_call(update.message.reply_text(
+        message_text,
+        reply_markup=reply_markup
+    ))
+    
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
+        context.user_data['last_state'] = STATE_NAMES[CALCULATING_RATES]
+    
+    return CALCULATING_RATES
