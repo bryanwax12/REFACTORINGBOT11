@@ -5598,8 +5598,8 @@ async def check_user_channel_status(telegram_id: int, authenticated: bool = Depe
             # Member statuses: "creator", "administrator", "member", "restricted", "left", "kicked"
             is_member = chat_member.status in ["creator", "administrator", "member", "restricted"]
             
-            # Update user record
-            await db.users.update_one(
+            # Update user record using Repository Pattern
+            await user_repo.collection.update_one(
                 {"telegram_id": telegram_id},
                 {"$set": {
                     "is_channel_member": is_member,
