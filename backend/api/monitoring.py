@@ -44,9 +44,10 @@ async def health_check() -> Dict:
 
 
 @router.get("/metrics")
-async def get_metrics() -> Dict:
+async def get_metrics(authenticated: bool = Depends(verify_admin_key)) -> Dict:
     """
     Get application performance metrics
+    Requires admin authentication via X-API-Key header
     """
     from server import db
     
