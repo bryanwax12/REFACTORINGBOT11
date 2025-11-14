@@ -62,14 +62,16 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
         await safe_telegram_call(update.message.reply_text(error_msg))
         return FROM_NAME
     
-    # Store in session AND context
+    # Store in session AND context using service
     user_id = update.effective_user.id
     context.user_data['from_name'] = name
     
-    # Update session via repository
-    session_repo = SessionRepository(db)
-    await session_repo.update_temp_data(user_id, {'from_name': name})
-    await session_repo.update_step(user_id, "FROM_ADDRESS")
+    # Update session via service
+    await session_service.update_session_step(
+        user_id,
+        step="FROM_ADDRESS",
+        data={'from_name': name}
+    )
     
     # Log action
     await SecurityLogger.log_action(
