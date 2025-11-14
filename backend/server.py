@@ -2278,7 +2278,9 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     asyncio.create_task(mark_message_as_selected(update, context))
     
     telegram_id = query.from_user.id
-    user = await find_user_by_telegram_id(telegram_id)
+    from repositories import get_user_repo
+    user_repo = get_user_repo()
+    user = await user_repo.find_by_telegram_id(telegram_id)
     data = context.user_data
     selected_rate = data['selected_rate']
     amount = context.user_data.get('final_amount', selected_rate['amount'])  # Use discounted amount
