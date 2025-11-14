@@ -2043,7 +2043,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         context.user_data['rates'] = balance_and_deduplicate_rates(all_rates, max_per_carrier=5)[:15]
         
         # Save to cache and session using service
-        from services.shipping_service_new import save_rates_to_cache_and_session
+        from services.shipping_service import save_rates_to_cache_and_session
         user_id = update.effective_user.id
         await save_rates_to_cache_and_session(
             rates=context.user_data['rates'],
