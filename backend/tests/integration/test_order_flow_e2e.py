@@ -205,7 +205,9 @@ class TestOrderFlowE2E:
                 "telegram_id": 123456789,
                 "balance": 100.0  # Sufficient balance
             }
-            mock_safe_call.side_effect = lambda x: x
+            mock_reply_msg = MagicMock()
+            mock_reply_msg.message_id = 222
+            mock_safe_call.return_value = mock_reply_msg
             
             result = await show_payment_methods(mock_update_callback, mock_context)
             
