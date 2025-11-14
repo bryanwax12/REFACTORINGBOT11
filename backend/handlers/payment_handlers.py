@@ -19,8 +19,8 @@ from utils.handler_decorators import with_user_session, safe_handler, with_servi
 
 @safe_handler()
 @with_user_session(create_user=True)
-@with_services(user_service=True, order_service=False)
-async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE, user_service):
+@with_services(user_service=True, payment_service=True)
+async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE, user_service, payment_service):
     """
     /balance command handler
     Shows user balance and allows topup
