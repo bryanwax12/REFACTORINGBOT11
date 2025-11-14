@@ -62,9 +62,13 @@ async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return context.user_data.get('last_state', PAYMENT_METHOD)
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=False, require_session=True)
 async def confirm_cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Confirm order cancellation"""
-    from server import session_manager, safe_telegram_call, mark_message_as_selected
+    from server import safe_telegram_call, mark_message_as_selected
+    from repositories.session_repository import SessionRepository
+    from server import db
     
     query = update.callback_query
     await safe_telegram_call(query.answer())
