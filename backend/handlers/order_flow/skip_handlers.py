@@ -82,7 +82,8 @@ async def handle_skip_field(
     return next_step_const
 
 
-@with_typing_indicator
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=False, require_session=True)
 async def skip_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Skip FROM address line 2"""
     from server import FROM_CITY
