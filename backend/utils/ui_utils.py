@@ -774,3 +774,307 @@ def get_payment_keyboard(balance: float, amount: float) -> InlineKeyboardMarkup:
     ])
     
     return InlineKeyboardMarkup(keyboard)
+
+
+
+# ============================================================
+# SHIPPING RATES UI COMPONENTS
+# ============================================================
+
+class ShippingRatesUI:
+    """UI components for shipping rates display and selection"""
+    
+    # Carrier icons mapping
+    CARRIER_ICONS = {
+        'UPS': '🛡 UPS',
+        'USPS': '🦅 USPS',
+        'Stamps.com': '🦅 USPS',
+        'FedEx One Balance': '⚡ FedEx',
+        'FedEx': '⚡ FedEx'
+    }
+    
+    @staticmethod
+    def progress_message(seconds: int = 0) -> str:
+        """Progress message while fetching rates"""
+        return f"⏳ Получаю доступные курьерские службы и тарифы... ({seconds} сек)"
+    
+    @staticmethod
+    def cache_hit_message() -> str:
+        """Message when using cached rates"""
+        return "✅ Тарифы загружены из кэша"
+    
+    @staticmethod
+    def missing_fields_error(fields: list) -> str:
+        """Error message for missing required fields"""
+        fields_list = "\n• ".join(fields)
+        return f"""❌ Ошибка: Отсутствуют обязательные поля:
+
+• {fields_list}
+
+Пожалуйста, заполните все необходимые поля заказа."""
+    
+    @staticmethod
+    def api_error_message(error: str) -> str:
+        """Error message for API failures"""
+        return f"""❌ Ошибка при получении тарифов
+
+*Детали:* {error}
+
+Пожалуйста, попробуйте снова или обратитесь в поддержку."""
+    
+    @staticmethod
+    def no_rates_found() -> str:
+        """Message when no rates are available"""
+        return """❌ К сожалению, не удалось найти доступные тарифы для указанных адресов.
+
+Возможные причины:
+• Указанные адреса не обслуживаются курьерскими службами
+• Вес или размеры посылки превышают допустимые лимиты
+• Временные проблемы с курьерскими службами
+
+Пожалуйста, проверьте введенные данные или попробуйте позже."""
+    
+    @staticmethod
+    def address_validation_error() -> str:
+        """Message for address validation errors"""
+        return """❌ Ошибка валидации адресов
+
+ShipStation не смог проверить один или оба адреса.
+
+*Что делать:*
+• Проверьте правильность написания адресов
+• Убедитесь, что ZIP коды соответствуют городам
+• Попробуйте указать более точный адрес
+
+Используйте кнопки ниже для редактирования."""
+    
+    @staticmethod
+    def insufficient_balance() -> str:
+        """Message when balance is insufficient"""
+        return "❌ Недостаточно средств на балансе."
+    
+    @staticmethod
+    def format_rates_message(rates: list, user_balance: float) -> str:
+        """
+        Format shipping rates list message
+        
+        Args:
+            rates: List of rate dictionaries
+            user_balance: User's current balance
+        
+        Returns:
+            Formatted message string
+        """
+        from datetime import datetime, timedelta, timezone
+        
+        # Group rates by carrier
+        rates_by_carrier = {}
+        for i, rate in enumerate(rates):
+            carrier = rate['carrier']
+            if carrier not in rates_by_carrier:
+                rates_by_carrier[carrier] = []
+            rates_by_carrier[carrier].append((i, rate))
+        
+        # Count unique carriers
+        unique_carriers = len(set(r['carrier'] for r in rates))
+        
+        # Build message
+        message = f"📦 Найдено {len(rates)} тарифов от {unique_carriers} курьеров:\n\n"
+        
+        # Display rates grouped by carrier
+        for carrier in sorted(rates_by_carrier.keys()):
+            carrier_icon = ShippingRatesUI.CARRIER_ICONS.get(carrier, '📦')
+            message += f"{'='*30}\n<b>{carrier_icon}</b>\n{'='*30}\n\n"
+            
+            carrier_rates = rates_by_carrier[carrier]
+            for idx, rate in carrier_rates:
+                days_text = f" ({rate['days']} дней)" if rate['days'] else ""
+                
+                # Calculate estimated delivery date
+                if rate['days']:
+                    delivery_date = datetime.now(timezone.utc) + timedelta(days=rate['days'])
+                    date_text = f" → {delivery_date.strftime('%d.%m')}"
+                else:
+                    date_text = ""
+                
+                message += f"• {rate['service']}{days_text}{date_text}\n  💰 ${rate['amount']:.2f}\n\n"
+        
+        # Add user balance info
+        message += f"\n{'='*30}\n"
+        message += f"💰 <b>Ваш баланс: ${user_balance:.2f}</b>\n"
+        message += f"{'='*30}\n"
+        
+        return message
+    
+    @staticmethod
+    def build_rates_keyboard(rates: list) -> InlineKeyboardMarkup:
+        """
+        Build keyboard with rate selection buttons
+        
+        Args:
+            rates: List of rate dictionaries
+        
+        Returns:
+            InlineKeyboardMarkup with rate buttons
+        """
+        keyboard = []
+        
+        # Add rate selection buttons
+        for i, rate in enumerate(rates):
+            button_text = f"{rate['carrier']} - {rate['service']} - ${rate['amount']:.2f}"
+            keyboard.append([InlineKeyboardButton(
+                button_text,
+                callback_data=f'select_carrier_{i}'
+            )])
+        
+        # Add refresh and cancel buttons
+        keyboard.append([InlineKeyboardButton("🔄 Обновить тарифы", callback_data='refresh_rates')])
+        keyboard.append([InlineKeyboardButton(ButtonTexts.CANCEL, callback_data=CallbackData.CANCEL_ORDER)])
+        
+        return InlineKeyboardMarkup(keyboard)
+
+
+# ============================================================
+# LABEL CREATION UI COMPONENTS
+# ============================================================
+
+class LabelCreationUI:
+    """UI components for shipping label creation"""
+    
+    @staticmethod
+    def creating_label_message() -> str:
+        """Progress message while creating label"""
+        return "📝 Создаю shipping label..."
+    
+    @staticmethod
+    def success_message(tracking_number: str, carrier: str) -> str:
+        """Success message after label creation"""
+        return f"""✅ *Label создан успешно!*
+
+📋 *Tracking номер:* `{tracking_number}`
+🚚 *Курьер:* {carrier}
+
+Label отправлен вам в виде PDF файла."""
+    
+    @staticmethod
+    def error_message(error: str) -> str:
+        """Error message for label creation failure"""
+        return f"""❌ *Ошибка при создании label*
+
+*Детали:* {error}
+
+Пожалуйста, попробуйте снова или обратитесь в поддержку."""
+    
+    @staticmethod
+    def insufficient_funds_message(required: float, available: float) -> str:
+        """Message when balance is insufficient"""
+        deficit = required - available
+        return f"""❌ *Недостаточно средств*
+
+💰 *Требуется:* ${required:.2f}
+💳 *Доступно:* ${available:.2f}
+📉 *Не хватает:* ${deficit:.2f}
+
+Пожалуйста, пополните баланс."""
+    
+    @staticmethod
+    def payment_success_message(amount: float, new_balance: float) -> str:
+        """Success message after payment"""
+        return f"""✅ *Оплата прошла успешно!*
+
+💰 *Списано:* ${amount:.2f}
+💳 *Новый баланс:* ${new_balance:.2f}
+
+Создаю shipping label..."""
+
+
+# ============================================================
+# DATA CONFIRMATION UI COMPONENTS
+# ============================================================
+
+class DataConfirmationUI:
+    """UI components for order data confirmation screen"""
+    
+    @staticmethod
+    def confirmation_header() -> str:
+        """Header for data confirmation"""
+        return "📋 *Проверьте введенные данные:*\n\n"
+    
+    @staticmethod
+    def format_address_section(title: str, data: dict, prefix: str) -> str:
+        """
+        Format address section for confirmation
+        
+        Args:
+            title: Section title (e.g., "Отправитель", "Получатель")
+            data: Context user_data dict
+            prefix: Field prefix ('from' or 'to')
+        
+        Returns:
+            Formatted address section string
+        """
+        name = data.get(f'{prefix}_name', '')
+        street = data.get(f'{prefix}_street', '')
+        street2 = data.get(f'{prefix}_street2', '')
+        city = data.get(f'{prefix}_city', '')
+        state = data.get(f'{prefix}_state', '')
+        zip_code = data.get(f'{prefix}_zip', '')
+        phone = data.get(f'{prefix}_phone', '')
+        
+        section = f"*{title}:*\n"
+        section += f"👤 {name}\n"
+        section += f"📍 {street}\n"
+        if street2:
+            section += f"   {street2}\n"
+        section += f"🏙 {city}, {state} {zip_code}\n"
+        if phone:
+            section += f"📞 {phone}\n"
+        section += "\n"
+        
+        return section
+    
+    @staticmethod
+    def format_parcel_section(data: dict) -> str:
+        """
+        Format parcel information section
+        
+        Args:
+            data: Context user_data dict
+        
+        Returns:
+            Formatted parcel section string
+        """
+        weight = data.get('weight', '')
+        length = data.get('length', '')
+        width = data.get('width', '')
+        height = data.get('height', '')
+        
+        section = "*Посылка:*\n"
+        section += f"⚖️ Вес: {weight} lb\n"
+        
+        if length and width and height:
+            section += f"📏 Размеры: {length}\" × {width}\" × {height}\"\n"
+        
+        return section
+    
+    @staticmethod
+    def build_confirmation_keyboard() -> InlineKeyboardMarkup:
+        """Build keyboard for data confirmation screen"""
+        keyboard = [
+            [InlineKeyboardButton("✅ Всё верно, показать тарифы", callback_data='show_rates')],
+            [InlineKeyboardButton("✏️ Редактировать данные", callback_data='edit_data')],
+            [InlineKeyboardButton("💾 Сохранить как шаблон", callback_data='save_as_template')],
+            [InlineKeyboardButton(ButtonTexts.CANCEL, callback_data=CallbackData.CANCEL_ORDER)]
+        ]
+        return InlineKeyboardMarkup(keyboard)
+    
+    @staticmethod
+    def build_edit_menu_keyboard() -> InlineKeyboardMarkup:
+        """Build keyboard for edit menu"""
+        keyboard = [
+            [InlineKeyboardButton("📤 Адрес отправителя", callback_data='edit_from_address')],
+            [InlineKeyboardButton("📥 Адрес получателя", callback_data='edit_to_address')],
+            [InlineKeyboardButton("📦 Посылка", callback_data='edit_parcel')],
+            [InlineKeyboardButton("◀️ Назад", callback_data='back_to_confirmation')]
+        ]
+        return InlineKeyboardMarkup(keyboard)
