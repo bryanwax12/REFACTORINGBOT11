@@ -3660,7 +3660,8 @@ async def get_order(order_id: str):
         raise HTTPException(status_code=404, detail="Order not found")
     return order
 
-@api_router.post("/shipping/create-label")
+# MOVED TO routers/shipping.py
+# @api_router.post("/shipping/create-label")
 async def create_shipping_label(order_id: str):
     try:
         from repositories import get_repositories
