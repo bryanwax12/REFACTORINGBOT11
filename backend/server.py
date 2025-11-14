@@ -4459,17 +4459,19 @@ async def block_user(telegram_id: int, authenticated: bool = Depends(verify_admi
 async def unblock_user(telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
     """Unblock a user to allow bot usage"""
     try:
-        user = await find_user_by_telegram_id(telegram_id)
+        # Unblock user using Repository Pattern
+        from repositories import get_user_repo
+        user_repo = get_user_repo()
+        
+        # Check if user exists
+        user = await user_repo.find_by_telegram_id(telegram_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
-        # Update user blocked status
-        result = await db.users.update_one(
-            {"telegram_id": telegram_id},
-            {"$set": {"blocked": False}}
-        )
+        # Unblock user
+        result = await user_repo.unblock_user(telegram_id)
         
-        if result.modified_count > 0:
+        if result:
             # Notify user via Telegram
             if bot_instance:
                 try:
