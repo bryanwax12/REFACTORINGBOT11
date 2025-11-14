@@ -1179,6 +1179,126 @@ Label будет создан и отправлен вам в течение м�
             [InlineKeyboardButton("Ξ Ethereum (ETH)", callback_data='crypto_eth')],
             [InlineKeyboardButton("₮ Tether (USDT)", callback_data='crypto_usdt')],
             [InlineKeyboardButton("Ł Litecoin (LTC)", callback_data='crypto_ltc')],
+
+
+
+# ============================================================
+# TEMPLATE MANAGEMENT UI COMPONENTS
+# ============================================================
+
+class TemplateManagementUI:
+    """UI components for template management"""
+    
+    @staticmethod
+    def no_templates_message() -> str:
+        """Message when user has no templates"""
+        return """📋 *Мои шаблоны*
+
+У вас пока нет сохраненных шаблонов.
+Создайте заказ и нажмите "*Сохранить как шаблон*" на экране проверки данных."""
+    
+    @staticmethod
+    def templates_list_header() -> str:
+        """Header for templates list"""
+        return "📋 *Выберите шаблон:*\n\n"
+    
+    @staticmethod
+    def format_template_item(index: int, template: dict) -> str:
+        """Format single template item in list"""
+        from_name = template.get('from_name', '')
+        from_street = template.get('from_street1', '')
+        from_city = template.get('from_city', '')
+        from_state = template.get('from_state', '')
+        from_zip = template.get('from_zip', '')
+        to_name = template.get('to_name', '')
+        to_street = template.get('to_street1', '')
+        to_city = template.get('to_city', '')
+        to_state = template.get('to_state', '')
+        to_zip = template.get('to_zip', '')
+        
+        return f"""*{index}. {template['name']}*
+📤 От: {from_name}
+   {from_street}, {from_city}, {from_state} {from_zip}
+📥 Кому: {to_name}
+   {to_street}, {to_city}, {to_state} {to_zip}
+
+"""
+    
+    @staticmethod
+    def template_saved_success(template_name: str) -> str:
+        """Success message after saving template"""
+        return f"""✅ *Шаблон сохранён!*
+
+Название: *{template_name}*
+
+Вы можете использовать этот шаблон для создания заказов в будущем."""
+    
+    @staticmethod
+    def template_name_prompt() -> str:
+        """Prompt to enter template name"""
+        return "💾 *Введите название для шаблона:*"
+    
+    @staticmethod
+    def template_deleted_success(template_name: str) -> str:
+        """Success message after deleting template"""
+        return f"""✅ *Шаблон удалён*
+
+Шаблон "{template_name}" был успешно удалён."""
+    
+    @staticmethod
+    def template_rename_prompt(current_name: str) -> str:
+        """Prompt to rename template"""
+        return f"""✏️ *Переименование шаблона*
+
+Текущее название: *{current_name}*
+
+Введите новое название:"""
+    
+    @staticmethod
+    def template_renamed_success(old_name: str, new_name: str) -> str:
+        """Success message after renaming"""
+        return f"""✅ *Шаблон переименован*
+
+*{old_name}* → *{new_name}*"""
+    
+    @staticmethod
+    def confirm_delete_template(template_name: str) -> str:
+        """Confirmation message for template deletion"""
+        return f"""❓ *Удалить шаблон?*
+
+Шаблон: *{template_name}*
+
+Это действие нельзя отменить."""
+    
+    @staticmethod
+    def build_no_templates_keyboard() -> InlineKeyboardMarkup:
+        """Keyboard when no templates exist"""
+        keyboard = [
+            [InlineKeyboardButton("📦 Создать заказ", callback_data='new_order')],
+            [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]
+        ]
+        return InlineKeyboardMarkup(keyboard)
+    
+    @staticmethod
+    def build_template_view_keyboard(template_id: str) -> InlineKeyboardMarkup:
+        """Keyboard for viewing a single template"""
+        keyboard = [
+            [InlineKeyboardButton("📦 Использовать шаблон", callback_data=f'use_template_{template_id}')],
+            [InlineKeyboardButton("✏️ Переименовать", callback_data=f'rename_template_{template_id}')],
+            [InlineKeyboardButton("🗑 Удалить", callback_data=f'delete_template_{template_id}')],
+            [InlineKeyboardButton("◀️ Назад к списку", callback_data='my_templates')]
+        ]
+        return InlineKeyboardMarkup(keyboard)
+    
+    @staticmethod
+    def build_confirm_delete_keyboard(template_id: str) -> InlineKeyboardMarkup:
+        """Keyboard for confirming template deletion"""
+        keyboard = [
+            [InlineKeyboardButton("✅ Да, удалить", callback_data=f'confirm_delete_{template_id}')],
+            [InlineKeyboardButton("❌ Отмена", callback_data=f'template_view_{template_id}')]
+        ]
+        return InlineKeyboardMarkup(keyboard)
+
             [InlineKeyboardButton("❌ Отмена", callback_data='start')]
         ]
         return InlineKeyboardMarkup(keyboard)
