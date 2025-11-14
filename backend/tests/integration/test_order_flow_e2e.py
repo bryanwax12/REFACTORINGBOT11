@@ -121,7 +121,9 @@ class TestOrderFlowE2E:
         mock_context.user_data['last_state'] = STATE_NAMES[SELECT_CARRIER]
         
         with patch('server.safe_telegram_call') as mock_safe_call:
-            mock_safe_call.side_effect = lambda x: x
+            mock_reply_msg = MagicMock()
+            mock_reply_msg.message_id = 999
+            mock_safe_call.return_value = mock_reply_msg
             
             # Step 1: User clicks cancel
             result = await cancel_order(mock_update_callback, mock_context)
