@@ -1,0 +1,335 @@
+"""
+Order Flow: Template Save and Topup Handlers
+Handles template saving and topup amount input
+"""
+import logging
+import asyncio
+import time
+import uuid
+from datetime import datetime, timezone
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import ContextTypes, ConversationHandler
+
+logger = logging.getLogger(__name__)
+
+
+async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Save template with user-provided name"""
+    from server import (
+        TEMPLATE_NAME,
+        db, safe_telegram_call,
+        find_user_by_telegram_id, insert_template,
+        count_user_templates, template_service
+    )
+    
+    template_name = update.message.text.strip()[:30]  # Limit to 30 chars
+    
+    if not template_name:
+        await safe_telegram_call(update.message.reply_text("❌ Название не может быть пустым. Попробуйте еще раз:"))
+        return TEMPLATE_NAME
+    
+    telegram_id = update.effective_user.id
+    
+    # Check if template with this name already exists
+    existing = await db.templates.find_one({
+        "telegram_id": telegram_id,
+        "name": template_name
+    })
+    
+    if existing:
+        # Ask to update or use new name
+        keyboard = [
+            [InlineKeyboardButton("🔄 Обновить существующий", callback_data=f'template_update_{existing["id"]}')],
+            [InlineKeyboardButton("📝 Ввести другое название", callback_data='template_new_name')],
+            [InlineKeyboardButton("❌ Отмена", callback_data='start')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        bot_msg = await safe_telegram_call(update.message.reply_text(
+            f"""⚠️ Шаблон с названием "{template_name}" уже существует.
+
+Что делать?""",
+            reply_markup=reply_markup
+        ))
+        # Don't clear last_bot_message here - we need it for mark_message_as_selected
+        context.user_data['pending_template_name'] = template_name
+        return TEMPLATE_NAME
+    
+    # Create template using template service
+    success, template_id, error = await template_service.create_template(
+        telegram_id=telegram_id,
+        template_name=template_name,
+        order_data=context.user_data,
+        insert_template_func=insert_template,
+        count_user_templates_func=count_user_templates,
+        max_templates=10
+    )
+    
+    if not success:
+        await safe_telegram_call(update.message.reply_text(
+            f"""❌ *Ошибка сохранения шаблона*
+
+{error}""",
+            parse_mode='Markdown'
+        ))
+        return ConversationHandler.END
+    
+    keyboard = [
+        [InlineKeyboardButton("📦 Продолжить создание заказа", callback_data='continue_order')],
+        [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    message_text = f"""✅ *Шаблон "{template_name}" сохранен!*
+
+Теперь вы можете использовать его для быстрого создания заказов.
+
+*Продолжить создание этого заказа?*"""
+    
+    bot_msg = await safe_telegram_call(update.message.reply_text(
+        message_text,
+        reply_markup=reply_markup,
+        parse_mode='Markdown'
+    ))
+    
+    # Save last bot message context for button protection
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
+    
+    # Save template name for potential continuation
+    context.user_data['saved_template_name'] = template_name
+    
+    return TEMPLATE_NAME
+
+
+async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Update existing template with current order data"""
+    from server import (
+        db, safe_telegram_call, mark_message_as_selected,
+        find_user_by_telegram_id
+    )
+    
+    query = update.callback_query
+    await safe_telegram_call(query.answer())
+    
+    # Mark previous message as selected (non-blocking)
+    asyncio.create_task(mark_message_as_selected(update, context))
+    
+    template_id = query.data.replace('template_update_', '')
+    telegram_id = query.from_user.id
+    
+    # Get user
+    user = await find_user_by_telegram_id(telegram_id)
+    if not user:
+        await safe_telegram_call(query.message.reply_text("❌ Ошибка: пользователь не найден"))
+        return ConversationHandler.END
+    
+    # Update template
+    update_data = {
+        "from_name": context.user_data.get('from_name', ''),
+        "from_street1": context.user_data.get('from_street', ''),
+        "from_street2": context.user_data.get('from_street2', ''),
+        "from_city": context.user_data.get('from_city', ''),
+        "from_state": context.user_data.get('from_state', ''),
+        "from_zip": context.user_data.get('from_zip', ''),
+        "from_phone": context.user_data.get('from_phone', ''),
+        "to_name": context.user_data.get('to_name', ''),
+        "to_street1": context.user_data.get('to_street', ''),
+        "to_street2": context.user_data.get('to_street2', ''),
+        "to_city": context.user_data.get('to_city', ''),
+        "to_state": context.user_data.get('to_state', ''),
+        "to_zip": context.user_data.get('to_zip', ''),
+        "to_phone": context.user_data.get('to_phone', ''),
+        "updated_at": datetime.now(timezone.utc)
+    }
+    
+    # Note: update_template only supports template_id filter, manual query needed for telegram_id check
+    result = await db.templates.update_one(
+        {"id": template_id, "telegram_id": telegram_id},
+        {"$set": update_data}
+    )
+    
+    if result.modified_count > 0:
+        template_name = context.user_data.get('pending_template_name', 'шаблон')
+        keyboard = [
+            [InlineKeyboardButton("📦 Продолжить создание заказа", callback_data='continue_order')],
+            [InlineKeyboardButton("🏠 Главное меню", callback_data='start')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        message_text = f"""✅ *Шаблон "{template_name}" обновлен!*
+
+Данные шаблона обновлены текущими адресами.
+
+*Продолжить создание этого заказа?*"""
+        
+        bot_msg = await safe_telegram_call(query.message.reply_text(
+            message_text,
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
+        ))
+        
+        # Save last bot message context for button protection
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
+        context.user_data['saved_template_name'] = template_name
+    else:
+        await safe_telegram_call(query.message.reply_text("❌ Не удалось обновить шаблон"))
+        return ConversationHandler.END
+
+
+async def handle_template_new_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Ask user to enter a new template name"""
+    from server import TEMPLATE_NAME, safe_telegram_call, mark_message_as_selected
+    
+    query = update.callback_query
+    await safe_telegram_call(query.answer())
+    
+    # Mark previous message as selected (non-blocking)
+    asyncio.create_task(mark_message_as_selected(update, context))
+    
+    await safe_telegram_call(query.message.reply_text(
+        """📝 Введите новое название для шаблона:
+
+Например: Доставка маме 2, Офис NY"""
+    ))
+    # Clear last_bot_message to prevent interfering with text input
+    context.user_data.pop('last_bot_message_id', None)
+    context.user_data.pop('last_bot_message_text', None)
+    return TEMPLATE_NAME
+
+
+async def continue_order_after_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Continue order creation after saving template"""
+    from server import fetch_shipping_rates
+    return await fetch_shipping_rates(update, context)
+
+
+async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle custom top-up amount input and create Oxapay invoice directly"""
+    from server import (
+        TOPUP_AMOUNT,
+        safe_telegram_call, mark_message_as_selected,
+        find_user_by_telegram_id, create_oxapay_invoice,
+        insert_payment, db, Payment
+    )
+    
+    # Mark previous message as selected (remove "Отмена" button)
+    asyncio.create_task(mark_message_as_selected(update, context))
+    
+    try:
+        amount_text = update.message.text.strip()
+        
+        # Validate amount
+        try:
+            topup_amount = float(amount_text)
+        except ValueError:
+            await safe_telegram_call(update.message.reply_text(
+                "❌ Неверный формат суммы. Введите число, например: 50"
+            ))
+            return TOPUP_AMOUNT
+        
+        # Check limits
+        if topup_amount < 10:
+            await safe_telegram_call(update.message.reply_text(
+                "❌ Минимальная сумма пополнения: $10"
+            ))
+            return TOPUP_AMOUNT
+        
+        if topup_amount > 10000:
+            await safe_telegram_call(update.message.reply_text(
+                "❌ Максимальная сумма пополнения: $10,000"
+            ))
+            return TOPUP_AMOUNT
+        
+        telegram_id = update.effective_user.id
+        user = await find_user_by_telegram_id(telegram_id)
+        
+        # Create Oxapay invoice directly (order_id must be <= 50 chars)
+        # Generate short order_id: "top_" (4) + timestamp (10) + "_" (1) + random (8) = 23 chars
+        order_id = f"top_{int(time.time())}_{uuid.uuid4().hex[:8]}"
+        invoice_result = await create_oxapay_invoice(
+            amount=topup_amount,
+            order_id=order_id,
+            description=f"Balance Top-up ${topup_amount}"
+        )
+        
+        if invoice_result.get('success'):
+            track_id = invoice_result['trackId']
+            pay_link = invoice_result['payLink']
+            
+            # Save top-up payment
+            payment = Payment(
+                order_id=f"topup_{user['id']}",
+                amount=topup_amount,
+                invoice_id=track_id,
+                pay_url=pay_link,
+                status="pending"
+            )
+            payment_dict = payment.model_dump()
+            payment_dict['created_at'] = payment_dict['created_at'].isoformat()
+            payment_dict['telegram_id'] = telegram_id
+            payment_dict['type'] = 'topup'
+            await insert_payment(payment_dict)
+            
+            keyboard = [[InlineKeyboardButton("💳 Оплатить", url=pay_link)]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            message_text = f"""✅ *Счёт на пополнение создан!*
+
+💵 *Сумма: ${topup_amount}*
+🪙 *Криптовалюта: Любая из доступных*
+
+*Нажмите кнопку "Оплатить" для перехода на страницу оплаты.*
+*На платежной странице вы сможете выбрать удобную криптовалюту.*
+
+⚠️❗️❗️ *ВАЖНО: Оплатите точно ${topup_amount}!* ❗️❗️⚠️
+_Если вы оплатите другую сумму, деньги НЕ поступят на баланс!_
+
+*После успешной оплаты баланс будет автоматически пополнен.*"""
+            
+            bot_msg = await safe_telegram_call(update.message.reply_text(
+            message_text,
+            reply_markup=reply_markup,
+            parse_mode='Markdown'
+        ))
+            
+            # Save message_id in payment for later removal of button
+            await db.payments.update_one(
+                {"invoice_id": track_id},
+                {"$set": {
+                    "payment_message_id": bot_msg.message_id,
+                    "payment_message_text": message_text
+                }}
+            )
+            
+            # Also save in context for immediate use
+            context.user_data['last_bot_message_id'] = bot_msg.message_id
+            context.user_data['last_bot_message_text'] = message_text
+            
+            return ConversationHandler.END
+        else:
+            error_msg = invoice_result.get('error', 'Unknown error')
+            await safe_telegram_call(update.message.reply_text(f"❌ *Ошибка создания инвойса:* {error_msg}", parse_mode='Markdown'))
+            return ConversationHandler.END
+        
+    except Exception as e:
+        logger.error(f"Top-up amount handling error: {e}")
+        await safe_telegram_call(update.message.reply_text(
+            "❌ Произошла ошибка. Попробуйте снова позже."
+        ))
+        return ConversationHandler.END
+
+
+# ============================================================
+# MODULE EXPORTS
+# ============================================================
+
+__all__ = [
+    'save_template_name',
+    'handle_template_update',
+    'handle_template_new_name',
+    'continue_order_after_template',
+    'handle_topup_amount'
+]
