@@ -98,7 +98,8 @@ async def skip_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE)
     )
 
 
-@with_typing_indicator
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=False, require_session=True)
 async def skip_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Skip TO address line 2"""
     from server import TO_CITY
