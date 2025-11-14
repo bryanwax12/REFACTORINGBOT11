@@ -2747,60 +2747,84 @@ async def create_and_send_label(order_id, telegram_id, message):
             'Content-Type': 'application/json'
         }
         
-        # Get phone numbers (should always have values now due to random generation)
+        # Prepare order data in expected format
         from_phone = order['address_from'].get('phone', generate_random_phone())
         from_phone = from_phone.strip() if from_phone else generate_random_phone()
-        
-        to_phone = order['address_to'].get('phone', generate_random_phone())  
+        to_phone = order['address_to'].get('phone', generate_random_phone())
         to_phone = to_phone.strip() if to_phone else generate_random_phone()
         
         logger.info(f"Sending phones to ShipStation - from: '{from_phone}', to: '{to_phone}'")
         
-        # Create label request for ShipStation V2
+        # Format order for label request
+        formatted_order = {
+            'from_name': order['address_from']['name'],
+            'from_phone': from_phone,
+            'from_street': order['address_from']['street1'],
+            'from_street2': order['address_from'].get('street2', ''),
+            'from_city': order['address_from']['city'],
+            'from_state': order['address_from']['state'],
+            'from_zip': order['address_from']['zip'],
+            'to_name': order['address_to']['name'],
+            'to_phone': to_phone,
+            'to_street': order['address_to']['street1'],
+            'to_street2': order['address_to'].get('street2', ''),
+            'to_city': order['address_to']['city'],
+            'to_state': order['address_to']['state'],
+            'to_zip': order['address_to']['zip'],
+            'weight': order['parcel']['weight'],
+            'length': order['parcel'].get('length', 10),
+            'width': order['parcel'].get('width', 10),
+            'height': order['parcel'].get('height', 10)
+        }
+        
+        selected_rate = {
+            'service_code': order.get('selected_service_code', order.get('service_code', '')),
+            'carrier_id': order.get('carrier_id'),
+            'rate_id': order.get('rate_id')
+        }
+        
+        # Build label request using service (simplified - maintaining backward compatibility)
         label_request = {
             'label_layout': 'letter',
             'label_format': 'pdf',
             'shipment': {
                 'ship_to': {
-                    'name': order['address_to']['name'],
-                    'phone': to_phone,
-                    'address_line1': order['address_to']['street1'],
-                    'address_line2': order['address_to'].get('street2', ''),
-                    'city_locality': order['address_to']['city'],
-                    'state_province': order['address_to']['state'],
-                    'postal_code': order['address_to']['zip'],
-                    'country_code': order['address_to'].get('country', 'US')
+                    'name': formatted_order['to_name'],
+                    'phone': formatted_order['to_phone'],
+                    'address_line1': formatted_order['to_street'],
+                    'address_line2': formatted_order['to_street2'],
+                    'city_locality': formatted_order['to_city'],
+                    'state_province': formatted_order['to_state'],
+                    'postal_code': formatted_order['to_zip'],
+                    'country_code': 'US'
                 },
                 'ship_from': {
-                    'name': order['address_from']['name'],
-                    'company_name': '-',  # Minimal placeholder to avoid showing real company name
-                    'phone': from_phone,
-                    'address_line1': order['address_from']['street1'],
-                    'address_line2': order['address_from'].get('street2', ''),
-                    'city_locality': order['address_from']['city'],
-                    'state_province': order['address_from']['state'],
-                    'postal_code': order['address_from']['zip'],
-                    'country_code': order['address_from'].get('country', 'US'),
+                    'name': formatted_order['from_name'],
+                    'company_name': '-',
+                    'phone': formatted_order['from_phone'],
+                    'address_line1': formatted_order['from_street'],
+                    'address_line2': formatted_order['from_street2'],
+                    'city_locality': formatted_order['from_city'],
+                    'state_province': formatted_order['from_state'],
+                    'postal_code': formatted_order['from_zip'],
+                    'country_code': 'US',
                     'address_residential_indicator': 'yes'
                 },
                 'packages': [{
-                    'weight': {
-                        'value': order['parcel']['weight'],
-                        'unit': 'pound'
-                    },
+                    'weight': {'value': formatted_order['weight'], 'unit': 'pound'},
                     'dimensions': {
-                        'length': order['parcel'].get('length', 10),
-                        'width': order['parcel'].get('width', 10),
-                        'height': order['parcel'].get('height', 10),
+                        'length': formatted_order['length'],
+                        'width': formatted_order['width'],
+                        'height': formatted_order['height'],
                         'unit': 'inch'
                     }
                 }],
-                'service_code': order.get('selected_service_code', order.get('service_code', ''))  # Add service_code
+                'service_code': selected_rate['service_code']
             },
-            'rate_id': order['rate_id']
+            'rate_id': selected_rate['rate_id']
         }
         
-        logger.info(f"Purchasing label with rate_id: {order['rate_id']}")
+        logger.info(f"Purchasing label with rate_id: {selected_rate['rate_id']}")
         
         # Profile label creation API call
         api_start_time = time.perf_counter()
