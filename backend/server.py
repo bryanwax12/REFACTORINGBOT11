@@ -156,7 +156,9 @@ async def count_user_templates(telegram_id: int):
 @profile_db_query("find_user_templates")
 async def find_user_templates(telegram_id: int, limit: int = 10):
     """Профилируемый поиск шаблонов пользователя"""
-    return await db.templates.find({"telegram_id": telegram_id}).sort("created_at", -1).to_list(limit)
+    from repositories import get_repositories
+    repos = get_repositories()
+    return await repos.templates.get_user_templates(telegram_id, limit=limit)
 
 @profile_db_query("update_order")
 async def update_order(order_id: str, update_data: dict):
