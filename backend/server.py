@@ -5694,20 +5694,20 @@ async def deduct_balance(telegram_id: int, amount: float):
         if amount <= 0:
             raise HTTPException(status_code=400, detail="Amount must be positive")
         
-        user = await find_user_by_telegram_id(telegram_id)
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-        
-        current_balance = user.get('balance', 0)
-        if current_balance < amount:
-            raise HTTPException(status_code=400, detail="Insufficient balance")
-        
-        # Deduct balance
-        new_balance = current_balance - amount
-        await db.users.update_one(
-            {"telegram_id": telegram_id},
-            {"$set": {"balance": new_balance}}
+        # Use payment service
+        success, new_balance, error = await payment_service.deduct_balance(
+            telegram_id=telegram_id,
+            amount=amount,
+            db=db,
+            find_user_func=find_user_by_telegram_id
         )
+        
+        if not success:
+            if error == "User not found":
+                raise HTTPException(status_code=404, detail=error)
+            elif error == "Insufficient balance":
+                raise HTTPException(status_code=400, detail=error)
+            raise HTTPException(status_code=500, detail=error)
         
         # Notify user via Telegram
         if bot_instance:
