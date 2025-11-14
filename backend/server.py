@@ -3849,19 +3849,19 @@ async def refund_order(order_id: str, refund_reason: Optional[str] = None):
         refund_amount = order['amount']
         await user_repo.update_balance(order['telegram_id'], refund_amount, operation="add")
         
-        # Update order status
-        await db.orders.update_one(
-            {"id": order_id},
+        # Update order status using Repository Pattern
+        from repositories import get_repositories
+        repos = get_repositories()
+        await repos.orders.update_by_id(
+            order_id,
             {
-                "$set": {
-                    "refund_status": "refunded",
-                    "refund_amount": refund_amount,
-                    "refund_reason": refund_reason or "Admin refund",
-                    "refund_date": datetime.now(timezone.utc).isoformat(),
-                    "shipping_status": "cancelled",
-                    "void_status": "voided" if void_success else "void_failed",
-                    "void_message": void_message
-                }
+                "refund_status": "refunded",
+                "refund_amount": refund_amount,
+                "refund_reason": refund_reason or "Admin refund",
+                "refund_date": datetime.now(timezone.utc).isoformat(),
+                "shipping_status": "cancelled",
+                "void_status": "voided" if void_success else "void_failed",
+                "void_message": void_message
             }
         )
         
