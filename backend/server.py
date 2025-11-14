@@ -5717,7 +5717,10 @@ async def set_user_discount(telegram_id: int, discount: float):
         if discount < 0 or discount > 100:
             raise HTTPException(status_code=400, detail="Discount must be between 0 and 100")
         
-        user = await find_user_by_telegram_id(telegram_id)
+        # Check if user exists using Repository Pattern
+        from repositories import get_user_repo
+        user_repo = get_user_repo()
+        user = await user_repo.find_by_telegram_id(telegram_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
