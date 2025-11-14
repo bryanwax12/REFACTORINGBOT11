@@ -2688,8 +2688,13 @@ _Если вы оплатите другую сумму, деньги НЕ по�
         return ConversationHandler.END
 
 async def create_order_in_db(user, data, selected_rate, amount, discount_percent=0, discount_amount=0):
+    # Get order_id from session or generate new one
+    from utils.order_utils import generate_order_id
+    order_id = data.get('order_id') or generate_order_id(telegram_id=user['telegram_id'])
+    
     order = Order(
         user_id=user['id'],
+        order_id=order_id,  # Add unique order_id
         telegram_id=user['telegram_id'],
         address_from=Address(
             name=data['from_name'],
