@@ -6308,6 +6308,11 @@ async def startup_event():
     from utils.monitoring import init_sentry
     init_sentry()
     
+    # Инициализация фабрики сервисов
+    from services.service_factory import init_service_factory
+    init_service_factory(db)
+    logger.info("✅ Service factory initialized")
+    
     # V2: TTL index автоматически очищает сессии старше 15 минут
     # Периодическая очистка больше не нужна
     logger.info("✅ Session cleanup: TTL index (automatic, no manual cleanup needed)")
