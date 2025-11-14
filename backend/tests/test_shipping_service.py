@@ -402,13 +402,13 @@ async def test_fetch_rates_from_shipstation_timeout():
 @pytest.mark.asyncio
 async def test_fetch_rates_from_shipstation_no_rates():
     """Test when API returns no rates"""
-    mock_response = AsyncMock()
+    mock_response = Mock()  # httpx response is sync
     mock_response.status_code = 200
-    mock_response.json.return_value = {
+    mock_response.json = Mock(return_value={
         'rate_response': {
             'rates': []  # Empty rates
         }
-    }
+    })
     
     with patch('httpx.AsyncClient') as mock_client:
         mock_client_instance = AsyncMock()
