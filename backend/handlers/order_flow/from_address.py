@@ -79,7 +79,7 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if bot_msg:
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
-        context.user_data['last_state'] = FROM_ADDRESS
+        context.user_data['last_state'] = STATE_NAMES[FROM_ADDRESS]
     
     logger.info(f"✅ order_from_name completed - name: '{name}'")
     return FROM_ADDRESS
