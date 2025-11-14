@@ -1,6 +1,6 @@
 """
 Unit tests for Shipping Service
-Tests all 19 functions in services/shipping_service_new.py
+Tests all 19 functions in services/shipping_service.py
 """
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
