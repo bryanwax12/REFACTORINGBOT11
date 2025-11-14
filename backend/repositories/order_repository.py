@@ -97,6 +97,27 @@ class OrderRepository(BaseRepository):
             limit=limit
         )
     
+    async def update_by_id(
+        self,
+        order_id: str,
+        update_data: Dict
+    ) -> bool:
+        """
+        Обновить заказ по UUID id
+        
+        Args:
+            order_id: UUID заказа (поле 'id')
+            update_data: Данные для обновления
+            
+        Returns:
+            True если обновлено
+        """
+        result = await self.update_one(
+            {"id": order_id},
+            {"$set": update_data}
+        )
+        return result
+    
     async def update_status(
         self,
         order_id: str,
