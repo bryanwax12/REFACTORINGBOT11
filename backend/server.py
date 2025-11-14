@@ -1886,7 +1886,8 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
     
     # Cache MISS - need to fetch from API
     # Send initial progress message
-    progress_msg = await safe_telegram_call(query.message.reply_text("⏳ Получаю доступные курьерские службы и тарифы... (0 сек)"))
+    from utils.ui_utils import ShippingRatesUI
+    progress_msg = await safe_telegram_call(query.message.reply_text(ShippingRatesUI.progress_message(0)))
     
     try:
         import requests
