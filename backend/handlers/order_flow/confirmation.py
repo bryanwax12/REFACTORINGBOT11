@@ -39,12 +39,16 @@ async def show_data_confirmation(update: Update, context: ContextTypes.DEFAULT_T
     return CONFIRM_DATA
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=False, require_session=True)
 async def handle_data_edit(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle edit data button"""
     from server import show_edit_menu
     return await show_edit_menu(update, context)
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=False, require_session=True)
 async def handle_save_as_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle save as template button"""
     from server import TEMPLATE_NAME, safe_telegram_call, mark_message_as_selected
