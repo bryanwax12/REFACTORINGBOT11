@@ -3649,13 +3649,12 @@ async def download_label(label_id: str):
             'API-Key': SHIPSTATION_API_KEY
         }
         
-        # Download label from ShipStation
-        response = await asyncio.to_thread(
-            requests.get,
-            label_url,
-            headers=headers,
-            timeout=30
-        )
+        # Download label from ShipStation (async)
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(
+                label_url,
+                headers=headers
+            )
         
         if response.status_code == 200:
             from fastapi.responses import Response
