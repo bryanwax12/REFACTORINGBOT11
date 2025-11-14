@@ -1928,12 +1928,13 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         logger.info(f"⚡ ShipStation /rates API took {api_duration_ms:.2f}ms")
         
         if not success and "timeout" in error_msg.lower():
-            logger.error("ShipStation rate request timed out after 35 seconds")
+            # Handle timeout error
+            logger.error(f"ShipStation rate request failed: {error_msg}")
             
-            # Log error to session for debugging
+            # Log error to session
             user_id = update.effective_user.id
             await session_manager.update_session_atomic(user_id, data={
-                'last_error': 'ShipStation API timeout (35s)',
+                'last_error': f'ShipStation API error: {error_msg}',
                 'error_step': 'FETCH_RATES',
                 'error_timestamp': datetime.now(timezone.utc).isoformat()
             })
@@ -1951,29 +1952,25 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             except Exception:
                 pass
             
-            from utils.ui_utils import get_retry_edit_cancel_keyboard, ShippingRatesUI
+            from utils.ui_utils import get_retry_edit_cancel_keyboard
             reply_markup = get_retry_edit_cancel_keyboard()
             
-            timeout_error = "❌ Превышено время ожидания ответа от ShipStation.\n\nПопробуйте еще раз или проверьте правильность адресов."
             await safe_telegram_call(query.message.reply_text(
-                timeout_error,
+                f"❌ {error_msg}\n\nПопробуйте еще раз или проверьте правильность адресов.",
                 reply_markup=reply_markup
             ))
             return CONFIRM_DATA
         
-        if response.status_code != 200:
-            error_data = response.json() if response.text else {}
-            error_msg = error_data.get('message', f'Status code: {response.status_code}')
+        if not success:
+            # Handle other API errors
             logger.error(f"ShipStation rate request failed: {error_msg}")
-            logger.error(f"Response body: {response.text}")
             
-            # Log error to session for debugging
+            # Log error to session
             user_id = update.effective_user.id
             await session_manager.update_session_atomic(user_id, data={
                 'last_error': f'ShipStation API error: {error_msg}',
                 'error_step': 'FETCH_RATES',
-                'error_timestamp': datetime.now(timezone.utc).isoformat(),
-                'error_response': response.text[:500]  # First 500 chars of error
+                'error_timestamp': datetime.now(timezone.utc).isoformat()
             })
             
             # Delete progress message
@@ -1986,16 +1983,18 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             reply_markup = get_edit_addresses_keyboard()
             
             await safe_telegram_call(query.message.reply_text(
-            ShippingRatesUI.api_error_message(error_msg),
-            reply_markup=reply_markup,
-        ))
-            # Stop progress task on error
+                ShippingRatesUI.api_error_message(error_msg),
+                reply_markup=reply_markup,
+            ))
+            
+            # Stop progress task
             progress_task.cancel()
             try:
                 await progress_task
             except asyncio.CancelledError:
                 pass
-            return CONFIRM_DATA  # Stay to handle callback
+            
+            return CONFIRM_DATA
         
         # Stop progress updates on success (will be deleted later)
         progress_task.cancel()
