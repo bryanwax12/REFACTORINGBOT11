@@ -73,12 +73,16 @@ async def handle_save_as_template(update: Update, context: ContextTypes.DEFAULT_
     return TEMPLATE_NAME
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=False, require_session=True)
 async def handle_confirm_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle confirm data button - proceed to fetch shipping rates"""
     from server import fetch_shipping_rates
     return await fetch_shipping_rates(update, context)
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=False, require_session=True)
 async def check_data_from_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Return to data confirmation screen from cancel dialog"""
     query = update.callback_query
