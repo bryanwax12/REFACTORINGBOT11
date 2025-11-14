@@ -128,7 +128,7 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if bot_msg:
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
-        context.user_data['last_state'] = TO_CITY
+        context.user_data['last_state'] = STATE_NAMES[TO_CITY]
     
     return TO_CITY
 
@@ -136,7 +136,7 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
 @with_typing_indicator
 async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 11/13: Collect recipient city"""
-    from server import session_manager, sanitize_string, TO_CITY, TO_STATE
+    from server import session_manager, sanitize_string, TO_CITY, TO_STATE, STATE_NAMES
     
     city = update.message.text.strip()
     city = sanitize_string(city, max_length=50)
