@@ -3424,8 +3424,10 @@ async def search_orders(
         if shipping_status:
             search_filter["shipping_status"] = shipping_status
         
-        # Get orders
-        orders = await db.orders.find(search_filter, {"_id": 0}).sort("created_at", -1).limit(limit).to_list(limit)
+        # Get orders using Repository Pattern
+        from repositories import get_repositories
+        repos = get_repositories()
+        orders = await repos.orders.find_with_filter(search_filter, limit=limit)
         
         result = []
         
