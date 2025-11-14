@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "РЕГРЕССИОННОЕ ТЕСТИРОВАНИЕ после рефакторинга модульной архитектуры (вынос функций в handlers/common_handlers.py и handlers/admin_handlers.py). Проверка работоспособности Telegram webhook, команд бота, callback кнопок и админских API эндпоинтов."
+user_problem_statement: "КОМПЛЕКСНОЕ ТЕСТИРОВАНИЕ ГЛОБАЛЬНОГО РЕФАКТОРИНГА системы управления состоянием last_state. Проблема: context.user_data['last_state'] сохранялся как целочисленная константа (FROM_NAME = 0), а при чтении ожидалась строка ('FROM_NAME'). Это вызывало KeyError при нажатии кнопок 'Отмена' → 'Вернуться к заказу'. Исправлено: создан словарь STATE_NAMES для маппинга INT → STRING, обновлено 32 места присваивания last_state."
 
 backend:
   - task: "Handlers Refactoring - Modular Architecture Migration"
