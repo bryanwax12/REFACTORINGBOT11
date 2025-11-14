@@ -3224,9 +3224,14 @@ async def create_order(order_data: OrderCreate):
         if not user:
             raise HTTPException(status_code=404, detail="User not found. Please /start the bot first.")
         
+        # Generate unique order_id
+        from utils.order_utils import generate_order_id
+        order_id = generate_order_id(telegram_id=order_data.telegram_id)
+        
         # Create order
         order = Order(
             user_id=user['id'],
+            order_id=order_id,
             telegram_id=order_data.telegram_id,
             address_from=order_data.address_from,
             address_to=order_data.address_to,
