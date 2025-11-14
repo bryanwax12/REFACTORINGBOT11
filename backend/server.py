@@ -6306,39 +6306,55 @@ async def startup_event():
                 menu_button=MenuButtonCommands()
             )
             
-            # Auto-detect environment based on WEBHOOK_BASE_URL
-            # Preview: contains "preview" → POLLING mode
-            # Production: contains "crypto-shipping.emergent.host" → WEBHOOK mode
-            webhook_base_url = os.environ.get('WEBHOOK_BASE_URL', '')
-            is_production = 'crypto-shipping.emergent.host' in webhook_base_url
+            # ============================================================
+            # BOT START: Webhook or Polling (Refactored)
+            # ============================================================
+            # Используем новую систему конфигурации
+            use_webhook = is_webhook_mode()
+            webhook_url = bot_config.get_webhook_url() if use_webhook else None
             
-            # Choose webhook URL based on environment
-            if is_production:
-                # Production: use webhook mode
-                webhook_url = webhook_base_url
-                logger.info(f"🟢 PRODUCTION ENVIRONMENT: {webhook_base_url}")
-            else:
-                # Preview: use polling mode
-                webhook_url = None
-                logger.info(f"🔵 PREVIEW ENVIRONMENT: {webhook_base_url}")
+            env_icon = "🟢" if is_production_environment() else "🔵"
+            mode_icon = "🌐" if use_webhook else "🔄"
             
-            if webhook_url:
-                # Production: use webhook
-                # Remove trailing slash from webhook_url to avoid double slashes
-                webhook_url = webhook_url.rstrip('/')
-                webhook_endpoint = f"{webhook_url}/api/telegram/webhook"
-                logger.info(f"Starting Telegram Bot in WEBHOOK mode: {webhook_endpoint}")
+            logger.info(f"{env_icon} Starting Telegram Bot:")
+            logger.info(f"   Environment: {bot_config.environment.upper()}")
+            logger.info(f"   Mode: {mode_icon} {bot_config.mode.upper()}")
+            logger.info(f"   Bot: @{get_bot_username()}")
+            
+            if use_webhook and webhook_url:
+                # Webhook mode
+                logger.info(f"🌐 WEBHOOK MODE: {webhook_url}")
+                
+                # Удалить старый webhook перед установкой нового
                 await application.bot.delete_webhook(drop_pending_updates=True)
+                
+                # Установить новый webhook
                 await application.bot.set_webhook(
-                    url=webhook_endpoint,
-                    allowed_updates=["message", "callback_query"]
+                    url=webhook_url,
+                    allowed_updates=["message", "callback_query"],
+                    drop_pending_updates=False
                 )
-                logger.info("Telegram Bot webhook set successfully!")
+                
+                logger.info(f"✅ Webhook set successfully: {webhook_url}")
+                
             else:
-                # Preview: use polling
-                logger.info("Starting Telegram Bot in POLLING mode (preview)")
-                await application.updater.start_polling()
-                logger.info("Telegram Bot polling started successfully!")
+                # Polling mode
+                logger.info(f"🔄 POLLING MODE")
+                
+                # Убедиться что webhook отключен
+                try:
+                    await application.bot.delete_webhook(drop_pending_updates=True)
+                    logger.info("   Webhook disabled")
+                except Exception as e:
+                    logger.debug(f"   Webhook delete skipped: {e}")
+                
+                # Запустить polling
+                await application.updater.start_polling(
+                    allowed_updates=["message", "callback_query"],
+                    drop_pending_updates=False
+                )
+                
+                logger.info("✅ Polling started successfully")
         except Exception as e:
             logger.error(f"Failed to start Telegram Bot: {e}")
             logger.warning("Application will continue without Telegram Bot")
