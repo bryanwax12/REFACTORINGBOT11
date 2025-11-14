@@ -3881,14 +3881,13 @@ async def create_label_manually(order_id: str):
         
         logger.info(f"Creating label manually for order {order_id}")
         
-        # Create label via ShipStation
-        response = await asyncio.to_thread(
-            requests.post,
-            'https://api.shipstation.com/v2/labels',
-            headers=headers,
-            json=shipment_data,
-            timeout=30
-        )
+        # Create label via ShipStation (async)
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                'https://api.shipstation.com/v2/labels',
+                headers=headers,
+                json=shipment_data
+            )
         
         if response.status_code != 200:
             error_msg = response.text
@@ -4037,14 +4036,13 @@ async def create_label_manual_form(request: Request):
         
         logger.info("Creating label manually from form")
         
-        # Create label via ShipStation
-        response = await asyncio.to_thread(
-            requests.post,
-            'https://api.shipstation.com/v2/labels',
-            headers=headers,
-            json=shipment_data,
-            timeout=30
-        )
+        # Create label via ShipStation (async)
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                'https://api.shipstation.com/v2/labels',
+                headers=headers,
+                json=shipment_data
+            )
         
         if response.status_code != 200:
             error_msg = response.text
