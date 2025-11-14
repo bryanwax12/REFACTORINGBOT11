@@ -23,7 +23,7 @@ class ApiModeUpdate(BaseModel):
 
 @router.get("/maintenance")
 async def get_maintenance_status(
-    authenticated: bool = Depends(lambda: True)
+    authenticated: bool = Depends(verify_admin_key)
 ):
     """
     Get maintenance mode status
@@ -49,7 +49,7 @@ async def get_maintenance_status(
 @router.post("/maintenance/enable")
 async def enable_maintenance(
     payload: MaintenanceMessage,
-    authenticated: bool = Depends(lambda: True)
+    authenticated: bool = Depends(verify_admin_key)
 ):
     """
     Enable maintenance mode
@@ -80,7 +80,7 @@ async def enable_maintenance(
 
 @router.post("/maintenance/disable")
 async def disable_maintenance(
-    authenticated: bool = Depends(lambda: True)
+    authenticated: bool = Depends(verify_admin_key)
 ):
     """
     Disable maintenance mode
@@ -105,7 +105,7 @@ async def disable_maintenance(
 
 @router.post("/sessions/clear")
 async def clear_all_sessions(
-    authenticated: bool = Depends(lambda: True)
+    authenticated: bool = Depends(verify_admin_key)
 ):
     """
     Clear all user sessions
@@ -137,7 +137,7 @@ async def clear_all_sessions(
 
 @router.get("/api-mode")
 async def get_api_mode(
-    authenticated: bool = Depends(lambda: True)
+    authenticated: bool = Depends(verify_admin_key)
 ):
     """
     Get API-only mode status
@@ -163,7 +163,7 @@ async def get_api_mode(
 @router.post("/api-mode")
 async def set_api_mode(
     payload: ApiModeUpdate,
-    authenticated: bool = Depends(lambda: True)
+    authenticated: bool = Depends(verify_admin_key)
 ):
     """
     Set API-only mode
@@ -196,7 +196,7 @@ async def set_api_mode(
 async def get_system_logs(
     level: str = Query("ERROR", regex="^(ALL|DEBUG|INFO|WARNING|ERROR|CRITICAL)$"),
     limit: int = Query(100, ge=1, le=1000),
-    authenticated: bool = Depends(lambda: True)
+    authenticated: bool = Depends(verify_admin_key)
 ):
     """
     Get system logs
@@ -225,7 +225,7 @@ async def get_system_logs(
 
 @router.post("/shipstation/check-balance")
 async def check_shipstation_balance(
-    authenticated: bool = Depends(lambda: True)
+    authenticated: bool = Depends(verify_admin_key)
 ):
     """
     Check ShipStation account balance
