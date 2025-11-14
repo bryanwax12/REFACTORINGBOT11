@@ -44,7 +44,11 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Store
     user_id = update.effective_user.id
     context.user_data['to_name'] = name
-    await session_manager.update_session_atomic(user_id, step="TO_ADDRESS", data={'to_name': name})
+    
+    # Update session via repository
+    session_repo = SessionRepository(db)
+    await session_repo.update_temp_data(user_id, {'to_name': name})
+    await session_repo.update_step(user_id, "TO_ADDRESS")
     
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
     asyncio.create_task(mark_message_as_selected(update, context))
