@@ -213,6 +213,31 @@ class OrderRepository(BaseRepository):
         
         return await self.update_one({"order_id": order_id}, update_data)
     
+    async def find_with_filter(
+        self,
+        filter_dict: Dict,
+        sort_by: str = "created_at",
+        sort_order: int = -1,
+        limit: int = 100
+    ) -> List[Dict]:
+        """
+        Универсальный поиск заказов с фильтрами
+        
+        Args:
+            filter_dict: Словарь фильтров
+            sort_by: Поле для сортировки
+            sort_order: Порядок сортировки (1 или -1)
+            limit: Максимальное количество
+            
+        Returns:
+            Список заказов
+        """
+        return await self.find_many(
+            filter_dict,
+            sort=[(sort_by, sort_order)],
+            limit=limit
+        )
+    
     async def get_orders_by_status(
         self,
         status: str,
