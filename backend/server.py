@@ -4711,8 +4711,10 @@ async def invite_all_users_to_channel(authenticated: bool = Depends(verify_admin
                     reply_markup=reply_markup
                 ))
                 
-                # Update user record
-                await db.users.update_one(
+                # Update user record using Repository Pattern
+                from repositories import get_user_repo
+                user_repo = get_user_repo()
+                await user_repo.collection.update_one(
                     {"telegram_id": user['telegram_id']},
                     {"$set": {"channel_invite_sent": True, "channel_invite_sent_at": datetime.now(timezone.utc).isoformat()}}
                 )
