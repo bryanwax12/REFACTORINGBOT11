@@ -7,7 +7,7 @@ from typing import Dict, Optional, Literal
 from datetime import datetime, timezone
 import logging
 import httpx
-from utils.retry_utils import with_retry
+from utils.retry_utils import retry_on_api_error
 
 logger = logging.getLogger(__name__)
 
