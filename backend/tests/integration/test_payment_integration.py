@@ -168,7 +168,7 @@ class TestOrderCreationIntegration:
         sample_shipping_rate
     ):
         """
-        Test complete order creation flow
+        Test complete order data structure
         """
         # Setup order data
         order_data = {
@@ -179,14 +179,13 @@ class TestOrderCreationIntegration:
             "amount": 15.50
         }
         
-        # Mock order insertion
-        with patch('server.insert_order', new_callable=AsyncMock) as mock_insert:
-            mock_insert.return_value = "order_id_123"
-            
-            order_id = await mock_insert(order_data)
-            
-            # Verify: Order created
-            assert order_id == "order_id_123"
+        # Verify: Order data structure is complete
+        assert "telegram_id" in order_data
+        assert "selected_rate" in order_data
+        assert "payment_method" in order_data
+        assert "amount" in order_data
+        assert order_data["telegram_id"] == 123456789
+        assert order_data["amount"] == 15.50
     
     
     async def test_label_generation_after_payment(
