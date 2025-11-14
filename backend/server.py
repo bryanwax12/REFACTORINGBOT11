@@ -44,6 +44,14 @@ from services.api_services import (
     validate_address_with_shipstation
 )
 
+# Business Logic Services
+from services import payment_service, template_service
+from services.shipping_service_new import (
+    display_shipping_rates as display_rates_service,
+    validate_shipping_address,
+    validate_parcel_data
+)
+
 # Common handlers (start, help, faq, button routing)
 from handlers.common_handlers import (
     start_command,
