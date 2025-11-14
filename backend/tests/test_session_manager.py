@@ -2,6 +2,7 @@
 Tests for SessionManager (MongoDB session management)
 """
 import pytest
+import pytest_asyncio
 import asyncio
 from datetime import datetime, timezone
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -17,7 +18,7 @@ sys.path.insert(0, '/app/backend')
 from session_manager import SessionManager
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def session_manager():
     """Fixture: Create SessionManager instance"""
     mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
