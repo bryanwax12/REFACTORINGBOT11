@@ -195,8 +195,8 @@ async def get_template_stats(authenticated: bool = Depends(verify_admin_key)) ->
 
 
 @router.get("/stats/payments")
-async def get_payment_stats() -> Dict:
-    """Get payment statistics"""
+async def get_payment_stats(authenticated: bool = Depends(verify_admin_key)) -> Dict:
+    """Get payment statistics (requires admin authentication)"""
     from server import db
     
     try:
