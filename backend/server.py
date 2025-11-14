@@ -1360,8 +1360,10 @@ async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_T
     template_id = query.data.replace('template_update_', '')
     telegram_id = query.from_user.id
     
-    # Get user
-    user = await find_user_by_telegram_id(telegram_id)
+    # Get user using Repository Pattern
+    from repositories import get_user_repo
+    user_repo = get_user_repo()
+    user = await user_repo.find_by_telegram_id(telegram_id)
     if not user:
         await safe_telegram_call(query.message.reply_text("❌ Ошибка: пользователь не найден"))
         return ConversationHandler.END
