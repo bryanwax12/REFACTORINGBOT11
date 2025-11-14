@@ -3327,7 +3327,7 @@ async def check_data_from_cancel(update: Update, context: ContextTypes.DEFAULT_T
 
 async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Return to order after cancel button - restore exact screen"""
-    from utils.ui_utils import OrderStepMessages
+    from utils.ui_utils import OrderStepMessages, get_cancel_keyboard
     
     logger.info(f"return_to_order called - user_id: {update.effective_user.id}")
     query = update.callback_query
