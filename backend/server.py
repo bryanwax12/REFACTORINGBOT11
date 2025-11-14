@@ -5673,13 +5673,12 @@ async def get_carriers():
             'Content-Type': 'application/json'
         }
         
-        # Get carrier accounts
-        response = await asyncio.to_thread(
-            requests.get,
-            'https://api.shipstation.com/v2/carriers',
-            headers=headers,
-            timeout=10
-        )
+        # Get carrier accounts (async)
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(
+                'https://api.shipstation.com/v2/carriers',
+                headers=headers
+            )
         
         if response.status_code != 200:
             raise HTTPException(status_code=response.status_code, detail="Failed to fetch carriers")
