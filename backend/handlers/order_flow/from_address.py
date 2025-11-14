@@ -172,7 +172,7 @@ async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE
 @with_typing_indicator
 async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 4/13: Collect sender city"""
-    from server import session_manager, sanitize_string, FROM_CITY, FROM_STATE
+    from server import session_manager, sanitize_string, FROM_CITY, FROM_STATE, STATE_NAMES
     
     city = update.message.text.strip()
     city = sanitize_string(city, max_length=50)
