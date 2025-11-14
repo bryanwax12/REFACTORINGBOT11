@@ -15,18 +15,37 @@ logger = logging.getLogger(__name__)
 # from utils.security import check_user_blocked, send_blocked_message
 
 
-async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE, db, find_user_by_telegram_id, safe_telegram_call, mark_message_as_selected, check_user_blocked, send_blocked_message):
+from utils.handler_decorators import with_user_session, safe_handler, with_services
+
+@safe_handler()
+@with_user_session(create_user=True)
+@with_services(user_service=True, order_service=False)
+async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE, user_service):
     """
-    Show user balance and topup options
-    Handles both /balance command and callback
+    /balance command handler
+    Shows user balance and allows topup
+    
+    Decorators handle:
+    - User session management + blocking check
+    - Error handling
+    - UserService injection
     """
+    from server import safe_telegram_call, mark_message_as_selected
+    import asyncio
+    
+    # Get user and balance from injected service
+    user = context.user_data['db_user']
+    telegram_id = user['telegram_id']
+    balance = await user_service.get_balance(telegram_id)
+    
     # Handle both command and callback
     if update.callback_query:
         query = update.callback_query
         await safe_telegram_call(query.answer())
-        telegram_id = query.from_user.id
         
         # Load message context from database if this is a callback from payment screen
+        from server import get_db
+        db = get_db()
         payment_record = await db.payments.find_one(
             {"telegram_id": telegram_id, "type": "topup", "status": "pending"},
             {"_id": 0},
@@ -47,18 +66,7 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE,
         send_method = query.message.reply_text
     else:
         asyncio.create_task(mark_message_as_selected(update, context))
-        telegram_id = update.effective_user.id
         send_method = update.message.reply_text
-    
-    # Check if user is blocked
-    if await check_user_blocked(telegram_id):
-        await send_blocked_message(update)
-        return
-    
-    # Get balance using Repository Pattern
-    from repositories import get_user_repo
-    user_repo = get_user_repo()
-    balance = await user_repo.get_balance(telegram_id)
     
     from utils.ui_utils import get_cancel_and_menu_keyboard
     
