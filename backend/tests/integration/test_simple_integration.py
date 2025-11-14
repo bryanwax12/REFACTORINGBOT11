@@ -188,10 +188,7 @@ class TestServiceIntegration:
         
         # Valid parcel
         valid_parcel = {
-            "parcel_weight": 5.0,
-            "parcel_length": 12,
-            "parcel_width": 8,
-            "parcel_height": 6
+            "weight": 5.0  # Function expects 'weight' key
         }
         valid, error = validate_parcel_data(valid_parcel)
         assert valid is True
@@ -199,10 +196,7 @@ class TestServiceIntegration:
         
         # Negative weight
         invalid_parcel = {
-            "parcel_weight": -1.0,
-            "parcel_length": 12,
-            "parcel_width": 8,
-            "parcel_height": 6
+            "weight": -1.0
         }
         valid, error = validate_parcel_data(invalid_parcel)
         assert valid is False
@@ -210,10 +204,7 @@ class TestServiceIntegration:
         
         # Weight too high
         heavy_parcel = {
-            "parcel_weight": 200.0,
-            "parcel_length": 12,
-            "parcel_width": 8,
-            "parcel_height": 6
+            "weight": 200.0
         }
         valid, error = validate_parcel_data(heavy_parcel)
         assert valid is False
