@@ -813,7 +813,9 @@ async def handle_create_label_request(update: Update, context: ContextTypes.DEFA
     
     if label_created:
         # Update order payment status to paid (if it was failed before)
-        await update_order(order_id, {"payment_status": "paid"})
+        from repositories import get_repositories
+        repos = get_repositories()
+        await repos.orders.update_by_id(order_id, {"payment_status": "paid"})
         
         keyboard = [[
             InlineKeyboardButton("🔙 Главное меню", callback_data='start')
