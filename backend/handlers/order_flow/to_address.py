@@ -25,7 +25,7 @@ from utils.decorators import with_typing_indicator
 @with_typing_indicator
 async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 8/13: Collect recipient name"""
-    from server import session_manager, sanitize_string, TO_NAME, TO_ADDRESS, with_typing_indicator
+    from server import session_manager, sanitize_string, TO_NAME, TO_ADDRESS, with_typing_indicator, STATE_NAMES
     
     name = update.message.text.strip()
     name = sanitize_string(name, max_length=50)
