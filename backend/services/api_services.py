@@ -131,12 +131,11 @@ async def check_shipstation_balance():
             "Content-Type": "application/json"
         }
         
-        response = await asyncio.to_thread(
-            requests.get,
-            'https://api.shipstation.com/v2/account',
-            headers=headers,
-            timeout=10
-        )
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(
+                'https://api.shipstation.com/v2/account',
+                headers=headers
+            )
         
         if response.status_code == 200:
             account_data = response.json()
