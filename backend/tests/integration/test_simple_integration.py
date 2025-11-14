@@ -154,12 +154,18 @@ class TestServiceIntegration:
         """Test template data validation"""
         from services.template_service import validate_template_data
         
-        # Valid template
+        # Valid template - needs all required fields
         valid_data = {
             "from_name": "John",
+            "from_street": "123 Main",
             "from_city": "NY",
+            "from_state": "NY",
+            "from_zip": "10001",
             "to_name": "Jane",
-            "to_city": "LA"
+            "to_street": "456 Oak",
+            "to_city": "LA",
+            "to_state": "CA",
+            "to_zip": "90001"
         }
         valid, error = validate_template_data(valid_data)
         assert valid is True
