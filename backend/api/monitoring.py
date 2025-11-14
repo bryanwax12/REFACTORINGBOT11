@@ -165,8 +165,8 @@ async def get_order_stats(authenticated: bool = Depends(verify_admin_key)) -> Di
 
 
 @router.get("/stats/templates")
-async def get_template_stats() -> Dict:
-    """Get template statistics"""
+async def get_template_stats(authenticated: bool = Depends(verify_admin_key)) -> Dict:
+    """Get template statistics (requires admin authentication)"""
     from server import db
     
     try:
