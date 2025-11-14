@@ -55,7 +55,7 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if bot_msg:
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
-        context.user_data['last_state'] = TO_ADDRESS
+        context.user_data['last_state'] = STATE_NAMES[TO_ADDRESS]
     
     return TO_ADDRESS
 
@@ -63,7 +63,7 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
 @with_typing_indicator
 async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 9/13: Collect recipient street address"""
-    from server import session_manager, sanitize_string, TO_ADDRESS, TO_ADDRESS2
+    from server import session_manager, sanitize_string, TO_ADDRESS, TO_ADDRESS2, STATE_NAMES
     
     address = update.message.text.strip()
     address = sanitize_string(address, max_length=100)
