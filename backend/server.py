@@ -6072,10 +6072,11 @@ async def calculate_shipping_rates(request: ShippingRateRequest):
 
 @api_router.get("/stats")
 async def get_stats(authenticated: bool = Depends(verify_admin_key)):
-    from repositories import get_repositories
+    from repositories import get_repositories, get_user_repo
     repos = get_repositories()
+    user_repo = get_user_repo()
     
-    total_users = await db.users.count_documents({})
+    total_users = await user_repo.count_users()
     total_orders = await repos.orders.count_orders()
     paid_orders = await repos.orders.count_orders({"payment_status": "paid"})
     
@@ -6091,10 +6092,10 @@ async def get_stats(authenticated: bool = Depends(verify_admin_key)):
     total_labels = await db.shipping_labels.count_documents({"status": "created"})
     total_profit = total_labels * 10.0
     
-    # Calculate total user balance (sum of all user balances)
-    total_user_balance = await db.users.aggregate([
+    # Calculate total user balance (sum of all user balances) using Repository Pattern
+    total_user_balance = await user_repo.aggregate_users([
         {"$group": {"_id": None, "total": {"$sum": "$balance"}}}
-    ]).to_list(1)
+    ])
     
     user_balance_sum = total_user_balance[0]['total'] if total_user_balance else 0
     
