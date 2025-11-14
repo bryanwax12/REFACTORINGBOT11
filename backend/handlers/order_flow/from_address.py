@@ -15,7 +15,6 @@ from utils.validators import (
     validate_name, validate_address, validate_city,
     validate_state, validate_zip, validate_phone
 )
-from utils.decorators import with_typing_indicator
 from utils.handler_decorators import with_user_session, safe_handler, with_typing_action
 
 # These will be imported from server when handlers are called
