@@ -5211,10 +5211,12 @@ async def get_bot_logs(authenticated: bool = Depends(verify_admin_key), limit: i
 async def get_bot_metrics(authenticated: bool = Depends(verify_admin_key)):
     """Get bot performance metrics"""
     try:
-        # Get order statistics
-        total_orders = await db.orders.count_documents({})
+        # Get order statistics using Repository Pattern
+        from repositories import get_repositories
+        repos = get_repositories()
+        total_orders = await repos.orders.count_orders()
         today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
-        orders_today = await db.orders.count_documents({
+        orders_today = await repos.orders.count_orders({
             "created_at": {"$gte": today_start.isoformat()}
         })
         
@@ -5232,7 +5234,7 @@ async def get_bot_metrics(authenticated: bool = Depends(verify_admin_key)):
                 "avg_order": {"$avg": "$amount"}
             }}
         ]
-        revenue_stats = await db.orders.aggregate(pipeline).to_list(1)
+        revenue_stats = await repos.orders.aggregate_orders(pipeline)
         
         total_revenue = revenue_stats[0]["total_revenue"] if revenue_stats else 0
         avg_order = revenue_stats[0]["avg_order"] if revenue_stats else 0
