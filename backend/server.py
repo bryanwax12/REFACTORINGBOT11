@@ -3263,8 +3263,10 @@ async def root():
 @api_router.post("/orders", response_model=dict)
 async def create_order(order_data: OrderCreate):
     try:
-        # Check user exists
-        user = await find_user_by_telegram_id(order_data.telegram_id)
+        # Check user exists using Repository Pattern
+        from repositories import get_user_repo
+        user_repo = get_user_repo()
+        user = await user_repo.find_by_telegram_id(order_data.telegram_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found. Please /start the bot first.")
         
