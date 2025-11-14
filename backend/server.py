@@ -127,9 +127,9 @@ async def find_order_by_id(order_id: str, projection: dict = None):
 @profile_db_query("find_template_by_id")
 async def find_template_by_id(template_id: str, projection: dict = None):
     """Профилируемый поиск шаблона по ID"""
-    if projection is None:
-        projection = {"_id": 0}
-    return await db.templates.find_one({"id": template_id}, projection)
+    from repositories import get_repositories
+    repos = get_repositories()
+    return await repos.templates.find_by_id(template_id)
 
 # Additional profiled DB operations for performance monitoring
 @profile_db_query("find_payment_by_invoice")
