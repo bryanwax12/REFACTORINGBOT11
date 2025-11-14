@@ -46,7 +46,7 @@ from services.api_services import (
 
 # Business Logic Services
 from services import payment_service, template_service
-from services.shipping_service_new import (
+from services.shipping_service import (
     display_shipping_rates as display_rates_service,
     validate_shipping_address,
     validate_parcel_data
