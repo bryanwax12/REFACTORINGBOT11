@@ -261,10 +261,10 @@ class TestOrderFlowEdgeCases:
         """Test when blocked user tries to create order"""
         from handlers.order_flow.entry_points import new_order_start
         
-        with patch('handlers.order_flow.entry_points.check_maintenance_mode', return_value=False), \
-             patch('handlers.order_flow.entry_points.check_user_blocked', return_value=True), \
-             patch('handlers.order_flow.entry_points.send_blocked_message') as mock_blocked, \
-             patch('handlers.order_flow.entry_points.session_manager') as mock_session:
+        with patch('server.check_maintenance_mode', return_value=False), \
+             patch('server.check_user_blocked', return_value=True), \
+             patch('server.send_blocked_message') as mock_blocked, \
+             patch('server.session_manager') as mock_session:
             
             mock_session.get_or_create_session = AsyncMock(return_value={})
             
