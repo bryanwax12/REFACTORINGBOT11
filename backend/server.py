@@ -5674,7 +5674,9 @@ async def check_all_users_channel_status(authenticated: bool = Depends(verify_ad
                 
                 is_member = chat_member.status in ["creator", "administrator", "member", "restricted"]
                 
-                await db.users.update_one(
+                from repositories import get_user_repo
+                user_repo = get_user_repo()
+                await user_repo.collection.update_one(
                     {"telegram_id": user['telegram_id']},
                     {"$set": {
                         "is_channel_member": is_member,
