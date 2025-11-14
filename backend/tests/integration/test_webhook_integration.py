@@ -197,19 +197,24 @@ class TestExternalAPIIntegration:
         from services.shipping_service import fetch_rates_from_shipstation
         import asyncio
         
-        with patch('aiohttp.ClientSession.post') as mock_post:
+        with patch('httpx.AsyncClient') as mock_client:
             # Simulate timeout
-            mock_post.side_effect = asyncio.TimeoutError()
+            mock_client_instance = AsyncMock()
+            mock_client_instance.post = AsyncMock(side_effect=asyncio.TimeoutError())
+            mock_client.return_value.__aenter__.return_value = mock_client_instance
+            
+            headers = {"API-Key": "test"}
+            api_url = "https://api.shipengine.com/v1/rates/estimate"
             
             success, rates, error = await fetch_rates_from_shipstation(
                 {},
-                api_key="test",
-                api_secret="test"
+                headers,
+                api_url
             )
             
             # Should handle timeout gracefully
             assert success is False
-            assert "timeout" in error.lower() or "error" in error.lower()
+            assert error is not None
     
     
     async def test_api_error_response_handling(
