@@ -28,7 +28,7 @@ async def get_users(
     limit: int = Query(100, ge=1, le=1000),
     skip: int = Query(0, ge=0),
     blocked_only: bool = False,
-    authenticated: bool = Depends(lambda: True)  # Replace with verify_admin_key
+    authenticated: bool = Depends(verify_admin_key)
 ):
     """
     Get all users with pagination
