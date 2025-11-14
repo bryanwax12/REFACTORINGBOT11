@@ -130,11 +130,12 @@ class TestServiceIntegration:
         # Valid payment
         valid, error = validate_payment_amount(10.0, 100.0)
         assert valid is True
+        assert error is None
         
         # Insufficient balance
         valid, error = validate_payment_amount(150.0, 100.0)
         assert valid is False
-        assert "insufficient" in error.lower()
+        assert error is not None and "insufficient" in error.lower()
         
         # Valid topup
         valid, error = validate_topup_amount(50.0)
