@@ -502,9 +502,10 @@ async def continue_order(update, context):
 # ============================================================
 
 def with_services(
-    order_service=True,
-    user_service=True,
-    inject_repos=False
+    order_service=False,
+    user_service=False,
+    session_service=False,
+    payment_service=False
 ):
     """
     Decorator to inject services into handler
@@ -512,31 +513,33 @@ def with_services(
     Automatically provides:
     - OrderService instance
     - UserService instance
-    - Repositories (optional)
+    - SessionService instance
+    - PaymentService instance
     
     Services are passed as keyword arguments to handler
     
     Usage:
-        @with_services(order_service=True, user_service=True)
-        async def my_handler(update, context, order_service, user_service):
+        @with_services(user_service=True, session_service=True)
+        async def my_handler(update, context, user_service, session_service):
             # Services ready to use
             user = await user_service.get_user(telegram_id)
-            order = await order_service.get_order(order_id)
+            session = await session_service.get_session(telegram_id)
     
     Args:
         order_service: Inject OrderService
-        user_service: Inject UserService  
-        inject_repos: Also inject repositories
+        user_service: Inject UserService
+        session_service: Inject SessionService
+        payment_service: Inject PaymentService
     """
     def decorator(func):
         @wraps(func)
         async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
-            from repositories import get_repositories
-            from services.order_service import create_order_service
-            from services.user_service import create_user_service
-            from services.notification_service import NotificationService
+            from services.service_factory import get_service_factory
             
-            # Get repositories
+            # Get service factory
+            factory = get_service_factory()
+            
+            # Inject requested services
             repos = get_repositories()
             
             # Create services
