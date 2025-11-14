@@ -210,12 +210,16 @@ async def handle_template_new_name(update: Update, context: ContextTypes.DEFAULT
     return TEMPLATE_NAME
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=False, require_session=True)
 async def continue_order_after_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Continue order creation after saving template"""
     from server import fetch_shipping_rates
     return await fetch_shipping_rates(update, context)
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=False, require_session=True)
 async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle custom top-up amount input and create Oxapay invoice directly"""
     from server import (
