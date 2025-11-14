@@ -184,17 +184,35 @@ class TestServiceIntegration:
         from services.shipping_service import validate_parcel_data
         
         # Valid parcel
-        valid, error = validate_parcel_data(5.0, 12, 8, 6)
+        valid_parcel = {
+            "parcel_weight": 5.0,
+            "parcel_length": 12,
+            "parcel_width": 8,
+            "parcel_height": 6
+        }
+        valid, error = validate_parcel_data(valid_parcel)
         assert valid is True
         assert error is None
         
         # Negative weight
-        valid, error = validate_parcel_data(-1.0, 12, 8, 6)
+        invalid_parcel = {
+            "parcel_weight": -1.0,
+            "parcel_length": 12,
+            "parcel_width": 8,
+            "parcel_height": 6
+        }
+        valid, error = validate_parcel_data(invalid_parcel)
         assert valid is False
         assert error is not None
         
         # Weight too high
-        valid, error = validate_parcel_data(200.0, 12, 8, 6)
+        heavy_parcel = {
+            "parcel_weight": 200.0,
+            "parcel_length": 12,
+            "parcel_width": 8,
+            "parcel_height": 6
+        }
+        valid, error = validate_parcel_data(heavy_parcel)
         assert valid is False
         assert error is not None
 
