@@ -1868,7 +1868,8 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         logger.info(f"✅ Using cached rates for {data['from_zip']} → {data['to_zip']}")
         
         # Immediately show rates (no API call needed)
-        await safe_telegram_call(query.answer("✅ Тарифы загружены из кэша"))
+        from utils.ui_utils import ShippingRatesUI
+        await safe_telegram_call(query.answer(ShippingRatesUI.cache_hit_message()))
         
         # Prepare rate data
         context.user_data['rates'] = cached_rates
