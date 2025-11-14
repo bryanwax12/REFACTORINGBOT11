@@ -1665,15 +1665,23 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
     
     template_id = context.user_data.get('renaming_template_id')
     
-    await update_template(template_id, {"name": new_name})
+    # Use template service
+    success, error = await template_service.update_template_name(
+        template_id=template_id,
+        new_name=new_name,
+        update_template_func=update_template
+    )
     
-    keyboard = [[InlineKeyboardButton("👁️ Просмотреть", callback_data=f'template_view_{template_id}')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    await safe_telegram_call(update.message.reply_text(
-            f"""✅ Шаблон переименован в "{new_name}" """,
-            reply_markup=reply_markup
-        ))
+    if success:
+        keyboard = [[InlineKeyboardButton("👁️ Просмотреть", callback_data=f'template_view_{template_id}')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await safe_telegram_call(update.message.reply_text(
+                f"""✅ Шаблон переименован в "{new_name}" """,
+                reply_markup=reply_markup
+            ))
+    else:
+        await safe_telegram_call(update.message.reply_text(f"❌ {error}"))
     
     return ConversationHandler.END
 
