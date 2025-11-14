@@ -1448,27 +1448,13 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return ConversationHandler.END
     
     # Build template list message
-    message = "📋 *Выберите шаблон:*\n\n"
+    from utils.ui_utils import TemplateManagementUI
+    message = TemplateManagementUI.templates_list_header()
     
     keyboard = []
     for i, template in enumerate(templates, 1):
-        from_name = template.get('from_name', '')
-        from_street = template.get('from_street1', '')
-        from_city = template.get('from_city', '')
-        from_state = template.get('from_state', '')
-        from_zip = template.get('from_zip', '')
-        to_name = template.get('to_name', '')
-        to_street = template.get('to_street1', '')
-        to_city = template.get('to_city', '')
-        to_state = template.get('to_state', '')
-        to_zip = template.get('to_zip', '')
-        
         # Add compact template info to message
-        message += f"*{i}. {template['name']}*\n"
-        message += f"📤 От: {from_name}\n"
-        message += f"   {from_street}, {from_city}, {from_state} {from_zip}\n"
-        message += f"📥 Кому: {to_name}\n"
-        message += f"   {to_street}, {to_city}, {to_state} {to_zip}\n\n"
+        message += TemplateManagementUI.format_template_item(i, template)
         
         # Create button with just number and name
         keyboard.append([InlineKeyboardButton(
