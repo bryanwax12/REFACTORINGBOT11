@@ -445,9 +445,9 @@ async def test_full_rate_fetching_pipeline(sample_order_data, sample_carrier_ids
     # 3. Mock API call
     from unittest.mock import AsyncMock
     
-    mock_response = AsyncMock()
+    mock_response = Mock()  # httpx response is sync
     mock_response.status_code = 200
-    mock_response.json.return_value = {
+    mock_response.json = Mock(return_value={
         'rate_response': {
             'rates': [
                 {
@@ -462,7 +462,7 @@ async def test_full_rate_fetching_pipeline(sample_order_data, sample_carrier_ids
                 for i in range(5)
             ]
         }
-    }
+    })
     
     with patch('httpx.AsyncClient') as mock_client:
         mock_client_instance = AsyncMock()
