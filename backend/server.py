@@ -187,17 +187,23 @@ async def delete_pending_order(telegram_id: int):
 @profile_db_query("insert_template")
 async def insert_template(template_dict: dict):
     """Профилируемая вставка шаблона"""
-    return await db.templates.insert_one(template_dict)
+    from repositories import get_repositories
+    repos = get_repositories()
+    return await repos.templates.collection.insert_one(template_dict)
 
 @profile_db_query("update_template")
 async def update_template(template_id: str, update_data: dict):
     """Профилируемое обновление шаблона"""
-    return await db.templates.update_one({"id": template_id}, {"$set": update_data})
+    from repositories import get_repositories
+    repos = get_repositories()
+    return await repos.templates.update_by_id(template_id, update_data)
 
 @profile_db_query("delete_template")
 async def delete_template(template_id: str):
     """Профилируемое удаление шаблона"""
-    return await db.templates.delete_one({"id": template_id})
+    from repositories import get_repositories
+    repos = get_repositories()
+    return await repos.templates.delete_by_id(template_id)
 
 # Debug logging removed - was causing startup issues
 
