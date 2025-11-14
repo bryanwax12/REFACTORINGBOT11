@@ -214,7 +214,8 @@ async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE
 @safe_handler(fallback_state=ConversationHandler.END)
 @with_typing_action()
 @with_user_session(create_user=False, require_session=True)
-async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
+@with_services(session_service=True)
+async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE, session_service):
     """
     Step 4/13: Collect sender city
     
