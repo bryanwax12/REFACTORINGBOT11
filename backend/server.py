@@ -101,20 +101,21 @@ from handlers.order_flow.to_address import order_to_address2
 
 # Profiled DB operations (most frequently used)
 @profile_db_query("find_user_by_telegram_id")
+@profile_db_query("find_user_by_telegram_id")
 async def find_user_by_telegram_id(telegram_id: int, projection: dict = None):
     """
     Профилируемый поиск пользователя по telegram_id
     
     Args:
         telegram_id: Telegram user ID
-        projection: Optional projection dict (default: {"_id": 0})
+        projection: Optional projection dict (ignored, kept for compatibility)
     
     Returns:
         User document or None
     """
-    if projection is None:
-        projection = {"_id": 0}
-    return await db.users.find_one({"telegram_id": telegram_id}, projection)
+    from repositories import get_user_repo
+    user_repo = get_user_repo()
+    return await user_repo.find_by_telegram_id(telegram_id)
 
 @profile_db_query("find_order_by_id")
 async def find_order_by_id(order_id: str, projection: dict = None):
