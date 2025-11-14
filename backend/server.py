@@ -2933,7 +2933,9 @@ async def create_and_send_label(order_id, telegram_id, message):
             })
             
             # Notify admin about label creation error
-            user = await find_user_by_telegram_id(telegram_id)
+            from repositories import get_user_repo
+            user_repo = get_user_repo()
+            user = await user_repo.find_by_telegram_id(telegram_id)
             if user:
                 error_details = f"ShipStation API Error:\n{response.text[:500]}"
                 await notify_admin_error(
