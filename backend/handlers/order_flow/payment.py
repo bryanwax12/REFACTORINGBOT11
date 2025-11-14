@@ -86,12 +86,16 @@ async def show_payment_methods(update: Update, context: ContextTypes.DEFAULT_TYP
     return PAYMENT_METHOD
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=False, require_session=True)
 async def handle_pay_from_balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle payment from user balance"""
     from server import process_payment
     return await process_payment(update, context)
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=False, require_session=True)
 async def handle_pay_crypto(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle crypto payment selection"""
     from server import (
