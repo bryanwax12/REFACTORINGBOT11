@@ -198,24 +198,17 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await send_blocked_message(update)
         return ConversationHandler.END
     
-    # Import required modules
-    from server import db, find_user_by_telegram_id
-    from models.models import User
+    # Get or create user using Repository Pattern
+    from repositories import get_user_repo
+    user_repo = get_user_repo()
     
-    existing_user = await find_user_by_telegram_id(telegram_id)
+    user = await user_repo.get_or_create_user(
+        telegram_id=telegram_id,
+        username=username,
+        first_name=first_name
+    )
     
-    if not existing_user:
-        user = User(
-            telegram_id=telegram_id,
-            username=username,
-            first_name=first_name
-        )
-        user_dict = user.model_dump()
-        user_dict['created_at'] = user_dict['created_at'].isoformat()
-        await db.users.insert_one(user_dict)
-        user_balance = 0.0
-    else:
-        user_balance = existing_user.get('balance', 0.0)
+    user_balance = user.get('balance', 0.0)
         
     # Import UI utilities
     from utils.ui_utils import MessageTemplates, get_main_menu_keyboard
