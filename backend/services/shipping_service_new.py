@@ -175,17 +175,39 @@ async def format_order_for_shipstation(
 SHIPPING SERVICE ARCHITECTURE:
 
 This module centralizes all shipping-related operations:
-1. Rate calculation and display
-2. Label creation and delivery
-3. ShipStation API integration
-4. Order validation
-5. Address formatting
 
-BENEFITS:
+## Core Functions:
+1. Rate Calculation & Display:
+   - display_shipping_rates() - Show rates to user
+   - validate_order_data_for_rates() - Validate before API call
+   - build_shipstation_rates_request() - Build API request
+   - fetch_rates_from_shipstation() - Make API call
+   - filter_and_sort_rates() - Process API response
+   - save_rates_to_cache_and_session() - Cache results
+
+2. Label Creation & Delivery:
+   - build_shipstation_label_request() - Build label request
+   - download_label_pdf() - Download PDF from URL
+   - send_label_to_user() - Send via Telegram
+
+3. Validation:
+   - validate_shipping_address() - Address validation
+   - validate_parcel_data() - Parcel info validation
+
+4. Utilities:
+   - format_order_for_shipstation() - Format order data
+
+## Design Pattern:
+All functions use dependency injection - they receive external dependencies
+(db, functions) as parameters, making them easy to test and reuse.
+
+## Benefits:
 - Single responsibility: All shipping logic in one place
-- Testability: Easy to unit test
+- Testability: Easy to unit test with mocks
 - Reusability: Functions can be used across handlers
 - Maintainability: Changes to shipping logic isolated here
+- Modularity: Large functions broken into smaller pieces
+- Cache-friendly: Rate caching built-in
 """
 
 
