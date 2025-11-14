@@ -2908,7 +2908,7 @@ async def create_and_send_label(order_id, telegram_id, message):
         if bot_instance:
             try:
                 # Download label PDF using service
-                from services.shipping_service_new import download_label_pdf
+                from services.shipping_service import download_label_pdf
                 success, pdf_bytes, error = await download_label_pdf(label_download_url, timeout=30)
                 
                 if success:
