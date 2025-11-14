@@ -222,32 +222,33 @@ async def deduct_balance(telegram_id: int, amount: float, db):
     Args:
         telegram_id: User's Telegram ID
         amount: Amount to deduct
-        db: Database connection
+        db: Database connection (deprecated, kept for backward compatibility)
     
     Returns:
         bool: True if successful, False if insufficient balance
     """
     try:
+        from repositories import get_user_repo
+        user_repo = get_user_repo()
+        
         # Check current balance first
-        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0, "balance": 1})
+        current_balance = await user_repo.get_balance(telegram_id)
         
-        if not user:
-            logger.warning(f"⚠️ User {telegram_id} not found")
-            return False
-        
-        current_balance = user.get('balance', 0.0)
+        if current_balance == 0.0:
+            # User might not exist
+            user = await user_repo.find_by_telegram_id(telegram_id)
+            if not user:
+                logger.warning(f"⚠️ User {telegram_id} not found")
+                return False
         
         if current_balance < amount:
             logger.warning(f"⚠️ Insufficient balance for user {telegram_id}: ${current_balance:.2f} < ${amount:.2f}")
             return False
         
         # Deduct balance
-        result = await db.users.update_one(
-            {"telegram_id": telegram_id},
-            {"$inc": {"balance": -amount}}
-        )
+        result = await user_repo.update_balance(telegram_id, amount, operation="subtract")
         
-        if result.modified_count > 0:
+        if result:
             logger.info(f"💸 Deducted ${amount:.2f} from user {telegram_id}")
             return True
         else:
