@@ -149,7 +149,9 @@ async def find_pending_order(telegram_id: int, projection: dict = None):
 @profile_db_query("count_user_templates")
 async def count_user_templates(telegram_id: int):
     """Профилируемый подсчет шаблонов пользователя"""
-    return await db.templates.count_documents({"telegram_id": telegram_id})
+    from repositories import get_repositories
+    repos = get_repositories()
+    return await repos.templates.count_user_templates(telegram_id)
 
 @profile_db_query("find_user_templates")
 async def find_user_templates(telegram_id: int, limit: int = 10):
