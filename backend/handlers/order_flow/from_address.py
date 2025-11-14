@@ -308,10 +308,18 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return FROM_ZIP
 
 
-@with_typing_indicator
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_typing_action()
+@with_user_session(create_user=False, require_session=True)
 async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Step 6/13: Collect sender ZIP code"""
-    from server import session_manager, FROM_ZIP, FROM_PHONE, STATE_NAMES
+    """
+    Step 6/13: Collect sender ZIP code
+    
+    Decorators handle: User session + error handling + typing indicator
+    """
+    from server import FROM_ZIP, FROM_PHONE, STATE_NAMES
+    from repositories.session_repository import SessionRepository
+    from server import db
     
     zip_code = update.message.text.strip()
     
