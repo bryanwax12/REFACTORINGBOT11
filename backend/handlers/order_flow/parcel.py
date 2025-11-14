@@ -51,7 +51,7 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
     if bot_msg:
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
-        context.user_data['last_state'] = PARCEL_LENGTH
+        context.user_data['last_state'] = STATE_NAMES[PARCEL_LENGTH]
     
     return PARCEL_LENGTH
 
