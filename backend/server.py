@@ -2279,7 +2279,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 
                 await safe_telegram_call(query.message.reply_text(
-                    PaymentFlowUI.payment_success_balance(amount, new_balance),
+                    PaymentFlowUI.payment_success_balance(amount, new_balance, order.get('order_id')),
                     reply_markup=reply_markup
                 ))
                 
