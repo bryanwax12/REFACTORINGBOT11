@@ -248,7 +248,11 @@ class TestAPIIntegration:
         """Test ShipStation API call with mocked response"""
         from services.shipping_service import fetch_rates_from_shipstation, build_shipstation_rates_request
         
-        request = build_shipstation_rates_request(sample_order_data)
+        # Add required fields
+        sample_order_data['parcel_weight'] = 5.5
+        carrier_ids = ["se-123456"]
+        
+        request = build_shipstation_rates_request(sample_order_data, carrier_ids)
         
         with patch('aiohttp.ClientSession.post') as mock_post:
             mock_response = AsyncMock()
