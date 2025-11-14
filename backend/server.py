@@ -6014,9 +6014,11 @@ async def get_topups(authenticated: bool = Depends(verify_admin_key)):
 
 app.include_router(api_router)
 
-# Include admin router
-from routers.admin_router import admin_router
-app.include_router(admin_router)
+# Include admin routers (v1 and v2)
+from routers.admin_router import admin_router  # Legacy
+from routers.admin import admin_router_v2  # New modular
+app.include_router(admin_router)  # Keep for backward compatibility
+app.include_router(admin_router_v2)  # New modular admin API
 
 # Include monitoring router
 from api.monitoring import router as monitoring_router
