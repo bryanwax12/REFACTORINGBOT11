@@ -2692,7 +2692,15 @@ async def handle_topup_crypto_selection(update: Update, context: ContextTypes.DE
             return ConversationHandler.END
         
         telegram_id = query.from_user.id
-        user = await find_user_by_telegram_id(telegram_id)
+        
+        # Get user using Repository Pattern
+        from repositories import get_user_repo
+        user_repo = get_user_repo()
+        user = await user_repo.find_by_telegram_id(telegram_id)
+        
+        if not user:
+            await safe_telegram_call(query.message.reply_text("❌ Пользователь не найден"))
+            return ConversationHandler.END
         
         # Create Oxapay invoice for top-up (order_id must be <= 50 chars)
         # Generate short order_id: "top_" (4) + timestamp (10) + "_" (1) + random (8) = 23 chars
