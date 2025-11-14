@@ -366,7 +366,8 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
 @safe_handler(fallback_state=ConversationHandler.END)
 @with_typing_action()
 @with_user_session(create_user=False, require_session=True)
-async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
+@with_services(session_service=True)
+async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, session_service):
     """
     Step 7/13: Collect sender phone (optional)
     
