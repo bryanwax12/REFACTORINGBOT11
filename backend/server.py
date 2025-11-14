@@ -5433,7 +5433,10 @@ async def check_all_bot_access(authenticated: bool = Depends(verify_admin_key)):
         if not bot_instance:
             raise HTTPException(status_code=500, detail="Bot not initialized")
         
-        users = await db.users.find({}).to_list(None)
+        # Get all users using Repository Pattern
+        from repositories import get_user_repo
+        user_repo = get_user_repo()
+        users = await user_repo.get_all_users()
         
         checked_count = 0
         accessible_count = 0
