@@ -88,7 +88,7 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
 @with_typing_indicator
 async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 2/13: Collect sender street address"""
-    from server import session_manager, SecurityLogger, sanitize_string, FROM_ADDRESS, FROM_ADDRESS2
+    from server import session_manager, SecurityLogger, sanitize_string, FROM_ADDRESS, FROM_ADDRESS2, STATE_NAMES
     
     logger.info(f"🔵 order_from_address - User: {update.effective_user.id}")
     
