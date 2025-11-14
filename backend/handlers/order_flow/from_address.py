@@ -382,7 +382,11 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Store
     user_id = update.effective_user.id
     context.user_data['from_phone'] = formatted_phone
-    await session_manager.update_session_atomic(user_id, step="TO_NAME", data={'from_phone': formatted_phone})
+    
+    # Update session via repository
+    session_repo = SessionRepository(db)
+    await session_repo.update_temp_data(user_id, {'from_phone': formatted_phone})
+    await session_repo.update_step(user_id, "TO_NAME")
     
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
     asyncio.create_task(mark_message_as_selected(update, context))
