@@ -3710,12 +3710,12 @@ async def refund_order(order_id: str, refund_reason: Optional[str] = None):
                     'Content-Type': 'application/json'
                 }
                 
-                # Void label on ShipStation V2
-                void_response = requests.put(
-                    f'https://api.shipstation.com/v2/labels/{label["label_id"]}/void',
-                    headers=headers,
-                    timeout=10
-                )
+                # Void label on ShipStation V2 (async)
+                async with httpx.AsyncClient(timeout=10.0) as client:
+                    void_response = await client.put(
+                        f'https://api.shipstation.com/v2/labels/{label["label_id"]}/void',
+                        headers=headers
+                    )
                 
                 if void_response.status_code == 200:
                     void_data = void_response.json()
