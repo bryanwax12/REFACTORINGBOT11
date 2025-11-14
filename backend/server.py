@@ -2391,8 +2391,9 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         if query.data == 'pay_from_balance':
             # Pay from balance
+            from utils.ui_utils import PaymentFlowUI
             if user.get('balance', 0) < amount:
-                await safe_telegram_call(query.message.reply_text("❌ Недостаточно средств на балансе."))
+                await safe_telegram_call(query.message.reply_text(PaymentFlowUI.insufficient_balance_error()))
                 return ConversationHandler.END
             
             # Create order
