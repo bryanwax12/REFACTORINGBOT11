@@ -101,10 +101,18 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return FROM_ADDRESS
 
 
-@with_typing_indicator
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_typing_action()
+@with_user_session(create_user=False, require_session=True)
 async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Step 2/13: Collect sender street address"""
-    from server import session_manager, SecurityLogger, sanitize_string, FROM_ADDRESS, FROM_ADDRESS2, STATE_NAMES
+    """
+    Step 2/13: Collect sender street address
+    
+    Decorators handle: User session + error handling + typing indicator
+    """
+    from server import SecurityLogger, sanitize_string, FROM_ADDRESS, FROM_ADDRESS2, STATE_NAMES
+    from repositories.session_repository import SessionRepository
+    from server import db
     
     logger.info(f"🔵 order_from_address - User: {update.effective_user.id}")
     
