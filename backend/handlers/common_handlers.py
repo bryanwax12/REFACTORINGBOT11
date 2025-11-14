@@ -103,8 +103,9 @@ async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT
 
 async def check_user_blocked(telegram_id: int) -> bool:
     """Check if user is blocked"""
-    from server import find_user_by_telegram_id
-    user = await find_user_by_telegram_id(telegram_id, {"_id": 0, "blocked": 1})
+    from repositories import get_user_repo
+    user_repo = get_user_repo()
+    user = await user_repo.find_by_telegram_id(telegram_id)
     return user.get('blocked', False) if user else False
 
 
