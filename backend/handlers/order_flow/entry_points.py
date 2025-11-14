@@ -50,23 +50,17 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     logger.info(f"📝 User {telegram_id} starting new order flow")
     
-    # Get or create session (V2 - atomic with TTL)
-    user_id = update.effective_user.id
-    session = await session_manager.get_or_create_session(user_id, initial_data={})
+    # Session is already handled by @with_user_session decorator
+    # Available in context.user_data['session']
+    session = context.user_data.get('session', {})
+    current_step = session.get('current_step', 'START')
+    temp_data = session.get('temp_data', {})
     
-    if session:
-        current_step = session.get('current_step', 'START')
-        temp_data = session.get('temp_data', {})
-        
-        if current_step != 'START' and temp_data:
-            logger.info(f"🔄 Resuming session for user {user_id} from step {current_step}")
-            context.user_data.update(temp_data)
-        else:
-            logger.info(f"🆕 New session for user {user_id}")
-            context.user_data.clear()
+    if current_step != 'START' and temp_data:
+        logger.info(f"🔄 Resuming session for user {telegram_id} from step {current_step}")
+        context.user_data.update(temp_data)
     else:
-        logger.error(f"❌ Failed to get/create session for user {user_id}")
-        context.user_data.clear()
+        logger.info(f"🆕 New session for user {telegram_id}")
     
     # Check if bot is in maintenance mode
     if await check_maintenance_mode(update):
