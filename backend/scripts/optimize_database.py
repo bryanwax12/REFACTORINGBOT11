@@ -24,14 +24,27 @@ async def create_indexes():
     
     logger.info(f"🔍 Analyzing database: {db_name}")
     
+    async def safe_create_index(collection, keys, **kwargs):
+        """Safely create index, skip if already exists"""
+        try:
+            await collection.create_index(keys, **kwargs)
+            return True
+        except Exception as e:
+            if "already exists" in str(e):
+                logger.info(f"⏭️  Skipped (already exists): {kwargs.get('name', keys)}")
+                return False
+            else:
+                logger.error(f"❌ Error creating index: {e}")
+                return False
+    
     # ============================================================
     # USERS COLLECTION INDEXES
     # ============================================================
     logger.info("\n📊 Creating indexes for 'users' collection...")
     
     # 1. Unique index on telegram_id (most frequent lookup)
-    await db.users.create_index("telegram_id", unique=True, name="idx_telegram_id_unique")
-    logger.info("✅ Created unique index: users.telegram_id")
+    if await safe_create_index(db.users, "telegram_id", unique=True, name="idx_telegram_id_unique"):
+        logger.info("✅ Created unique index: users.telegram_id")
     
     # 2. Index on created_at for analytics
     await db.users.create_index("created_at", name="idx_created_at")
