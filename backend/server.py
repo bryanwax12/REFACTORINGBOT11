@@ -914,7 +914,15 @@ async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAUL
         context.user_data['awaiting_topup_amount'] = False
         
         telegram_id = update.effective_user.id
-        user = await find_user_by_telegram_id(telegram_id)
+        
+        # Get user using Repository Pattern
+        from repositories import get_user_repo
+        user_repo = get_user_repo()
+        user = await user_repo.find_by_telegram_id(telegram_id)
+        
+        if not user:
+            await safe_telegram_call(update.message.reply_text("❌ Пользователь не найден"))
+            return
         
         # Create Oxapay invoice (order_id must be <= 50 chars)
         # Generate short order_id: "top_" (4) + timestamp (10) + "_" (1) + random (8) = 23 chars
