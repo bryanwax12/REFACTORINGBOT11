@@ -1238,7 +1238,6 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return TEMPLATE_NAME
     
     telegram_id = update.effective_user.id
-    user = await find_user_by_telegram_id(telegram_id)
     
     # Check if template with this name already exists
     existing = await db.templates.find_one({
