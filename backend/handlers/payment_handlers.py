@@ -33,7 +33,7 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE,
     from server import safe_telegram_call, mark_message_as_selected
     import asyncio
     
-    # Get user and balance from injected service
+    # Get user and balance from injected services
     user = context.user_data['db_user']
     telegram_id = user['telegram_id']
     balance = await user_service.get_balance(telegram_id)
@@ -43,16 +43,9 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE,
         query = update.callback_query
         await safe_telegram_call(query.answer())
         
-        # Load message context from database if this is a callback from payment screen
-        from server import get_db
-        db = get_db()
-        payment_record = await db.payments.find_one(
-            {"telegram_id": telegram_id, "type": "topup", "status": "pending"},
-            {"_id": 0},
-            sort=[("created_at", -1)]  # Get latest pending payment
-        )
+        # Load message context from last pending payment
+        payment_record = await payment_service.get_pending_payment(telegram_id, "topup")
         
-        logger.info(f"Payment record found: {payment_record is not None}")
         if payment_record and payment_record.get('payment_message_id'):
             logger.info(f"Payment message_id: {payment_record.get('payment_message_id')}")
             context.user_data['last_bot_message_id'] = payment_record['payment_message_id']
