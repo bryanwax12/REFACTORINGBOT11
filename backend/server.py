@@ -2071,11 +2071,11 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             except Exception:
                 pass
             
-            from utils.ui_utils import get_edit_addresses_keyboard
+            from utils.ui_utils import get_edit_addresses_keyboard, ShippingRatesUI
             reply_markup = get_edit_addresses_keyboard()
             
             await safe_telegram_call(query.message.reply_text(
-            f"❌ Ошибка при получении тарифов:\n{error_msg}\n\nПроверьте правильность введенных адресов.",
+            ShippingRatesUI.api_error_message(error_msg),
             reply_markup=reply_markup,
         ))
             # Stop progress task on error
