@@ -2815,7 +2815,11 @@ async def create_order_in_db(user, data, selected_rate, amount, discount_percent
     order_dict['markup'] = selected_rate['amount'] - selected_rate['original_amount']  # Store markup amount before discount
     order_dict['discount_percent'] = discount_percent  # Store discount percentage
     order_dict['discount_amount'] = discount_amount  # Store discount amount
-    await db.orders.insert_one(order_dict)
+    
+    # Insert order using Repository Pattern
+    from repositories import get_repositories
+    repos = get_repositories()
+    await repos.orders.collection.insert_one(order_dict)
     
     return order_dict
 
