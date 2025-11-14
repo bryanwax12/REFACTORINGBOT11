@@ -213,11 +213,11 @@ class TestOrderFlowEdgeCases:
         """Test handling when user not found in database"""
         from handlers.order_flow.entry_points import new_order_start
         
-        with patch('handlers.order_flow.entry_points.find_user_by_telegram_id', return_value=None), \
-             patch('handlers.order_flow.entry_points.count_user_templates', return_value=0), \
-             patch('handlers.order_flow.entry_points.check_maintenance_mode', return_value=False), \
-             patch('handlers.order_flow.entry_points.check_user_blocked', return_value=False), \
-             patch('handlers.order_flow.entry_points.session_manager') as mock_session:
+        with patch('server.find_user_by_telegram_id', return_value=None), \
+             patch('server.count_user_templates', return_value=0), \
+             patch('server.check_maintenance_mode', return_value=False), \
+             patch('server.check_user_blocked', return_value=False), \
+             patch('server.session_manager') as mock_session:
             
             mock_session.get_or_create_session = AsyncMock(return_value={
                 "user_id": 123456789,
