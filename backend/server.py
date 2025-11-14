@@ -620,6 +620,7 @@ class Payment(BaseModel):
 class Order(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    order_id: str  # Unique tracking ID for user display (e.g., "ORD-20251114-a3f8d2b4")
     user_id: str
     telegram_id: int
     address_from: Address
