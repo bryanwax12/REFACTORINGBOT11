@@ -2336,8 +2336,16 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                            [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 
+                # Get order_id from session for display
+                from utils.order_utils import format_order_id_for_display
+                session = await session_manager.get_session(telegram_id)
+                order_id_display = ""
+                if session and session.get('order_id'):
+                    display_id = format_order_id_for_display(session['order_id'])
+                    order_id_display = f"\n📦 Номер заказа: #{display_id}\n"
+                
                 await safe_telegram_call(query.message.reply_text(
-                    f"""✅ Заказ создан!
+                    f"""✅ Заказ создан!{order_id_display}
 
 💰 Сумма к оплате: ${amount}
 🪙 Криптовалюта: BTC, ETH, USDT, USDC и др.
