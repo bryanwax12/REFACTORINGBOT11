@@ -1210,6 +1210,8 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
 
 async def show_edit_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Show menu to select what to edit"""
+    from utils.ui_utils import DataConfirmationUI
+    
     query = update.callback_query
     
     # Mark previous message as selected (non-blocking)
@@ -1217,13 +1219,8 @@ async def show_edit_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     message = "✏️ Что вы хотите изменить?"
     
-    keyboard = [
-        [InlineKeyboardButton("📤 Адрес отправителя", callback_data='edit_from_address')],
-        [InlineKeyboardButton("📥 Адрес получателя", callback_data='edit_to_address')],
-        [InlineKeyboardButton("📦 Вес посылки", callback_data='edit_parcel')],
-        [InlineKeyboardButton("⬅️ Назад", callback_data='back_to_confirmation')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    # Build keyboard using UI utils
+    reply_markup = DataConfirmationUI.build_edit_menu_keyboard()
     
     await safe_telegram_call(query.message.reply_text(message, reply_markup=reply_markup))
     return EDIT_MENU
