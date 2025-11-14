@@ -4018,16 +4018,17 @@ async def create_label_manually(order_id: str):
         }
         await db.shipping_labels.insert_one({**label_doc, '_id': label_id})
         
-        # Update order with label info
-        await db.orders.update_one(
-            {'id': order_id},
+        # Update order with label info using Repository Pattern
+        from repositories import get_repositories
+        repos = get_repositories()
+        await repos.orders.update_by_id(
+            order_id,
             {
-                '$set': {
-                    'label_id': label_id,
-                    'tracking_number': tracking_number,
-                    'carrier': carrier_code,
-                    'shipping_status': 'label_created',
-                    'label_created_at': datetime.now(timezone.utc).isoformat()
+                'label_id': label_id,
+                'tracking_number': tracking_number,
+                'carrier': carrier_code,
+                'shipping_status': 'label_created',
+                'label_created_at': datetime.now(timezone.utc).isoformat()
                 }
             }
         )
