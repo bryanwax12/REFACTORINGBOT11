@@ -358,10 +358,18 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return FROM_PHONE
 
 
-@with_typing_indicator
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_typing_action()
+@with_user_session(create_user=False, require_session=True)
 async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Step 7/13: Collect sender phone (optional)"""
-    from server import session_manager, FROM_PHONE, TO_NAME, STATE_NAMES
+    """
+    Step 7/13: Collect sender phone (optional)
+    
+    Decorators handle: User session + error handling + typing indicator
+    """
+    from server import FROM_PHONE, TO_NAME, STATE_NAMES
+    from repositories.session_repository import SessionRepository
+    from server import db
     
     phone = update.message.text.strip()
     
