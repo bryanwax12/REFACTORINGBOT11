@@ -139,10 +139,20 @@ async def check_maintenance_mode(update: Update) -> bool:
 
 # ==================== COMMAND HANDLERS ====================
 
+from utils.handler_decorators import with_user_session, safe_handler, with_typing_action
+
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_typing_action()
+@with_user_session(create_user=True, require_session=False)
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     /start command handler - Main menu
     Handles both direct command and callback query
+    
+    Decorators handle:
+    - User creation/retrieval + blocking check
+    - Error handling
+    - Typing indicator
     """
     # CRITICAL: Clear old conversation state for this user to prevent stuck dialogs
     try:
@@ -163,25 +173,19 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         logger.error(f"Error clearing conversation state: {e}")
     
+    # Get user from context (injected by decorator)
+    user = context.user_data['db_user']
+    user_balance = user.get('balance', 0.0)
+    first_name = user.get('first_name', 'Пользователь')
+    
     # Handle both command and callback
     if update.callback_query:
         query = update.callback_query
         await safe_telegram_call(query.answer())
-        
-        # Mark previous message as selected (remove buttons and add "✅ Выбрано")
         asyncio.create_task(mark_message_as_selected(update, context))
-        
-        telegram_id = query.from_user.id
-        username = query.from_user.username
-        first_name = query.from_user.first_name
         send_method = query.message.reply_text
     else:
-        # Mark previous message as selected (non-blocking)
         asyncio.create_task(mark_message_as_selected(update, context))
-        
-        telegram_id = update.effective_user.id
-        username = update.effective_user.username
-        first_name = update.effective_user.first_name
         send_method = update.message.reply_text
     
     # Check if bot is in maintenance mode
@@ -192,23 +196,6 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode='Markdown'
         )
         return ConversationHandler.END
-    
-    # Check if user is blocked
-    if await check_user_blocked(telegram_id):
-        await send_blocked_message(update)
-        return ConversationHandler.END
-    
-    # Get or create user using Repository Pattern
-    from repositories import get_user_repo
-    user_repo = get_user_repo()
-    
-    user = await user_repo.get_or_create_user(
-        telegram_id=telegram_id,
-        username=username,
-        first_name=first_name
-    )
-    
-    user_balance = user.get('balance', 0.0)
         
     # Import UI utilities
     from utils.ui_utils import MessageTemplates, get_main_menu_keyboard
