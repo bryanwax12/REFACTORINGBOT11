@@ -180,7 +180,7 @@ class OxapayGateway(PaymentGateway):
         super().__init__(api_key, "oxapay")
         logger.info("🟢 Oxapay Gateway initialized")
     
-    @with_retry(max_attempts=3, delay=1.0)
+    @retry_on_api_error(max_attempts=3, min_wait=1, max_wait=3)
     async def create_invoice(
         self,
         amount: float,
@@ -241,7 +241,7 @@ class OxapayGateway(PaymentGateway):
             logger.error(f"❌ Error creating Oxapay invoice: {e}")
             raise
     
-    @with_retry(max_attempts=3, delay=1.0)
+    @retry_on_api_error(max_attempts=3, min_wait=1, max_wait=3)
     async def verify_payment(self, invoice_id: str) -> PaymentInvoice:
         """Проверить статус платежа в Oxapay"""
         
@@ -339,7 +339,7 @@ class CryptoBotGateway(PaymentGateway):
         self.api_token = api_token
         logger.info("🤖 CryptoBot Gateway initialized")
     
-    @with_retry(max_attempts=3, delay=1.0)
+    @retry_on_api_error(max_attempts=3, min_wait=1, max_wait=3)
     async def create_invoice(
         self,
         amount: float,
