@@ -20,7 +20,8 @@ async def handle_skip_field(
     context: ContextTypes.DEFAULT_TYPE,
     field_name: str,
     field_value: any,
-    next_step: str,
+    next_step_const: int,
+    next_step_name: str,
     next_message: str
 ):
     """
@@ -31,7 +32,8 @@ async def handle_skip_field(
         context: Bot context
         field_name: Name of field to skip (e.g., 'from_street2')
         field_value: Value to set (None for skip, or generated value)
-        next_step: Next state constant (e.g., FROM_CITY)
+        next_step_const: Next state constant value (e.g., FROM_CITY constant)
+        next_step_name: Next state name for logging (e.g., "FROM_CITY")
         next_message: Message text for next step
     
     Returns:
@@ -52,7 +54,7 @@ async def handle_skip_field(
     # Update session atomically
     await session_manager.update_session_atomic(
         user_id, 
-        step=next_step, 
+        step=next_step_name, 
         data={field_name: field_value}
     )
     
@@ -72,12 +74,10 @@ async def handle_skip_field(
     if bot_msg:
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = next_message
-        context.user_data['last_state'] = next_step
+        context.user_data['last_state'] = next_step_name
     
-    # Return next state - it's already passed as parameter
-    # The calling function imports the actual constant (FROM_CITY, TO_CITY, etc.)
-    # and passes it here, so we just return it
-    return eval(next_step) if isinstance(next_step, str) else next_step
+    # Return next state constant
+    return next_step_const
 
 
 @with_typing_indicator
