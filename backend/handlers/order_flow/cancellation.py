@@ -68,8 +68,8 @@ async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def confirm_cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE, session_service):
     """Confirm order cancellation"""
     from server import safe_telegram_call, mark_message_as_selected
-    from repositories.session_repository import SessionRepository
-    from server import db
+    
+    
     
     query = update.callback_query
     await safe_telegram_call(query.answer())
