@@ -1890,47 +1890,9 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             'Content-Type': 'application/json'
         }
         
-        # Create rate request for ShipStation V2
-        rate_request = {
-            'rate_options': {
-                'carrier_ids': carrier_ids  # Use actual carrier IDs
-            },
-            'shipment': {
-                'ship_to': {
-                    'name': data['to_name'],
-                    'phone': data.get('to_phone') or '+15551234567',  # Default phone if not provided
-                    'address_line1': data['to_street'],
-                    'address_line2': data.get('to_street2', ''),
-                    'city_locality': data['to_city'],
-                    'state_province': data['to_state'],
-                    'postal_code': data['to_zip'],
-                    'country_code': 'US',
-                    'address_residential_indicator': 'unknown'
-                },
-                'ship_from': {
-                    'name': data['from_name'],
-                    'phone': data.get('from_phone') or '+15551234567',  # Default phone if not provided
-                    'address_line1': data['from_street'],
-                    'address_line2': data.get('from_street2', ''),
-                    'city_locality': data['from_city'],
-                    'state_province': data['from_state'],
-                    'postal_code': data['from_zip'],
-                    'country_code': 'US'
-                },
-                'packages': [{
-                    'weight': {
-                        'value': data['weight'],
-                        'unit': 'pound'
-                    },
-                    'dimensions': {
-                        'length': data.get('length', 10),
-                        'width': data.get('width', 10),
-                        'height': data.get('height', 10),
-                        'unit': 'inch'
-                    }
-                }]
-            }
-        }
+        # Build rate request using service
+        from services.shipping_service_new import build_shipstation_rates_request
+        rate_request = build_shipstation_rates_request(data, carrier_ids)
         
         # Log the request for debugging
         logger.info(f"ShipStation rate request: {rate_request}")
