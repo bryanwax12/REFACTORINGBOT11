@@ -3333,7 +3333,8 @@ async def root():
 
 # Debug endpoints removed - were causing startup issues and memory_handler references
 
-@api_router.post("/orders", response_model=dict)
+# MOVED TO routers/orders.py
+# @api_router.post("/orders", response_model=dict)
 async def create_order(order_data: OrderCreate):
     try:
         # Check user exists using Repository Pattern
