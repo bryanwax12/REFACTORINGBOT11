@@ -7,22 +7,36 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/webhooks", tags=["webhooks"])
+router = APIRouter(tags=["webhooks"])
 
 
-@router.post("/oxapay")
+@router.post("/oxapay/webhook")
 async def oxapay_webhook(request: Request):
-    """
-    Oxapay payment webhook
-    TODO: Move implementation from server.py
-    """
-    return {"status": "not implemented"}
+    """Handle Oxapay payment webhooks"""
+    from server import (
+        handle_oxapay_webhook,
+        db,
+        bot_instance,
+        safe_telegram_call,
+        find_user_by_telegram_id,
+        find_pending_order,
+        create_and_send_label
+    )
+    
+    return await handle_oxapay_webhook(
+        request, 
+        db, 
+        bot_instance, 
+        safe_telegram_call, 
+        find_user_by_telegram_id, 
+        find_pending_order, 
+        create_and_send_label
+    )
 
 
-@router.post("/telegram")
+@router.post("/telegram/webhook")
 async def telegram_webhook(request: Request):
-    """
-    Telegram bot webhook
-    TODO: Move implementation from server.py
-    """
-    return {"status": "not implemented"}
+    """Handle Telegram webhook updates"""
+    from server import handle_telegram_webhook, application
+    
+    return await handle_telegram_webhook(request, application)
