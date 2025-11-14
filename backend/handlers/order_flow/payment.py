@@ -18,10 +18,10 @@ async def show_payment_methods(update: Update, context: ContextTypes.DEFAULT_TYP
     """
     from server import (
         safe_telegram_call,
-        find_user_by_telegram_id,
         PAYMENT_METHOD,
         mark_message_as_selected
     )
+    from repositories import get_user_repo
     from utils.ui_utils import PaymentFlowUI
     import asyncio
     
@@ -32,12 +32,14 @@ async def show_payment_methods(update: Update, context: ContextTypes.DEFAULT_TYP
     asyncio.create_task(mark_message_as_selected(update, context))
     
     telegram_id = query.from_user.id
-    user = await find_user_by_telegram_id(telegram_id)
+    
+    # Get balance using Repository Pattern
+    user_repo = get_user_repo()
+    balance = await user_repo.get_balance(telegram_id)
     
     # Get order amount
     selected_rate = context.user_data.get('selected_rate', {})
     amount = context.user_data.get('final_amount', selected_rate.get('amount', 0))
-    balance = user.get('balance', 0.0) if user else 0.0
     
     # Build message
     message = PaymentFlowUI.payment_method_selection(amount, balance)
