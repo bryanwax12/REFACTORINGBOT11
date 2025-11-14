@@ -1757,7 +1757,7 @@ async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if bot_msg:
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
-        context.user_data['last_state'] = FROM_NAME
+        context.user_data['last_state'] = STATE_NAMES[FROM_NAME]
     logger.info("order_new returning FROM_NAME state")
     return FROM_NAME
 
