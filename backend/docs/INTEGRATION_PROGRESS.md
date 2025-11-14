@@ -74,12 +74,27 @@
 
 ---
 
+### Phase 7: PaymentRepository Integration ✅ ЗАВЕРШЕНО
+- [x] **Новые методы**:
+  - [x] `get_topups()` - получение всех topup платежей
+  - [x] `update_payment()` - универсальное обновление платежа
+- [x] **Обращения заменены (6 обращений)**:
+  - [x] Helper functions: `find_payment_by_invoice()`, `insert_payment()`
+  - [x] `my_balance_command()` - поиск pending topup
+  - [x] Update payment message_id
+  - [x] `GET /users/{telegram_id}/details` - user payments
+  - [x] `GET /topups` - topup history
+  
+**Результат**: ВСЕ обращения к `db.payments` (6) заменены на PaymentRepository
+
+---
+
 ## 🔄 В работе
 
-### Осталось:
-- [ ] ~27 обращений к `db.orders` в server.py (find, update, count, aggregate)
-- [ ] Admin handlers - статистические запросы (агрегации)
-- [ ] Обращения к `db.payments`, `db.shipping_labels` - можно заменить на PaymentRepository
+### Осталось (Low Priority):
+- [ ] 9 обращений к `db.templates` - можно заменить на TemplateRepository
+- [ ] 15 обращений к `db.shipping_labels` - создать LabelRepository
+- [ ] 3 create_index в db.orders - не критично
 
 ---
 
