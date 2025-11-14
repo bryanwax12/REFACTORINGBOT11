@@ -3,10 +3,9 @@ External API Services
 Handles communication with ShipStation, Oxapay, and other external services
 """
 import os
-import asyncio
 import logging
 import time
-import requests
+import httpx
 from fastapi import HTTPException
 
 logger = logging.getLogger(__name__)
