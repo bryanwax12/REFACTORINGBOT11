@@ -40,10 +40,10 @@ class TestPaymentIntegration:
         mock_context.user_data['selected_rate'] = sample_shipping_rate
         mock_context.user_data['final_amount'] = amount
         
-        with patch('services.payment_service.find_user_by_telegram_id', return_value=mock_user) as mock_find, \
-             patch('services.payment_service.deduct_balance') as mock_deduct:
-            
-            mock_deduct.return_value = (True, None)
+        # Note: find_user_by_telegram_id and deduct_balance are passed as parameters
+        # Create mock functions directly
+        mock_find = AsyncMock(return_value=mock_user)
+        mock_deduct = AsyncMock(return_value=(True, None))
             
             # Process payment
             success, new_balance, error = await process_balance_payment(
