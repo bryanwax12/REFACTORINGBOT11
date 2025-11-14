@@ -178,7 +178,7 @@ class TestOrderFlowE2E:
             # Verify: Should display confirmation screen
             assert result == CONFIRM_DATA
             # Should save all address data in session
-            assert mock_session.update_session.called
+            assert mock_session.update_session_atomic.called
     
     
     async def test_payment_flow_sufficient_balance(
