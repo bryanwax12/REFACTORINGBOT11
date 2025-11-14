@@ -4442,11 +4442,8 @@ async def get_user_details(telegram_id: int):
         repos = get_repositories()
         orders = await repos.orders.find_with_filter({"telegram_id": telegram_id}, limit=100)
         
-        # Get user payments
-        payments = await db.payments.find(
-            {"telegram_id": telegram_id},
-            {"_id": 0}
-        ).sort("created_at", -1).to_list(100)
+        # Get user payments using Repository Pattern
+        payments = await repos.payments.get_user_payments(telegram_id, limit=100)
         
         # Get shipping labels for user orders
         order_ids = [order['id'] for order in orders]
