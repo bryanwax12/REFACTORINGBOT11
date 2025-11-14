@@ -155,10 +155,14 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
     return PARCEL_HEIGHT
 
 
-@with_typing_indicator
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_typing_action()
+@with_user_session(create_user=False, require_session=True)
 async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Step 18/18: Collect parcel height and trigger rate calculation"""
-    from server import session_manager, PARCEL_HEIGHT, fetch_shipping_rates
+    """Step 18/17: Collect parcel height and calculate shipping rates"""
+    from server import PARCEL_HEIGHT, CALCULATING_RATES, STATE_NAMES
+    from repositories.session_repository import SessionRepository
+    from server import db
     
     height_str = update.message.text.strip()
     
