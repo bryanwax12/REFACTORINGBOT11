@@ -1993,7 +1993,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
                 elapsed = int((datetime.now(timezone.utc) - start_time).total_seconds())
                 try:
                     await safe_telegram_call(progress_msg.edit_text(
-                        f"⏳ Получаю доступные курьерские службы и тарифы... ({elapsed} сек)"
+                        ShippingRatesUI.progress_message(elapsed)
                     ))
                 except Exception:
                     break  # Stop if message was deleted or can't be edited
