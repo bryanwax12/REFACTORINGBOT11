@@ -11,8 +11,9 @@ logger = logging.getLogger(__name__)
 
 # Import shared utilities
 from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
-from utils.decorators import with_typing_indicator
 from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
+from utils.handler_decorators import with_user_session, safe_handler
+from telegram.ext import ConversationHandler
 
 
 async def handle_skip_field(
