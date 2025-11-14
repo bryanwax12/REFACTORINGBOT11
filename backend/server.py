@@ -1437,17 +1437,11 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.info(f"📋 my_templates_menu: user {telegram_id} has {len(templates)} templates")
     
     if not templates:
-        keyboard = [
-            [InlineKeyboardButton("📦 Создать заказ", callback_data='new_order')],
-            [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
+        from utils.ui_utils import TemplateManagementUI
+        reply_markup = TemplateManagementUI.build_no_templates_keyboard()
         
         await safe_telegram_call(query.message.reply_text(
-            """📋 *Мои шаблоны*
-
-У вас пока нет сохраненных шаблонов.
-Создайте заказ и нажмите "*Сохранить как шаблон*" на экране проверки данных.""",
+            TemplateManagementUI.no_templates_message(),
             reply_markup=reply_markup,
             parse_mode='Markdown'
         ))
