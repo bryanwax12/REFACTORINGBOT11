@@ -352,11 +352,17 @@ async def test_fetch_rates_from_shipstation_success():
 @pytest.mark.asyncio
 async def test_fetch_rates_from_shipstation_api_error():
     """Test API error handling"""
-    mock_response = Mock()
+    from unittest.mock import AsyncMock
+    
+    mock_response = AsyncMock()
     mock_response.status_code = 400
     mock_response.text = 'Bad Request'
     
-    with patch('requests.post', return_value=mock_response):
+    with patch('httpx.AsyncClient') as mock_client:
+        mock_client_instance = AsyncMock()
+        mock_client_instance.post = AsyncMock(return_value=mock_response)
+        mock_client.return_value.__aenter__.return_value = mock_client_instance
+        
         success, rates, error = await fetch_rates_from_shipstation(
             rate_request={},
             headers={},
