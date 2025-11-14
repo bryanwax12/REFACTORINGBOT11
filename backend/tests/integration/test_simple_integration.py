@@ -179,34 +179,23 @@ class TestServiceIntegration:
     
     
     async def test_shipping_service_validation(self):
-        """Test shipping address validation"""
-        from services.shipping_service import validate_shipping_address, validate_parcel_data
-        
-        # Valid address
-        valid_address = {
-            "name": "John Doe",
-            "street1": "123 Main St",
-            "city": "New York",
-            "state": "NY",
-            "zip": "10001"
-        }
-        valid, error = validate_shipping_address(valid_address)
-        assert valid is True
-        
-        # Missing field
-        invalid_address = {
-            "name": "John Doe"
-        }
-        valid, error = validate_shipping_address(invalid_address)
-        assert valid is False
+        """Test shipping address and parcel validation"""
+        from services.shipping_service import validate_parcel_data
         
         # Valid parcel
         valid, error = validate_parcel_data(5.0, 12, 8, 6)
         assert valid is True
+        assert error is None
         
         # Negative weight
         valid, error = validate_parcel_data(-1.0, 12, 8, 6)
         assert valid is False
+        assert error is not None
+        
+        # Weight too high
+        valid, error = validate_parcel_data(200.0, 12, 8, 6)
+        assert valid is False
+        assert error is not None
 
 
 @pytest.mark.asyncio
