@@ -94,7 +94,9 @@ class TestOrderFlowE2E:
         mock_context.user_data['template_name'] = "Test Template"
         
         with patch('server.safe_telegram_call') as mock_safe_call:
-            mock_safe_call.side_effect = lambda x: x
+            mock_reply_msg = MagicMock()
+            mock_reply_msg.message_id = 789
+            mock_safe_call.return_value = mock_reply_msg
             
             # Start order with template
             result = await start_order_with_template(mock_update_callback, mock_context)
