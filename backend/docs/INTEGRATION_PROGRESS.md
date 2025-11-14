@@ -75,6 +75,22 @@
 ---
 
 ### Phase 7: PaymentRepository Integration ✅ ЗАВЕРШЕНО
+
+### Phase 8: TemplateRepository Integration ✅ ЗАВЕРШЕНО
+- [x] **Новые методы**:
+  - [x] `find_by_id()` - поиск по UUID
+  - [x] `update_by_id()` - обновление по UUID
+  - [x] `delete_by_id()` - удаление по UUID
+  - [x] `count_user_templates()` - подсчет шаблонов пользователя
+- [x] **Обращения заменены (9 обращений)**:
+  - [x] Helper functions: `find_template_by_id()`, `count_user_templates()`, `find_user_templates()`, `insert_template()`, `update_template()`, `delete_template()`
+  - [x] Template name validation - поиск существующего
+  - [x] Template update handler
+  
+**Результат**: ВСЕ обращения к `db.templates` (9) заменены на TemplateRepository (кроме 1 create_index)
+
+### Phase 9: Final Helper Function Fix ✅
+- [x] `find_user_by_telegram_id()` - последняя helper function переведена на Repository
 - [x] **Новые методы**:
   - [x] `get_topups()` - получение всех topup платежей
   - [x] `update_payment()` - универсальное обновление платежа
