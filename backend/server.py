@@ -166,7 +166,9 @@ async def update_order(order_id: str, update_data: dict):
 @profile_db_query("insert_payment")
 async def insert_payment(payment_dict: dict):
     """Профилируемая вставка платежа"""
-    return await db.payments.insert_one(payment_dict)
+    from repositories import get_repositories
+    repos = get_repositories()
+    return await repos.payments.collection.insert_one(payment_dict)
 
 @profile_db_query("insert_pending_order")
 async def insert_pending_order(order_dict: dict):
