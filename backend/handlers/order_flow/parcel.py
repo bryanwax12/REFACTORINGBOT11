@@ -65,10 +65,14 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
     return PARCEL_LENGTH
 
 
-@with_typing_indicator
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_typing_action()
+@with_user_session(create_user=False, require_session=True)
 async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 16/17: Collect parcel length"""
-    from server import session_manager, PARCEL_LENGTH, PARCEL_WIDTH, STATE_NAMES
+    from server import PARCEL_LENGTH, PARCEL_WIDTH, STATE_NAMES
+    from repositories.session_repository import SessionRepository
+    from server import db
     
     length_str = update.message.text.strip()
     
