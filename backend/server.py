@@ -135,9 +135,9 @@ async def find_template_by_id(template_id: str, projection: dict = None):
 @profile_db_query("find_payment_by_invoice")
 async def find_payment_by_invoice(invoice_id: int, projection: dict = None):
     """Профилируемый поиск платежа по invoice_id"""
-    if projection is None:
-        projection = {"_id": 0}
-    return await db.payments.find_one({"invoice_id": invoice_id}, projection)
+    from repositories import get_repositories
+    repos = get_repositories()
+    return await repos.payments.find_by_invoice_id(invoice_id)
 
 @profile_db_query("find_pending_order")
 async def find_pending_order(telegram_id: int, projection: dict = None):
