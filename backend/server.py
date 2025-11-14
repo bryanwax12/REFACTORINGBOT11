@@ -2040,11 +2040,12 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             except Exception:
                 pass
             
-            from utils.ui_utils import get_retry_edit_cancel_keyboard
+            from utils.ui_utils import get_retry_edit_cancel_keyboard, ShippingRatesUI
             reply_markup = get_retry_edit_cancel_keyboard()
             
+            timeout_error = "❌ Превышено время ожидания ответа от ShipStation.\n\nПопробуйте еще раз или проверьте правильность адресов."
             await safe_telegram_call(query.message.reply_text(
-                "❌ Превышено время ожидания ответа от ShipStation.\n\nПопробуйте еще раз или проверьте правильность адресов.",
+                timeout_error,
                 reply_markup=reply_markup
             ))
             return CONFIRM_DATA
