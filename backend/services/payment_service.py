@@ -1,12 +1,131 @@
 """
-Payment Service Module
-Handles all payment-related operations including balance management and payment processing
+Payment Service
+Сервис для управления платежами
 """
 import logging
 from typing import Optional, Dict, Any, Tuple
-from decimal import Decimal
+from datetime import datetime, timezone
+from uuid import uuid4
 
 logger = logging.getLogger(__name__)
+
+
+class PaymentService:
+    """
+    Сервис для управления платежами
+    Инкапсулирует бизнес-логику работы с платежами
+    """
+    
+    def __init__(self, payment_repo, user_repo):
+        """
+        Инициализация сервиса
+        
+        Args:
+            payment_repo: PaymentRepository
+            user_repo: UserRepository
+        """
+        self.payment_repo = payment_repo
+        self.user_repo = user_repo
+    
+    async def check_balance_sufficient(
+        self,
+        telegram_id: int,
+        amount: float
+    ) -> Tuple[bool, float]:
+        """
+        Проверить достаточность баланса
+        
+        Args:
+            telegram_id: Telegram ID пользователя
+            amount: Требуемая сумма
+            
+        Returns:
+            (sufficient, current_balance)
+        """
+        balance = await self.user_repo.get_balance(telegram_id)
+        return balance >= amount, balance
+    
+    async def process_balance_payment(
+        self,
+        telegram_id: int,
+        order_id: str,
+        amount: float
+    ) -> Tuple[bool, Optional[str]]:
+        """
+        Обработать платеж с баланса
+        
+        Args:
+            telegram_id: Telegram ID пользователя
+            order_id: ID заказа
+            amount: Сумма
+            
+        Returns:
+            (success, error_message)
+        """
+        # Проверить достаточность баланса
+        sufficient, balance = await self.check_balance_sufficient(telegram_id, amount)
+        
+        if not sufficient:
+            return False, f"Insufficient balance. Required: ${amount:.2f}, Available: ${balance:.2f}"
+        
+        # Списать с баланса
+        success = await self.user_repo.update_balance(
+            telegram_id,
+            -amount,
+            f"Payment for order {order_id}"
+        )
+        
+        if not success:
+            return False, "Failed to deduct balance"
+        
+        return True, None
+    
+    async def add_balance(
+        self,
+        telegram_id: int,
+        amount: float,
+        description: str = "Balance topup"
+    ) -> bool:
+        """
+        Добавить средства на баланс
+        
+        Args:
+            telegram_id: Telegram ID пользователя
+            amount: Сумма
+            description: Описание
+            
+        Returns:
+            True если успешно
+        """
+        return await self.user_repo.update_balance(
+            telegram_id,
+            amount,
+            description
+        )
+    
+    @staticmethod
+    def validate_topup_amount(amount: float) -> Tuple[bool, Optional[str]]:
+        """
+        Валидировать сумму пополнения
+        
+        Args:
+            amount: Сумма
+            
+        Returns:
+            (is_valid, error_message)
+        """
+        if amount < 10:
+            return False, "❌ Минимальная сумма пополнения: $10"
+        
+        if amount > 10000:
+            return False, "❌ Максимальная сумма пополнения: $10,000"
+        
+        return True, None
+
+
+# ============================================================
+# LEGACY FUNCTIONS (for backward compatibility)
+# ============================================================
 
 
 # ============================================================
