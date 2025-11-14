@@ -218,13 +218,12 @@ async def validate_address_with_shipstation(name, street1, street2, city, state,
             "country": "US"
         }
         
-        response = await asyncio.to_thread(
-            requests.post,
-            'https://api.shipstation.com/v2/addresses/validate',
-            json=payload,
-            headers=headers,
-            timeout=10
-        )
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.post(
+                'https://api.shipstation.com/v2/addresses/validate',
+                json=payload,
+                headers=headers
+            )
         
         if response.status_code == 200:
             data = response.json()
