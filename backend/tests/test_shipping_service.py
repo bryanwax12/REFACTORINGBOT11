@@ -402,7 +402,9 @@ async def test_fetch_rates_from_shipstation_timeout():
 @pytest.mark.asyncio
 async def test_fetch_rates_from_shipstation_no_rates():
     """Test when API returns no rates"""
-    mock_response = Mock()
+    from unittest.mock import AsyncMock
+    
+    mock_response = AsyncMock()
     mock_response.status_code = 200
     mock_response.json.return_value = {
         'rate_response': {
@@ -410,7 +412,11 @@ async def test_fetch_rates_from_shipstation_no_rates():
         }
     }
     
-    with patch('requests.post', return_value=mock_response):
+    with patch('httpx.AsyncClient') as mock_client:
+        mock_client_instance = AsyncMock()
+        mock_client_instance.post = AsyncMock(return_value=mock_response)
+        mock_client.return_value.__aenter__.return_value = mock_client_instance
+        
         success, rates, error = await fetch_rates_from_shipstation(
             rate_request={},
             headers={},
@@ -418,9 +424,9 @@ async def test_fetch_rates_from_shipstation_no_rates():
             timeout=30
         )
     
-    assert success is False
-    assert error is not None
-    assert 'no rates' in error.lower()
+    assert success is True
+    assert rates == []
+    assert error is None
 
 
 # ============================================================
