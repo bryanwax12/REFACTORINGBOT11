@@ -58,14 +58,16 @@ class TestOrderFlowE2E:
         mock_update_message = MagicMock()
         mock_update_message.message = MagicMock()
         mock_update_message.message.text = "John Doe"
-        mock_update_message.message.reply_text = AsyncMock()
+        mock_reply_msg = MagicMock()
+        mock_reply_msg.message_id = 456
+        mock_update_message.message.reply_text = AsyncMock(return_value=mock_reply_msg)
         mock_update_message.effective_user = mock_update_callback.effective_user
         
         with patch('server.safe_telegram_call') as mock_safe_call, \
              patch('server.session_manager') as mock_session:
             
             mock_safe_call.side_effect = lambda x: x
-            mock_session.update_session = AsyncMock()
+            mock_session.update_session_atomic = AsyncMock()
             
             result = await order_from_name(mock_update_message, mock_context)
             
