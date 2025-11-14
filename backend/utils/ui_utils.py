@@ -1103,11 +1103,18 @@ class PaymentFlowUI:
         return "❌ Недостаточно средств на балансе."
     
     @staticmethod
-    def payment_success_balance(amount: float, new_balance: float) -> str:
+    def payment_success_balance(amount: float, new_balance: float, order_id: str = None) -> str:
         """Success message after paying from balance"""
+        from utils.order_utils import format_order_id_for_display
+        
+        order_info = ""
+        if order_id:
+            display_id = format_order_id_for_display(order_id)
+            order_info = f"📦 Номер заказа: #{display_id}\n\n"
+        
         return f"""✅ Заказ оплачен с баланса!
 
-💳 Списано: ${amount:.2f}
+{order_info}💳 Списано: ${amount:.2f}
 💰 Новый баланс: ${new_balance:.2f}
 
 Label будет создан и отправлен вам в течение минуты."""
