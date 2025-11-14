@@ -862,12 +862,13 @@ async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAUL
     try:
         amount = float(update.message.text.strip())
         
+        from utils.ui_utils import PaymentFlowUI
         if amount < 10:
-            await safe_telegram_call(update.message.reply_text("❌ *Минимальная сумма для пополнения: $10*", parse_mode='Markdown'))
+            await safe_telegram_call(update.message.reply_text(PaymentFlowUI.topup_amount_too_small(), parse_mode='Markdown'))
             return
         
         if amount > 10000:
-            await safe_telegram_call(update.message.reply_text("❌ *Максимальная сумма для пополнения: $10,000*", parse_mode='Markdown'))
+            await safe_telegram_call(update.message.reply_text(PaymentFlowUI.topup_amount_too_large(), parse_mode='Markdown'))
             return
         
         # Clear the waiting flag
