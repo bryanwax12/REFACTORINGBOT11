@@ -453,15 +453,13 @@ async def fetch_rates_from_shipstation(
     Returns:
         (success, rates_list, error_message)
     """
-    import requests
-    
     try:
-        response = requests.post(
-            api_url,
-            json=rate_request,
-            headers=headers,
-            timeout=timeout
-        )
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            response = await client.post(
+                api_url,
+                json=rate_request,
+                headers=headers
+            )
         
         if response.status_code == 200:
             data = response.json()
@@ -477,9 +475,9 @@ async def fetch_rates_from_shipstation(
             logger.error(error_msg)
             return False, None, error_msg
             
-    except requests.exceptions.Timeout:
+    except httpx.TimeoutException:
         return False, None, "Request timeout - ShipStation API took too long to respond"
-    except requests.exceptions.RequestException as e:
+    except httpx.RequestError as e:
         return False, None, f"Network error: {str(e)}"
     except Exception as e:
         return False, None, f"Unexpected error: {str(e)}"
