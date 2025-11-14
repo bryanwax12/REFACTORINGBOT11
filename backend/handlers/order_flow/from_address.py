@@ -136,7 +136,7 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE)
 @with_typing_indicator
 async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 3/13: Collect sender address line 2 (optional)"""
-    from server import session_manager, sanitize_string, FROM_ADDRESS2, FROM_CITY
+    from server import session_manager, sanitize_string, FROM_ADDRESS2, FROM_CITY, STATE_NAMES
     
     address2 = update.message.text.strip()
     address2 = sanitize_string(address2, max_length=100)
