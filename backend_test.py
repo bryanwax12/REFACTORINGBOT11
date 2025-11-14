@@ -955,72 +955,154 @@ def test_telegram_bot_token():
         print(f"❌ Error testing bot token: {e}")
         return False
 
-def test_admin_search_orders():
-    """Test Search Orders API - GET /api/orders/search"""
-    print("\n🔍 Testing Admin Search Orders API...")
+def test_orders_creation():
+    """Test POST /api/orders - order creation endpoint"""
+    print("\n🔍 Testing Order Creation Endpoint...")
     
     try:
-        # Test 1: Search without parameters (get all orders)
-        print("   Test 1: Get all orders")
-        response = requests.get(f"{API_BASE}/orders/search", timeout=15)
+        # Test order payload
+        test_order = {
+            "telegram_id": 999999999,  # Test user ID
+            "address_from": {
+                "name": "John Sender",
+                "street1": "123 Main St",
+                "city": "New York",
+                "state": "NY",
+                "zip": "10001",
+                "country": "US",
+                "phone": "+15551234567"
+            },
+            "address_to": {
+                "name": "Jane Receiver",
+                "street1": "456 Oak Ave",
+                "city": "Los Angeles", 
+                "state": "CA",
+                "zip": "90001",
+                "country": "US",
+                "phone": "+15559876543"
+            },
+            "parcel": {
+                "length": 10,
+                "width": 8,
+                "height": 6,
+                "weight": 5,
+                "distance_unit": "in",
+                "mass_unit": "lb"
+            },
+            "amount": 25.50
+        }
+        
+        print(f"   📦 Test Order Payload: {json.dumps(test_order, indent=2)}")
+        
+        start_time = time.time()
+        response = requests.post(
+            f"{API_BASE}/orders",
+            json=test_order,
+            headers={'Content-Type': 'application/json'},
+            timeout=15
+        )
+        response_time = (time.time() - start_time) * 1000
+        
+        print(f"   Response time: {response_time:.2f}ms {'✅' if response_time < 500 else '❌'}")
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code == 201:
+            data = response.json()
+            print(f"   ✅ Order Created: {json.dumps(data, indent=2)}")
+            
+            # Check response structure
+            required_fields = ['id', 'order_id', 'telegram_id', 'amount', 'payment_status', 'shipping_status']
+            for field in required_fields:
+                if field in data:
+                    print(f"      {field}: ✅ {data[field]}")
+                else:
+                    print(f"      {field}: ❌ Missing")
+            
+            return True, data.get('id')
+        else:
+            print(f"   ❌ Order creation failed: {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"      Error: {error_data}")
+            except:
+                print(f"      Error: {response.text}")
+            return False, None
+            
+    except Exception as e:
+        print(f"❌ Order creation test error: {e}")
+        return False, None
+
+def test_admin_stats_dashboard():
+    """Test GET /api/admin/stats/dashboard with X-API-Key - admin statistics"""
+    print("\n🔍 Testing Admin Stats Dashboard Endpoint...")
+    
+    # Load admin API key
+    load_dotenv('/app/backend/.env')
+    admin_api_key = os.environ.get('ADMIN_API_KEY')
+    
+    if not admin_api_key:
+        print("   ❌ ADMIN_API_KEY not found in environment")
+        return False
+    
+    print(f"   Admin API Key loaded: ✅")
+    
+    try:
+        # Test 1: Without API key (should fail)
+        print("   Test 1: Request without API key")
+        response = requests.get(f"{API_BASE}/admin/stats/dashboard", timeout=15)
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code in [401, 403]:
+            print(f"   ✅ Correctly rejected request without API key")
+        else:
+            print(f"   ❌ Should reject request without API key")
+            return False
+        
+        # Test 2: With correct API key
+        print("   Test 2: Request with correct API key")
+        headers = {'X-API-Key': admin_api_key}
+        start_time = time.time()
+        response = requests.get(f"{API_BASE}/admin/stats/dashboard", headers=headers, timeout=15)
+        response_time = (time.time() - start_time) * 1000
+        
+        print(f"   Response time: {response_time:.2f}ms {'✅' if response_time < 500 else '❌'}")
         print(f"   Status Code: {response.status_code}")
         
         if response.status_code == 200:
             data = response.json()
-            print(f"   ✅ Found {len(data)} orders")
+            print(f"   ✅ Admin Stats Response: {json.dumps(data, indent=2)}")
             
-            # Check if orders have required fields and enrichment
-            if data:
-                sample_order = data[0]
-                required_fields = ['id', 'telegram_id', 'amount', 'payment_status', 'shipping_status']
-                enriched_fields = ['tracking_number', 'label_url', 'carrier']
-                
-                print(f"   📋 Order Structure Validation:")
-                for field in required_fields:
-                    has_field = field in sample_order
-                    print(f"      {field}: {'✅' if has_field else '❌'}")
-                
-                print(f"   📋 Enrichment Validation:")
-                for field in enriched_fields:
-                    has_field = field in sample_order
-                    print(f"      {field}: {'✅' if has_field else '❌'}")
+            # Check for expected stats fields
+            expected_fields = ['total_orders', 'total_users', 'total_revenue', 'orders_by_status']
+            for field in expected_fields:
+                if field in data:
+                    print(f"      {field}: ✅")
+                else:
+                    print(f"      {field}: ❌ Missing")
+            
+            return True
         else:
-            print(f"   ❌ Failed: {response.status_code}")
+            print(f"   ❌ Admin stats request failed: {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"      Error: {error_data}")
+            except:
+                print(f"      Error: {response.text}")
             return False
         
-        # Test 2: Search by payment status
-        print("   Test 2: Search by payment_status=paid")
-        response = requests.get(f"{API_BASE}/orders/search?payment_status=paid", timeout=15)
-        if response.status_code == 200:
-            paid_orders = response.json()
-            print(f"   ✅ Found {len(paid_orders)} paid orders")
+        # Test 3: With wrong API key
+        print("   Test 3: Request with wrong API key")
+        headers = {'X-API-Key': 'wrong_key'}
+        response = requests.get(f"{API_BASE}/admin/stats/dashboard", headers=headers, timeout=15)
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code in [401, 403]:
+            print(f"   ✅ Correctly rejected request with wrong API key")
         else:
-            print(f"   ❌ Payment status filter failed: {response.status_code}")
-        
-        # Test 3: Search by shipping status
-        print("   Test 3: Search by shipping_status=pending")
-        response = requests.get(f"{API_BASE}/orders/search?shipping_status=pending", timeout=15)
-        if response.status_code == 200:
-            pending_orders = response.json()
-            print(f"   ✅ Found {len(pending_orders)} pending orders")
-        else:
-            print(f"   ❌ Shipping status filter failed: {response.status_code}")
-        
-        # Test 4: Search by order ID (if we have orders)
-        if data and len(data) > 0:
-            test_order_id = data[0]['id'][:8]  # Use first 8 chars
-            print(f"   Test 4: Search by order ID '{test_order_id}'")
-            response = requests.get(f"{API_BASE}/orders/search?query={test_order_id}", timeout=15)
-            if response.status_code == 200:
-                search_results = response.json()
-                print(f"   ✅ Found {len(search_results)} orders matching ID")
-            else:
-                print(f"   ❌ Order ID search failed: {response.status_code}")
-        
-        return True
-        
+            print(f"   ❌ Should reject request with wrong API key")
+            
     except Exception as e:
-        print(f"❌ Search orders test error: {e}")
+        print(f"❌ Admin stats test error: {e}")
         return False
 
 def test_admin_refund_order():
