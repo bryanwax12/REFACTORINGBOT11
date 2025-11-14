@@ -2035,75 +2035,24 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             return CONFIRM_DATA  # Stay to handle callback
         
         # Log carriers
-        carriers = set([r['carrier_friendly_name'] for r in all_rates])
+        carriers = set([r.get('carrier_friendly_name', 'Unknown') for r in all_rates])
         logger.info(f"Got {len(all_rates)} rates from carriers: {carriers}")
         
-        # Balance rates across carriers - show best rates from each carrier
-        context.user_data['rates'] = []
+        # Balance and deduplicate rates using service
+        from services.shipping_service_new import balance_and_deduplicate_rates
+        context.user_data['rates'] = balance_and_deduplicate_rates(all_rates, max_per_carrier=5)[:15]
         
-        # Group rates by carrier
-        rates_by_carrier = {}
-        for rate in all_rates:
-            carrier = rate['carrier_friendly_name']
-            if carrier not in rates_by_carrier:
-                rates_by_carrier[carrier] = []
-            rates_by_carrier[carrier].append(rate)
-        
-        # Sort each carrier's rates by price and take top 5 from each
-        balanced_rates = []
-        for carrier, carrier_rates in rates_by_carrier.items():
-            # Sort by price (ascending)
-            sorted_carrier_rates = sorted(carrier_rates, key=lambda r: float(r['shipping_amount']['amount']))
-            
-            # Deduplicate by service_type - keep only cheapest for each service
-            seen_services = {}
-            deduplicated_rates = []
-            for rate in sorted_carrier_rates:
-                service_type = rate.get('service_type', '')
-                if service_type not in seen_services:
-                    seen_services[service_type] = True
-                    deduplicated_rates.append(rate)
-            
-            # Take top 5 unique services from each carrier
-            balanced_rates.extend(deduplicated_rates[:5])
-        
-        # Sort all balanced rates by carrier, then by price
-        balanced_rates = sorted(balanced_rates, key=lambda r: (r['carrier_friendly_name'], float(r['shipping_amount']['amount'])))
-        
-        # Take top 15 overall but maintain carrier grouping
-        for rate in balanced_rates[:15]:
-            rate_data = {
-                'rate_id': rate['rate_id'],
-                'carrier': rate['carrier_friendly_name'],
-                'carrier_code': rate['carrier_code'],
-                'service': rate['service_type'],
-                'service_code': rate['service_code'],
-                'original_amount': float(rate['shipping_amount']['amount']),
-                'amount': float(rate['shipping_amount']['amount']),  # No markup applied
-                'currency': rate['shipping_amount']['currency'],
-                'days': rate.get('delivery_days')
-            }
-            context.user_data['rates'].append(rate_data)
-        
-        # Cache the rates for future requests
-        shipstation_cache.set(
-            from_zip=data['from_zip'],
-            to_zip=data['to_zip'],
-            weight=data['weight'],
-            rates=context.user_data['rates'],
-            length=data.get('length', 10),
-            width=data.get('width', 10),
-            height=data.get('height', 10)
-        )
-        logger.info(f"💾 Rates cached for route {data['from_zip']} → {data['to_zip']}")
-        
-        # Save ShipStation API results to session
+        # Save to cache and session using service
+        from services.shipping_service_new import save_rates_to_cache_and_session
         user_id = update.effective_user.id
-        await save_to_session(user_id, "CARRIER_SELECTION", {
-            'rates': context.user_data['rates'],
-            'shipstation_api_called': datetime.now(timezone.utc).isoformat()
-        }, context)
-        logger.info(f"💾 ShipStation rates saved to session for user {user_id}")
+        await save_rates_to_cache_and_session(
+            rates=context.user_data['rates'],
+            order_data=data,
+            user_id=user_id,
+            context=context,
+            shipstation_cache=shipstation_cache,
+            session_manager=session_manager
+        )
         
         # Delete progress message
         try:
