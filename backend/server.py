@@ -6070,6 +6070,10 @@ async def get_performance_statistics(admin_key: str = None):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
+# ==================== MIDDLEWARE SETUP ====================
+# Order matters: SecurityMiddleware first for rate limiting & security headers
+app.add_middleware(SecurityMiddleware)
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
