@@ -2394,15 +2394,21 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
             label_created = await create_and_send_label(order['id'], telegram_id, query.message)
             
             if label_created:
-                # Only deduct balance if label was created successfully
-                new_balance = user['balance'] - amount
-                await db.users.update_one(
-                    {"telegram_id": telegram_id},
-                    {"$set": {"balance": new_balance}}
+                # Only deduct balance if label was created successfully using payment service
+                success, new_balance, error = await payment_service.process_balance_payment(
+                    telegram_id=telegram_id,
+                    amount=amount,
+                    order_id=order['id'],
+                    db=db,
+                    find_user_func=find_user_by_telegram_id,
+                    update_order_func=update_order
                 )
                 
-                # Update order as paid
-                await update_order(order['id'], {"payment_status": "paid"})
+                if not success:
+                    logger.error(f"Failed to process payment: {error}")
+                    # This shouldn't happen as we checked balance earlier
+                    await safe_telegram_call(query.message.reply_text(f"❌ Ошибка обработки платежа: {error}"))
+                    return ConversationHandler.END
                 
                 from utils.ui_utils import PaymentFlowUI
                 keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
