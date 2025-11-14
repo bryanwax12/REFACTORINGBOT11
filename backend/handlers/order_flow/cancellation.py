@@ -80,9 +80,8 @@ async def confirm_cancel_order(update: Update, context: ContextTypes.DEFAULT_TYP
     # Clear session and context data
     user_id = update.effective_user.id
     
-    # Clear session via repository
-    session_repo = SessionRepository(db)
-    await session_repo.clear_session(user_id)
+    # Clear session via service
+    await session_service.clear_session(user_id)
     context.user_data.clear()
     logger.info(f"🗑️ Session cleared after order cancellation for user {user_id}")
     
