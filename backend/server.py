@@ -119,9 +119,10 @@ async def find_user_by_telegram_id(telegram_id: int, projection: dict = None):
 @profile_db_query("find_order_by_id")
 async def find_order_by_id(order_id: str, projection: dict = None):
     """Профилируемый поиск заказа по ID"""
-    if projection is None:
-        projection = {"_id": 0}
-    return await db.orders.find_one({"id": order_id}, projection)
+    from repositories import get_repositories
+    repos = get_repositories()
+    # Repository already excludes _id by default
+    return await repos.orders.find_by_id(order_id)
 
 @profile_db_query("find_template_by_id")
 async def find_template_by_id(template_id: str, projection: dict = None):
