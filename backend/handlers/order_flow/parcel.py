@@ -85,7 +85,11 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
     # Store
     user_id = update.effective_user.id
     context.user_data['parcel_length'] = length
-    await session_manager.update_session_atomic(user_id, step="PARCEL_WIDTH", data={'parcel_length': length})
+    
+    # Update session via repository
+    session_repo = SessionRepository(db)
+    await session_repo.update_temp_data(user_id, {'parcel_length': length})
+    await session_repo.update_step(user_id, "PARCEL_WIDTH")
     
     asyncio.create_task(mark_message_as_selected(update, context))
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
