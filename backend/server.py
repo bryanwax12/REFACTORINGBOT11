@@ -1815,10 +1815,11 @@ async def display_shipping_rates(update: Update, context: ContextTypes.DEFAULT_T
     
     query = update.callback_query
     
-    # Get user balance
+    # Get user balance using Repository Pattern
     telegram_id = query.from_user.id
-    user = await find_user_by_telegram_id(telegram_id)
-    user_balance = user.get('balance', 0.0) if user else 0.0
+    from repositories import get_user_repo
+    user_repo = get_user_repo()
+    user_balance = await user_repo.get_balance(telegram_id)
     
     # Format message and keyboard using UI utils
     message = ShippingRatesUI.format_rates_message(rates, user_balance)
