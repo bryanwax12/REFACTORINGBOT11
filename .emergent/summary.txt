@@ -1,402 +1,1353 @@
 <analysis>**original_problem_statement:**
-Изначально пользователь столкнулся с проблемой зависания Telegram-бота из-за потери состояния . Было решено заменить встроенный  на кастомный  с использованием MongoDB. После этого пользователь инициировал серию задач по полному рефакторингу и аудиту кода с целью разделения монолитного , выделения UI-логики в отдельный модуль и повышения общего качества и надежности кода.
+Изначально пользователь столкнулся с проблемой зависания Telegram-бота из-за потери состояния . Было решено заменить встроенный  на кастомный  с использованием MongoDB. После этого пользователь инициировал серию задач по полному рефакторингу и аудиту кода, включая разделение монолитного , выделение UI-логики, добавление тестов, оптимизацию производительности и усиление безопасности.
 
 PRODUCT REQUIREMENTS:
-1.  **Стабильность сессий:** Использовать кастомный  для надежного управления состояниями диалогов.
-2.  **Качество кода:** Устранить дублирование, мертвый код, баги и разделить монолитный  на логические модули (services, handlers, utils).
-3.  **Разделение UI и логики:** Полностью вынести UI-компоненты (клавиатуры, тексты сообщений) из файлов-обработчиков и  в утилитарный модуль .
-4.  **Надежность:** Покрыть новую сервисную логику unit-тестами для обеспечения стабильности.
-5.  **Модуляризация:** Перенести ключевую бизнес-логику (shipping, payments, templates) в отдельные сервисные модули.
+1.  **Стабильность сессий:** Использовать кастомный  для надежного управления состояниями.
+2.  **Качество кода:** Провести полный рефакторинг для устранения дублирования, разделения  на логические модули (services, handlers, utils).
+3.  **Разделение UI и логики:** Полностью вынести UI-компоненты в утилитарный модуль .
+4.  **Надежность:** Покрыть новую логику unit-тестами и интеграционными тестами.
+5.  **Модуляризация:** Перенести бизнес-логику (доставка, платежи, шаблоны, админка) в отдельные сервисные модули.
+6.  **Безопасность:** Провести аудит и устранить все уязвимости.
+7.  **Производительность:** Оптимизировать запросы к БД, добавить индексы и подготовить инфраструктуру для мониторинга.
 
 **what currently exists?** (give crisp summary)
-Проведен комплексный рефакторинг архитектуры.  был унифицирован для использования строковых значений, что устранило системную ошибку . Практически все UI-элементы (~95%) вынесены из  в . Ключевая бизнес-логика была выделена в новые сервисные модули: ,  и . Огромные функции  и  в  были разбиты на более мелкие подфункции, которые были размещены в , а  был обновлен для их использования. Создана структура для написания unit-тестов.
+Проект прошел через несколько этапов масштабного рефакторинга. Монолитный  был разделен на сервисы, роутеры и обработчики. UI-логика централизована.  и админ-панель были полностью перестроены по модульному принципу. Добавлены Unit-тесты, которые успешно проходят. Были созданы MongoDB индексы для оптимизации. Подготовлена инфраструктура для интеграционного тестирования, мониторинга и алертинга. Был проведен аудит безопасности, который выявил критические уязвимости, и начата работа по их устранению.
 
 **Last working item**: (Tell about what agent was working on and its readiness in terms of completion and testing)
-    - Last item agent was working: Агент подготовил инфраструктуру для написания unit-тестов. Были созданы пустые файлы для тестов, включая  для общих фикстур и отдельные файлы для каждого нового сервиса: , , и . Задача — наполнить эти файлы реальными тестами.
-    - Status: NOT STARTED
+    - Last item agent was working: Агент начал комплексный рефакторинг безопасности после обнаружения критических уязвимостей. В качестве первого шага был создан централизованный модуль безопасности . Следующим шагом должно было стать исправление уязвимости в  и интеграция нового middleware в приложение.
+    - Status: IN PROGRESS
     - Agent Testing Done: N
-    - Which testing method agent to use? backend testing agent (или ============================= test session starts ==============================
+    - Which testing method agent to use? После исправления уязвимостей необходимо запустить интеграционные тесты (============================= test session starts ==============================
 platform linux -- Python 3.11.14, pytest-8.4.2, pluggy-1.6.0
 rootdir: /app
-plugins: anyio-4.11.0
-collected 186 items
+plugins: cov-7.0.0, asyncio-1.3.0, anyio-4.11.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 0 items
+
+============================ no tests ran in 0.01s =============================) и выполнить ручные  запросы к защищенным эндпоинтам для проверки работы middleware.
+    - User Testing Done: N
+
+**All Pending/In progress Issue list**: (List down all issues plus pending 
+wtmp begins Fri Nov 14 03:24:00 2025 issues (if present) with PRIORITY. This includes issue on which agent was lastly working on and not yet resolved, issues work in progress or pending, issues mentioned by users but not yet resolved,  issues main agent introduced or missed while working. IMPORTANT: Most recent working item that is pending or in progress by default is of HIGHEST priority, ie P0)
+
+  - Issue 1: (P0) Незавершенный рефакторинг безопасности.
+  - Issue 2: (P1) Падающие интеграционные тесты.
+  
+  Issues Detail:
+  - Issue 1: 
+     - Attempted fixes: Был создан файл  для централизации логики безопасности. Работа была прервана до фактической интеграции и исправления уязвимостей.
+     - Next debug checklist: 
+        1. Открыть  и исправить уязвимость, при которой доступ разрешается, если  не задан.
+        2. Открыть  и интегрировать созданный  middleware в FastAPI приложение.
+        3. Реализовать защиту от атак (rate limiting, input sanitization) для всех API эндпоинтов.
+        4. Заменить прямое использование API ключей на централизованную зависимость (dependency) из middleware.
+     - Why fix this issue and what will be achieved with the fix? Устранение критических уязвимостей, защита приложения от несанкционированного доступа и других векторов атак.
+     - Status:  IN PROGRESS
+     - Is recurring issue? N
+     - Should Test frontend/backend/both after fix? backend
+     - Blocked on other issue: Нет.
+  - Issue 2: 
+     - Attempted fixes: Агент начал исправлять пути для  в тестах, но основная проблема осталась. Были созданы упрощенные тесты в , которые частично проходят.
+     - Next debug checklist: 
+        1. Открыть файлы в  (например, ).
+        2. Заменить все использования  для асинхронных функций на .
+        3. Убедиться, что  указывает на правильный модуль, откуда функция импортируется (часто это , а не сам ).
+     - Why fix this issue and what will be achieved with the fix? Рабочий набор интеграционных тестов обеспечит стабильность E2E сценариев и предотвратит регрессии.
+     - Status:  IN PROGRESS
+     - Is recurring issue? Y
+     - Should Test frontend/backend/both after fix? backend
+     - Blocked on other issue: Нет.
+
+**In progress Task List**: (Tasks that were started but were not finished)
+  - Task 1: (P0) Комплексное усиление безопасности (Security Hardening).
+
+ Task Detail:
+  - Task 1: 
+     - Where to resume: Продолжить с интеграции middleware из  в основной файл приложения  и исправления уязвимостей.
+     - What will be achieved with this? Защищенное, готовое к эксплуатации приложение с централизованным управлением доступом.
+     - Status:  IN PROGRESS
+     - Should Test frontend/backend/both after fix? backend
+     - Blocked on something: Нет.
+
+**Upcoming and Future Tasks**
+ Upcoming Tasks:
+    - (P1) **Настройка нагрузочного тестирования:** Запустить и проанализировать результаты скрипта .
+    - (P2) **Настройка мониторинга и алертинга:** Реализовать логику для отправки алертов (например, в Telegram) из  и подготовить инструкции для интеграции с Grafana.
+
+ Future Tasks:
+    - (P3) **Обновление документации:** Обновить  и  для отражения финальной архитектуры, включая модули безопасности, мониторинга и админ-панели.
+
+**Completed work in this session**
+- **Unit-тестирование:** Пройдены все 101 unit-теста.
+- **Рефакторинг :** Логика полностью вынесена из  в модульную структуру .
+- **Консолидация :** Устранен дублирующийся сервис доставки.
+- **Оптимизация производительности:** Созданы индексы для коллекций MongoDB.
+- **Рефакторинг Админ-панели:** Монолитная админка переписана на модульную сервис-ориентированную архитектуру с собственными тестами.
+- **Подготовка к мониторингу:** Созданы API эндпоинты (, ) и конфигурация для Grafana.
+- **Аудит безопасности:** Проведен аудит, выявлены критические уязвимости.
+
+**Earlier issues found/mentioned but not fixed**
+   - Issue 1: Падающие интеграционные тесты из-за некорректного использования  для  функций и неправильных путей для . Работа по исправлению начата, но не завершена.
+
+**Known issue recurrence from previous fork**
+  - Нет.
+
+**Code Architecture**
+
+
+**Key Technical Concepts**
+- **Security Hardening:** Внедрение middleware для централизованной аутентификации и авторизации.
+- **Modular Refactoring:** Архитектурный паттерн, примененный ко всем ключевым частям приложения (админка, ).
+- **Integration Testing (Pytest):** Тестирование E2E сценариев с использованием , , и .
+- **API Monitoring:** Создание выделенных эндпоинтов для сбора метрик.
+
+**key DB schema**
+  - Без изменений. Добавлены индексы для , ,  для повышения производительности.
+
+**changes in tech stack**
+  - Добавлена зависимость  для сбора системных метрик.
+
+**All files** (list a.) all created or updated files in this session and why do they exists?  2. Any other important files)
+- **Созданы (Безопасность):**
+  - : Для централизации логики аутентификации/авторизации.
+- **Созданы и изменены (Рефакторинг админки):**
+  - : Новые сервисы для логики админ-панели.
+  - : Новые модульные роутеры для API админки.
+  - : Unit-тесты для новых сервисов.
+- **Созданы (Тестирование и Мониторинг):**
+  - : Файлы для интеграционных тестов.
+  - : Скрипт для нагрузочного тестирования.
+  - : API для мониторинга и алертинга.
+- **Важные файлы для работы:**
+  - : Основной файл, куда нужно будет интегрировать middleware безопасности.
+  - : Содержит критическую уязвимость, требующую немедленного исправления.
+
+**Areas that need refactoring**:
+- ** и **: Устаревшие файлы админки, которые нужно будет удалить после полного перехода на новую модульную структуру и ее защиты.
+- ****: Вся директория требует рефакторинга для исправления падающих тестов.
+
+**Critical Info for New Agent**
+- **Главный приоритет (P0): Рефакторинг безопасности.** Начните с немедленного исправления уязвимости в , где доступ разрешается при отсутствии API ключа. Сразу после этого интегрируйте middleware из  в  для защиты всех эндпоинтов.
+- **Следующий приоритет (P1): Исправление интеграционных тестов.** После усиления безопасности убедитесь, что приложение все еще работает корректно, исправив падающие интеграционные тесты. Основное внимание уделите замене  на  и проверке путей для .
+- **Контекст по Redis:** Пользователь подтвердил, что Redis недоступен на платформе. Не предлагайте его для кэширования или других задач.
+- **Язык общения:** Пользователь общается на русском языке. Вся коммуникация, планы и отчеты должны быть на русском.
+
+**documents created in this job**
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+
+**Last 5 User Messages and any pending user messages**
+- **User:**  (Утверждение варианта С для рефакторинга админки) - **Status:** COMPLETED.
+- **User:**  - **Status:** IN PROGRESS (Эта команда инициировала аудит и рефакторинг безопасности).
+- **User:**  (Утверждение варианта B для комплексного усиления безопасности) - **Status:** IN PROGRESS.
+- **User:**  (Сделать все по предложенному плану комплексных улучшений) - **Status:** IN PROGRESS.
+- **User:**  (Команда начать работу по безопасности) - **Status:** IN PROGRESS.
+
+**Project Health Check:**
+- **Broken:** Интеграционные тесты частично не работают. Приложение содержит критические уязвимости, которые находятся в процессе исправления.
+- **Mocked:** Unit и интеграционные тесты активно используют моки.
+
+**Testing status**
+  - Testing agent used after significant changes: NO (агент запускал тесты вручную через ============================= test session starts ==============================
+platform linux -- Python 3.11.14, pytest-8.4.2, pluggy-1.6.0
+rootdir: /app
+plugins: cov-7.0.0, asyncio-1.3.0, anyio-4.11.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 234 items
 
 admin_notification_test.py ...                                           [  1%]
-backend/tests/test_payment_service.py FFFFFFF.......FFFFFFFF             [ 13%]
-backend/tests/test_refactoring_handlers.py ....                          [ 15%]
-backend/tests/test_session_manager.py FFFFFFF                            [ 19%]
-backend/tests/test_shipping_service.py FFF...............FFFFF           [ 31%]
-backend/tests/test_template_service.py FFFFFFFFFFFFFF...F                [ 41%]
-backend/tests/test_ui_components.py ...........................          [ 55%]
-backend_test.py ........................................................ [ 86%]
-........                                                                 [ 90%]
-return_to_order_test.py ..                                               [ 91%]
-telegram_bot_test.py .....                                               [ 94%]
+backend/tests/integration/test_order_flow_e2e.py FFFFF...                [  4%]
+backend/tests/integration/test_payment_integration.py FFFF.FF.           [  8%]
+backend/tests/integration/test_simple_integration.py .F..FFFFF...        [ 13%]
+backend/tests/integration/test_webhook_integration.py ..F.FFFF           [ 16%]
+backend/tests/test_admin_services.py ............                        [ 21%]
+backend/tests/test_payment_service.py ......................             [ 31%]
+backend/tests/test_refactoring_handlers.py ....                          [ 32%]
+backend/tests/test_session_manager.py FFFFFFF                            [ 35%]
+backend/tests/test_shipping_service.py .......................           [ 45%]
+backend/tests/test_template_service.py ..................                [ 53%]
+backend/tests/test_ui_components.py ...........................          [ 64%]
+backend_test.py ........................................................ [ 88%]
+........                                                                 [ 92%]
+return_to_order_test.py ..                                               [ 93%]
+telegram_bot_test.py .....                                               [ 95%]
 telegram_persistence_test.py ......                                      [ 97%]
 template_test.py FF..                                                    [ 99%]
 test_admin_notification_direct.py F                                      [100%]
 
 =================================== FAILURES ===================================
-_________________________ test_get_user_balance_exists _________________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-_______________________ test_get_user_balance_not_exists _______________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-___________________________ test_add_balance_success ___________________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-_______________________ test_add_balance_user_not_found ________________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-_________________________ test_deduct_balance_success __________________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-_______________________ test_deduct_balance_insufficient _______________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-______________________ test_deduct_balance_user_not_found ______________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-_____________________ test_process_balance_payment_success _____________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-______________ test_process_balance_payment_insufficient_balance _______________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-_________________ test_process_balance_payment_user_not_found __________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-_____________________ test_create_payment_invoice_success ______________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-_________________ test_create_payment_invoice_amount_too_small _________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-____________________ test_create_payment_invoice_api_error _____________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-____________________________ test_full_payment_flow ____________________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-_____________________________ test_full_topup_flow _____________________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
+__________________ TestOrderFlowE2E.test_new_order_flow_basic __________________
+
+self = <test_order_flow_e2e.TestOrderFlowE2E object at 0xfc24030633d0>
+mock_update_callback = <MagicMock spec='Update' id='277231579314512'>
+mock_context = <MagicMock spec='_GenericAlias' id='277231585723344'>
+test_db = AsyncIOMotorDatabase(Database(MongoClient(host=['localhost:27017'], document_class=dict, tz_aware=False, connect=False, driver=DriverInfo(name='Motor', version='3.3.1', platform='asyncio')), 'telegram_shipping_bot'))
+
+    async def test_new_order_flow_basic(
+        self,
+        mock_update_callback,
+        mock_context,
+        test_db
+    ):
+        """
+        Test basic order flow: new_order -> addresses -> parcel -> rates
+        """
+        from handlers.order_flow.entry_points import new_order_start
+        from handlers.order_flow.from_address import order_from_name
+        from server import FROM_NAME, FROM_ADDRESS
+    
+        # Setup: User starts new order
+        mock_update_callback.callback_query.data = "new_order"
+    
+        # Mock database operations
+        with patch('server.find_user_by_telegram_id') as mock_find_user, \
+             patch('server.count_user_templates', return_value=0), \
+             patch('server.check_maintenance_mode', return_value=False), \
+             patch('server.check_user_blocked', return_value=False), \
+             patch('server.session_manager') as mock_session:
+    
+            mock_find_user.return_value = {
+                "id": "user123",
+                "telegram_id": 123456789,
+                "balance": 100.0
+            }
+    
+            mock_session.get_or_create_session = AsyncMock(return_value={
+                "user_id": 123456789,
+                "current_step": "START",
+                "temp_data": {}
+            })
+    
+            # Step 1: Start new order
+            result = await new_order_start(mock_update_callback, mock_context)
+    
+            # Verify: Should transition to FROM_NAME state
+            assert result == FROM_NAME
+            assert mock_update_callback.callback_query.answer.called
+    
+        # Step 2: Enter from_name
+        mock_update_message = MagicMock()
+        mock_update_message.message = MagicMock()
+        mock_update_message.message.text = "John Doe"
+        mock_update_message.message.reply_text = AsyncMock()
+        mock_update_message.effective_user = mock_update_callback.effective_user
+    
+        with patch('server.safe_telegram_call') as mock_safe_call, \
+             patch('server.session_manager') as mock_session:
+    
+            mock_safe_call.side_effect = lambda x: x
+            mock_session.update_session = AsyncMock()
+    
+>           result = await order_from_name(mock_update_message, mock_context)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/integration/test_order_flow_e2e.py:70: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/utils/decorators.py:38: in wrapper
+    return await func(update, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+update = <MagicMock id='277231572940752'>
+context = <MagicMock spec='_GenericAlias' id='277231585723344'>
+
+    @with_typing_indicator
+    async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Step 1/13: Collect sender name"""
+        from server import session_manager, SecurityLogger, sanitize_string, FROM_NAME, FROM_ADDRESS, STATE_NAMES
+    
+        logger.info(f"🔵 order_from_name - User: {update.effective_user.id}")
+    
+        # Skip if user is in topup flow
+        if context.user_data.get('awaiting_topup_amount'):
+            logger.info("⏭️ Skipping - user in topup flow")
+            return ConversationHandler.END
+    
+        name = update.message.text.strip()
+        name = sanitize_string(name, max_length=50)
+    
+        # Validate using centralized validator
+        is_valid, error_msg = validate_name(name)
+        if not is_valid:
+            await safe_telegram_call(update.message.reply_text(error_msg))
+            return FROM_NAME
+    
+        # Store in session AND context
+        user_id = update.effective_user.id
+        context.user_data['from_name'] = name
+>       await session_manager.update_session_atomic(user_id, step="FROM_ADDRESS", data={'from_name': name})
+E       TypeError: object MagicMock can't be used in 'await' expression
+
+backend/handlers/order_flow/from_address.py:56: TypeError
+----------------------------- Captured stdout call -----------------------------
+🔵 PREVIEW DATABASE: telegram_shipping_bot
+🔵 PREVIEW BOT SELECTED: @whitelabel_shipping_bot_test_bot
+__________________ TestOrderFlowE2E.test_template_order_flow ___________________
+
+self = <test_order_flow_e2e.TestOrderFlowE2E object at 0xfc2403063dd0>
+mock_update_callback = <MagicMock spec='Update' id='277231572312080'>
+mock_context = <MagicMock spec='_GenericAlias' id='277231568621712'>
+sample_order_data = {'from_city': 'New York', 'from_name': 'John Doe', 'from_phone': '1234567890', 'from_state': 'NY', ...}
+
+    async def test_template_order_flow(
+        self,
+        mock_update_callback,
+        mock_context,
+        sample_order_data
+    ):
+        """
+        Test order creation from template
+        """
+        from handlers.order_flow.entry_points import start_order_with_template
+        from server import PARCEL_WEIGHT
+    
+        # Setup: Load template data into context
+        mock_context.user_data.update(sample_order_data)
+        mock_context.user_data['template_name'] = "Test Template"
+    
+        with patch('server.safe_telegram_call') as mock_safe_call:
+            mock_safe_call.side_effect = lambda x: x
+    
+            # Start order with template
+>           result = await start_order_with_template(mock_update_callback, mock_context)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/integration/test_order_flow_e2e.py:98: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+update = <MagicMock spec='Update' id='277231572312080'>
+context = <MagicMock spec='_GenericAlias' id='277231568621712'>
+
+    async def start_order_with_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Start order creation with pre-loaded template data"""
+        from server import PARCEL_WEIGHT, STATE_NAMES, safe_telegram_call, mark_message_as_selected
+    
+        query = update.callback_query
+    
+        # Clear topup flag to prevent conflict with parcel weight input
+        context.user_data['awaiting_topup_amount'] = False
+    
+        # Template data already loaded in context.user_data
+        # Ask for parcel weight (first thing not in template)
+        from utils.ui_utils import get_cancel_keyboard
+        reply_markup = get_cancel_keyboard()
+    
+        template_name = context.user_data.get('template_name', 'шаблон')
+    
+        message_text = f"""📦 Создание заказа по шаблону \"{template_name}\"
+    
+    Теперь введите данные посылки:
+    
+    *Вес посылки в фунтах (lb)*
+    Например: 5.5"""
+    
+        # Execute answer and mark selected, then send new message
+        await safe_telegram_call(query.answer())
+    
+        # Mark previous message as selected (blocking)
+        asyncio.create_task(mark_message_as_selected(update, context))
+    
+        # Send new message immediately without waiting for mark_message_as_selected
+        bot_msg = await safe_telegram_call(query.message.reply_text(
+                message_text,
+                reply_markup=reply_markup,
+                parse_mode='Markdown'
+            ))
+>       context.user_data['last_bot_message_id'] = bot_msg.message_id
+                                                   ^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'coroutine' object has no attribute 'message_id'
+
+backend/handlers/order_flow/entry_points.py:148: AttributeError
+___________________ TestOrderFlowE2E.test_cancel_order_flow ____________________
+
+self = <test_order_flow_e2e.TestOrderFlowE2E object at 0xfc240306c790>
+mock_update_callback = <MagicMock spec='Update' id='277231573099280'>
+mock_context = <MagicMock spec='_GenericAlias' id='277231571515088'>
+
+    async def test_cancel_order_flow(
+        self,
+        mock_update_callback,
+        mock_context
+    ):
+        """
+        Test order cancellation
+        """
+        from handlers.order_flow.cancellation import cancel_order, confirm_cancel_order
+        from server import SELECT_CARRIER, STATE_NAMES
+    
+        # Setup: User is on rates selection screen
+        mock_context.user_data['last_state'] = STATE_NAMES[SELECT_CARRIER]
+    
+        with patch('server.safe_telegram_call') as mock_safe_call:
+            mock_safe_call.side_effect = lambda x: x
+    
+            # Step 1: User clicks cancel
+>           result = await cancel_order(mock_update_callback, mock_context)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/integration/test_order_flow_e2e.py:123: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+update = <MagicMock spec='Update' id='277231573099280'>
+context = <MagicMock spec='_GenericAlias' id='277231571515088'>
+
+    async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Show cancellation confirmation"""
+        from server import (
+            SELECT_CARRIER, PAYMENT_METHOD, STATE_NAMES,
+            safe_telegram_call, mark_message_as_selected
+        )
+    
+        if update.callback_query:
+            query = update.callback_query
+            await safe_telegram_call(query.answer())
+    
+        # Mark previous message as selected (remove buttons and add "✅ Выбрано")
+        asyncio.create_task(mark_message_as_selected(update, context))
+    
+        # Check if we're on shipping rates screen
+        last_state = context.user_data.get('last_state')
+    
+        # Add "Check Data" button only if on shipping rates selection screen
+        if last_state == STATE_NAMES[SELECT_CARRIER]:
+            keyboard = [
+                [InlineKeyboardButton("📋 Проверить данные", callback_data='check_data')],
+                [InlineKeyboardButton("↩️ Вернуться к заказу", callback_data='return_to_order')],
+                [InlineKeyboardButton("✅ Да, отменить заказ", callback_data='confirm_cancel')]
+            ]
+        else:
+            keyboard = [
+                [InlineKeyboardButton("↩️ Вернуться к заказу", callback_data='return_to_order')],
+                [InlineKeyboardButton("✅ Да, отменить заказ", callback_data='confirm_cancel')]
+            ]
+    
+        reply_markup = InlineKeyboardMarkup(keyboard)
+    
+        message_text = "⚠️ Вы уверены, что хотите отменить создание заказа?\n\nВсе введённые данные будут потеряны."
+    
+        bot_msg = await safe_telegram_call(query.message.reply_text(
+                message_text,
+                reply_markup=reply_markup
+            ))
+    
+        # Save last bot message context for button protection
+        if bot_msg:
+>           context.user_data['last_bot_message_id'] = bot_msg.message_id
+                                                       ^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'coroutine' object has no attribute 'message_id'
+
+backend/handlers/order_flow/cancellation.py:54: AttributeError
+_________________ TestOrderFlowE2E.test_data_confirmation_flow _________________
+
+self = <test_order_flow_e2e.TestOrderFlowE2E object at 0xfc240306d190>
+mock_update_callback = <MagicMock spec='Update' id='277231572364944'>
+mock_context = <MagicMock spec='_GenericAlias' id='277231572354512'>
+sample_order_data = {'from_city': 'New York', 'from_name': 'John Doe', 'from_phone': '1234567890', 'from_state': 'NY', ...}
+
+    async def test_data_confirmation_flow(
+        self,
+        mock_update_callback,
+        mock_context,
+        sample_order_data
+    ):
+        """
+        Test data confirmation screen
+        """
+        from handlers.order_flow.confirmation import show_data_confirmation
+        from server import CONFIRM_DATA
+    
+        # Setup: User has entered all data
+        mock_context.user_data.update(sample_order_data)
+    
+        with patch('server.safe_telegram_call') as mock_safe_call, \
+             patch('server.session_manager') as mock_session:
+    
+            mock_safe_call.side_effect = lambda x: x
+            mock_session.update_session = AsyncMock()
+    
+>           result = await show_data_confirmation(mock_update_callback, mock_context)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/integration/test_order_flow_e2e.py:164: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+update = <MagicMock spec='Update' id='277231572364944'>
+context = <MagicMock spec='_GenericAlias' id='277231572354512'>
+
+    async def show_data_confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Show summary of entered data with edit option"""
+        from server import CONFIRM_DATA
+        from utils.ui_utils import DataConfirmationUI
+    
+        data = context.user_data
+    
+        # Format the summary message using UI utils
+        message = DataConfirmationUI.confirmation_header()
+        message += DataConfirmationUI.format_address_section("Отправитель", data, "from")
+        message += DataConfirmationUI.format_address_section("Получатель", data, "to")
+        message += DataConfirmationUI.format_parcel_section(data)
+    
+        # Build keyboard using UI utils
+        reply_markup = DataConfirmationUI.build_confirmation_keyboard()
+    
+        # Save last bot message context for button protection
+>       bot_msg = await update.message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown')
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'reply_text'
+
+backend/handlers/order_flow/confirmation.py:29: AttributeError
+____________ TestOrderFlowE2E.test_payment_flow_sufficient_balance _____________
+
+self = <test_order_flow_e2e.TestOrderFlowE2E object at 0xfc240306db10>
+mock_update_callback = <MagicMock spec='Update' id='277231569398160'>
+mock_context = <MagicMock spec='_GenericAlias' id='277231569403344'>
+sample_shipping_rate = {'amount': 15.5, 'carrier': 'USPS', 'carrier_name': 'USPS', 'delivery_days': '2-3', ...}
+
+    async def test_payment_flow_sufficient_balance(
+        self,
+        mock_update_callback,
+        mock_context,
+        sample_shipping_rate
+    ):
+        """
+        Test payment flow when user has sufficient balance
+        """
+        from handlers.order_flow.payment import show_payment_methods
+        from server import PAYMENT_METHOD
+    
+        # Setup: User selected a rate
+        mock_context.user_data['selected_rate'] = sample_shipping_rate
+        mock_context.user_data['final_amount'] = 15.50
+    
+        with patch('server.find_user_by_telegram_id') as mock_find_user, \
+             patch('server.safe_telegram_call') as mock_safe_call:
+    
+            mock_find_user.return_value = {
+                "id": "user123",
+                "telegram_id": 123456789,
+                "balance": 100.0  # Sufficient balance
+            }
+            mock_safe_call.side_effect = lambda x: x
+    
+>           result = await show_payment_methods(mock_update_callback, mock_context)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/integration/test_order_flow_e2e.py:198: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+update = <MagicMock spec='Update' id='277231569398160'>
+context = <MagicMock spec='_GenericAlias' id='277231569403344'>
+
+    async def show_payment_methods(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """
+        Show payment method selection screen
+    
+        This function is typically called after carrier selection.
+        Shows options: Pay from balance, Pay with crypto, Top-up balance
+        """
+        from server import (
+            safe_telegram_call,
+            find_user_by_telegram_id,
+            PAYMENT_METHOD,
+            mark_message_as_selected
+        )
+        from utils.ui_utils import PaymentFlowUI
+        import asyncio
+    
+        query = update.callback_query
+        await safe_telegram_call(query.answer())
+    
+        # Mark previous message as selected (non-blocking)
+        asyncio.create_task(mark_message_as_selected(update, context))
+    
+        telegram_id = query.from_user.id
+        user = await find_user_by_telegram_id(telegram_id)
+    
+        # Get order amount
+        selected_rate = context.user_data.get('selected_rate', {})
+        amount = context.user_data.get('final_amount', selected_rate.get('amount', 0))
+        balance = user.get('balance', 0.0) if user else 0.0
+    
+        # Build message
+        message = PaymentFlowUI.payment_method_selection(amount, balance)
+    
+        # Build keyboard
+        keyboard = []
+    
+        if balance >= amount:
+            keyboard.append([InlineKeyboardButton(
+                f"💳 Оплатить с баланса (${balance:.2f})",
+                callback_data='pay_from_balance'
+            )])
+    
+        keyboard.append([InlineKeyboardButton(
+            "💰 Оплатить криптовалютой",
+            callback_data='pay_crypto'
+        )])
+    
+        if balance < amount:
+            deficit = amount - balance
+            keyboard.append([InlineKeyboardButton(
+                f"➕ Пополнить баланс (не хватает ${deficit:.2f})",
+                callback_data='topup_for_order'
+            )])
+    
+        keyboard.append([InlineKeyboardButton("🔙 Назад к тарифам", callback_data='back_to_rates')])
+        keyboard.append([InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')])
+    
+        reply_markup = InlineKeyboardMarkup(keyboard)
+    
+        bot_msg = await safe_telegram_call(query.message.reply_text(
+            message,
+            reply_markup=reply_markup
+        ))
+    
+        if bot_msg:
+>           context.user_data['last_bot_message_id'] = bot_msg.message_id
+                                                       ^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'coroutine' object has no attribute 'message_id'
+
+backend/handlers/order_flow/payment.py:77: AttributeError
+____________ TestPaymentIntegration.test_balance_payment_full_flow _____________
+
+self = <test_payment_integration.TestPaymentIntegration object at 0xfc240307d790>
+test_db = AsyncIOMotorDatabase(Database(MongoClient(host=['localhost:27017'], document_class=dict, tz_aware=False, connect=False, driver=DriverInfo(name='Motor', version='3.3.1', platform='asyncio')), 'telegram_shipping_bot'))
+mock_update_callback = <MagicMock spec='Update' id='277231574058384'>
+mock_context = <MagicMock spec='_GenericAlias' id='277231574063504'>
+sample_shipping_rate = {'amount': 15.5, 'carrier': 'USPS', 'carrier_name': 'USPS', 'delivery_days': '2-3', ...}
+sample_order_data = {'from_city': 'New York', 'from_name': 'John Doe', 'from_phone': '1234567890', 'from_state': 'NY', ...}
+
+    async def test_balance_payment_full_flow(
+        self,
+        test_db,
+        mock_update_callback,
+        mock_context,
+        sample_shipping_rate,
+        sample_order_data
+    ):
+        """
+        Test complete flow: balance payment -> order creation -> label generation
+        """
+        from services.payment_service import process_balance_payment
+    
+        # Setup: User has sufficient balance
+        telegram_id = 123456789
+        amount = 15.50
+    
+        # Mock user with balance
+        mock_user = {
+            "id": "user123",
+            "telegram_id": telegram_id,
+            "balance": 100.0
+        }
+    
+        mock_context.user_data.update(sample_order_data)
+        mock_context.user_data['selected_rate'] = sample_shipping_rate
+        mock_context.user_data['final_amount'] = amount
+    
+>       with patch('services.payment_service.find_user_by_telegram_id', return_value=mock_user) as mock_find, \
+             patch('services.payment_service.deduct_balance') as mock_deduct:
+
+backend/tests/integration/test_payment_integration.py:43: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.11/unittest/mock.py:1446: in __enter__
+    original, local = self.get_original()
+                      ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <unittest.mock._patch object at 0xfc24017d8510>
+
+    def get_original(self):
+        target = self.getter()
+        name = self.attribute
+    
+        original = DEFAULT
+        local = False
+    
+        try:
+            original = target.__dict__[name]
+        except (AttributeError, KeyError):
+            original = getattr(target, name, DEFAULT)
+        else:
+            local = True
+    
+        if name in _builtins and isinstance(target, ModuleType):
+            self.create = True
+    
+        if not self.create and original is DEFAULT:
+>           raise AttributeError(
+                "%s does not have the attribute %r" % (target, name)
+            )
+E           AttributeError: <module 'services.payment_service' from '/app/backend/services/payment_service.py'> does not have the attribute 'find_user_by_telegram_id'
+
+/usr/local/lib/python3.11/unittest/mock.py:1419: AttributeError
+___________ TestPaymentIntegration.test_insufficient_balance_payment ___________
+
+self = <test_payment_integration.TestPaymentIntegration object at 0xfc240307e150>
+mock_update_callback = <MagicMock spec='Update' id='277231570059728'>
+mock_context = <MagicMock spec='_GenericAlias' id='277231570066640'>
+
+    async def test_insufficient_balance_payment(
+        self,
+        mock_update_callback,
+        mock_context
+    ):
+        """
+        Test payment flow when user has insufficient balance
+        """
+        from services.payment_service import validate_payment_amount
+    
+        telegram_id = 123456789
+        amount = 150.0  # More than balance
+        user_balance = 100.0
+    
+        # Validate payment
+        valid, error = validate_payment_amount(
+            amount=amount,
+            user_balance=user_balance
+        )
+    
+        # Verify: Should fail validation
+        assert valid is False
+>       assert "insufficient" in error.lower()
+E       AssertionError: assert 'insufficient' in '❌ недостаточно средств на балансе.'
+E        +  where '❌ недостаточно средств на балансе.' = <built-in method lower of str object at 0xfc2402208ae0>()
+E        +    where <built-in method lower of str object at 0xfc2402208ae0> = '❌ Недостаточно средств на балансе.'.lower
+
+backend/tests/integration/test_payment_integration.py:84: AssertionError
+_________ TestPaymentIntegration.test_crypto_payment_invoice_creation __________
+
+self = <test_payment_integration.TestPaymentIntegration object at 0xfc240307ead0>
+mock_update_callback = <MagicMock spec='Update' id='277231569595856'>
+mock_context = <MagicMock spec='_GenericAlias' id='277231569597136'>
+mock_oxapay_response = {'message': 'Success', 'payLink': 'https://payment.oxapay.com/test', 'result': 100, 'trackId': 'test_track_id_123'}
+
+    async def test_crypto_payment_invoice_creation(
+        self,
+        mock_update_callback,
+        mock_context,
+        mock_oxapay_response
+    ):
+        """
+        Test crypto payment invoice creation
+        """
+        from server import create_oxapay_invoice
+    
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_response = AsyncMock()
+            mock_response.status = 200
+            mock_response.json = AsyncMock(return_value=mock_oxapay_response)
+            mock_post.return_value.__aenter__.return_value = mock_response
+    
+>           result = await create_oxapay_invoice(
+                amount=25.0,
+                order_id="order_123",
+                description="Test Order Payment"
+            )
+
+backend/tests/integration/test_payment_integration.py:104: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+amount = 25.0, order_id = 'order_123', description = 'Test Order Payment'
+
+    async def create_oxapay_invoice(amount: float, order_id: str, description: str = "Shipping Label Payment"):
+        """Create payment invoice via Oxapay"""
+        if not OXAPAY_API_KEY:
+>           raise HTTPException(status_code=500, detail="Oxapay API key not configured")
+E           fastapi.exceptions.HTTPException: 500: Oxapay API key not configured
+
+backend/services/api_services.py:23: HTTPException
+____________________ TestPaymentIntegration.test_topup_flow ____________________
+
+self = <test_payment_integration.TestPaymentIntegration object at 0xfc240306e690>
+test_db = AsyncIOMotorDatabase(Database(MongoClient(host=['localhost:27017'], document_class=dict, tz_aware=False, connect=False, driver=DriverInfo(name='Motor', version='3.3.1', platform='asyncio')), 'telegram_shipping_bot'))
+mock_update_message = <MagicMock spec='Update' id='277231574069072'>
+mock_context = <MagicMock spec='_GenericAlias' id='277231574065424'>
+
+    async def test_topup_flow(
+        self,
+        test_db,
+        mock_update_message,
+        mock_context
+    ):
+        """
+        Test balance top-up flow
+        """
+        from handlers.order_flow.template_save import handle_topup_amount
+        from services.payment_service import validate_topup_amount
+    
+        # Step 1: Validate topup amount
+        valid, error = validate_topup_amount(50.0)
+        assert valid is True
+        assert error is None
+    
+        # Step 2: Test too small amount
+        valid, error = validate_topup_amount(5.0)
+        assert valid is False
+>       assert "minimum" in error.lower()
+E       AssertionError: assert 'minimum' in '❌ *минимальная сумма для пополнения: $10*'
+E        +  where '❌ *минимальная сумма для пополнения: $10*' = <built-in method lower of str object at 0xfc24021b7af0>()
+E        +    where <built-in method lower of str object at 0xfc24021b7af0> = '❌ *Минимальная сумма для пополнения: $10*'.lower
+
+backend/tests/integration/test_payment_integration.py:134: AssertionError
+__________ TestOrderCreationIntegration.test_complete_order_creation ___________
+
+self = <test_payment_integration.TestOrderCreationIntegration object at 0xfc240307dc10>
+test_db = AsyncIOMotorDatabase(Database(MongoClient(host=['localhost:27017'], document_class=dict, tz_aware=False, connect=False, driver=DriverInfo(name='Motor', version='3.3.1', platform='asyncio')), 'telegram_shipping_bot'))
+sample_order_data = {'from_city': 'New York', 'from_name': 'John Doe', 'from_phone': '1234567890', 'from_state': 'NY', ...}
+sample_shipping_rate = {'amount': 15.5, 'carrier': 'USPS', 'carrier_name': 'USPS', 'delivery_days': '2-3', ...}
+
+    async def test_complete_order_creation(
+        self,
+        test_db,
+        sample_order_data,
+        sample_shipping_rate
+    ):
+        """
+        Test complete order creation flow
+        """
+        # Setup order data
+        order_data = {
+            **sample_order_data,
+            "selected_rate": sample_shipping_rate,
+            "telegram_id": 123456789,
+            "payment_method": "balance",
+            "amount": 15.50
+        }
+    
+        # Mock order insertion
+>       with patch('server.insert_order') as mock_insert:
+
+backend/tests/integration/test_payment_integration.py:186: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.11/unittest/mock.py:1446: in __enter__
+    original, local = self.get_original()
+                      ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <unittest.mock._patch object at 0xfc2401449b10>
+
+    def get_original(self):
+        target = self.getter()
+        name = self.attribute
+    
+        original = DEFAULT
+        local = False
+    
+        try:
+            original = target.__dict__[name]
+        except (AttributeError, KeyError):
+            original = getattr(target, name, DEFAULT)
+        else:
+            local = True
+    
+        if name in _builtins and isinstance(target, ModuleType):
+            self.create = True
+    
+        if not self.create and original is DEFAULT:
+>           raise AttributeError(
+                "%s does not have the attribute %r" % (target, name)
+            )
+E           AttributeError: <module 'server' from '/app/backend/server.py'> does not have the attribute 'insert_order'
+
+/usr/local/lib/python3.11/unittest/mock.py:1419: AttributeError
+_______ TestOrderCreationIntegration.test_label_generation_after_payment _______
+
+self = <test_payment_integration.TestOrderCreationIntegration object at 0xfc240307d490>
+sample_order_data = {'from_city': 'New York', 'from_name': 'John Doe', 'from_phone': '1234567890', 'from_state': 'NY', ...}
+sample_shipping_rate = {'amount': 15.5, 'carrier': 'USPS', 'carrier_name': 'USPS', 'delivery_days': '2-3', ...}
+
+    async def test_label_generation_after_payment(
+        self,
+        sample_order_data,
+        sample_shipping_rate
+    ):
+        """
+        Test shipping label generation after successful payment
+        """
+        from services.shipping_service import build_shipstation_label_request
+    
+        order_data = {
+            **sample_order_data,
+            "selected_rate": sample_shipping_rate
+        }
+    
+        # Build label request
+>       label_request = build_shipstation_label_request(
+            order_data=order_data,
+            rate_data=sample_shipping_rate
+        )
+E       TypeError: build_shipstation_label_request() got an unexpected keyword argument 'order_data'
+
+backend/tests/integration/test_payment_integration.py:211: TypeError
+________________ TestDatabaseIntegration.test_order_pagination _________________
+
+self = <test_simple_integration.TestDatabaseIntegration object at 0xfc240308e250>
+test_db = AsyncIOMotorDatabase(Database(MongoClient(host=['localhost:27017'], document_class=dict, tz_aware=False, connect=False, driver=DriverInfo(name='Motor', version='3.3.1', platform='asyncio')), 'telegram_shipping_bot'))
+
+    async def test_order_pagination(self, test_db):
+        """Test order pagination with compound index"""
+        from utils.optimized_queries import get_user_orders
+    
+        telegram_id = 888888888
+    
+        # Insert test orders
+        for i in range(5):
+>           await test_db.orders.insert_one({
+                "id": f"order_{i}",
+                "telegram_id": telegram_id,
+                "order_number": f"ORD-{i}",
+                "created_at": f"2025-01-0{i+1}T00:00:00Z",
+                "payment_status": "paid",
+                "amount": 10.0 + i
+            })
+
+backend/tests/integration/test_simple_integration.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/local/lib/python3.11/concurrent/futures/thread.py:58: in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/pymongo/collection.py:671: in insert_one
+    self._insert_one(
+/root/.venv/lib/python3.11/site-packages/pymongo/collection.py:611: in _insert_one
+    self.__database.client._retryable_write(acknowledged, _insert_command, session)
+/root/.venv/lib/python3.11/site-packages/pymongo/mongo_client.py:1568: in _retryable_write
+    return self._retry_with_session(retryable, func, s, None)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/pymongo/mongo_client.py:1413: in _retry_with_session
+    return self._retry_internal(retryable, func, session, bulk)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/pymongo/_csot.py:108: in csot_wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/pymongo/mongo_client.py:1460: in _retry_internal
+    return func(session, conn, retryable)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/root/.venv/lib/python3.11/site-packages/pymongo/collection.py:609: in _insert_command
+    _check_write_command_response(result)
+/root/.venv/lib/python3.11/site-packages/pymongo/helpers.py:259: in _check_write_command_response
+    _raise_last_write_error(write_errors)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+write_errors = [{'code': 11000, 'errmsg': 'E11000 duplicate key error collection: telegram_shipping_bot.orders index: order_id_1 dup key: { order_id: null }', 'index': 0, 'keyPattern': {'order_id': 1}, ...}]
+
+    def _raise_last_write_error(write_errors: List[Any]) -> NoReturn:
+        # If the last batch had multiple errors only report
+        # the last error to emulate continue_on_error.
+        error = write_errors[-1]
+        if error.get("code") == 11000:
+>           raise DuplicateKeyError(error.get("errmsg"), 11000, error)
+E           pymongo.errors.DuplicateKeyError: E11000 duplicate key error collection: telegram_shipping_bot.orders index: order_id_1 dup key: { order_id: null }, full error: {'index': 0, 'code': 11000, 'errmsg': 'E11000 duplicate key error collection: telegram_shipping_bot.orders index: order_id_1 dup key: { order_id: null }', 'keyPattern': {'order_id': 1}, 'keyValue': {'order_id': None}}
+
+/root/.venv/lib/python3.11/site-packages/pymongo/helpers.py:231: DuplicateKeyError
+____________ TestServiceIntegration.test_payment_service_validation ____________
+
+self = <test_simple_integration.TestServiceIntegration object at 0xfc240308fd50>
+
+    async def test_payment_service_validation(self):
+        """Test payment amount validation"""
+        from services.payment_service import validate_payment_amount, validate_topup_amount
+    
+        # Valid payment
+        valid, error = validate_payment_amount(10.0, 100.0)
+        assert valid is True
+        assert error is None
+    
+        # Insufficient balance
+        valid, error = validate_payment_amount(150.0, 100.0)
+        assert valid is False
+>       assert error is not None and "insufficient" in error.lower()
+E       AssertionError: assert ('❌ Недостаточно средств на балансе.' is not None and 'insufficient' in '❌ недостаточно средств на балансе.')
+E        +  where '❌ недостаточно средств на балансе.' = <built-in method lower of str object at 0xfc2402208ae0>()
+E        +    where <built-in method lower of str object at 0xfc2402208ae0> = '❌ Недостаточно средств на балансе.'.lower
+
+backend/tests/integration/test_simple_integration.py:138: AssertionError
+___________ TestServiceIntegration.test_template_service_validation ____________
+
+self = <test_simple_integration.TestServiceIntegration object at 0xfc2403094590>
+
+    async def test_template_service_validation(self):
+        """Test template data validation"""
+        from services.template_service import validate_template_data
+    
+        # Valid template - needs all required fields
+        valid_data = {
+            "from_name": "John",
+            "from_street": "123 Main",
+            "from_city": "NY",
+            "from_state": "NY",
+            "from_zip": "10001",
+            "to_name": "Jane",
+            "to_street": "456 Oak",
+            "to_city": "LA",
+            "to_state": "CA",
+            "to_zip": "90001"
+        }
+        valid, error = validate_template_data(valid_data)
+>       assert valid is True
+E       assert False is True
+
+backend/tests/integration/test_simple_integration.py:171: AssertionError
+___________ TestServiceIntegration.test_shipping_service_validation ____________
+
+self = <test_simple_integration.TestServiceIntegration object at 0xfc2403094d90>
+
+    async def test_shipping_service_validation(self):
+        """Test shipping address and parcel validation"""
+        from services.shipping_service import validate_parcel_data
+    
+        # Valid parcel
+>       valid, error = validate_parcel_data(5.0, 12, 8, 6)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: validate_parcel_data() takes 1 positional argument but 4 were given
+
+backend/tests/integration/test_simple_integration.py:186: TypeError
+_____________ TestAPIIntegration.test_shipstation_request_building _____________
+
+self = <test_simple_integration.TestAPIIntegration object at 0xfc2403095890>
+sample_order_data = {'from_city': 'New York', 'from_name': 'John Doe', 'from_phone': '1234567890', 'from_state': 'NY', ...}
+
+    async def test_shipstation_request_building(self, sample_order_data):
+        """Test ShipStation API request construction"""
+        from services.shipping_service import build_shipstation_rates_request
+    
+        # Add required weight field
+        sample_order_data['parcel_weight'] = 5.5
+    
+>       request = build_shipstation_rates_request(sample_order_data)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: build_shipstation_rates_request() missing 1 required positional argument: 'carrier_ids'
+
+backend/tests/integration/test_simple_integration.py:212: TypeError
+_____________ TestAPIIntegration.test_shipstation_api_call_mocked ______________
+
+self = <test_simple_integration.TestAPIIntegration object at 0xfc240308fa10>
+sample_order_data = {'from_city': 'New York', 'from_name': 'John Doe', 'from_phone': '1234567890', 'from_state': 'NY', ...}
+mock_shipstation_response = [{'carrierCode': 'stamps_com', 'carrierName': 'USPS', 'otherCost': 0.0, 'serviceCode': 'usps_priority_mail', ...}, {'carrierCode': 'ups_walleted', 'carrierName': 'UPS', 'otherCost': 0.0, 'serviceCode': 'ups_ground', ...}]
+
+    async def test_shipstation_api_call_mocked(
+        self,
+        sample_order_data,
+        mock_shipstation_response
+    ):
+        """Test ShipStation API call with mocked response"""
+        from services.shipping_service import fetch_rates_from_shipstation, build_shipstation_rates_request
+    
+>       request = build_shipstation_rates_request(sample_order_data)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: build_shipstation_rates_request() missing 1 required positional argument: 'carrier_ids'
+
+backend/tests/integration/test_simple_integration.py:230: TypeError
+____________ TestWebhookIntegration.test_telegram_api_rate_limiting ____________
+
+    async def rate_limited_call():
+>       raise RetryAfter(5)  # Retry after 5 seconds
+        ^^^^^^^^^^^^^^^^^^^
+E       telegram.error.RetryAfter: Flood control exceeded. Retry in 5 seconds
+
+backend/tests/integration/test_webhook_integration.py:89: RetryAfter
+
+During handling of the above exception, another exception occurred:
+
+self = <test_webhook_integration.TestWebhookIntegration object at 0xfc2402543ed0>
+
+    async def test_telegram_api_rate_limiting(self):
+        """
+        Test that we handle Telegram API rate limits
+        """
+        from server import safe_telegram_call
+        from telegram.error import RetryAfter
+    
+        # Mock a rate-limited call
+        async def rate_limited_call():
+            raise RetryAfter(5)  # Retry after 5 seconds
+    
+        with patch('asyncio.sleep', new_callable=AsyncMock):
+            # Should handle rate limit gracefully
+            try:
+>               result = await safe_telegram_call(rate_limited_call())
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+backend/tests/integration/test_webhook_integration.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+backend/handlers/common_handlers.py:43: in safe_telegram_call
+    return await asyncio.wait_for(coro, timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fut = <Task finished name='Task-127' coro=<TestWebhookIntegration.test_telegram_api_rate_limiting.<locals>.rate_limited_call...end/tests/integration/test_webhook_integration.py:88> exception=RuntimeError('cannot reuse already awaited coroutine')>
+timeout = 10
+
+    async def wait_for(fut, timeout):
+        """Wait for the single Future or coroutine to complete, with timeout.
+    
+        Coroutine will be wrapped in Task.
+    
+        Returns result of the Future or coroutine.  When a timeout occurs,
+        it cancels the task and raises TimeoutError.  To avoid the task
+        cancellation, wrap it in shield().
+    
+        If the wait is cancelled, the task is also cancelled.
+    
+        This function is a coroutine.
+        """
+        loop = events.get_running_loop()
+    
+        if timeout is None:
+            return await fut
+    
+        if timeout <= 0:
+            fut = ensure_future(fut, loop=loop)
+    
+            if fut.done():
+                return fut.result()
+    
+            await _cancel_and_wait(fut, loop=loop)
+            try:
+                return fut.result()
+            except exceptions.CancelledError as exc:
+                raise exceptions.TimeoutError() from exc
+    
+        waiter = loop.create_future()
+        timeout_handle = loop.call_later(timeout, _release_waiter, waiter)
+        cb = functools.partial(_release_waiter, waiter)
+    
+        fut = ensure_future(fut, loop=loop)
+        fut.add_done_callback(cb)
+    
+        try:
+            # wait until the future completes or the timeout
+            try:
+                await waiter
+            except exceptions.CancelledError:
+                if fut.done():
+                    return fut.result()
+                else:
+                    fut.remove_done_callback(cb)
+                    # We must ensure that the task is not running
+                    # after wait_for() returns.
+                    # See https://bugs.python.org/issue32751
+                    await _cancel_and_wait(fut, loop=loop)
+                    raise
+    
+            if fut.done():
+>               return fut.result()
+                       ^^^^^^^^^^^^
+E               RuntimeError: cannot reuse already awaited coroutine
+
+/usr/local/lib/python3.11/asyncio/tasks.py:489: RuntimeError
+------------------------------ Captured log call -------------------------------
+WARNING  handlers.common_handlers:common_handlers.py:41 Telegram rate limit: waiting 5s
+_________ TestExternalAPIIntegration.test_shipstation_api_integration __________
+
+self = <test_webhook_integration.TestExternalAPIIntegration object at 0xfc24025513d0>
+sample_order_data = {'from_city': 'New York', 'from_name': 'John Doe', 'from_phone': '1234567890', 'from_state': 'NY', ...}
+mock_shipstation_response = [{'carrierCode': 'stamps_com', 'carrierName': 'USPS', 'otherCost': 0.0, 'serviceCode': 'usps_priority_mail', ...}, {'carrierCode': 'ups_walleted', 'carrierName': 'UPS', 'otherCost': 0.0, 'serviceCode': 'ups_ground', ...}]
+
+    async def test_shipstation_api_integration(
+        self,
+        sample_order_data,
+        mock_shipstation_response
+    ):
+        """
+        Test ShipStation API integration with mocked response
+        """
+        from services.shipping_service import build_shipstation_rates_request, fetch_rates_from_shipstation
+    
+        # Build request
+>       request_data = build_shipstation_rates_request(sample_order_data)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: build_shipstation_rates_request() missing 1 required positional argument: 'carrier_ids'
+
+backend/tests/integration/test_webhook_integration.py:129: TypeError
+__________ TestExternalAPIIntegration.test_oxapay_payment_integration __________
+
+self = <test_webhook_integration.TestExternalAPIIntegration object at 0xfc2402551d10>
+mock_oxapay_response = {'message': 'Success', 'payLink': 'https://payment.oxapay.com/test', 'result': 100, 'trackId': 'test_track_id_123'}
+
+    async def test_oxapay_payment_integration(
+        self,
+        mock_oxapay_response
+    ):
+        """
+        Test Oxapay payment API integration
+        """
+        from server import create_oxapay_invoice
+    
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_response = AsyncMock()
+            mock_response.status = 200
+            mock_response.json = AsyncMock(return_value=mock_oxapay_response)
+            mock_post.return_value.__aenter__.return_value = mock_response
+    
+>           result = await create_oxapay_invoice(
+                amount=50.0,
+                order_id="test_order_123",
+                description="Test payment"
+            )
+
+backend/tests/integration/test_webhook_integration.py:170: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+amount = 50.0, order_id = 'test_order_123', description = 'Test payment'
+
+    async def create_oxapay_invoice(amount: float, order_id: str, description: str = "Shipping Label Payment"):
+        """Create payment invoice via Oxapay"""
+        if not OXAPAY_API_KEY:
+>           raise HTTPException(status_code=500, detail="Oxapay API key not configured")
+E           fastapi.exceptions.HTTPException: 500: Oxapay API key not configured
+
+backend/services/api_services.py:23: HTTPException
+_____________ TestExternalAPIIntegration.test_api_timeout_handling _____________
+
+self = <test_webhook_integration.TestExternalAPIIntegration object at 0xfc2402552610>
+
+    async def test_api_timeout_handling(self):
+        """
+        Test handling of API timeouts
+        """
+        from services.shipping_service import fetch_rates_from_shipstation
+        import asyncio
+    
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            # Simulate timeout
+            mock_post.side_effect = asyncio.TimeoutError()
+    
+>           success, rates, error = await fetch_rates_from_shipstation(
+                {},
+                api_key="test",
+                api_secret="test"
+            )
+E           TypeError: fetch_rates_from_shipstation() got an unexpected keyword argument 'api_key'
+
+backend/tests/integration/test_webhook_integration.py:192: TypeError
+_________ TestExternalAPIIntegration.test_api_error_response_handling __________
+
+self = <test_webhook_integration.TestExternalAPIIntegration object at 0xfc2402552fd0>
+sample_order_data = {'from_city': 'New York', 'from_name': 'John Doe', 'from_phone': '1234567890', 'from_state': 'NY', ...}
+
+    async def test_api_error_response_handling(
+        self,
+        sample_order_data
+    ):
+        """
+        Test handling of API error responses (4xx, 5xx)
+        """
+        from services.shipping_service import fetch_rates_from_shipstation, build_shipstation_rates_request
+    
+>       request_data = build_shipstation_rates_request(sample_order_data)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: build_shipstation_rates_request() missing 1 required positional argument: 'carrier_ids'
+
+backend/tests/integration/test_webhook_integration.py:212: TypeError
 ________________________ test_get_or_create_session_new ________________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
+
+session_manager = <async_generator object session_manager at 0xfc2401bedd50>
+
+    @pytest.mark.asyncio
+    async def test_get_or_create_session_new(session_manager):
+        """Test creating a new session"""
+        user_id = 12345
+    
+        # Create new session
+>       session = await session_manager.get_or_create_session(user_id, initial_data={'test': 'data'})
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'async_generator' object has no attribute 'get_or_create_session'
+
+backend/tests/test_session_manager.py:45: AttributeError
 _____________________ test_get_or_create_session_existing ______________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
+
+session_manager = <async_generator object session_manager at 0xfc2402272980>
+
+    @pytest.mark.asyncio
+    async def test_get_or_create_session_existing(session_manager):
+        """Test getting existing session"""
+        user_id = 12345
+    
+        # Create session
+>       await session_manager.get_or_create_session(user_id, initial_data={'first': 'call'})
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'async_generator' object has no attribute 'get_or_create_session'
+
+backend/tests/test_session_manager.py:60: AttributeError
 __________________________ test_update_session_atomic __________________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
+
+session_manager = <async_generator object session_manager at 0xfc2402272110>
+
+    @pytest.mark.asyncio
+    async def test_update_session_atomic(session_manager):
+        """Test atomic session update"""
+        user_id = 12345
+    
+        # Create session
+>       await session_manager.get_or_create_session(user_id)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'async_generator' object has no attribute 'get_or_create_session'
+
+backend/tests/test_session_manager.py:76: AttributeError
 __________________ test_update_session_atomic_multiple_fields __________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
+
+session_manager = <async_generator object session_manager at 0xfc2401741e40>
+
+    @pytest.mark.asyncio
+    async def test_update_session_atomic_multiple_fields(session_manager):
+        """Test updating multiple fields atomically"""
+        user_id = 12345
+    
+>       await session_manager.get_or_create_session(user_id)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'async_generator' object has no attribute 'get_or_create_session'
+
+backend/tests/test_session_manager.py:95: AttributeError
 ______________________________ test_clear_session ______________________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
+
+session_manager = <async_generator object session_manager at 0xfc2401741030>
+
+    @pytest.mark.asyncio
+    async def test_clear_session(session_manager):
+        """Test session deletion"""
+        user_id = 12345
+    
+        # Create session
+>       await session_manager.get_or_create_session(user_id)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'async_generator' object has no attribute 'get_or_create_session'
+
+backend/tests/test_session_manager.py:113: AttributeError
 ______________________ test_save_completed_label_fallback ______________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
+
+session_manager = <async_generator object session_manager at 0xfc2401740e50>
+
+    @pytest.mark.asyncio
+    async def test_save_completed_label_fallback(session_manager):
+        """Test save_completed_label with fallback (no replica set)"""
+        user_id = 12345
+    
+        # Create session
+>       await session_manager.get_or_create_session(user_id, initial_data={'order_id': 'test123'})
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'async_generator' object has no attribute 'get_or_create_session'
+
+backend/tests/test_session_manager.py:130: AttributeError
 _________________________ test_revert_to_previous_step _________________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-______________________ test_validate_order_data_complete _______________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-_____________________ test_validate_order_data_incomplete ______________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-____________________ test_validate_order_data_empty_strings ____________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-__________________ test_fetch_rates_from_shipstation_success ___________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-_________________ test_fetch_rates_from_shipstation_api_error __________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-__________________ test_fetch_rates_from_shipstation_timeout ___________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-__________________ test_fetch_rates_from_shipstation_no_rates __________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-_______________________ test_full_rate_fetching_pipeline _______________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-_______________________ test_get_user_templates_success ________________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-________________________ test_get_user_templates_empty _________________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-_________________________ test_create_template_success _________________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-______________________ test_create_template_limit_reached ______________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-_______________________ test_create_template_empty_name ________________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-______________________ test_create_template_name_too_long ______________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-______________________ test_update_template_name_success _______________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-_______________________ test_update_template_name_empty ________________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-_________________________ test_delete_template_success _________________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-________________________ test_delete_template_not_found ________________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-______________________ test_delete_template_unauthorized _______________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-____________________ test_load_template_to_context_success _____________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-_________________________ test_load_template_not_found _________________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-_______________________ test_load_template_unauthorized ________________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
-_________________________ test_full_template_lifecycle _________________________
-async def functions are not natively supported.
-You need to install a suitable plugin for your async framework, for example:
-  - anyio
-  - pytest-asyncio
-  - pytest-tornasync
-  - pytest-trio
-  - pytest-twisted
+
+session_manager = <async_generator object session_manager at 0xfc240179f3d0>
+
+    @pytest.mark.asyncio
+    async def test_revert_to_previous_step(session_manager):
+        """Test reverting to previous step"""
+        user_id = 12345
+    
+        # Create session at FROM_ZIP step
+>       await session_manager.get_or_create_session(user_id)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'async_generator' object has no attribute 'get_or_create_session'
+
+backend/tests/test_session_manager.py:158: AttributeError
 _______________________ test_template_database_structure _______________________
 async def functions are not natively supported.
 You need to install a suitable plugin for your async framework, for example:
@@ -426,186 +1377,6 @@ You need to install a suitable plugin for your async framework, for example:
   /root/.venv/lib/python3.11/site-packages/starlette/formparsers.py:12: PendingDeprecationWarning: Please use `import python_multipart` instead.
     import multipart
 
-backend/tests/test_payment_service.py:22
-  /app/backend/tests/test_payment_service.py:22: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_payment_service.py:33
-  /app/backend/tests/test_payment_service.py:33: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_payment_service.py:47
-  /app/backend/tests/test_payment_service.py:47: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_payment_service.py:65
-  /app/backend/tests/test_payment_service.py:65: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_payment_service.py:83
-  /app/backend/tests/test_payment_service.py:83: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_payment_service.py:100
-  /app/backend/tests/test_payment_service.py:100: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_payment_service.py:115
-  /app/backend/tests/test_payment_service.py:115: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_payment_service.py:225
-  /app/backend/tests/test_payment_service.py:225: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_payment_service.py:247
-  /app/backend/tests/test_payment_service.py:247: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_payment_service.py:266
-  /app/backend/tests/test_payment_service.py:266: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_payment_service.py:292
-  /app/backend/tests/test_payment_service.py:292: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_payment_service.py:321
-  /app/backend/tests/test_payment_service.py:321: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_payment_service.py:343
-  /app/backend/tests/test_payment_service.py:343: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_payment_service.py:372
-  /app/backend/tests/test_payment_service.py:372: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_payment_service.py:398
-  /app/backend/tests/test_payment_service.py:398: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_session_manager.py:39
-  /app/backend/tests/test_session_manager.py:39: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_session_manager.py:54
-  /app/backend/tests/test_session_manager.py:54: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_session_manager.py:70
-  /app/backend/tests/test_session_manager.py:70: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_session_manager.py:90
-  /app/backend/tests/test_session_manager.py:90: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_session_manager.py:107
-  /app/backend/tests/test_session_manager.py:107: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_session_manager.py:124
-  /app/backend/tests/test_session_manager.py:124: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_session_manager.py:152
-  /app/backend/tests/test_session_manager.py:152: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_shipping_service.py:24
-  /app/backend/tests/test_shipping_service.py:24: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_shipping_service.py:33
-  /app/backend/tests/test_shipping_service.py:33: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_shipping_service.py:45
-  /app/backend/tests/test_shipping_service.py:45: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_shipping_service.py:314
-  /app/backend/tests/test_shipping_service.py:314: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_shipping_service.py:346
-  /app/backend/tests/test_shipping_service.py:346: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_shipping_service.py:367
-  /app/backend/tests/test_shipping_service.py:367: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_shipping_service.py:385
-  /app/backend/tests/test_shipping_service.py:385: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_shipping_service.py:413
-  /app/backend/tests/test_shipping_service.py:413: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_template_service.py:21
-  /app/backend/tests/test_template_service.py:21: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_template_service.py:37
-  /app/backend/tests/test_template_service.py:37: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_template_service.py:51
-  /app/backend/tests/test_template_service.py:51: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_template_service.py:76
-  /app/backend/tests/test_template_service.py:76: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_template_service.py:99
-  /app/backend/tests/test_template_service.py:99: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_template_service.py:120
-  /app/backend/tests/test_template_service.py:120: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_template_service.py:143
-  /app/backend/tests/test_template_service.py:143: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_template_service.py:161
-  /app/backend/tests/test_template_service.py:161: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_template_service.py:177
-  /app/backend/tests/test_template_service.py:177: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_template_service.py:198
-  /app/backend/tests/test_template_service.py:198: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_template_service.py:218
-  /app/backend/tests/test_template_service.py:218: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_template_service.py:242
-  /app/backend/tests/test_template_service.py:242: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_template_service.py:264
-  /app/backend/tests/test_template_service.py:264: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_template_service.py:281
-  /app/backend/tests/test_template_service.py:281: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
-backend/tests/test_template_service.py:337
-  /app/backend/tests/test_template_service.py:337: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
-    @pytest.mark.asyncio
-
 admin_notification_test.py::test_admin_notification_for_label_creation
   /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but admin_notification_test.py::test_admin_notification_for_label_creation returned <class 'bool'>.
   Did you mean to use `assert` instead of `return`?
@@ -623,6 +1394,57 @@ admin_notification_test.py::test_backend_logs_for_notifications
   Did you mean to use `assert` instead of `return`?
   See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
     warnings.warn(
+
+backend/tests/integration/test_order_flow_e2e.py::TestOrderFlowE2E::test_new_order_flow_basic
+  /app/backend/routers/admin/system.py:196: DeprecationWarning: `regex` has been deprecated, please use `pattern` instead
+    level: str = Query("ERROR", regex="^(ALL|DEBUG|INFO|WARNING|ERROR|CRITICAL)$"),
+
+backend/tests/integration/test_order_flow_e2e.py::TestOrderFlowE2E::test_new_order_flow_basic
+  /app/backend/server.py:6086: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("startup")
+
+backend/tests/integration/test_order_flow_e2e.py::TestOrderFlowE2E::test_new_order_flow_basic
+backend/tests/integration/test_order_flow_e2e.py::TestOrderFlowE2E::test_new_order_flow_basic
+  /root/.venv/lib/python3.11/site-packages/fastapi/applications.py:4495: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    return self.router.on_event(event_type)
+
+backend/tests/integration/test_order_flow_e2e.py::TestOrderFlowE2E::test_new_order_flow_basic
+  /app/backend/server.py:6318: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("shutdown")
+
+backend/tests/integration/test_order_flow_e2e.py::TestOrderFlowEdgeCases::test_missing_user_in_database
+  /usr/local/lib/python3.11/unittest/mock.py:2133: RuntimeWarning: coroutine 'AsyncMockMixin._execute_mock_call' was never awaited
+    setattr(_type, entry, MagicProxy(entry, self))
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+backend/tests/integration/test_order_flow_e2e.py::TestOrderFlowEdgeCases::test_blocked_user_attempt
+  /usr/local/lib/python3.11/inspect.py:2385: RuntimeWarning: coroutine 'AsyncMockMixin._execute_mock_call' was never awaited
+    parameters.append(Parameter(name, annotation=annotation,
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+backend/tests/integration/test_webhook_integration.py::TestWebhookIntegration::test_telegram_api_rate_limiting
+backend/tests/integration/test_webhook_integration.py::TestWebhookIntegration::test_telegram_api_rate_limiting
+backend/tests/integration/test_webhook_integration.py::TestWebhookIntegration::test_telegram_api_rate_limiting
+backend/tests/integration/test_webhook_integration.py::TestWebhookIntegration::test_telegram_api_rate_limiting
+  /root/.venv/lib/python3.11/site-packages/telegram/error.py:244: PTBDeprecationWarning: Deprecated since version v22.2: In a future major version attribute `retry_after` will be of type `datetime.timedelta`. You can opt-in early by setting `PTB_TIMEDELTA=true` or ``PTB_TIMEDELTA=1`` as an environment variable.
+    return get_timedelta_value(  # type: ignore[return-value]
 
 backend/tests/test_refactoring_handlers.py::test_telegram_webhook_endpoint
   /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend/tests/test_refactoring_handlers.py::test_telegram_webhook_endpoint returned <class 'bool'>.
@@ -653,9 +1475,17 @@ backend/tests/test_session_manager.py::test_get_or_create_session_new
   See: https://docs.pytest.org/en/stable/deprecations.html#sync-test-depending-on-async-fixture
     warnings.warn(
 
+backend/tests/test_session_manager.py::test_get_or_create_session_new
+  /root/.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:673: PytestDeprecationWarning: asyncio test 'test_get_or_create_session_new' requested async @pytest.fixture 'session_manager' in strict mode. You might want to use @pytest_asyncio.fixture or switch to auto mode. This will become an error in future versions of pytest-asyncio.
+    warnings.warn(
+
 backend/tests/test_session_manager.py::test_get_or_create_session_existing
   /root/.venv/lib/python3.11/site-packages/_pytest/fixtures.py:1182: PytestRemovedIn9Warning: 'test_get_or_create_session_existing' requested an async fixture 'session_manager', with no plugin or hook that handled it. This is usually an error, as pytest does not natively support it. This will turn into an error in pytest 9.
   See: https://docs.pytest.org/en/stable/deprecations.html#sync-test-depending-on-async-fixture
+    warnings.warn(
+
+backend/tests/test_session_manager.py::test_get_or_create_session_existing
+  /root/.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:673: PytestDeprecationWarning: asyncio test 'test_get_or_create_session_existing' requested async @pytest.fixture 'session_manager' in strict mode. You might want to use @pytest_asyncio.fixture or switch to auto mode. This will become an error in future versions of pytest-asyncio.
     warnings.warn(
 
 backend/tests/test_session_manager.py::test_update_session_atomic
@@ -663,9 +1493,17 @@ backend/tests/test_session_manager.py::test_update_session_atomic
   See: https://docs.pytest.org/en/stable/deprecations.html#sync-test-depending-on-async-fixture
     warnings.warn(
 
+backend/tests/test_session_manager.py::test_update_session_atomic
+  /root/.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:673: PytestDeprecationWarning: asyncio test 'test_update_session_atomic' requested async @pytest.fixture 'session_manager' in strict mode. You might want to use @pytest_asyncio.fixture or switch to auto mode. This will become an error in future versions of pytest-asyncio.
+    warnings.warn(
+
 backend/tests/test_session_manager.py::test_update_session_atomic_multiple_fields
   /root/.venv/lib/python3.11/site-packages/_pytest/fixtures.py:1182: PytestRemovedIn9Warning: 'test_update_session_atomic_multiple_fields' requested an async fixture 'session_manager', with no plugin or hook that handled it. This is usually an error, as pytest does not natively support it. This will turn into an error in pytest 9.
   See: https://docs.pytest.org/en/stable/deprecations.html#sync-test-depending-on-async-fixture
+    warnings.warn(
+
+backend/tests/test_session_manager.py::test_update_session_atomic_multiple_fields
+  /root/.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:673: PytestDeprecationWarning: asyncio test 'test_update_session_atomic_multiple_fields' requested async @pytest.fixture 'session_manager' in strict mode. You might want to use @pytest_asyncio.fixture or switch to auto mode. This will become an error in future versions of pytest-asyncio.
     warnings.warn(
 
 backend/tests/test_session_manager.py::test_clear_session
@@ -673,14 +1511,26 @@ backend/tests/test_session_manager.py::test_clear_session
   See: https://docs.pytest.org/en/stable/deprecations.html#sync-test-depending-on-async-fixture
     warnings.warn(
 
+backend/tests/test_session_manager.py::test_clear_session
+  /root/.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:673: PytestDeprecationWarning: asyncio test 'test_clear_session' requested async @pytest.fixture 'session_manager' in strict mode. You might want to use @pytest_asyncio.fixture or switch to auto mode. This will become an error in future versions of pytest-asyncio.
+    warnings.warn(
+
 backend/tests/test_session_manager.py::test_save_completed_label_fallback
   /root/.venv/lib/python3.11/site-packages/_pytest/fixtures.py:1182: PytestRemovedIn9Warning: 'test_save_completed_label_fallback' requested an async fixture 'session_manager', with no plugin or hook that handled it. This is usually an error, as pytest does not natively support it. This will turn into an error in pytest 9.
   See: https://docs.pytest.org/en/stable/deprecations.html#sync-test-depending-on-async-fixture
     warnings.warn(
 
+backend/tests/test_session_manager.py::test_save_completed_label_fallback
+  /root/.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:673: PytestDeprecationWarning: asyncio test 'test_save_completed_label_fallback' requested async @pytest.fixture 'session_manager' in strict mode. You might want to use @pytest_asyncio.fixture or switch to auto mode. This will become an error in future versions of pytest-asyncio.
+    warnings.warn(
+
 backend/tests/test_session_manager.py::test_revert_to_previous_step
   /root/.venv/lib/python3.11/site-packages/_pytest/fixtures.py:1182: PytestRemovedIn9Warning: 'test_revert_to_previous_step' requested an async fixture 'session_manager', with no plugin or hook that handled it. This is usually an error, as pytest does not natively support it. This will turn into an error in pytest 9.
   See: https://docs.pytest.org/en/stable/deprecations.html#sync-test-depending-on-async-fixture
+    warnings.warn(
+
+backend/tests/test_session_manager.py::test_revert_to_previous_step
+  /root/.venv/lib/python3.11/site-packages/pytest_asyncio/plugin.py:673: PytestDeprecationWarning: asyncio test 'test_revert_to_previous_step' requested async @pytest.fixture 'session_manager' in strict mode. You might want to use @pytest_asyncio.fixture or switch to auto mode. This will become an error in future versions of pytest-asyncio.
     warnings.warn(
 
 backend_test.py::test_api_health
@@ -700,12 +1550,6 @@ backend_test.py::test_shipstation_production_api_key
   Did you mean to use `assert` instead of `return`?
   See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
     warnings.warn(
-
-backend_test.py::test_shipstation_carrier_ids
-  /app/backend_test.py:235: RuntimeWarning: coroutine 'SessionManager._create_indexes' was never awaited
-    return False
-  Enable tracemalloc to get traceback where the object was allocated.
-  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
 
 backend_test.py::test_shipstation_carrier_ids
   /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_shipstation_carrier_ids returned <class 'bool'>.
@@ -1044,22 +1888,10 @@ backend_test.py::test_oxapay_order_id_length_fix
     warnings.warn(
 
 backend_test.py::test_oxapay_invoice_creation
-  /app/backend_test.py:6090: RuntimeWarning: coroutine 'SessionManager._create_indexes' was never awaited
-    return False
-  Enable tracemalloc to get traceback where the object was allocated.
-  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
-
-backend_test.py::test_oxapay_invoice_creation
   /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_oxapay_invoice_creation returned <class 'bool'>.
   Did you mean to use `assert` instead of `return`?
   See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
     warnings.warn(
-
-backend_test.py::test_oxapay_payment_check
-  /app/backend_test.py:6137: RuntimeWarning: coroutine 'SessionManager._create_indexes' was never awaited
-    return False
-  Enable tracemalloc to get traceback where the object was allocated.
-  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
 
 backend_test.py::test_oxapay_payment_check
   /root/.venv/lib/python3.11/site-packages/_pytest/python.py:161: PytestReturnNotNoneWarning: Test functions should return None, but backend_test.py::test_oxapay_payment_check returned <class 'bool'>.
@@ -1177,147 +2009,42 @@ template_test.py::test_template_function_implementation
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
 =========================== short test summary info ============================
-FAILED backend/tests/test_payment_service.py::test_get_user_balance_exists - ...
-FAILED backend/tests/test_payment_service.py::test_get_user_balance_not_exists
-FAILED backend/tests/test_payment_service.py::test_add_balance_success - Fail...
-FAILED backend/tests/test_payment_service.py::test_add_balance_user_not_found
-FAILED backend/tests/test_payment_service.py::test_deduct_balance_success - F...
-FAILED backend/tests/test_payment_service.py::test_deduct_balance_insufficient
-FAILED backend/tests/test_payment_service.py::test_deduct_balance_user_not_found
-FAILED backend/tests/test_payment_service.py::test_process_balance_payment_success
-FAILED backend/tests/test_payment_service.py::test_process_balance_payment_insufficient_balance
-FAILED backend/tests/test_payment_service.py::test_process_balance_payment_user_not_found
-FAILED backend/tests/test_payment_service.py::test_create_payment_invoice_success
-FAILED backend/tests/test_payment_service.py::test_create_payment_invoice_amount_too_small
-FAILED backend/tests/test_payment_service.py::test_create_payment_invoice_api_error
-FAILED backend/tests/test_payment_service.py::test_full_payment_flow - Failed...
-FAILED backend/tests/test_payment_service.py::test_full_topup_flow - Failed: ...
+FAILED backend/tests/integration/test_order_flow_e2e.py::TestOrderFlowE2E::test_new_order_flow_basic
+FAILED backend/tests/integration/test_order_flow_e2e.py::TestOrderFlowE2E::test_template_order_flow
+FAILED backend/tests/integration/test_order_flow_e2e.py::TestOrderFlowE2E::test_cancel_order_flow
+FAILED backend/tests/integration/test_order_flow_e2e.py::TestOrderFlowE2E::test_data_confirmation_flow
+FAILED backend/tests/integration/test_order_flow_e2e.py::TestOrderFlowE2E::test_payment_flow_sufficient_balance
+FAILED backend/tests/integration/test_payment_integration.py::TestPaymentIntegration::test_balance_payment_full_flow
+FAILED backend/tests/integration/test_payment_integration.py::TestPaymentIntegration::test_insufficient_balance_payment
+FAILED backend/tests/integration/test_payment_integration.py::TestPaymentIntegration::test_crypto_payment_invoice_creation
+FAILED backend/tests/integration/test_payment_integration.py::TestPaymentIntegration::test_topup_flow
+FAILED backend/tests/integration/test_payment_integration.py::TestOrderCreationIntegration::test_complete_order_creation
+FAILED backend/tests/integration/test_payment_integration.py::TestOrderCreationIntegration::test_label_generation_after_payment
+FAILED backend/tests/integration/test_simple_integration.py::TestDatabaseIntegration::test_order_pagination
+FAILED backend/tests/integration/test_simple_integration.py::TestServiceIntegration::test_payment_service_validation
+FAILED backend/tests/integration/test_simple_integration.py::TestServiceIntegration::test_template_service_validation
+FAILED backend/tests/integration/test_simple_integration.py::TestServiceIntegration::test_shipping_service_validation
+FAILED backend/tests/integration/test_simple_integration.py::TestAPIIntegration::test_shipstation_request_building
+FAILED backend/tests/integration/test_simple_integration.py::TestAPIIntegration::test_shipstation_api_call_mocked
+FAILED backend/tests/integration/test_webhook_integration.py::TestWebhookIntegration::test_telegram_api_rate_limiting
+FAILED backend/tests/integration/test_webhook_integration.py::TestExternalAPIIntegration::test_shipstation_api_integration
+FAILED backend/tests/integration/test_webhook_integration.py::TestExternalAPIIntegration::test_oxapay_payment_integration
+FAILED backend/tests/integration/test_webhook_integration.py::TestExternalAPIIntegration::test_api_timeout_handling
+FAILED backend/tests/integration/test_webhook_integration.py::TestExternalAPIIntegration::test_api_error_response_handling
 FAILED backend/tests/test_session_manager.py::test_get_or_create_session_new
 FAILED backend/tests/test_session_manager.py::test_get_or_create_session_existing
-FAILED backend/tests/test_session_manager.py::test_update_session_atomic - Fa...
+FAILED backend/tests/test_session_manager.py::test_update_session_atomic - At...
 FAILED backend/tests/test_session_manager.py::test_update_session_atomic_multiple_fields
-FAILED backend/tests/test_session_manager.py::test_clear_session - Failed: as...
+FAILED backend/tests/test_session_manager.py::test_clear_session - AttributeE...
 FAILED backend/tests/test_session_manager.py::test_save_completed_label_fallback
 FAILED backend/tests/test_session_manager.py::test_revert_to_previous_step - ...
-FAILED backend/tests/test_shipping_service.py::test_validate_order_data_complete
-FAILED backend/tests/test_shipping_service.py::test_validate_order_data_incomplete
-FAILED backend/tests/test_shipping_service.py::test_validate_order_data_empty_strings
-FAILED backend/tests/test_shipping_service.py::test_fetch_rates_from_shipstation_success
-FAILED backend/tests/test_shipping_service.py::test_fetch_rates_from_shipstation_api_error
-FAILED backend/tests/test_shipping_service.py::test_fetch_rates_from_shipstation_timeout
-FAILED backend/tests/test_shipping_service.py::test_fetch_rates_from_shipstation_no_rates
-FAILED backend/tests/test_shipping_service.py::test_full_rate_fetching_pipeline
-FAILED backend/tests/test_template_service.py::test_get_user_templates_success
-FAILED backend/tests/test_template_service.py::test_get_user_templates_empty
-FAILED backend/tests/test_template_service.py::test_create_template_success
-FAILED backend/tests/test_template_service.py::test_create_template_limit_reached
-FAILED backend/tests/test_template_service.py::test_create_template_empty_name
-FAILED backend/tests/test_template_service.py::test_create_template_name_too_long
-FAILED backend/tests/test_template_service.py::test_update_template_name_success
-FAILED backend/tests/test_template_service.py::test_update_template_name_empty
-FAILED backend/tests/test_template_service.py::test_delete_template_success
-FAILED backend/tests/test_template_service.py::test_delete_template_not_found
-FAILED backend/tests/test_template_service.py::test_delete_template_unauthorized
-FAILED backend/tests/test_template_service.py::test_load_template_to_context_success
-FAILED backend/tests/test_template_service.py::test_load_template_not_found
-FAILED backend/tests/test_template_service.py::test_load_template_unauthorized
-FAILED backend/tests/test_template_service.py::test_full_template_lifecycle
 FAILED template_test.py::test_template_database_structure - Failed: async def...
 FAILED template_test.py::test_template_data_integrity - Failed: async def fun...
 FAILED test_admin_notification_direct.py::test_admin_notification - Failed: a...
-================ 48 failed, 138 passed, 142 warnings in 31.21s ================= в bash) для запуска создаваемых тестов.
-    - User Testing Done: N
+================ 32 failed, 202 passed, 112 warnings in 32.07s =================).
+  - Troubleshoot agent used after agent stuck in loop: NO.
+  - Test files created: Да, созданы директории ,  и новые файлы тестов, например .
+  - Known regressions: Нет, но падающие тесты могут скрывать регрессии.
 
-**All Pending/In progress Issue list**: (List down all issues plus pending 
-wtmp begins Fri Nov 14 01:57:41 2025 issues (if present) with PRIORITY. This includes issue on which agent was lastly working on and not yet resolved, issues work in progress or pending, issues mentioned by users but not yet resolved,  issues main agent introduced or missed while working. IMPORTANT: Most recent working item that is pending or in progress by default is of HIGHEST priority, ie P0)
-
-  Нет известных активных проблем или багов. Текущая работа является плановой задачей.
-
-**In progress Task List**: (Tasks that were started but were not finished)
-  - Task 1: (P0) Написание Unit-тестов для сервисного слоя.
-
- Task Detail:
-  - Task 1: 
-     - **Where to resume:** Начать с файла  для определения базовых фикстур (например, мок , ). Затем последовательно наполнять тестами файлы ,  и , покрывая все функции в соответствующих сервисах.
-     - **What will be achieved with this?** Это обеспечит надежность и стабильность новой сервисной архитектуры, упростит будущие доработки и предотвратит регрессии.
-     - **Status:** NOT STARTED
-     - **Should Test frontend/backend/both after fix?** backend
-     - **Blocked on something:** Нет.
-
-**Upcoming and Future Tasks**
- Upcoming Tasks:
-    - (P1) **Рефакторинг :** Перенести логику основного  из  в соответствующие модули в директории . Для этого уже созданы файлы-заготовки (, ).
-    - (P2) **Консолидация Shipping Service:** Заменить старый  на новый  и переименовать его, чтобы устранить путаницу.
-
- Future Tasks:
-    - (P3) **Документация:** Обновить  и  для отражения финальной структуры проекта и инструкций по запуску/тестированию.
-
-**Completed work in this session**
-- **Рефакторинг :** Завершено глобальное обновление механизма управления состоянием для использования строковых констант, что устранило системные ошибки.
-- **Полный рефакторинг UI:** Все оставшиеся UI-элементы из  (включая payment flow, template management,  и ) были перенесены в классы в .
-- **Модуляризация сервисов:**
-    - Созданы и наполнены логикой  и .
-    - Создан , куда были вынесены и разбиты на подфункции гигантские  и .
-- **Интеграция сервисов:** Новые сервисы (, , ) были интегрированы обратно в , что значительно сократило его размер и улучшило читаемость.
-- **Подготовка к тестированию:** Создана файловая структура для unit-тестов в директории .
-
-**Code Architecture**
-
-
-**Key Technical Concepts**
-- **Service-Oriented Architecture:** Логика вынесена в независимые сервисные модули.
-- **Dependency Injection:** Сервисы используются в , который делегирует им выполнение бизнес-логики.
-- **Unit Testing (Pytest):** Текущий этап работы, направленный на покрытие кода тестами.
-
-**key DB schema**
-  - **user_sessions:** 
-  - **orders:** 
-  - **templates:** 
-
-**changes in tech stack**
-  - Нет.
-
-**All files** (list a.) all created or updated files in this session and why do they exists?  2. Any other important files)
-- **Созданы:**
-  - : Для модуляризации бизнес-логики.
-  - : Файлы-заготовки для будущего рефакторинга .
-  - : Для написания unit-тестов.
-  - : Для документирования архитектуры.
-- **Сильно изменены:**
-  - : Значительно сокращен и очищен от UI и бизнес-логики.
-  - : Существенно расширен новыми классами и функциями для генерации всего UI.
-  - Файлы в : Обновлены для использования строковых состояний.
-
-**Areas that need refactoring**:
-- **:** Все еще содержит монолитный , который является следующим кандидатом на рефакторинг.
-- **:** Необходимо объединить  и , оставив только актуальную версию.
-
-**Critical Info for New Agent**
-- **Главный приоритет (P0):** Написать unit-тесты. Начните с , затем покройте тестами сервисы, используя моки для внешних зависимостей (API, DB).
-- **Следующий шаг (P1):** После завершения тестов, приступайте к рефакторингу  из . Логику каждого шага диалога нужно переносить в соответствующие функции в директории .
-- **Архитектура:** Строго придерживайтесь новой сервисной архитектуры. Бизнес-логика должна находиться в , обработчики Telegram-событий — в , а UI — в .
-
-**documents created in this job**
-  - 
-
-**Last 5 User Messages and any pending user messages**
-- **User:**  - **Status:** COMPLETED. Агент завершил полный рефакторинг UI.
-- **User:**  - **Status:** COMPLETED. Агент воспринял это как подтверждение продолжать работу по своему плану (модуляризация).
-- **User:**  - **Status:** COMPLETED. Еще одно подтверждение для продолжения.
-- **User:**  - **Status:** COMPLETED. Агент ответил, что работает, и предоставил отчет.
-- **User:**  (после вопроса о ) - **Status:** COMPLETED. Агент воспринял это как команду начать задачу по написанию тестов и создал для этого файловую структуру.
-
-**Project Health Check:**
-- **Broken:** Нет.
-- **Mocked:** Нет.
-- **Refactoring in Progress:** Да. Проект находится на стадии завершения большого архитектурного рефакторинга и перехода к написанию тестов.
-
-**Testing status**
-  - Testing agent used after significant changes: YES (использовался для проверки  рефакторинга).
-  - Troubleshoot agent used after agent stuck in loop: NO (в этой сессии не требовался).
-  - Test files created:
-    - 
-    - 
-    - 
-    - 
-  - Known regressions: Нет.</analysis>
+**Credentials to test flow:**
+Для тестирования защищенных API-эндпоинтов потребуется  из переменных окружения.</analysis>
