@@ -6099,6 +6099,10 @@ logger = logging.getLogger(__name__)
 async def startup_event():
     logger.info("Starting application...")
     
+    # Инициализация мониторинга
+    from utils.monitoring import init_sentry
+    init_sentry()
+    
     # V2: TTL index автоматически очищает сессии старше 15 минут
     # Периодическая очистка больше не нужна
     logger.info("✅ Session cleanup: TTL index (automatic, no manual cleanup needed)")
