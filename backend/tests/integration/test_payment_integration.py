@@ -209,10 +209,11 @@ class TestOrderCreationIntegration:
             selected_rate=sample_shipping_rate
         )
         
-        # Verify request structure
-        assert "shipFrom" in label_request
-        assert "shipTo" in label_request
-        assert "carrierCode" in label_request or "serviceCode" in label_request
+        # Verify request structure (ShipEngine format)
+        assert "shipment" in label_request
+        assert "ship_from" in label_request["shipment"]
+        assert "ship_to" in label_request["shipment"]
+        assert "service_code" in label_request["shipment"] or "carrier_id" in label_request["shipment"]
     
     
     async def test_order_history_retrieval(
