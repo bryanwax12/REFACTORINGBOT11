@@ -231,8 +231,8 @@ async def get_payment_stats(authenticated: bool = Depends(verify_admin_key)) -> 
 
 
 @router.get("/db/indexes")
-async def get_database_indexes() -> Dict:
-    """Get information about database indexes"""
+async def get_database_indexes(authenticated: bool = Depends(verify_admin_key)) -> Dict:
+    """Get information about database indexes (requires admin authentication)"""
     from server import db
     
     try:
