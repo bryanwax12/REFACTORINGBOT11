@@ -379,9 +379,14 @@ async def test_fetch_rates_from_shipstation_api_error():
 @pytest.mark.asyncio
 async def test_fetch_rates_from_shipstation_timeout():
     """Test timeout handling"""
-    import requests
+    from unittest.mock import AsyncMock
+    import httpx
     
-    with patch('requests.post', side_effect=requests.exceptions.Timeout()):
+    with patch('httpx.AsyncClient') as mock_client:
+        mock_client_instance = AsyncMock()
+        mock_client_instance.post = AsyncMock(side_effect=httpx.TimeoutException("timeout"))
+        mock_client.return_value.__aenter__.return_value = mock_client_instance
+        
         success, rates, error = await fetch_rates_from_shipstation(
             rate_request={},
             headers={},
