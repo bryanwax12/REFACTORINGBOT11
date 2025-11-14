@@ -29,8 +29,8 @@ from telegram.ext import ConversationHandler
 async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 8/13: Collect recipient name"""
     from server import sanitize_string, TO_NAME, TO_ADDRESS, STATE_NAMES
-    from repositories.session_repository import SessionRepository
-    from server import db
+    
+    
     
     name = update.message.text.strip()
     name = sanitize_string(name, max_length=50)
@@ -46,9 +46,9 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['to_name'] = name
     
     # Update session via repository
-    session_repo = SessionRepository(db)
-    await session_repo.update_temp_data(user_id, {'to_name': name})
-    await session_repo.update_step(user_id, "TO_ADDRESS")
+    # Session service injected via decorator
+    await session_service.save_order_field(user_id, {'to_name': name})
+    await session_service.update_session_step(user_id, step="TO_ADDRESS")
     
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
     asyncio.create_task(mark_message_as_selected(update, context))
@@ -75,8 +75,8 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 9/13: Collect recipient street address"""
     from server import sanitize_string, TO_ADDRESS, TO_ADDRESS2, STATE_NAMES
-    from repositories.session_repository import SessionRepository
-    from server import db
+    
+    
     
     address = update.message.text.strip()
     address = sanitize_string(address, max_length=100)
@@ -92,9 +92,9 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['to_address'] = address
     
     # Update session via repository
-    session_repo = SessionRepository(db)
-    await session_repo.update_temp_data(user_id, {'to_address': address})
-    await session_repo.update_step(user_id, "TO_ADDRESS2")
+    # Session service injected via decorator
+    await session_service.save_order_field(user_id, {'to_address': address})
+    await session_service.update_session_step(user_id, step="TO_ADDRESS2")
     
     asyncio.create_task(mark_message_as_selected(update, context))
     from utils.ui_utils import get_skip_and_cancel_keyboard, OrderStepMessages, CallbackData
@@ -121,8 +121,8 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 10/13: Collect recipient address line 2 (optional)"""
     from server import sanitize_string, TO_ADDRESS2, TO_CITY, STATE_NAMES
-    from repositories.session_repository import SessionRepository
-    from server import db
+    
+    
     
     address2 = update.message.text.strip()
     address2 = sanitize_string(address2, max_length=100)
@@ -136,9 +136,9 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['to_address2'] = address2
     
     # Update session via repository
-    session_repo = SessionRepository(db)
-    await session_repo.update_temp_data(user_id, {'to_address2': address2})
-    await session_repo.update_step(user_id, "TO_CITY")
+    # Session service injected via decorator
+    await session_service.save_order_field(user_id, {'to_address2': address2})
+    await session_service.update_session_step(user_id, step="TO_CITY")
     
     asyncio.create_task(mark_message_as_selected(update, context))
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
@@ -165,8 +165,8 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 11/13: Collect recipient city"""
     from server import sanitize_string, TO_CITY, TO_STATE, STATE_NAMES
-    from repositories.session_repository import SessionRepository
-    from server import db
+    
+    
     
     city = update.message.text.strip()
     city = sanitize_string(city, max_length=50)
@@ -182,9 +182,9 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['to_city'] = city
     
     # Update session via repository
-    session_repo = SessionRepository(db)
-    await session_repo.update_temp_data(user_id, {'to_city': city})
-    await session_repo.update_step(user_id, "TO_STATE")
+    # Session service injected via decorator
+    await session_service.save_order_field(user_id, {'to_city': city})
+    await session_service.update_session_step(user_id, step="TO_STATE")
     
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
     asyncio.create_task(mark_message_as_selected(update, context))
@@ -211,8 +211,8 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 12/13: Collect recipient state"""
     from server import TO_STATE, TO_ZIP, STATE_NAMES
-    from repositories.session_repository import SessionRepository
-    from server import db
+    
+    
     
     state = update.message.text.strip().upper()
     
@@ -227,9 +227,9 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['to_state'] = state
     
     # Update session via repository
-    session_repo = SessionRepository(db)
-    await session_repo.update_temp_data(user_id, {'to_state': state})
-    await session_repo.update_step(user_id, "TO_ZIP")
+    # Session service injected via decorator
+    await session_service.save_order_field(user_id, {'to_state': state})
+    await session_service.update_session_step(user_id, step="TO_ZIP")
     
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
     asyncio.create_task(mark_message_as_selected(update, context))
@@ -256,8 +256,8 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 13/13: Collect recipient ZIP code"""
     from server import TO_ZIP, TO_PHONE, STATE_NAMES
-    from repositories.session_repository import SessionRepository
-    from server import db
+    
+    
     
     zip_code = update.message.text.strip()
     
@@ -272,9 +272,9 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['to_zip'] = zip_code
     
     # Update session via repository
-    session_repo = SessionRepository(db)
-    await session_repo.update_temp_data(user_id, {'to_zip': zip_code})
-    await session_repo.update_step(user_id, "TO_PHONE")
+    # Session service injected via decorator
+    await session_service.save_order_field(user_id, {'to_zip': zip_code})
+    await session_service.update_session_step(user_id, step="TO_PHONE")
     
     asyncio.create_task(mark_message_as_selected(update, context))
     
@@ -302,8 +302,8 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 14/13: Collect recipient phone (optional)"""
     from server import TO_PHONE, PARCEL_WEIGHT, STATE_NAMES
-    from repositories.session_repository import SessionRepository
-    from server import db
+    
+    
     
     phone = update.message.text.strip()
     
@@ -318,9 +318,9 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['to_phone'] = formatted_phone
     
     # Update session via repository
-    session_repo = SessionRepository(db)
-    await session_repo.update_temp_data(user_id, {'to_phone': formatted_phone})
-    await session_repo.update_step(user_id, "PARCEL_WEIGHT")
+    # Session service injected via decorator
+    await session_service.save_order_field(user_id, {'to_phone': formatted_phone})
+    await session_service.update_session_step(user_id, step="PARCEL_WEIGHT")
     
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
     asyncio.create_task(mark_message_as_selected(update, context))

@@ -26,8 +26,8 @@ from telegram.ext import ConversationHandler
 async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 15/17: Collect parcel weight"""
     from server import PARCEL_WEIGHT, PARCEL_LENGTH, STATE_NAMES
-    from repositories.session_repository import SessionRepository
-    from server import db
+    
+    
     
     weight_str = update.message.text.strip()
     
@@ -42,9 +42,9 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
     context.user_data['parcel_weight'] = weight
     
     # Update session via repository
-    session_repo = SessionRepository(db)
-    await session_repo.update_temp_data(user_id, {'parcel_weight': weight})
-    await session_repo.update_step(user_id, "PARCEL_LENGTH")
+    # Session service injected via decorator
+    await session_service.save_order_field(user_id, {'parcel_weight': weight})
+    await session_service.update_session_step(user_id, step="PARCEL_LENGTH")
     
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
     asyncio.create_task(mark_message_as_selected(update, context))
@@ -71,8 +71,8 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
 async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 16/17: Collect parcel length"""
     from server import PARCEL_LENGTH, PARCEL_WIDTH, STATE_NAMES
-    from repositories.session_repository import SessionRepository
-    from server import db
+    
+    
     
     length_str = update.message.text.strip()
     
@@ -87,9 +87,9 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
     context.user_data['parcel_length'] = length
     
     # Update session via repository
-    session_repo = SessionRepository(db)
-    await session_repo.update_temp_data(user_id, {'parcel_length': length})
-    await session_repo.update_step(user_id, "PARCEL_WIDTH")
+    # Session service injected via decorator
+    await session_service.save_order_field(user_id, {'parcel_length': length})
+    await session_service.update_session_step(user_id, step="PARCEL_WIDTH")
     
     asyncio.create_task(mark_message_as_selected(update, context))
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
@@ -116,8 +116,8 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
 async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 17/17: Collect parcel width"""
     from server import PARCEL_WIDTH, PARCEL_HEIGHT, STATE_NAMES
-    from repositories.session_repository import SessionRepository
-    from server import db
+    
+    
     
     width_str = update.message.text.strip()
     
@@ -132,9 +132,9 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
     context.user_data['parcel_width'] = width
     
     # Update session via repository
-    session_repo = SessionRepository(db)
-    await session_repo.update_temp_data(user_id, {'parcel_width': width})
-    await session_repo.update_step(user_id, "PARCEL_HEIGHT")
+    # Session service injected via decorator
+    await session_service.save_order_field(user_id, {'parcel_width': width})
+    await session_service.update_session_step(user_id, step="PARCEL_HEIGHT")
     
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
     asyncio.create_task(mark_message_as_selected(update, context))
@@ -161,8 +161,8 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE)
 async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 18/17: Collect parcel height and calculate shipping rates"""
     from server import PARCEL_HEIGHT, CALCULATING_RATES, STATE_NAMES
-    from repositories.session_repository import SessionRepository
-    from server import db
+    
+    
     
     height_str = update.message.text.strip()
     
@@ -177,9 +177,9 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
     context.user_data['parcel_height'] = height
     
     # Update session via repository
-    session_repo = SessionRepository(db)
-    await session_repo.update_temp_data(user_id, {'parcel_height': height})
-    await session_repo.update_step(user_id, "CALCULATING_RATES")
+    # Session service injected via decorator
+    await session_service.save_order_field(user_id, {'parcel_height': height})
+    await session_service.update_session_step(user_id, step="CALCULATING_RATES")
     
     asyncio.create_task(mark_message_as_selected(update, context))
     
