@@ -6069,6 +6069,10 @@ app.include_router(monitoring_router)  # New /monitoring
 from routers.bot_config_router import router as bot_config_router
 app.include_router(bot_config_router, prefix="/api")  # /api/bot-config
 
+# Include API configuration router
+from routers.api_config_router import router as api_config_router
+app.include_router(api_config_router, prefix="/api")  # /api/api-config
+
 # Include alerting router
 from api.alerting import router as alerting_router
 app.include_router(alerting_router)
