@@ -5245,9 +5245,11 @@ async def get_bot_metrics(authenticated: bool = Depends(verify_admin_key)):
             "created_at": {"$gte": today_start.isoformat()}
         })
         
-        # Get user statistics
-        total_users = await db.users.count_documents({})
-        active_users_today = await db.users.count_documents({
+        # Get user statistics using Repository Pattern
+        from repositories import get_user_repo
+        user_repo = get_user_repo()
+        total_users = await user_repo.count_users()
+        active_users_today = await user_repo.count_users({
             "last_activity": {"$gte": today_start.isoformat()}
         })
         
