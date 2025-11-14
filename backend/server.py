@@ -5515,10 +5515,11 @@ async def check_all_bot_access(authenticated: bool = Depends(verify_admin_key)):
 @api_router.get("/users/leaderboard")
 async def get_leaderboard():
     try:
-        users = await db.users.find({}, {"_id": 0}).to_list(1000)
-        
-        from repositories import get_repositories
+        # Get users using Repository Pattern
+        from repositories import get_repositories, get_user_repo
         repos = get_repositories()
+        user_repo = get_user_repo()
+        users = await user_repo.get_all_users(limit=1000)
         
         leaderboard = []
         for user in users:
