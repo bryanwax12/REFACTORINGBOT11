@@ -238,6 +238,31 @@ class OrderRepository(BaseRepository):
             limit=limit
         )
     
+    async def count_orders(self, filter_dict: Optional[Dict] = None) -> int:
+        """
+        Подсчет количества заказов
+        
+        Args:
+            filter_dict: Фильтр для подсчета (опционально)
+            
+        Returns:
+            Количество заказов
+        """
+        filter_dict = filter_dict or {}
+        return await self.collection.count_documents(filter_dict)
+    
+    async def aggregate_orders(self, pipeline: List[Dict]) -> List[Dict]:
+        """
+        Агрегация заказов
+        
+        Args:
+            pipeline: Pipeline для агрегации
+            
+        Returns:
+            Результат агрегации
+        """
+        return await self.collection.aggregate(pipeline).to_list(None)
+    
     async def get_orders_by_status(
         self,
         status: str,
