@@ -6149,13 +6149,13 @@ async def get_topups(authenticated: bool = Depends(verify_admin_key)):
     Get all balance top-ups history with user information
     """
     try:
-        # Get all top-up payments
-        topups = await db.payments.find({"type": "topup"}).sort("created_at", -1).to_list(1000)
+        # Get all top-up payments using Repository Pattern
+        from repositories import get_repositories, get_user_repo
+        repos = get_repositories()
+        topups = await repos.payments.get_topups(limit=1000)
         
         # Enrich with user information
         enriched_topups = []
-        # Get user repository once
-        from repositories import get_user_repo
         user_repo = get_user_repo()
         
         for topup in topups:
