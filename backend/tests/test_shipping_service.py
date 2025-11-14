@@ -422,9 +422,10 @@ async def test_fetch_rates_from_shipstation_no_rates():
             timeout=30
         )
     
-    assert success is True
-    assert rates == []
-    assert error is None
+    assert success is False  # Function returns False for empty rates
+    assert rates is None
+    assert error is not None
+    assert "no rates" in error.lower()
 
 
 # ============================================================
