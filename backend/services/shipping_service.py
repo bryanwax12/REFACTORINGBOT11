@@ -1,145 +1,170 @@
 """
 Shipping Service Module
-Handles shipping rate calculations and label creation via ShipStation API
-
-This module has been refactored to use the new shipping_service_new.py
-All new shipping logic should be added to shipping_service_new.py
+Handles all shipping-related operations including rate calculations and label creation
 """
 import logging
-from typing import Optional, Dict, List, Any
+from typing import Optional, Dict, List, Any, Tuple
+from telegram import Update
+from telegram.ext import ContextTypes
 
 logger = logging.getLogger(__name__)
 
-# Import from new shipping service
-from services.shipping_service_new import (
-    display_shipping_rates as display_rates_new,
-    validate_shipping_address,
-    validate_parcel_data,
-    format_order_for_shipstation
-)
-
 
 # ============================================================
-# SHIPPING RATES CALCULATION
+# DISPLAY SHIPPING RATES
 # ============================================================
 
-async def calculate_shipping_rates(update, context):
+async def display_shipping_rates(
+    update: Update, 
+    context: ContextTypes.DEFAULT_TYPE, 
+    rates: list,
+    find_user_by_telegram_id_func,
+    safe_telegram_call_func,
+    STATE_NAMES: dict,
+    SELECT_CARRIER: int
+) -> int:
     """
-    Calculate shipping rates for an order
-    
-    This is a complex function that:
-    1. Validates all order data (addresses, parcel info)
-    2. Calls ShipStation API for rates
-    3. Caches results for performance
-    4. Formats and displays rates to user
-    5. Handles errors and retries
-    
-    Current implementation: ~600 lines in server.py
-    Future: Will be extracted to this module with subfunctions:
-        - validate_order_data()
-        - call_shipstation_rates_api()
-        - format_rates_for_display()
-        - save_rates_to_session()
+    Display shipping rates to user (reusable for both cached and fresh rates)
     
     Args:
-        update: Telegram Update object
-        context: Bot context with order data
+        update: Telegram update
+        context: Telegram context
+        rates: List of rate dictionaries
+        find_user_by_telegram_id_func: Function to find user
+        safe_telegram_call_func: Function for safe telegram calls
+        STATE_NAMES: State names mapping
+        SELECT_CARRIER: Select carrier state constant
     
     Returns:
-        Conversation state (SELECT_CARRIER or error state)
+        int: SELECT_CARRIER state
     """
-    from server import fetch_shipping_rates
-    return await fetch_shipping_rates(update, context)
+    from utils.ui_utils import ShippingRatesUI
+    
+    query = update.callback_query
+    
+    # Get user balance
+    telegram_id = query.from_user.id
+    user = await find_user_by_telegram_id_func(telegram_id)
+    user_balance = user.get('balance', 0.0) if user else 0.0
+    
+    # Format message and keyboard using UI utils
+    message = ShippingRatesUI.format_rates_message(rates, user_balance)
+    reply_markup = ShippingRatesUI.build_rates_keyboard(rates)
+    
+    # Save state
+    context.user_data['last_state'] = STATE_NAMES[SELECT_CARRIER]
+    
+    # Send message
+    bot_msg = await safe_telegram_call_func(
+        query.message.reply_text(message, reply_markup=reply_markup, parse_mode='HTML')
+    )
+    
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message
+    
+    return SELECT_CARRIER
 
 
 # ============================================================
-# LABEL CREATION AND DELIVERY
+# HELPER FUNCTIONS
 # ============================================================
 
-async def create_shipping_label(order_id: str, telegram_id: int, message: Optional[object] = None):
+def validate_shipping_address(address_data: Dict[str, Any], prefix: str) -> Tuple[bool, Optional[str]]:
     """
-    Create and send shipping label for a paid order
-    
-    This is a complex function that:
-    1. Retrieves order and rate data
-    2. Creates label via ShipStation API
-    3. Downloads PDF label
-    4. Sends to user via Telegram
-    5. Updates order status
-    6. Handles errors and notifications
-    
-    Current implementation: ~400 lines in server.py
-    Future: Will be extracted to this module with subfunctions:
-        - retrieve_order_data()
-        - create_shipstation_label()
-        - download_label_pdf()
-        - send_label_to_user()
-        - update_order_status()
-        - send_notifications()
+    Validate shipping address data
     
     Args:
-        order_id: Unique order identifier
-        telegram_id: Telegram user ID
-        message: Optional Telegram message object for replies
+        address_data: Context user_data dict
+        prefix: 'from' or 'to'
     
     Returns:
-        bool: True if label created and sent successfully
+        (is_valid, error_message or None)
     """
-    from server import create_and_send_label
-    return await create_and_send_label(order_id, telegram_id, message)
-
-
-# ============================================================
-# HELPER FUNCTIONS (Placeholders for future extraction)
-# ============================================================
-
-async def validate_order_data(order_data: Dict[str, Any]) -> tuple[bool, str]:
-    """
-    Validate order data before sending to ShipStation
+    required_fields = ['name', 'street', 'city', 'state', 'zip']
     
-    Future implementation will check:
-    - Address completeness
-    - Parcel dimensions validity
-    - Required fields presence
+    for field in required_fields:
+        key = f'{prefix}_{field}'
+        if not address_data.get(key):
+            return False, f"Missing required field: {key}"
     
-    Returns:
-        (is_valid, error_message)
-    """
-    # TODO: Extract validation logic from fetch_shipping_rates
-    pass
+    return True, None
 
 
-async def format_rate_for_display(rate: Dict[str, Any]) -> str:
+def validate_parcel_data(parcel_data: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
     """
-    Format shipping rate for user-friendly display
+    Validate parcel data
     
-    Future implementation will:
-    - Format price
-    - Add carrier info
-    - Show delivery time
-    - Add discount info if applicable
+    Args:
+        parcel_data: Context user_data dict with parcel info
     
     Returns:
-        Formatted rate string
+        (is_valid, error_message or None)
     """
-    # TODO: Extract formatting logic from fetch_shipping_rates
-    pass
-
-
-async def save_label_to_storage(label_data: bytes, order_id: str) -> str:
-    """
-    Save label PDF to persistent storage
+    if not parcel_data.get('weight'):
+        return False, "Missing parcel weight"
     
-    Future implementation will:
-    - Save to filesystem or S3
-    - Generate access URL
-    - Track label storage
+    try:
+        weight = float(parcel_data['weight'])
+        if weight <= 0:
+            return False, "Parcel weight must be positive"
+        if weight > 150:  # 150 lbs limit
+            return False, "Parcel weight exceeds maximum (150 lbs)"
+    except (ValueError, TypeError):
+        return False, "Invalid parcel weight format"
+    
+    return True, None
+
+
+async def format_order_for_shipstation(
+    order_data: Dict[str, Any]
+) -> Dict[str, Any]:
+    """
+    Format order data for ShipStation API
+    
+    Args:
+        order_data: Raw order data from context
     
     Returns:
-        Storage path or URL
+        Formatted order data for ShipStation
     """
-    # TODO: Extract storage logic from create_and_send_label
-    pass
+    return {
+        'carrierCode': order_data.get('carrier_code'),
+        'serviceCode': order_data.get('service_code'),
+        'packageCode': 'package',
+        'confirmation': 'none',
+        'shipDate': order_data.get('ship_date'),
+        'weight': {
+            'value': float(order_data.get('weight', 0)),
+            'units': 'pounds'
+        },
+        'dimensions': {
+            'length': float(order_data.get('length', 10)),
+            'width': float(order_data.get('width', 10)),
+            'height': float(order_data.get('height', 10)),
+            'units': 'inches'
+        },
+        'shipFrom': {
+            'name': order_data.get('from_name'),
+            'street1': order_data.get('from_street'),
+            'street2': order_data.get('from_street2', ''),
+            'city': order_data.get('from_city'),
+            'state': order_data.get('from_state'),
+            'postalCode': order_data.get('from_zip'),
+            'country': 'US',
+            'phone': order_data.get('from_phone', '')
+        },
+        'shipTo': {
+            'name': order_data.get('to_name'),
+            'street1': order_data.get('to_street'),
+            'street2': order_data.get('to_street2', ''),
+            'city': order_data.get('to_city'),
+            'state': order_data.get('to_state'),
+            'postalCode': order_data.get('to_zip'),
+            'country': 'US',
+            'phone': order_data.get('to_phone', '')
+        }
+    }
 
 
 # ============================================================
@@ -147,32 +172,544 @@ async def save_label_to_storage(label_data: bytes, order_id: str) -> str:
 # ============================================================
 
 """
-REFACTORING ROADMAP:
+SHIPPING SERVICE ARCHITECTURE:
 
-Phase 1 (CURRENT): Wrapper approach
-- ✅ Module structure created
-- ✅ Documentation added
-- ✅ Wrapper functions implemented
-- Main logic remains in server.py
+This module centralizes all shipping-related operations:
 
-Phase 2 (FUTURE): Extract validation and formatting
-- Move validate_order_data() from server.py
-- Move format_rate_for_display() from server.py
-- Move error handling helpers
+## Core Functions:
+1. Rate Calculation & Display:
+   - display_shipping_rates() - Show rates to user
+   - validate_order_data_for_rates() - Validate before API call
+   - build_shipstation_rates_request() - Build API request
+   - fetch_rates_from_shipstation() - Make API call
+   - filter_and_sort_rates() - Process API response
+   - save_rates_to_cache_and_session() - Cache results
 
-Phase 3 (FUTURE): Extract API calls
-- Move ShipStation API calls
-- Move rate caching logic
-- Move label creation logic
+2. Label Creation & Delivery:
+   - build_shipstation_label_request() - Build label request
+   - download_label_pdf() - Download PDF from URL
+   - send_label_to_user() - Send via Telegram
 
-Phase 4 (FUTURE): Complete extraction
-- Move all shipping logic to this module
-- Server.py only coordinates
-- Full test coverage
+3. Validation:
+   - validate_shipping_address() - Address validation
+   - validate_parcel_data() - Parcel info validation
 
-BENEFITS OF PHASED APPROACH:
-- Maintains stability during refactoring
-- Allows testing between phases
-- Reduces risk of breaking changes
-- Enables gradual improvement
+4. Utilities:
+   - format_order_for_shipstation() - Format order data
+
+## Design Pattern:
+All functions use dependency injection - they receive external dependencies
+(db, functions) as parameters, making them easy to test and reuse.
+
+## Benefits:
+- Single responsibility: All shipping logic in one place
+- Testability: Easy to unit test with mocks
+- Reusability: Functions can be used across handlers
+- Maintainability: Changes to shipping logic isolated here
+- Modularity: Large functions broken into smaller pieces
+- Cache-friendly: Rate caching built-in
 """
+
+
+
+
+# ============================================================
+# FETCH SHIPPING RATES - HELPER FUNCTIONS
+# ============================================================
+
+async def validate_order_data_for_rates(order_data: Dict[str, Any]) -> Tuple[bool, List[str]]:
+    """
+    Validate order data before fetching rates
+    
+    Args:
+        order_data: Context user_data with order info
+    
+    Returns:
+        (is_valid, missing_fields_list)
+    """
+    required_fields = [
+        'from_name', 'from_street', 'from_city', 'from_state', 'from_zip',
+        'to_name', 'to_street', 'to_city', 'to_state', 'to_zip',
+        'weight'
+    ]
+    
+    missing_fields = [
+        field for field in required_fields
+        if not order_data.get(field) or order_data.get(field) == 'None' or order_data.get(field) == ''
+    ]
+    
+    return (len(missing_fields) == 0, missing_fields)
+
+
+def build_shipstation_rates_request(order_data: Dict[str, Any], carrier_ids: List[str]) -> Dict[str, Any]:
+    """
+    Build ShipStation V2 rate request payload
+    
+    Args:
+        order_data: Context user_data with order info
+        carrier_ids: List of carrier IDs to request rates from
+    
+    Returns:
+        ShipStation API request dictionary
+    """
+    return {
+        'rate_options': {
+            'carrier_ids': carrier_ids
+        },
+        'shipment': {
+            'ship_to': {
+                'name': order_data['to_name'],
+                'phone': order_data.get('to_phone') or '+15551234567',
+                'address_line1': order_data['to_street'],
+                'address_line2': order_data.get('to_street2', ''),
+                'city_locality': order_data['to_city'],
+                'state_province': order_data['to_state'],
+                'postal_code': order_data['to_zip'],
+                'country_code': 'US',
+                'address_residential_indicator': 'unknown'
+            },
+            'ship_from': {
+                'name': order_data['from_name'],
+                'phone': order_data.get('from_phone') or '+15551234567',
+                'address_line1': order_data['from_street'],
+                'address_line2': order_data.get('from_street2', ''),
+                'city_locality': order_data['from_city'],
+                'state_province': order_data['from_state'],
+                'postal_code': order_data['from_zip'],
+                'country_code': 'US'
+            },
+            'packages': [{
+                'weight': {
+                    'value': float(order_data['weight']),
+                    'unit': 'pound'
+                },
+                'dimensions': {
+                    'length': float(order_data.get('length', 10)),
+                    'width': float(order_data.get('width', 10)),
+                    'height': float(order_data.get('height', 10)),
+                    'unit': 'inch'
+                }
+            }]
+        }
+    }
+
+
+def get_allowed_services_config() -> Dict[str, List[str]]:
+    """
+    Get configuration for allowed shipping services per carrier
+    
+    Returns:
+        Dictionary mapping carrier codes to allowed service codes
+    """
+    return {
+        'ups': [
+            'ups_ground',
+            'ups_3_day_select',
+            'ups_2nd_day_air',
+            'ups_next_day_air',
+            'ups_next_day_air_saver'
+        ],
+        'fedex_walleted': [
+            'fedex_ground',
+            'fedex_economy',  # FedEx Express Saver - 3-day
+            'fedex_2day',
+            'fedex_standard_overnight',
+            'fedex_priority_overnight'
+        ],
+        'usps': [
+            'usps_ground_advantage',
+            'usps_priority_mail',
+            'usps_priority_mail_express'
+        ],
+        'stamps_com': [
+            'usps_ground_advantage',
+            'usps_priority_mail',
+            'usps_priority_mail_express',
+            'usps_first_class_mail',
+            'usps_media_mail'
+        ]
+    }
+
+
+def apply_service_filter(
+    rates: List[Dict],
+    allowed_services: Optional[Dict[str, List[str]]] = None
+) -> List[Dict]:
+    """
+    Filter rates to only allowed services per carrier
+    
+    Args:
+        rates: List of rate dictionaries from ShipStation
+        allowed_services: Optional dict of allowed services per carrier
+                         If None, uses default configuration
+    
+    Returns:
+        Filtered rates list
+    """
+    if allowed_services is None:
+        allowed_services = get_allowed_services_config()
+    
+    filtered_rates = []
+    
+    for rate in rates:
+        carrier_code = rate.get('carrier_code', '').lower()
+        service_code = rate.get('service_code', '').lower()
+        
+        if carrier_code in allowed_services:
+            if service_code in allowed_services[carrier_code]:
+                filtered_rates.append(rate)
+        else:
+            # Keep rates from unlisted carriers
+            filtered_rates.append(rate)
+    
+    return filtered_rates
+
+
+def balance_and_deduplicate_rates(
+    rates: List[Dict],
+    max_per_carrier: int = 5
+) -> List[Dict[str, Any]]:
+    """
+    Balance rates across carriers and deduplicate by service type
+    
+    Takes top N rates from each carrier, deduplicates by service,
+    and formats for display.
+    
+    Args:
+        rates: Raw rates from ShipStation
+        max_per_carrier: Maximum rates to show per carrier
+    
+    Returns:
+        Balanced and formatted rates list
+    """
+    # Group rates by carrier
+    rates_by_carrier = {}
+    for rate in rates:
+        carrier = rate.get('carrier_friendly_name', 'Unknown')
+        if carrier not in rates_by_carrier:
+            rates_by_carrier[carrier] = []
+        rates_by_carrier[carrier].append(rate)
+    
+    # Process each carrier's rates
+    balanced_rates = []
+    
+    for carrier, carrier_rates in rates_by_carrier.items():
+        # Sort by price (ascending)
+        sorted_rates = sorted(
+            carrier_rates,
+            key=lambda r: float(r.get('shipping_amount', {}).get('amount', 0))
+        )
+        
+        # Deduplicate by service_type - keep only cheapest for each service
+        seen_services = {}
+        deduplicated_rates = []
+        
+        for rate in sorted_rates:
+            service_type = rate.get('service_type', 'Unknown')
+            if service_type not in seen_services:
+                seen_services[service_type] = True
+                deduplicated_rates.append(rate)
+        
+        # Take top N rates per carrier
+        top_rates = deduplicated_rates[:max_per_carrier]
+        
+        # Format rates
+        for rate in top_rates:
+            formatted_rate = {
+                'carrier': carrier,
+                'carrier_code': rate.get('carrier_code'),
+                'service': rate.get('service_type', 'Standard'),
+                'service_code': rate.get('service_code'),
+                'amount': float(rate.get('shipping_amount', {}).get('amount', 0)),
+                'days': rate.get('delivery_days'),
+                'carrier_delivery_days': rate.get('carrier_delivery_days'),
+                'guaranteed_service': rate.get('guaranteed_service', False),
+                'rate_id': rate.get('rate_id')
+            }
+            balanced_rates.append(formatted_rate)
+    
+    # Final sort by price across all carriers
+    balanced_rates.sort(key=lambda x: x['amount'])
+    
+    return balanced_rates
+
+
+async def fetch_rates_from_shipstation(
+    rate_request: Dict[str, Any],
+    headers: Dict[str, str],
+    api_url: str,
+    timeout: int = 30
+) -> Tuple[bool, Optional[List[Dict]], Optional[str]]:
+    """
+    Make API call to ShipStation to fetch rates
+    
+    Args:
+        rate_request: Rate request payload
+        headers: API headers with auth
+        api_url: ShipStation API URL
+        timeout: Request timeout in seconds
+    
+    Returns:
+        (success, rates_list, error_message)
+    """
+    import requests
+    
+    try:
+        response = requests.post(
+            api_url,
+            json=rate_request,
+            headers=headers,
+            timeout=timeout
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            rates = data.get('rate_response', {}).get('rates', [])
+            
+            if not rates:
+                return False, None, "No rates returned from ShipStation"
+            
+            return True, rates, None
+            
+        else:
+            error_msg = f"ShipStation API error: {response.status_code} - {response.text}"
+            logger.error(error_msg)
+            return False, None, error_msg
+            
+    except requests.exceptions.Timeout:
+        return False, None, "Request timeout - ShipStation API took too long to respond"
+    except requests.exceptions.RequestException as e:
+        return False, None, f"Network error: {str(e)}"
+    except Exception as e:
+        return False, None, f"Unexpected error: {str(e)}"
+
+
+def filter_and_sort_rates(
+    rates: List[Dict],
+    excluded_carriers: Optional[List[str]] = None
+) -> List[Dict[str, Any]]:
+    """
+    Filter, format and sort shipping rates
+    
+    Args:
+        rates: Raw rates from ShipStation
+        excluded_carriers: List of carrier codes to exclude
+    
+    Returns:
+        Formatted and sorted rates list
+    """
+    if excluded_carriers is None:
+        excluded_carriers = []
+    
+    formatted_rates = []
+    
+    for rate in rates:
+        # Skip excluded carriers
+        carrier_code = rate.get('carrier_code', '').lower()
+        if carrier_code in excluded_carriers:
+            continue
+        
+        # Extract rate info
+        formatted_rate = {
+            'carrier': rate.get('carrier_friendly_name', rate.get('carrier_code', 'Unknown')),
+            'carrier_code': rate.get('carrier_code'),
+            'service': rate.get('service_type', 'Standard'),
+            'service_code': rate.get('service_code'),
+            'amount': float(rate.get('shipping_amount', {}).get('amount', 0)),
+            'days': rate.get('delivery_days'),
+            'carrier_delivery_days': rate.get('carrier_delivery_days'),
+            'guaranteed_service': rate.get('guaranteed_service', False),
+            'rate_id': rate.get('rate_id')
+        }
+        
+        formatted_rates.append(formatted_rate)
+    
+    # Sort by price (lowest first)
+    formatted_rates.sort(key=lambda x: x['amount'])
+    
+    return formatted_rates
+
+
+async def save_rates_to_cache_and_session(
+    rates: List[Dict],
+    order_data: Dict[str, Any],
+    user_id: int,
+    context,
+    shipstation_cache,
+    session_manager
+) -> None:
+    """
+    Save rates to cache and session
+    
+    Args:
+        rates: Formatted rates list
+        order_data: Order data for cache key
+        user_id: Telegram user ID
+        context: Telegram context
+        shipstation_cache: Cache instance
+        session_manager: Session manager instance
+    """
+    from datetime import datetime, timezone
+    
+    # Save to cache
+    shipstation_cache.set(
+        from_zip=order_data['from_zip'],
+        to_zip=order_data['to_zip'],
+        weight=order_data['weight'],
+        length=order_data.get('length', 10),
+        width=order_data.get('width', 10),
+        height=order_data.get('height', 10),
+        rates=rates
+    )
+    
+    # Save to session
+    await session_manager.update_session_atomic(user_id, data={
+        'rates': rates,
+        'cached': False,
+        'fetch_timestamp': datetime.now(timezone.utc).isoformat()
+    })
+    
+    # Store in context
+    context.user_data['rates'] = rates
+
+
+# ============================================================
+# CREATE AND SEND LABEL - HELPER FUNCTIONS
+# ============================================================
+
+def build_shipstation_label_request(
+    order: Dict[str, Any],
+    selected_rate: Dict[str, Any]
+) -> Dict[str, Any]:
+    """
+    Build ShipStation label creation request
+    
+    Args:
+        order: Order data from database
+        selected_rate: Selected shipping rate
+    
+    Returns:
+        ShipStation API request dictionary
+    """
+    from datetime import datetime, timezone
+    
+    return {
+        'shipment': {
+            'service_code': selected_rate.get('service_code'),
+            'carrier_id': selected_rate.get('carrier_id'),
+            'ship_to': {
+                'name': order.get('to_name'),
+                'phone': order.get('to_phone', '+15551234567'),
+                'address_line1': order.get('to_street'),
+                'address_line2': order.get('to_street2', ''),
+                'city_locality': order.get('to_city'),
+                'state_province': order.get('to_state'),
+                'postal_code': order.get('to_zip'),
+                'country_code': 'US'
+            },
+            'ship_from': {
+                'name': order.get('from_name'),
+                'phone': order.get('from_phone', '+15551234567'),
+                'address_line1': order.get('from_street'),
+                'address_line2': order.get('from_street2', ''),
+                'city_locality': order.get('from_city'),
+                'state_province': order.get('from_state'),
+                'postal_code': order.get('from_zip'),
+                'country_code': 'US'
+            },
+            'packages': [{
+                'weight': {
+                    'value': float(order.get('weight', 1)),
+                    'unit': 'pound'
+                },
+                'dimensions': {
+                    'length': float(order.get('length', 10)),
+                    'width': float(order.get('width', 10)),
+                    'height': float(order.get('height', 10)),
+                    'unit': 'inch'
+                }
+            }]
+        },
+        'label_format': 'pdf',
+        'label_download_type': 'url'
+    }
+
+
+async def download_label_pdf(label_url: str, timeout: int = 30) -> Tuple[bool, Optional[bytes], Optional[str]]:
+    """
+    Download label PDF from URL
+    
+    Args:
+        label_url: URL to download PDF from
+        timeout: Request timeout
+    
+    Returns:
+        (success, pdf_bytes, error_message)
+    """
+    import requests
+    
+    try:
+        response = requests.get(label_url, timeout=timeout)
+        
+        if response.status_code == 200:
+            return True, response.content, None
+        else:
+            return False, None, f"Failed to download label: HTTP {response.status_code}"
+            
+    except requests.exceptions.Timeout:
+        return False, None, "Timeout downloading label"
+    except Exception as e:
+        return False, None, f"Error downloading label: {str(e)}"
+
+
+async def send_label_to_user(
+    bot_instance,
+    telegram_id: int,
+    pdf_bytes: bytes,
+    order_id: str,
+    tracking_number: str,
+    carrier: str,
+    safe_telegram_call_func
+) -> Tuple[bool, Optional[str]]:
+    """
+    Send label PDF to user via Telegram
+    
+    Args:
+        bot_instance: Telegram bot instance
+        telegram_id: User's telegram ID
+        pdf_bytes: PDF file content
+        order_id: Order ID
+        tracking_number: Tracking number
+        carrier: Carrier name
+        safe_telegram_call_func: Safe telegram call wrapper
+    
+    Returns:
+        (success, error_message)
+    """
+    import io
+    
+    try:
+        # Create file-like object
+        pdf_file = io.BytesIO(pdf_bytes)
+        pdf_file.name = f"label_{order_id[:8]}.pdf"
+        
+        # Caption message
+        caption = f"""✅ Shipping Label
+
+Order: #{order_id[:8]}
+Carrier: {carrier}
+Tracking: {tracking_number}"""
+        
+        # Send document
+        await safe_telegram_call_func(
+            bot_instance.send_document(
+                chat_id=telegram_id,
+                document=pdf_file,
+                caption=caption
+            )
+        )
+        
+        return True, None
+        
+    except Exception as e:
+        return False, f"Error sending label: {str(e)}"
