@@ -18,9 +18,10 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
     from server import (
         TEMPLATE_NAME,
         db, safe_telegram_call,
-        find_user_by_telegram_id, insert_template,
+        insert_template,
         count_user_templates, template_service
     )
+    from repositories import get_user_repo
     
     template_name = update.message.text.strip()[:30]  # Limit to 30 chars
     
