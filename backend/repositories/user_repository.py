@@ -281,6 +281,54 @@ class UserRepository(BaseRepository):
             {"$inc": {"total_spent": abs(amount)}}
         )
     
+    async def count_users(self, filter_dict: Optional[Dict] = None) -> int:
+        """
+        Подсчитать количество пользователей
+        
+        Args:
+            filter_dict: Фильтр (опционально)
+            
+        Returns:
+            Количество пользователей
+        """
+        filter_dict = filter_dict or {}
+        return await self.collection.count_documents(filter_dict)
+    
+    async def get_all_users(self, filter_dict: Optional[Dict] = None, limit: Optional[int] = None) -> List[Dict]:
+        """
+        Получить всех пользователей
+        
+        Args:
+            filter_dict: Фильтр (опционально)
+            limit: Ограничение количества
+            
+        Returns:
+            Список пользователей
+        """
+        filter_dict = filter_dict or {}
+        if limit:
+            return await self.find_many(filter_dict, limit=limit)
+        else:
+            # No limit - get all
+            return await self.collection.find(filter_dict, {"_id": 0}).to_list(None)
+    
+    async def update_user_field(self, telegram_id: int, field: str, value: any) -> bool:
+        """
+        Обновить поле пользователя
+        
+        Args:
+            telegram_id: Telegram ID
+            field: Название поля
+            value: Значение
+            
+        Returns:
+            True если обновлено
+        """
+        return await self.update_one(
+            {"telegram_id": telegram_id},
+            {"$set": {field: value}}
+        )
+    
     async def get_users_with_balance(self, min_balance: float = 0.01) -> List[Dict]:
         """
         Получить пользователей с балансом
