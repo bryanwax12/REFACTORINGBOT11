@@ -6191,145 +6191,22 @@ async def startup_event():
             #             CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
             #             CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
             #         ],
-                    FROM_ADDRESS: [
-                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_address),
-                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
-                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
-                    ],
-                    FROM_ADDRESS2: [
-                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_address2),
-                        CallbackQueryHandler(skip_from_address2, pattern='^skip_from_address2$'),
-                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
-                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
-                    ],
-                    FROM_CITY: [
-                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_city),
-                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
-                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
-                    ],
-                    FROM_STATE: [
-                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_state),
-                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
-                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
-                    ],
-                    FROM_ZIP: [
-                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_zip),
-                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
-                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
-                    ],
-                    FROM_PHONE: [
-                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_phone),
-                        CallbackQueryHandler(skip_from_phone, pattern='^skip_from_phone$'),
-                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
-                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
-                    ],
-                    TO_NAME: [
-                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_name),
-                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
-                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
-                    ],
-                    TO_ADDRESS: [
-                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_address),
-                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
-                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
-                    ],
-                    TO_ADDRESS2: [
-                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_address2),
-                        CallbackQueryHandler(skip_to_address2, pattern='^skip_to_address2$'),
-                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
-                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
-                    ],
-                    TO_CITY: [
-                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_city),
-                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
-                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
-                    ],
-                    TO_STATE: [
-                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_state),
-                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
-                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
-                    ],
-                    TO_ZIP: [
-                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_zip),
-                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
-                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
-                    ],
-                    TO_PHONE: [
-                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_to_phone),
-                        CallbackQueryHandler(skip_to_phone, pattern='^skip_to_phone$'),
-                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
-                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
-                    ],
-                    PARCEL_WEIGHT: [
-                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_parcel_weight),
-                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
-                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
-                    ],
-                    PARCEL_LENGTH: [
-                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_parcel_length),
-                        CallbackQueryHandler(order_parcel_length, pattern='^skip_dimensions$'),
-                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
-                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
-                    ],
-                    PARCEL_WIDTH: [
-                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_parcel_width),
-                        CallbackQueryHandler(order_parcel_width, pattern='^skip_dimensions$'),
-                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
-                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
-                    ],
-                    PARCEL_HEIGHT: [
-                        MessageHandler(filters.TEXT & ~filters.COMMAND, order_parcel_height),
-                        CallbackQueryHandler(order_parcel_height, pattern='^skip_height$'),
-                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
-                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
-                    ],
-                    CONFIRM_DATA: [
-                        CallbackQueryHandler(handle_data_confirmation, pattern='^(confirm_data|save_template|edit_data|edit_addresses_error|edit_from_address|edit_to_address|return_to_order|confirm_cancel|cancel_order)$')
-                    ],
-                    EDIT_MENU: [CallbackQueryHandler(handle_data_confirmation, pattern='^(edit_from_address|edit_to_address|edit_parcel|back_to_confirmation|return_to_order|confirm_cancel)$')],
-                    SELECT_CARRIER: [CallbackQueryHandler(select_carrier, pattern='^(select_carrier_|refresh_rates|check_data|return_to_order|confirm_cancel|cancel_order)')],
-                    PAYMENT_METHOD: [
-                        CallbackQueryHandler(return_to_order, pattern='^return_to_order$'),
-                        CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
-                        CallbackQueryHandler(process_payment, pattern='^(pay_from_balance|pay_with_crypto|top_up_balance|back_to_rates|cancel_order)')
-                    ],
-                    TOPUP_AMOUNT: [
-                        MessageHandler(filters.TEXT & ~filters.COMMAND, handle_topup_amount)
-                    ],
-                    TEMPLATE_NAME: [
-                        MessageHandler(filters.TEXT & ~filters.COMMAND, save_template_name),
-                        CallbackQueryHandler(handle_template_update, pattern='^template_update_'),
-                        CallbackQueryHandler(handle_template_new_name, pattern='^template_new_name$'),
-                        CallbackQueryHandler(continue_order_after_template, pattern='^continue_order$'),
-                        CallbackQueryHandler(start_command, pattern='^start$')
-                    ],
-                    TEMPLATE_LIST: [
-                        CallbackQueryHandler(use_template, pattern='^template_use_'),
-                        CallbackQueryHandler(view_template, pattern='^template_view_'),
-                        CallbackQueryHandler(start_command, pattern='^start$')
-                    ],
-                    TEMPLATE_VIEW: [
-                        CallbackQueryHandler(use_template, pattern='^template_use_'),
-                        CallbackQueryHandler(delete_template, pattern='^template_delete_'),
-                        CallbackQueryHandler(confirm_delete_template, pattern='^template_confirm_delete_'),
-                        CallbackQueryHandler(my_templates_menu, pattern='^my_templates$'),
-                        CallbackQueryHandler(start_command, pattern='^start$')
-                    ],
-                    TEMPLATE_LOADED: [
-                        CallbackQueryHandler(start_order_with_template, pattern='^start_order_with_template$'),
-                        CallbackQueryHandler(my_templates_menu, pattern='^my_templates$'),
-                        CallbackQueryHandler(start_command, pattern='^start$')
-                    ]
-                },
-                fallbacks=[
-                    CallbackQueryHandler(cancel_order, pattern='^cancel_order$'),
-                    CommandHandler('start', start_command)
-                ],
-                per_chat=True,
-                per_user=True,
-                per_message=False,  # False is correct: we use MessageHandler (not only CallbackQueryHandler)
-                allow_reentry=True
-            )
+#         FROM_ADDRESS: [
+#             MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_address),
+#             CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
+#             CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
+#         ],
+#         ... (rest of states commented out - see conversation_setup.py)
+#     },
+#     fallbacks=[
+#         CallbackQueryHandler(cancel_order, pattern='^cancel_order$'),
+#         CommandHandler('start', start_command)
+#     ],
+#     per_chat=True,
+#     per_user=True,
+#     per_message=False,
+#     allow_reentry=True
+# )
             
             application.add_handler(template_rename_handler)
             application.add_handler(order_conv_handler)
