@@ -4203,7 +4203,9 @@ async def create_label_manual_form(request: Request):
             'label_created_at': datetime.now(timezone.utc).isoformat(),
             'manual_creation': True
         }
-        await db.orders.insert_one({**order_doc, '_id': order_id})
+        from repositories import get_repositories
+        repos = get_repositories()
+        await repos.orders.collection.insert_one({**order_doc, '_id': order_id})
         
         logger.info(f"Label created manually from form: {label_id}")
         
