@@ -285,7 +285,7 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
 @with_typing_indicator
 async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 7/13: Collect sender phone (optional)"""
-    from server import session_manager, FROM_PHONE, TO_NAME
+    from server import session_manager, FROM_PHONE, TO_NAME, STATE_NAMES
     
     phone = update.message.text.strip()
     
