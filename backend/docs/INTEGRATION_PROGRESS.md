@@ -60,7 +60,7 @@
 
 ---
 
-### Phase 6: OrderRepository Integration ✅ НАЧАТО
+### Phase 6: OrderRepository Integration ✅ ЗАВЕРШЕНО
 - [x] **Методы добавлены**:
   - [x] `find_by_id()` - поиск по UUID
   - [x] `update_by_id()` - обновление по UUID
