@@ -122,8 +122,8 @@ async def get_user_stats(authenticated: bool = Depends(verify_admin_key)) -> Dic
 
 
 @router.get("/stats/orders")
-async def get_order_stats() -> Dict:
-    """Get order statistics"""
+async def get_order_stats(authenticated: bool = Depends(verify_admin_key)) -> Dict:
+    """Get order statistics (requires admin authentication)"""
     from server import db
     
     try:
