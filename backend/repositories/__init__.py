@@ -30,6 +30,8 @@ class RepositoryManager:
         self.users = UserRepository(db)
         self.orders = OrderRepository(db)
         self.sessions = SessionRepository(db)
+        self.payments = PaymentRepository(db)
+        self.templates = TemplateRepository(db)
         
         logger.info("📦 Repository Manager initialized")
     
