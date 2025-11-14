@@ -5617,8 +5617,8 @@ async def check_user_channel_status(telegram_id: int, authenticated: bool = Depe
             # User probably left or was never in channel
             logger.error(f"Failed to check channel status for user {telegram_id}: {e}")
             
-            # Update as not member
-            await db.users.update_one(
+            # Update as not member using Repository Pattern
+            await user_repo.collection.update_one(
                 {"telegram_id": telegram_id},
                 {"$set": {
                     "is_channel_member": False,
