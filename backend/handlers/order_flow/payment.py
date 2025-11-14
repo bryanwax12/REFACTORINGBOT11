@@ -128,6 +128,8 @@ async def handle_pay_crypto(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return PAYMENT_METHOD
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=False, require_session=True)
 async def handle_topup_for_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle top-up balance before payment"""
     from server import my_balance_command
@@ -138,6 +140,8 @@ async def handle_topup_for_order(update: Update, context: ContextTypes.DEFAULT_T
     return await my_balance_command(update, context)
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=False, require_session=True)
 async def handle_back_to_rates(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle back to rates button"""
     from server import fetch_shipping_rates, mark_message_as_selected
