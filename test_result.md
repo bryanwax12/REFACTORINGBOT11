@@ -4067,3 +4067,110 @@ orders = await order_repo.find_by_user(12345)
 - ⏳ TemplateRepository
 - ⏳ SessionRepository
 
+
+
+---
+
+## ✅ Notification Service + Config Validator - ЗАВЕРШЕНО
+**Дата**: 2025-11-14  
+**Агент**: Fork Agent (E1)  
+**Фаза**: 2.2 + 2.3
+
+### 🎯 Phase 2.2: Notification Service
+
+**Проблема**:
+- Разбросанные `bot.send_message()` по всему коду
+- Дублирование форматирования сообщений
+- Нет централизованного управления уведомлениями
+
+**Решение** (`services/notification_service.py`):
+- Централизованный сервис для всех уведомлений
+- 15+ предопределенных типов уведомлений
+- Шаблоны сообщений (NotificationTemplate)
+- User notifications (balance, orders, payments)
+- Admin notifications (new orders, errors, low balance)
+- Broadcast функциональность
+- Статистика отправок
+
+**Возможности**:
+```python
+from services.notification_service import get_notification_service
+
+notifier = get_notification_service()
+
+# User notifications
+await notifier.notify_order_created(user_id, order_id, cost)
+await notifier.notify_payment_received(user_id, amount, invoice_id)
+
+# Admin notifications
+await notifier.notify_admin_new_order(user_id, name, order_id, cost)
+
+# Broadcast
+stats = await notifier.broadcast_to_users(user_ids, message)
+```
+
+### 🎯 Phase 2.3: Configuration Validator
+
+**Проблема**:
+- Ошибки конфигурации обнаруживаются во время выполнения
+- Неясно какие переменные обязательны
+- Нет проверки форматов и значений
+
+**Решение** (`utils/config_validator.py`):
+- Fail-fast валидация при запуске
+- Проверка 15+ переменных окружения
+- Валидация форматов (URL, Telegram tokens, integers)
+- Условная валидация (зависимости)
+- Детальные отчеты с рекомендациями
+
+**Типы валидации**:
+- validate_required() - обязательные переменные
+- validate_url() - формат URL
+- validate_telegram_token() - формат токена
+- validate_integer() - целые числа с диапазонами
+- validate_enum() - допустимые значения
+- validate_conditional() - условные зависимости
+
+**Использование**:
+```python
+from utils.config_validator import validate_configuration
+
+is_valid, report = validate_configuration(print_report=True)
+
+if not is_valid:
+    raise SystemExit(1)
+```
+
+**Пример отчета**:
+```
+📊 Summary:
+   Critical Errors: 0
+   Warnings: 1
+   Info: 1
+
+✅ Configuration is VALID - Application can start
+```
+
+### 📊 Преимущества
+
+**Notification Service**:
+✅ Централизованное управление уведомлениями
+✅ Единый формат сообщений
+✅ Broadcast функциональность
+✅ Статистика и error handling
+✅ Легко добавить Email/SMS
+
+**Config Validator**:
+✅ Fail-fast при ошибках
+✅ Понятные сообщения об ошибках
+✅ Документация конфигурации
+✅ Рекомендации по настройке
+✅ Conditional validation
+
+### 🚀 Production Ready
+
+✅ Оба компонента готовы к использованию
+✅ Полная документация в коде
+✅ Примеры использования
+✅ Error handling
+
