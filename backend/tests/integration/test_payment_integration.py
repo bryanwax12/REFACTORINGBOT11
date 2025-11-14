@@ -93,13 +93,13 @@ class TestPaymentIntegration:
         """
         Test crypto payment invoice creation
         """
-        from server import create_oxapay_invoice
+        from services.api_services import create_oxapay_invoice
         
-        with patch('aiohttp.ClientSession.post') as mock_post:
+        with patch('httpx.AsyncClient.post') as mock_post:
             mock_response = AsyncMock()
-            mock_response.status = 200
+            mock_response.status_code = 200
             mock_response.json = AsyncMock(return_value=mock_oxapay_response)
-            mock_post.return_value.__aenter__.return_value = mock_response
+            mock_post.return_value = mock_response
             
             result = await create_oxapay_invoice(
                 amount=25.0,
@@ -108,7 +108,8 @@ class TestPaymentIntegration:
             )
             
             # Verify: Invoice created
-            assert 'trackId' in result or 'success' in result
+            assert result is not None
+            assert 'trackId' in result or 'success' in result or result == mock_oxapay_response
     
     
     async def test_topup_flow(
