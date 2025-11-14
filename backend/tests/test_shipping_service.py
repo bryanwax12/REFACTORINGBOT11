@@ -316,9 +316,9 @@ async def test_fetch_rates_from_shipstation_success():
     """Test successful rates fetch from ShipStation"""
     from unittest.mock import AsyncMock
     
-    mock_response = AsyncMock()
+    mock_response = Mock()  # Not AsyncMock - httpx response is sync
     mock_response.status_code = 200
-    mock_response.json.return_value = {
+    mock_response.json = Mock(return_value={
         'rate_response': {
             'rates': [
                 {
@@ -329,7 +329,7 @@ async def test_fetch_rates_from_shipstation_success():
                 }
             ]
         }
-    }
+    })
     
     with patch('httpx.AsyncClient') as mock_client:
         mock_client_instance = AsyncMock()
