@@ -210,8 +210,8 @@ class TestOrderCreationIntegration:
         
         # Build label request
         label_request = build_shipstation_label_request(
-            order_data=order_data,
-            rate_data=sample_shipping_rate
+            order=order_data,
+            selected_rate=sample_shipping_rate
         )
         
         # Verify request structure
