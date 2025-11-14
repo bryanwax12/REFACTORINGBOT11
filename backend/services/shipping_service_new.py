@@ -257,7 +257,41 @@ def build_shipstation_rates_request(order_data: Dict[str, Any], carrier_ids: Lis
             'carrier_ids': carrier_ids
         },
         'shipment': {
-
+            'ship_to': {
+                'name': order_data['to_name'],
+                'phone': order_data.get('to_phone') or '+15551234567',
+                'address_line1': order_data['to_street'],
+                'address_line2': order_data.get('to_street2', ''),
+                'city_locality': order_data['to_city'],
+                'state_province': order_data['to_state'],
+                'postal_code': order_data['to_zip'],
+                'country_code': 'US',
+                'address_residential_indicator': 'unknown'
+            },
+            'ship_from': {
+                'name': order_data['from_name'],
+                'phone': order_data.get('from_phone') or '+15551234567',
+                'address_line1': order_data['from_street'],
+                'address_line2': order_data.get('from_street2', ''),
+                'city_locality': order_data['from_city'],
+                'state_province': order_data['from_state'],
+                'postal_code': order_data['from_zip'],
+                'country_code': 'US'
+            },
+            'packages': [{
+                'weight': {
+                    'value': float(order_data['weight']),
+                    'unit': 'pound'
+                },
+                'dimensions': {
+                    'length': float(order_data.get('length', 10)),
+                    'width': float(order_data.get('width', 10)),
+                    'height': float(order_data.get('height', 10)),
+                    'unit': 'inch'
+                }
+            }]
+        }
+    }
 
 
 def get_allowed_services_config() -> Dict[str, List[str]]:
