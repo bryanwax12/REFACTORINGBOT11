@@ -5461,8 +5461,10 @@ async def check_all_bot_access(authenticated: bool = Depends(verify_admin_key)):
                     action="typing"
                 )
                 
-                # If successful, bot is accessible
-                await db.users.update_one(
+                # If successful, bot is accessible - using Repository Pattern
+                from repositories import get_user_repo
+                user_repo = get_user_repo()
+                await user_repo.collection.update_one(
                     {"telegram_id": user['telegram_id']},
                     {"$set": {
                         "bot_blocked_by_user": False,
