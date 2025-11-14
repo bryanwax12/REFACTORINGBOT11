@@ -8,7 +8,11 @@ from telegram.ext import ContextTypes, ConversationHandler
 
 logger = logging.getLogger(__name__)
 
+from utils.handler_decorators import with_user_session, safe_handler
 
+
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=False, require_session=True)
 async def show_data_confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Show summary of entered data with edit option"""
     from server import CONFIRM_DATA
