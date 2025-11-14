@@ -5126,9 +5126,9 @@ async def get_bot_health(authenticated: bool = Depends(verify_admin_key)):
         from repositories import get_repositories, get_user_repo
         repos = get_repositories()
         user_repo = get_user_repo()
-        total_users = await db.users.count_documents({})
+        total_users = await user_repo.count_users()
         total_orders = await repos.orders.count_orders()
-        blocked_users_db = await db.users.count_documents({"blocked": True})
+        blocked_users_db = await user_repo.count_users({"blocked": True})
         
         # Get API mode
         api_mode_setting = await db.settings.find_one({"key": "api_mode"})
