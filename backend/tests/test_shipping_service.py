@@ -314,7 +314,9 @@ def test_balance_and_deduplicate_rates_deduplication():
 @pytest.mark.asyncio
 async def test_fetch_rates_from_shipstation_success():
     """Test successful rates fetch from ShipStation"""
-    mock_response = Mock()
+    from unittest.mock import AsyncMock
+    
+    mock_response = AsyncMock()
     mock_response.status_code = 200
     mock_response.json.return_value = {
         'rate_response': {
@@ -329,7 +331,11 @@ async def test_fetch_rates_from_shipstation_success():
         }
     }
     
-    with patch('requests.post', return_value=mock_response):
+    with patch('httpx.AsyncClient') as mock_client:
+        mock_client_instance = AsyncMock()
+        mock_client_instance.post = AsyncMock(return_value=mock_response)
+        mock_client.return_value.__aenter__.return_value = mock_client_instance
+        
         success, rates, error = await fetch_rates_from_shipstation(
             rate_request={},
             headers={},
