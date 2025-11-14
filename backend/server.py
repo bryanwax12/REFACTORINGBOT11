@@ -2608,7 +2608,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # Save new pending order
             await insert_pending_order(pending_order)
             
-            context.user_data['last_state'] = TOPUP_AMOUNT  # Save state for cancel return
+            context.user_data['last_state'] = STATE_NAMES[TOPUP_AMOUNT]  # Save state for cancel return
             
         from utils.ui_utils import get_cancel_keyboard
         reply_markup = get_cancel_keyboard()
