@@ -4944,8 +4944,10 @@ async def disable_maintenance_mode(authenticated: bool = Depends(verify_admin_ke
             upsert=True
         )
         
-        # Send message to all users that bot is back online
-        users = await db.users.find({"blocked": {"$ne": True}}).to_list(length=None)
+        # Send message to all non-blocked users using Repository Pattern
+        from repositories import get_user_repo
+        user_repo = get_user_repo()
+        users = await user_repo.get_all_users(filter_dict={"blocked": {"$ne": True}})
         
         back_online_message = """✅ *Бот снова работает!*
 
