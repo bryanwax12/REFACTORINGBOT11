@@ -12,7 +12,8 @@ logger = logging.getLogger(__name__)
 # Import shared utilities
 from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
 from utils.validators import validate_weight, validate_dimension
-from utils.decorators import with_typing_indicator
+from utils.handler_decorators import with_user_session, safe_handler, with_typing_action
+from telegram.ext import ConversationHandler
 
 
 # ============================================================
