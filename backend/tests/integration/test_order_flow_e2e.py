@@ -185,8 +185,8 @@ class TestOrderFlowE2E:
         mock_context.user_data['selected_rate'] = sample_shipping_rate
         mock_context.user_data['final_amount'] = 15.50
         
-        with patch('handlers.order_flow.payment.find_user_by_telegram_id') as mock_find_user, \
-             patch('handlers.order_flow.payment.safe_telegram_call') as mock_safe_call:
+        with patch('server.find_user_by_telegram_id') as mock_find_user, \
+             patch('server.safe_telegram_call') as mock_safe_call:
             
             mock_find_user.return_value = {
                 "id": "user123",
