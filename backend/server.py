@@ -1996,22 +1996,23 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             
             return CONFIRM_DATA
         
-        # Stop progress updates on success (will be deleted later)
+        # Stop progress updates on success
         progress_task.cancel()
         try:
             await progress_task
         except asyncio.CancelledError:
             pass
         
-        rate_response = response.json()
-        all_rates = rate_response.get('rate_response', {}).get('rates', [])
+        # Filter and format rates using service
+        from services.shipping_service_new import filter_and_sort_rates
         
-        # Filter out only GlobalPost rates (keep stamps_com which is USPS)
+        # First apply basic exclusion
         excluded_carriers = ['globalpost']
-        all_rates = [
-            rate for rate in all_rates 
+        filtered_rates = [
+            rate for rate in all_rates
             if rate.get('carrier_code', '').lower() not in excluded_carriers
         ]
+        all_rates = filtered_rates
         
         # Filter to keep only specific services per carrier
         allowed_services = {
