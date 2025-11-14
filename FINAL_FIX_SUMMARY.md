@@ -164,7 +164,7 @@ else:
 
 ### Preview окружение (текущее)
 ```
-WEBHOOK_BASE_URL = "https://asyncbot.preview.emergentagent.com"
+WEBHOOK_BASE_URL = "https://telebot-architect.preview.emergentagent.com"
                                      ↓
               Содержит "preview" → НЕ production
                                      ↓
