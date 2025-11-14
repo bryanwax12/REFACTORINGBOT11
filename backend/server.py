@@ -1915,7 +1915,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         progress_task = asyncio.create_task(update_progress())
         
         # Fetch rates from ShipStation using service
-        from services.shipping_service_new import fetch_rates_from_shipstation
+        from services.shipping_service import fetch_rates_from_shipstation
         
         api_start_time = time.perf_counter()
         success, all_rates, error_msg = await fetch_rates_from_shipstation(
