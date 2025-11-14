@@ -1846,12 +1846,11 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         import requests
         import asyncio
         
-        # Validate required fields and check for None values
-        required_fields = ['from_name', 'from_street', 'from_city', 'from_state', 'from_zip', 
-                          'to_name', 'to_street', 'to_city', 'to_state', 'to_zip', 'weight']
-        missing_fields = [field for field in required_fields if not data.get(field) or data.get(field) == 'None' or data.get(field) == '']
+        # Validate order data using service
+        from services.shipping_service_new import validate_order_data_for_rates
+        is_valid, missing_fields = await validate_order_data_for_rates(data)
         
-        if missing_fields:
+        if not is_valid:
             logger.error(f"Missing or invalid required fields: {missing_fields}")
             logger.error(f"Current user_data: {data}")
             
