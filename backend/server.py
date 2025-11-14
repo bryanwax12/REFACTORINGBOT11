@@ -6072,12 +6072,15 @@ async def get_expense_stats(date_from: Optional[str] = None, date_to: Optional[s
                 date_query["$lt"] = end_date.isoformat()
             query["created_at"] = date_query
         
-        # Get all paid orders with original_amount (real cost from ShipStation)
-        total_spent = await db.orders.aggregate([
+        # Get all paid orders with original_amount (real cost from ShipStation) using Repository Pattern
+        from repositories import get_repositories
+        repos = get_repositories()
+        
+        total_spent = await repos.orders.aggregate_orders([
             {"$match": query},
             {"$match": {"original_amount": {"$exists": True}}},
             {"$group": {"_id": None, "total": {"$sum": "$original_amount"}}}
-        ]).to_list(1)
+        ])
         
         total_expense = total_spent[0]['total'] if total_spent else 0
         
@@ -6102,10 +6105,10 @@ async def get_expense_stats(date_from: Optional[str] = None, date_to: Optional[s
             "created_at": {"$gte": today_start.isoformat()}
         }
         
-        today_spent = await db.orders.aggregate([
+        today_spent = await repos.orders.aggregate_orders([
             {"$match": today_query},
             {"$group": {"_id": None, "total": {"$sum": "$original_amount"}}}
-        ]).to_list(1)
+        ])
         
         today_expense = today_spent[0]['total'] if today_spent else 0
         
