@@ -3063,8 +3063,10 @@ Label PDF: {label_download_url}
         # Send notification to admin about new label
         if ADMIN_TELEGRAM_ID:
             try:
-                # Get user info
-                user = await find_user_by_telegram_id(telegram_id)
+                # Get user info using Repository Pattern
+                from repositories import get_user_repo
+                user_repo = get_user_repo()
+                user = await user_repo.find_by_telegram_id(telegram_id)
                 user_name = user.get('first_name', 'Unknown') if user else 'Unknown'
                 username = user.get('username', '') if user else ''
                 user_display = f"{user_name}" + (f" (@{username})" if username else f" (ID: {telegram_id})")
