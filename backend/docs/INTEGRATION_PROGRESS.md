@@ -117,11 +117,14 @@
 **Общий прогресс**: ~60%
 
 **Рефакторинг за всю работу**: 
-- **42 обращения** к `find_user_by_telegram_id()` заменено на `UserRepository`
-- **ВСЕ операции с user balance** теперь через Repository Pattern
-- **0 прямых обращений** к `db.users` для user operations
+- **42 обращения** к `find_user_by_telegram_id()` → `UserRepository` ✅
+- **8 обращений** к `db.users.update_one()` → `UserRepository.update_balance()` ✅
+- **6 обращений** к `db.orders` → `OrderRepository` 🟡
+- **ВСЕ операции с user** теперь через Repository Pattern ✅
+- **0 прямых обращений** к `db.users` для user operations ✅
 
 **Тесты**: 198/200 (99%) ✅
+**Новые методы**: `OrderRepository.find_by_id()`, `OrderRepository.update_by_id()`
 
 ---
 
