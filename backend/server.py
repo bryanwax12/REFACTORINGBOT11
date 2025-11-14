@@ -3781,8 +3781,10 @@ async def refund_order(order_id: str, refund_reason: Optional[str] = None):
     Refund an order - void label on ShipStation and return money to user balance
     """
     try:
-        # Find order
-        order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+        # Find order using Repository Pattern
+        from repositories import get_repositories
+        repos = get_repositories()
+        order = await repos.orders.find_by_id(order_id)
         if not order:
             raise HTTPException(status_code=404, detail="Order not found")
         
@@ -3909,8 +3911,10 @@ async def create_label_manually(order_id: str):
     Manually create shipping label for paid order (admin function)
     """
     try:
-        # Find order
-        order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+        # Find order using Repository Pattern
+        from repositories import get_repositories
+        repos = get_repositories()
+        order = await repos.orders.find_by_id(order_id)
         if not order:
             raise HTTPException(status_code=404, detail="Order not found")
         
