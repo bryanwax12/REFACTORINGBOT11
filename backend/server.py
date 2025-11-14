@@ -6031,12 +6031,8 @@ app.include_router(alerting_router)
 
 # Direct endpoint for clearing conversations (easier access)
 @app.get("/clear-conversations")
-async def clear_conversations_direct(admin_key: str = None):
+async def clear_conversations_direct(admin_verified: bool = Depends(verify_admin_key)):
     """Clear all stuck conversation states - Admin only"""
-    # Verify admin key
-    if admin_key != ADMIN_API_KEY:
-        raise HTTPException(status_code=403, detail="Invalid admin key")
-    
     try:
         result = await db.bot_persistence.delete_many({"_id": {"$regex": "^conversation_"}})
         return {
