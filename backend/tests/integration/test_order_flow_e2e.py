@@ -116,7 +116,7 @@ class TestOrderFlowE2E:
         # Setup: User is on rates selection screen
         mock_context.user_data['last_state'] = STATE_NAMES[SELECT_CARRIER]
         
-        with patch('handlers.order_flow.cancellation.safe_telegram_call') as mock_safe_call:
+        with patch('server.safe_telegram_call') as mock_safe_call:
             mock_safe_call.side_effect = lambda x: x
             
             # Step 1: User clicks cancel
