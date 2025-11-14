@@ -166,12 +166,11 @@ async def get_shipstation_carrier_ids():
             "Content-Type": "application/json"
         }
         
-        response = await asyncio.to_thread(
-            requests.get,
-            'https://api.shipstation.com/v2/carriers',
-            headers=headers,
-            timeout=10
-        )
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(
+                'https://api.shipstation.com/v2/carriers',
+                headers=headers
+            )
         
         if response.status_code == 200:
             carriers_data = response.json()
