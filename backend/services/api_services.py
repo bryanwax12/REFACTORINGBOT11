@@ -41,15 +41,14 @@ async def create_oxapay_invoice(amount: float, order_id: str, description: str =
             "order_id": order_id
         }
         
-        # Profile Oxapay API call
+        # Profile Oxapay API call (now truly async!)
         api_start_time = time.perf_counter()
-        response = await asyncio.to_thread(
-            requests.post,
-            f"{OXAPAY_API_URL}/v1/payment/invoice",
-            json=payload,
-            headers=headers,
-            timeout=30
-        )
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                f"{OXAPAY_API_URL}/v1/payment/invoice",
+                json=payload,
+                headers=headers
+            )
         api_duration_ms = (time.perf_counter() - api_start_time) * 1000
         logger.info(f"⚡ Oxapay create invoice API took {api_duration_ms:.2f}ms")
         
