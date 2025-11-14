@@ -2155,11 +2155,11 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             except Exception:
                 pass
             
-            from utils.ui_utils import get_edit_addresses_keyboard
+            from utils.ui_utils import get_edit_addresses_keyboard, ShippingRatesUI
             reply_markup = get_edit_addresses_keyboard()
             
             await safe_telegram_call(query.message.reply_text(
-            "❌ Нет доступных тарифов для данного направления.\n\nПроверьте правильность введенных адресов.",
+            ShippingRatesUI.no_rates_found(),
             reply_markup=reply_markup,
         ))
             return CONFIRM_DATA  # Stay to handle callback
