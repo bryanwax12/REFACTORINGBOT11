@@ -10,7 +10,6 @@ from middleware.security import SecurityMiddleware, security_manager, audit_logg
 import os
 import logging
 import random
-import requests
 import httpx
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional
