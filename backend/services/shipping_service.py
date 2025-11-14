@@ -2,19 +2,21 @@
 Shipping Service Module
 Handles shipping rate calculations and label creation via ShipStation API
 
-Architecture:
-- This module provides wrappers and will gradually contain extracted logic
-- Main implementations currently in server.py (~1000 lines total)
-- Future: Full extraction into this service layer
-
-Functions:
-- calculate_shipping_rates: Get shipping rates for an order (~600 lines in server.py)
-- create_shipping_label: Create and send label (~400 lines in server.py)
+This module has been refactored to use the new shipping_service_new.py
+All new shipping logic should be added to shipping_service_new.py
 """
 import logging
 from typing import Optional, Dict, List, Any
 
 logger = logging.getLogger(__name__)
+
+# Import from new shipping service
+from services.shipping_service_new import (
+    display_shipping_rates as display_rates_new,
+    validate_shipping_address,
+    validate_parcel_data,
+    format_order_for_shipstation
+)
 
 
 # ============================================================
