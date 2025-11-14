@@ -184,7 +184,7 @@ class TestOrderCreationIntegration:
         }
         
         # Mock order insertion
-        with patch('server.insert_order') as mock_insert:
+        with patch('server.insert_order', new_callable=AsyncMock) as mock_insert:
             mock_insert.return_value = "order_id_123"
             
             order_id = await mock_insert(order_data)
