@@ -49,6 +49,7 @@ class TestDatabaseIntegration:
         for i in range(5):
             await test_db.orders.insert_one({
                 "id": f"order_{i}",
+                "order_id": f"test_order_{telegram_id}_{i}",  # Add unique order_id
                 "telegram_id": telegram_id,
                 "order_number": f"ORD-{i}",
                 "created_at": f"2025-01-0{i+1}T00:00:00Z",
