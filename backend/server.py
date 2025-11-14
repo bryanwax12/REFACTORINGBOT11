@@ -5485,7 +5485,9 @@ async def check_all_bot_access(authenticated: bool = Depends(verify_admin_key)):
                 if "bot was blocked by the user" in error_msg.lower() or "forbidden" in error_msg.lower():
                     logger.warning(f"User {user['telegram_id']} has blocked the bot")
                     
-                    await db.users.update_one(
+                    from repositories import get_user_repo
+                    user_repo = get_user_repo()
+                    await user_repo.collection.update_one(
                         {"telegram_id": user['telegram_id']},
                         {"$set": {
                             "bot_blocked_by_user": True,
