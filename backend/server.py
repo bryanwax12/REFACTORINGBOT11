@@ -5295,7 +5295,10 @@ async def upload_image(
 async def check_bot_access(telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
     """Check if bot can send messages to user"""
     try:
-        user = await find_user_by_telegram_id(telegram_id)
+        # Check if user exists using Repository Pattern
+        from repositories import get_user_repo
+        user_repo = get_user_repo()
+        user = await user_repo.find_by_telegram_id(telegram_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
