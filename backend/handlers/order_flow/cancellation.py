@@ -92,6 +92,8 @@ async def confirm_cancel_order(update: Update, context: ContextTypes.DEFAULT_TYP
     return ConversationHandler.END
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=False, require_session=True)
 async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Return to order after cancel button - restore exact screen"""
     from server import FROM_NAME, safe_telegram_call, mark_message_as_selected
