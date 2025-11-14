@@ -55,8 +55,10 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE,
         await send_blocked_message(update)
         return
     
-    user = await find_user_by_telegram_id(telegram_id)
-    balance = user.get('balance', 0.0) if user else 0.0
+    # Get balance using Repository Pattern
+    from repositories import get_user_repo
+    user_repo = get_user_repo()
+    balance = await user_repo.get_balance(telegram_id)
     
     from utils.ui_utils import get_cancel_and_menu_keyboard
     
