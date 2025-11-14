@@ -13,7 +13,7 @@ router = APIRouter(prefix="/stats", tags=["admin-stats"])
 
 @router.get("/dashboard")
 async def get_dashboard_stats(
-    authenticated: bool = Depends(lambda: True)
+    authenticated: bool = Depends(verify_admin_key)
 ):
     """
     Get main dashboard statistics
@@ -41,7 +41,7 @@ async def get_dashboard_stats(
 @router.get("/expenses")
 async def get_expense_stats(
     days: int = Query(30, ge=1, le=365),
-    authenticated: bool = Depends(lambda: True)
+    authenticated: bool = Depends(verify_admin_key)
 ):
     """
     Get expense statistics for specified period
@@ -70,7 +70,7 @@ async def get_expense_stats(
 @router.get("/topups")
 async def get_topup_stats(
     limit: int = Query(50, ge=1, le=500),
-    authenticated: bool = Depends(lambda: True)
+    authenticated: bool = Depends(verify_admin_key)
 ):
     """
     Get recent top-up statistics
@@ -98,7 +98,7 @@ async def get_topup_stats(
 
 @router.get("/performance")
 async def get_performance_stats(
-    authenticated: bool = Depends(lambda: True)
+    authenticated: bool = Depends(verify_admin_key)
 ):
     """
     Get performance statistics
