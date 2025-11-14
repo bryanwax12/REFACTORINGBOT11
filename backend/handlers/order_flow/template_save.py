@@ -12,7 +12,11 @@ from telegram.ext import ContextTypes, ConversationHandler
 
 logger = logging.getLogger(__name__)
 
+from utils.handler_decorators import with_user_session, safe_handler
 
+
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=False, require_session=True)
 async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Save template with user-provided name"""
     from server import (
