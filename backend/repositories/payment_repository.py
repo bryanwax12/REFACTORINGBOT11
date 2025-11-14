@@ -311,6 +311,35 @@ class PaymentRepository(BaseRepository):
                 }
             }
         )
+    
+    async def get_topups(self, limit: int = 1000) -> List[Dict]:
+        """
+        Получить список пополнений (topup)
+        
+        Args:
+            limit: Максимальное количество
+            
+        Returns:
+            Список топапов
+        """
+        return await self.find_many(
+            {"type": "topup"},
+            sort=[("created_at", -1)],
+            limit=limit
+        )
+    
+    async def update_payment(self, filter_dict: Dict, update_data: Dict) -> bool:
+        """
+        Обновить платеж
+        
+        Args:
+            filter_dict: Фильтр для поиска платежа
+            update_data: Данные для обновления
+            
+        Returns:
+            True если обновлено
+        """
+        return await self.update_one(filter_dict, {"$set": update_data})
 
 
 """
