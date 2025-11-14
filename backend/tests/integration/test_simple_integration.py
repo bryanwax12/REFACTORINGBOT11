@@ -157,7 +157,7 @@ class TestServiceIntegration:
         """Test template data validation"""
         from services.template_service import validate_template_data
         
-        # Valid template - needs all required fields
+        # Valid template - needs all required fields (including weight)
         valid_data = {
             "from_name": "John",
             "from_street": "123 Main",
@@ -168,7 +168,8 @@ class TestServiceIntegration:
             "to_street": "456 Oak",
             "to_city": "LA",
             "to_state": "CA",
-            "to_zip": "90001"
+            "to_zip": "90001",
+            "weight": 5.0
         }
         valid, error = validate_template_data(valid_data)
         assert valid is True
