@@ -3339,7 +3339,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Get the state we were in when cancel was pressed
     last_state = context.user_data.get('last_state')
     
-    logger.info(f"return_to_order: last_state = {last_state}")
+    logger.info(f"return_to_order: last_state = {last_state}, type = {type(last_state)}")
     logger.info(f"return_to_order: user_data keys = {list(context.user_data.keys())}")
     
     # If no last_state - just continue
@@ -3348,22 +3348,43 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await safe_telegram_call(query.message.reply_text("Продолжаем оформление заказа..."))
         return FROM_NAME
     
-    # Use centralized helper to get keyboard and message for this state
+    # If last_state is a number (state constant), we need the string name
+    # Check if it's a string (state name) or int (state constant)
+    if isinstance(last_state, int):
+        # It's a state constant - return it directly
+        keyboard, message_text = OrderStepMessages.get_step_keyboard_and_message(str(last_state))
+        logger.warning(f"return_to_order: last_state is int ({last_state}), should be string!")
+        
+        # Show next step
+        reply_markup = get_cancel_keyboard()
+        bot_msg = await safe_telegram_call(query.message.reply_text(
+            message_text if message_text else "Продолжаем оформление заказа...",
+            reply_markup=reply_markup
+        ))
+        
+        if bot_msg:
+            context.user_data['last_bot_message_id'] = bot_msg.message_id
+            context.user_data['last_bot_message_text'] = message_text if message_text else "Продолжаем..."
+        
+        return last_state
+    
+    # last_state is a string (state name like "FROM_CITY")
     keyboard, message_text = OrderStepMessages.get_step_keyboard_and_message(last_state)
     
     # Send message with or without keyboard
     if keyboard:
         bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=keyboard))
     else:
-        bot_msg = await safe_telegram_call(query.message.reply_text(message_text))
+        reply_markup = get_cancel_keyboard()
+        bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=reply_markup))
     
     # Save context
     if bot_msg:
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
     
-    # Return the state we were in
-    return globals()[last_state]
+    # Return the state constant
+    return globals().get(last_state, FROM_NAME)
 async def root():
     return {"message": "Telegram Shipping Bot API", "status": "running"}
 
