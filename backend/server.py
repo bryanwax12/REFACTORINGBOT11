@@ -1847,7 +1847,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         import asyncio
         
         # Validate order data using service
-        from services.shipping_service_new import validate_order_data_for_rates
+        from services.shipping_service import validate_order_data_for_rates
         is_valid, missing_fields = await validate_order_data_for_rates(data)
         
         if not is_valid:
