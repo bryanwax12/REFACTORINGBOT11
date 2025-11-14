@@ -127,8 +127,8 @@ class TestOrderFlowE2E:
             assert mock_update_callback.callback_query.answer.called
         
         # Step 2: User confirms cancellation
-        with patch('handlers.order_flow.cancellation.session_manager') as mock_session, \
-             patch('handlers.order_flow.cancellation.safe_telegram_call') as mock_safe_call:
+        with patch('server.session_manager') as mock_session, \
+             patch('server.safe_telegram_call') as mock_safe_call:
             
             mock_session.clear_session = AsyncMock()
             mock_safe_call.side_effect = lambda x: x
