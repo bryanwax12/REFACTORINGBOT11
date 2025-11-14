@@ -243,7 +243,7 @@ class TestAPIIntegration:
         from services.shipping_service import fetch_rates_from_shipstation, build_shipstation_rates_request
         
         # Add required fields
-        sample_order_data['parcel_weight'] = 5.5
+        sample_order_data['weight'] = 5.5
         carrier_ids = ["se-123456"]
         
         request = build_shipstation_rates_request(sample_order_data, carrier_ids)
