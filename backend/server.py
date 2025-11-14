@@ -2039,7 +2039,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         logger.info(f"Got {len(all_rates)} rates from carriers: {carriers}")
         
         # Balance and deduplicate rates using service
-        from services.shipping_service_new import balance_and_deduplicate_rates
+        from services.shipping_service import balance_and_deduplicate_rates
         context.user_data['rates'] = balance_and_deduplicate_rates(all_rates, max_per_carrier=5)[:15]
         
         # Save to cache and session using service
