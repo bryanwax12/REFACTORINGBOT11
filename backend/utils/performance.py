@@ -20,7 +20,7 @@ PERFORMANCE_STATS = {
 SLOW_QUERY_THRESHOLD_MS = 100  # Логировать запросы медленнее 100ms
 
 
-def profile_db_query(operation_name: str):
+def profile_db_query(operation_name: str, order_id: Optional[str] = None):
     """
     Декоратор для профилирования DB запросов
     
@@ -34,6 +34,9 @@ def profile_db_query(operation_name: str):
         async def wrapper(*args, **kwargs):
             start_time = time.perf_counter()
             
+            # Try to extract order_id from kwargs if not provided
+            extracted_order_id = order_id or kwargs.get('order_id')
+            
             try:
                 result = await func(*args, **kwargs)
                 
@@ -41,9 +44,11 @@ def profile_db_query(operation_name: str):
                 
                 # Логирование
                 if elapsed_ms > SLOW_QUERY_THRESHOLD_MS:
-                    logger.warning(f"🐌 SLOW DB QUERY: {operation_name} took {elapsed_ms:.2f}ms")
+                    order_info = f" [order: {extracted_order_id[:12]}]" if extracted_order_id else ""
+                    logger.warning(f"🐌 SLOW DB QUERY: {operation_name}{order_info} took {elapsed_ms:.2f}ms")
                     PERFORMANCE_STATS['slow_queries'].append({
                         'operation': operation_name,
+                        'order_id': extracted_order_id,
                         'duration_ms': elapsed_ms,
                         'timestamp': datetime.now().isoformat(),
                         'type': 'db'
