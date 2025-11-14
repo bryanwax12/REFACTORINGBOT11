@@ -1613,22 +1613,27 @@ async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_
     asyncio.create_task(mark_message_as_selected(update, context))
     
     template_id = query.data.replace('template_confirm_delete_', '')
-    template = await find_template_by_id(template_id)
+    telegram_id = query.from_user.id
     
-    if template:
-        result = await delete_template(template_id)
-        logger.info(f"🗑️ Deleted template '{template['name']}' (id: {template_id}) - deleted_count: {result.deleted_count}")
-        
+    # Use template service
+    success, template_name, error = await template_service.delete_template(
+        template_id=template_id,
+        telegram_id=telegram_id,
+        find_template_func=find_template_by_id,
+        delete_template_func=delete_template
+    )
+    
+    if success:
+        from utils.ui_utils import TemplateManagementUI
         keyboard = [[InlineKeyboardButton("🔙 К списку шаблонов", callback_data='my_templates')]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
         await safe_telegram_call(query.message.reply_text(
-            f"""✅ Шаблон "{template['name']}" удален""",
+            TemplateManagementUI.template_deleted_success(template_name),
             reply_markup=reply_markup
         ))
     else:
-        logger.warning(f"⚠️ Template {template_id} not found for deletion")
-        await safe_telegram_call(query.message.reply_text("❌ Шаблон не найден"))
+        await safe_telegram_call(query.message.reply_text(f"❌ {error}"))
     # Don't return state - deleted successfully
 
 async def rename_template_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
