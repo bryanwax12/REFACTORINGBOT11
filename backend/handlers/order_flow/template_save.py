@@ -213,9 +213,10 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
     from server import (
         TOPUP_AMOUNT,
         safe_telegram_call, mark_message_as_selected,
-        find_user_by_telegram_id, create_oxapay_invoice,
+        create_oxapay_invoice,
         insert_payment, db, Payment
     )
+    from repositories import get_user_repo
     
     # Mark previous message as selected (remove "Отмена" button)
     asyncio.create_task(mark_message_as_selected(update, context))
