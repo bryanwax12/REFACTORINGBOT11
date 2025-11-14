@@ -259,9 +259,9 @@ async def get_database_indexes(authenticated: bool = Depends(verify_admin_key)) 
 
 
 @router.get("/performance/slow-queries")
-async def get_slow_queries() -> Dict:
+async def get_slow_queries(authenticated: bool = Depends(verify_admin_key)) -> Dict:
     """
-    Get slow queries from MongoDB profiler
+    Get slow queries from MongoDB profiler (requires admin authentication)
     Note: Profiling must be enabled
     """
     from server import db
