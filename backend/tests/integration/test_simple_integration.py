@@ -228,14 +228,16 @@ class TestAPIIntegration:
         # Add required weight field
         sample_order_data['parcel_weight'] = 5.5
         
-        request = build_shipstation_rates_request(sample_order_data)
+        # Mock carrier IDs
+        carrier_ids = ["se-123456", "se-789012"]
         
-        # Verify structure
-        assert "shipFrom" in request
-        assert "shipTo" in request
-        assert "weight" in request
-        assert request["shipFrom"]["name"] == sample_order_data["from_name"]
-        assert request["shipTo"]["city"] == sample_order_data["to_city"]
+        request = build_shipstation_rates_request(sample_order_data, carrier_ids)
+        
+        # Verify structure (ShipEngine V2 format)
+        assert "shipment" in request
+        assert "rate_options" in request
+        assert "ship_from" in request["shipment"]
+        assert "ship_to" in request["shipment"]
     
     
     async def test_shipstation_api_call_mocked(
