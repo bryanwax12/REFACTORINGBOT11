@@ -91,7 +91,7 @@ class TestWebhookIntegration:
         with patch('asyncio.sleep', new_callable=AsyncMock):
             # Should handle rate limit gracefully
             try:
-                result = await safe_telegram_call(rate_limited_call())
+                result = await safe_telegram_call(rate_limited_call)
             except RetryAfter:
                 # Expected to raise if retries exhausted
                 pass
