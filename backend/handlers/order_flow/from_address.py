@@ -65,7 +65,13 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Store in session AND context
     user_id = update.effective_user.id
     context.user_data['from_name'] = name
-    await session_manager.update_session_atomic(user_id, step="FROM_ADDRESS", data={'from_name': name})
+    
+    # Update session via repository
+    session_repo = SessionRepository(db)
+    session = context.user_data.get('session', {})
+    temp_data = session.get('temp_data', {})
+    temp_data['from_name'] = name
+    await session_repo.update_session(user_id, current_step="FROM_ADDRESS", temp_data=temp_data)
     
     # Log action
     await SecurityLogger.log_action(
