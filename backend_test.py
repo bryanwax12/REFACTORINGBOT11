@@ -35,6 +35,118 @@ def test_api_health():
         print(f"❌ API Health error: {e}")
         return False
 
+def test_monitoring_health():
+    """Test GET /monitoring/health - health check endpoint"""
+    print("\n🔍 Testing Monitoring Health Endpoint...")
+    try:
+        start_time = time.time()
+        response = requests.get(f"{BACKEND_URL}/monitoring/health", timeout=10)
+        response_time = (time.time() - start_time) * 1000
+        
+        print(f"   Response time: {response_time:.2f}ms {'✅' if response_time < 500 else '❌'}")
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            print(f"   ✅ Health Check Response: {data}")
+            
+            # Check for expected health check fields
+            expected_fields = ['status']
+            for field in expected_fields:
+                if field in data:
+                    print(f"      {field}: ✅ {data[field]}")
+                else:
+                    print(f"      {field}: ❌ Missing")
+            
+            # Check if status is healthy
+            status = data.get('status', '').lower()
+            if status in ['healthy', 'ok', 'running']:
+                print(f"   ✅ Service status is healthy: {status}")
+                return True
+            else:
+                print(f"   ❌ Service status not healthy: {status}")
+                return False
+        else:
+            print(f"   ❌ Health check failed: {response.status_code}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Monitoring health test error: {e}")
+        return False
+
+def test_monitoring_metrics():
+    """Test GET /monitoring/metrics with X-API-Key - metrics endpoint"""
+    print("\n🔍 Testing Monitoring Metrics Endpoint...")
+    
+    # Load admin API key
+    load_dotenv('/app/backend/.env')
+    admin_api_key = os.environ.get('ADMIN_API_KEY')
+    
+    if not admin_api_key:
+        print("   ❌ ADMIN_API_KEY not found in environment")
+        return False
+    
+    print(f"   Admin API Key loaded: ✅")
+    
+    try:
+        # Test 1: Without API key (should fail)
+        print("   Test 1: Request without API key")
+        response = requests.get(f"{BACKEND_URL}/monitoring/metrics", timeout=10)
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code in [401, 403]:
+            print(f"   ✅ Correctly rejected request without API key")
+        else:
+            print(f"   ❌ Should reject request without API key")
+            return False
+        
+        # Test 2: With correct API key
+        print("   Test 2: Request with correct API key")
+        headers = {'X-API-Key': admin_api_key}
+        start_time = time.time()
+        response = requests.get(f"{BACKEND_URL}/monitoring/metrics", headers=headers, timeout=10)
+        response_time = (time.time() - start_time) * 1000
+        
+        print(f"   Response time: {response_time:.2f}ms {'✅' if response_time < 500 else '❌'}")
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            print(f"   ✅ Metrics Response: {json.dumps(data, indent=2)}")
+            
+            # Check for expected metrics fields
+            expected_fields = ['uptime', 'requests', 'memory', 'database']
+            for field in expected_fields:
+                if field in data:
+                    print(f"      {field}: ✅")
+                else:
+                    print(f"      {field}: ❌ Missing")
+            
+            return True
+        else:
+            print(f"   ❌ Metrics request failed: {response.status_code}")
+            try:
+                error_data = response.json()
+                print(f"      Error: {error_data}")
+            except:
+                print(f"      Error: {response.text}")
+            return False
+        
+        # Test 3: With wrong API key
+        print("   Test 3: Request with wrong API key")
+        headers = {'X-API-Key': 'wrong_key'}
+        response = requests.get(f"{BACKEND_URL}/monitoring/metrics", headers=headers, timeout=10)
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code in [401, 403]:
+            print(f"   ✅ Correctly rejected request with wrong API key")
+        else:
+            print(f"   ❌ Should reject request with wrong API key")
+            
+    except Exception as e:
+        print(f"❌ Monitoring metrics test error: {e}")
+        return False
+
 def test_carriers():
     """Test fetching carrier accounts (GET /api/carriers)"""
     print("\n🔍 Testing Carrier Accounts...")
