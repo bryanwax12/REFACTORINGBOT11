@@ -96,7 +96,7 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
 @with_typing_indicator
 async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 17/17: Collect parcel width"""
-    from server import session_manager, PARCEL_WIDTH, PARCEL_HEIGHT
+    from server import session_manager, PARCEL_WIDTH, PARCEL_HEIGHT, STATE_NAMES
     
     width_str = update.message.text.strip()
     
