@@ -1179,6 +1179,9 @@ Label будет создан и отправлен вам в течение м�
             [InlineKeyboardButton("Ξ Ethereum (ETH)", callback_data='crypto_eth')],
             [InlineKeyboardButton("₮ Tether (USDT)", callback_data='crypto_usdt')],
             [InlineKeyboardButton("Ł Litecoin (LTC)", callback_data='crypto_ltc')],
+            [InlineKeyboardButton("❌ Отмена", callback_data='start')]
+        ]
+        return InlineKeyboardMarkup(keyboard)
 
 
 
