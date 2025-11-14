@@ -3576,8 +3576,10 @@ async def export_orders_csv(
 
 @api_router.get("/orders", response_model=List[dict])
 async def get_orders(telegram_id: Optional[int] = None):
+    from repositories import get_repositories
+    repos = get_repositories()
     query = {"telegram_id": telegram_id} if telegram_id else {}
-    orders = await db.orders.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
+    orders = await repos.orders.find_with_filter(query, limit=100)
     
     result = []
     
