@@ -1302,7 +1302,3 @@ class TemplateManagementUI:
         ]
         return InlineKeyboardMarkup(keyboard)
 
-            [InlineKeyboardButton("❌ Отмена", callback_data='start')]
-        ]
-        return InlineKeyboardMarkup(keyboard)
-
