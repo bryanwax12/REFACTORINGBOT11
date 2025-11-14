@@ -192,18 +192,18 @@ async def add_balance(telegram_id: int, amount: float, db):
     Args:
         telegram_id: User's Telegram ID
         amount: Amount to add
-        db: Database connection
+        db: Database connection (deprecated, kept for backward compatibility)
     
     Returns:
         bool: True if successful
     """
     try:
-        result = await db.users.update_one(
-            {"telegram_id": telegram_id},
-            {"$inc": {"balance": amount}}
-        )
+        from repositories import get_user_repo
+        user_repo = get_user_repo()
         
-        if result.modified_count > 0:
+        result = await user_repo.update_balance(telegram_id, amount, operation="add")
+        
+        if result:
             logger.info(f"💰 Added ${amount:.2f} to user {telegram_id}")
             return True
         else:
