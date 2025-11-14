@@ -5,6 +5,8 @@ Repository Manager
 from repositories.user_repository import UserRepository
 from repositories.order_repository import OrderRepository
 from repositories.session_repository import SessionRepository
+from repositories.payment_repository import PaymentRepository
+from repositories.template_repository import TemplateRepository
 import logging
 
 logger = logging.getLogger(__name__)
