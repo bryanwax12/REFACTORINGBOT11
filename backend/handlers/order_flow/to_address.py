@@ -69,10 +69,14 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return TO_ADDRESS
 
 
-@with_typing_indicator
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_typing_action()
+@with_user_session(create_user=False, require_session=True)
 async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 9/13: Collect recipient street address"""
-    from server import session_manager, sanitize_string, TO_ADDRESS, TO_ADDRESS2, STATE_NAMES
+    from server import sanitize_string, TO_ADDRESS, TO_ADDRESS2, STATE_NAMES
+    from repositories.session_repository import SessionRepository
+    from server import db
     
     address = update.message.text.strip()
     address = sanitize_string(address, max_length=100)
