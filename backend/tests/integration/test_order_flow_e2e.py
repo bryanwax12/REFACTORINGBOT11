@@ -161,11 +161,17 @@ class TestOrderFlowE2E:
         # Setup: User has entered all data
         mock_context.user_data.update(sample_order_data)
         
+        # Add update.message mock
+        mock_update_callback.message = MagicMock()
+        mock_reply_msg = MagicMock()
+        mock_reply_msg.message_id = 111
+        mock_update_callback.message.reply_text = AsyncMock(return_value=mock_reply_msg)
+        
         with patch('server.safe_telegram_call') as mock_safe_call, \
              patch('server.session_manager') as mock_session:
             
-            mock_safe_call.side_effect = lambda x: x
-            mock_session.update_session = AsyncMock()
+            mock_safe_call.return_value = mock_reply_msg
+            mock_session.update_session_atomic = AsyncMock()
             
             result = await show_data_confirmation(mock_update_callback, mock_context)
             
