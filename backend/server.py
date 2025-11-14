@@ -2015,7 +2015,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         all_rates = filtered_rates
         
         # Apply service filter using service
-        from services.shipping_service_new import apply_service_filter
+        from services.shipping_service import apply_service_filter
         all_rates = apply_service_filter(all_rates)
         
         if not all_rates or len(all_rates) == 0:
