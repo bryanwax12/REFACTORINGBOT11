@@ -91,7 +91,7 @@ class TestOrderFlowE2E:
         mock_context.user_data.update(sample_order_data)
         mock_context.user_data['template_name'] = "Test Template"
         
-        with patch('handlers.order_flow.entry_points.safe_telegram_call') as mock_safe_call:
+        with patch('server.safe_telegram_call') as mock_safe_call:
             mock_safe_call.side_effect = lambda x: x
             
             # Start order with template
