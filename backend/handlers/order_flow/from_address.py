@@ -210,7 +210,7 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
 @with_typing_indicator
 async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 5/13: Collect sender state"""
-    from server import session_manager, FROM_STATE, FROM_ZIP
+    from server import session_manager, FROM_STATE, FROM_ZIP, STATE_NAMES
     
     state = update.message.text.strip().upper()
     
