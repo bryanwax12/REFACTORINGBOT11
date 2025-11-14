@@ -29,11 +29,11 @@ class TestOrderFlowE2E:
         mock_update_callback.callback_query.data = "new_order"
         
         # Mock database operations
-        with patch('handlers.order_flow.entry_points.find_user_by_telegram_id') as mock_find_user, \
-             patch('handlers.order_flow.entry_points.count_user_templates', return_value=0), \
-             patch('handlers.order_flow.entry_points.check_maintenance_mode', return_value=False), \
-             patch('handlers.order_flow.entry_points.check_user_blocked', return_value=False), \
-             patch('handlers.order_flow.entry_points.session_manager') as mock_session:
+        with patch('server.find_user_by_telegram_id') as mock_find_user, \
+             patch('server.count_user_templates', return_value=0), \
+             patch('server.check_maintenance_mode', return_value=False), \
+             patch('server.check_user_blocked', return_value=False), \
+             patch('server.session_manager') as mock_session:
             
             mock_find_user.return_value = {
                 "id": "user123",
