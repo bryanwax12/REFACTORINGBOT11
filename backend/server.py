@@ -2004,7 +2004,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             pass
         
         # Filter and format rates using service
-        from services.shipping_service_new import filter_and_sort_rates
+        from services.shipping_service import filter_and_sort_rates
         
         # First apply basic exclusion
         excluded_carriers = ['globalpost']
