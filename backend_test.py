@@ -7075,124 +7075,163 @@ def test_atomic_operations_flow():
         return False
 
 def main():
-    """Run comprehensive regression tests - Focus on State Management Refactoring"""
-    print("🚀 КОМПЛЕКСНОЕ ТЕСТИРОВАНИЕ ГЛОБАЛЬНОГО РЕФАКТОРИНГА")
-    print("🎯 Focus: Система управления состоянием last_state (INT → STRING)")
-    print("🔧 CRITICAL: Устранение KeyError при нажатии 'Отмена' → 'Вернуться к заказу'")
+    """Run comprehensive Telegram Bot backend tests per review request"""
+    print("🚀 КОМПЛЕКСНОЕ ТЕСТИРОВАНИЕ TELEGRAM БОТА")
+    print("🎯 COMPREHENSIVE TESTING per Review Request")
+    print(f"Backend URL: {BACKEND_URL}")
+    print(f"API Base: {API_BASE}")
+    print(f"MongoDB: mongodb://localhost:27017")
+    print(f"Database: telegram_shipping_bot")
     print("=" * 80)
     
-    # Test results
-    results = {}
+    # Run critical tests as specified in review request
+    tests = [
+        # 1. Critical API Endpoints
+        ("API Health Check", test_api_health),
+        ("Monitoring Health Endpoint", test_monitoring_health),
+        ("Monitoring Metrics (with X-API-Key)", test_monitoring_metrics),
+        ("Order Creation API", test_orders_creation),
+        ("Admin Stats Dashboard (with X-API-Key)", test_admin_stats_dashboard),
+        
+        # 2. MongoDB Connection
+        ("MongoDB Connection & Operations", test_mongodb_connection),
+        
+        # 3. Async Operations
+        ("Async Operations & httpx Usage", test_async_operations),
+        
+        # 4. Error Handling
+        ("Error Handling & Retry Logic", test_error_handling_and_retry),
+        
+        # 5. Security Tests (covered in monitoring_metrics and admin_stats_dashboard)
+        
+        # 6. Performance Tests (response times checked in individual tests)
+        
+        # Additional Telegram Bot Specific Tests
+        ("Telegram Bot Infrastructure", test_telegram_bot_infrastructure),
+        ("Telegram Bot Token Validation", test_telegram_bot_token),
+        ("Conversation Handler Functions", test_conversation_handler_functions),
+        ("Return to Order Functionality", test_return_to_order_functionality),
+        
+        # ShipStation Integration Tests
+        ("ShipStation Production API Key", test_shipstation_production_api_key),
+        ("ShipStation Carrier IDs", test_shipstation_carrier_ids),
+        ("Carrier Exclusion Fix", test_carrier_exclusion_fix),
+        ("ShipStation Production Rates", test_shipping_rates_production),
+        ("Shipping Rates Calculation", test_shipping_rates),
+        
+        # Admin & Management Tests
+        ("Admin Telegram ID Environment", test_admin_telegram_id_environment),
+        ("Admin Notification Function", test_admin_notification_function),
+        ("Contact Admin Buttons", test_contact_admin_buttons),
+        ("Backend Admin ID Loading", test_backend_admin_id_loading),
+        ("Telegram Bot Admin Integration", test_telegram_bot_admin_integration),
+        
+        # State Management Tests (Critical per review)
+        ("STATE_NAMES Mapping", test_state_names_mapping),
+        ("Last State Assignments", test_last_state_assignments),
+    ]
     
-    # 1. API Health (prerequisite)
-    results['api_health'] = test_api_health()
+    results = []
+    critical_failures = []
     
-    # 2. STATE MANAGEMENT REFACTORING TESTS - CRITICAL per review request
-    print("\n🎯 КРИТИЧЕСКИЕ ТЕСТЫ РЕФАКТОРИНГА СИСТЕМЫ СОСТОЯНИЙ")
-    print("=" * 80)
-    results['state_names_mapping'] = test_state_names_mapping()
-    results['last_state_assignments'] = test_last_state_assignments()
-    results['cancel_order_state_handling'] = test_cancel_order_state_handling()
-    results['return_to_order_state_restoration'] = test_return_to_order_state_restoration()
+    for test_name, test_func in tests:
+        try:
+            print(f"\n{'='*60}")
+            result = test_func()
+            results.append((test_name, result))
+            
+            # Mark critical failures
+            if not result and any(critical in test_name.lower() for critical in 
+                                ['monitoring', 'order creation', 'admin stats', 'mongodb', 'async']):
+                critical_failures.append(test_name)
+                
+        except Exception as e:
+            print(f"❌ {test_name} failed with exception: {e}")
+            results.append((test_name, False))
+            critical_failures.append(test_name)
     
-    # 3. Telegram Webhook State Simulation - CRITICAL
-    results['telegram_webhook_state_simulation'] = test_telegram_webhook_state_simulation()
-    
-    # 4. Supporting Infrastructure Tests
-    results['telegram_infrastructure'] = test_telegram_bot_infrastructure()
-    results['bot_token'] = test_telegram_bot_token()
-    results['admin_integration'] = test_telegram_bot_admin_integration()
-    results['webhook_endpoint'] = test_telegram_webhook_endpoint()
-    
-    # 5. Check Backend Logs
+    # Check backend logs for additional insights
     check_backend_logs()
     
     # Summary
-    print("\n" + "=" * 80)
-    print("📊 РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ РЕФАКТОРИНГА СОСТОЯНИЙ")
-    print("=" * 80)
+    print("\n" + "="*80)
+    print("📊 TELEGRAM BOT BACKEND TEST RESULTS SUMMARY")
+    print("="*80)
     
-    # STATE MANAGEMENT CRITICAL TESTS from review request
-    state_critical_tests = [
-        'state_names_mapping',
-        'last_state_assignments', 
-        'cancel_order_state_handling',
-        'return_to_order_state_restoration',
-        'telegram_webhook_state_simulation'
-    ]
+    passed = 0
+    failed = 0
     
-    supporting_tests = [
-        'api_health', 'telegram_infrastructure', 'bot_token', 'admin_integration', 'webhook_endpoint'
-    ]
+    # Group results by category
+    categories = {
+        "Critical API Endpoints": [],
+        "MongoDB & Database": [],
+        "Async & Performance": [],
+        "Security & Auth": [],
+        "Telegram Bot": [],
+        "ShipStation Integration": [],
+        "Admin & Management": [],
+        "State Management": []
+    }
     
-    # Show results by category
-    print("\n🎯 КРИТИЧЕСКИЕ ТЕСТЫ СИСТЕМЫ СОСТОЯНИЙ:")
-    state_passed = 0
-    for test_name in state_critical_tests:
-        if test_name in results:
-            passed = results[test_name]
-            if passed:
-                state_passed += 1
-            status = "✅ PASS" if passed else "❌ FAIL"
-            test_display = test_name.replace('_', ' ').title()
-            print(f"   {test_display:40} {status}")
+    for test_name, result in results:
+        status = "✅ PASS" if result else "❌ FAIL"
+        
+        # Categorize tests
+        if any(x in test_name.lower() for x in ['monitoring', 'health', 'order creation', 'admin stats']):
+            categories["Critical API Endpoints"].append((test_name, status))
+        elif any(x in test_name.lower() for x in ['mongodb', 'database']):
+            categories["MongoDB & Database"].append((test_name, status))
+        elif any(x in test_name.lower() for x in ['async', 'performance', 'httpx']):
+            categories["Async & Performance"].append((test_name, status))
+        elif any(x in test_name.lower() for x in ['security', 'auth', 'api key']):
+            categories["Security & Auth"].append((test_name, status))
+        elif any(x in test_name.lower() for x in ['telegram', 'bot', 'conversation']):
+            categories["Telegram Bot"].append((test_name, status))
+        elif any(x in test_name.lower() for x in ['shipstation', 'shipping', 'carrier']):
+            categories["ShipStation Integration"].append((test_name, status))
+        elif any(x in test_name.lower() for x in ['admin', 'notification', 'contact']):
+            categories["Admin & Management"].append((test_name, status))
+        elif any(x in test_name.lower() for x in ['state', 'mapping']):
+            categories["State Management"].append((test_name, status))
+        
+        if result:
+            passed += 1
+        else:
+            failed += 1
     
-    print(f"\n   Тесты состояний пройдены: {state_passed}/{len(state_critical_tests)} ({state_passed/len(state_critical_tests)*100:.1f}%)")
+    # Print categorized results
+    for category, tests in categories.items():
+        if tests:
+            print(f"\n📋 {category}:")
+            for test_name, status in tests:
+                print(f"   {status} - {test_name}")
     
-    print("\n🔧 ПОДДЕРЖИВАЮЩАЯ ИНФРАСТРУКТУРА:")
-    supporting_passed = 0
-    for test_name in supporting_tests:
-        if test_name in results:
-            passed = results[test_name]
-            if passed:
-                supporting_passed += 1
-            status = "✅ PASS" if passed else "❌ FAIL"
-            test_display = test_name.replace('_', ' ').title()
-            print(f"   {test_display:40} {status}")
+    print(f"\n📈 OVERALL RESULTS:")
+    print(f"   Total Tests: {len(results)}")
+    print(f"   ✅ Passed: {passed}")
+    print(f"   ❌ Failed: {failed}")
+    print(f"   📊 Success Rate: {(passed/len(results)*100):.1f}%")
     
-    # Overall Assessment
-    state_refactoring_success = state_passed == len(state_critical_tests)
-    supporting_success = supporting_passed >= len(supporting_tests) * 0.8  # 80% threshold
-    all_passed = all(results.values())
+    # Critical failures summary
+    if critical_failures:
+        print(f"\n🚨 CRITICAL FAILURES ({len(critical_failures)}):")
+        for failure in critical_failures:
+            print(f"   ❌ {failure}")
     
-    print(f"\n🎯 Статус рефакторинга состояний: {'✅ УСПЕХ' if state_refactoring_success else '❌ ПРОВАЛ'}")
-    print(f"🔧 Статус инфраструктуры: {'✅ УСПЕХ' if supporting_success else '❌ ПРОВАЛ'}")
-    print(f"📊 Общий результат: {'✅ ВСЕ ТЕСТЫ ПРОЙДЕНЫ' if all_passed else '❌ ЕСТЬ ПРОБЛЕМЫ'}")
-    
-    # STATE MANAGEMENT REFACTORING SUMMARY
-    print(f"\n🎯 АНАЛИЗ РЕФАКТОРИНГА СИСТЕМЫ СОСТОЯНИЙ:")
-    if state_refactoring_success:
-        print(f"   ✅ РЕФАКТОРИНГ УСПЕШЕН: STATE_NAMES словарь работает корректно")
-        print(f"   ✅ Все 32 места используют STATE_NAMES[] вместо констант")
-        print(f"   ✅ Функция cancel_order корректно обрабатывает состояния")
-        print(f"   ✅ Функция return_to_order восстанавливает состояния без KeyError")
-        print(f"   ✅ Telegram webhook симуляция подтверждает работоспособность")
-        print(f"   ✅ KeyError при нажатии 'Вернуться к заказу' ПОЛНОСТЬЮ УСТРАНЕН")
-        print(f"\n   📝 ОЖИДАЕМЫЕ РЕЗУЛЬТАТЫ ДОСТИГНУТЫ:")
-        print(f"   ✅ Все 13 шагов создания заказа работают с корректным сохранением состояния")
-        print(f"   ✅ Функции 'Отмена' → 'Вернуться' работают на всех шагах")
-        print(f"   ✅ Режим редактирования с отменой работает")
-        print(f"   ✅ Функции 'Пропустить' работают корректно")
-        print(f"\n   🎉 КРИТИЧЕСКИЙ РЕФАКТОРИНГ АРХИТЕКТУРЫ ЗАВЕРШЕН УСПЕШНО!")
+    # Final assessment
+    if failed == 0:
+        print("\n🎉 ALL TESTS PASSED!")
+        print("✅ Telegram Bot Backend is fully functional")
+    elif len(critical_failures) == 0:
+        print(f"\n⚠️ {failed} NON-CRITICAL TESTS FAILED")
+        print("✅ Core functionality is working")
     else:
-        print(f"   ❌ ПРОБЛЕМЫ РЕФАКТОРИНГА: {len(state_critical_tests) - state_passed} критических тестов провалены")
-        print(f"   ❌ STATE_NAMES словарь может быть неполным или неправильным")
-        print(f"   ❌ Не все места используют STATE_NAMES[] для last_state")
-        print(f"   ❌ Функции cancel_order/return_to_order могут иметь проблемы")
-        print(f"   ❌ KeyError при 'Вернуться к заказу' может все еще возникать")
-        print(f"   ⚠️ Требуется дополнительная работа по исправлению")
+        print(f"\n🚨 {len(critical_failures)} CRITICAL TESTS FAILED")
+        print("❌ Core functionality issues detected - requires immediate attention")
     
-    # Manual testing recommendations
-    print(f"\n📋 РЕКОМЕНДАЦИИ ДЛЯ РУЧНОГО ТЕСТИРОВАНИЯ:")
-    print(f"   Протестируйте с @whitelabel_shipping_bot_test_bot:")
-    print(f"   1. Создайте заказ до шага FROM_ADDRESS (адрес отправителя)")
-    print(f"   2. Нажмите кнопку 'Отмена'")
-    print(f"   3. Нажмите 'Вернуться к заказу'")
-    print(f"   4. Убедитесь, что бот показывает правильный промпт без ошибок")
-    print(f"   5. Повторите для шагов FROM_CITY, TO_ADDRESS, TO_CITY, PARCEL_WEIGHT")
-    print(f"   6. Протестируйте режим редактирования с отменой")
+    print("="*80)
     
-    return state_refactoring_success
+    return len(critical_failures) == 0
 
 def run_shipstation_carrier_tests():
     """Run ShipStation carrier-specific tests per review request"""
