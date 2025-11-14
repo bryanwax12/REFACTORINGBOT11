@@ -220,7 +220,7 @@ class TestAPIIntegration:
         from services.shipping_service import build_shipstation_rates_request
         
         # Add required weight field
-        sample_order_data['parcel_weight'] = 5.5
+        sample_order_data['weight'] = 5.5
         
         # Mock carrier IDs
         carrier_ids = ["se-123456", "se-789012"]
