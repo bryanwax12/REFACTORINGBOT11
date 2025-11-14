@@ -4427,11 +4427,10 @@ async def get_user_details(telegram_id: int):
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
-        # Get user orders
-        orders = await db.orders.find(
-            {"telegram_id": telegram_id},
-            {"_id": 0}
-        ).sort("created_at", -1).to_list(100)
+        # Get user orders using Repository Pattern
+        from repositories import get_repositories
+        repos = get_repositories()
+        orders = await repos.orders.find_with_filter({"telegram_id": telegram_id}, limit=100)
         
         # Get user payments
         payments = await db.payments.find(
