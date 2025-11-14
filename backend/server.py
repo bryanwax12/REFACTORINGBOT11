@@ -4653,8 +4653,10 @@ async def invite_all_users_to_channel(authenticated: bool = Depends(verify_admin
         if not bot_instance:
             raise HTTPException(status_code=500, detail="Bot not initialized")
         
-        # Get all users
-        users = await db.users.find({}).to_list(None)
+        # Get all users using Repository Pattern
+        from repositories import get_user_repo
+        user_repo = get_user_repo()
+        users = await user_repo.get_all_users()
         
         success_count = 0
         failed_count = 0
@@ -4761,8 +4763,10 @@ async def broadcast_message(
         if not bot_instance:
             raise HTTPException(status_code=500, detail="Bot not initialized")
         
-        # Get all users
-        users = await db.users.find({}).to_list(None)
+        # Get all users using Repository Pattern
+        from repositories import get_user_repo
+        user_repo = get_user_repo()
+        users = await user_repo.get_all_users()
         
         success_count = 0
         failed_count = 0
