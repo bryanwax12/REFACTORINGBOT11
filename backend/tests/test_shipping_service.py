@@ -402,8 +402,6 @@ async def test_fetch_rates_from_shipstation_timeout():
 @pytest.mark.asyncio
 async def test_fetch_rates_from_shipstation_no_rates():
     """Test when API returns no rates"""
-    from unittest.mock import AsyncMock
-    
     mock_response = AsyncMock()
     mock_response.status_code = 200
     mock_response.json.return_value = {
