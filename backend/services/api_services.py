@@ -80,6 +80,7 @@ async def create_oxapay_invoice(amount: float, order_id: str, description: str =
         return {'success': False, 'error': str(e)}
 
 
+@retry_on_api_error(max_attempts=3, min_wait=1, max_wait=5)
 async def check_oxapay_payment(track_id: str):
     """Check payment status via Oxapay"""
     try:
