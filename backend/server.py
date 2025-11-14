@@ -2920,7 +2920,7 @@ async def create_and_send_label(order_id, telegram_id, message):
                         thank_you_msg = "Спасибо за использование нашего сервиса!"
                     
                     # Send label using service
-                    from services.shipping_service_new import send_label_to_user
+                    from services.shipping_service import send_label_to_user
                     success, error = await send_label_to_user(
                         bot_instance=bot_instance,
                         telegram_id=telegram_id,
