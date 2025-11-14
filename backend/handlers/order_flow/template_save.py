@@ -108,6 +108,8 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
     return TEMPLATE_NAME
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=False, require_session=True)
 async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Update existing template with current order data"""
     from server import (
