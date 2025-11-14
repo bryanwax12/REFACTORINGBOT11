@@ -224,6 +224,11 @@ db = client[db_name]
 from session_manager import SessionManager
 session_manager = SessionManager(db)
 
+# Initialize Repository Manager for data access layer
+from repositories import init_repositories, get_repositories
+repository_manager = init_repositories(db)
+logger.info("📦 Repository Manager initialized successfully")
+
 # In-memory cache for frequently accessed data
 from functools import lru_cache
 
