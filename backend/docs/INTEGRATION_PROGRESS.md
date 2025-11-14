@@ -132,14 +132,16 @@
 **Общий прогресс**: ~60%
 
 **Рефакторинг за всю работу**: 
-- **42 обращения** к `find_user_by_telegram_id()` → `UserRepository` ✅
-- **8 обращений** к `db.users.update_one()` → `UserRepository.update_balance()` ✅
-- **6 обращений** к `db.orders` → `OrderRepository` 🟡
-- **ВСЕ операции с user** теперь через Repository Pattern ✅
-- **0 прямых обращений** к `db.users` для user operations ✅
+- **50 обращений** к `db.users` → `UserRepository` ✅
+- **30 обращений** к `db.orders` → `OrderRepository` ✅
+- **6 обращений** к `db.payments` → `PaymentRepository` ✅
+- **86 обращений** к БД заменено за всю работу ✅
+- **0 прямых обращений** к `db.users`, `db.orders`, `db.payments` ✅
 
-**Тесты**: 198/200 (99%) ✅
-**Новые методы**: `OrderRepository.find_by_id()`, `OrderRepository.update_by_id()`
+**Тесты**: 33/33 (100%) для repositories и payment service ✅
+**Новые методы**: 
+- OrderRepository: `find_by_id()`, `update_by_id()`, `find_with_filter()`, `count_orders()`, `aggregate_orders()`
+- PaymentRepository: `get_topups()`, `update_payment()`
 
 ---
 
