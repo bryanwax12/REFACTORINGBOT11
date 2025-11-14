@@ -15,15 +15,17 @@
 
 ---
 
-## 🔄 В работе
-
-### Phase 3: Handlers - Payment
-- [ ] `handlers/payment_handlers.py`:
-  - [ ] `my_balance_command()` - строка 58
-  - [ ] `add_balance_to_user()` - строка 199
-  - [ ] `deduct_balance()` - строки 230, 243
+### Phase 3: Handlers - Payment ✅ ЗАВЕРШЕНО
+- [x] `handlers/payment_handlers.py`:
+  - [x] `my_balance_command()` - использует `UserRepository.get_balance()`
+  - [x] `add_balance()` - использует `UserRepository.update_balance()`
+  - [x] `deduct_balance()` - использует `UserRepository.get_balance()` + `update_balance()`
   
-**Цель**: Заменить все прямые обращения к `db.users` на `UserRepository` методы
+**Результат**: Убрано 5 прямых обращений к `db.users`, все операции с балансом через Repository
+
+---
+
+## 🔄 В работе
 
 ---
 
