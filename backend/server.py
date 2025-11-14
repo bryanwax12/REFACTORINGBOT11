@@ -6039,7 +6039,8 @@ app.include_router(admin_router_v2)  # New modular admin API
 # Include monitoring routers
 from api.monitoring import router as monitoring_router_old
 from routers.monitoring_router import router as monitoring_router
-app.include_router(monitoring_router)
+app.include_router(monitoring_router_old)  # Legacy /api/monitoring
+app.include_router(monitoring_router)  # New /monitoring
 
 # Include alerting router
 from api.alerting import router as alerting_router
