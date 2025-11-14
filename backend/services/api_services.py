@@ -7,6 +7,7 @@ import logging
 import time
 import httpx
 from fastapi import HTTPException
+from utils.retry_utils import retry_on_api_error, SHIPSTATION_CIRCUIT, OXAPAY_CIRCUIT
 
 logger = logging.getLogger(__name__)
 
