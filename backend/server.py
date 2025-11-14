@@ -1190,7 +1190,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         ))
         if bot_msg:
             context.user_data['last_bot_message_id'] = bot_msg.message_id
-        context.user_data['last_state'] = FROM_NAME
+        context.user_data['last_state'] = STATE_NAMES[FROM_NAME]
         return FROM_NAME
     
     if query.data == 'edit_to_address':
