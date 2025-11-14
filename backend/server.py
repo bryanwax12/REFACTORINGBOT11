@@ -837,17 +837,9 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
     user = await find_user_by_telegram_id(telegram_id)
     balance = user.get('balance', 0.0) if user else 0.0
     
-    message = f"""*💳 Ваш баланс: ${balance:.2f}*
-
-*Вы можете использовать баланс для оплаты заказов.*
-
-*Введите сумму для пополнения (минимум $10):*"""
-    
-    keyboard = [
-        [InlineKeyboardButton("❌ Отмена", callback_data='start')],
-        [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    from utils.ui_utils import PaymentFlowUI
+    message = PaymentFlowUI.balance_screen(balance)
+    reply_markup = PaymentFlowUI.build_balance_keyboard()
     
     # Set state to wait for amount input
     context.user_data['awaiting_topup_amount'] = True
