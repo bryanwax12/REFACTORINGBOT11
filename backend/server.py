@@ -1128,7 +1128,7 @@ async def show_data_confirmation(update: Update, context: ContextTypes.DEFAULT_T
     if bot_msg:
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message
-        context.user_data['last_state'] = CONFIRM_DATA  # Save state for cancel return
+        context.user_data['last_state'] = STATE_NAMES[CONFIRM_DATA]  # Save state for cancel return
     return CONFIRM_DATA
 
 async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
