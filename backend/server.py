@@ -1303,7 +1303,9 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
     telegram_id = update.effective_user.id
     
     # Check if template with this name already exists
-    existing = await db.templates.find_one({
+    from repositories import get_repositories
+    repos = get_repositories()
+    existing = await repos.templates.find_one({
         "telegram_id": telegram_id,
         "name": template_name
     })
