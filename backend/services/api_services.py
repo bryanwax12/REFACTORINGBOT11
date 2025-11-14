@@ -17,6 +17,7 @@ OXAPAY_API_URL = 'https://api.oxapay.com'
 SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY', '')
 
 
+@retry_on_api_error(max_attempts=3, min_wait=2, max_wait=10)
 async def create_oxapay_invoice(amount: float, order_id: str, description: str = "Shipping Label Payment"):
     """Create payment invoice via Oxapay"""
     if not OXAPAY_API_KEY:
