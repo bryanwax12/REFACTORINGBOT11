@@ -5388,8 +5388,8 @@ async def check_bot_access(telegram_id: int, authenticated: bool = Depends(verif
                 action="typing"
             )
             
-            # If successful, user hasn't blocked the bot
-            await db.users.update_one(
+            # If successful, user hasn't blocked the bot - using Repository Pattern
+            await user_repo.collection.update_one(
                 {"telegram_id": telegram_id},
                 {"$set": {
                     "bot_blocked_by_user": False,
