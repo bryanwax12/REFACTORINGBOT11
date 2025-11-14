@@ -22,7 +22,7 @@ from utils.decorators import with_typing_indicator
 @with_typing_indicator
 async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Step 15/17: Collect parcel weight"""
-    from server import session_manager, PARCEL_WEIGHT, PARCEL_LENGTH
+    from server import session_manager, PARCEL_WEIGHT, PARCEL_LENGTH, STATE_NAMES
     
     weight_str = update.message.text.strip()
     
