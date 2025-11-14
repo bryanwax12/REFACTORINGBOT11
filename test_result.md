@@ -1462,6 +1462,72 @@ agent_communication:
       timestamp: "2025-01-27 15:45:00 UTC"
       message: "✅ UNIT TESTS EXECUTION COMPLETED: Successfully executed all unit tests for service layer as requested. RESULTS: Total tests executed: 101 (all passed), Service layer tests: 63 tests covering 3 files - test_payment_service.py (22 tests, 8 functions), test_template_service.py (18 tests, 8 functions), test_shipping_service.py (23 tests, 19 functions). CODE COVERAGE: payment_service.py (85%), template_service.py (82%), shipping_service_new.py (68%). All tests use proper async/await patterns with @pytest.mark.asyncio, external dependencies properly mocked via conftest.py fixtures, pytest-asyncio installed and configured correctly. CRITICAL SUCCESS: All service layer functions tested with proper isolation, mocking, and async support. Unit tests validate business logic without external dependencies."
 
+## P2 TASK COMPLETED: Shipping Service Consolidation (2025-01-27)
+
+### 📝 Task Summary:
+Консолидация двух shipping service файлов в единый модуль для устранения дублирования кода.
+
+### ✅ What Was Accomplished:
+
+#### 1. File Consolidation
+- ❌ **Removed**: `/app/backend/services/shipping_service.py` (old wrapper, 5.1 KB)
+- ✅ **Renamed**: `shipping_service_new.py` → `shipping_service.py` (22 KB)
+- **Result**: Single source of truth for shipping logic
+
+#### 2. Import Updates
+- **server.py**: Updated 10 import statements
+  - `from services.shipping_service_new import` → `from services.shipping_service import`
+- **test_shipping_service.py**: Updated imports and comments
+- **Zero references** to old `shipping_service_new` remaining
+
+#### 3. Testing & Verification
+- ✅ **Unit Tests**: 23/23 tests passed (100% success rate)
+- ✅ **Backend Status**: RUNNING
+- ✅ **Compilation**: No errors
+- ✅ **Hot Reload**: Working correctly
+
+### 📊 Results Summary:
+
+| Metric | Before | After | Improvement |
+|--------|--------|-------|-------------|
+| Shipping service files | 2 files | 1 file | -50% |
+| Code duplication | Old wrapper | None | ✅ Eliminated |
+| Import statements | Mixed | Unified | ✅ Consistent |
+| Test coverage | 68% | 68% | ✅ Maintained |
+| Tests passing | 23/23 | 23/23 | ✅ 100% |
+
+### 🎯 Architecture After Consolidation:
+
+```
+/app/backend/services/
+├── shipping_service.py (22 KB) ✅ CONSOLIDATED
+│   ├── validate_order_data_for_rates()
+│   ├── build_shipstation_rates_request()
+│   ├── fetch_rates_from_shipstation()
+│   ├── filter_and_sort_rates()
+│   ├── apply_service_filter()
+│   ├── balance_and_deduplicate_rates()
+│   ├── save_rates_to_cache_and_session()
+│   ├── build_shipstation_label_request()
+│   ├── download_label_pdf()
+│   └── send_label_to_user()
+├── payment_service.py (85% coverage)
+└── template_service.py (82% coverage)
+```
+
+### ✅ Benefits Achieved:
+1. **Single Source of Truth**: One file for all shipping logic
+2. **No Duplication**: Eliminated wrapper and confusion
+3. **Consistent Imports**: All code uses `services.shipping_service`
+4. **Maintained Stability**: All tests passing, no regressions
+5. **Cleaner Codebase**: Easier to maintain and understand
+
+### 📌 Status: ✅ COMPLETE
+
+Shipping service successfully consolidated. All functionality preserved, tests passing, no regressions.
+
+---
+
 ## P0 TASK COMPLETED: Unit Tests Implementation (2025-01-27)
 
 ### 📝 Task Summary:
