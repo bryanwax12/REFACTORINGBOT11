@@ -4,6 +4,7 @@ Repository Manager
 """
 from repositories.user_repository import UserRepository
 from repositories.order_repository import OrderRepository
+from repositories.session_repository import SessionRepository
 import logging
 
 logger = logging.getLogger(__name__)
@@ -28,6 +29,7 @@ class RepositoryManager:
         # Инициализировать репозитории
         self.users = UserRepository(db)
         self.orders = OrderRepository(db)
+        self.sessions = SessionRepository(db)
         
         logger.info("📦 Repository Manager initialized")
     
