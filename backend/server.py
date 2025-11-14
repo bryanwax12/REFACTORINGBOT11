@@ -6136,18 +6136,27 @@ async def startup_event():
     # Периодическая очистка больше не нужна
     logger.info("✅ Session cleanup: TTL index (automatic, no manual cleanup needed)")
     
-    # Load correct API key based on api_mode in database
-    global SHIPSTATION_API_KEY
+    # ============================================================
+    # API Configuration Setup (Refactored)
+    # ============================================================
+    global SHIPSTATION_API_KEY, api_config_manager
     try:
+        # Определить окружение из БД
         api_mode_setting = await db.settings.find_one({"key": "api_mode"})
         api_mode = api_mode_setting.get("value", "production") if api_mode_setting else "production"
         
-        if api_mode == "test":
-            SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY_TEST', SHIPSTATION_API_KEY)
-            logger.info("🧪 Loaded TEST API key from environment")
-        else:
-            SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY_PROD', SHIPSTATION_API_KEY)
-            logger.info("🚀 Loaded PRODUCTION API key from environment")
+        # Установить окружение в APIConfigManager
+        api_config_manager.set_environment(api_mode)
+        
+        # Обновить legacy переменную для обратной совместимости
+        SHIPSTATION_API_KEY = api_config_manager.get_shipstation_key()
+        
+        # Логирование
+        env_icon = "🧪" if api_mode == "test" else "🚀"
+        logger.info(f"{env_icon} API Environment: {api_mode.upper()}")
+        logger.info(f"   ShipStation: {api_config_manager._mask_key(SHIPSTATION_API_KEY)}")
+        logger.info(f"   Oxapay: {'✅ Configured' if api_config_manager.is_oxapay_configured() else '❌ Not configured'}")
+        logger.info(f"   CryptoBot: {'✅ Configured' if api_config_manager.is_cryptobot_configured() else '❌ Not configured'}")
         
         logger.info(f"✅ ShipStation API mode: {api_mode.upper()}")
         
