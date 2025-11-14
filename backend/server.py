@@ -5097,9 +5097,12 @@ async def get_bot_health(authenticated: bool = Depends(verify_admin_key)):
         best_practices = TelegramBestPractices.get_guidelines()
         protection_info = bot_protection.get_instance_info()
         
-        # Get database stats
+        # Get database stats using Repository Pattern
+        from repositories import get_repositories, get_user_repo
+        repos = get_repositories()
+        user_repo = get_user_repo()
         total_users = await db.users.count_documents({})
-        total_orders = await db.orders.count_documents({})
+        total_orders = await repos.orders.count_orders()
         blocked_users_db = await db.users.count_documents({"blocked": True})
         
         # Get API mode
