@@ -645,18 +645,19 @@ async def download_label_pdf(label_url: str, timeout: int = 30) -> Tuple[bool, O
     Returns:
         (success, pdf_bytes, error_message)
     """
-    import requests
-    
     try:
-        response = requests.get(label_url, timeout=timeout)
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            response = await client.get(label_url)
         
         if response.status_code == 200:
             return True, response.content, None
         else:
             return False, None, f"Failed to download label: HTTP {response.status_code}"
             
-    except requests.exceptions.Timeout:
+    except httpx.TimeoutException:
         return False, None, "Timeout downloading label"
+    except httpx.RequestError as e:
+        return False, None, f"Network error: {str(e)}"
     except Exception as e:
         return False, None, f"Error downloading label: {str(e)}"
 
