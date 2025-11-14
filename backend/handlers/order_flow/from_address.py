@@ -172,8 +172,8 @@ async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE
     Decorators handle: User session + error handling + typing indicator
     """
     from server import sanitize_string, FROM_ADDRESS2, FROM_CITY, STATE_NAMES
-    from repositories.session_repository import SessionRepository
-    from server import db
+    
+    
     
     address2 = update.message.text.strip()
     address2 = sanitize_string(address2, max_length=100)
@@ -220,8 +220,8 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     Decorators handle: User session + error handling + typing indicator
     """
     from server import sanitize_string, FROM_CITY, FROM_STATE, STATE_NAMES
-    from repositories.session_repository import SessionRepository
-    from server import db
+    
+    
     
     city = update.message.text.strip()
     city = sanitize_string(city, max_length=50)
@@ -270,8 +270,8 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE):
     Decorators handle: User session + error handling + typing indicator
     """
     from server import FROM_STATE, FROM_ZIP, STATE_NAMES
-    from repositories.session_repository import SessionRepository
-    from server import db
+    
+    
     
     state = update.message.text.strip().upper()
     
@@ -319,8 +319,8 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE):
     Decorators handle: User session + error handling + typing indicator
     """
     from server import FROM_ZIP, FROM_PHONE, STATE_NAMES
-    from repositories.session_repository import SessionRepository
-    from server import db
+    
+    
     
     zip_code = update.message.text.strip()
     
@@ -369,8 +369,8 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     Decorators handle: User session + error handling + typing indicator
     """
     from server import FROM_PHONE, TO_NAME, STATE_NAMES
-    from repositories.session_repository import SessionRepository
-    from server import db
+    
+    
     
     phone = update.message.text.strip()
     
