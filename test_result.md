@@ -362,6 +362,22 @@ backend:
         - working: true
           agent: "testing"
           comment: "✅ SHIPSTATION CARRIER EXCLUSION FIX VERIFIED: Comprehensive testing confirms the fix is working perfectly. (1) ✅ Carrier exclusion updated correctly - get_shipstation_carrier_ids() now only excludes 'globalpost', keeps 'stamps_com', (2) ✅ Function returns 3 carrier IDs as expected: ['se-4002273', 'se-4002274', 'se-4013427'] (stamps_com, ups, fedex), (3) ✅ /api/calculate-shipping endpoint now returns rates from multiple carriers: UPS (5 rates), Stamps.com/USPS (13 rates), FedEx (2 rates) - total 20 rates, (4) ✅ Carrier diversity achieved - all 3 carriers (UPS, USPS/stamps_com, FedEx) now returning rates, (5) ✅ Fixed secondary filtering issue in calculate-shipping endpoint that was still excluding stamps_com rates, (6) ✅ Added stamps_com to allowed_services configuration. CRITICAL SUCCESS: Multiple carriers now available in Create Label tab instead of only UPS. Users will see rates from USPS/Stamps.com, UPS, and FedEx as requested."
+
+  - task: "Comprehensive Telegram Bot Backend Testing - Review Request"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py, /app/backend/.env, /app/backend_test.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "🔍 КОМПЛЕКСНОЕ ТЕСТИРОВАНИЕ TELEGRAM БОТА НАЧАТО: Проведено полное тестирование backend системы согласно review request. ТЕСТИРУЕМЫЕ ОБЛАСТИ: (1) Critical API Endpoints: GET /monitoring/health, GET /monitoring/metrics (X-API-Key), POST /api/orders, GET /api/admin/stats/dashboard (X-API-Key), (2) MongoDB Connection & Operations, (3) Async Operations & httpx Usage, (4) Error Handling & Retry Logic, (5) Security & Authentication, (6) Performance (<500ms response times), (7) Telegram Bot Infrastructure, (8) ShipStation Integration, (9) Admin & Management, (10) State Management. ВСЕГО ТЕСТОВ: 24 comprehensive tests covering all critical functionality."
+        - working: false
+          agent: "testing"
+          comment: "❌ КРИТИЧЕСКИЕ ПРОБЛЕМЫ ОБНАРУЖЕНЫ: Comprehensive testing выявил серьезные проблемы в backend системе. РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ: SUCCESS RATE: 58.3% (14/24 tests passed). КРИТИЧЕСКИЕ СБОИ (4): (1) ❌ Monitoring Health Endpoint - возвращает HTML вместо JSON, (2) ❌ Monitoring Metrics (X-API-Key) - не требует API key для доступа, (3) ❌ MongoDB Connection & Operations - backend не может подключиться к MongoDB, (4) ❌ Async Operations & httpx Usage - concurrent requests failing (0/5 successful). УСПЕШНЫЕ ТЕСТЫ: ✅ Admin Stats Dashboard (X-API-Key) - правильная аутентификация, ✅ Telegram Bot Token Validation - токен валиден (@whitelabel_shipping_bot), ✅ ShipStation Production API Key - аутентификация работает, ✅ Carrier Exclusion Fix - только 'globalpost' исключен, ✅ STATE_NAMES Mapping - 22/22 состояний корректно, ✅ Last State Assignments - 28/28 мест используют STATE_NAMES[]. ПРОБЛЕМЫ БЕЗОПАСНОСТИ: Monitoring endpoints не защищены API ключами. ПРОБЛЕМЫ ПРОИЗВОДИТЕЛЬНОСТИ: Concurrent request handling не работает. ЗАКЛЮЧЕНИЕ: Core functionality имеет критические проблемы, требуется немедленное внимание к MongoDB подключению, monitoring endpoints, и async operations."
+
 backend:
   - task: "Data Confirmation Screen with Edit Button"
     implemented: true
