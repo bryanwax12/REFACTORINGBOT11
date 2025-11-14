@@ -211,10 +211,18 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['last_bot_message_text'] = welcome_message
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_typing_action()
+@with_user_session(create_user=False, require_session=False)
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     /help command handler
     Handles both direct command and callback query
+    
+    Decorators handle:
+    - User session management + blocking check
+    - Error handling
+    - Typing indicator
     """
     from server import ADMIN_TELEGRAM_ID
     from utils.ui_utils import MessageTemplates, get_help_keyboard
