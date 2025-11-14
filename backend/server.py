@@ -3420,8 +3420,10 @@ async def search_orders(
                 {"_id": 0}
             ).sort("created_at", -1).to_list(100)
             
-            # Get user info once
-            user = await find_user_by_telegram_id(order["telegram_id"])
+            # Get user info once using Repository Pattern
+            from repositories import get_user_repo
+            user_repo = get_user_repo()
+            user = await user_repo.find_by_telegram_id(order["telegram_id"])
             user_name = user.get('first_name', 'Unknown') if user else 'Unknown'
             user_username = user.get('username', '') if user else ''
             
