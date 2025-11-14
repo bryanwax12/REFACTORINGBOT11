@@ -2413,16 +2413,12 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 # Update order as paid
                 await update_order(order['id'], {"payment_status": "paid"})
                 
+                from utils.ui_utils import PaymentFlowUI
                 keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 
                 await safe_telegram_call(query.message.reply_text(
-                    f"""✅ Заказ оплачен с баланса!
-
-💳 Списано: ${amount}
-💰 Новый баланс: ${new_balance:.2f}
-
-📦 Shipping label создан успешно!""",
+                    PaymentFlowUI.payment_success_balance(amount, new_balance),
                     reply_markup=reply_markup
                 ))
                 
