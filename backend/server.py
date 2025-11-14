@@ -244,26 +244,39 @@ ADMIN_TELEGRAM_ID = os.environ.get('ADMIN_TELEGRAM_ID', '')
 CHANNEL_INVITE_LINK = os.environ.get('CHANNEL_INVITE_LINK', '')
 CHANNEL_ID = os.environ.get('CHANNEL_ID', '')
 
-# Telegram Bot - Auto-select token based on environment
-# Detect environment from WEBHOOK_BASE_URL
-webhook_base_url = os.environ.get('WEBHOOK_BASE_URL', '')
-is_production_env = 'crypto-shipping.emergent.host' in webhook_base_url
+# ============================================================
+# TELEGRAM BOT CONFIGURATION (Refactored)
+# ============================================================
+from utils.bot_config import (
+    get_bot_config,
+    get_bot_token,
+    get_bot_username,
+    is_webhook_mode,
+    is_production_environment
+)
 
-# Choose correct token
-if is_production_env:
-    # Production: use production bot @whitelabel_shipping_bot
-    TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN_PRODUCTION', '')
-    print("🟢 PRODUCTION BOT SELECTED: @whitelabel_shipping_bot")
-else:
-    # Preview: use preview bot @whitelabel_shipping_bot_test_bot
-    TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN_PREVIEW', 
-                                       os.environ.get('TELEGRAM_BOT_TOKEN', ''))
-    print("🔵 PREVIEW BOT SELECTED: @whitelabel_shipping_bot_test_bot")
+# Получить конфигурацию бота
+bot_config = get_bot_config()
+TELEGRAM_BOT_TOKEN = get_bot_token()
 
+# Вывести информацию о выбранном боте
+config_summary = bot_config.get_config_summary()
+env_icon = "🟢" if config_summary['is_production'] else "🔵"
+mode_icon = "🌐" if config_summary['webhook_enabled'] else "🔄"
+
+print(f"{env_icon} BOT CONFIGURATION:")
+print(f"   Environment: {config_summary['environment'].upper()}")
+print(f"   Mode: {mode_icon} {config_summary['mode'].upper()}")
+print(f"   Active Bot: @{config_summary['bot_username']}")
+if config_summary['webhook_enabled'] and config_summary['webhook_url']:
+    print(f"   Webhook URL: {config_summary['webhook_url']}")
+
+# Legacy поддержка: создать bot_instance для старого кода
 bot_instance = None
 application = None  # Global Telegram Application instance for webhook
 if TELEGRAM_BOT_TOKEN:
     bot_instance = Bot(token=TELEGRAM_BOT_TOKEN)
+    print(f"✅ Bot instance created: @{get_bot_username()}")
 
 # Simple in-memory cache for frequently accessed settings
 # Cache moved to utils/cache.py
