@@ -24,7 +24,7 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     from server import (
         FROM_NAME, STATE_NAMES,
-        session_manager, safe_telegram_call,
+        safe_telegram_call,
         mark_message_as_selected,
         check_maintenance_mode, count_user_templates
     )
