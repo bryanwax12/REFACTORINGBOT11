@@ -5700,8 +5700,10 @@ async def check_all_users_channel_status(authenticated: bool = Depends(verify_ad
                 consecutive_errors += 1
                 failed_count += 1
                 
-                # Mark as not member (don't block functionality)
-                await db.users.update_one(
+                # Mark as not member (don't block functionality) using Repository Pattern
+                from repositories import get_user_repo
+                user_repo = get_user_repo()
+                await user_repo.collection.update_one(
                     {"telegram_id": user['telegram_id']},
                     {"$set": {
                         "is_channel_member": False,
