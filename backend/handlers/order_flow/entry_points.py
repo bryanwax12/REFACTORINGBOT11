@@ -10,43 +10,48 @@ from telegram.ext import ContextTypes, ConversationHandler
 logger = logging.getLogger(__name__)
 
 
+from utils.handler_decorators import with_user_session, safe_handler
+
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=True, require_session=False)
 async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Start new order flow"""
+    """
+    Start new order flow
+    
+    Decorators handle:
+    - User session management + blocking check
+    - Error handling
+    """
     from server import (
         FROM_NAME, STATE_NAMES,
         session_manager, safe_telegram_call,
         mark_message_as_selected,
-        check_maintenance_mode, check_user_blocked,
-        send_blocked_message, count_user_templates
+        check_maintenance_mode, count_user_templates
     )
+    from utils.ui_utils import MessageTemplates
+    import asyncio
+    
+    # Get user from context (injected by decorator)
+    user = context.user_data['db_user']
+    telegram_id = user['telegram_id']
     
     # Handle both command and callback
     if update.callback_query:
         query = update.callback_query
-        # INSTANT feedback: answer immediately without wrapper
         try:
             await query.answer()
         except Exception:
             pass
-        
-        # Mark previous message as selected (remove buttons and add "✅ Выбрано")
         asyncio.create_task(mark_message_as_selected(update, context))
-        
-        telegram_id = query.from_user.id
         send_method = query.message.reply_text
     else:
-        # Mark previous message as selected (non-blocking)
         asyncio.create_task(mark_message_as_selected(update, context))
-        
-        telegram_id = update.effective_user.id
         send_method = update.message.reply_text
+    
     logger.info(f"📝 User {telegram_id} starting new order flow")
     
-    # STEP 2: Get or create session (V2 - atomic with TTL)
+    # Get or create session (V2 - atomic with TTL)
     user_id = update.effective_user.id
-    
-    # Атомарно получить существующую сессию или создать новую
-    # TTL индекс автоматически удаляет сессии старше 15 минут
     session = await session_manager.get_or_create_session(user_id, initial_data={})
     
     if session:
@@ -54,11 +59,9 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         temp_data = session.get('temp_data', {})
         
         if current_step != 'START' and temp_data:
-            # Есть незавершенная сессия - продолжить
             logger.info(f"🔄 Resuming session for user {user_id} from step {current_step}")
             context.user_data.update(temp_data)
         else:
-            # Новая сессия
             logger.info(f"🆕 New session for user {user_id}")
             context.user_data.clear()
     else:
@@ -66,17 +69,11 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data.clear()
     
     # Check if bot is in maintenance mode
-    from utils.ui_utils import MessageTemplates
     if await check_maintenance_mode(update):
         await safe_telegram_call(send_method(
             MessageTemplates.maintenance_mode(),
             parse_mode='Markdown'
         ))
-        return ConversationHandler.END
-    
-    # Check if user is blocked
-    if await check_user_blocked(telegram_id):
-        await send_blocked_message(update)
         return ConversationHandler.END
     
     # Check if user has templates
