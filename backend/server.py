@@ -4351,8 +4351,10 @@ async def telegram_status():
 @api_router.get("/users/{telegram_id}/details")
 async def get_user_details(telegram_id: int):
     try:
-        # Get user
-        user = await find_user_by_telegram_id(telegram_id)
+        # Get user using Repository Pattern
+        from repositories import get_user_repo
+        user_repo = get_user_repo()
+        user = await user_repo.find_by_telegram_id(telegram_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
