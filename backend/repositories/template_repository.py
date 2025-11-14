@@ -272,6 +272,56 @@ class TemplateRepository(BaseRepository):
             limit=limit
         )
     
+    async def find_by_id(self, template_id: str) -> Optional[Dict]:
+        """
+        Найти шаблон по UUID
+        
+        Args:
+            template_id: UUID шаблона
+            
+        Returns:
+            Шаблон или None
+        """
+        return await self.find_one({"id": template_id})
+    
+    async def update_by_id(self, template_id: str, update_data: Dict) -> bool:
+        """
+        Обновить шаблон по UUID
+        
+        Args:
+            template_id: UUID шаблона
+            update_data: Данные для обновления
+            
+        Returns:
+            True если обновлено
+        """
+        return await self.update_one({"id": template_id}, {"$set": update_data})
+    
+    async def delete_by_id(self, template_id: str) -> bool:
+        """
+        Удалить шаблон по UUID
+        
+        Args:
+            template_id: UUID шаблона
+            
+        Returns:
+            True если удалено
+        """
+        result = await self.collection.delete_one({"id": template_id})
+        return result.deleted_count > 0
+    
+    async def count_user_templates(self, telegram_id: int) -> int:
+        """
+        Подсчитать количество шаблонов пользователя
+        
+        Args:
+            telegram_id: Telegram ID пользователя
+            
+        Returns:
+            Количество шаблонов
+        """
+        return await self.collection.count_documents({"telegram_id": telegram_id})
+    
     async def get_stats(self) -> Dict:
         """
         Получить статистику по шаблонам
