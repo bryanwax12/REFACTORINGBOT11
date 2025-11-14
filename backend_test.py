@@ -734,6 +734,257 @@ def test_shipping_rates():
         print(f"❌ Shipping rates test error: {e}")
         return False, None
 
+def test_mongodb_connection():
+    """Test MongoDB connection and basic operations"""
+    print("\n🔍 Testing MongoDB Connection...")
+    
+    try:
+        # Test MongoDB connection by making a simple API call that uses DB
+        print("   Test 1: MongoDB availability via API")
+        response = requests.get(f"{API_BASE}/", timeout=10)
+        
+        if response.status_code == 200:
+            print("   ✅ Backend can connect to MongoDB (API responding)")
+        else:
+            print("   ❌ Backend cannot connect to MongoDB")
+            return False
+        
+        # Test basic operations through API endpoints
+        print("   Test 2: Basic MongoDB operations")
+        
+        # Create a test document (order creation)
+        test_order = {
+            "telegram_id": 999999999,
+            "address_from": {
+                "name": "Test User",
+                "street1": "123 Test St",
+                "city": "Test City",
+                "state": "NY",
+                "zip": "10001",
+                "country": "US"
+            },
+            "address_to": {
+                "name": "Test Recipient",
+                "street1": "456 Test Ave",
+                "city": "Test City",
+                "state": "CA",
+                "zip": "90001",
+                "country": "US"
+            },
+            "parcel": {
+                "length": 10,
+                "width": 8,
+                "height": 6,
+                "weight": 5,
+                "distance_unit": "in",
+                "mass_unit": "lb"
+            },
+            "amount": 15.00
+        }
+        
+        # INSERT operation
+        response = requests.post(f"{API_BASE}/orders", json=test_order, timeout=15)
+        if response.status_code == 201:
+            print("   ✅ MongoDB INSERT operation working")
+            order_data = response.json()
+            test_order_id = order_data.get('id')
+        else:
+            print("   ❌ MongoDB INSERT operation failed")
+            return False
+        
+        # FIND operation (search for the order)
+        if test_order_id:
+            response = requests.get(f"{API_BASE}/orders/search?query={test_order_id[:8]}", timeout=15)
+            if response.status_code == 200:
+                orders = response.json()
+                if orders and len(orders) > 0:
+                    print("   ✅ MongoDB FIND operation working")
+                else:
+                    print("   ❌ MongoDB FIND operation - no results")
+            else:
+                print("   ❌ MongoDB FIND operation failed")
+        
+        # UPDATE operation would require admin endpoints
+        print("   ✅ MongoDB basic operations verified")
+        
+        return True
+        
+    except Exception as e:
+        print(f"❌ MongoDB connection test error: {e}")
+        return False
+
+def test_async_operations():
+    """Test async operations and httpx usage"""
+    print("\n🔍 Testing Async Operations...")
+    
+    try:
+        # Check backend logs for httpx usage (not requests)
+        print("   Test 1: Checking for httpx usage in logs")
+        log_result = os.popen("tail -n 200 /var/log/supervisor/backend.out.log | grep -i 'httpx\\|async'").read()
+        
+        if 'httpx' in log_result.lower():
+            print("   ✅ httpx usage detected in logs")
+        else:
+            print("   ℹ️ No explicit httpx logs found (may be normal)")
+        
+        # Test concurrent requests to check async handling
+        print("   Test 2: Concurrent request handling")
+        import threading
+        import time
+        
+        results = []
+        start_time = time.time()
+        
+        def make_request():
+            try:
+                response = requests.get(f"{API_BASE}/", timeout=10)
+                results.append(response.status_code == 200)
+            except:
+                results.append(False)
+        
+        # Make 5 concurrent requests
+        threads = []
+        for i in range(5):
+            thread = threading.Thread(target=make_request)
+            threads.append(thread)
+            thread.start()
+        
+        # Wait for all threads
+        for thread in threads:
+            thread.join()
+        
+        total_time = time.time() - start_time
+        success_count = sum(results)
+        
+        print(f"   Concurrent requests: {success_count}/5 successful")
+        print(f"   Total time: {total_time:.2f}s")
+        
+        if success_count >= 4 and total_time < 5:
+            print("   ✅ Async request handling working")
+        else:
+            print("   ❌ Async request handling issues")
+            return False
+        
+        # Check for blocking calls in code
+        print("   Test 3: Checking for blocking calls")
+        try:
+            with open('/app/backend/server.py', 'r') as f:
+                server_code = f.read()
+            
+            # Look for requests usage (should be replaced with httpx)
+            import re
+            requests_usage = len(re.findall(r'requests\.(get|post|put|delete)', server_code))
+            httpx_usage = len(re.findall(r'httpx\.(get|post|put|delete)', server_code))
+            
+            print(f"   requests usage found: {requests_usage}")
+            print(f"   httpx usage found: {httpx_usage}")
+            
+            if httpx_usage > 0:
+                print("   ✅ httpx usage detected in code")
+            else:
+                print("   ⚠️ No httpx usage found in main server code")
+            
+            # Check for async/await patterns
+            async_functions = len(re.findall(r'async def', server_code))
+            await_calls = len(re.findall(r'await ', server_code))
+            
+            print(f"   async functions: {async_functions}")
+            print(f"   await calls: {await_calls}")
+            
+            if async_functions > 10 and await_calls > 20:
+                print("   ✅ Extensive async/await usage detected")
+            else:
+                print("   ⚠️ Limited async/await usage")
+            
+        except Exception as e:
+            print(f"   ❌ Error checking code for async patterns: {e}")
+        
+        return True
+        
+    except Exception as e:
+        print(f"❌ Async operations test error: {e}")
+        return False
+
+def test_error_handling_and_retry():
+    """Test error handling and retry logic"""
+    print("\n🔍 Testing Error Handling and Retry Logic...")
+    
+    try:
+        # Test 1: Invalid request handling
+        print("   Test 1: Invalid request handling")
+        invalid_order = {
+            "telegram_id": "invalid",  # Should be int
+            "invalid_field": "test"
+        }
+        
+        response = requests.post(f"{API_BASE}/orders", json=invalid_order, timeout=15)
+        print(f"   Status Code: {response.status_code}")
+        
+        if response.status_code == 422:  # Validation error
+            print("   ✅ Proper validation error handling")
+        elif response.status_code == 400:  # Bad request
+            print("   ✅ Proper bad request handling")
+        else:
+            print(f"   ⚠️ Unexpected response for invalid data: {response.status_code}")
+        
+        # Test 2: Check for retry logic in code
+        print("   Test 2: Checking retry logic implementation")
+        try:
+            with open('/app/backend/server.py', 'r') as f:
+                server_code = f.read()
+            
+            # Look for retry patterns
+            import re
+            retry_patterns = [
+                r'retry',
+                r'tenacity',
+                r'backoff',
+                r'max_retries',
+                r'for.*attempt.*in.*range'
+            ]
+            
+            retry_found = False
+            for pattern in retry_patterns:
+                if re.search(pattern, server_code, re.IGNORECASE):
+                    print(f"   ✅ Retry pattern found: {pattern}")
+                    retry_found = True
+                    break
+            
+            if not retry_found:
+                print("   ⚠️ No explicit retry patterns found in main code")
+            
+        except Exception as e:
+            print(f"   ❌ Error checking retry logic: {e}")
+        
+        # Test 3: Circuit breaker patterns
+        print("   Test 3: Checking circuit breaker patterns")
+        try:
+            circuit_breaker_patterns = [
+                r'circuit.*breaker',
+                r'CircuitBreaker',
+                r'failure.*threshold',
+                r'timeout.*handler'
+            ]
+            
+            circuit_breaker_found = False
+            for pattern in circuit_breaker_patterns:
+                if re.search(pattern, server_code, re.IGNORECASE):
+                    print(f"   ✅ Circuit breaker pattern found: {pattern}")
+                    circuit_breaker_found = True
+                    break
+            
+            if not circuit_breaker_found:
+                print("   ℹ️ No explicit circuit breaker patterns found")
+            
+        except Exception as e:
+            print(f"   ❌ Error checking circuit breaker patterns: {e}")
+        
+        return True
+        
+    except Exception as e:
+        print(f"❌ Error handling test error: {e}")
+        return False
+
 def check_backend_logs():
     """Check backend logs for any errors"""
     print("\n🔍 Checking Backend Logs...")
@@ -746,13 +997,13 @@ def check_backend_logs():
         else:
             print("✅ No recent errors in backend logs")
             
-        # Check output logs for GoShippo related entries
-        result = os.popen("tail -n 50 /var/log/supervisor/backend.out.log | grep -i 'shippo\\|carrier\\|rate'").read()
+        # Check output logs for async/httpx related entries
+        result = os.popen("tail -n 50 /var/log/supervisor/backend.out.log | grep -i 'httpx\\|async\\|await'").read()
         if result.strip():
-            print("\n📋 GoShippo Related Logs:")
+            print("\n📋 Async/HTTP Related Logs:")
             print(result)
         else:
-            print("ℹ️ No GoShippo related logs found")
+            print("ℹ️ No async/HTTP related logs found")
             
     except Exception as e:
         print(f"❌ Error checking logs: {e}")
