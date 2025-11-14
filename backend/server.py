@@ -1082,41 +1082,18 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def show_data_confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Show summary of entered data with edit option"""
+    from utils.ui_utils import DataConfirmationUI
+    
     data = context.user_data
     
-    # Format the summary message
-    message = "📋 Проверьте введенные данные:\n\n"
-    message += "📤 ОТПРАВИТЕЛЬ:\n"
-    message += f"   Имя: {data.get('from_name')}\n"
-    message += f"   Адрес: {data.get('from_street')}\n"
-    if data.get('from_street2'):
-        message += f"   Квартира: {data.get('from_street2')}\n"
-    message += f"   Город: {data.get('from_city')}\n"
-    message += f"   Штат: {data.get('from_state')}\n"
-    message += f"   ZIP: {data.get('from_zip')}\n"
-    message += f"   Телефон: {data.get('from_phone')}\n\n"
+    # Format the summary message using UI utils
+    message = DataConfirmationUI.confirmation_header()
+    message += DataConfirmationUI.format_address_section("Отправитель", data, "from")
+    message += DataConfirmationUI.format_address_section("Получатель", data, "to")
+    message += DataConfirmationUI.format_parcel_section(data)
     
-    message += "📥 ПОЛУЧАТЕЛЬ:\n"
-    message += f"   Имя: {data.get('to_name')}\n"
-    message += f"   Адрес: {data.get('to_street')}\n"
-    if data.get('to_street2'):
-        message += f"   Квартира: {data.get('to_street2')}\n"
-    message += f"   Город: {data.get('to_city')}\n"
-    message += f"   Штат: {data.get('to_state')}\n"
-    message += f"   ZIP: {data.get('to_zip')}\n"
-    message += f"   Телефон: {data.get('to_phone')}\n\n"
-    
-    message += "📦 ПОСЫЛКА:\n"
-    message += f"   Вес: {data.get('weight')} фунтов\n"
-    message += f"   Размеры: {data.get('length', 10)} x {data.get('width', 10)} x {data.get('height', 10)} дюймов\n"
-    
-    keyboard = [
-        [InlineKeyboardButton("✅ Всё верно, показать тарифы", callback_data='confirm_data')],
-        [InlineKeyboardButton("✏️ Редактировать данные", callback_data='edit_data')],
-        [InlineKeyboardButton("💾 Сохранить как шаблон", callback_data='save_template')],
-        [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    # Build keyboard using UI utils
+    reply_markup = DataConfirmationUI.build_confirmation_keyboard()
     
     # Check if it's a message or callback query
     if hasattr(update, 'callback_query') and update.callback_query:
