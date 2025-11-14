@@ -625,7 +625,7 @@ def with_user_session(create_user=True, require_session=False):
                 return ConversationHandler.END
             
             if not session:
-                session = await session_repo.create_session(
+                session = await session_repo.get_or_create_session(
                     user_id,
                     session_type="conversation"
                 )
