@@ -354,7 +354,7 @@ async def test_fetch_rates_from_shipstation_api_error():
     """Test API error handling"""
     from unittest.mock import AsyncMock
     
-    mock_response = AsyncMock()
+    mock_response = Mock()  # httpx response is sync
     mock_response.status_code = 400
     mock_response.text = 'Bad Request'
     
