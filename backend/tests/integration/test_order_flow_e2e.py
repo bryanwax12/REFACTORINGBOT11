@@ -155,8 +155,8 @@ class TestOrderFlowE2E:
         # Setup: User has entered all data
         mock_context.user_data.update(sample_order_data)
         
-        with patch('handlers.order_flow.confirmation.safe_telegram_call') as mock_safe_call, \
-             patch('handlers.order_flow.confirmation.session_manager') as mock_session:
+        with patch('server.safe_telegram_call') as mock_safe_call, \
+             patch('server.session_manager') as mock_session:
             
             mock_safe_call.side_effect = lambda x: x
             mock_session.update_session = AsyncMock()
