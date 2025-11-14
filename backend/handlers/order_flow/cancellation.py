@@ -9,7 +9,7 @@ from telegram.ext import ContextTypes, ConversationHandler
 
 logger = logging.getLogger(__name__)
 
-from utils.handler_decorators import with_user_session, safe_handler
+from utils.handler_decorators import with_user_session, safe_handler, with_services
 
 
 @safe_handler(fallback_state=ConversationHandler.END)

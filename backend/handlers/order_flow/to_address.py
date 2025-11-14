@@ -15,7 +15,7 @@ from utils.validators import (
     validate_name, validate_address, validate_city,
     validate_state, validate_zip, validate_phone
 )
-from utils.handler_decorators import with_user_session, safe_handler, with_typing_action
+from utils.handler_decorators import with_user_session, safe_handler, with_typing_action, with_services
 from telegram.ext import ConversationHandler
 
 
