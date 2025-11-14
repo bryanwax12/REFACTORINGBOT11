@@ -248,10 +248,18 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['last_bot_message_text'] = help_text
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_typing_action()
+@with_user_session(create_user=False, require_session=False)
 async def faq_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     FAQ command handler
     Handles both direct command and callback query
+    
+    Decorators handle:
+    - User session management + blocking check
+    - Error handling
+    - Typing indicator
     """
     from utils.ui_utils import MessageTemplates, get_back_to_menu_keyboard
     
