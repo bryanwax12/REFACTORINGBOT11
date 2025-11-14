@@ -6016,15 +6016,18 @@ async def calculate_shipping_rates(request: ShippingRateRequest):
 
 @api_router.get("/stats")
 async def get_stats(authenticated: bool = Depends(verify_admin_key)):
+    from repositories import get_repositories
+    repos = get_repositories()
+    
     total_users = await db.users.count_documents({})
-    total_orders = await db.orders.count_documents({})
-    paid_orders = await db.orders.count_documents({"payment_status": "paid"})
+    total_orders = await repos.orders.count_orders()
+    paid_orders = await repos.orders.count_orders({"payment_status": "paid"})
     
     # Calculate total revenue
-    total_revenue = await db.orders.aggregate([
+    total_revenue = await repos.orders.aggregate_orders([
         {"$match": {"payment_status": "paid"}},
         {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
-    ]).to_list(1)
+    ])
     
     revenue = total_revenue[0]['total'] if total_revenue else 0
     
