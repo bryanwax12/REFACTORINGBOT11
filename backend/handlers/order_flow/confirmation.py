@@ -71,6 +71,16 @@ async def handle_confirm_data(update: Update, context: ContextTypes.DEFAULT_TYPE
     return await fetch_shipping_rates(update, context)
 
 
+async def check_data_from_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Return to data confirmation screen from cancel dialog"""
+    query = update.callback_query
+    from server import safe_telegram_call
+    await safe_telegram_call(query.answer())
+    
+    # Go back to data confirmation screen
+    return await show_data_confirmation(update, context)
+
+
 # ============================================================
 # MODULE EXPORTS
 # ============================================================
@@ -79,5 +89,6 @@ __all__ = [
     'show_data_confirmation',
     'handle_data_edit',
     'handle_save_as_template',
-    'handle_confirm_data'
+    'handle_confirm_data',
+    'check_data_from_cancel'
 ]
