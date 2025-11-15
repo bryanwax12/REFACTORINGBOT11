@@ -246,3 +246,94 @@ __all__ = [
     'start_order_with_template',
     'return_to_payment_after_topup'
 ]
+
+
+
+async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Start new order (without template)"""
+    from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
+    from utils.ui_utils import get_cancel_keyboard, OrderFlowMessages
+    from server import FROM_NAME, STATE_NAMES
+    import asyncio
+    
+    logger.info(f"order_new called - user_id: {update.effective_user.id}")
+    query = update.callback_query
+    await safe_telegram_call(query.answer())
+    
+    # Clear topup flag to prevent conflict with order input
+    context.user_data['awaiting_topup_amount'] = False
+    
+    # Mark previous message as selected (remove buttons from choice screen)
+    asyncio.create_task(mark_message_as_selected(update, context))
+    
+    reply_markup = get_cancel_keyboard()
+    message_text = OrderFlowMessages.new_order_start()
+    
+    bot_msg = await safe_telegram_call(query.message.reply_text(
+        message_text,
+        reply_markup=reply_markup
+    ))
+    
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
+        context.user_data['last_state'] = STATE_NAMES[FROM_NAME]
+    
+    logger.info("order_new returning FROM_NAME state")
+    return FROM_NAME
+
+
+async def order_from_template_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Show template list for order creation"""
+    from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
+    from utils.ui_utils import get_template_selection_keyboard, OrderFlowMessages
+    from server import find_user_templates, TEMPLATE_LIST
+    from telegram.ext import ConversationHandler
+    import asyncio
+    
+    query = update.callback_query
+    await safe_telegram_call(query.answer())
+    
+    # Mark previous message as selected (remove buttons and add "✅ Выбрано")
+    asyncio.create_task(mark_message_as_selected(update, context))
+    
+    telegram_id = query.from_user.id
+    templates = await find_user_templates(telegram_id, limit=10)
+    
+    if not templates:
+        await safe_telegram_call(query.message.reply_text(OrderFlowMessages.no_templates_error()))
+        return ConversationHandler.END
+    
+    message = OrderFlowMessages.select_template()
+    
+    for i, template in enumerate(templates, 1):
+        message += OrderFlowMessages.template_item(i, template)
+    
+    reply_markup = get_template_selection_keyboard(templates)
+    
+    bot_msg = await safe_telegram_call(query.message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown'))
+    
+    # Save last bot message context for button protection
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message
+    
+    return TEMPLATE_LIST
+
+
+async def continue_order_after_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Continue order creation after saving template - return to data confirmation"""
+    from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
+    from handlers.order_flow.confirmation import show_data_confirmation
+    import asyncio
+    
+    query = update.callback_query
+    await safe_telegram_call(query.answer())
+    
+    # Mark previous message as selected (remove buttons and add "✅ Выбрано")
+    asyncio.create_task(mark_message_as_selected(update, context))
+    
+    # Since template was saved from CONFIRM_DATA screen, we have all data including weight/dimensions
+    # Return to data confirmation screen
+    return await show_data_confirmation(update, context)
+
