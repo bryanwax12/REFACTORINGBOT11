@@ -133,6 +133,13 @@ from handlers.order_flow.confirmation import (
     show_data_confirmation as handler_show_data_confirmation,
 )
 
+# Order handlers (shipping rates, carrier selection)
+from handlers.order_handlers import (
+    display_shipping_rates as handler_display_shipping_rates,
+    fetch_shipping_rates as handler_fetch_shipping_rates,
+    select_carrier as handler_select_carrier,
+)
+
 # Utility functions (Phase 4 refactoring - gradually moving from server.py)
 # Note: These are still defined in server.py for backward compatibility
 # TODO: Update all imports to use utils modules and remove duplicates
