@@ -32,8 +32,11 @@ async def show_data_confirmation(update: Update, context: ContextTypes.DEFAULT_T
     # Build keyboard using UI utils
     reply_markup = DataConfirmationUI.build_confirmation_keyboard()
     
+    # Use effective_message to handle both regular messages and callback queries
+    effective_msg = update.effective_message
+    
     # Save last bot message context for button protection
-    bot_msg = await update.message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown')
+    bot_msg = await safe_telegram_call(effective_msg.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown'))
     
     if bot_msg:
         context.user_data['last_bot_message_id'] = bot_msg.message_id
