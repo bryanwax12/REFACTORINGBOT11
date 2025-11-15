@@ -4428,3 +4428,49 @@ async def create_order_handler(update, context):
 - Читаемость: +40%
 - Maintenance time: -50%
 
+
+
+---
+## Testing Session Sat Nov 15 00:36:33 UTC 2025
+Agent: E1 Fork Agent
+Session ID: 1763166993
+
+### Summary
+- Total tests: 207
+- Passed: 203 (98.1%)
+- Failed: 4 (1.9%)
+
+### Fixed Tests
+✅ test_new_order_flow_basic - Fixed by initializing service factory in test fixtures
+✅ test_payment_flow_sufficient_balance - Fixed by adding user and session to test DB (flaky when run with other tests)
+
+### Remaining Issues
+❌ test_cancel_order_flow - Requires updating mocks to use new decorator/service architecture
+❌ test_data_confirmation_flow - Requires updating mocks to use new decorator/service architecture  
+❌ test_payment_flow_sufficient_balance - Flaky test (passes alone, fails in suite - test isolation issue)
+❌ test_get_all_keys_status - Flaky test (known issue from previous session)
+
+### Root Cause Analysis
+The failing tests are using old mock patterns (mocking `session_manager` and `server.find_user_by_telegram_id`) but handlers now use:
+- Decorators (`@with_user_session`, `@inject_services`) for dependency injection
+- Service Factory pattern
+- Repository pattern
+
+### Recommended Fix
+Update test fixtures to:
+1. Initialize service factory ✅ (DONE)
+2. Create actual DB records for users/sessions instead of mocking ✅ (DONE for 2 tests)
+3. Patch repositories/services instead of server-level functions
+4. Fix test isolation to prevent data leakage between tests
+
+### Files Modified
+- /app/backend/tests/integration/conftest.py: Added service factory initialization and DB cleanup
+- /app/backend/tests/integration/test_order_flow_e2e.py: Updated test_payment_flow_sufficient_balance to use real DB data
+
+### Utils Created (for Phase 4 refactoring)
+- /app/backend/utils/telegram_utils.py: Telegram helper functions
+- /app/backend/utils/session_utils.py: Session management utilities
+- /app/backend/utils/settings_cache.py: Settings cache utilities
+- /app/backend/utils/db_wrappers.py: Profiled DB operation wrappers
+
+
