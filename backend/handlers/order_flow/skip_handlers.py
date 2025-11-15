@@ -161,7 +161,12 @@ async def skip_parcel_dimensions(update: Update, context: ContextTypes.DEFAULT_T
     
     query = update.callback_query
     await safe_telegram_call(query.answer())
-    await safe_telegram_call(query.message.reply_text("✅ Используются стандартные размеры: 10x10x10 дюймов"))
+    
+    # Edit message to remove buttons and show confirmation
+    await safe_telegram_call(query.message.edit_text(
+        "✅ Используются стандартные размеры: 10x10x10 дюймов",
+        reply_markup=None  # Remove keyboard
+    ))
     
     # Set standard dimensions
     user_id = update.effective_user.id
