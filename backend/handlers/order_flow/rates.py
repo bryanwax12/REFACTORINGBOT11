@@ -205,7 +205,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             reply_markup = get_retry_edit_cancel_keyboard()
             
             await safe_telegram_call(message.reply_text(
-                f"❌ {error_msg}\n\nПопробуйте еще раз или проверьте правильность адресов.",
+                "❌ Превышено время ожидания ответа от сервиса доставки.\n\nПопробуйте еще раз или проверьте правильность адресов.",
                 reply_markup=reply_markup
             ))
             return CONFIRM_DATA
