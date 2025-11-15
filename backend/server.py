@@ -479,13 +479,8 @@ OXAPAY_API_URL = 'https://api.oxapay.com'
 
 # Oxapay helper functions - imported from services/api_services.py
 
-def generate_random_phone():
-    """Generate a random valid US phone number"""
-    # Generate random US phone number in format +1XXXXXXXXXX
-    area_code = random.randint(200, 999)  # Valid area codes start from 200
-    exchange = random.randint(200, 999)   # Valid exchanges start from 200
-    number = random.randint(1000, 9999)   # Last 4 digits
-    return f"+1{area_code}{exchange}{number}"
+# DEPRECATED: Use utils.telegram_utils.generate_random_phone instead
+generate_random_phone = util_generate_random_phone
 
 def clear_settings_cache():
     """Clear settings cache when settings are updated"""
