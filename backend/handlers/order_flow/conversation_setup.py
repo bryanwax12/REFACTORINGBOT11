@@ -70,7 +70,10 @@ def setup_order_conversation_handler():
         skip_from_address2,
         skip_to_address2,
         skip_from_phone,
-        skip_to_phone
+        skip_to_phone,
+        skip_parcel_dimensions,
+        skip_parcel_width_height,
+        skip_parcel_height
     )
     from handlers.order_flow.cancellation import (
         cancel_order,
