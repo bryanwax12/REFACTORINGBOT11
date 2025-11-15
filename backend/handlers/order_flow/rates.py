@@ -96,11 +96,13 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             return CONFIRM_DATA
         
         # Get carrier IDs
+        logger.info("📦 About to fetch carrier IDs from ShipStation...")
         headers = {
             'API-Key': SHIPSTATION_API_KEY,
             'Content-Type': 'application/json'
         }
         carrier_ids = await get_shipstation_carrier_ids()
+        logger.info(f"📦 Received carrier IDs: {len(carrier_ids) if carrier_ids else 0}")
         if not carrier_ids:
             from utils.ui_utils import get_edit_addresses_keyboard
             reply_markup = get_edit_addresses_keyboard()
