@@ -1246,35 +1246,8 @@ confirm_delete_template = handler_confirm_delete_template
 # MIGRATED: Use handlers.template_handlers.rename_template_start
 rename_template_start = handler_rename_template_start
 
-async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Save new template name"""
-    new_name = update.message.text.strip()[:30]
-    
-    if not new_name:
-        await safe_telegram_call(update.message.reply_text("❌ Название не может быть пустым. Попробуйте еще раз:"))
-        return TEMPLATE_RENAME
-    
-    template_id = context.user_data.get('renaming_template_id')
-    
-    # Use template service
-    success, error = await template_service.update_template_name(
-        template_id=template_id,
-        new_name=new_name,
-        update_template_func=update_template
-    )
-    
-    if success:
-        keyboard = [[InlineKeyboardButton("👁️ Просмотреть", callback_data=f'template_view_{template_id}')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        
-        await safe_telegram_call(update.message.reply_text(
-                f"""✅ Шаблон переименован в "{new_name}" """,
-                reply_markup=reply_markup
-            ))
-    else:
-        await safe_telegram_call(update.message.reply_text(f"❌ {error}"))
-    
-    return ConversationHandler.END
+# MIGRATED: Use handlers.template_handlers.rename_template_save
+rename_template_save = handler_rename_template_save
 
 async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Start new order (without template)"""
