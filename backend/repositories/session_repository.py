@@ -45,8 +45,10 @@ class SessionRepository(BaseRepository):
             return session
         
         # Создать новую сессию
+        session_id = f"{user_id}_{session_type}_{int(datetime.now(timezone.utc).timestamp())}"
         session_data = {
             "user_id": user_id,
+            "session_id": session_id,
             "session_type": session_type,
             "is_active": True,
             "current_step": "START",
@@ -55,9 +57,14 @@ class SessionRepository(BaseRepository):
             "started_at": datetime.now(timezone.utc).isoformat()
         }
         
-        await self.insert_one(session_data)
+        # Use update_one with upsert to avoid duplicate key errors
+        await self.collection.update_one(
+            {"user_id": user_id, "session_type": session_type},
+            {"$set": session_data},
+            upsert=True
+        )
         
-        logger.info(f"✅ Created new session for user {user_id}, type {session_type}")
+        logger.info(f"✅ Created/updated session for user {user_id}, type {session_type}")
         
         return session_data
     
