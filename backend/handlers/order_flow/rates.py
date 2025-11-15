@@ -312,7 +312,19 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             pass
         
         # Display rates using reusable function
-        return await display_shipping_rates(update, context, context.user_data['rates'])
+        from repositories import get_user_repo
+        from server import STATE_NAMES, SELECT_CARRIER
+        
+        user_repo = get_user_repo()
+        return await display_shipping_rates(
+            update, 
+            context, 
+            context.user_data['rates'],
+            find_user_by_telegram_id_func=user_repo.find_by_telegram_id,
+            safe_telegram_call_func=safe_telegram_call,
+            STATE_NAMES=STATE_NAMES,
+            SELECT_CARRIER=SELECT_CARRIER
+        )
         
     except Exception as e:
         logger.error(f"Error getting rates: {e}", exc_info=True)
