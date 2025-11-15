@@ -11,7 +11,7 @@ from utils.handler_decorators import with_user_session, safe_handler
 logger = logging.getLogger(__name__)
 
 
-@safe_handler(fallback_message="❌ Произошла ошибка при обработке выбора курьера.")
+@safe_handler
 @with_user_session(create_user=False, require_session=True)
 async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
