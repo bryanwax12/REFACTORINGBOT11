@@ -23,12 +23,14 @@ SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY_PROD') or os.environ.g
 
 async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Fetch shipping rates from ShipStation with caching"""
+    logger.info("🚀 fetch_shipping_rates called")
     query = update.callback_query
     
     # Import cache
     from services.shipstation_cache import shipstation_cache
     
     data = context.user_data
+    logger.info(f"📋 User data keys: {list(data.keys())}")
     
     # Check cache first (before showing progress message)
     cached_rates = shipstation_cache.get(
