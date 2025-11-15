@@ -818,6 +818,11 @@ async def show_edit_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = "✏️ Что вы хотите изменить?"
     
     # Build keyboard using UI utils
+    reply_markup = DataConfirmationUI.build_edit_menu_keyboard()
+    
+    await safe_telegram_call(query.message.reply_text(message, reply_markup=reply_markup))
+    return EDIT_MENU
+
 # MIGRATED: Use handlers.order_flow.template_save.save_template_name
 save_template_name = handler_save_template_name
 
