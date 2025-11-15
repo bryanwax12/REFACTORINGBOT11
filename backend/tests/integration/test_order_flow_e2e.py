@@ -183,7 +183,8 @@ class TestOrderFlowE2E:
         self,
         mock_update_callback,
         mock_context,
-        sample_shipping_rate
+        sample_shipping_rate,
+        test_db
     ):
         """
         Test payment flow when user has sufficient balance
@@ -191,18 +192,21 @@ class TestOrderFlowE2E:
         from handlers.order_flow.payment import show_payment_methods
         from server import PAYMENT_METHOD
         
+        # Setup: Create user in DB with sufficient balance
+        await test_db.users.insert_one({
+            "id": "user123",
+            "telegram_id": 123456789,
+            "username": "testuser",
+            "first_name": "Test",
+            "balance": 100.0,  # Sufficient balance
+            "created_at": "2024-01-01T00:00:00Z"
+        })
+        
         # Setup: User selected a rate
         mock_context.user_data['selected_rate'] = sample_shipping_rate
         mock_context.user_data['final_amount'] = 15.50
         
-        with patch('server.find_user_by_telegram_id') as mock_find_user, \
-             patch('server.safe_telegram_call') as mock_safe_call:
-            
-            mock_find_user.return_value = {
-                "id": "user123",
-                "telegram_id": 123456789,
-                "balance": 100.0  # Sufficient balance
-            }
+        with patch('server.safe_telegram_call') as mock_safe_call:
             mock_reply_msg = MagicMock()
             mock_reply_msg.message_id = 222
             mock_safe_call.return_value = mock_reply_msg
