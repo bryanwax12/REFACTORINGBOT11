@@ -2431,33 +2431,6 @@ async def debug_active_conversations():
 
 
 @api_router.get("/debug/persistence")
-async def debug_persistence():
-    """Check MongoDB persistence state (NO AUTH)"""
-    try:
-        # Get all persistence data from MongoDB
-        persistence_docs = await db.bot_persistence.find({}).to_list(100)
-        
-        # Convert ObjectId to string for JSON serialization
-        for doc in persistence_docs:
-            if '_id' in doc:
-                doc['_id'] = str(doc['_id'])
-            if 'updated_at' in doc:
-                doc['updated_at'] = doc['updated_at'].isoformat() if hasattr(doc['updated_at'], 'isoformat') else str(doc['updated_at'])
-        
-        return {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "total_documents": len(persistence_docs),
-            "documents": persistence_docs
-        }
-    except Exception as e:
-        return {
-            "error": str(e),
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        }
-
-
-
-
 
 @api_router.post("/upload-image")
 
