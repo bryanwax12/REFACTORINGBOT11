@@ -140,6 +140,12 @@ from handlers.order_handlers import (
     select_carrier as handler_select_carrier,
 )
 
+# Template save handlers
+from handlers.order_flow.template_save import (
+    save_template_name as handler_save_template_name,
+    handle_template_update as handler_handle_template_update,
+)
+
 # Utility functions (Phase 4 refactoring - gradually moving from server.py)
 # Note: These are still defined in server.py for backward compatibility
 # TODO: Update all imports to use utils modules and remove duplicates
