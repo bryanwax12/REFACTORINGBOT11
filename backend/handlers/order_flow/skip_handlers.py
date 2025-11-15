@@ -153,6 +153,112 @@ async def skip_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=False, require_session=True)
+async def skip_parcel_dimensions(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Skip all dimensions (L/W/H) - use standard 10x10x10 inches"""
+    from server import CALCULATING_RATES
+    
+    query = update.callback_query
+    await safe_telegram_call(query.answer())
+    await safe_telegram_call(query.message.reply_text("✅ Используются стандартные размеры: 10x10x10 дюймов"))
+    
+    # Set standard dimensions
+    user_id = update.effective_user.id
+    context.user_data['parcel_length'] = 10.0
+    context.user_data['parcel_width'] = 10.0
+    context.user_data['parcel_height'] = 10.0
+    
+    # Update session
+    from server import session_manager
+    await session_manager.update_session_atomic(
+        user_id,
+        step='CALCULATING_RATES',
+        data={
+            'parcel_length': 10.0,
+            'parcel_width': 10.0,
+            'parcel_height': 10.0
+        }
+    )
+    
+    return await handle_skip_field(
+        update, context,
+        field_name='dimensions_set',
+        field_value=True,
+        next_step_const=CALCULATING_RATES,
+        next_step_name='CALCULATING_RATES',
+        next_message=OrderStepMessages.CALCULATING_RATES
+    )
+
+
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=False, require_session=True)
+async def skip_parcel_width_height(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Skip width and height - use standard 10x10 inches"""
+    from server import CALCULATING_RATES
+    
+    query = update.callback_query
+    await safe_telegram_call(query.answer())
+    await safe_telegram_call(query.message.reply_text("✅ Используются стандартные размеры для ширины и высоты: 10x10 дюймов"))
+    
+    # Set standard width and height
+    user_id = update.effective_user.id
+    context.user_data['parcel_width'] = 10.0
+    context.user_data['parcel_height'] = 10.0
+    
+    # Update session
+    from server import session_manager
+    await session_manager.update_session_atomic(
+        user_id,
+        step='CALCULATING_RATES',
+        data={
+            'parcel_width': 10.0,
+            'parcel_height': 10.0
+        }
+    )
+    
+    return await handle_skip_field(
+        update, context,
+        field_name='dimensions_set',
+        field_value=True,
+        next_step_const=CALCULATING_RATES,
+        next_step_name='CALCULATING_RATES',
+        next_message=OrderStepMessages.CALCULATING_RATES
+    )
+
+
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=False, require_session=True)
+async def skip_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Skip height only - use standard 10 inches"""
+    from server import CALCULATING_RATES
+    
+    query = update.callback_query
+    await safe_telegram_call(query.answer())
+    await safe_telegram_call(query.message.reply_text("✅ Используется стандартная высота: 10 дюймов"))
+    
+    # Set standard height
+    user_id = update.effective_user.id
+    context.user_data['parcel_height'] = 10.0
+    
+    # Update session
+    from server import session_manager
+    await session_manager.update_session_atomic(
+        user_id,
+        step='CALCULATING_RATES',
+        data={'parcel_height': 10.0}
+    )
+    
+    return await handle_skip_field(
+        update, context,
+        field_name='height_set',
+        field_value=True,
+        next_step_const=CALCULATING_RATES,
+        next_step_name='CALCULATING_RATES',
+        next_message=OrderStepMessages.CALCULATING_RATES
+    )
+
+
 async def skip_address_validation(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Skip address validation and continue with rate fetching"""
     from handlers.common_handlers import safe_telegram_call
