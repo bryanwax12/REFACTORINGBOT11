@@ -189,14 +189,17 @@ async def get_shipstation_carrier_ids():
         }
         
         logger.info(f"🔍 Fetching carriers from ShipStation...")
+        logger.info(f"   URL: https://api.shipstation.com/v2/carriers")
+        logger.info(f"   API Key (first 10 chars): {api_key[:10]}...")
         
-        async with httpx.AsyncClient(timeout=10.0) as client:
+        async with httpx.AsyncClient(timeout=30.0) as client:  # Increased timeout to 30 sec
             response = await client.get(
                 'https://api.shipstation.com/v2/carriers',
                 headers=headers
             )
         
         logger.info(f"📡 ShipStation carriers response: status={response.status_code}")
+        logger.info(f"📡 Response body (first 200 chars): {response.text[:200]}")
         
         if response.status_code == 200:
             carriers_data = response.json()
