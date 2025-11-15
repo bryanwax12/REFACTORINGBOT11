@@ -99,6 +99,37 @@ from handlers.order_flow import (
 from handlers.order_flow.from_address import order_from_address2
 from handlers.order_flow.to_address import order_to_address2
 
+# Utility functions (Phase 4 refactoring - gradually moving from server.py)
+# Note: These are still defined in server.py for backward compatibility
+# TODO: Update all imports to use utils modules and remove duplicates
+from utils.telegram_utils import (
+    is_button_click_allowed as util_is_button_click_allowed,
+    generate_random_phone as util_generate_random_phone,
+    sanitize_string as util_sanitize_string,
+    generate_thank_you_message as util_generate_thank_you_message
+)
+from utils.session_utils import (
+    save_to_session as util_save_to_session,
+    handle_critical_api_error as util_handle_critical_api_error,
+    handle_step_error as util_handle_step_error
+)
+from utils.settings_cache import (
+    clear_settings_cache as util_clear_settings_cache,
+    SETTINGS_CACHE as UTIL_SETTINGS_CACHE
+)
+from utils.db_wrappers import (
+    find_user_by_telegram_id as util_find_user_by_telegram_id,
+    find_order_by_id as util_find_order_by_id,
+    find_template_by_id as util_find_template_by_id,
+    find_payment_by_invoice as util_find_payment_by_invoice,
+    count_user_templates as util_count_user_templates,
+    find_user_templates as util_find_user_templates,
+    update_order as util_update_order,
+    insert_payment as util_insert_payment,
+    update_template as util_update_template,
+    delete_template as util_delete_template
+)
+
 # Profiled DB operations (most frequently used)
 @profile_db_query("find_user_by_telegram_id")
 @profile_db_query("find_user_by_telegram_id")
