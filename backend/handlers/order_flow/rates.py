@@ -3,11 +3,16 @@ Order Flow: Shipping Rates Handlers
 Handles fetching and displaying shipping rates
 """
 import logging
+import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from handlers.common_handlers import safe_telegram_call
+from utils.notifications import notify_admin_error
 
 logger = logging.getLogger(__name__)
+
+# Get ShipStation API key from environment
+SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY_PROD') or os.environ.get('SHIPSTATION_API_KEY_TEST')
 
 async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Fetch shipping rates from ShipStation with caching"""
