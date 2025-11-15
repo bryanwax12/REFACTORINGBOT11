@@ -1243,24 +1243,8 @@ start_order_with_template = handler_start_order_with_template
 confirm_delete_template = handler_confirm_delete_template
 
 
-async def rename_template_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Start template rename process"""
-    query = update.callback_query
-    await safe_telegram_call(query.answer())
-    
-    # Mark previous message as selected (non-blocking)
-    asyncio.create_task(mark_message_as_selected(update, context))
-    
-    template_id = query.data.replace('template_rename_', '')
-    context.user_data['renaming_template_id'] = template_id
-    
-    await safe_telegram_call(query.message.reply_text(
-            """✏️ Введите новое название для шаблона (до 30 символов):""",
-        ))
-    # Clear last_bot_message to not interfere with text input
-    context.user_data.pop('last_bot_message_id', None)
-    context.user_data.pop('last_bot_message_text', None)
-    return TEMPLATE_RENAME
+# MIGRATED: Use handlers.template_handlers.rename_template_start
+rename_template_start = handler_rename_template_start
 
 async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Save new template name"""
