@@ -31,12 +31,13 @@ def setup_order_conversation_handler():
         TEMPLATE_NAME, TEMPLATE_LIST, TEMPLATE_VIEW, TEMPLATE_LOADED,
         # Handler functions from server.py (large functions)
         select_carrier,
-        handle_data_confirmation, order_from_template_list, use_template, view_template,
+        order_from_template_list, use_template, view_template,
         delete_template, confirm_delete_template, my_templates_menu,
         order_new, start_command
     )
-    # Import process_payment from its actual location
+    # Import handlers from their actual locations
     from handlers.order_flow.payment import process_payment
+    from handlers.order_flow.confirmation import handle_data_confirmation
     
     # Import handlers from order_flow modules
     from handlers.order_flow.entry_points import (
