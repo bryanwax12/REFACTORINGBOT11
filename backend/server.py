@@ -6238,6 +6238,9 @@ from routers.bot import router as bot_router
 from routers.settings import router as settings_router
 from routers.maintenance import router as maintenance_router
 from routers.stats import router as stats_router
+from routers.users import router as users_router
+from routers.broadcast import router as broadcast_router
+from routers.admin_labels import router as admin_labels_router
 
 app.include_router(webhooks_router, prefix="/api")
 app.include_router(shipping_router, prefix="/api")
@@ -6247,6 +6250,9 @@ app.include_router(bot_router, prefix="/api")
 app.include_router(settings_router, prefix="/api")
 app.include_router(maintenance_router, prefix="/api")
 app.include_router(stats_router, prefix="/api")
+app.include_router(users_router, prefix="/api")
+app.include_router(broadcast_router, prefix="/api")
+app.include_router(admin_labels_router, prefix="/api")
 
 # Include admin routers (v1 and v2)
 from routers.admin_router import admin_router  # Legacy
