@@ -482,12 +482,8 @@ OXAPAY_API_URL = 'https://api.oxapay.com'
 # DEPRECATED: Use utils.telegram_utils.generate_random_phone instead
 generate_random_phone = util_generate_random_phone
 
-def clear_settings_cache():
-    """Clear settings cache when settings are updated"""
-    SETTINGS_CACHE['api_mode'] = None
-    SETTINGS_CACHE['api_mode_timestamp'] = None
-    SETTINGS_CACHE['maintenance_mode'] = None
-    SETTINGS_CACHE['maintenance_timestamp'] = None
+# DEPRECATED: Use utils.settings_cache.clear_settings_cache instead
+clear_settings_cache = util_clear_settings_cache
 
 # check_shipstation_balance - imported from services/api_services.py
 
