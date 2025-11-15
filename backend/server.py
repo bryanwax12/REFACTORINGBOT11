@@ -379,7 +379,7 @@ api_router = APIRouter(prefix="/api")
 # ==================== ROUTERS REGISTRATION ====================
 # Import and register all API routers
 try:
-    from routers.admin_router import router as admin_router
+    from routers.admin_router import admin_router
     from routers.admin_labels import router as admin_labels_router
     from routers.api_config_router import router as api_config_router
     from routers.bot import router as bot_router
