@@ -3622,46 +3622,6 @@ async def debug_persistence():
         }
 
 
-# MOVED TO routers/bot.py
-# @api_router.get("/telegram/status")
-async def telegram_status():
-    """Check Telegram bot application status (NO AUTH REQUIRED FOR DEBUG)"""
-    webhook_url = os.environ.get('WEBHOOK_URL', '')
-    webhook_base_url = os.environ.get('WEBHOOK_BASE_URL', '')
-    
-    # Determine bot mode
-    bot_mode = "UNKNOWN"
-    if webhook_url or (webhook_base_url and 'preview' not in webhook_base_url.lower()):
-        bot_mode = "WEBHOOK"
-    else:
-        bot_mode = "POLLING"
-    
-    return {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "application_initialized": application is not None,
-        "application_running": application.running if application else False,
-        "bot_instance": bot_instance is not None,
-        "telegram_token_set": bool(TELEGRAM_BOT_TOKEN),
-        "webhook_url_env": webhook_url or 'Not set',
-        "webhook_base_url_env": webhook_base_url or 'Not set',
-        "bot_mode": bot_mode,
-        "mode_description": "WEBHOOK mode eliminates double message bug. POLLING mode may cause conflicts.",
-        "persistence": {
-            "type": type(application.persistence).__name__ if application and application.persistence else "None",
-            "store_data": str(application.persistence.store_data) if application and application.persistence else "None"
-        },
-        "conversation_handlers": [
-            {
-                "name": getattr(h, 'name', 'unnamed'),
-                "persistent": getattr(h, 'persistent', False)
-            }
-            for h in (application.handlers.get(0, []) if application else [])
-            if hasattr(h, '__class__') and 'ConversationHandler' in h.__class__.__name__
-        ]
-    }
-
-
-
 @api_router.get("/users/{telegram_id}/details")
 async def get_user_details(telegram_id: int):
     try:
