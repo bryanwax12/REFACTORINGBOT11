@@ -120,20 +120,13 @@ async def send_blocked_message(update: Update):
 
 
 async def check_maintenance_mode(update: Update) -> bool:
-    """Check if bot is in maintenance mode and user is not admin"""
-    try:
-        from server import db, ADMIN_TELEGRAM_ID
-        settings = await db.settings.find_one({"key": "maintenance_mode"})
-        is_maintenance = settings.get("value", False) if settings else False
-        
-        # Allow admin to use bot even in maintenance mode
-        if is_maintenance and str(update.effective_user.id) != ADMIN_TELEGRAM_ID:
-            return True
-        
-        return False
-    except Exception as e:
-        logger.error(f"Error checking maintenance mode: {e}")
-        return False
+    """
+    Check if bot is in maintenance mode and user is not admin
+    DEPRECATED: Use utils.maintenance_check.check_maintenance_mode instead
+    This wrapper is kept for backwards compatibility
+    """
+    from utils.maintenance_check import check_maintenance_mode as _check
+    return await _check(update)
 
 
 # ==================== COMMAND HANDLERS ====================
