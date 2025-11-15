@@ -14,6 +14,7 @@ from utils.handler_decorators import with_user_session, safe_handler, with_servi
 
 @safe_handler(fallback_state=ConversationHandler.END)
 @with_user_session(create_user=False, require_session=True)
+@safe_handler(fallback_state=ConversationHandler.END)
 async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Show cancellation confirmation"""
     from server import (
