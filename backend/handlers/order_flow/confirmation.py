@@ -160,6 +160,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
     
     if query.data == 'confirm_data':
         # User confirmed data, proceed to fetch rates
+        logger.info("✅ User confirmed data, calling fetch_shipping_rates...")
         return await fetch_shipping_rates(update, context)
     
     if query.data == 'save_template':
