@@ -3080,46 +3080,9 @@ Label PDF: {label_download_url}
         
         return False  # Failed
 
-async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if update.callback_query:
-        query = update.callback_query
-        await safe_telegram_call(query.answer())
-    
-    # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-    asyncio.create_task(mark_message_as_selected(update, context))
-    
-    # Check if we're on shipping rates screen
-    last_state = context.user_data.get('last_state')
-    
-    # Add "Check Data" button only if on shipping rates selection screen
-    if last_state == STATE_NAMES[SELECT_CARRIER]:
-        keyboard = [
-            [InlineKeyboardButton("📋 Проверить данные", callback_data='check_data')],
-            [InlineKeyboardButton("↩️ Вернуться к заказу", callback_data='return_to_order')],
-            [InlineKeyboardButton("✅ Да, отменить заказ", callback_data='confirm_cancel')]
-        ]
-    else:
-        keyboard = [
-            [InlineKeyboardButton("↩️ Вернуться к заказу", callback_data='return_to_order')],
-            [InlineKeyboardButton("✅ Да, отменить заказ", callback_data='confirm_cancel')]
-        ]
-    
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    message_text = "⚠️ Вы уверены, что хотите отменить создание заказа?\n\nВсе введённые данные будут потеряны."
-    
-    bot_msg = await safe_telegram_call(query.message.reply_text(
-            message_text,
-            reply_markup=reply_markup
-        ))
-    
-    # Save last bot message context for button protection
-    if bot_msg:
-        context.user_data['last_bot_message_id'] = bot_msg.message_id
-        context.user_data['last_bot_message_text'] = message_text
-    
-    # Return the state we were in before cancel
-    return context.user_data.get('last_state', PAYMENT_METHOD)
+# MIGRATED: Use handlers.order_flow.cancellation.cancel_order
+# Keeping alias for backward compatibility
+cancel_order = handler_cancel_order
 
 # MIGRATED: Use handlers.order_flow.cancellation.confirm_cancel_order
 # Keeping alias for backward compatibility
