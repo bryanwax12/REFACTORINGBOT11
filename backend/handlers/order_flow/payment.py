@@ -197,8 +197,10 @@ async def handle_back_to_rates(update: Update, context: ContextTypes.DEFAULT_TYP
 
 __all__ = [
     'show_payment_methods',
+    'show_order_summary',
     'handle_pay_from_balance',
-    'handle_pay_crypto',
+    'handle_order_summary',
+    'handle_proceed_to_payment',
     'handle_topup_for_order',
     'handle_back_to_rates'
 ]
