@@ -21,7 +21,7 @@ async def save_to_session(user_id: int, next_step: str, data: dict, context: Con
         data: Data to save
         context: Telegram context
     """
-    from session_manager import session_manager
+    from server import session_manager
     
     context.user_data.update(data)
     await session_manager.update_session_atomic(user_id, step=next_step, data=data)
