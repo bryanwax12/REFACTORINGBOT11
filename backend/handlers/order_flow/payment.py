@@ -165,3 +165,235 @@ __all__ = [
     'handle_topup_for_order',
     'handle_back_to_rates'
 ]
+async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    
+    # Check for stale interaction
+    if await check_stale_interaction(query, context):
+        return ConversationHandler.END
+    
+    await safe_telegram_call(query.answer())
+    
+    if query.data == 'cancel_order':
+        return await cancel_order(update, context)
+    
+    if query.data == 'confirm_cancel':
+        return await confirm_cancel_order(update, context)
+    
+    if query.data == 'return_to_order':
+        return await return_to_order(update, context)
+    
+    # Handle back to rates
+    if query.data == 'back_to_rates':
+        # Mark previous message as selected (remove buttons and add "✅ Выбрано")
+        asyncio.create_task(mark_message_as_selected(update, context))
+        # Return to rate selection - call fetch_shipping_rates again
+        return await fetch_shipping_rates(update, context)
+    
+    # Mark previous message as selected (remove buttons)
+    asyncio.create_task(mark_message_as_selected(update, context))
+    
+    telegram_id = query.from_user.id
+    from repositories import get_user_repo
+    user_repo = get_user_repo()
+    user = await user_repo.find_by_telegram_id(telegram_id)
+    data = context.user_data
+    selected_rate = data['selected_rate']
+    amount = context.user_data.get('final_amount', selected_rate['amount'])  # Use discounted amount
+    
+    # Get user discount (should be already calculated and stored in context)
+    user_discount = context.user_data.get('user_discount', 0)
+    discount_amount = context.user_data.get('discount_amount', 0)
+    
+    try:
+        if query.data == 'pay_from_balance':
+            # Pay from balance
+            from utils.ui_utils import PaymentFlowUI
+            if user.get('balance', 0) < amount:
+                await safe_telegram_call(query.message.reply_text(PaymentFlowUI.insufficient_balance_error()))
+                return ConversationHandler.END
+            
+            # Create order
+            order = await create_order_in_db(user, data, selected_rate, amount, user_discount, discount_amount)
+            
+            # Try to create shipping label first
+            label_created = await create_and_send_label(order['id'], telegram_id, query.message)
+            
+            if label_created:
+                # Only deduct balance if label was created successfully using payment service
+                success, new_balance, error = await payment_service.process_balance_payment(
+                    telegram_id=telegram_id,
+                    amount=amount,
+                    order_id=order['id'],
+                    db=db,
+                    find_user_func=find_user_by_telegram_id,
+                    update_order_func=update_order
+                )
+                
+                if not success:
+                    logger.error(f"Failed to process payment: {error}")
+                    # This shouldn't happen as we checked balance earlier
+                    await safe_telegram_call(query.message.reply_text(f"❌ Ошибка обработки платежа: {error}"))
+                    return ConversationHandler.END
+                
+                from utils.ui_utils import PaymentFlowUI
+                keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                
+                await safe_telegram_call(query.message.reply_text(
+                    PaymentFlowUI.payment_success_balance(amount, new_balance, order.get('order_id')),
+                    reply_markup=reply_markup
+                ))
+                
+                # Mark order as completed to prevent stale button interactions
+                context.user_data.clear()
+                context.user_data['order_completed'] = True
+            else:
+                # Label creation failed - don't charge user
+                from repositories import get_repositories
+                repos = get_repositories()
+                await repos.orders.update_by_id(
+                    order['id'],
+                    {"payment_status": "failed", "shipping_status": "failed"}
+                )
+                
+                keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                
+                await safe_telegram_call(query.message.reply_text(
+            """❌ Не удалось создать shipping label.
+            Оплата не списана. Ваш баланс не изменился.
+            Пожалуйста, свяжитесь с администратором.""",
+            reply_markup=reply_markup
+        ))
+                
+                # Mark order as completed to prevent stale button interactions
+                context.user_data.clear()
+                context.user_data['order_completed'] = True
+            
+        elif query.data == 'pay_with_crypto':
+            # Create order
+            order = await create_order_in_db(user, data, selected_rate, amount, user_discount, discount_amount)
+            
+            # Create Oxapay invoice
+            invoice_result = await create_oxapay_invoice(
+                amount=amount,
+                order_id=order['id'],
+                description=f"Shipping Label - Order {order['id'][:8]}"
+            )
+            
+            if invoice_result.get('success'):
+                track_id = invoice_result['trackId']
+                pay_link = invoice_result['payLink']
+                
+                payment = Payment(
+                    order_id=order['id'],
+                    amount=amount,
+                    invoice_id=track_id,
+                    pay_url=pay_link
+                )
+                payment_dict = payment.model_dump()
+                payment_dict['created_at'] = payment_dict['created_at'].isoformat()
+                await insert_payment(payment_dict)
+                
+                keyboard = [[InlineKeyboardButton("💳 Оплатить", url=pay_link)],
+                           [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                
+                # Get order_id from session for display
+                from utils.order_utils import format_order_id_for_display
+                session = await session_manager.get_session(telegram_id)
+                order_id_display = ""
+                if session and session.get('order_id'):
+                    display_id = format_order_id_for_display(session['order_id'])
+                    order_id_display = f"\n📦 Номер заказа: #{display_id}\n"
+                
+                await safe_telegram_call(query.message.reply_text(
+                    f"""✅ Заказ создан!{order_id_display}
+
+💰 Сумма к оплате: ${amount}
+🪙 Криптовалюта: BTC, ETH, USDT, USDC и др.
+
+Нажмите кнопку "Оплатить" для перехода на страницу оплаты.
+
+После успешной оплаты мы автоматически создадим shipping label.""",
+                    reply_markup=reply_markup
+                ))
+            else:
+                error_msg = invoice_result.get('error', 'Unknown error')
+                await safe_telegram_call(query.message.reply_text(f"❌ Ошибка создания инвойса: {error_msg}"))
+        elif query.data == 'top_up_balance':
+            # Save order data to database before top-up so user can return to payment after
+            pending_order = {
+                'telegram_id': telegram_id,
+                'selected_rate': data.get('selected_rate'),
+                'final_amount': context.user_data.get('final_amount'),
+                'user_discount': context.user_data.get('user_discount', 0),
+                'discount_amount': context.user_data.get('discount_amount', 0),
+                'from_name': data.get('from_name'),
+                'from_street': data.get('from_street'),
+                'from_street2': data.get('from_street2'),
+                'from_city': data.get('from_city'),
+                'from_state': data.get('from_state'),
+                'from_zip': data.get('from_zip'),
+                'from_phone': data.get('from_phone'),
+                'to_name': data.get('to_name'),
+                'to_street': data.get('to_street'),
+                'to_street2': data.get('to_street2'),
+                'to_city': data.get('to_city'),
+                'to_state': data.get('to_state'),
+                'to_zip': data.get('to_zip'),
+                'to_phone': data.get('to_phone'),
+                'parcel_weight': data.get('parcel_weight'),
+                'parcel_length': data.get('parcel_length'),
+                'parcel_width': data.get('parcel_width'),
+                'parcel_height': data.get('parcel_height'),
+                'created_at': datetime.now(timezone.utc).isoformat()
+            }
+            
+            # Delete any existing pending order for this user
+            await db.pending_orders.delete_many({"telegram_id": telegram_id})
+            # Save new pending order
+            await insert_pending_order(pending_order)
+            
+            context.user_data['last_state'] = STATE_NAMES[TOPUP_AMOUNT]  # Save state for cancel return
+            
+        from utils.ui_utils import get_cancel_keyboard
+        reply_markup = get_cancel_keyboard()
+        
+        message_text = """💵 Пополнение баланса
+
+Введите сумму пополнения в долларах США (USD):
+
+Например: 50
+
+Минимальная сумма: $5
+Максимальная сумма: $1000"""
+        
+        bot_msg = await safe_telegram_call(query.message.reply_text(
+            message_text,
+            reply_markup=reply_markup
+        ))
+        
+        # Save message context for button protection
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
+        
+        return TOPUP_AMOUNT
+    
+    except Exception as e:
+        logger.error(f"Payment error: {e}")
+        await safe_telegram_call(query.message.reply_text(f"❌ Ошибка при оплате: {str(e)}"))
+        return ConversationHandler.END
+
+# MIGRATED: Use handlers.order_flow.entry_points.return_to_payment_after_topup
+return_to_payment_after_topup = handler_return_to_payment_after_topup
+
+# MIGRATED: Use handlers.payment_handlers.handle_topup_amount
+from handlers.payment_handlers import handle_topup_amount
+
+
+# MIGRATED: Use handlers.payment_handlers.handle_topup_crypto_selection
+from handlers.payment_handlers import handle_topup_crypto_selection
+
+
