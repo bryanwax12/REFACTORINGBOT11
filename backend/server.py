@@ -2509,66 +2509,6 @@ async def debug_persistence():
 
 
 
-@api_router.post("/settings/api-mode")
-async def set_api_mode(request: dict, authenticated: bool = Depends(verify_admin_key)):
-    """Set API mode (test or production)"""
-    try:
-        mode = request.get("mode")
-        if mode not in ["test", "production"]:
-            raise HTTPException(status_code=400, detail="Mode must be 'test' or 'production'")
-        
-        # Save to database
-        await db.settings.update_one(
-            {"key": "api_mode"},
-            {"$set": {"value": mode, "updated_at": datetime.now(timezone.utc).isoformat()}},
-            upsert=True
-        )
-        
-        # Update environment variable in-memory (will revert on restart)
-        global SHIPSTATION_API_KEY, SHIPSTATION_CARRIER_IDS
-        if mode == "test":
-            SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY_TEST', SHIPSTATION_API_KEY)
-            mode_text = "🧪 Тестовый"
-            api_key_display = SHIPSTATION_API_KEY[:20] + "..." if len(SHIPSTATION_API_KEY) > 20 else SHIPSTATION_API_KEY
-        else:
-            SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY_PROD', SHIPSTATION_API_KEY)
-            mode_text = "🚀 Продакшн"
-            api_key_display = SHIPSTATION_API_KEY[:20] + "..." if len(SHIPSTATION_API_KEY) > 20 else SHIPSTATION_API_KEY
-        
-        # Clear carrier IDs cache when switching modes
-        SHIPSTATION_CARRIER_IDS = []
-        logger.info(f"Cleared carrier IDs cache after switching to {mode} mode")
-        
-        # Clear settings cache
-        clear_settings_cache()
-        logger.info("Cleared settings cache")
-        
-        # Send notification to admin via Telegram
-        if ADMIN_TELEGRAM_ID and bot_instance:
-            try:
-                notification_message = f"""🔄 *API режим переключен*
-
-Новый режим: *{mode_text}*
-API Key: `{api_key_display}`
-
-ShipStation API: https://ssapi.shipstation.com/
-
-⏰ Время: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')} UTC"""
-                
-                await safe_telegram_call(bot_instance.send_message(
-                    chat_id=ADMIN_TELEGRAM_ID,
-                    text=notification_message,
-                    parse_mode='Markdown'
-                ))
-                logger.info(f"API mode notification sent to admin {ADMIN_TELEGRAM_ID}")
-            except Exception as e:
-                logger.error(f"Failed to send API mode notification to admin: {e}")
-        
-        logger.info(f"API mode switched to: {mode}")
-        return {"status": "success", "mode": mode}
-    except Exception as e:
-        logger.error(f"Error setting API mode: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/upload-image")
 
