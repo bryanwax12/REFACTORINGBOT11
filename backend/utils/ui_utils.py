@@ -436,7 +436,6 @@ class OrderStepMessages:
         Returns:
             Tuple of (keyboard, message_text) or (None, message_text) if no keyboard
         """
-        from telegram import InlineKeyboardButton, InlineKeyboardMarkup
         
         # Map states to their messages and keyboards
         state_mapping = {

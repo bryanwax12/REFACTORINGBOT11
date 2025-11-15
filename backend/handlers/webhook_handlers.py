@@ -4,7 +4,6 @@ Handles payment webhooks from Oxapay and Telegram bot updates
 """
 import logging
 from fastapi import Request
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 logger = logging.getLogger(__name__)
 

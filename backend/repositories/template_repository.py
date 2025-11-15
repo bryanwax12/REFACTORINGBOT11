@@ -4,7 +4,6 @@ Template Repository
 """
 from typing import Dict, List, Optional
 from repositories.base_repository import BaseRepository
-from datetime import datetime, timezone
 import logging
 
 logger = logging.getLogger(__name__)

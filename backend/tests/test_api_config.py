@@ -4,7 +4,7 @@ Tests for API Configuration Manager
 import pytest
 import os
 from unittest.mock import patch
-from utils.api_config import APIConfigManager, get_api_config
+from utils.api_config import APIConfigManager
 
 
 class TestAPIConfigManager:

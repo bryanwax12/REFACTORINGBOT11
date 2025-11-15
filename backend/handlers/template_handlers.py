@@ -4,7 +4,7 @@ Manages address templates for quick order creation
 """
 import asyncio
 import logging
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update
 from telegram.ext import ContextTypes
 from datetime import datetime, timezone
 

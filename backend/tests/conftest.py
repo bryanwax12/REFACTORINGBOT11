@@ -2,7 +2,7 @@
 Pytest configuration and shared fixtures
 """
 import pytest
-from unittest.mock import Mock, AsyncMock, MagicMock
+from unittest.mock import Mock, AsyncMock
 from datetime import datetime, timezone
 from typing import Dict, Any
 

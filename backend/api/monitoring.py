@@ -3,11 +3,9 @@ Performance Monitoring API Endpoints
 Provides metrics and health checks for the application
 """
 from fastapi import APIRouter, Depends
-from typing import Dict, List, Optional
+from typing import Dict
 from datetime import datetime, timezone, timedelta
-import asyncio
 import psutil
-import os
 from handlers.admin_handlers import verify_admin_key
 
 router = APIRouter(prefix="/api/monitoring", tags=["monitoring"])

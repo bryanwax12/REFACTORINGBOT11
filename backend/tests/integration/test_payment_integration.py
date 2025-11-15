@@ -3,9 +3,7 @@ Payment Integration Tests
 Tests complete payment flow including balance, crypto, and order creation
 """
 import pytest
-import pytest_asyncio
-from unittest.mock import AsyncMock, patch, MagicMock
-from datetime import datetime, timezone
+from unittest.mock import AsyncMock, patch
 
 
 @pytest.mark.asyncio
@@ -117,7 +115,6 @@ class TestPaymentIntegration:
         """
         Test balance top-up flow
         """
-        from handlers.order_flow.template_save import handle_topup_amount
         from services.payment_service import validate_topup_amount
         
         # Step 1: Validate topup amount

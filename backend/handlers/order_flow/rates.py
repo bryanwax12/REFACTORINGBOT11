@@ -55,7 +55,6 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
     progress_msg = await safe_telegram_call(query.message.reply_text(ShippingRatesUI.progress_message(0)))
     
     try:
-        import requests
         import asyncio
         
         # Validate order data using service
@@ -216,7 +215,6 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             pass
         
         # Filter and format rates using service
-        from services.shipping_service import filter_and_sort_rates
         
         # First apply basic exclusion
         excluded_carriers = ['globalpost']

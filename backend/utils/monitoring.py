@@ -389,7 +389,7 @@ def track_metrics(metric_name: str):
                 metrics_collector.increment('requests_success')
                 metrics_collector.increment(metric_name)
                 return result
-            except Exception as e:
+            except Exception:
                 metrics_collector.increment('requests_failed')
                 metrics_collector.increment('errors_count')
                 raise

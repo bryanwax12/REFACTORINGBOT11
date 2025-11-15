@@ -4,7 +4,6 @@ Tests for SessionManager (MongoDB session management)
 import pytest
 import pytest_asyncio
 import asyncio
-from datetime import datetime, timezone
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 from dotenv import load_dotenv

@@ -3,7 +3,6 @@ Order Flow: Conversation Handler Setup
 Centralizes the ConversationHandler configuration for order creation flow
 """
 import logging
-from telegram import Update
 from telegram.ext import (
     CommandHandler,
     CallbackQueryHandler,
@@ -31,9 +30,8 @@ def setup_order_conversation_handler():
         EDIT_MENU, SELECT_CARRIER, PAYMENT_METHOD, TOPUP_AMOUNT,
         TEMPLATE_NAME, TEMPLATE_LIST, TEMPLATE_VIEW, TEMPLATE_LOADED,
         # Handler functions from server.py (large functions)
-        fetch_shipping_rates, select_carrier, process_payment,
-        handle_data_confirmation, show_edit_menu,
-        order_from_template_list, use_template, view_template,
+        select_carrier, process_payment,
+        handle_data_confirmation, order_from_template_list, use_template, view_template,
         delete_template, confirm_delete_template, my_templates_menu,
         order_new, start_command
     )
@@ -73,10 +71,6 @@ def setup_order_conversation_handler():
         skip_to_address2,
         skip_from_phone,
         skip_to_phone
-    )
-    from handlers.order_flow.confirmation import (
-        show_data_confirmation,
-        check_data_from_cancel
     )
     from handlers.order_flow.cancellation import (
         cancel_order,

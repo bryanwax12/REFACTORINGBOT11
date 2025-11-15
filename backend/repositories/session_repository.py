@@ -2,7 +2,7 @@
 Session Repository
 Репозиторий для работы с пользовательскими сессиями
 """
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional
 from repositories.base_repository import BaseRepository
 from datetime import datetime, timezone, timedelta
 import logging

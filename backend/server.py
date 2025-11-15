@@ -1,27 +1,20 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Request, Header, Depends, UploadFile, File, BackgroundTasks
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, APIRouter, Request
 from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv
 from pathlib import Path
-from bot_protection import BotProtection, get_copyright_footer, PROTECTED_BADGE, VERSION_WATERMARK
+from bot_protection import BotProtection
 from telegram_safety import TelegramSafetySystem, TelegramBestPractices
-from middleware.security import SecurityMiddleware, security_manager, audit_logger
 import os
 import logging
-import random
 import httpx
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
-from typing import List, Optional
-from datetime import datetime, timezone, timedelta
+from typing import Optional
+from datetime import datetime, timezone
 import uuid
 import time
 from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup, BotCommand, MenuButtonCommands
-import telegram.error
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes, MessageHandler, filters, ConversationHandler
 import asyncio
-import hashlib
-import hmac
 import warnings
 
 # Suppress PTBUserWarning about per_message settings (expected behavior)
@@ -36,71 +29,33 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 # Performance monitoring
-from utils.performance import profile_db_query, profile_api_call, QueryTimer
 
 # API Services
 from services.api_services import (
-    create_oxapay_invoice,
-    check_oxapay_payment,
-    check_shipstation_balance,
-    get_shipstation_carrier_ids,
-    validate_address_with_shipstation
+    check_shipstation_balance
 )
 
 # Business Logic Services
-from services import payment_service, template_service
-from services.shipping_service import (
-    display_shipping_rates as display_rates_service,
-    validate_shipping_address,
-    validate_parcel_data
-)
 
 # Common handlers (start, help, faq, button routing)
 from handlers.common_handlers import (
     start_command,
     help_command,
-    faq_command,
     button_callback,
     mark_message_as_selected,
-    safe_telegram_call,
-    check_user_blocked,
-    send_blocked_message,
-    check_maintenance_mode
+    safe_telegram_call
 )
 
 # Admin handlers
 from handlers.admin_handlers import (
-    verify_admin_key,
-    notify_admin_error,
-    get_stats_data,
-    get_expense_stats_data
+    notify_admin_error
 )
 
 # Webhook handlers
-from handlers.webhook_handlers import (
-    handle_oxapay_webhook,
-    handle_telegram_webhook
-)
 
 # Order flow handlers
-from handlers.order_flow import (
-    # FROM address handlers
-    order_from_name, order_from_address, order_from_city,
-    order_from_state, order_from_zip, order_from_phone,
-    # TO address handlers
-    order_to_name, order_to_address, order_to_city,
-    order_to_state, order_to_zip, order_to_phone,
-    # Parcel handlers
-    order_parcel_weight, order_parcel_length,
-    order_parcel_width, order_parcel_height,
-    # Skip handlers (NEW - refactored)
-    skip_from_address2, skip_to_address2,
-    skip_from_phone, skip_to_phone
-)
 
 # Import address2 handlers directly since they're not in __init__.py yet
-from handlers.order_flow.from_address import order_from_address2
-from handlers.order_flow.to_address import order_to_address2
 
 # Payment handlers
 from handlers.payment_handlers import (
@@ -112,7 +67,6 @@ from handlers.template_handlers import (
     my_templates_menu as handler_my_templates_menu,
     view_template as handler_view_template,
     use_template as handler_use_template,
-    delete_template as handler_delete_template,
     confirm_delete_template as handler_confirm_delete_template,
     rename_template_start as handler_rename_template_start,
     rename_template_save as handler_rename_template_save,
@@ -128,7 +82,6 @@ from handlers.order_flow.cancellation import (
 from handlers.order_flow.entry_points import (
     new_order_start as handler_new_order_start,
     start_order_with_template as handler_start_order_with_template,
-    return_to_payment_after_topup as handler_return_to_payment_after_topup,
 )
 
 # Order flow - confirmation handlers
@@ -139,7 +92,6 @@ from handlers.order_flow.confirmation import (
 # Order handlers (shipping rates, carrier selection)
 from handlers.order_handlers import (
     display_shipping_rates as handler_display_shipping_rates,
-    fetch_shipping_rates as handler_fetch_shipping_rates,
     select_carrier as handler_select_carrier,
 )
 
@@ -164,37 +116,11 @@ from utils.session_utils import (
     handle_step_error as util_handle_step_error
 )
 from utils.settings_cache import (
-    clear_settings_cache as util_clear_settings_cache,
-    SETTINGS_CACHE as UTIL_SETTINGS_CACHE
-)
-from utils.db_wrappers import (
-    find_user_by_telegram_id as util_find_user_by_telegram_id,
-    find_order_by_id as util_find_order_by_id,
-    find_template_by_id as util_find_template_by_id,
-    find_payment_by_invoice as util_find_payment_by_invoice,
-    count_user_templates as util_count_user_templates,
-    find_user_templates as util_find_user_templates,
-    update_order as util_update_order,
-    insert_payment as util_insert_payment,
-    update_template as util_update_template,
-    delete_template as util_delete_template
+    clear_settings_cache as util_clear_settings_cache
 )
 
 # MIGRATED: Profiled DB operations moved to utils.db_operations
 from utils.db_operations import (
-    find_user_by_telegram_id,
-    find_order_by_id,
-    find_template_by_id,
-    find_payment_by_invoice,
-    find_pending_order,
-    count_user_templates,
-    find_user_templates,
-    update_order,
-    insert_payment,
-    insert_pending_order,
-    delete_pending_order,
-    insert_template,
-    update_template,
     delete_template
 )
 
@@ -238,7 +164,6 @@ repository_manager = init_repositories(db)
 print("📦 Repository Manager initialized successfully")
 
 # In-memory cache for frequently accessed data
-from functools import lru_cache
 
 user_balance_cache = {}  # Cache user balances
 cache_ttl = 60  # Cache TTL in seconds
@@ -246,7 +171,7 @@ cache_ttl = 60  # Cache TTL in seconds
 # ============================================================
 # API CONFIGURATION (Refactored with APIConfigManager)
 # ============================================================
-from utils.api_config import get_api_config, init_api_config
+from utils.api_config import init_api_config
 
 # Инициализировать API Config Manager
 # Окружение определяется автоматически на основе api_mode из БД (см. startup)
@@ -303,7 +228,6 @@ if TELEGRAM_BOT_TOKEN:
 
 # Simple in-memory cache for frequently accessed settings
 # Cache moved to utils/cache.py
-from utils.cache import SETTINGS_CACHE, CACHE_TTL, get_api_mode_cached
 
 
 # Button click debouncing - prevent multiple rapid clicks
@@ -417,8 +341,6 @@ except Exception as e:
 # ==================== SECURITY ====================
 
 # Input Sanitization
-import re
-import html
 
 # DEPRECATED: Use utils.telegram_utils.sanitize_string instead
 sanitize_string = util_sanitize_string
@@ -585,7 +507,6 @@ class Template(BaseModel):
 # check_user_blocked and send_blocked_message moved to handlers/common_handlers.py
 
 # MIGRATED: Use handlers.common_handlers.handle_orphaned_button
-from handlers.common_handlers import handle_orphaned_button, check_stale_interaction
 
 # mark_message_as_selected_nonblocking removed - unused function (mark_message_as_selected is called directly)
 
@@ -603,7 +524,6 @@ from handlers.common_handlers import handle_orphaned_button, check_stale_interac
 
 
 # MIGRATED: Use handlers.order_handlers.handle_create_label_request
-from handlers.order_handlers import handle_create_label_request
 
 # button_callback moved to handlers/common_handlers.py
 
@@ -612,7 +532,6 @@ from handlers.order_handlers import handle_create_label_request
 my_balance_command = handler_my_balance_command
 
 # MIGRATED: Use handlers.payment_handlers.handle_topup_amount_input
-from handlers.payment_handlers import handle_topup_amount_input
 
 # Conversation states for order creation
 FROM_NAME, FROM_ADDRESS, FROM_ADDRESS2, FROM_CITY, FROM_STATE, FROM_ZIP, FROM_PHONE, TO_NAME, TO_ADDRESS, TO_ADDRESS2, TO_CITY, TO_STATE, TO_ZIP, TO_PHONE, PARCEL_WEIGHT, PARCEL_LENGTH, PARCEL_WIDTH, PARCEL_HEIGHT, CONFIRM_DATA, EDIT_MENU, SELECT_CARRIER, PAYMENT_METHOD, TOPUP_AMOUNT, TEMPLATE_NAME, TEMPLATE_LIST, TEMPLATE_VIEW, TEMPLATE_RENAME, TEMPLATE_LOADED = range(28)
@@ -663,11 +582,9 @@ new_order_start = handler_new_order_start
 show_data_confirmation = handler_show_data_confirmation
 
 # MIGRATED: Use handlers.order_flow.confirmation.handle_data_confirmation
-from handlers.order_flow.confirmation import handle_data_confirmation
 
 
 # MIGRATED: Use handlers.order_flow.confirmation.show_edit_menu
-from handlers.order_flow.confirmation import show_edit_menu
 
 # MIGRATED: Use handlers.order_flow.template_save.save_template_name
 save_template_name = handler_save_template_name
@@ -676,10 +593,8 @@ save_template_name = handler_save_template_name
 handle_template_update = handler_handle_template_update
 
 # MIGRATED: Use handlers.template_handlers.handle_template_new_name
-from handlers.template_handlers import handle_template_new_name
 
 # MIGRATED: Use handlers.order_flow.entry_points.continue_order_after_template
-from handlers.order_flow.entry_points import continue_order_after_template
 
 
 # MIGRATED: Use handlers.template_handlers.my_templates_menu
@@ -709,7 +624,6 @@ rename_template_start = handler_rename_template_start
 rename_template_save = handler_rename_template_save
 
 # MIGRATED: Use handlers.order_flow.entry_points.order_new
-from handlers.order_flow.entry_points import order_new
 
 
 # MIGRATED: Use handlers.order_flow.entry_points.order_from_template_list
@@ -717,21 +631,18 @@ from handlers.order_flow.entry_points import order_from_template_list
 
 
 # MIGRATED: Use handlers.order_flow.skip_handlers.skip_address_validation
-from handlers.order_flow.skip_handlers import skip_address_validation
 
 # MIGRATED: Use handlers.order_handlers.display_shipping_rates
 display_shipping_rates = handler_display_shipping_rates
 
 
 # MIGRATED: Use handlers.order_flow.rates.fetch_shipping_rates
-from handlers.order_flow.rates import fetch_shipping_rates
 
 
 # MIGRATED: Use handlers.order_handlers.select_carrier
 select_carrier = handler_select_carrier
 
 # MIGRATED: Use handlers.order_flow.payment.process_payment
-from handlers.order_flow.payment import process_payment
 
 
 async def create_order_in_db(user, data, selected_rate, amount, discount_percent=0, discount_amount=0):
@@ -786,7 +697,6 @@ async def create_order_in_db(user, data, selected_rate, amount, discount_percent
     order_dict['discount_amount'] = discount_amount  # Store discount amount
     
     # Insert order using Repository Pattern
-    from repositories import get_repositories
     repos = get_repositories()
     await repos.orders.collection.insert_one(order_dict)
     
@@ -801,7 +711,6 @@ async def create_and_send_label(order_id, telegram_id, message):
         
         logger.info(f"Creating label for order {order_id}")
         
-        import requests
         
         headers = {
             'API-Key': SHIPSTATION_API_KEY,
@@ -1451,7 +1360,7 @@ async def startup_event():
                 
             else:
                 # Polling mode
-                logger.info(f"🔄 POLLING MODE")
+                logger.info("🔄 POLLING MODE")
                 
                 # Убедиться что webhook отключен
                 try:

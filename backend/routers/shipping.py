@@ -3,7 +3,6 @@ Shipping Router
 Эндпоинты для управления доставкой и метками
 """
 from fastapi import APIRouter, HTTPException
-from typing import Optional
 import logging
 
 logger = logging.getLogger(__name__)

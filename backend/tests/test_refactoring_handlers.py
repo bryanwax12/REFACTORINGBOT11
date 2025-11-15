@@ -5,7 +5,6 @@ Tests the modular architecture after moving functions to handlers modules
 """
 
 import requests
-import json
 import os
 import time
 from dotenv import load_dotenv
@@ -14,7 +13,7 @@ from dotenv import load_dotenv
 load_dotenv('/app/frontend/.env')
 
 # Get backend URL from environment
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://tgbot-revamp.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://telegram-revival.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 def test_telegram_webhook_endpoint():
@@ -30,7 +29,7 @@ def test_telegram_webhook_endpoint():
         
         # Webhook endpoints typically don't support GET, so 405 is expected
         if response.status_code in [405, 200]:
-            print(f"   ✅ Webhook endpoint accessible")
+            print("   ✅ Webhook endpoint accessible")
         else:
             print(f"   ❌ Webhook endpoint not accessible: {response.status_code}")
             return False
@@ -50,7 +49,7 @@ def test_telegram_webhook_endpoint():
         
         # Should handle invalid data gracefully (200 or 400 are both acceptable)
         if response.status_code in [200, 400]:
-            print(f"   ✅ Webhook handles invalid data gracefully")
+            print("   ✅ Webhook handles invalid data gracefully")
         else:
             print(f"   ❌ Webhook error handling issue: {response.status_code}")
             return False
@@ -91,17 +90,17 @@ def test_telegram_webhook_endpoint():
         print(f"   Status Code: {response.status_code}")
         
         if response.status_code == 200:
-            print(f"   ✅ Webhook processes valid Telegram updates")
+            print("   ✅ Webhook processes valid Telegram updates")
             
             # Check response format
             try:
                 response_data = response.json()
                 if response_data.get('ok') == True:
-                    print(f"   ✅ Webhook returns correct response format")
+                    print("   ✅ Webhook returns correct response format")
                 else:
                     print(f"   ⚠️ Webhook response format: {response_data}")
             except:
-                print(f"   ⚠️ Webhook response not JSON (may be expected)")
+                print("   ⚠️ Webhook response not JSON (may be expected)")
         else:
             print(f"   ❌ Webhook failed to process valid update: {response.status_code}")
             try:
@@ -132,7 +131,7 @@ def test_admin_api_endpoints():
             print("   ❌ ADMIN_API_KEY not found in environment")
             return False
         
-        print(f"   Admin API key loaded: ✅")
+        print("   Admin API key loaded: ✅")
         
         # Test 1: GET /api/admin/stats with correct API key
         print("   Test 1: GET /api/admin/stats with valid API key")
@@ -147,7 +146,7 @@ def test_admin_api_endpoints():
         
         if response.status_code == 200:
             stats_data = response.json()
-            print(f"   ✅ Admin stats endpoint working")
+            print("   ✅ Admin stats endpoint working")
             print(f"   📊 Stats data keys: {list(stats_data.keys())}")
             
             # Verify expected stats fields
@@ -173,12 +172,12 @@ def test_admin_api_endpoints():
         print(f"   Status Code: {response.status_code}")
         
         if response.status_code in [401, 403]:
-            print(f"   ✅ Correctly rejected request without API key")
+            print("   ✅ Correctly rejected request without API key")
         else:
             print(f"   ❌ Should have rejected request without API key: {response.status_code}")
             return False
         
-        print(f"   ✅ All admin API endpoint tests passed")
+        print("   ✅ All admin API endpoint tests passed")
         return True
         
     except Exception as e:
@@ -244,10 +243,10 @@ def test_handlers_import_verification():
             sys.path.append('/app/backend')
             
             from handlers.common_handlers import start_command, help_command, faq_command, button_callback
-            print(f"      common_handlers functions: ✅")
+            print("      common_handlers functions: ✅")
             
             from handlers.admin_handlers import verify_admin_key, notify_admin_error
-            print(f"      admin_handlers functions: ✅")
+            print("      admin_handlers functions: ✅")
             
         except ImportError as e:
             print(f"      ❌ Import error: {e}")
@@ -266,15 +265,15 @@ def test_handlers_import_verification():
                 import_errors.append(line.strip())
         
         if import_errors:
-            print(f"      ❌ Import errors found in logs:")
+            print("      ❌ Import errors found in logs:")
             for error in import_errors[-3:]:  # Show last 3 import errors
                 if error:
                     print(f"         {error}")
             return False
         else:
-            print(f"      ✅ No import errors in backend logs")
+            print("      ✅ No import errors in backend logs")
         
-        print(f"   ✅ All handlers import tests passed")
+        print("   ✅ All handlers import tests passed")
         return True
         
     except Exception as e:
@@ -328,19 +327,19 @@ def main():
         status = "✅ ПРОЙДЕН" if result else "❌ ПРОВАЛЕН"
         print(f"   {test_name}: {status}")
     
-    print(f"\n📈 ОБЩИЕ РЕЗУЛЬТАТЫ:")
+    print("\n📈 ОБЩИЕ РЕЗУЛЬТАТЫ:")
     print(f"   Всего тестов: {total_tests}")
     print(f"   Пройдено: {passed_tests} ✅")
     print(f"   Провалено: {total_tests - passed_tests} ❌")
     print(f"   Процент успеха: {success_rate:.1f}%")
     
     if success_rate >= 75:
-        print(f"\n✅ РЕГРЕССИОННОЕ ТЕСТИРОВАНИЕ УСПЕШНО ЗАВЕРШЕНО")
-        print(f"   Рефакторинг модульной архитектуры работает корректно")
+        print("\n✅ РЕГРЕССИОННОЕ ТЕСТИРОВАНИЕ УСПЕШНО ЗАВЕРШЕНО")
+        print("   Рефакторинг модульной архитектуры работает корректно")
         return True
     else:
-        print(f"\n❌ РЕГРЕССИОННОЕ ТЕСТИРОВАНИЕ ВЫЯВИЛО ПРОБЛЕМЫ")
-        print(f"   Требуется исправление ошибок рефакторинга")
+        print("\n❌ РЕГРЕССИОННОЕ ТЕСТИРОВАНИЕ ВЫЯВИЛО ПРОБЛЕМЫ")
+        print("   Требуется исправление ошибок рефакторинга")
         return False
 
 

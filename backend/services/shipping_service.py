@@ -7,7 +7,7 @@ import httpx
 from typing import Optional, Dict, List, Any, Tuple
 from telegram import Update
 from telegram.ext import ContextTypes
-from utils.retry_utils import retry_on_api_error, SHIPSTATION_CIRCUIT
+from utils.retry_utils import retry_on_api_error
 
 logger = logging.getLogger(__name__)
 
@@ -592,7 +592,6 @@ def build_shipstation_label_request(
     Returns:
         ShipStation API request dictionary
     """
-    from datetime import datetime, timezone
     
     return {
         'shipment': {

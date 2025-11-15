@@ -1,7 +1,6 @@
 """User models"""
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
-from datetime import datetime
 
 class User(BaseModel):
     """User model"""

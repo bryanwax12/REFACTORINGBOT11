@@ -3,7 +3,6 @@ Unit tests for Template Service
 Tests all 8 functions in services/template_service.py
 """
 import pytest
-from unittest.mock import Mock, AsyncMock
 from services.template_service import (
     get_user_templates,
     create_template,

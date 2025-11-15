@@ -4,9 +4,8 @@ Includes: start, help, faq, button routing, and utility functions
 """
 import asyncio
 import logging
-import time
 from datetime import datetime, timezone
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 import telegram.error
 

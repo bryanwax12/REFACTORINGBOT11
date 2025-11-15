@@ -5,8 +5,7 @@ Telegram Bot Safety System - Защита от блокировки
 
 import asyncio
 import time
-from datetime import datetime, timezone, timedelta
-from typing import Dict, List, Optional
+from typing import Dict, List
 import logging
 
 logger = logging.getLogger(__name__)
@@ -69,7 +68,7 @@ class TelegramSafetySystem:
         ]
         
         if len(self.global_message_counter) >= self.MAX_MESSAGES_PER_SECOND_GLOBAL:
-            logger.warning(f"Global rate limit exceeded")
+            logger.warning("Global rate limit exceeded")
             return False
         
         return True

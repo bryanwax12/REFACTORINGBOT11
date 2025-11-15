@@ -1,7 +1,6 @@
 """
 Fixtures for unit tests
 """
-import pytest
 import pytest_asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
 import os

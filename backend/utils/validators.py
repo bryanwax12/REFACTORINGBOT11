@@ -275,10 +275,10 @@ def validate_dimension(dimension_str: str, dimension_name: str) -> Tuple[bool, s
             return False, f"❌ {dimension_name} должен быть больше 0", 0.0
         
         if dimension < 0.1:
-            return False, f"❌ Минимум: 0.1 дюйма", 0.0
+            return False, "❌ Минимум: 0.1 дюйма", 0.0
         
         if dimension > 108:
-            return False, f"❌ Максимум: 108 дюймов (9 футов)", 0.0
+            return False, "❌ Максимум: 108 дюймов (9 футов)", 0.0
         
         return True, "", dimension
         

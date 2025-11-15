@@ -2,8 +2,8 @@
 Base Repository Pattern
 Базовый класс для всех репозиториев БД
 """
-from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Any, TypeVar, Generic
+from abc import ABC
+from typing import Dict, List, Optional, TypeVar, Generic
 from motor.motor_asyncio import AsyncIOMotorCollection
 from datetime import datetime, timezone
 import logging

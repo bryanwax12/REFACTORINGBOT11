@@ -4,7 +4,6 @@ Unit tests for utility functions
 import pytest
 from utils.db_operations import (
     find_user_by_telegram_id,
-    find_order_by_id,
     count_user_templates
 )
 

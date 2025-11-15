@@ -4,7 +4,7 @@ Handles order data confirmation, editing, and template saving
 """
 import logging
 import asyncio
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 
 logger = logging.getLogger(__name__)

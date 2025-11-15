@@ -4,7 +4,7 @@ Handles collection of parcel dimensions and weight (4 steps)
 """
 import asyncio
 import logging
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update
 from telegram.ext import ContextTypes
 
 logger = logging.getLogger(__name__)

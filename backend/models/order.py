@@ -1,5 +1,5 @@
 """Order models"""
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict
 from typing import Optional, Dict, Any
 
 class OrderCreate(BaseModel):

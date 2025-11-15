@@ -3,8 +3,7 @@ Tests for Payment Gateway
 """
 import pytest
 import pytest_asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime, timezone
+from unittest.mock import MagicMock, patch
 from services.payment_gateway import (
     PaymentInvoice,
     OxapayGateway,

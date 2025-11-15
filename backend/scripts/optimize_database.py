@@ -5,7 +5,6 @@ Adds indexes and analyzes query performance for MongoDB
 import asyncio
 import logging
 from motor.motor_asyncio import AsyncIOMotorClient
-from datetime import datetime, timezone
 import os
 
 logging.basicConfig(level=logging.INFO)

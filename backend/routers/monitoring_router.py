@@ -3,7 +3,6 @@ Monitoring Router
 API endpoints для мониторинга и health checks
 """
 from fastapi import APIRouter, Depends, HTTPException
-from typing import Dict, Any
 import logging
 from handlers.admin_handlers import verify_admin_key
 from utils.monitoring import (

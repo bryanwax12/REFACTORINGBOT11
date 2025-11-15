@@ -3,7 +3,7 @@ User Service
 Сервис для управления пользователями - бизнес-логика работы с пользователями
 """
 import logging
-from typing import Optional, Dict, List, Any
+from typing import Optional, Dict, Any
 from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)

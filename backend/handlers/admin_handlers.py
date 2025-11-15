@@ -4,7 +4,7 @@ Includes: authentication, notifications, stats, and admin utilities
 """
 import logging
 from typing import Optional
-from fastapi import Header, HTTPException, Depends
+from fastapi import Header, HTTPException
 from datetime import datetime, timezone, timedelta
 
 # Logger

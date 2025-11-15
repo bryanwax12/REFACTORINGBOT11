@@ -133,7 +133,6 @@ def create_alert(rule: AlertRule, value: float) -> Alert:
 
 async def check_system_metrics():
     """Check system metrics and trigger alerts"""
-    from server import db
     import psutil
     
     try:

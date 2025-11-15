@@ -2,7 +2,7 @@
 Notification Service
 Централизованный сервис для всех уведомлений (Telegram, Email, SMS и т.д.)
 """
-from typing import Optional, Dict, List, Union
+from typing import Optional, Dict, List
 from telegram import Bot
 from telegram.error import TelegramError
 import logging

@@ -4,7 +4,6 @@ Provides backward compatibility for old API endpoints used by frontend
 """
 from fastapi import APIRouter, Header, HTTPException, Depends
 from typing import Optional
-import httpx
 
 router = APIRouter(prefix="/api", tags=["legacy"])
 
@@ -20,7 +19,6 @@ async def verify_api_key(x_api_key: Optional[str] = Header(None)):
 @router.get("/stats")
 async def legacy_get_stats(api_key: str = Depends(verify_api_key)):
     """Legacy stats endpoint"""
-    from server import db
     from repositories import get_repositories
     repos = get_repositories()
     

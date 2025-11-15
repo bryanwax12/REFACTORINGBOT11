@@ -3,7 +3,7 @@ Tests for Repository Pattern
 """
 import pytest
 import pytest_asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 from repositories.user_repository import UserRepository
 from repositories.order_repository import OrderRepository
 

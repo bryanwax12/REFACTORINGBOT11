@@ -46,7 +46,7 @@ class BotConfig:
         # Validate configuration
         self._validate_config()
         
-        logger.info(f"🤖 Bot Configuration Loaded:")
+        logger.info("🤖 Bot Configuration Loaded:")
         logger.info(f"   Environment: {self.environment.upper()}")
         logger.info(f"   Mode: {self.mode.upper()}")
         logger.info(f"   Active Bot: @{self.get_active_bot_username()}")

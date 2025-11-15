@@ -3,7 +3,7 @@ Webhook Processor
 Унифицированная обработка webhook от различных сервисов
 """
 from abc import ABC, abstractmethod
-from typing import Dict, Optional, Callable, Any
+from typing import Dict, Optional
 import hmac
 import hashlib
 import logging

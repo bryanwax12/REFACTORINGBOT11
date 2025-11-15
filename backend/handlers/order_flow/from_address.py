@@ -4,7 +4,7 @@ Handles collection of sender (FROM) address information through 7 steps
 """
 import asyncio
 import logging
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 
 logger = logging.getLogger(__name__)

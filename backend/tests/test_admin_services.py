@@ -3,9 +3,7 @@ Unit Tests for Admin Services
 Tests user, stats, and system admin services
 """
 import pytest
-import pytest_asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime, timezone
+from unittest.mock import AsyncMock, MagicMock
 
 
 @pytest.mark.asyncio

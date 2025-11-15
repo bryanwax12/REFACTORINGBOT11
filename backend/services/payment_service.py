@@ -4,8 +4,6 @@ Payment Service
 """
 import logging
 from typing import Optional, Dict, Any, Tuple
-from datetime import datetime, timezone
-from uuid import uuid4
 
 logger = logging.getLogger(__name__)
 

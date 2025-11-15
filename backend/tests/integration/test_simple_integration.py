@@ -3,7 +3,6 @@ Simplified Integration Tests
 Tests that verify integration between components without complex mocking
 """
 import pytest
-import pytest_asyncio
 from unittest.mock import AsyncMock, patch
 
 

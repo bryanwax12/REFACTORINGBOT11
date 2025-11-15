@@ -1,6 +1,5 @@
 """Shipping label models"""
 from pydantic import BaseModel, ConfigDict
-from typing import Optional
 
 class ShippingLabel(BaseModel):
     """Shipping label model"""

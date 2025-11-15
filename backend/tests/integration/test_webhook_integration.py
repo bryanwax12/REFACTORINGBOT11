@@ -3,10 +3,7 @@ Webhook Integration Tests
 Tests Telegram webhook handling and API integration
 """
 import pytest
-import pytest_asyncio
-from unittest.mock import AsyncMock, patch, MagicMock
-from fastapi.testclient import TestClient
-import json
+from unittest.mock import AsyncMock, patch
 
 
 @pytest.mark.asyncio

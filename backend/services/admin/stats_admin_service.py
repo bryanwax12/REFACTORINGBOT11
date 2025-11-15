@@ -3,7 +3,7 @@ Stats Admin Service
 Handles statistics and analytics for admin panel
 """
 import logging
-from typing import Dict, List
+from typing import Dict
 from datetime import datetime, timezone, timedelta
 
 logger = logging.getLogger(__name__)

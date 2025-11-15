@@ -151,7 +151,6 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
         find_pending_order, delete_pending_order
     )
     from repositories import get_user_repo
-    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
     
     logger.info(f"return_to_payment_after_topup called - user_id: {update.effective_user.id}")
     query = update.callback_query

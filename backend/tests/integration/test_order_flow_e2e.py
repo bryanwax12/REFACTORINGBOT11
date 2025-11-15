@@ -3,7 +3,6 @@ End-to-End Order Flow Integration Tests
 Tests the complete order creation flow through ConversationHandler
 """
 import pytest
-import pytest_asyncio
 from unittest.mock import AsyncMock, patch, MagicMock
 from telegram.ext import ConversationHandler
 

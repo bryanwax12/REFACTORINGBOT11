@@ -3,7 +3,7 @@ Shared fixtures for integration tests
 """
 import pytest
 import pytest_asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 from telegram import Update, User, Chat, Message, CallbackQuery
 from telegram.ext import ContextTypes
 from motor.motor_asyncio import AsyncIOMotorClient

@@ -2,7 +2,6 @@
 Unit Tests for Order Utilities
 Tests order ID generation and validation
 """
-import pytest
 from utils.order_utils import (
     generate_order_id,
     generate_pure_uuid_order_id,

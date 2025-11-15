@@ -271,7 +271,6 @@ async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAUL
     import time
     import uuid
     from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-    from telegram.ext import ConversationHandler
     
     if not context.user_data.get('awaiting_topup_amount'):
         return

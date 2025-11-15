@@ -3,7 +3,7 @@ Unit tests for Payment Service
 Tests all 8 functions in services/payment_service.py
 """
 import pytest
-from unittest.mock import Mock, AsyncMock
+from unittest.mock import AsyncMock
 from services.payment_service import (
     get_user_balance,
     add_balance,

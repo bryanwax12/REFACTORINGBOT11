@@ -463,7 +463,7 @@ class ConfigValidator:
         
         # Логирование
         if is_valid:
-            logger.info(f"✅ Configuration validation passed")
+            logger.info("✅ Configuration validation passed")
             if self.warnings:
                 logger.warning(f"⚠️ {len(self.warnings)} warnings found")
         else:
@@ -484,7 +484,7 @@ class ConfigValidator:
         
         # Summary
         summary = report['summary']
-        print(f"\n📊 Summary:")
+        print("\n📊 Summary:")
         print(f"   Critical Errors: {summary['critical_errors']}")
         print(f"   Warnings: {summary['warnings']}")
         print(f"   Info: {summary['info']}")
