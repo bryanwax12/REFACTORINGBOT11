@@ -1044,13 +1044,6 @@ async def show_edit_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # MIGRATED: Use handlers.order_flow.template_save.save_template_name
 save_template_name = handler_save_template_name
 
-        context.user_data['last_bot_message_id'] = bot_msg.message_id
-        context.user_data['last_bot_message_text'] = message_text
-    
-    # Save template name for potential continuation
-    context.user_data['saved_template_name'] = template_name
-    
-
 # MIGRATED: Use handlers.order_flow.template_save.handle_template_update
 handle_template_update = handler_handle_template_update
 
