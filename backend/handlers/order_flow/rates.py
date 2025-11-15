@@ -24,7 +24,10 @@ SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY_PROD') or os.environ.g
 async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Fetch shipping rates from ShipStation with caching"""
     logger.info("🚀 fetch_shipping_rates called")
+    
+    # Handle both callback queries and direct message calls
     query = update.callback_query
+    message = update.effective_message
     
     # Import cache
     from services.shipstation_cache import shipstation_cache
