@@ -219,7 +219,7 @@ async def skip_parcel_width_height(update: Update, context: ContextTypes.DEFAULT
 @with_user_session(create_user=False, require_session=True)
 async def skip_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Skip height only - use standard 10 inches"""
-    from server import CALCULATING_RATES
+    from handlers.order_flow.rates import fetch_shipping_rates
     
     query = update.callback_query
     await safe_telegram_call(query.answer())
@@ -237,14 +237,8 @@ async def skip_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE)
         data={'parcel_height': 10.0}
     )
     
-    return await handle_skip_field(
-        update, context,
-        field_name='height_set',
-        field_value=True,
-        next_step_const=CALCULATING_RATES,
-        next_step_name='CALCULATING_RATES',
-        next_message=OrderStepMessages.CALCULATING_RATES
-    )
+    # Call fetch_shipping_rates to calculate and show rates
+    return await fetch_shipping_rates(update, context)
 
 
 async def skip_address_validation(update: Update, context: ContextTypes.DEFAULT_TYPE):
