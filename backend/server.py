@@ -4405,7 +4405,8 @@ async def debug_persistence():
         }
 
 
-@api_router.get("/telegram/status")
+# MOVED TO routers/bot.py
+# @api_router.get("/telegram/status")
 async def telegram_status():
     """Check Telegram bot application status (NO AUTH REQUIRED FOR DEBUG)"""
     webhook_url = os.environ.get('WEBHOOK_URL', '')
