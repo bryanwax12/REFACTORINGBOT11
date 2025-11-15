@@ -44,40 +44,40 @@ async def legacy_get_expense_stats(
 
 @router.get("/orders")
 async def legacy_get_orders(api_key: str = Depends(verify_api_key)):
-    """Legacy orders endpoint"""
+    """Legacy orders endpoint - returns array directly"""
     from server import db
     orders = await db.orders.find({}, {"_id": 0}).limit(100).to_list(100)
-    return {"orders": orders}
+    return orders
 
 
 @router.get("/users")
 async def legacy_get_users(api_key: str = Depends(verify_api_key)):
-    """Legacy users endpoint"""
+    """Legacy users endpoint - returns array directly"""
     from server import db
     users = await db.users.find({}, {"_id": 0}).limit(100).to_list(100)
-    return {"users": users}
+    return users
 
 
 @router.get("/topups")
 async def legacy_get_topups(api_key: str = Depends(verify_api_key)):
-    """Legacy topups endpoint"""
+    """Legacy topups endpoint - returns array directly"""
     from server import db
     payments = await db.payments.find(
         {"type": "topup"},
         {"_id": 0}
     ).limit(100).to_list(100)
-    return {"topups": payments}
+    return payments
 
 
 @router.get("/users/leaderboard")
 async def legacy_get_leaderboard(api_key: str = Depends(verify_api_key)):
-    """Legacy leaderboard endpoint"""
+    """Legacy leaderboard endpoint - returns array directly"""
     from server import db
     users = await db.users.find(
         {"balance": {"$gt": 0}},
         {"_id": 0}
     ).sort("balance", -1).limit(10).to_list(10)
-    return {"leaderboard": users}
+    return users
 
 
 @router.get("/settings/api-mode")
