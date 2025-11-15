@@ -2381,28 +2381,7 @@ async def root():
 
 # Debug endpoints removed - were causing startup issues and memory_handler references
 
-@api_router.post("/admin/create-label/{order_id}", dependencies=[Depends(verify_admin_key)])
-
-@api_router.post("/admin/create-label-manual", dependencies=[Depends(verify_admin_key)])
-@api_router.post("/oxapay/webhook")
-
-@api_router.get("/debug/active-conversations")
-
-@api_router.get("/debug/persistence")
-
-@api_router.post("/upload-image")
-
-
-@api_router.post("/users/{telegram_id}/balance/add")
-
-
-@api_router.post("/users/{telegram_id}/discount")
-
-@api_router.get("/carriers")
-
-@api_router.get("/stats")
-# Direct endpoint for clearing conversations (easier access)
-@app.get("/clear-conversations")
+# Old API decorators removed - endpoints moved to routers/
 
 @app.get("/api/performance/stats")
 async def get_performance_statistics(admin_verified: bool = Depends(verify_admin_key)):
