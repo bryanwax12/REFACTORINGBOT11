@@ -1138,7 +1138,7 @@ class DataConfirmationUI:
     @staticmethod
     def confirmation_header() -> str:
         """Header for data confirmation"""
-        return "📋 *Проверьте введенные данные:*\n\n"
+        return "📋 *ПРОВЕРКА ДАННЫХ ЗАКАЗА*\n" + "═" * 30 + "\n\n"
     
     @staticmethod
     def format_address_section(title: str, data: dict, prefix: str) -> str:
