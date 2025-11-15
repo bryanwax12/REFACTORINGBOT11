@@ -508,25 +508,8 @@ api_router = APIRouter(prefix="/api")
 import re
 import html
 
-def sanitize_string(text: str, max_length: int = 200) -> str:
-    """Sanitize input string to prevent injection attacks"""
-    if not text:
-        return ""
-    
-    # Remove null bytes
-    text = text.replace('\x00', '')
-    
-    # Escape HTML
-    text = html.escape(text)
-    
-    # Remove potentially dangerous characters
-    text = re.sub(r'[<>"\']', '', text)
-    
-    # Limit length
-    if len(text) > max_length:
-        text = text[:max_length]
-    
-    return text.strip()
+# DEPRECATED: Use utils.telegram_utils.sanitize_string instead
+sanitize_string = util_sanitize_string
 
 # sanitize_address and sanitize_phone removed - unused functions
 
