@@ -35,8 +35,8 @@ class APIConfigManager:
         # CryptoBot Token
         self.cryptobot_token = os.environ.get('CRYPTOBOT_TOKEN', '')
         
-        # Current environment (default to production)
-        self._current_environment: APIEnvironment = "production"
+        # Current environment (default to TEST for sandbox mode)
+        self._current_environment: APIEnvironment = "test"  # ⚠️ SANDBOX MODE ENABLED
         
         # Cache для текущих активных ключей
         self._active_keys_cache: Dict[str, str] = {}
