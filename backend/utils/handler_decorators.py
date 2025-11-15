@@ -553,6 +553,9 @@ def with_services(
             if payment_service:
                 kwargs['payment_service'] = factory.get_payment_service()
             
+            if template_service:
+                kwargs['template_service'] = factory.get_template_service()
+            
             return await func(update, context, *args, **kwargs)
         
         return wrapper
