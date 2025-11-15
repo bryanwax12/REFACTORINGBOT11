@@ -568,6 +568,9 @@ STATE_NAMES = {
     TEMPLATE_LOADED: "TEMPLATE_LOADED"
 }
 
+# Reverse mapping: string names to state constants
+STATE_CONSTANTS = {v: k for k, v in STATE_NAMES.items()}
+
 # MIGRATED: Use handlers.order_flow.entry_points.new_order_start
 # Keeping alias for backward compatibility
 new_order_start = handler_new_order_start
