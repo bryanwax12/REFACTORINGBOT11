@@ -123,6 +123,23 @@ def get_skip_and_cancel_keyboard(skip_callback: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(keyboard)
 
 
+def get_standard_size_and_cancel_keyboard(standard_size_callback: str) -> InlineKeyboardMarkup:
+    """
+    Keyboard with 'Use Standard Size' and Cancel buttons (for parcel dimensions)
+    
+    Args:
+        standard_size_callback: Callback data for standard size button
+    
+    Returns:
+        InlineKeyboardMarkup with standard size and cancel buttons
+    """
+    keyboard = [
+        [InlineKeyboardButton("⏭️ Использовать стандартные размеры", callback_data=standard_size_callback)],
+        [InlineKeyboardButton(ButtonTexts.CANCEL, callback_data=CallbackData.CANCEL_ORDER)]
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
 def get_back_to_menu_keyboard() -> InlineKeyboardMarkup:
     """Simple back to menu button"""
     keyboard = [[InlineKeyboardButton(ButtonTexts.BACK_TO_MENU, callback_data=CallbackData.START)]]
