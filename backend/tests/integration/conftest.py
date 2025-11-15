@@ -18,10 +18,22 @@ async def test_db():
     db_name = os.environ.get('MONGODB_DB_NAME', 'telegram_shipping_bot')
     db = client[db_name]
     
+    # Cleanup BEFORE tests: remove test data from previous runs
+    await db.user_sessions.delete_many({"user_id": 123456789})
+    await db.users.delete_many({"telegram_id": 123456789})
+    await db.orders.delete_many({"telegram_id": 123456789})
+    await db.templates.delete_many({"telegram_id": 123456789})
+    await db.payments.delete_many({"telegram_id": 123456789})
+    
     yield db
     
-    # Cleanup: don't drop collections in production, just clean test data
-    # await db.test_orders.delete_many({"test": True})
+    # Cleanup AFTER tests: remove test data
+    await db.user_sessions.delete_many({"user_id": 123456789})
+    await db.users.delete_many({"telegram_id": 123456789})
+    await db.orders.delete_many({"telegram_id": 123456789})
+    await db.templates.delete_many({"telegram_id": 123456789})
+    await db.payments.delete_many({"telegram_id": 123456789})
+    
     client.close()
 
 
