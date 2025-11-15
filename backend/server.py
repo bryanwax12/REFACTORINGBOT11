@@ -1041,88 +1041,9 @@ async def show_edit_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = "✏️ Что вы хотите изменить?"
     
     # Build keyboard using UI utils
-    reply_markup = DataConfirmationUI.build_edit_menu_keyboard()
-    
-    await safe_telegram_call(query.message.reply_text(message, reply_markup=reply_markup))
-    return EDIT_MENU
+# MIGRATED: Use handlers.order_flow.template_save.save_template_name
+save_template_name = handler_save_template_name
 
-# Template Management Functions
-async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Save template with user-provided name"""
-    template_name = update.message.text.strip()[:30]  # Limit to 30 chars
-    
-    if not template_name:
-        await safe_telegram_call(update.message.reply_text("❌ Название не может быть пустым. Попробуйте еще раз:"))
-        return TEMPLATE_NAME
-    
-    telegram_id = update.effective_user.id
-    
-    # Check if template with this name already exists
-    from repositories import get_repositories
-    repos = get_repositories()
-    existing = await repos.templates.find_one({
-        "telegram_id": telegram_id,
-        "name": template_name
-    })
-    
-    if existing:
-        # Ask to update or use new name
-        keyboard = [
-            [InlineKeyboardButton("🔄 Обновить существующий", callback_data=f'template_update_{existing["id"]}')],
-            [InlineKeyboardButton("📝 Ввести другое название", callback_data='template_new_name')],
-            [InlineKeyboardButton("❌ Отмена", callback_data='start')]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        
-        bot_msg = await safe_telegram_call(update.message.reply_text(
-            f"""⚠️ Шаблон с названием "{template_name}" уже существует.
-
-Что делать?""",
-            reply_markup=reply_markup
-        ))
-        # Don't clear last_bot_message here - we need it for mark_message_as_selected
-        context.user_data['pending_template_name'] = template_name
-        return TEMPLATE_NAME
-    
-    # Create template using template service
-    success, template_id, error = await template_service.create_template(
-        telegram_id=telegram_id,
-        template_name=template_name,
-        order_data=context.user_data,
-        insert_template_func=insert_template,
-        count_user_templates_func=count_user_templates,
-        max_templates=10
-    )
-    
-    if not success:
-        await safe_telegram_call(update.message.reply_text(
-            f"""❌ *Ошибка сохранения шаблона*
-
-{error}""",
-            parse_mode='Markdown'
-        ))
-        return ConversationHandler.END
-    
-    keyboard = [
-        [InlineKeyboardButton("📦 Продолжить создание заказа", callback_data='continue_order')],
-        [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    message_text = f"""✅ *Шаблон "{template_name}" сохранен!*
-
-Теперь вы можете использовать его для быстрого создания заказов.
-
-*Продолжить создание этого заказа?*"""
-    
-    bot_msg = await safe_telegram_call(update.message.reply_text(
-        message_text,
-        reply_markup=reply_markup,
-        parse_mode='Markdown'
-    ))
-    
-    # Save last bot message context for button protection
-    if bot_msg:
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
     
