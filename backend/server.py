@@ -2587,47 +2587,6 @@ async def deduct_balance(telegram_id: int, amount: float):
 
 
 @api_router.post("/users/{telegram_id}/discount")
-async def set_user_discount(telegram_id: int, discount: float):
-    """
-    Set discount percentage for a user (e.g., 10 for 10% discount)
-    """
-    try:
-        if discount < 0 or discount > 100:
-            raise HTTPException(status_code=400, detail="Discount must be between 0 and 100")
-        
-        # Check if user exists using Repository Pattern
-        from repositories import get_user_repo
-        user_repo = get_user_repo()
-        user = await user_repo.find_by_telegram_id(telegram_id)
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-        
-        # Update discount using Repository Pattern
-        await user_repo.update_user_field(telegram_id, "discount", discount)
-        
-        # Notify user if bot is available and discount is set
-        if bot_instance and discount > 0:
-            try:
-                keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-                
-                await safe_telegram_call(bot_instance.send_message(
-                    chat_id=telegram_id,
-                    text=f"""🎉 Поздравляем!
-
-Вам предоставлена скидка {discount}% на все заказы!
-
-Скидка будет автоматически применена при создании следующих заказов.""",
-                    reply_markup=reply_markup
-                ))
-            except Exception as e:
-                logger.error(f"Failed to notify user about discount: {e}")
-        
-        return {"success": True, "telegram_id": telegram_id, "discount": discount}
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/carriers")
 
