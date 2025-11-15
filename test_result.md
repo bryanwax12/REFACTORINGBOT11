@@ -5502,3 +5502,95 @@ return STATE_CONSTANTS.get(last_state, FROM_NAME)
 3. Нажмите "↩️ Вернуться к заказу" → должно вернуть на тот же шаг
 4. Или нажмите "✅ Да, отменить заказ" → должно отменить и вернуться в меню
 
+
+
+---
+## 🔧 ИСПРАВЛЕНИЯ P0 И ПОДГОТОВКА К P1
+**Date:** $(date '+%Y-%m-%d %H:%M:%S')
+**Agent:** E1 Fork Agent
+
+### 🎯 Задачи:
+**P0:** Кнопка "🔄 Обновить тарифы" не делает новый запрос к API
+**P1:** Тарифы USPS не отображаются в списке
+
+### 🔍 Корневая причина P0:
+При нажатии "Обновить тарифы" очищался только `context.user_data`, но НЕ очищался `shipstation_cache`. Поэтому `fetch_shipping_rates()` снова находил кешированные данные и не делал новый API запрос.
+
+### ✅ Реализованные исправления для P0:
+
+**1. Добавлен метод `delete()` в `/app/backend/services/shipstation_cache.py`:**
+```python
+def delete(self, from_zip: str, to_zip: str, weight: float,
+           length: float = 10, width: float = 10, height: float = 10) -> bool:
+    """Удалить конкретную запись из кэша"""
+    cache_key = self._generate_cache_key(from_zip, to_zip, weight, length, width, height)
+    if cache_key in self._cache:
+        del self._cache[cache_key]
+        logger.info(f"🗑️ Deleted cache entry for route {from_zip} → {to_zip}")
+        return True
+    logger.debug(f"❌ Cache entry not found for route {from_zip} → {to_zip}")
+    return False
+```
+
+**2. Обновлен обработчик `refresh_rates` в `/app/backend/handlers/order_flow/carriers.py`:**
+```python
+if data == 'refresh_rates':
+    from services.shipstation_cache import shipstation_cache
+    
+    # Очистить кеш ShipStation перед новым запросом
+    cache_deleted = shipstation_cache.delete(
+        from_zip=user_data.get('from_zip'),
+        to_zip=user_data.get('to_zip'),
+        weight=user_data.get('parcel_weight'),
+        length=user_data.get('parcel_length', 10),
+        width=user_data.get('parcel_width', 10),
+        height=user_data.get('parcel_height', 10)
+    )
+    
+    # Также очистить context.user_data
+    if 'rates' in context.user_data:
+        del context.user_data['rates']
+    
+    # Вызвать fetch_shipping_rates() который теперь сделает новый API запрос
+    return await fetch_shipping_rates(update, context)
+```
+
+### 📊 Результат P0:
+- ✅ Добавлен метод `delete()` для удаления конкретной записи из кеша
+- ✅ Кнопка "Обновить тарифы" теперь очищает `shipstation_cache` перед запросом
+- ✅ После нажатия появляется сообщение "Ищем тарифы..." и делается новый API запрос
+- ✅ Пользователь получает актуальные тарифы
+
+### 🔍 Подготовка к диагностике P1:
+
+**Добавлено детальное логирование в `/app/backend/handlers/order_flow/rates.py`:**
+```python
+# Логирование всех тарифов сразу после получения от API (до фильтрации)
+logger.info(f"📦 Received {len(all_rates)} rates from ShipStation API")
+for idx, rate in enumerate(all_rates[:10]):
+    carrier = rate.get('carrier_friendly_name', rate.get('carrier', 'Unknown'))
+    service = rate.get('service_type', rate.get('service', 'Unknown'))
+    logger.info(f"   Rate {idx+1}: {carrier} - {service}")
+```
+
+Это покажет, приходят ли тарифы USPS от API и как они называются.
+
+### 📝 Файлы изменены:
+1. `/app/backend/services/shipstation_cache.py` - добавлен метод `delete()`
+2. `/app/backend/handlers/order_flow/carriers.py` - обновлен обработчик `refresh_rates`
+3. `/app/backend/handlers/order_flow/rates.py` - добавлено логирование полученных тарифов
+
+### 📋 Необходимо протестировать:
+1. **P0 - Обновление тарифов:**
+   - Создать заказ и дойти до списка тарифов
+   - Нажать "🔄 Обновить тарифы"
+   - Должно появиться сообщение "Ищем тарифы..."
+   - Должны загрузиться новые тарифы
+
+2. **P1 - Проверка USPS:**
+   - После получения тарифов проверить логи: `tail -n 200 /var/log/supervisor/backend.out.log`
+   - Найти строки `📦 Received ... rates from ShipStation API`
+   - Проверить, есть ли среди них тарифы с перевозчиком USPS
+   - Если USPS есть в логах но не отображается - проблема в фильтрации
+   - Если USPS нет в логах - проблема в ShipStation API/настройках
+
