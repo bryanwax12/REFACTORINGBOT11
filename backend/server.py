@@ -131,9 +131,6 @@ from utils.db_operations import (
 
 # Debug logging removed - was causing startup issues
 
-ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
-
 # MongoDB connection with connection pooling for high load
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(
