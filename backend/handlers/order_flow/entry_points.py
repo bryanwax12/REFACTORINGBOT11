@@ -25,10 +25,10 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     from server import (
         FROM_NAME, STATE_NAMES,
         safe_telegram_call,
-        mark_message_as_selected,
-        count_user_templates
+        mark_message_as_selected
     )
     from utils.maintenance_check import check_maintenance_mode
+    from utils.db_operations import count_user_templates
     from utils.ui_utils import MessageTemplates
     import asyncio
     
