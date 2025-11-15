@@ -240,7 +240,7 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     
     # Update session via repository
     # Session service injected via decorator
-    await session_service.save_order_field(user_id, {'from_city': city})
+    await session_service.save_order_field(user_id, 'from_city', city)
     await session_service.update_session_step(user_id, step="FROM_STATE")
     
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
