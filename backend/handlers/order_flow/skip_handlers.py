@@ -332,12 +332,13 @@ async def skip_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE)
     # Update session with height
     await session_manager.update_session_atomic(
         user_id,
-        step='CALCULATING_RATES',
+        step='CONFIRM_DATA',
         data={'parcel_height': 10.0}
     )
     
-    # Call fetch_shipping_rates to calculate and show rates
-    return await fetch_shipping_rates(update, context)
+    # Show data confirmation screen before fetching rates
+    from handlers.order_flow.confirmation import show_data_confirmation
+    return await show_data_confirmation(update, context)
 
 
 async def skip_address_validation(update: Update, context: ContextTypes.DEFAULT_TYPE):
