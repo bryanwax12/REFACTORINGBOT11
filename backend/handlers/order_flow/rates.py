@@ -253,6 +253,13 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         except asyncio.CancelledError:
             pass
         
+        # Log all rates received from API for debugging
+        logger.info(f"📦 Received {len(all_rates)} rates from ShipStation API")
+        for idx, rate in enumerate(all_rates[:10]):  # Log first 10
+            carrier = rate.get('carrier_friendly_name', rate.get('carrier', 'Unknown'))
+            service = rate.get('service_type', rate.get('service', 'Unknown'))
+            logger.info(f"   Rate {idx+1}: {carrier} - {service}")
+        
         # Filter and format rates using service
         
         # First apply basic exclusion
