@@ -964,6 +964,12 @@ ShipStation не смог проверить один или оба адреса
                     break
         
         logger.info(f"📊 Filtered {len(filtered)} rates from {len(rates)} total")
+        
+        # If we have few rates (< 15), show all to give users more options
+        if len(rates) < 15:
+            logger.info("📊 Less than 15 rates total, showing all")
+            return rates
+        
         return filtered if filtered else rates  # Return all if no matches
     
     @staticmethod
