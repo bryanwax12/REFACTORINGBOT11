@@ -202,6 +202,17 @@ class TestOrderFlowE2E:
             "created_at": "2024-01-01T00:00:00Z"
         })
         
+        # Setup: Create session for user
+        from datetime import datetime, timezone
+        await test_db.user_sessions.insert_one({
+            "user_id": 123456789,
+            "session_type": "conversation",
+            "current_step": "PAYMENT_METHOD",
+            "temp_data": {},
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc)
+        })
+        
         # Setup: User selected a rate
         mock_context.user_data['selected_rate'] = sample_shipping_rate
         mock_context.user_data['final_amount'] = 15.50
