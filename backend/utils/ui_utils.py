@@ -890,6 +890,12 @@ ShipStation не смог проверить один или оба адреса
         # Filter to show only popular rates
         filtered_rates = ShippingRatesUI.filter_popular_rates(rates)
         
+        # Sort by price (lowest to highest)
+        filtered_rates = sorted(
+            filtered_rates, 
+            key=lambda r: r.get('shipping_amount', {}).get('amount', r.get('amount', 999999.0))
+        )
+        
         # Group rates by carrier
         rates_by_carrier = {}
         for i, rate in enumerate(filtered_rates):
