@@ -130,7 +130,7 @@ async def check_shipstation_balance():
             return {"success": False, "error": "API key not configured"}
         
         headers = {
-            "Authorization": f"Bearer {SHIPSTATION_API_KEY}",
+            "API-Key": SHIPSTATION_API_KEY,
             "Content-Type": "application/json"
         }
         
