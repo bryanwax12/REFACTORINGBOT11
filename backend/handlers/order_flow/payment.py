@@ -56,20 +56,14 @@ async def show_payment_methods(update: Update, context: ContextTypes.DEFAULT_TYP
             f"💳 Оплатить с баланса (${balance:.2f})",
             callback_data='pay_from_balance'
         )])
-    
-    keyboard.append([InlineKeyboardButton(
-        "💰 Оплатить криптовалютой",
-        callback_data='pay_crypto'
-    )])
-    
-    if balance < amount:
+    else:
         deficit = amount - balance
         keyboard.append([InlineKeyboardButton(
             f"➕ Пополнить баланс (не хватает ${deficit:.2f})",
             callback_data='topup_for_order'
         )])
     
-    keyboard.append([InlineKeyboardButton("🔙 Назад к тарифам", callback_data='back_to_rates')])
+    keyboard.append([InlineKeyboardButton("📋 Информация о заказе", callback_data='order_summary')])
     keyboard.append([InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')])
     
     reply_markup = InlineKeyboardMarkup(keyboard)
