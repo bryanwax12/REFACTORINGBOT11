@@ -379,66 +379,8 @@ save_to_session = util_save_to_session
 handle_critical_api_error = util_handle_critical_api_error
 
 
-async def handle_step_error(user_id: int, error: Exception, current_step: str, context: ContextTypes.DEFAULT_TYPE, allow_revert: bool = False):
-    """
-    Handle errors during step processing
-    
-    Args:
-        user_id: User ID
-        error: Exception that occurred
-        current_step: Current conversation step
-        context: Telegram context
-        allow_revert: If True, revert to previous step; if False, retry from same step
-    
-    Returns:
-        int: State to return to (current or previous)
-    """
-    logger.error(f"❌ Error at step {current_step} for user {user_id}: {error}")
-    
-    # Save error info to session for debugging
-    error_data = {
-        'last_error': str(error),
-        'error_step': current_step,
-        'error_timestamp': datetime.now(timezone.utc).isoformat()
-    }
-    
-    if allow_revert:
-        # Revert to previous step
-        previous_step = await session_manager.revert_to_previous_step(user_id, current_step, str(error))
-        if previous_step:
-            logger.info(f"🔙 Reverted user {user_id} from {current_step} to {previous_step}")
-            # Map step names to ConversationHandler states
-            step_to_state = {
-                "START": FROM_NAME,
-                "FROM_NAME": FROM_NAME,
-                "FROM_ADDRESS": FROM_NAME,
-                "FROM_ADDRESS2": FROM_ADDRESS,
-                "FROM_CITY": FROM_ADDRESS2,
-                "FROM_STATE": FROM_CITY,
-                "FROM_ZIP": FROM_STATE,
-                "FROM_PHONE": FROM_ZIP,
-                "TO_NAME": FROM_PHONE,
-                "TO_ADDRESS": TO_NAME,
-                "TO_ADDRESS2": TO_ADDRESS,
-                "TO_CITY": TO_ADDRESS2,
-                "TO_STATE": TO_CITY,
-                "TO_ZIP": TO_STATE,
-                "TO_PHONE": TO_ZIP,
-                "PARCEL_WEIGHT": TO_PHONE,
-                "PARCEL_LENGTH": PARCEL_WEIGHT,
-                "PARCEL_WIDTH": PARCEL_LENGTH,
-                "PARCEL_HEIGHT": PARCEL_WIDTH,
-                "CONFIRM_DATA": PARCEL_HEIGHT,
-                "CARRIER_SELECTION": CONFIRM_DATA,
-                "PAYMENT_METHOD": SELECT_CARRIER
-            }
-            return step_to_state.get(previous_step, current_step)
-    else:
-        # Save error but stay on same step (retry)
-        await session_manager.update_session_atomic(user_id, data=error_data)
-    
-    # Don't change step - let user retry from same step
-    return current_step
+# DEPRECATED: Use utils.session_utils.handle_step_error instead
+handle_step_error = util_handle_step_error
 
 # DEPRECATED: Use utils.telegram_utils.is_button_click_allowed instead
 # Keeping for backward compatibility
