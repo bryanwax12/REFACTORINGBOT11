@@ -975,18 +975,31 @@ ShipStation не смог проверить один или оба адреса
             carrier_lower = carrier.lower()
             service_lower = service.lower()
             
+            logger.info(f"🔍 Checking: carrier='{carrier}', service='{service}'")
+            
             # Check each carrier
+            matched = False
             for popular_carrier, popular_keywords in POPULAR_SERVICES.items():
-                if popular_carrier.lower() in carrier_lower:
+                # Check if carrier matches (more flexible matching)
+                carrier_match = (
+                    popular_carrier.lower() in carrier_lower or
+                    carrier_lower in popular_carrier.lower()
+                )
+                
+                if carrier_match:
+                    logger.info(f"   📍 Carrier matched: {popular_carrier}")
                     # Check if any popular keyword is in the service name
                     for keyword in popular_keywords:
                         if keyword in service_lower:
                             filtered.append(rate)
-                            logger.info(f"✅ Matched: {popular_carrier} - {service}")
+                            logger.info(f"   ✅ Service matched: {popular_carrier} - {service}")
+                            matched = True
                             break  # Found match, move to next rate
+                    if not matched:
+                        logger.warning(f"   ⚠️ Carrier matched but service '{service}' not in popular list")
                     break  # Carrier identified, move to next rate
         
-        logger.info(f"📊 Showing {len(filtered)} popular rates from {len(rates)} total")
+        logger.info(f"📊 Filtered: {len(filtered)} popular rates from {len(rates)} total")
         return filtered if filtered else rates  # Return all if no popular rates found
     
     @staticmethod
