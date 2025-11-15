@@ -932,12 +932,15 @@ ShipStation не смог проверить один или оба адреса
         Filter rates to show only popular services from top carriers
         
         Popular services by carrier:
-        - USPS: Priority Mail, Media Mail, First Class Mail
+        - USPS: Priority Mail, Media Mail, First Class Mail, Ground Advantage
         - FedEx: Ground, Home Delivery, 2Day
         - UPS: Ground, 3 Day Select, 2nd Day Air
         """
+        import logging
+        logger = logging.getLogger(__name__)
+        
         POPULAR_SERVICES = {
-            'USPS': ['Priority Mail', 'Media Mail', 'First Class Mail', 'Priority Mail Express'],
+            'USPS': ['Priority Mail', 'Media Mail', 'First Class', 'Ground Advantage', 'Priority Mail Express'],
             'FedEx': ['Ground', 'Home Delivery', '2Day', 'Express Saver'],
             'UPS': ['Ground', '3 Day Select', '2nd Day Air', 'Next Day Air']
         }
@@ -947,6 +950,8 @@ ShipStation не смог проверить один или оба адреса
             carrier = rate.get('carrier_friendly_name', rate.get('carrier', ''))
             service = rate.get('service_type', rate.get('service', ''))
             
+            logger.info(f"🔍 Checking rate: carrier='{carrier}', service='{service}'")
+            
             # Check if carrier is in popular list
             for popular_carrier, popular_services in POPULAR_SERVICES.items():
                 if popular_carrier.lower() in carrier.lower():
@@ -954,9 +959,11 @@ ShipStation не смог проверить один или оба адреса
                     for popular_service in popular_services:
                         if popular_service.lower() in service.lower():
                             filtered.append(rate)
+                            logger.info(f"✅ Matched: {popular_carrier} - {popular_service}")
                             break
                     break
         
+        logger.info(f"📊 Filtered {len(filtered)} rates from {len(rates)} total")
         return filtered if filtered else rates  # Return all if no matches
     
     @staticmethod
