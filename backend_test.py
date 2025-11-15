@@ -1018,8 +1018,8 @@ def test_telegram_bot_basic_flow():
         print("   Test 1: Telegram Webhook Endpoint Availability")
         
         # Test GET request (should return 405 Method Not Allowed)
-        response = requests.get(f"{API_BASE}/telegram/webhook", timeout=10)
-        print(f"   GET /api/telegram/webhook: {response.status_code} {'✅' if response.status_code == 405 else '❌'}")
+        response = requests.get(f"{BACKEND_URL}/telegram/webhook", timeout=10)
+        print(f"   GET /telegram/webhook: {response.status_code} {'✅' if response.status_code == 405 else '❌'}")
         
         # Test 2: Simulate /start command webhook
         print("   Test 2: Simulating /start Command")
