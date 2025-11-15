@@ -2630,55 +2630,6 @@ async def set_user_discount(telegram_id: int, discount: float):
         raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.get("/carriers")
-async def get_carriers():
-    """Get list of active carrier accounts from ShipStation"""
-    try:
-        if not SHIPSTATION_API_KEY:
-            raise HTTPException(status_code=500, detail="ShipStation API not configured")
-        
-        headers = {
-            'API-Key': SHIPSTATION_API_KEY,
-            'Content-Type': 'application/json'
-        }
-        
-        # Get carrier accounts (async)
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.get(
-                'https://api.shipstation.com/v2/carriers',
-                headers=headers
-            )
-        
-        if response.status_code != 200:
-            raise HTTPException(status_code=response.status_code, detail="Failed to fetch carriers")
-        
-        carriers_data = response.json()
-        carriers = carriers_data.get('carriers', [])
-        
-        # Format carriers
-        active_carriers = [
-            {
-                "carrier": carrier.get('friendly_name'),
-                "carrier_code": carrier.get('carrier_code'),
-                "account_id": carrier.get('carrier_id'),
-                "active": not carrier.get('disabled_by_billing_plan', False),
-                "services": len(carrier.get('services', []))
-            }
-            for carrier in carriers
-        ]
-        
-        return {
-            "carriers": active_carriers,
-            "total": len(active_carriers)
-        }
-        
-    except Exception as e:
-        logger.error(f"Error fetching carriers: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-class ShippingRateRequest(BaseModel):
-    from_address: Address
-    to_address: Address
-    parcel: Parcel
 
 @api_router.get("/stats")
 # Direct endpoint for clearing conversations (easier access)
