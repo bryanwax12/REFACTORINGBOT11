@@ -4627,3 +4627,40 @@ Fixed all 4 flaky tests that were failing due to event loop isolation issues:
 - `handle_topup_amount` → payment_handlers.py
 - `handle_topup_crypto_selection` → payment_handlers.py
 
+
+
+---
+## 🚀 P1 Progress Update - Server.py Decomposition 57% Complete
+**Date:** $(date)
+**Agent:** E1 Fork Agent
+
+### ✅ Additional Migrations Completed (3 payment handlers):
+
+**Payment Handlers (`/app/backend/handlers/payment_handlers.py`):**
+- ✅ `handle_topup_amount_input` - Handles custom topup input
+- ✅ `handle_topup_amount` - Creates Oxapay invoice for topup
+- ✅ `handle_topup_crypto_selection` - Handles crypto selection
+
+### 📊 Server.py Status:
+- **Before session:** 2639 lines
+- **After:** 2233 lines  
+- **Removed:** 406 lines (~15.4%)
+- **Target:** Remove ~710 lines total
+- **Progress:** 57% complete (406/710 lines)
+
+### ✅ All Tests Still Passing:
+```
+207 passed, 17 warnings in 5.09s (100% success)
+```
+
+### 📋 Remaining Work (9 handlers, ~300 lines):
+- `handle_data_confirmation` → order_flow/confirmation.py
+- `show_edit_menu` → order_flow/confirmation.py
+- `handle_template_new_name` → template_handlers.py
+- `continue_order_after_template` → order_flow/entry_points.py
+- `order_new` → order_flow/entry_points.py
+- `order_from_template_list` → order_flow/entry_points.py
+- `skip_address_validation` → order_flow/skip_handlers.py
+- `fetch_shipping_rates` → order_flow/ (new rates.py?)
+- `process_payment` → order_flow/payment.py
+
