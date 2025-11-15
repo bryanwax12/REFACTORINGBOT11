@@ -34,6 +34,22 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if data == 'refresh_rates':
         from handlers.order_flow.rates import fetch_shipping_rates
         logger.info("🔄 Refreshing shipping rates...")
+        
+        # Clear cached rates to force fresh API call
+        if 'rates' in context.user_data:
+            del context.user_data['rates']
+        if 'rates_cache_key' in context.user_data:
+            del context.user_data['rates_cache_key']
+        
+        # Remove old message with buttons
+        try:
+            await safe_telegram_call(query.message.edit_reply_markup(reply_markup=None))
+        except Exception as e:
+            logger.warning(f"Could not remove old buttons: {e}")
+        
+        # Add confirmation emoji
+        await query.answer("✅ Обновление тарифов...")
+        
         return await fetch_shipping_rates(update, context)
     
     # Handle cancel order
