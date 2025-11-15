@@ -5,7 +5,7 @@ Handles fetching and displaying shipping rates
 import logging
 import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ContextTypes, ConversationHandler
+from telegram.ext import ContextTypes
 from handlers.common_handlers import safe_telegram_call
 from handlers.admin_handlers import notify_admin_error
 from services.api_services import get_shipstation_carrier_ids

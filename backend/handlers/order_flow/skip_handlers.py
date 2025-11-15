@@ -185,7 +185,7 @@ async def skip_parcel_dimensions(update: Update, context: ContextTypes.DEFAULT_T
                 context.user_data[key] = value
     else:
         # If no session, try to get data directly from DB (last order draft)
-        logger.warning(f"No session found, trying to load from orders collection")
+        logger.warning("No session found, trying to load from orders collection")
         order_draft = await db.orders.find_one(
             {"telegram_id": user_id, "payment_status": {"$in": ["pending", "draft"]}},
             {"_id": 0},
