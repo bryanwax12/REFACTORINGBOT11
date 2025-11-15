@@ -90,7 +90,7 @@ async def skip_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE)
     
     return await handle_skip_field(
         update, context,
-        field_name='from_street2',
+        field_name='from_address2',
         field_value=None,
         next_step_const=FROM_CITY,
         next_step_name='FROM_CITY',
