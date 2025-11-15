@@ -14,8 +14,15 @@ logger = logging.getLogger(__name__)
 # Configuration from environment
 OXAPAY_API_KEY = os.environ.get('OXAPAY_API_KEY', '')
 OXAPAY_API_URL = 'https://api.oxapay.com'
+
 # Get ShipStation API key from environment (prefer PROD, fallback to TEST, then default)
-SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY_PROD') or os.environ.get('SHIPSTATION_API_KEY_TEST') or os.environ.get('SHIPSTATION_API_KEY', '')
+_PROD_KEY = os.environ.get('SHIPSTATION_API_KEY_PROD')
+_TEST_KEY = os.environ.get('SHIPSTATION_API_KEY_TEST')
+_DEFAULT_KEY = os.environ.get('SHIPSTATION_API_KEY', '')
+SHIPSTATION_API_KEY = _PROD_KEY or _TEST_KEY or _DEFAULT_KEY
+
+# Debug logging for API key loading
+logger.info(f"🔑 ShipStation API Key loading: PROD={'SET' if _PROD_KEY else 'NOT SET'}, TEST={'SET' if _TEST_KEY else 'NOT SET'}, DEFAULT={'SET' if _DEFAULT_KEY else 'NOT SET'}, FINAL={'SET (len={})'.format(len(SHIPSTATION_API_KEY)) if SHIPSTATION_API_KEY else 'NOT SET'}")
 
 
 @retry_on_api_error(max_attempts=3, min_wait=2, max_wait=10)
