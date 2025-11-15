@@ -271,7 +271,7 @@ def build_shipstation_rates_request(order_data: Dict[str, Any], carrier_ids: Lis
             'ship_to': {
                 'name': order_data['to_name'],
                 'phone': order_data.get('to_phone') or '+15551234567',
-                'address_line1': order_data['to_street'],
+                'address_line1': order_data.get('to_street') or order_data.get('to_address', ''),
                 'address_line2': order_data.get('to_street2', ''),
                 'city_locality': order_data['to_city'],
                 'state_province': order_data['to_state'],
@@ -282,7 +282,7 @@ def build_shipstation_rates_request(order_data: Dict[str, Any], carrier_ids: Lis
             'ship_from': {
                 'name': order_data['from_name'],
                 'phone': order_data.get('from_phone') or '+15551234567',
-                'address_line1': order_data['from_street'],
+                'address_line1': order_data.get('from_street') or order_data.get('from_address', ''),
                 'address_line2': order_data.get('from_street2', ''),
                 'city_locality': order_data['from_city'],
                 'state_province': order_data['from_state'],
