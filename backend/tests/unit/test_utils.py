@@ -53,9 +53,11 @@ class TestDBOperations:
     async def test_count_user_templates_multiple(self, test_db):
         """Test counting templates when user has multiple"""
         # Setup: Create test templates
+        from uuid import uuid4
         telegram_id = 123456789
         for i in range(3):
             await test_db.templates.insert_one({
+                "id": str(uuid4()),
                 "telegram_id": telegram_id,
                 "name": f"Template {i}",
                 "data": {}
