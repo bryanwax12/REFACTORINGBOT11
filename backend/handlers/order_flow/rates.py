@@ -108,6 +108,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         }
         carrier_ids = await get_shipstation_carrier_ids()
         logger.info(f"📦 Received carrier IDs: {len(carrier_ids) if carrier_ids else 0}")
+        logger.info(f"📦 Carrier IDs dict: {carrier_ids}")
         if not carrier_ids:
             from utils.ui_utils import get_edit_addresses_keyboard
             reply_markup = get_edit_addresses_keyboard()
