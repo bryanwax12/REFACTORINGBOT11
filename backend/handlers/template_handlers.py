@@ -14,19 +14,12 @@ logger = logging.getLogger(__name__)
 # These handlers allow users to save, view, edit, delete and use address templates
 
 
-async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, db, safe_telegram_call, mark_message_as_selected, check_user_blocked, send_blocked_message):
+async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Show user's saved templates menu
-    
-    Args:
-        update: Telegram update
-        context: Bot context
-        db: Database connection
-        safe_telegram_call: Safe Telegram API wrapper
-        mark_message_as_selected: Mark message function
-        check_user_blocked: Check if user blocked
-        send_blocked_message: Send blocked message
     """
+    from server import db, safe_telegram_call, mark_message_as_selected, check_user_blocked, send_blocked_message
+    
     query = update.callback_query
     if query:
         await safe_telegram_call(query.answer())
