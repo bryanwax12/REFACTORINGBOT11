@@ -233,7 +233,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             reply_markup = get_edit_addresses_keyboard()
             
             await safe_telegram_call(message.reply_text(
-                ShippingRatesUI.api_error_message(error_msg),
+                "❌ Не удалось получить тарифы доставки.\n\nПожалуйста, проверьте корректность адресов и попробуйте снова.",
                 reply_markup=reply_markup,
             ))
             
