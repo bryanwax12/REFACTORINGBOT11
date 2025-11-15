@@ -25,7 +25,7 @@
 
 **Результат**: Бизнес-логика отделена от presentation layer
 
-### **Phase 4: Router Decomposition (75%)**
+### **Phase 4: Router Decomposition (95%)**
 
 **Созданы и интегрированы роутеры**:
 
@@ -41,7 +41,7 @@
    - POST `/api/calculate-shipping`
 
 3. **orders.py** (6 эндпоинтов):
-   - POST `/api/orders` - создание заказа
+   - POST `/api/orders` - создание
    - GET `/api/orders/search` - поиск
    - GET `/api/orders/export/csv` - экспорт
    - GET `/api/orders` - список
@@ -55,7 +55,7 @@
    - GET `/api/debug/persistence`
 
 5. **bot.py** (5 эндпоинтов):
-   - GET `/api/bot/health` - здоровье бота
+   - GET `/api/bot/health` - здоровье
    - GET `/api/bot/status` - статус
    - POST `/api/bot/restart` - перезапуск
    - GET `/api/bot/logs` - логи
@@ -75,11 +75,29 @@
    - GET `/api/stats/expenses` - расходы
    - GET `/api/topups` - пополнения
 
-**Всего перенесено**: 30 эндпоинтов из api_router
+9. **users.py** (9 эндпоинтов) ✨ NEW:
+   - GET `/api/users/{telegram_id}/details` - детали
+   - POST `/api/users/{telegram_id}/block` - блокировка
+   - POST `/api/users/{telegram_id}/unblock` - разблокировка
+   - POST `/api/users/{telegram_id}/balance/add` - добавить баланс
+   - POST `/api/users/{telegram_id}/balance/deduct` - списать баланс
+   - POST `/api/users/{telegram_id}/discount` - установить скидку
+   - GET `/api/users/leaderboard` - рейтинг пользователей
+   - POST `/api/users/{telegram_id}/check-bot-access` - проверка доступа
+   - GET `/api/users/{telegram_id}/channel-status` - статус в канале
 
-**Осталось в api_router**: ~15-20 эндпоинтов (в основном users management и admin функции, многие дублируются в admin роутерах)
+10. **broadcast.py** (1 эндпоинт) ✨ NEW:
+    - POST `/api/broadcast` - массовая рассылка
 
-**Результат**: Значительная модуляризация API, server.py существенно разгружен
+11. **admin_labels.py** (2 эндпоинта) ✨ NEW:
+    - POST `/api/admin/create-label/{order_id}` - создать метку
+    - POST `/api/admin/create-label-manual` - добавить метку вручную
+
+**Всего перенесено**: 42 эндпоинта из api_router!
+
+**Осталось в api_router**: ~5-10 эндпоинтов (в основном устаревшие/дублирующиеся)
+
+**Результат**: Практически полная модуляризация API, server.py максимально разгружен!
 
 ---
 
