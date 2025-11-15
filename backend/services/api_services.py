@@ -134,12 +134,15 @@ async def check_shipstation_balance():
             logger.info("🧪 Test mode - skipping balance check")
             return {"success": True, "balance": 999.99, "test_mode": True}
         
-        if not SHIPSTATION_API_KEY:
+        # Load API key inside function to ensure env vars are available
+        api_key = os.environ.get('SHIPSTATION_API_KEY_PROD') or os.environ.get('SHIPSTATION_API_KEY_TEST') or os.environ.get('SHIPSTATION_API_KEY', '')
+        
+        if not api_key:
             logger.warning("⚠️ ShipStation API key not configured")
             return {"success": False, "error": "API key not configured"}
         
         headers = {
-            "API-Key": SHIPSTATION_API_KEY,
+            "API-Key": api_key,
             "Content-Type": "application/json"
         }
         
