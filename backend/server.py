@@ -2383,41 +2383,6 @@ async def root():
 
 # Old API decorators removed - endpoints moved to routers/
 
-@app.get("/api/performance/stats")
-async def get_performance_statistics(admin_verified: bool = Depends(verify_admin_key)):
-    """
-    Get performance statistics - Admin only
-    Useful for monitoring and identifying bottlenecks
-    """
-    try:
-        from utils.performance import get_performance_stats
-        stats = get_performance_stats()
-        return {
-            "success": True,
-            "stats": stats,
-            "threshold_ms": 100,
-            "message": "Performance statistics retrieved"
-        }
-    except Exception as e:
-        return {"success": False, "error": str(e)}
-
-# ==================== MIDDLEWARE SETUP ====================
-# Order matters: SecurityMiddleware first for rate limiting & security headers
-app.add_middleware(SecurityMiddleware)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
 
 @app.on_event("startup")
 async def startup_event():
