@@ -505,7 +505,8 @@ def with_services(
     order_service=False,
     user_service=False,
     session_service=False,
-    payment_service=False
+    payment_service=False,
+    template_service=False
 ):
     """
     Decorator to inject services into handler
