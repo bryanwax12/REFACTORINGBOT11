@@ -4520,3 +4520,62 @@ Update test fixtures to:
 4. /app/backend/utils/ - Созданы 4 новых файла
 
 
+
+
+---
+## ✅ Test Isolation Fixed - All Tests Passing
+**Date:** $(date)
+**Agent:** E1 Fork Agent
+**Session ID:** Test Isolation Fix
+
+### 🎯 Problem Solved
+Fixed all 4 flaky tests that were failing due to event loop isolation issues:
+1. ✅ test_cancel_order_flow
+2. ✅ test_data_confirmation_flow  
+3. ✅ test_payment_flow_sufficient_balance
+4. ✅ test_get_all_keys_status
+
+### 📊 Test Results: 207/207 PASSING (100%)
+```
+==================== 207 passed, 20 warnings in 5.17s ====================
+```
+
+### 🔧 Root Cause & Solution
+
+**Problem:**
+- Tests were sharing global Motor (MongoDB) client with closed event loops
+- ServiceFactory and RepositoryManager were singletons storing stale DB connections
+- Global `server.db` and `server.client` were initialized once at module level
+- Test fixtures created new clients but code still referenced old ones
+
+**Solution Implemented:**
+1. **Added reset functions:**
+   - `reset_service_factory()` in `/app/backend/services/service_factory.py`
+   - `reset_repositories()` in `/app/backend/repositories/__init__.py`
+
+2. **Enhanced test_db fixture** (`/app/backend/tests/integration/conftest.py`):
+   - Resets ServiceFactory and RepositoryManager before each test
+   - Replaces global `server.db`, `server.client`, `server.session_manager` with fresh test instances
+   - Restores original globals after test completes
+   - Ensures complete event loop isolation between tests
+
+3. **Fixed SessionRepository usage in ServiceFactory:**
+   - Changed from `SessionRepository(self.db)` (new instance with stale db)
+   - To `get_session_repo()` (uses fresh repository from RepositoryManager)
+
+4. **Fixed test_get_all_keys_status:**
+   - Added explicit clearing of environment variables in @patch.dict
+   - Ensures test isolation from previous tests
+
+### 📁 Files Modified
+1. `/app/backend/services/service_factory.py` - Added reset_service_factory()
+2. `/app/backend/repositories/__init__.py` - Added reset_repositories() and missing get_*_repo() functions
+3. `/app/backend/tests/integration/conftest.py` - Enhanced test_db fixture with complete isolation
+4. `/app/backend/tests/test_api_config.py` - Fixed environment variable isolation
+
+### ✨ Impact
+- **Test stability:** 100% (was 98.1% with 4 flaky tests)
+- **CI/CD reliability:** Tests now run consistently in any order
+- **Developer experience:** No more "passes alone, fails in suite" mysteries
+- **Architecture validation:** Confirms refactored code with Service Factory + Repository patterns works correctly
+
