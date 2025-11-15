@@ -93,6 +93,18 @@ def init_service_factory(db):
     _factory = ServiceFactory(db)
 
 
+def reset_service_factory():
+    """
+    Сбросить глобальную фабрику сервисов
+    Используется в тестах для обеспечения изоляции
+    """
+    global _factory
+    if _factory is not None:
+        # Очистить все кешированные сервисы
+        _factory._services.clear()
+    _factory = None
+
+
 def get_service_factory() -> ServiceFactory:
     """
     Получить глобальную фабрику сервисов
