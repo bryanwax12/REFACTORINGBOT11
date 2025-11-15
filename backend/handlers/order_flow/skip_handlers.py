@@ -209,8 +209,16 @@ async def skip_parcel_width_height(update: Update, context: ContextTypes.DEFAULT
     context.user_data['parcel_width'] = 10.0
     context.user_data['parcel_height'] = 10.0
     
-    # Update session
+    # Load session data to ensure we have all order data
     from server import session_manager
+    session = await session_manager.get_session(user_id)
+    if session and session.get('session_data'):
+        session_data = session['session_data']
+        for key, value in session_data.items():
+            if key not in context.user_data:
+                context.user_data[key] = value
+    
+    # Update session with dimensions
     await session_manager.update_session_atomic(
         user_id,
         step='CALCULATING_RATES',
