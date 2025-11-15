@@ -141,7 +141,8 @@ async def legacy_get_api_mode(api_key: str = Depends(verify_api_key)):
 @router.post("/settings/api-mode")
 async def legacy_set_api_mode(request: dict, api_key: str = Depends(verify_api_key)):
     """Legacy API mode endpoint - set mode"""
-    from server import db, clear_settings_cache
+    from server import db, clear_settings_cache, bot_instance, ADMIN_TELEGRAM_ID
+    from handlers.common_handlers import safe_telegram_call
     
     mode = request.get("mode", "production")
     if mode not in ["production", "test", "preview"]:
@@ -153,6 +154,30 @@ async def legacy_set_api_mode(request: dict, api_key: str = Depends(verify_api_k
         upsert=True
     )
     clear_settings_cache()
+    
+    # Notify admin about API mode change
+    if bot_instance and ADMIN_TELEGRAM_ID:
+        mode_emoji = "🚀" if mode == "production" else "🧪"
+        mode_text = {
+            "production": "Продакшн (Production)",
+            "test": "Тестовый (Test)",
+            "preview": "Превью (Preview)"
+        }.get(mode, mode)
+        
+        admin_message = f"{mode_emoji} *API режим изменен*\n\nНовый режим: *{mode_text}*"
+        
+        try:
+            await safe_telegram_call(
+                bot_instance.send_message(
+                    chat_id=ADMIN_TELEGRAM_ID,
+                    text=admin_message,
+                    parse_mode='Markdown'
+                )
+            )
+        except Exception as e:
+            # Don't fail the request if admin notification fails
+            import logging
+            logging.getLogger(__name__).error(f"Failed to notify admin about API mode change: {e}")
     
     return {"success": True, "message": f"API mode set to {mode}"}
 
