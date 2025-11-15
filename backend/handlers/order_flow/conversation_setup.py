@@ -199,6 +199,11 @@ def setup_order_conversation_handler():
                 CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
                 CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
             ],
+            CALCULATING_RATES: [
+                MessageHandler(filters.ALL, fetch_shipping_rates),
+                CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
+                CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
+            ],
             CONFIRM_DATA: [
                 CallbackQueryHandler(handle_data_confirmation, pattern='^(confirm_data|save_template|edit_data|edit_addresses_error|edit_from_address|edit_to_address|return_to_order|confirm_cancel|cancel_order)$')
             ],
