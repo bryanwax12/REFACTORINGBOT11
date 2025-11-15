@@ -22,12 +22,20 @@ async def test_db():
     from services.service_factory import init_service_factory
     init_service_factory(db)
     
-    # Cleanup BEFORE tests: remove test data from previous runs
+    # Aggressive cleanup BEFORE tests: remove ALL test data
+    # This ensures clean slate for each test
     await db.user_sessions.delete_many({"user_id": 123456789})
     await db.users.delete_many({"telegram_id": 123456789})
     await db.orders.delete_many({"telegram_id": 123456789})
     await db.templates.delete_many({"telegram_id": 123456789})
     await db.payments.delete_many({"telegram_id": 123456789})
+    await db.pending_orders.delete_many({"telegram_id": 123456789})
+    
+    # Also clear any stale sessions from repositories cache
+    from repositories.session_repository import SessionRepository
+    session_repo = SessionRepository(db)
+    # Force cleanup through repository to clear any caches
+    await session_repo.collection.delete_many({"user_id": 123456789})
     
     yield db
     
@@ -37,6 +45,7 @@ async def test_db():
     await db.orders.delete_many({"telegram_id": 123456789})
     await db.templates.delete_many({"telegram_id": 123456789})
     await db.payments.delete_many({"telegram_id": 123456789})
+    await db.pending_orders.delete_many({"telegram_id": 123456789})
     
     client.close()
 
