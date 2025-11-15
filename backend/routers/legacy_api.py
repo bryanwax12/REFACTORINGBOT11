@@ -131,22 +131,109 @@ async def legacy_get_leaderboard(api_key: str = Depends(verify_api_key)):
 
 @router.get("/settings/api-mode")
 async def legacy_get_api_mode(api_key: str = Depends(verify_api_key)):
-    """Legacy API mode endpoint"""
+    """Legacy API mode endpoint - get current mode"""
     from server import db
-    settings = await db.settings.find_one({"type": "bot_settings"}, {"_id": 0})
-    if settings:
-        return {"mode": settings.get("telegram_mode", "polling")}
-    return {"mode": "polling"}
+    setting = await db.settings.find_one({"key": "api_mode"}, {"_id": 0})
+    api_mode = setting.get("value", "production") if setting else "production"
+    return {"mode": api_mode}
+
+
+@router.post("/settings/api-mode")
+async def legacy_set_api_mode(request: dict, api_key: str = Depends(verify_api_key)):
+    """Legacy API mode endpoint - set mode"""
+    from server import db, clear_settings_cache
+    
+    mode = request.get("mode", "production")
+    if mode not in ["production", "test", "preview"]:
+        raise HTTPException(status_code=400, detail="Invalid mode")
+    
+    await db.settings.update_one(
+        {"key": "api_mode"},
+        {"$set": {"value": mode}},
+        upsert=True
+    )
+    clear_settings_cache()
+    
+    return {"success": True, "message": f"API mode set to {mode}"}
 
 
 @router.get("/maintenance/status")
 async def legacy_get_maintenance_status(api_key: str = Depends(verify_api_key)):
     """Legacy maintenance status endpoint"""
     from server import db
-    settings = await db.settings.find_one({"type": "bot_settings"}, {"_id": 0})
-    if settings:
-        return {
-            "maintenance_mode": settings.get("maintenance_mode", False),
-            "message": settings.get("maintenance_message", "")
-        }
-    return {"maintenance_mode": False, "message": ""}
+    setting = await db.settings.find_one({"key": "maintenance_mode"}, {"_id": 0})
+    is_enabled = setting.get("value", False) if setting else False
+    return {
+        "maintenance_mode": is_enabled,
+        "message": "Maintenance mode is enabled" if is_enabled else ""
+    }
+
+
+@router.post("/maintenance/enable")
+async def legacy_enable_maintenance(api_key: str = Depends(verify_api_key)):
+    """Legacy maintenance enable endpoint"""
+    from server import db, clear_settings_cache, bot_instance
+    from handlers.common_handlers import safe_telegram_call
+    
+    await db.settings.update_one(
+        {"key": "maintenance_mode"},
+        {"$set": {"value": True}},
+        upsert=True
+    )
+    clear_settings_cache()
+    
+    # Notify all users
+    users_notified = 0
+    if bot_instance:
+        users = await db.users.find({"blocked": False, "bot_blocked_by_user": {"$ne": True}}, {"_id": 0}).to_list(1000)
+        message = "⚠️ *Режим технического обслуживания*\n\nБот временно недоступен для технического обслуживания.\nМы скоро вернемся!"
+        
+        for user in users:
+            try:
+                await safe_telegram_call(
+                    bot_instance.send_message(
+                        chat_id=user["telegram_id"],
+                        text=message,
+                        parse_mode='Markdown'
+                    )
+                )
+                users_notified += 1
+            except:
+                pass
+    
+    return {"success": True, "message": "Maintenance mode enabled", "users_notified": users_notified}
+
+
+@router.post("/maintenance/disable")
+async def legacy_disable_maintenance(api_key: str = Depends(verify_api_key)):
+    """Legacy maintenance disable endpoint"""
+    from server import db, clear_settings_cache, bot_instance
+    from handlers.common_handlers import safe_telegram_call
+    
+    await db.settings.update_one(
+        {"key": "maintenance_mode"},
+        {"$set": {"value": False}},
+        upsert=True
+    )
+    clear_settings_cache()
+    
+    # Notify all users
+    users_notified = 0
+    if bot_instance:
+        users = await db.users.find({"blocked": False, "bot_blocked_by_user": {"$ne": True}}, {"_id": 0}).to_list(1000)
+        message = "✅ *Технические работы завершены*\n\nБот снова работает! Спасибо за ожидание."
+        
+        for user in users:
+            try:
+                await safe_telegram_call(
+                    bot_instance.send_message(
+                        chat_id=user["telegram_id"],
+                        text=message,
+                        parse_mode='Markdown'
+                    )
+                )
+                users_notified += 1
+            except:
+                pass
+    
+    return {"success": True, "message": "Maintenance mode disabled", "users_notified": users_notified}
