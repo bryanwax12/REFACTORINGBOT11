@@ -379,36 +379,34 @@ api_router = APIRouter(prefix="/api")
 # ==================== ROUTERS REGISTRATION ====================
 # Import and register all API routers
 try:
-    from routers import (
-        admin_router,
-        admin_labels,
-        api_config_router,
-        bot,
-        bot_config_router,
-        broadcast,
-        monitoring_router,
-        orders,
-        settings,
-        shipping,
-        stats,
-        users,
-        webhooks
-    )
+    from routers.admin_router import router as admin_router
+    from routers.admin_labels import router as admin_labels_router
+    from routers.api_config_router import router as api_config_router
+    from routers.bot import router as bot_router
+    from routers.bot_config_router import router as bot_config_router
+    from routers.broadcast import router as broadcast_router
+    from routers.monitoring_router import router as monitoring_router
+    from routers.orders import router as orders_router
+    from routers.settings import router as settings_router
+    from routers.shipping import router as shipping_router
+    from routers.stats import router as stats_router
+    from routers.users import router as users_router
+    from routers.webhooks import router as webhooks_router
     
-    # Register routers with api_router
-    app.include_router(admin_router.router, prefix="/api")
-    app.include_router(admin_labels.router, prefix="/api")
-    app.include_router(api_config_router.router, prefix="/api")
-    app.include_router(bot.router, prefix="/api")
-    app.include_router(bot_config_router.router, prefix="/api")
-    app.include_router(broadcast.router, prefix="/api")
-    app.include_router(monitoring_router.router, prefix="/api")
-    app.include_router(orders.router, prefix="/api")
-    app.include_router(settings.router, prefix="/api")
-    app.include_router(shipping.router, prefix="/api")
-    app.include_router(stats.router, prefix="/api")
-    app.include_router(users.router, prefix="/api")
-    app.include_router(webhooks.router, prefix="/api")
+    # Register routers with app
+    app.include_router(admin_router, prefix="/api")
+    app.include_router(admin_labels_router, prefix="/api")
+    app.include_router(api_config_router, prefix="/api")
+    app.include_router(bot_router, prefix="/api")
+    app.include_router(bot_config_router, prefix="/api")
+    app.include_router(broadcast_router, prefix="/api")
+    app.include_router(monitoring_router, prefix="/api")
+    app.include_router(orders_router, prefix="/api")
+    app.include_router(settings_router, prefix="/api")
+    app.include_router(shipping_router, prefix="/api")
+    app.include_router(stats_router, prefix="/api")
+    app.include_router(users_router, prefix="/api")
+    app.include_router(webhooks_router, prefix="/api")
     
     logger.info("✅ All API routers registered successfully")
 except Exception as e:
