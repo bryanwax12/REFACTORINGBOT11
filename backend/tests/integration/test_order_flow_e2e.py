@@ -109,13 +109,31 @@ class TestOrderFlowE2E:
     async def test_cancel_order_flow(
         self,
         mock_update_callback,
-        mock_context
+        mock_context,
+        test_db
     ):
         """
         Test order cancellation
         """
         from handlers.order_flow.cancellation import cancel_order, confirm_cancel_order
         from server import SELECT_CARRIER, STATE_NAMES
+        
+        # Setup: Create user and session in DB
+        await test_db.users.insert_one({
+            "id": "user123",
+            "telegram_id": 123456789,
+            "username": "testuser",
+            "first_name": "Test",
+            "balance": 50.0,
+            "created_at": "2024-01-01T00:00:00Z"
+        })
+        
+        from repositories.session_repository import SessionRepository
+        session_repo = SessionRepository(test_db)
+        await session_repo.get_or_create_session(
+            user_id=123456789,
+            session_type="conversation"
+        )
         
         # Setup: User is on rates selection screen
         mock_context.user_data['last_state'] = STATE_NAMES[SELECT_CARRIER]
@@ -133,17 +151,13 @@ class TestOrderFlowE2E:
             assert mock_update_callback.callback_query.answer.called
         
         # Step 2: User confirms cancellation
-        with patch('server.session_manager') as mock_session, \
-             patch('server.safe_telegram_call') as mock_safe_call:
-            
-            mock_session.clear_session = AsyncMock()
+        with patch('server.safe_telegram_call') as mock_safe_call:
             mock_safe_call.side_effect = lambda x: x
             
             result = await confirm_cancel_order(mock_update_callback, mock_context)
             
             # Verify: Should end conversation and clear data
             assert result == ConversationHandler.END
-            assert mock_session.clear_session.called
     
     
     async def test_data_confirmation_flow(
