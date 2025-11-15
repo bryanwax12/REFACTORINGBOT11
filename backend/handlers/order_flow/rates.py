@@ -3,7 +3,7 @@ Order Flow: Shipping Rates Handlers
 Handles fetching and displaying shipping rates
 """
 import logging
-from telegram import Update
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from handlers.common_handlers import safe_telegram_call
 
