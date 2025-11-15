@@ -135,7 +135,7 @@ async def check_shipstation_balance():
             return {"success": True, "balance": 999.99, "test_mode": True}
         
         # Load API key inside function to ensure env vars are available
-        api_key = os.environ.get('SHIPSTATION_API_KEY_PROD') or os.environ.get('SHIPSTATION_API_KEY_TEST') or os.environ.get('SHIPSTATION_API_KEY', '')
+        api_key = os.environ.get('SHIPSTATION_API_KEY_TEST') or os.environ.get('SHIPSTATION_API_KEY_PROD') or os.environ.get('SHIPSTATION_API_KEY', '')
         
         if not api_key:
             logger.warning("⚠️ ShipStation API key not configured")
@@ -174,7 +174,7 @@ async def get_shipstation_carrier_ids():
     """
     try:
         # Load API key inside function to ensure env vars are available
-        api_key = os.environ.get('SHIPSTATION_API_KEY_PROD') or os.environ.get('SHIPSTATION_API_KEY_TEST') or os.environ.get('SHIPSTATION_API_KEY', '')
+        api_key = os.environ.get('SHIPSTATION_API_KEY_TEST') or os.environ.get('SHIPSTATION_API_KEY_PROD') or os.environ.get('SHIPSTATION_API_KEY', '')
         
         if not api_key:
             logger.warning("⚠️ ShipStation API key not configured")
@@ -244,7 +244,7 @@ async def validate_address_with_shipstation(name, street1, street2, city, state,
     """
     try:
         # Load API key inside function to ensure env vars are available
-        api_key = os.environ.get('SHIPSTATION_API_KEY_PROD') or os.environ.get('SHIPSTATION_API_KEY_TEST') or os.environ.get('SHIPSTATION_API_KEY', '')
+        api_key = os.environ.get('SHIPSTATION_API_KEY_TEST') or os.environ.get('SHIPSTATION_API_KEY_PROD') or os.environ.get('SHIPSTATION_API_KEY', '')
         
         if not api_key:
             # If no API key, assume address is valid
