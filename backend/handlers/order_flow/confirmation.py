@@ -134,6 +134,10 @@ async def show_edit_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle user's choice on data confirmation"""
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(f"🎯 handle_data_confirmation called with query.data={update.callback_query.data if update.callback_query else 'None'}")
+    
     query = update.callback_query
     
     # Check for stale interaction
