@@ -761,65 +761,9 @@ async def handle_create_label_request(update: Update, context: ContextTypes.DEFA
 
 # button_callback moved to handlers/common_handlers.py
 
-async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Handle both command and callback
-    if update.callback_query:
-        query = update.callback_query
-        await safe_telegram_call(query.answer())
-        telegram_id = query.from_user.id
-        
-        # Load message context from database if this is a callback from payment screen
-        from repositories import get_repositories
-        repos = get_repositories()
-        # Get latest pending topup payment
-        pending_payments = await repos.payments.find_many(
-            {"telegram_id": telegram_id, "type": "topup", "status": "pending"},
-            sort=[("created_at", -1)],
-            limit=1
-        )
-        payment_record = pending_payments[0] if pending_payments else None
-        
-        logger.info(f"Payment record found: {payment_record is not None}")
-        if payment_record and payment_record.get('payment_message_id'):
-            logger.info(f"Payment message_id: {payment_record.get('payment_message_id')}")
-            context.user_data['last_bot_message_id'] = payment_record['payment_message_id']
-            context.user_data['last_bot_message_text'] = payment_record.get('payment_message_text', '')
-        
-        logger.info(f"Context before mark_message_as_selected: last_bot_message_id={context.user_data.get('last_bot_message_id')}")
-        
-        # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-        asyncio.create_task(mark_message_as_selected(update, context))
-        
-        send_method = query.message.reply_text
-    else:
-        # Mark previous message as selected (non-blocking)
-        asyncio.create_task(mark_message_as_selected(update, context))
-        telegram_id = update.effective_user.id
-        send_method = update.message.reply_text
-    
-    # Check if user is blocked
-    if await check_user_blocked(telegram_id):
-        await send_blocked_message(update)
-        return
-    
-    # Get balance using Repository Pattern
-    from repositories import get_user_repo
-    user_repo = get_user_repo()
-    balance = await user_repo.get_balance(telegram_id)
-    
-    from utils.ui_utils import PaymentFlowUI
-    message = PaymentFlowUI.balance_screen(balance)
-    reply_markup = PaymentFlowUI.build_balance_keyboard()
-    
-    # Set state to wait for amount input
-    context.user_data['awaiting_topup_amount'] = True
-    
-    # Send message and save context for mark_message_as_selected
-    bot_message = await send_method(message, reply_markup=reply_markup, parse_mode='Markdown')
-    
-    # Always save message context for button protection
-    context.user_data['last_bot_message_id'] = bot_message.message_id
-    context.user_data['last_bot_message_text'] = message
+# MIGRATED: Use handlers.payment_handlers.my_balance_command
+# Keeping alias for backward compatibility
+my_balance_command = handler_my_balance_command
 
 async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle custom topup amount input"""
