@@ -225,12 +225,15 @@ async def validate_address_with_shipstation(name, street1, street2, city, state,
     Returns (is_valid, corrected_address_or_error_message)
     """
     try:
-        if not SHIPSTATION_API_KEY:
+        # Load API key inside function to ensure env vars are available
+        api_key = os.environ.get('SHIPSTATION_API_KEY_PROD') or os.environ.get('SHIPSTATION_API_KEY_TEST') or os.environ.get('SHIPSTATION_API_KEY', '')
+        
+        if not api_key:
             # If no API key, assume address is valid
             return True, None
         
         headers = {
-            "API-Key": SHIPSTATION_API_KEY,
+            "API-Key": api_key,
             "Content-Type": "application/json"
         }
         
