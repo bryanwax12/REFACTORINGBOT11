@@ -212,7 +212,7 @@ async def validate_address_with_shipstation(name, street1, street2, city, state,
             return True, None
         
         headers = {
-            "Authorization": f"Bearer {SHIPSTATION_API_KEY}",
+            "API-Key": SHIPSTATION_API_KEY,
             "Content-Type": "application/json"
         }
         
