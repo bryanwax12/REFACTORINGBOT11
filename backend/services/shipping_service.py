@@ -229,11 +229,20 @@ async def validate_order_data_for_rates(order_data: Dict[str, Any]) -> Tuple[boo
     Returns:
         (is_valid, missing_fields_list)
     """
+    # Support both 'from_street' and 'from_address' naming conventions
     required_fields = [
-        'from_name', 'from_street', 'from_city', 'from_state', 'from_zip',
-        'to_name', 'to_street', 'to_city', 'to_state', 'to_zip',
+        'from_name', 'from_city', 'from_state', 'from_zip',
+        'to_name', 'to_city', 'to_state', 'to_zip',
         'weight'
     ]
+    
+    # Check for from_street OR from_address
+    if not (order_data.get('from_street') or order_data.get('from_address')):
+        required_fields.append('from_street')
+    
+    # Check for to_street OR to_address
+    if not (order_data.get('to_street') or order_data.get('to_address')):
+        required_fields.append('to_street')
     
     missing_fields = [
         field for field in required_fields
