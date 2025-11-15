@@ -430,3 +430,83 @@ async def check_stale_interaction(query, context: ContextTypes.DEFAULT_TYPE) -> 
     logger.info("Interaction is valid - proceeding")
     return False
 
+
+
+# ==================== NAVIGATION HELPERS ====================
+
+async def check_data_from_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Return to data confirmation screen from cancel dialog"""
+    from handlers.order_flow.confirmation import show_data_confirmation
+    
+    query = update.callback_query
+    await safe_telegram_call(query.answer())
+    
+    # Go back to data confirmation screen
+    return await show_data_confirmation(update, context)
+
+
+async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Return to order after cancel button - restore exact screen"""
+    from utils.ui_utils import OrderStepMessages, get_cancel_keyboard
+    from server import FROM_NAME, STATE_NAMES
+    import asyncio
+    
+    logger.info(f"return_to_order called - user_id: {update.effective_user.id}")
+    query = update.callback_query
+    await safe_telegram_call(query.answer())
+    
+    # Mark previous message as selected (remove buttons and add "✅ Выбрано")
+    asyncio.create_task(mark_message_as_selected(update, context))
+    
+    # Get the state we were in when cancel was pressed
+    last_state = context.user_data.get('last_state')
+    
+    logger.info(f"return_to_order: last_state = {last_state}, type = {type(last_state)}")
+    logger.info(f"return_to_order: user_data keys = {list(context.user_data.keys())}")
+    
+    # If no last_state - just continue
+    if last_state is None:
+        logger.warning("return_to_order: No last_state found!")
+        await safe_telegram_call(query.message.reply_text("Продолжаем оформление заказа..."))
+        return FROM_NAME
+    
+    # If last_state is a number (state constant), we need the string name
+    # Check if it's a string (state name) or int (state constant)
+    if isinstance(last_state, int):
+        # It's a state constant - return it directly
+        keyboard, message_text = OrderStepMessages.get_step_keyboard_and_message(str(last_state))
+        logger.warning(f"return_to_order: last_state is int ({last_state}), should be string!")
+        
+        # Show next step
+        reply_markup = get_cancel_keyboard()
+        bot_msg = await safe_telegram_call(query.message.reply_text(
+            message_text if message_text else "Продолжаем оформление заказа...",
+            reply_markup=reply_markup
+        ))
+        
+        if bot_msg:
+            context.user_data['last_bot_message_id'] = bot_msg.message_id
+            context.user_data['last_bot_message_text'] = message_text if message_text else "Продолжаем..."
+        
+        return last_state
+    
+    # last_state is a string (state name like "FROM_CITY")
+    keyboard, message_text = OrderStepMessages.get_step_keyboard_and_message(last_state)
+    
+    # Send message with or without keyboard
+    if keyboard:
+        bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=keyboard))
+    else:
+        reply_markup = get_cancel_keyboard()
+        bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=reply_markup))
+    
+    # Save context
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = message_text
+    
+    # Get state constant from state name
+    state_constant = STATE_NAMES.get(last_state, FROM_NAME)
+    logger.info(f"return_to_order: Returning state {state_constant} for state name '{last_state}'")
+    
+    return state_constant
