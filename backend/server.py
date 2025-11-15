@@ -524,6 +524,15 @@ async def generate_thank_you_message():
         return random.choice(fallback_messages)
 
 app = FastAPI(title="Telegram Shipping Bot")
+
+# ==================== MIDDLEWARE ====================
+from middleware.logging import RequestLoggingMiddleware
+from middleware.rate_limiting import RateLimitMiddleware
+
+# Add middleware (order matters - first added = last executed)
+app.add_middleware(RequestLoggingMiddleware, log_body=False)
+app.add_middleware(RateLimitMiddleware, requests_per_minute=60, requests_per_hour=1000)
+
 api_router = APIRouter(prefix="/api")
 
 # ==================== SECURITY ====================
