@@ -36,10 +36,10 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
     cached_rates = shipstation_cache.get(
         from_zip=data['from_zip'],
         to_zip=data['to_zip'],
-        weight=data['weight'],
-        length=data.get('length', 10),
-        width=data.get('width', 10),
-        height=data.get('height', 10)
+        weight=data['parcel_weight'],
+        length=data.get('parcel_length', 10),
+        width=data.get('parcel_width', 10),
+        height=data.get('parcel_height', 10)
     )
     
     if cached_rates:
