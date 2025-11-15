@@ -1239,37 +1239,9 @@ use_template = handler_use_template
 # Keeping alias for backward compatibility
 start_order_with_template = handler_start_order_with_template
 
-async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Confirm and delete template"""
-    query = update.callback_query
-    await safe_telegram_call(query.answer())
-    
-    # Mark previous message as selected (non-blocking)
-    asyncio.create_task(mark_message_as_selected(update, context))
-    
-    template_id = query.data.replace('template_confirm_delete_', '')
-    telegram_id = query.from_user.id
-    
-    # Use template service
-    success, template_name, error = await template_service.delete_template(
-        template_id=template_id,
-        telegram_id=telegram_id,
-        find_template_func=find_template_by_id,
-        delete_template_func=delete_template
-    )
-    
-    if success:
-        from utils.ui_utils import TemplateManagementUI
-        keyboard = [[InlineKeyboardButton("🔙 К списку шаблонов", callback_data='my_templates')]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        
-        await safe_telegram_call(query.message.reply_text(
-            TemplateManagementUI.template_deleted_success(template_name),
-            reply_markup=reply_markup
-        ))
-    else:
-        await safe_telegram_call(query.message.reply_text(f"❌ {error}"))
-    # Don't return state - deleted successfully
+# MIGRATED: Use handlers.template_handlers.confirm_delete_template
+confirm_delete_template = handler_confirm_delete_template
+
 
 async def rename_template_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Start template rename process"""
