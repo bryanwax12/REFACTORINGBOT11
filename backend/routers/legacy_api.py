@@ -143,6 +143,7 @@ async def legacy_set_api_mode(request: dict, api_key: str = Depends(verify_api_k
     """Legacy API mode endpoint - set mode"""
     from server import db, clear_settings_cache, bot_instance, ADMIN_TELEGRAM_ID
     from handlers.common_handlers import safe_telegram_call
+    import os
     
     mode = request.get("mode", "production")
     if mode not in ["production", "test", "preview"]:
@@ -164,7 +165,22 @@ async def legacy_set_api_mode(request: dict, api_key: str = Depends(verify_api_k
             "preview": "Превью (Preview)"
         }.get(mode, mode)
         
-        admin_message = f"{mode_emoji} *API режим изменен*\n\nНовый режим: *{mode_text}*"
+        # Get API key for the selected mode
+        api_key_var = f"SHIPSTATION_API_KEY_{mode.upper()}" if mode != "production" else "SHIPSTATION_API_KEY_PROD"
+        api_key_value = os.environ.get(api_key_var, "не настроен")
+        
+        # Mask the API key (show only first and last 4 characters)
+        if api_key_value != "не настроен" and len(api_key_value) > 8:
+            masked_key = f"{api_key_value[:4]}...{api_key_value[-4:]}"
+        else:
+            masked_key = api_key_value
+        
+        admin_message = (
+            f"{mode_emoji} *API режим изменен*\n\n"
+            f"Новый режим: *{mode_text}*\n"
+            f"API ключ: `{masked_key}`\n"
+            f"Переменная: `{api_key_var}`"
+        )
         
         try:
             await safe_telegram_call(
