@@ -932,42 +932,29 @@ ShipStation не смог проверить один или оба адреса
     @staticmethod
     def filter_popular_rates(rates: list) -> list:
         """
-        Filter rates to show only popular services from top carriers
-        
-        Popular services by carrier:
-        - USPS: Priority Mail, Media Mail, First Class Mail, Ground Advantage
-        - FedEx: Ground, Home Delivery, 2Day
-        - UPS: Ground, 3 Day Select, 2nd Day Air
+        Filter rates to show only rates from top 3 carriers: USPS, FedEx, UPS
+        Shows ALL services from these carriers
         """
         import logging
         logger = logging.getLogger(__name__)
         
-        POPULAR_SERVICES = {
-            'USPS': ['Priority Mail', 'Media Mail', 'First Class', 'Ground Advantage', 'Priority Mail Express'],
-            'FedEx': ['Ground', 'Home Delivery', '2Day', 'Express Saver'],
-            'UPS': ['Ground', '3 Day Select', '2nd Day Air', 'Next Day Air']
-        }
+        # Top 3 carriers to show
+        TOP_CARRIERS = ['USPS', 'FedEx', 'UPS']
         
         filtered = []
         for rate in rates:
             carrier = rate.get('carrier_friendly_name', rate.get('carrier', ''))
             service = rate.get('service_type', rate.get('service', ''))
             
-            logger.info(f"🔍 Checking rate: carrier='{carrier}', service='{service}'")
-            
-            # Check if carrier is in popular list
-            for popular_carrier, popular_services in POPULAR_SERVICES.items():
-                if popular_carrier.lower() in carrier.lower():
-                    # Check if service is popular
-                    for popular_service in popular_services:
-                        if popular_service.lower() in service.lower():
-                            filtered.append(rate)
-                            logger.info(f"✅ Matched: {popular_carrier} - {popular_service}")
-                            break
+            # Check if carrier is one of the top 3
+            for top_carrier in TOP_CARRIERS:
+                if top_carrier.lower() in carrier.lower():
+                    filtered.append(rate)
+                    logger.info(f"✅ Added: {top_carrier} - {service}")
                     break
         
-        logger.info(f"📊 Filtered {len(filtered)} rates from {len(rates)} total")
-        return filtered if filtered else rates  # Return all if no matches
+        logger.info(f"📊 Showing {len(filtered)} rates from top 3 carriers (out of {len(rates)} total)")
+        return filtered if filtered else rates  # Return all if no top carriers found
     
     @staticmethod
     def build_rates_keyboard(rates: list) -> InlineKeyboardMarkup:
