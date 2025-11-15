@@ -82,9 +82,19 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['selected_rate'] = selected_rate
         context.user_data['selected_carrier'] = selected_rate.get('carrier_friendly_name', 'Unknown')
         context.user_data['selected_service'] = selected_rate.get('service_type', 'Standard')
-        context.user_data['shipping_cost'] = selected_rate.get('shipping_amount', {}).get('amount', 0.0)
         
-        logger.info(f"✅ Selected: {context.user_data['selected_carrier']} - {context.user_data['selected_service']} - ${context.user_data['shipping_cost']}")
+        # Get base shipping cost from API
+        base_cost = selected_rate.get('shipping_amount', {}).get('amount', 0.0)
+        
+        # Add $10 markup (hidden from user)
+        LABEL_MARKUP = 10.0
+        final_cost = base_cost + LABEL_MARKUP
+        
+        context.user_data['shipping_cost'] = base_cost  # Original cost
+        context.user_data['final_amount'] = final_cost  # Cost with markup for billing
+        
+        logger.info(f"✅ Selected: {context.user_data['selected_carrier']} - {context.user_data['selected_service']}")
+        logger.info(f"💰 Cost: Base=${base_cost:.2f}, Markup=${LABEL_MARKUP:.2f}, Final=${final_cost:.2f}")
         
         # Proceed to payment
         from handlers.order_flow.payment import handle_payment_selection
