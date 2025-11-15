@@ -25,7 +25,7 @@
 
 **Результат**: Бизнес-логика отделена от presentation layer
 
-### **Phase 4: Router Decomposition (60%)**
+### **Phase 4: Router Decomposition (75%)**
 
 **Созданы и интегрированы роутеры**:
 
@@ -33,20 +33,20 @@
    - POST `/api/oxapay/webhook`
    - POST `/api/telegram/webhook`
 
-2. **shipping.py** (6 эндпоинтов):
+2. **shipping.py** (5 эндпоинтов):
    - POST `/api/shipping/create-label`
    - GET `/api/shipping/track/{tracking_number}`
    - GET `/api/labels/{label_id}/download`
    - GET `/api/carriers`
-   - POST `/api/calculate-shipping` (placeholder)
+   - POST `/api/calculate-shipping`
 
 3. **orders.py** (6 эндпоинтов):
-   - POST `/api/orders`
-   - GET `/api/orders/search`
-   - GET `/api/orders/export/csv`
-   - GET `/api/orders`
-   - GET `/api/orders/{order_id}`
-   - POST `/api/orders/{order_id}/refund`
+   - POST `/api/orders` - создание заказа
+   - GET `/api/orders/search` - поиск
+   - GET `/api/orders/export/csv` - экспорт
+   - GET `/api/orders` - список
+   - GET `/api/orders/{order_id}` - детали
+   - POST `/api/orders/{order_id}/refund` - возврат
 
 4. **debug.py** (4 эндпоинта):
    - GET `/api/debug/logs`
@@ -54,12 +54,32 @@
    - GET `/api/debug/active-conversations`
    - GET `/api/debug/persistence`
 
-**Всего перенесено**: 18 эндпоинтов из api_router
+5. **bot.py** (5 эндпоинтов):
+   - GET `/api/bot/health` - здоровье бота
+   - GET `/api/bot/status` - статус
+   - POST `/api/bot/restart` - перезапуск
+   - GET `/api/bot/logs` - логи
+   - GET `/api/bot/metrics` - метрики
 
-**Осталось в api_router**: ~30 эндпоинтов (users, bot management, stats)
-*Примечание: многие уже дублируются в admin роутерах*
+6. **settings.py** (2 эндпоинта):
+   - GET `/api/settings/api-mode`
+   - POST `/api/settings/api-mode`
 
-**Результат**: Значительная модуляризация API, server.py разгружен
+7. **maintenance.py** (3 эндпоинта):
+   - GET `/api/maintenance/status`
+   - POST `/api/maintenance/enable`
+   - POST `/api/maintenance/disable`
+
+8. **stats.py** (3 эндпоинта):
+   - GET `/api/stats` - общая статистика
+   - GET `/api/stats/expenses` - расходы
+   - GET `/api/topups` - пополнения
+
+**Всего перенесено**: 30 эндпоинтов из api_router
+
+**Осталось в api_router**: ~15-20 эндпоинтов (в основном users management и admin функции, многие дублируются в admin роутерах)
+
+**Результат**: Значительная модуляризация API, server.py существенно разгружен
 
 ---
 
