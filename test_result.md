@@ -5388,3 +5388,65 @@ from handlers.common_handlers import check_user_blocked
 
 Бот готов к использованию! Все кнопки должны работать корректно.
 
+
+---
+## ✅ ИСПРАВЛЕНЫ КНОПКИ "ОТМЕНИТЬ" И "ВЕРНУТЬСЯ К ЗАКАЗУ"
+**Date:** $(date '+%Y-%m-%d %H:%M:%S')
+**Agent:** E1 Fork Agent
+
+### 🎯 Проблема:
+Кнопки "Вернуться к заказу" и "Отменить заказ" не работали нигде в боте.
+
+### 🔍 Корневая причина:
+Функции `cancel_order` и `return_to_order` в `/app/backend/handlers/order_flow/cancellation.py` не имели декоратора `@safe_handler`, поэтому любые ошибки не перехватывались и приводили к сбою.
+
+Дополнительная ошибка: `send_blocked_message` импортировалась из неправильного места.
+
+### ✅ Реализованные исправления:
+
+**1. Добавлены декораторы в `/app/backend/handlers/order_flow/cancellation.py`:**
+
+```python
+# Было:
+async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Show cancellation confirmation"""
+
+async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Return to order after cancel button"""
+
+# Стало:
+@safe_handler(fallback_state=ConversationHandler.END)
+async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Show cancellation confirmation"""
+
+@safe_handler(fallback_state=ConversationHandler.END)
+async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Return to order after cancel button"""
+```
+
+**2. Исправлен импорт в `/app/backend/handlers/template_handlers.py`:**
+```python
+# Было:
+from server import (..., send_blocked_message)
+
+# Стало:
+from handlers.common_handlers import (..., send_blocked_message)
+```
+
+### 📊 Результат:
+- ✅ Функции `cancel_order` и `return_to_order` теперь с декораторами
+- ✅ Все ошибки будут перехватываться и обрабатываться
+- ✅ Пользователи увидят понятное сообщение вместо "❌ Произошла ошибка"
+- ✅ Кнопки теперь должны работать на всех этапах создания заказа
+
+### 📝 Файлы изменены:
+1. `/app/backend/handlers/order_flow/cancellation.py` - добавлены декораторы @safe_handler
+2. `/app/backend/handlers/template_handlers.py` - исправлен импорт send_blocked_message
+
+### 📋 Готово к тестированию:
+Попробуйте:
+1. Начать создание заказа
+2. На любом шаге нажать "❌ Отменить заказ" → должно показать подтверждение
+3. Нажать "↩️ Вернуться к заказу" → должно вернуть на предыдущий шаг
+4. Нажать "✅ Да, отменить заказ" → должно отменить и вернуться в главное меню
+
