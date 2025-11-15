@@ -70,7 +70,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
     # Cache MISS - need to fetch from API
     # Send initial progress message
     from utils.ui_utils import ShippingRatesUI
-    progress_msg = await safe_telegram_call(query.message.reply_text(ShippingRatesUI.progress_message(0)))
+    progress_msg = await safe_telegram_call(message.reply_text(ShippingRatesUI.progress_message(0)))
     
     try:
         import asyncio
@@ -94,7 +94,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             
             from utils.ui_utils import get_edit_data_keyboard
             reply_markup = get_edit_data_keyboard()
-            await safe_telegram_call(query.message.reply_text(
+            await safe_telegram_call(message.reply_text(
                 f"❌ Отсутствуют обязательные данные: {', '.join(missing_fields)}\n\nПожалуйста, заполните все поля.",
                 reply_markup=reply_markup
             ))
@@ -111,7 +111,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         if not carrier_ids:
             from utils.ui_utils import get_edit_addresses_keyboard
             reply_markup = get_edit_addresses_keyboard()
-            await safe_telegram_call(query.message.reply_text(
+            await safe_telegram_call(message.reply_text(
             "❌ Ошибка: не удалось загрузить список курьеров.\n\nПожалуйста, попробуйте позже.",
             reply_markup=reply_markup,
         ))
@@ -187,7 +187,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             from utils.ui_utils import get_retry_edit_cancel_keyboard
             reply_markup = get_retry_edit_cancel_keyboard()
             
-            await safe_telegram_call(query.message.reply_text(
+            await safe_telegram_call(message.reply_text(
                 f"❌ {error_msg}\n\nПопробуйте еще раз или проверьте правильность адресов.",
                 reply_markup=reply_markup
             ))
@@ -214,7 +214,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             from utils.ui_utils import get_edit_addresses_keyboard, ShippingRatesUI
             reply_markup = get_edit_addresses_keyboard()
             
-            await safe_telegram_call(query.message.reply_text(
+            await safe_telegram_call(message.reply_text(
                 ShippingRatesUI.api_error_message(error_msg),
                 reply_markup=reply_markup,
             ))
@@ -259,7 +259,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             from utils.ui_utils import get_edit_addresses_keyboard, ShippingRatesUI
             reply_markup = get_edit_addresses_keyboard()
             
-            await safe_telegram_call(query.message.reply_text(
+            await safe_telegram_call(message.reply_text(
             ShippingRatesUI.no_rates_found(),
             reply_markup=reply_markup,
         ))
@@ -315,7 +315,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
                 error_details=f"Exception: {str(e)}\n\nAddresses:\nFrom: {data.get('from_city')}, {data.get('from_state')}\nTo: {data.get('to_city')}, {data.get('to_state')}"
             )
         
-        await safe_telegram_call(query.message.reply_text(
+        await safe_telegram_call(message.reply_text(
             f"❌ Ошибка при получении тарифов:\n{str(e)}\n\nПроверьте корректность адресов и попробуйте снова.",
             reply_markup=reply_markup
         ))
