@@ -2699,61 +2699,6 @@ async def telegram_webhook(request: Request):
     return await handle_telegram_webhook(request, application)
 
 
-@api_router.get("/debug/logs")
-async def get_debug_logs(lines: int = 200, filter: str = ""):
-    """Get recent backend logs for debugging (NO AUTH)
-    
-    Usage:
-    - /api/debug/logs?lines=200 - get last 200 lines
-    - /api/debug/logs?filter=PERSISTENCE - filter by keyword
-    - /api/debug/logs?lines=500&filter=ERROR - get 500 lines with ERROR
-    """
-    try:
-        import subprocess
-        import os
-        
-        # Try multiple log locations
-        log_files = [
-            "/var/log/supervisor/backend.err.log",
-            "/var/log/supervisor/backend.out.log",
-            "/var/log/backend.log",
-            "/app/backend.log",
-            "backend.log"
-        ]
-        
-        all_logs = []
-        found_files = []
-        
-        for log_file in log_files:
-            if os.path.exists(log_file):
-                found_files.append(log_file)
-                try:
-                    cmd = f"tail -n {lines} {log_file}"
-                    result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=5)
-                    if result.stdout:
-                        all_logs.extend([f"[{log_file}] {line}" for line in result.stdout.split('\n') if line])
-                except Exception as e:
-                    logger.warning(f"Error reading log file {log_file}: {e}")
-                    pass
-        
-        # Filter if requested
-        if filter:
-            all_logs = [line for line in all_logs if filter.upper() in line.upper()]
-        
-        return {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "total_lines": len(all_logs),
-            "filter": filter or "none",
-            "log_files_checked": log_files,
-            "log_files_found": found_files,
-            "logs": all_logs[-100:]  # Return max 100 lines for readability
-        }
-    except Exception as e:
-        return {
-            "error": str(e),
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        }
-
 
 @api_router.get("/debug/clear-all-conversations")
 async def clear_all_conversations():
