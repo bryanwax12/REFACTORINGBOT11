@@ -90,7 +90,7 @@ async def show_payment_methods(update: Update, context: ContextTypes.DEFAULT_TYP
 @with_user_session(create_user=False, require_session=True)
 async def handle_pay_from_balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle payment from user balance"""
-    from server import process_payment
+    # Call process_payment from this module
     return await process_payment(update, context)
 
 
