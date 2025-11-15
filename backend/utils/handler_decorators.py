@@ -10,11 +10,12 @@ from telegram.ext import ContextTypes, ConversationHandler
 logger = logging.getLogger(__name__)
 
 
-def safe_handler(fallback_state=ConversationHandler.END, error_message="❌ Произошла ошибка. Попробуйте позже."):
+def safe_handler(fallback_state=ConversationHandler.END, error_message="❌ Произошла ошибка. Попробуйте позже.", skip_maintenance_check=False):
     """
     Decorator for Telegram handlers with automatic error handling
     
     Features:
+    - Checks maintenance mode (unless skip_maintenance_check=True)
     - Catches all exceptions
     - Logs error with context
     - Sends user-friendly error message
@@ -31,6 +32,21 @@ def safe_handler(fallback_state=ConversationHandler.END, error_message="❌ Пр
         @wraps(func)
         async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
             try:
+                # Check maintenance mode (unless explicitly skipped)
+                if not skip_maintenance_check:
+                    from handlers.common_handlers import check_maintenance_mode
+                    if await check_maintenance_mode(update):
+                        maintenance_msg = "⚠️ *Режим технического обслуживания*\n\nБот временно недоступен для технического обслуживания.\nМы скоро вернемся!"
+                        try:
+                            if update.message:
+                                await update.message.reply_text(maintenance_msg, parse_mode='Markdown')
+                            elif update.callback_query:
+                                await update.callback_query.answer("Бот на обслуживании", show_alert=True)
+                                await update.callback_query.message.reply_text(maintenance_msg, parse_mode='Markdown')
+                        except Exception as e:
+                            logger.error(f"Failed to send maintenance message: {e}")
+                        return fallback_state
+                
                 # Call original handler
                 return await func(update, context, *args, **kwargs)
                 
