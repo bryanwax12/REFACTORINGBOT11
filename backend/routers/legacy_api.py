@@ -74,5 +74,32 @@ async def legacy_get_topups(api_key: str = Depends(verify_api_key)):
 @router.get("/users/leaderboard")
 async def legacy_get_leaderboard(api_key: str = Depends(verify_api_key)):
     """Legacy leaderboard endpoint"""
-    from routers.users import get_users_leaderboard
-    return await get_users_leaderboard(limit=10)
+    from server import db
+    users = await db.users.find(
+        {"balance": {"$gt": 0}},
+        {"_id": 0}
+    ).sort("balance", -1).limit(10).to_list(10)
+    return {"leaderboard": users}
+
+
+@router.get("/settings/api-mode")
+async def legacy_get_api_mode(api_key: str = Depends(verify_api_key)):
+    """Legacy API mode endpoint"""
+    from server import db
+    settings = await db.settings.find_one({"type": "bot_settings"}, {"_id": 0})
+    if settings:
+        return {"mode": settings.get("telegram_mode", "polling")}
+    return {"mode": "polling"}
+
+
+@router.get("/maintenance/status")
+async def legacy_get_maintenance_status(api_key: str = Depends(verify_api_key)):
+    """Legacy maintenance status endpoint"""
+    from server import db
+    settings = await db.settings.find_one({"type": "bot_settings"}, {"_id": 0})
+    if settings:
+        return {
+            "maintenance_mode": settings.get("maintenance_mode", False),
+            "message": settings.get("maintenance_message", "")
+        }
+    return {"maintenance_mode": False, "message": ""}
