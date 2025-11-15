@@ -628,59 +628,8 @@ class Template(BaseModel):
 # Helper function to check if user is blocked
 # check_user_blocked and send_blocked_message moved to handlers/common_handlers.py
 
-async def handle_orphaned_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle button presses that are not caught by any active handler (orphaned buttons)"""
-    query = update.callback_query
-    
-    # Ignore menu buttons (start, help, etc)
-    if query.data in ['start', 'help', 'contact_admin', 'my_templates']:
-        return
-    
-    logger.info(f"Orphaned button detected: {query.data} from user {update.effective_user.id}")
-    
-    await safe_telegram_call(query.answer("⚠️ Этот заказ уже завершён"))
-    await safe_telegram_call(query.message.reply_text(
-        "⚠️ *Этот заказ уже завершён или отменён.*\n\n"
-        "Для создания нового заказа используйте меню в нижней части экрана.",
-        parse_mode='Markdown'
-    ))
-
-async def check_stale_interaction(query, context: ContextTypes.DEFAULT_TYPE) -> bool:
-    """Check if button press is from an old/completed interaction"""
-    logger.info(f"check_stale_interaction called - user_data keys: {list(context.user_data.keys())}")
-    
-    # Check for rapid multiple clicks (debouncing)
-    user_id = query.from_user.id
-    button_data = query.data
-    
-    if not is_button_click_allowed(user_id, button_data):
-        await safe_telegram_call(query.answer("⚠️ Пожалуйста, подождите..."))
-        return True  # Block this interaction
-    
-    # If user_data is empty or doesn't have active order data, it's likely stale
-    if not context.user_data or len(context.user_data) == 0:
-        logger.info("Stale interaction detected - empty user_data")
-        await safe_telegram_call(query.answer("⚠️ Этот заказ уже завершён"))
-        await safe_telegram_call(query.message.reply_text(
-            "⚠️ *Этот заказ уже завершён или отменён.*\n\n"
-            "Для создания нового заказа используйте меню в нижней части экрана.",
-            parse_mode='Markdown'
-        ))
-        return True
-    
-    # Check if order was already completed (has order_completed flag)
-    if context.user_data.get('order_completed'):
-        logger.info("Stale interaction detected - order_completed flag set")
-        await safe_telegram_call(query.answer("⚠️ Этот заказ уже завершён"))
-        await safe_telegram_call(query.message.reply_text(
-            "⚠️ *Этот заказ уже завершён.*\n\n"
-            "Для создания нового заказа используйте меню в нижней части экрана.",
-            parse_mode='Markdown'
-        ))
-        return True
-    
-    logger.info("Interaction is valid - proceeding")
-    return False
+# MIGRATED: Use handlers.common_handlers.handle_orphaned_button
+from handlers.common_handlers import handle_orphaned_button, check_stale_interaction
 
 # mark_message_as_selected_nonblocking removed - unused function (mark_message_as_selected is called directly)
 
