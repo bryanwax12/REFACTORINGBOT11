@@ -646,63 +646,8 @@ from handlers.common_handlers import handle_orphaned_button, check_stale_interac
 
 
 
-async def handle_create_label_request(update: Update, context: ContextTypes.DEFAULT_TYPE, order_id: str):
-    """Handle request to create/recreate shipping label for existing paid order"""
-    query = update.callback_query
-    telegram_id = query.from_user.id
-    
-    # Get order details using Repository Pattern
-    from repositories import get_repositories
-    repos = get_repositories()
-    order = await repos.orders.find_by_id(order_id)
-    
-    # Check if order belongs to user
-    if not order or order.get('telegram_id') != telegram_id:
-        await safe_telegram_call(query.message.reply_text("❌ Заказ не найден."))
-        return
-    
-    if order['payment_status'] != 'paid':
-        await safe_telegram_call(query.message.reply_text("❌ Заказ не оплачен. Создание лейбла невозможно."))
-        return
-    
-    # Show confirmation message
-    if order['shipping_status'] == 'label_created':
-        await safe_telegram_call(query.message.reply_text(f"""⏳ Пересоздаю shipping label для заказа #{order_id[:8]}...)
-    
-Это может занять несколько секунд."""))
-    else:
-        await safe_telegram_call(query.message.reply_text(f"""⏳ Создаю shipping label для заказа #{order_id[:8]}...)
-    
-Это может занять несколько секунд."""))
-    
-    # Try to create label
-    label_created = await create_and_send_label(order_id, telegram_id, query.message)
-    
-    if label_created:
-        # Update order payment status to paid (if it was failed before)
-        from repositories import get_repositories
-        repos = get_repositories()
-        await repos.orders.update_by_id(order_id, {"payment_status": "paid"})
-        
-        keyboard = [[
-            InlineKeyboardButton("🔙 Главное меню", callback_data='start')
-        ]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        
-        await safe_telegram_call(query.message.reply_text(
-            "✅ Shipping label успешно создан!",
-            reply_markup=reply_markup
-        ))
-    else:
-        keyboard = [[
-            InlineKeyboardButton("🔙 Главное меню", callback_data='start')
-        ]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        
-        await safe_telegram_call(query.message.reply_text(
-            "❌ Не удалось создать shipping label. Пожалуйста, свяжитесь с администратором.",
-            reply_markup=reply_markup
-        ))
+# MIGRATED: Use handlers.order_handlers.handle_create_label_request
+from handlers.order_handlers import handle_create_label_request
 
 # button_callback moved to handlers/common_handlers.py
 
