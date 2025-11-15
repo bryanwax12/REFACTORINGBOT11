@@ -4579,3 +4579,51 @@ Fixed all 4 flaky tests that were failing due to event loop isolation issues:
 - **Developer experience:** No more "passes alone, fails in suite" mysteries
 - **Architecture validation:** Confirms refactored code with Service Factory + Repository patterns works correctly
 
+
+
+---
+## 🔄 Phase 4 Progress - Server.py Decomposition Started
+**Date:** $(date)
+**Agent:** E1 Fork Agent
+
+### ✅ Completed Migrations (3 functions, ~120 lines removed):
+
+**1. Common Handlers (`/app/backend/handlers/common_handlers.py`):**
+- ✅ `handle_orphaned_button` - Handles orphaned button presses
+- ✅ `check_stale_interaction` - Validates button interactions aren't stale
+
+**2. Order Handlers (`/app/backend/handlers/order_handlers.py`):**
+- ✅ `handle_create_label_request` - Creates/recreates shipping labels for paid orders
+
+### 📊 Server.py Status:
+- **Before:** 2639 lines
+- **After:** 2533 lines  
+- **Removed:** 106 lines (~4%)
+- **Target:** Remove ~710 lines total (~14 handlers)
+- **Progress:** 15% complete
+
+### 📁 Files Modified:
+1. `/app/backend/handlers/common_handlers.py` - Added 2 handlers
+2. `/app/backend/handlers/order_handlers.py` - Added 1 handler  
+3. `/app/backend/server.py` - Replaced 3 handlers with imports
+
+### ✅ All Tests Still Passing:
+```
+207 passed, 17 warnings in 5.05s (100% success)
+```
+
+### 📋 Remaining Work (P1):
+**11 more handlers to migrate (~590 lines):**
+- `handle_topup_amount_input` → payment_handlers.py
+- `handle_data_confirmation` → order_flow/confirmation.py (check for duplicate)
+- `show_edit_menu` → order_flow/confirmation.py
+- `handle_template_new_name` → template_handlers.py
+- `continue_order_after_template` → order_flow/entry_points.py
+- `order_new` → order_flow/entry_points.py (check for duplicate)
+- `order_from_template_list` → order_flow/entry_points.py
+- `skip_address_validation` → order_flow/skip_handlers.py
+- `fetch_shipping_rates` → order_flow/ (new rates.py file)
+- `process_payment` → order_flow/payment.py (check for duplicate)
+- `handle_topup_amount` → payment_handlers.py
+- `handle_topup_crypto_selection` → payment_handlers.py
+
