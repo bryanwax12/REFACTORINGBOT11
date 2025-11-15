@@ -10,15 +10,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import os
 
 
-@pytest_asyncio.fixture(autouse=True)
-async def cleanup_test_data():
-    """Auto-cleanup fixture that runs before/after each test"""
-    # This runs BEFORE each test
-    yield
-    # This runs AFTER each test - cleanup happens here
-
-
-@pytest_asyncio.fixture
+@pytest_asyncio.fixture(scope='function')
 async def test_db():
     """Provide a test database connection"""
     mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
