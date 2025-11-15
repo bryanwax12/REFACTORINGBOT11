@@ -3046,29 +3046,6 @@ async def delayed_restart():
     )
     logger.info("Restart script launched in background")
 
-@api_router.post("/bot/restart")
-async def restart_bot(
-    background_tasks: BackgroundTasks, 
-    authenticated: bool = Depends(verify_admin_key)
-):
-    """Restart the Telegram bot backend service"""
-    try:
-        logger.info("Bot restart requested by admin")
-        
-        # Schedule restart in background after response is sent
-        background_tasks.add_task(delayed_restart)
-        
-        logger.info("Bot restart scheduled successfully")
-        return {
-            "status": "success",
-            "message": "Бот будет перезагружен через 2 секунды...",
-            "note": "Подождите 10-15 секунд для завершения перезагрузки"
-        }
-            
-    except Exception as e:
-        logger.error(f"Error scheduling bot restart: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
 
 @api_router.post("/settings/api-mode")
 async def set_api_mode(request: dict, authenticated: bool = Depends(verify_admin_key)):
