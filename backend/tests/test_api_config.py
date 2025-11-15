@@ -168,6 +168,8 @@ class TestAPIConfigManager:
     
     @patch.dict(os.environ, {
         'SHIPSTATION_API_KEY_TEST': 'test_key',
+        'SHIPSTATION_API_KEY_PROD': '',  # Explicitly clear prod key for test isolation
+        'SHIPSTATION_API_KEY': '',  # Clear default key too
         'OXAPAY_API_KEY': 'oxapay_key'
     })
     def test_get_all_keys_status(self):
