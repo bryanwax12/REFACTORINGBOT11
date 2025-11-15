@@ -486,9 +486,18 @@ class OrderStepMessages:
                 OrderStepMessages.TO_PHONE
             ),
             'PARCEL_WEIGHT': (None, OrderStepMessages.PARCEL_WEIGHT),
-            'PARCEL_LENGTH': (None, OrderStepMessages.PARCEL_LENGTH),
-            'PARCEL_WIDTH': (None, OrderStepMessages.PARCEL_WIDTH),
-            'PARCEL_HEIGHT': (None, OrderStepMessages.PARCEL_HEIGHT),
+            'PARCEL_LENGTH': (
+                get_standard_size_and_cancel_keyboard(CallbackData.SKIP_PARCEL_DIMENSIONS),
+                OrderStepMessages.PARCEL_LENGTH
+            ),
+            'PARCEL_WIDTH': (
+                get_standard_size_and_cancel_keyboard(CallbackData.SKIP_PARCEL_WIDTH_HEIGHT),
+                OrderStepMessages.PARCEL_WIDTH
+            ),
+            'PARCEL_HEIGHT': (
+                get_standard_size_and_cancel_keyboard(CallbackData.SKIP_PARCEL_HEIGHT),
+                OrderStepMessages.PARCEL_HEIGHT
+            ),
         }
         
         return state_mapping.get(state, (None, "Продолжаем оформление заказа..."))
