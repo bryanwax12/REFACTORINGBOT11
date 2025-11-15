@@ -107,7 +107,7 @@ def validate_parcel_data(parcel_data: Dict[str, Any]) -> Tuple[bool, Optional[st
         return False, "Missing parcel weight"
     
     try:
-        weight = float(parcel_data['weight'])
+        weight = float(parcel_data.get('weight') or parcel_data.get('parcel_weight', 0))
         if weight <= 0:
             return False, "Parcel weight must be positive"
         if weight > 150:  # 150 lbs limit
