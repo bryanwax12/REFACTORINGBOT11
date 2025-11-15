@@ -179,19 +179,19 @@ def setup_order_conversation_handler():
             ],
             PARCEL_LENGTH: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, order_parcel_length),
-                CallbackQueryHandler(order_parcel_length, pattern='^skip_dimensions$'),
+                CallbackQueryHandler(skip_parcel_dimensions, pattern='^skip_parcel_dimensions$'),
                 CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
                 CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
             ],
             PARCEL_WIDTH: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, order_parcel_width),
-                CallbackQueryHandler(order_parcel_width, pattern='^skip_dimensions$'),
+                CallbackQueryHandler(skip_parcel_width_height, pattern='^skip_parcel_width_height$'),
                 CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
                 CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
             ],
             PARCEL_HEIGHT: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, order_parcel_height),
-                CallbackQueryHandler(order_parcel_height, pattern='^skip_height$'),
+                CallbackQueryHandler(skip_parcel_height, pattern='^skip_parcel_height$'),
                 CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
                 CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
             ],
