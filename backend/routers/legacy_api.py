@@ -18,18 +18,12 @@ async def verify_api_key(x_api_key: Optional[str] = Header(None)):
 
 @router.get("/stats")
 async def legacy_get_stats(api_key: str = Depends(verify_api_key)):
-    """Legacy stats endpoint"""
-    from repositories import get_repositories
-    repos = get_repositories()
+    """Legacy stats endpoint - returns dashboard statistics"""
+    from server import db
+    from handlers.admin_handlers import get_stats_data
     
-    users_count = await repos.users.collection.count_documents({})
-    orders_count = await repos.orders.collection.count_documents({})
-    
-    return {
-        "users_count": users_count,
-        "orders_count": orders_count,
-        "revenue": 0
-    }
+    stats = await get_stats_data(db)
+    return stats
 
 
 @router.get("/stats/expenses")
