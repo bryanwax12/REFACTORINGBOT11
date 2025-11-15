@@ -2926,58 +2926,6 @@ async def check_all_bot_access(authenticated: bool = Depends(verify_admin_key)):
         logger.error(f"Error checking all bot access: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@api_router.get("/users/leaderboard")
-async def get_leaderboard():
-    try:
-        # Get users using Repository Pattern
-        from repositories import get_repositories, get_user_repo
-        repos = get_repositories()
-        user_repo = get_user_repo()
-        users = await user_repo.get_all_users(limit=1000)
-        
-        leaderboard = []
-        for user in users:
-            orders = await repos.orders.find_with_filter(
-                {"telegram_id": user['telegram_id'], "payment_status": "paid"},
-                limit=100
-            )
-            
-            total_orders = len(orders)
-            total_spent = sum([o.get('amount', 0) for o in orders])
-            
-            rating_score = 0
-            rating_score += total_orders * 10
-            rating_score += total_spent * 0.5
-            
-            if total_orders >= 10:
-                rating_level = "🏆 VIP"
-            elif total_orders >= 5:
-                rating_level = "⭐ Gold"
-            elif total_orders >= 2:
-                rating_level = "🥈 Silver"
-            elif total_orders >= 1:
-                rating_level = "🥉 Bronze"
-            else:
-                rating_level = "🆕 New"
-            
-            leaderboard.append({
-                "telegram_id": user['telegram_id'],
-                "first_name": user.get('first_name', 'Unknown'),
-                "username": user.get('username'),
-                "total_orders": total_orders,
-                "total_spent": total_spent,
-                "rating_score": rating_score,
-                "rating_level": rating_level,
-                "balance": user.get('balance', 0)
-            })
-        
-        # Sort by rating score
-        leaderboard.sort(key=lambda x: x['rating_score'], reverse=True)
-        
-        return leaderboard
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
 
 @api_router.get("/users/{telegram_id}/channel-status")
 async def check_user_channel_status(telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
