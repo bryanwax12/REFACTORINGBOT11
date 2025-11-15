@@ -64,6 +64,9 @@ class CallbackData:
     SKIP_FROM_PHONE = 'skip_from_phone'
     SKIP_TO_ADDRESS2 = 'skip_to_address2'
     SKIP_TO_PHONE = 'skip_to_phone'
+    SKIP_PARCEL_DIMENSIONS = 'skip_parcel_dimensions'  # Skip all dimensions (L/W/H) after weight
+    SKIP_PARCEL_WIDTH_HEIGHT = 'skip_parcel_width_height'  # Skip W and H after length
+    SKIP_PARCEL_HEIGHT = 'skip_parcel_height'  # Skip only height
     
     # Payment
     MY_BALANCE = 'my_balance'
