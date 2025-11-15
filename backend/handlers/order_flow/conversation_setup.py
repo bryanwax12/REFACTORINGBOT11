@@ -93,6 +93,10 @@ def setup_order_conversation_handler():
         continue_order_after_template,
         handle_topup_amount
     )
+    from handlers.order_flow.payment import (
+        handle_order_summary,
+        handle_proceed_to_payment
+    )
     
     # Build the conversation handler
     order_conv_handler = ConversationHandler(
