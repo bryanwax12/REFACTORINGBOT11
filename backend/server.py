@@ -1235,44 +1235,9 @@ view_template = handler_view_template
 # Keeping alias for backward compatibility
 use_template = handler_use_template
 
-async def start_order_with_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Start order creation with pre-loaded template data"""
-    query = update.callback_query
-    
-    # Clear topup flag to prevent conflict with parcel weight input
-    context.user_data['awaiting_topup_amount'] = False
-    
-    # Template data already loaded in context.user_data
-    # Ask for parcel weight (first thing not in template)
-    from utils.ui_utils import get_cancel_keyboard
-    reply_markup = get_cancel_keyboard()
-    
-    template_name = context.user_data.get('template_name', 'шаблон')
-    
-    message_text = f"""📦 Создание заказа по шаблону "{template_name}"
-
-Теперь введите данные посылки:
-
-*Вес посылки в фунтах (lb)*
-Например: 5.5"""
-    
-    # Execute answer and mark selected, then send new message
-    await safe_telegram_call(query.answer())
-    
-    # Mark previous message as selected (blocking)
-    asyncio.create_task(mark_message_as_selected(update, context))
-    
-    # Send new message immediately without waiting for mark_message_as_selected
-    bot_msg = await safe_telegram_call(query.message.reply_text(
-            message_text,
-            reply_markup=reply_markup,
-            parse_mode='Markdown'
-        ))
-    context.user_data['last_bot_message_id'] = bot_msg.message_id
-    context.user_data['last_bot_message_text'] = message_text
-    
-    context.user_data['last_state'] = STATE_NAMES[PARCEL_WEIGHT]
-    return PARCEL_WEIGHT
+# MIGRATED: Use handlers.order_flow.entry_points.start_order_with_template
+# Keeping alias for backward compatibility
+start_order_with_template = handler_start_order_with_template
 
 async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Confirm and delete template"""
