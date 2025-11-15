@@ -126,3 +126,8 @@ def get_payment_service() -> PaymentService:
 def get_order_service() -> OrderService:
     """Получить OrderService из глобальной фабрики"""
     return get_service_factory().get_order_service()
+
+
+def get_template_service():
+    """Получить TemplateService из глобальной фабрики"""
+    return get_service_factory().get_template_service()
