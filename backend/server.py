@@ -3069,16 +3069,6 @@ async def restart_bot(
         logger.error(f"Error scheduling bot restart: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@api_router.get("/settings/api-mode")
-async def get_api_mode(authenticated: bool = Depends(verify_admin_key)):
-    """Get current API mode (test or production)"""
-    try:
-        setting = await db.settings.find_one({"key": "api_mode"})
-        mode = setting.get("value", "production") if setting else "production"
-        return {"mode": mode}
-    except Exception as e:
-        logger.error(f"Error getting API mode: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/settings/api-mode")
 async def set_api_mode(request: dict, authenticated: bool = Depends(verify_admin_key)):
