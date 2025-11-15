@@ -2878,41 +2878,6 @@ async def get_order(order_id: str):
         raise HTTPException(status_code=404, detail="Order not found")
     return order
 
-# MOVED TO routers/shipping.py
-# @api_router.post("/shipping/create-label")
-async def create_shipping_label(order_id: str):
-    try:
-        from repositories import get_repositories
-        repos = get_repositories()
-        order = await repos.orders.find_by_id(order_id)
-        if not order:
-            raise HTTPException(status_code=404, detail="Order not found")
-        
-        if order['payment_status'] != 'paid':
-            raise HTTPException(status_code=400, detail="Order not paid")
-        
-        if not SHIPSTATION_API_KEY:
-            raise HTTPException(status_code=500, detail="ShipStation API not configured")
-        
-        # Use the main label creation function
-        result = await create_and_send_label(order_id, order['telegram_id'], None)
-        
-        if result:
-            # Get the created label
-            label = await db.shipping_labels.find_one({"order_id": order_id}, {"_id": 0})
-            return {
-                "order_id": order_id,
-                "tracking_number": label['tracking_number'],
-                "label_url": label['label_url'],
-                "status": "success"
-            }
-        else:
-            raise HTTPException(status_code=500, detail="Failed to create label")
-        
-    except Exception as e:
-        logger.error(f"Error creating label: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
 @api_router.get("/shipping/track/{tracking_number}")
 async def track_shipment(tracking_number: str, carrier: str):
     """
