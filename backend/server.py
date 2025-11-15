@@ -1215,6 +1215,12 @@ async def startup_event():
     if TELEGRAM_BOT_TOKEN and TELEGRAM_BOT_TOKEN != "your_telegram_bot_token_here":
         try:
             global application  # Use global application variable for webhook access
+            
+            # Prevent duplicate bot initialization
+            if application is not None:
+                logger.warning("⚠️  Telegram Bot application already initialized, skipping re-initialization")
+                return
+            
             logger.info("Initializing Telegram Bot...")
             # Build application - using in-memory state (STABLE)
             
