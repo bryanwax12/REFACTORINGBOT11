@@ -5,6 +5,7 @@ Handles fetching and displaying shipping rates
 import logging
 from telegram import Update
 from telegram.ext import ContextTypes
+from handlers.common_handlers import safe_telegram_call
 
 logger = logging.getLogger(__name__)
 
