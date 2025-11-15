@@ -132,11 +132,6 @@ from handlers.order_flow.confirmation import (
     show_data_confirmation as handler_show_data_confirmation,
 )
 
-# Order flow - payment handlers  
-from handlers.order_flow.payment import (
-    return_to_payment_after_topup as handler_return_to_payment_after_topup,
-)
-
 # Utility functions (Phase 4 refactoring - gradually moving from server.py)
 # Note: These are still defined in server.py for backward compatibility
 # TODO: Update all imports to use utils modules and remove duplicates
