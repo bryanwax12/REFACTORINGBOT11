@@ -829,36 +829,12 @@ save_template_name = handler_save_template_name
 # MIGRATED: Use handlers.order_flow.template_save.handle_template_update
 handle_template_update = handler_handle_template_update
 
-async def handle_template_new_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Ask user to enter a new template name"""
-    query = update.callback_query
-    await safe_telegram_call(query.answer())
-    
-    # Mark previous message as selected (non-blocking)
-    asyncio.create_task(mark_message_as_selected(update, context))
-    
-    await safe_telegram_call(query.message.reply_text(
-        """📝 Введите новое название для шаблона:
+# MIGRATED: Use handlers.template_handlers.handle_template_new_name
+from handlers.template_handlers import handle_template_new_name
 
-Например: Доставка маме 2, Офис NY"""
-    ))
-    # Clear last_bot_message to prevent interfering with text input
-    context.user_data.pop('last_bot_message_id', None)
-    context.user_data.pop('last_bot_message_text', None)
-    return TEMPLATE_NAME
+# MIGRATED: Use handlers.order_flow.entry_points.continue_order_after_template
+from handlers.order_flow.entry_points import continue_order_after_template
 
-
-async def continue_order_after_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Continue order creation after saving template - return to data confirmation"""
-    query = update.callback_query
-    await safe_telegram_call(query.answer())
-    
-    # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-    asyncio.create_task(mark_message_as_selected(update, context))
-    
-    # Since template was saved from CONFIRM_DATA screen, we have all data including weight/dimensions
-    # Return to data confirmation screen
-    return await show_data_confirmation(update, context)
 
 # MIGRATED: Use handlers.template_handlers.my_templates_menu
 # Keeping alias for backward compatibility
@@ -886,79 +862,16 @@ rename_template_start = handler_rename_template_start
 # MIGRATED: Use handlers.template_handlers.rename_template_save
 rename_template_save = handler_rename_template_save
 
-async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Start new order (without template)"""
-    from utils.ui_utils import get_cancel_keyboard, OrderFlowMessages
-    
-    logger.info(f"order_new called - user_id: {update.effective_user.id}")
-    query = update.callback_query
-    await safe_telegram_call(query.answer())
-    
-    # Clear topup flag to prevent conflict with order input
-    context.user_data['awaiting_topup_amount'] = False
-    
-    # Mark previous message as selected (remove buttons from choice screen)
-    asyncio.create_task(mark_message_as_selected(update, context))
-    
-    reply_markup = get_cancel_keyboard()
-    message_text = OrderFlowMessages.new_order_start()
-    
-    bot_msg = await safe_telegram_call(query.message.reply_text(
-            message_text,
-            reply_markup=reply_markup
-        ))
-    
-    if bot_msg:
-        context.user_data['last_bot_message_id'] = bot_msg.message_id
-        context.user_data['last_bot_message_text'] = message_text
-        context.user_data['last_state'] = STATE_NAMES[FROM_NAME]
-    logger.info("order_new returning FROM_NAME state")
-    return FROM_NAME
+# MIGRATED: Use handlers.order_flow.entry_points.order_new
+from handlers.order_flow.entry_points import order_new
 
-async def order_from_template_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Show template list for order creation"""
-    from utils.ui_utils import get_template_selection_keyboard, OrderFlowMessages
-    
-    query = update.callback_query
-    await safe_telegram_call(query.answer())
-    
-    # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-    asyncio.create_task(mark_message_as_selected(update, context))
-    
-    telegram_id = query.from_user.id
-    templates = await find_user_templates(telegram_id, limit=10)
-    
-    if not templates:
-        await safe_telegram_call(query.message.reply_text(OrderFlowMessages.no_templates_error()))
-        return ConversationHandler.END
-    
-    message = OrderFlowMessages.select_template()
-    
-    for i, template in enumerate(templates, 1):
-        message += OrderFlowMessages.template_item(i, template)
-    
-    reply_markup = get_template_selection_keyboard(templates)
-    
-    bot_msg = await safe_telegram_call(query.message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown'))
-    
-    # Save last bot message context for button protection
-    context.user_data['last_bot_message_id'] = bot_msg.message_id
-    context.user_data['last_bot_message_text'] = message
-    
-    return TEMPLATE_LIST
 
-async def skip_address_validation(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Skip address validation and continue with rate fetching"""
-    query = update.callback_query
-    await safe_telegram_call(query.answer())
-    
-    # Set flag to skip validation
-    context.user_data['skip_address_validation'] = True
-    
-    await safe_telegram_call(query.message.reply_text("⚠️ Пропускаю валидацию адреса...\n⏳ Получаю доступные курьерские службы и тарифы..."))
-    
-    # Call fetch_shipping_rates which will now skip validation
-    return await fetch_shipping_rates(update, context)
+# MIGRATED: Use handlers.order_flow.entry_points.order_from_template_list
+from handlers.order_flow.entry_points import order_from_template_list
+
+
+# MIGRATED: Use handlers.order_flow.skip_handlers.skip_address_validation
+from handlers.order_flow.skip_handlers import skip_address_validation
 
 # MIGRATED: Use handlers.order_handlers.display_shipping_rates
 display_shipping_rates = handler_display_shipping_rates
