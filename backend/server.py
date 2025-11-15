@@ -3684,22 +3684,7 @@ async def startup_event():
             #             CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
             #             CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
             #         ],
-#         FROM_ADDRESS: [
-#             MessageHandler(filters.TEXT & ~filters.COMMAND, order_from_address),
-#             CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
-#             CallbackQueryHandler(return_to_order, pattern='^return_to_order$')
-#         ],
-#         ... (rest of states commented out - see conversation_setup.py)
-#     },
-#     fallbacks=[
-#         CallbackQueryHandler(cancel_order, pattern='^cancel_order$'),
-#         CommandHandler('start', start_command)
-#     ],
-#     per_chat=True,
-#     per_user=True,
-#     per_message=False,
-#     allow_reentry=True
-# )
+# Old ConversationHandler definition removed - see handlers/order_flow/conversation_setup.py
             
             application.add_handler(template_rename_handler)
             application.add_handler(order_conv_handler)
