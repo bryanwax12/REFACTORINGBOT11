@@ -903,95 +903,10 @@ STATE_NAMES = {
     TEMPLATE_LOADED: "TEMPLATE_LOADED"
 }
 
-async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Handle both command and callback
-    if update.callback_query:
-        query = update.callback_query
-        # INSTANT feedback: answer immediately without wrapper
-        try:
-            await query.answer()
-        except Exception:
-            pass
-        
-        # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-        asyncio.create_task(mark_message_as_selected(update, context))
-        
-        telegram_id = query.from_user.id
-        send_method = query.message.reply_text
-    else:
-        # Mark previous message as selected (non-blocking)
-        asyncio.create_task(mark_message_as_selected(update, context))
-        
-        telegram_id = update.effective_user.id
-        send_method = update.message.reply_text
-    logger.info(f"📝 User {telegram_id} starting new order flow")
-    
-    # STEP 2: Get or create session (V2 - atomic with TTL)
-    user_id = update.effective_user.id
-    
-    # Атомарно получить существующую сессию или создать новую
-    # TTL индекс автоматически удаляет сессии старше 15 минут
-    session = await session_manager.get_or_create_session(user_id, initial_data={})
-    
-    if session:
-        current_step = session.get('current_step', 'START')
-        temp_data = session.get('temp_data', {})
-        
-        if current_step != 'START' and temp_data:
-            # Есть незавершенная сессия - продолжить
-            logger.info(f"🔄 Resuming session for user {user_id} from step {current_step}")
-            context.user_data.update(temp_data)
-        else:
-            # Новая сессия
-            logger.info(f"🆕 New session for user {user_id}")
-            context.user_data.clear()
-    else:
-        logger.error(f"❌ Failed to get/create session for user {user_id}")
-        context.user_data.clear()
-    
-    # Check if bot is in maintenance mode
-    from utils.ui_utils import MessageTemplates
-    if await check_maintenance_mode(update):
-        await safe_telegram_call(send_method(
-            MessageTemplates.maintenance_mode(),
-            parse_mode='Markdown'
-        ))
-        return ConversationHandler.END
-    
-    # Check if user is blocked
-    if await check_user_blocked(telegram_id):
-        await send_blocked_message(update)
-        return ConversationHandler.END
-    
-    # Check if user has templates
-    templates_count = await count_user_templates(telegram_id)
-    
-    from utils.ui_utils import get_new_order_choice_keyboard, get_cancel_keyboard, OrderFlowMessages
-    
-    if templates_count > 0:
-        # Show choice: New order or From template
-        reply_markup = get_new_order_choice_keyboard()
-        
-        await safe_telegram_call(send_method(
-            OrderFlowMessages.create_order_choice(),
-            reply_markup=reply_markup
-        ))
-        return FROM_NAME  # Waiting for choice
-    else:
-        # No templates, go straight to new order
-        reply_markup = get_cancel_keyboard()
-        
-        message_text = OrderFlowMessages.new_order_start()
-        bot_msg = await safe_telegram_call(send_method(
-            message_text,
-            reply_markup=reply_markup
-        ))
-        
-        if bot_msg:
-            context.user_data['last_bot_message_id'] = bot_msg.message_id
-            context.user_data['last_bot_message_text'] = message_text
-            context.user_data['last_state'] = STATE_NAMES[FROM_NAME]
-        return FROM_NAME
+# MIGRATED: Use handlers.order_flow.entry_points.new_order_start
+# Keeping alias for backward compatibility
+new_order_start = handler_new_order_start
+
 
 
 # Skip handlers moved to handlers/order_flow/skip_handlers.py
