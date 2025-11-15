@@ -32,6 +32,9 @@ except ImportError:
     # Fallback if PTBUserWarning not available
     warnings.filterwarnings("ignore", message=".*per_message.*")
 
+# Setup logger
+logger = logging.getLogger(__name__)
+
 # Performance monitoring
 from utils.performance import profile_db_query, profile_api_call, QueryTimer
 
