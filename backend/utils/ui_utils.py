@@ -1184,10 +1184,11 @@ class DataConfirmationUI:
         Returns:
             Formatted parcel section string
         """
-        weight = data.get('weight', '')
-        length = data.get('length', '')
-        width = data.get('width', '')
-        height = data.get('height', '')
+        # Try both key formats (parcel_weight and weight)
+        weight = data.get('parcel_weight', data.get('weight', ''))
+        length = data.get('parcel_length', data.get('length', ''))
+        width = data.get('parcel_width', data.get('width', ''))
+        height = data.get('parcel_height', data.get('height', ''))
         
         section = "*Посылка:*\n"
         section += f"⚖️ Вес: {weight} lb\n"
