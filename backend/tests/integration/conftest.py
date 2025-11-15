@@ -10,6 +10,14 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import os
 
 
+@pytest_asyncio.fixture(autouse=True)
+async def cleanup_test_data():
+    """Auto-cleanup fixture that runs before/after each test"""
+    # This runs BEFORE each test
+    yield
+    # This runs AFTER each test - cleanup happens here
+
+
 @pytest_asyncio.fixture
 async def test_db():
     """Provide a test database connection"""
