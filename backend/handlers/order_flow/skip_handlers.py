@@ -150,3 +150,22 @@ async def skip_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         next_step_name='PARCEL_WEIGHT',
         next_message=OrderStepMessages.PARCEL_WEIGHT
     )
+
+
+
+async def skip_address_validation(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Skip address validation and continue with rate fetching"""
+    from handlers.common_handlers import safe_telegram_call
+    from server import fetch_shipping_rates
+    
+    query = update.callback_query
+    await safe_telegram_call(query.answer())
+    
+    # Set flag to skip validation
+    context.user_data['skip_address_validation'] = True
+    
+    await safe_telegram_call(query.message.reply_text("⚠️ Пропускаю валидацию адреса...\n⏳ Получаю доступные курьерские службы и тарифы..."))
+    
+    # Call fetch_shipping_rates which will now skip validation
+    return await fetch_shipping_rates(update, context)
+
