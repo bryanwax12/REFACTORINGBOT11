@@ -202,19 +202,34 @@ async def get_shipstation_carrier_ids():
         logger.info(f"📡 Response body (first 200 chars): {response.text[:200]}")
         
         if response.status_code == 200:
-            carriers_data = response.json()
-            carriers = {}
-            
-            for carrier in carriers_data.get('carriers', []):
-                carrier_name = carrier.get('name')
-                carrier_id = carrier.get('carrier_id')
-                if carrier_name and carrier_id:
-                    carriers[carrier_name] = carrier_id
-            
-            logger.info(f"✅ Loaded {len(carriers)} ShipStation carriers: {list(carriers.keys())}")
-            return carriers
+            try:
+                carriers_data = response.json()
+                logger.info(f"✅ JSON parsed successfully. Keys: {list(carriers_data.keys())}")
+                
+                carriers_list = carriers_data.get('carriers', [])
+                logger.info(f"✅ Found {len(carriers_list)} carriers in response")
+                
+                carriers = {}
+                
+                for idx, carrier in enumerate(carriers_list):
+                    carrier_name = carrier.get('name') or carrier.get('friendly_name')
+                    carrier_id = carrier.get('carrier_id')
+                    
+                    if carrier_name and carrier_id:
+                        carriers[carrier_name] = carrier_id
+                        if idx < 3:  # Log first 3 carriers for debugging
+                            logger.info(f"   Carrier {idx+1}: {carrier_name} → {carrier_id}")
+                
+                logger.info(f"✅ Successfully loaded {len(carriers)} ShipStation carriers")
+                return carriers
+            except Exception as parse_error:
+                logger.error(f"❌ Error parsing carriers response: {parse_error}", exc_info=True)
+                logger.error(f"   Response text: {response.text[:500]}")
+                return {}
         else:
-            logger.error(f"❌ Failed to get carriers: status={response.status_code}, body={response.text}")
+            logger.error(f"❌ Failed to get carriers: status={response.status_code}")
+            logger.error(f"   Response headers: {dict(response.headers)}")
+            logger.error(f"   Response body: {response.text[:1000]}")
             return {}
             
     except Exception as e:
