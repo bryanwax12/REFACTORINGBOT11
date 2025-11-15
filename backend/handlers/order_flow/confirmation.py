@@ -104,3 +104,26 @@ __all__ = [
     'handle_confirm_data',
     'check_data_from_cancel'
 ]
+
+
+
+async def show_edit_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Show menu to select what to edit"""
+    from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
+    from utils.ui_utils import DataConfirmationUI
+    from server import EDIT_MENU
+    import asyncio
+    
+    query = update.callback_query
+    
+    # Mark previous message as selected (non-blocking)
+    asyncio.create_task(mark_message_as_selected(update, context))
+    
+    message = "✏️ Что вы хотите изменить?"
+    
+    # Build keyboard using UI utils
+    reply_markup = DataConfirmationUI.build_edit_menu_keyboard()
+    
+    await safe_telegram_call(query.message.reply_text(message, reply_markup=reply_markup))
+    return EDIT_MENU
+
