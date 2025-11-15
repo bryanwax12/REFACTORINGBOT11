@@ -375,35 +375,8 @@ rate_limiter = RateLimiter()
 # DEPRECATED: Use utils.session_utils.save_to_session instead
 save_to_session = util_save_to_session
 
-async def handle_critical_api_error(user_id: int, error_message: str, current_step: str, update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """
-    Handle critical API errors with option to revert to previous step
-    
-    Shows user a message with options to retry, edit data, or cancel
-    """
-    # Log to session
-    await session_manager.update_session_atomic(user_id, data={
-        'last_error': error_message,
-        'error_step': current_step,
-        'error_timestamp': datetime.now(timezone.utc).isoformat()
-    })
-    
-    keyboard = [
-        [InlineKeyboardButton("🔄 Попробовать снова", callback_data='continue_order')],
-        [InlineKeyboardButton("✏️ Редактировать данные", callback_data='edit_data')],
-        [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    # Show error message with options
-    query = update.callback_query
-    if query:
-        await safe_telegram_call(query.message.reply_text(
-            f"❌ Произошла ошибка:\n{error_message}\n\nВыберите действие:",
-            reply_markup=reply_markup
-        ))
-    
-    return current_step  # Stay on same step for retry
+# DEPRECATED: Use utils.session_utils.handle_critical_api_error instead
+handle_critical_api_error = util_handle_critical_api_error
 
 
 async def handle_step_error(user_id: int, error: Exception, current_step: str, context: ContextTypes.DEFAULT_TYPE, allow_revert: bool = False):
