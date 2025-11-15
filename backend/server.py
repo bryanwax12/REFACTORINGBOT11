@@ -3410,59 +3410,6 @@ async def get_bot_logs(authenticated: bool = Depends(verify_admin_key), limit: i
         logger.error(f"Error getting bot logs: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@api_router.get("/bot/metrics")
-async def get_bot_metrics(authenticated: bool = Depends(verify_admin_key)):
-    """Get bot performance metrics"""
-    try:
-        # Get order statistics using Repository Pattern
-        from repositories import get_repositories
-        repos = get_repositories()
-        total_orders = await repos.orders.count_orders()
-        today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
-        orders_today = await repos.orders.count_orders({
-            "created_at": {"$gte": today_start.isoformat()}
-        })
-        
-        # Get user statistics using Repository Pattern
-        from repositories import get_user_repo
-        user_repo = get_user_repo()
-        total_users = await user_repo.count_users()
-        active_users_today = await user_repo.count_users({
-            "last_activity": {"$gte": today_start.isoformat()}
-        })
-        
-        # Get revenue statistics
-        pipeline = [
-            {"$group": {
-                "_id": None,
-                "total_revenue": {"$sum": "$amount"},
-                "avg_order": {"$avg": "$amount"}
-            }}
-        ]
-        revenue_stats = await repos.orders.aggregate_orders(pipeline)
-        
-        total_revenue = revenue_stats[0]["total_revenue"] if revenue_stats else 0
-        avg_order = revenue_stats[0]["avg_order"] if revenue_stats else 0
-        
-        return {
-            "orders": {
-                "total": total_orders,
-                "today": orders_today,
-                "avg_per_day": total_orders / max((datetime.now(timezone.utc) - today_start).days, 1)
-            },
-            "users": {
-                "total": total_users,
-                "active_today": active_users_today
-            },
-            "revenue": {
-                "total": round(total_revenue, 2),
-                "average_order": round(avg_order, 2)
-            },
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        }
-    except Exception as e:
-        logger.error(f"Error getting bot metrics: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/upload-image")
 async def upload_image(
