@@ -69,13 +69,64 @@ async def legacy_get_topups(api_key: str = Depends(verify_api_key)):
 
 @router.get("/users/leaderboard")
 async def legacy_get_leaderboard(api_key: str = Depends(verify_api_key)):
-    """Legacy leaderboard endpoint - returns array directly"""
+    """Legacy leaderboard endpoint - returns array with rating metrics"""
     from server import db
+    
+    # Get top users by balance
     users = await db.users.find(
-        {"balance": {"$gt": 0}},
+        {},
         {"_id": 0}
-    ).sort("balance", -1).limit(10).to_list(10)
-    return users
+    ).limit(100).to_list(100)
+    
+    # Calculate rating for each user
+    leaderboard = []
+    for user in users:
+        telegram_id = user.get("telegram_id")
+        
+        # Get user's orders
+        total_orders = await db.orders.count_documents({"telegram_id": telegram_id})
+        paid_orders = await db.orders.count_documents({
+            "telegram_id": telegram_id,
+            "payment_status": "paid"
+        })
+        
+        # Calculate total spent
+        spent_result = await db.orders.aggregate([
+            {"$match": {"telegram_id": telegram_id, "payment_status": "paid"}},
+            {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+        ]).to_list(1)
+        
+        total_spent = spent_result[0]["total"] if spent_result else 0
+        
+        # Calculate rating score
+        rating_score = 0
+        rating_score += paid_orders * 10  # 10 points per paid order
+        rating_score += total_spent * 0.5  # 0.5 points per dollar spent
+        
+        # Determine rating level
+        if rating_score >= 100:
+            rating_level = "🏆 VIP"
+        elif rating_score >= 50:
+            rating_level = "⭐ Gold"
+        elif rating_score >= 20:
+            rating_level = "🥈 Silver"
+        elif rating_score >= 5:
+            rating_level = "🥉 Bronze"
+        else:
+            rating_level = "🆕 New"
+        
+        leaderboard.append({
+            **user,
+            "total_orders": total_orders,
+            "paid_orders": paid_orders,
+            "total_spent": total_spent,
+            "rating_score": rating_score,
+            "rating_level": rating_level
+        })
+    
+    # Sort by rating score and return top 10
+    leaderboard.sort(key=lambda x: x["rating_score"], reverse=True)
+    return leaderboard[:10]
 
 
 @router.get("/settings/api-mode")
