@@ -2451,24 +2451,6 @@ async def oxapay_webhook(request: Request):
 # get_users moved to routers/admin_router.py
 
 
-@api_router.get("/debug/clear-all-conversations")
-async def clear_all_conversations():
-    """EMERGENCY: Clear all conversation states (NO AUTH) - Use GET for easy browser access"""
-    try:
-        # Delete all conversation documents
-        result = await db.bot_persistence.delete_many({"_id": {"$regex": "^conversation_"}})
-        
-        return {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "deleted_count": result.deleted_count,
-            "message": "All conversation states cleared successfully! Users can now start fresh."
-        }
-    except Exception as e:
-        return {
-            "error": str(e),
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        }
-
 
 @api_router.get("/debug/active-conversations")
 async def debug_active_conversations():
