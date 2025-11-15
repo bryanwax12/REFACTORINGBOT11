@@ -99,6 +99,44 @@ from handlers.order_flow import (
 from handlers.order_flow.from_address import order_from_address2
 from handlers.order_flow.to_address import order_to_address2
 
+# Payment handlers
+from handlers.payment_handlers import (
+    my_balance_command as handler_my_balance_command,
+)
+
+# Template handlers  
+from handlers.template_handlers import (
+    my_templates_menu as handler_my_templates_menu,
+    view_template as handler_view_template,
+    use_template as handler_use_template,
+    delete_template as handler_delete_template,
+    confirm_delete_template as handler_confirm_delete_template,
+    rename_template_start as handler_rename_template_start,
+    rename_template_save as handler_rename_template_save,
+)
+
+# Order flow - cancellation handlers
+from handlers.order_flow.cancellation import (
+    cancel_order as handler_cancel_order,
+    confirm_cancel_order as handler_confirm_cancel_order,
+)
+
+# Order flow - entry point handlers
+from handlers.order_flow.entry_points import (
+    new_order_start as handler_new_order_start,
+    start_order_with_template as handler_start_order_with_template,
+)
+
+# Order flow - confirmation handlers
+from handlers.order_flow.confirmation import (
+    show_data_confirmation as handler_show_data_confirmation,
+)
+
+# Order flow - payment handlers  
+from handlers.order_flow.payment import (
+    return_to_payment_after_topup as handler_return_to_payment_after_topup,
+)
+
 # Utility functions (Phase 4 refactoring - gradually moving from server.py)
 # Note: These are still defined in server.py for backward compatibility
 # TODO: Update all imports to use utils modules and remove duplicates
