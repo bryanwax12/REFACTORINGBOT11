@@ -892,17 +892,17 @@ ShipStation не смог проверить один или оба адреса
         
         # Group rates by carrier
         rates_by_carrier = {}
-        for i, rate in enumerate(rates):
+        for i, rate in enumerate(filtered_rates):
             carrier = rate['carrier']
             if carrier not in rates_by_carrier:
                 rates_by_carrier[carrier] = []
             rates_by_carrier[carrier].append((i, rate))
         
         # Count unique carriers
-        unique_carriers = len(set(r['carrier'] for r in rates))
+        unique_carriers = len(set(r['carrier'] for r in filtered_rates))
         
         # Build message
-        message = f"📦 Найдено {len(rates)} тарифов от {unique_carriers} курьеров:\n\n"
+        message = f"📦 Найдено {len(filtered_rates)} тарифов от {unique_carriers} курьеров:\n\n"
         
         # Display rates grouped by carrier
         for carrier in sorted(rates_by_carrier.keys()):
