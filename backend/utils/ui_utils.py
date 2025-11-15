@@ -887,6 +887,9 @@ ShipStation не смог проверить один или оба адреса
         """
         from datetime import datetime, timedelta, timezone
         
+        # Filter to show only popular rates
+        filtered_rates = ShippingRatesUI.filter_popular_rates(rates)
+        
         # Group rates by carrier
         rates_by_carrier = {}
         for i, rate in enumerate(rates):
