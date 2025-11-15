@@ -72,7 +72,12 @@ async def test_db():
     await db.payments.delete_many({"telegram_id": 123456789})
     await db.pending_orders.delete_many({"telegram_id": 123456789})
     
-    # Close client and reset factory + repositories AFTER test completes
+    # Restore original global objects in server.py
+    server.db = old_db
+    server.client = old_client
+    server.session_manager = old_session_manager
+    
+    # Close test client and reset factory + repositories AFTER test completes
     client.close()
     reset_service_factory()
     reset_repositories()
