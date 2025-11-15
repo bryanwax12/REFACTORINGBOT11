@@ -283,3 +283,28 @@ async def save_order_as_template(telegram_id: int, template_name: str, order_dat
     except Exception as e:
         logger.error(f"Error saving template: {e}")
         return None
+
+
+
+async def handle_template_new_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Ask user to enter a new template name"""
+    from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
+    from server import TEMPLATE_NAME
+    import asyncio
+    
+    query = update.callback_query
+    await safe_telegram_call(query.answer())
+    
+    # Mark previous message as selected (non-blocking)
+    asyncio.create_task(mark_message_as_selected(update, context))
+    
+    await safe_telegram_call(query.message.reply_text(
+        """📝 Введите новое название для шаблона:
+
+Например: Доставка маме 2, Офис NY"""
+    ))
+    # Clear last_bot_message to prevent interfering with text input
+    context.user_data.pop('last_bot_message_id', None)
+    context.user_data.pop('last_bot_message_text', None)
+    return TEMPLATE_NAME
+
