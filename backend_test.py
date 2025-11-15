@@ -1055,7 +1055,7 @@ def test_telegram_bot_basic_flow():
         }
         
         response = requests.post(
-            f"{API_BASE}/telegram/webhook",
+            f"{BACKEND_URL}/telegram/webhook",
             json=start_update,
             headers={'Content-Type': 'application/json'},
             timeout=15
@@ -1107,7 +1107,7 @@ def test_telegram_bot_basic_flow():
         }
         
         response = requests.post(
-            f"{API_BASE}/telegram/webhook",
+            f"{BACKEND_URL}/telegram/webhook",
             json=new_order_update,
             headers={'Content-Type': 'application/json'},
             timeout=15
@@ -1141,7 +1141,7 @@ def test_telegram_bot_basic_flow():
         }
         
         response = requests.post(
-            f"{API_BASE}/telegram/webhook",
+            f"{BACKEND_URL}/telegram/webhook",
             json=name_input_update,
             headers={'Content-Type': 'application/json'},
             timeout=15
@@ -1175,7 +1175,7 @@ def test_telegram_bot_basic_flow():
         }
         
         response = requests.post(
-            f"{API_BASE}/telegram/webhook",
+            f"{BACKEND_URL}/telegram/webhook",
             json=address_input_update,
             headers={'Content-Type': 'application/json'},
             timeout=15
@@ -1193,7 +1193,7 @@ def test_telegram_bot_basic_flow():
         }
         
         response = requests.post(
-            f"{API_BASE}/telegram/webhook",
+            f"{BACKEND_URL}/telegram/webhook",
             json=invalid_update,
             headers={'Content-Type': 'application/json'},
             timeout=15
@@ -2331,7 +2331,7 @@ def test_telegram_webhook_state_simulation():
         }
         
         response = requests.post(
-            f"{API_BASE}/telegram/webhook",
+            f"{BACKEND_URL}/telegram/webhook",
             json=start_update,
             headers={'Content-Type': 'application/json'},
             timeout=15
@@ -2376,7 +2376,7 @@ def test_telegram_webhook_state_simulation():
         }
         
         response = requests.post(
-            f"{API_BASE}/telegram/webhook",
+            f"{BACKEND_URL}/telegram/webhook",
             json=new_order_update,
             headers={'Content-Type': 'application/json'},
             timeout=15
@@ -2414,7 +2414,7 @@ def test_telegram_webhook_state_simulation():
         }
         
         response = requests.post(
-            f"{API_BASE}/telegram/webhook",
+            f"{BACKEND_URL}/telegram/webhook",
             json=name_input_update,
             headers={'Content-Type': 'application/json'},
             timeout=15
@@ -2459,7 +2459,7 @@ def test_telegram_webhook_state_simulation():
         }
         
         response = requests.post(
-            f"{API_BASE}/telegram/webhook",
+            f"{BACKEND_URL}/telegram/webhook",
             json=cancel_update,
             headers={'Content-Type': 'application/json'},
             timeout=15
@@ -2504,7 +2504,7 @@ def test_telegram_webhook_state_simulation():
         }
         
         response = requests.post(
-            f"{API_BASE}/telegram/webhook",
+            f"{BACKEND_URL}/telegram/webhook",
             json=return_update,
             headers={'Content-Type': 'application/json'},
             timeout=15
@@ -2540,7 +2540,7 @@ def test_telegram_webhook_endpoint():
     try:
         # Test 1: GET request to webhook endpoint (should return method not allowed or basic info)
         print("   Test 1: GET /api/telegram/webhook")
-        response = requests.get(f"{API_BASE}/telegram/webhook", timeout=10)
+        response = requests.get(f"{BACKEND_URL}/telegram/webhook", timeout=10)
         print(f"   Status Code: {response.status_code}")
         
         # Webhook endpoints typically don't support GET, so 405 is expected
@@ -2555,7 +2555,7 @@ def test_telegram_webhook_endpoint():
         invalid_payload = {"invalid": "data"}
         
         response = requests.post(
-            f"{API_BASE}/telegram/webhook",
+            f"{BACKEND_URL}/telegram/webhook",
             json=invalid_payload,
             headers={'Content-Type': 'application/json'},
             timeout=10
@@ -2597,7 +2597,7 @@ def test_telegram_webhook_endpoint():
         }
         
         response = requests.post(
-            f"{API_BASE}/telegram/webhook",
+            f"{BACKEND_URL}/telegram/webhook",
             json=valid_update,
             headers={'Content-Type': 'application/json'},
             timeout=15
@@ -2665,7 +2665,7 @@ def test_telegram_bot_commands():
         }
         
         response = requests.post(
-            f"{API_BASE}/telegram/webhook",
+            f"{BACKEND_URL}/telegram/webhook",
             json=start_update,
             headers={'Content-Type': 'application/json'},
             timeout=15
@@ -2705,7 +2705,7 @@ def test_telegram_bot_commands():
         }
         
         response = requests.post(
-            f"{API_BASE}/telegram/webhook",
+            f"{BACKEND_URL}/telegram/webhook",
             json=help_update,
             headers={'Content-Type': 'application/json'},
             timeout=15
@@ -2778,7 +2778,7 @@ def test_telegram_callback_buttons():
             }
             
             response = requests.post(
-                f"{API_BASE}/telegram/webhook",
+                f"{BACKEND_URL}/telegram/webhook",
                 json=callback_update,
                 headers={'Content-Type': 'application/json'},
                 timeout=15
