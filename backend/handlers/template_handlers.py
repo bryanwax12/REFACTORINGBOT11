@@ -18,8 +18,8 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Show user's saved templates menu
     """
-    from server import db, safe_telegram_call, mark_message_as_selected, send_blocked_message
-    from handlers.common_handlers import check_user_blocked
+    from server import db, safe_telegram_call, mark_message_as_selected
+    from handlers.common_handlers import check_user_blocked, send_blocked_message
     
     query = update.callback_query
     if query:
