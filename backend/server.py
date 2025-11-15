@@ -625,23 +625,6 @@ class Template(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 # Telegram Bot Handlers
-async def test_error_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Test command to show error message with admin contact button"""
-    user_message = """😔 К сожалению, в данный момент мы не можем сгенерировать shipping label.
-
-Пожалуйста, свяжитесь с администратором.
-
-Приносим извинения за неудобства!"""
-    
-    # Add button to contact admin
-    keyboard = []
-    if ADMIN_TELEGRAM_ID:
-        keyboard.append([InlineKeyboardButton("💬 Связаться с администратором", url=f"tg://user?id={ADMIN_TELEGRAM_ID}")])
-    keyboard.append([InlineKeyboardButton("🏠 Главное меню", callback_data='main_menu')])
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    await safe_telegram_call(update.message.reply_text(user_message, reply_markup=reply_markup))
-
 # Helper function to check if user is blocked
 # check_user_blocked and send_blocked_message moved to handlers/common_handlers.py
 
