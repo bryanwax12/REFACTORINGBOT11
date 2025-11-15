@@ -164,7 +164,7 @@ else:
 
 ### Preview окружение (текущее)
 ```
-WEBHOOK_BASE_URL = "https://bothealth-app.preview.emergentagent.com"
+WEBHOOK_BASE_URL = "https://shipping-rates-4.preview.emergentagent.com"
                                      ↓
               Содержит "preview" → НЕ production
                                      ↓

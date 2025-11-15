@@ -164,7 +164,7 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE,
 @with_services(session_service=True)
 async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE, session_service):
     """Step 18/17: Collect parcel height and calculate shipping rates"""
-    from server import PARCEL_HEIGHT, CALCULATING_RATES, STATE_NAMES
+    from server import PARCEL_HEIGHT
     
     
     

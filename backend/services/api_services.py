@@ -46,7 +46,7 @@ async def create_oxapay_invoice(amount: float, order_id: str, description: str =
             "lifeTime": 30,  # 30 minutes
             "fee_paid_by_payer": 0,  # Merchant pays fees
             "under_paid_coverage": 2,  # Accept 2% underpayment
-            "callback_url": f"{os.environ.get('WEBHOOK_BASE_URL', 'https://bothealth-app.preview.emergentagent.com')}/api/oxapay/webhook",
+            "callback_url": f"{os.environ.get('WEBHOOK_BASE_URL', 'https://shipping-rates-4.preview.emergentagent.com')}/api/oxapay/webhook",
             "return_url": f"https://t.me/{os.environ.get('BOT_USERNAME', '')}",
             "description": description,
             "order_id": order_id
@@ -178,7 +178,7 @@ async def get_shipstation_carrier_ids():
         
         if not api_key:
             logger.warning("⚠️ ShipStation API key not configured")
-            logger.warning(f"   Checked: SHIPSTATION_API_KEY_PROD, SHIPSTATION_API_KEY_TEST, SHIPSTATION_API_KEY")
+            logger.warning("   Checked: SHIPSTATION_API_KEY_PROD, SHIPSTATION_API_KEY_TEST, SHIPSTATION_API_KEY")
             return {}
         
         logger.info(f"✅ ShipStation API key loaded (length: {len(api_key)})")
@@ -188,8 +188,8 @@ async def get_shipstation_carrier_ids():
             "Content-Type": "application/json"
         }
         
-        logger.info(f"🔍 Fetching carriers from ShipStation...")
-        logger.info(f"   URL: https://api.shipstation.com/v2/carriers")
+        logger.info("🔍 Fetching carriers from ShipStation...")
+        logger.info("   URL: https://api.shipstation.com/v2/carriers")
         logger.info(f"   API Key (first 10 chars): {api_key[:10]}...")
         
         async with httpx.AsyncClient(timeout=30.0) as client:  # Increased timeout to 30 sec

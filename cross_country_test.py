@@ -32,7 +32,7 @@ payload = {
 
 print('🔍 Testing Cross-Country Shipping (CA to NY)...')
 response = requests.post(
-    'https://bothealth-app.preview.emergentagent.com/api/calculate-shipping',
+    'https://shipping-rates-4.preview.emergentagent.com/api/calculate-shipping',
     json=payload,
     timeout=30
 )
