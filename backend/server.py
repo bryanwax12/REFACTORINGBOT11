@@ -2681,44 +2681,6 @@ class ShippingRateRequest(BaseModel):
     parcel: Parcel
 
 @api_router.get("/stats")
-async def get_stats(authenticated: bool = Depends(verify_admin_key)):
-    from repositories import get_repositories, get_user_repo
-    repos = get_repositories()
-    user_repo = get_user_repo()
-    
-    total_users = await user_repo.count_users()
-    total_orders = await repos.orders.count_orders()
-    paid_orders = await repos.orders.count_orders({"payment_status": "paid"})
-    
-    # Calculate total revenue
-    total_revenue = await repos.orders.aggregate_orders([
-        {"$match": {"payment_status": "paid"}},
-        {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
-    ])
-    
-    revenue = total_revenue[0]['total'] if total_revenue else 0
-    
-    # Calculate profit: $10 per created label
-    total_labels = await db.shipping_labels.count_documents({"status": "created"})
-    total_profit = total_labels * 10.0
-    
-    # Calculate total user balance (sum of all user balances) using Repository Pattern
-    total_user_balance = await user_repo.aggregate_users([
-        {"$group": {"_id": None, "total": {"$sum": "$balance"}}}
-    ])
-    
-    user_balance_sum = total_user_balance[0]['total'] if total_user_balance else 0
-    
-    return {
-        "total_users": total_users,
-        "total_orders": total_orders,
-        "paid_orders": paid_orders,
-        "total_revenue": revenue,
-        "total_profit": total_profit,
-        "total_labels": total_labels,
-        "total_user_balance": user_balance_sum
-    }
-
 # Direct endpoint for clearing conversations (easier access)
 @app.get("/clear-conversations")
 async def clear_conversations_direct(admin_verified: bool = Depends(verify_admin_key)):
