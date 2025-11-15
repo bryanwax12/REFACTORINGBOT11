@@ -5253,3 +5253,75 @@ from handlers.order_flow.entry_points import order_new
 2. Создайте новый заказ
 3. Все кнопки должны работать корректно
 
+
+---
+## ✅ ИСПРАВЛЕНА ОШИБКА "СОЗДАТЬ ЗАКАЗ"
+**Date:** $(date '+%Y-%m-%d %H:%M:%S')
+**Agent:** E1 Fork Agent
+
+### 🎯 Проблема:
+При нажатии на "Создать заказ" пользователи получали ошибку: "❌ Произошла ошибка. Попробуйте позже."
+
+### 🔍 Найденные ошибки:
+
+1. **ImportError в entry_points.py**:
+   ```
+   cannot import name 'check_maintenance_mode' from 'server'
+   ```
+   - Функция была перемещена в `utils.maintenance_check`
+
+2. **AttributeError в payment_handlers.py**:
+   ```
+   'PaymentService' object has no attribute 'get_pending_payment'
+   ```
+   - Метод не существовал в PaymentService
+
+3. **TypeError в template_handlers.py**:
+   ```
+   my_templates_menu() missing 5 required positional arguments
+   ```
+   - Функция была неправильно перенесена с дополнительными параметрами
+
+### ✅ Реализованные исправления:
+
+**1. Исправлен импорт в `/app/backend/handlers/order_flow/entry_points.py`:**
+```python
+# Было:
+from server import (..., check_maintenance_mode, ...)
+
+# Стало:
+from server import (...)
+from utils.maintenance_check import check_maintenance_mode
+```
+
+**2. Закомментирован проблемный код в `/app/backend/handlers/payment_handlers.py`:**
+```python
+# TODO: Load message context from last pending payment
+# payment_record = await payment_service.get_pending_payment(telegram_id, "topup")
+```
+- Добавлен TODO для будущей реализации метода `get_pending_payment`
+
+**3. Исправлена сигнатура функции в `/app/backend/handlers/template_handlers.py`:**
+```python
+# Было:
+async def my_templates_menu(update, context, db, safe_telegram_call, ...)
+
+# Стало:
+async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    from server import db, safe_telegram_call, ...
+```
+
+### 📊 Результат:
+- ✅ Бот запускается без ошибок
+- ✅ Все импорты исправлены
+- ✅ Кнопка "Создать заказ" должна работать
+- ✅ Hot reload работает корректно
+
+### 📝 Файлы изменены:
+1. `/app/backend/handlers/order_flow/entry_points.py` - исправлен импорт
+2. `/app/backend/handlers/payment_handlers.py` - закомментирован проблемный код
+3. `/app/backend/handlers/template_handlers.py` - исправлена сигнатура функции
+
+### 📋 Готово к тестированию:
+Попробуйте нажать "Создать заказ" в боте - должно начаться создание заказа без ошибок.
+
