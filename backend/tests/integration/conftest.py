@@ -18,6 +18,10 @@ async def test_db():
     db_name = os.environ.get('MONGODB_DB_NAME', 'telegram_shipping_bot')
     db = client[db_name]
     
+    # Initialize service factory for tests (required after refactoring)
+    from services.service_factory import init_service_factory
+    init_service_factory(db)
+    
     # Cleanup BEFORE tests: remove test data from previous runs
     await db.user_sessions.delete_many({"user_id": 123456789})
     await db.users.delete_many({"telegram_id": 123456789})
