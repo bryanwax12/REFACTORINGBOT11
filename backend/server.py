@@ -376,6 +376,44 @@ app.add_middleware(RateLimitMiddleware, requests_per_minute=60, requests_per_hou
 
 api_router = APIRouter(prefix="/api")
 
+# ==================== ROUTERS REGISTRATION ====================
+# Import and register all API routers
+try:
+    from routers import (
+        admin_router,
+        admin_labels,
+        api_config_router,
+        bot,
+        bot_config_router,
+        broadcast,
+        monitoring_router,
+        orders,
+        settings,
+        shipping,
+        stats,
+        users,
+        webhooks
+    )
+    
+    # Register routers with api_router
+    app.include_router(admin_router.router, prefix="/api")
+    app.include_router(admin_labels.router, prefix="/api")
+    app.include_router(api_config_router.router, prefix="/api")
+    app.include_router(bot.router, prefix="/api")
+    app.include_router(bot_config_router.router, prefix="/api")
+    app.include_router(broadcast.router, prefix="/api")
+    app.include_router(monitoring_router.router, prefix="/api")
+    app.include_router(orders.router, prefix="/api")
+    app.include_router(settings.router, prefix="/api")
+    app.include_router(shipping.router, prefix="/api")
+    app.include_router(stats.router, prefix="/api")
+    app.include_router(users.router, prefix="/api")
+    app.include_router(webhooks.router, prefix="/api")
+    
+    logger.info("✅ All API routers registered successfully")
+except Exception as e:
+    logger.error(f"❌ Error registering routers: {e}")
+
 # ==================== SECURITY ====================
 
 # Input Sanitization
