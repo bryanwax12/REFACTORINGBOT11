@@ -81,7 +81,6 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             # Log error to session for debugging
             user_id = update.effective_user.id
             from server import session_manager
-            from datetime import datetime, timezone
             await session_manager.update_session_atomic(user_id, data={
                 'last_error': f'Missing required fields: {", ".join(missing_fields)}',
                 'error_step': 'FETCH_RATES',
