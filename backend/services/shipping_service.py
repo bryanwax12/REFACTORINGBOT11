@@ -58,9 +58,10 @@ async def display_shipping_rates(
     # Save state
     context.user_data['last_state'] = STATE_NAMES[SELECT_CARRIER]
     
-    # Send message
+    # Send message (use effective_message to support both callbacks and regular messages)
+    message_obj = update.effective_message
     bot_msg = await safe_telegram_call_func(
-        query.message.reply_text(message, reply_markup=reply_markup, parse_mode='HTML')
+        message_obj.reply_text(message, reply_markup=reply_markup, parse_mode='HTML')
     )
     
     if bot_msg:
