@@ -34,7 +34,7 @@ def safe_handler(fallback_state=ConversationHandler.END, error_message="❌ Пр
             try:
                 # Check maintenance mode (unless explicitly skipped)
                 if not skip_maintenance_check:
-                    from handlers.common_handlers import check_maintenance_mode
+                    from utils.maintenance_check import check_maintenance_mode
                     if await check_maintenance_mode(update):
                         maintenance_msg = "⚠️ *Режим технического обслуживания*\n\nБот временно недоступен для технического обслуживания.\nМы скоро вернемся!"
                         try:
