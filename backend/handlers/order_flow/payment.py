@@ -142,8 +142,71 @@ async def handle_topup_for_order(update: Update, context: ContextTypes.DEFAULT_T
 
 @safe_handler(fallback_state=ConversationHandler.END)
 @with_user_session(create_user=False, require_session=True)
+async def show_order_summary(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Show order summary with selected rate details"""
+    from server import safe_telegram_call, PAYMENT_METHOD
+    from repositories import get_user_repo
+    import asyncio
+    
+    query = update.callback_query
+    await safe_telegram_call(query.answer())
+    
+    # Get order data
+    data = context.user_data
+    selected_carrier = data.get('selected_carrier', 'Unknown')
+    selected_service = data.get('selected_service', 'Standard')
+    amount = data.get('final_amount', 0)
+    
+    from_address = f"{data.get('from_name', 'N/A')}\n{data.get('from_street', 'N/A')}\n{data.get('from_city', 'N/A')}, {data.get('from_state', 'N/A')} {data.get('from_zip', 'N/A')}"
+    to_address = f"{data.get('to_name', 'N/A')}\n{data.get('to_street', 'N/A')}\n{data.get('to_city', 'N/A')}, {data.get('to_state', 'N/A')} {data.get('to_zip', 'N/A')}"
+    
+    weight = data.get('parcel_weight', 0)
+    
+    # Build summary message
+    summary = f"""📦 <b>Информация о заказе</b>
+{'='*30}
+
+<b>📍 Отправитель:</b>
+{from_address}
+
+<b>📍 Получатель:</b>
+{to_address}
+
+<b>📦 Посылка:</b>
+Вес: {weight} lbs
+
+<b>🚚 Выбранный тариф:</b>
+{selected_carrier} - {selected_service}
+💰 Стоимость: ${amount:.2f}
+
+{'='*30}"""
+    
+    # Get user balance
+    telegram_id = query.from_user.id
+    user_repo = get_user_repo()
+    balance = await user_repo.get_balance(telegram_id)
+    
+    # Build keyboard
+    keyboard = []
+    keyboard.append([InlineKeyboardButton("💳 Перейти к оплате", callback_data='proceed_to_payment')])
+    keyboard.append([InlineKeyboardButton("🔄 Выбрать другой тариф", callback_data='back_to_rates')])
+    keyboard.append([InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')])
+    
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await safe_telegram_call(query.message.reply_text(
+        summary,
+        reply_markup=reply_markup,
+        parse_mode='HTML'
+    ))
+    
+    return PAYMENT_METHOD
+
+
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=False, require_session=True)
 async def handle_back_to_rates(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle back to rates button"""
+    """Handle back to rates button - return to rate selection"""
     from server import fetch_shipping_rates, mark_message_as_selected
     import asyncio
     
