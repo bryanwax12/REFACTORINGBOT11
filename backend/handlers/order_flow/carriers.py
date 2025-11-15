@@ -33,9 +33,27 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Handle refresh rates
     if data == 'refresh_rates':
         from handlers.order_flow.rates import fetch_shipping_rates
+        from services.shipstation_cache import shipstation_cache
+        
         logger.info("🔄 Refreshing shipping rates...")
         
-        # Clear cached rates to force fresh API call
+        # Clear cached rates from shipstation_cache to force fresh API call
+        user_data = context.user_data
+        cache_deleted = shipstation_cache.delete(
+            from_zip=user_data.get('from_zip'),
+            to_zip=user_data.get('to_zip'),
+            weight=user_data.get('parcel_weight'),
+            length=user_data.get('parcel_length', 10),
+            width=user_data.get('parcel_width', 10),
+            height=user_data.get('parcel_height', 10)
+        )
+        
+        if cache_deleted:
+            logger.info("✅ Cache cleared successfully")
+        else:
+            logger.warning("⚠️ No cache entry found to delete")
+        
+        # Clear context.user_data cached rates
         if 'rates' in context.user_data:
             del context.user_data['rates']
         if 'rates_cache_key' in context.user_data:
