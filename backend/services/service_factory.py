@@ -36,8 +36,8 @@ class ServiceFactory:
     def get_session_service(self) -> SessionService:
         """Получить SessionService"""
         if 'session_service' not in self._services:
-            from repositories.session_repository import SessionRepository
-            session_repo = SessionRepository(self.db)
+            from repositories import get_session_repo
+            session_repo = get_session_repo()
             self._services['session_service'] = SessionService(session_repo)
         return self._services['session_service']
     
