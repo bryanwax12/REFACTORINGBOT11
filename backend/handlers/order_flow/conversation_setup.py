@@ -33,11 +33,12 @@ def setup_order_conversation_handler():
         select_carrier,
         order_from_template_list, use_template, view_template,
         delete_template, confirm_delete_template, my_templates_menu,
-        order_new, start_command
+        start_command
     )
     # Import handlers from their actual locations
     from handlers.order_flow.payment import process_payment
     from handlers.order_flow.confirmation import handle_data_confirmation
+    from handlers.order_flow.entry_points import order_new
     
     # Import handlers from order_flow modules
     from handlers.order_flow.entry_points import (
