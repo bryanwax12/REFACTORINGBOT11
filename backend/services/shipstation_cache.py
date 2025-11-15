@@ -120,6 +120,35 @@ class ShipStationCache:
         
         logger.info(f"💾 Cached {len(rates)} rates for route {from_zip} → {to_zip}")
     
+    def delete(self,
+               from_zip: str,
+               to_zip: str,
+               weight: float,
+               length: float = 10,
+               width: float = 10,
+               height: float = 10) -> bool:
+        """
+        Удалить конкретную запись из кэша
+        
+        Args:
+            from_zip: ZIP код отправителя
+            to_zip: ZIP код получателя
+            weight: Вес в фунтах
+            length, width, height: Размеры в дюймах
+        
+        Returns:
+            bool: True если запись была удалена, False если не найдена
+        """
+        cache_key = self._generate_cache_key(from_zip, to_zip, weight, length, width, height)
+        
+        if cache_key in self._cache:
+            del self._cache[cache_key]
+            logger.info(f"🗑️ Deleted cache entry for route {from_zip} → {to_zip}")
+            return True
+        
+        logger.debug(f"❌ Cache entry not found for route {from_zip} → {to_zip}")
+        return False
+    
     def clear(self) -> None:
         """Очистить весь кэш"""
         self._cache.clear()
