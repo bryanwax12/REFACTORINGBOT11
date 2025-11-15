@@ -187,21 +187,7 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
     
     asyncio.create_task(mark_message_as_selected(update, context))
     
-    from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
     from handlers.order_flow.rates import fetch_shipping_rates
     
-    reply_markup = get_cancel_keyboard()
-    message_text = OrderStepMessages.CALCULATING_RATES
-    
-    bot_msg = await safe_telegram_call(update.message.reply_text(
-        message_text,
-        reply_markup=reply_markup
-    ))
-    
-    if bot_msg:
-        context.user_data['last_bot_message_id'] = bot_msg.message_id
-        context.user_data['last_bot_message_text'] = message_text
-        context.user_data['last_state'] = STATE_NAMES[CALCULATING_RATES]
-    
-    # Сразу вызываем расчет тарифов вместо ожидания нового сообщения
+    # Напрямую вызываем расчет тарифов (там уже есть progress message)
     return await fetch_shipping_rates(update, context)
