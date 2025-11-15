@@ -372,10 +372,8 @@ class RateLimiter:
 rate_limiter = RateLimiter()
 
 # Helper function for session management
-async def save_to_session(user_id: int, next_step: str, data: dict, context: ContextTypes.DEFAULT_TYPE):
-    """Save data to both context.user_data and session manager (V2 - atomic)"""
-    context.user_data.update(data)
-    await session_manager.update_session_atomic(user_id, step=next_step, data=data)
+# DEPRECATED: Use utils.session_utils.save_to_session instead
+save_to_session = util_save_to_session
 
 async def handle_critical_api_error(user_id: int, error_message: str, current_step: str, update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
