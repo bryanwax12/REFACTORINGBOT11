@@ -170,12 +170,18 @@ async def get_shipstation_carrier_ids():
     Returns dict mapping carrier names to IDs
     """
     try:
-        if not SHIPSTATION_API_KEY:
-            logger.warning("ShipStation API key not configured")
+        # Load API key inside function to ensure env vars are available
+        api_key = os.environ.get('SHIPSTATION_API_KEY_PROD') or os.environ.get('SHIPSTATION_API_KEY_TEST') or os.environ.get('SHIPSTATION_API_KEY', '')
+        
+        if not api_key:
+            logger.warning("⚠️ ShipStation API key not configured")
+            logger.warning(f"   Checked: SHIPSTATION_API_KEY_PROD, SHIPSTATION_API_KEY_TEST, SHIPSTATION_API_KEY")
             return {}
         
+        logger.info(f"✅ ShipStation API key loaded (length: {len(api_key)})")
+        
         headers = {
-            "API-Key": SHIPSTATION_API_KEY,
+            "API-Key": api_key,
             "Content-Type": "application/json"
         }
         
