@@ -348,7 +348,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             )
         
         await safe_telegram_call(message.reply_text(
-            f"❌ Ошибка при получении тарифов:\n{str(e)}\n\nПроверьте корректность адресов и попробуйте снова.",
+            "❌ Произошла ошибка при получении тарифов.\n\nПроверьте корректность адресов и попробуйте снова, или обратитесь в поддержку.",
             reply_markup=reply_markup
         ))
         return CONFIRM_DATA  # Stay to handle callback
