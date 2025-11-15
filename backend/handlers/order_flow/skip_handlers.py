@@ -170,36 +170,47 @@ async def skip_parcel_dimensions(update: Update, context: ContextTypes.DEFAULT_T
     context.user_data['parcel_height'] = 10.0
     
     # Load session data to ensure we have all order data (weight, addresses, etc)
-    from server import session_manager
+    from server import session_manager, db
     import logging
     logger = logging.getLogger(__name__)
     
+    # Try to get session first
     session = await session_manager.get_session(user_id)
     if session and session.get('session_data'):
-        # Merge session data into context.user_data
         session_data = session['session_data']
         logger.info(f"Session data keys: {list(session_data.keys())}")
         
         for key, value in session_data.items():
             if key not in context.user_data:
                 context.user_data[key] = value
-        
-        # Map parcel_weight to weight for fetch_shipping_rates
-        if 'parcel_weight' in context.user_data and 'weight' not in context.user_data:
-            context.user_data['weight'] = context.user_data['parcel_weight']
-            logger.info(f"Mapped parcel_weight to weight: {context.user_data['weight']}")
-        
-        # Map parcel dimensions to short names
-        if 'parcel_length' in context.user_data and 'length' not in context.user_data:
-            context.user_data['length'] = context.user_data['parcel_length']
-        if 'parcel_width' in context.user_data and 'width' not in context.user_data:
-            context.user_data['width'] = context.user_data['parcel_width']
-        if 'parcel_height' in context.user_data and 'height' not in context.user_data:
-            context.user_data['height'] = context.user_data['parcel_height']
-        
-        logger.info(f"Context.user_data has 'weight': {'weight' in context.user_data}")
     else:
-        logger.error(f"No session data found for user {user_id}")
+        # If no session, try to get data directly from DB (last order draft)
+        logger.warning(f"No session found, trying to load from orders collection")
+        order_draft = await db.orders.find_one(
+            {"telegram_id": user_id, "payment_status": {"$in": ["pending", "draft"]}},
+            {"_id": 0},
+            sort=[("created_at", -1)]
+        )
+        if order_draft:
+            logger.info(f"Found order draft with keys: {list(order_draft.keys())}")
+            for key, value in order_draft.items():
+                if key not in context.user_data and value is not None:
+                    context.user_data[key] = value
+    
+    # Map parcel_weight to weight for fetch_shipping_rates
+    if 'parcel_weight' in context.user_data and 'weight' not in context.user_data:
+        context.user_data['weight'] = context.user_data['parcel_weight']
+        logger.info(f"Mapped parcel_weight to weight: {context.user_data['weight']}")
+    
+    # Map parcel dimensions to short names
+    if 'parcel_length' in context.user_data and 'length' not in context.user_data:
+        context.user_data['length'] = context.user_data['parcel_length']
+    if 'parcel_width' in context.user_data and 'width' not in context.user_data:
+        context.user_data['width'] = context.user_data['parcel_width']
+    if 'parcel_height' in context.user_data and 'height' not in context.user_data:
+        context.user_data['height'] = context.user_data['parcel_height']
+    
+    logger.info(f"Context.user_data has 'weight': {'weight' in context.user_data}, value: {context.user_data.get('weight', 'MISSING')}")
     
     # Update session with dimensions
     await session_manager.update_session_atomic(
