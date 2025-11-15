@@ -6,7 +6,7 @@ import logging
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 from handlers.common_handlers import safe_telegram_call
-from utils.handler_decorators import with_user_session, safe_handler
+from utils.handler_decorators import with_user_session
 
 logger = logging.getLogger(__name__)
 
