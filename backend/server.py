@@ -1418,64 +1418,9 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Keeping alias for backward compatibility
 view_template = handler_view_template
 
-async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Load template data into context and start order via ConversationHandler"""
-    query = update.callback_query
-    template_id = query.data.replace('template_use_', '')
-    
-    # Execute in parallel: answer query and fetch template
-    await safe_telegram_call(query.answer())
-    template = await find_template_by_id(template_id)
-    
-    if not template:
-        await safe_telegram_call(query.message.reply_text("❌ Шаблон не найден"))
-        return
-    
-    # Mark previous message as selected (non-blocking)
-    asyncio.create_task(mark_message_as_selected(update, context))
-    
-    # Load template data into context (use correct keys for rate fetching)
-    context.user_data['from_name'] = template.get('from_name', '')
-    context.user_data['from_street'] = template.get('from_street1', '')  # Use 'from_street' not 'from_address'
-    context.user_data['from_street2'] = template.get('from_street2', '')
-    context.user_data['from_city'] = template.get('from_city', '')
-    context.user_data['from_state'] = template.get('from_state', '')
-    context.user_data['from_zip'] = template.get('from_zip', '')
-    context.user_data['from_phone'] = template.get('from_phone', '')
-    context.user_data['to_name'] = template.get('to_name', '')
-    context.user_data['to_street'] = template.get('to_street1', '')  # Use 'to_street' not 'to_address'
-    context.user_data['to_street2'] = template.get('to_street2', '')
-    context.user_data['to_city'] = template.get('to_city', '')
-    context.user_data['to_state'] = template.get('to_state', '')
-    context.user_data['to_zip'] = template.get('to_zip', '')
-    context.user_data['to_phone'] = template.get('to_phone', '')
-    context.user_data['using_template'] = True
-    context.user_data['template_name'] = template['name']
-    
-    # Instead of staying outside ConversationHandler, show confirmation with button to start
-    keyboard = [
-        [InlineKeyboardButton("📦 Продолжить создание заказа", callback_data='start_order_with_template')],
-        [InlineKeyboardButton("🔙 К списку шаблонов", callback_data='my_templates')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    message_text = f"""✅ *Шаблон "{template['name']}" загружен!*
-
-📤 От: {template.get('from_name')} ({template.get('from_city')}, {template.get('from_state')})
-📥 Кому: {template.get('to_name')} ({template.get('to_city')}, {template.get('to_state')})
-
-Нажмите кнопку для продолжения создания заказа."""
-    
-    bot_msg = await safe_telegram_call(query.message.reply_text(
-            message_text,
-            reply_markup=reply_markup,
-            parse_mode='Markdown'
-        ))
-    context.user_data['last_bot_message_id'] = bot_msg.message_id
-    context.user_data['last_bot_message_text'] = message_text
-    
-    # Stay in conversation - go to TEMPLATE_LOADED state
-    return TEMPLATE_LOADED
+# MIGRATED: Use handlers.template_handlers.use_template
+# Keeping alias for backward compatibility
+use_template = handler_use_template
 
 async def start_order_with_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Start order creation with pre-loaded template data"""
