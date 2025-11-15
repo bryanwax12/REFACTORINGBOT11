@@ -275,6 +275,8 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         
         # Save to cache and session using service
         from services.shipping_service import save_rates_to_cache_and_session
+        from server import session_manager
+        
         user_id = update.effective_user.id
         await save_rates_to_cache_and_session(
             rates=context.user_data['rates'],
