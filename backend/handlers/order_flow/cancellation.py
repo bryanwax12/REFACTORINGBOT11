@@ -155,8 +155,9 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
     
-    # Return the state constant
-    return globals().get(last_state, FROM_NAME)
+    # Return the state constant - import from server
+    from server import STATE_CONSTANTS
+    return STATE_CONSTANTS.get(last_state, FROM_NAME)
 
 
 # ============================================================
