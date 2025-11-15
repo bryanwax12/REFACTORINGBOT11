@@ -1377,7 +1377,7 @@ async def startup_event():
                 
                 logger.info("✅ Polling started successfully")
         except Exception as e:
-            logger.error(f"Failed to start Telegram Bot: {e}")
+            logger.error(f"Failed to start Telegram Bot: {e}", exc_info=True)
             logger.warning("Application will continue without Telegram Bot")
     else:
         logger.warning("Telegram Bot Token not configured. Bot features will be disabled.")
