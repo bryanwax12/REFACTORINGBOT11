@@ -47,8 +47,8 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception as e:
             logger.warning(f"Could not remove old buttons: {e}")
         
-        # Add confirmation emoji
-        await query.answer("✅ Обновление тарифов...")
+        # Just answer without message
+        await query.answer()
         
         return await fetch_shipping_rates(update, context)
     
