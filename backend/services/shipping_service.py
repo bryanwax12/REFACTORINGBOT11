@@ -295,9 +295,9 @@ def build_shipstation_rates_request(order_data: Dict[str, Any], carrier_ids: Lis
                     'unit': 'pound'
                 },
                 'dimensions': {
-                    'length': float(order_data.get('length', 10)),
-                    'width': float(order_data.get('width', 10)),
-                    'height': float(order_data.get('height', 10)),
+                    'length': float(order_data.get('parcel_length') or order_data.get('length', 10)),
+                    'width': float(order_data.get('parcel_width') or order_data.get('width', 10)),
+                    'height': float(order_data.get('parcel_height') or order_data.get('height', 10)),
                     'unit': 'inch'
                 }
             }]
