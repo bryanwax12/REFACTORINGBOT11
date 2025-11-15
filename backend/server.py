@@ -469,21 +469,9 @@ async def handle_step_error(user_id: int, error: Exception, current_step: str, c
     # Don't change step - let user retry from same step
     return current_step
 
-def is_button_click_allowed(user_id: int, button_data: str) -> bool:
-    """Check if button click is allowed (debouncing)"""
-    current_time = datetime.now(timezone.utc).timestamp()
-    
-    if user_id not in button_click_tracker:
-        button_click_tracker[user_id] = {}
-    
-    last_click = button_click_tracker[user_id].get(button_data, 0)
-    
-    if current_time - last_click < BUTTON_DEBOUNCE_SECONDS:
-        logger.warning(f"Button click blocked for user {user_id}, button {button_data} - too fast")
-        return False
-    
-    button_click_tracker[user_id][button_data] = current_time
-    return True
+# DEPRECATED: Use utils.telegram_utils.is_button_click_allowed instead
+# Keeping for backward compatibility
+is_button_click_allowed = util_is_button_click_allowed
 
 # Oxapay - Cryptocurrency Payment Gateway
 OXAPAY_API_KEY = os.environ.get('OXAPAY_API_KEY', '')
