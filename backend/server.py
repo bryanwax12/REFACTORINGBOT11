@@ -3145,25 +3145,9 @@ async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Return the state we were in before cancel
     return context.user_data.get('last_state', PAYMENT_METHOD)
 
-async def confirm_cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Confirm order cancellation"""
-    query = update.callback_query
-    await safe_telegram_call(query.answer())
-    
-    # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-    asyncio.create_task(mark_message_as_selected(update, context))
-    
-    # Clear session and context data
-    user_id = update.effective_user.id
-    await session_manager.clear_session(user_id)
-    context.user_data.clear()
-    logger.info(f"🗑️ Session cleared after order cancellation for user {user_id}")
-    
-    keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    await safe_telegram_call(query.message.reply_text("❌ Создание заказа отменено.", reply_markup=reply_markup))
-    return ConversationHandler.END
+# MIGRATED: Use handlers.order_flow.cancellation.confirm_cancel_order
+# Keeping alias for backward compatibility
+confirm_cancel_order = handler_confirm_cancel_order
 
 async def check_data_from_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Return to data confirmation screen from cancel dialog"""
