@@ -7334,17 +7334,16 @@ def main():
     print(f"Bot Mode: Polling (localhost:8001)")
     print("=" * 80)
     
-    # Run critical tests as specified in review request
+    # Run tests as specified in review request
     tests = [
-        # 1. Critical API Endpoints
-        ("API Health Check", test_api_health),
-        ("Monitoring Health Endpoint", test_monitoring_health),
-        ("Monitoring Metrics (with X-API-Key)", test_monitoring_metrics),
-        ("Order Creation API", test_orders_creation),
-        ("Admin Stats Dashboard (with X-API-Key)", test_admin_stats_dashboard),
+        # 1. PRIORITY: Telegram Bot Basic Flow (Review Request)
+        ("🎯 Telegram Bot Basic Flow", test_telegram_bot_basic_flow),
+        ("🤖 Telegram Bot Infrastructure", test_telegram_bot_infrastructure),
+        ("🔑 Telegram Bot Token Validation", test_telegram_bot_token),
         
-        # 2. MongoDB Connection
-        ("MongoDB Connection & Operations", test_mongodb_connection),
+        # 2. Critical Backend Support
+        ("🏥 API Health Check", test_api_health),
+        ("🗄️ MongoDB Connection & Operations", test_mongodb_connection),
         
         # 3. Async Operations
         ("Async Operations & httpx Usage", test_async_operations),
