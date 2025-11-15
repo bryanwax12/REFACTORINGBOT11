@@ -806,22 +806,8 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         # Return to confirmation screen
         return await show_data_confirmation(update, context)
 
-async def show_edit_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Show menu to select what to edit"""
-    from utils.ui_utils import DataConfirmationUI
-    
-    query = update.callback_query
-    
-    # Mark previous message as selected (non-blocking)
-    asyncio.create_task(mark_message_as_selected(update, context))
-    
-    message = "✏️ Что вы хотите изменить?"
-    
-    # Build keyboard using UI utils
-    reply_markup = DataConfirmationUI.build_edit_menu_keyboard()
-    
-    await safe_telegram_call(query.message.reply_text(message, reply_markup=reply_markup))
-    return EDIT_MENU
+# MIGRATED: Use handlers.order_flow.confirmation.show_edit_menu
+from handlers.order_flow.confirmation import show_edit_menu
 
 # MIGRATED: Use handlers.order_flow.template_save.save_template_name
 save_template_name = handler_save_template_name
