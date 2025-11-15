@@ -395,6 +395,7 @@ try:
     from routers.legacy_api import router as legacy_api_router
     
     # Register routers with app (routers already have /api prefix)
+    app.include_router(legacy_api_router)  # Legacy endpoints for frontend compatibility
     app.include_router(admin_router)
     app.include_router(admin_labels_router)
     app.include_router(api_config_router)
