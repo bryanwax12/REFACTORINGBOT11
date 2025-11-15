@@ -125,6 +125,7 @@ from handlers.order_flow.cancellation import (
 from handlers.order_flow.entry_points import (
     new_order_start as handler_new_order_start,
     start_order_with_template as handler_start_order_with_template,
+    return_to_payment_after_topup as handler_return_to_payment_after_topup,
 )
 
 # Order flow - confirmation handlers
