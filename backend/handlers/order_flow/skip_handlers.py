@@ -229,6 +229,18 @@ async def skip_parcel_width_height(update: Update, context: ContextTypes.DEFAULT
         for key, value in session_data.items():
             if key not in context.user_data:
                 context.user_data[key] = value
+        
+        # Map parcel_weight to weight for fetch_shipping_rates
+        if 'parcel_weight' in context.user_data and 'weight' not in context.user_data:
+            context.user_data['weight'] = context.user_data['parcel_weight']
+        
+        # Map parcel dimensions to short names
+        if 'parcel_length' in context.user_data and 'length' not in context.user_data:
+            context.user_data['length'] = context.user_data['parcel_length']
+        if 'parcel_width' in context.user_data and 'width' not in context.user_data:
+            context.user_data['width'] = context.user_data['parcel_width']
+        if 'parcel_height' in context.user_data and 'height' not in context.user_data:
+            context.user_data['height'] = context.user_data['parcel_height']
     
     # Update session with dimensions
     await session_manager.update_session_atomic(
@@ -266,6 +278,18 @@ async def skip_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE)
         for key, value in session_data.items():
             if key not in context.user_data:
                 context.user_data[key] = value
+        
+        # Map parcel_weight to weight for fetch_shipping_rates
+        if 'parcel_weight' in context.user_data and 'weight' not in context.user_data:
+            context.user_data['weight'] = context.user_data['parcel_weight']
+        
+        # Map parcel dimensions to short names
+        if 'parcel_length' in context.user_data and 'length' not in context.user_data:
+            context.user_data['length'] = context.user_data['parcel_length']
+        if 'parcel_width' in context.user_data and 'width' not in context.user_data:
+            context.user_data['width'] = context.user_data['parcel_width']
+        if 'parcel_height' in context.user_data and 'height' not in context.user_data:
+            context.user_data['height'] = context.user_data['parcel_height']
     
     # Update session with height
     await session_manager.update_session_atomic(
