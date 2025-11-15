@@ -1154,21 +1154,22 @@ class DataConfirmationUI:
             Formatted address section string
         """
         name = data.get(f'{prefix}_name', '')
-        street = data.get(f'{prefix}_street', '')
-        street2 = data.get(f'{prefix}_street2', '')
+        # Try both 'address' and 'street' field names
+        street = data.get(f'{prefix}_address', data.get(f'{prefix}_street', ''))
+        street2 = data.get(f'{prefix}_address2', data.get(f'{prefix}_street2', ''))
         city = data.get(f'{prefix}_city', '')
         state = data.get(f'{prefix}_state', '')
         zip_code = data.get(f'{prefix}_zip', '')
         phone = data.get(f'{prefix}_phone', '')
         
         section = f"*{title}:*\n"
-        section += f"👤 {name}\n"
+        section += f"👤 *{name}*\n"
         section += f"📍 {street}\n"
         if street2:
-            section += f"   {street2}\n"
-        section += f"🏙 {city}, {state} {zip_code}\n"
+            section += f"    {street2}\n"
+        section += f"🏙️ {city}, {state} {zip_code}\n"
         if phone:
-            section += f"📞 {phone}\n"
+            section += f"📱 {phone}\n"
         section += "\n"
         
         return section
