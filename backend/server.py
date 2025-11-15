@@ -177,9 +177,6 @@ from utils.db_wrappers import (
     delete_template as util_delete_template
 )
 
-# Profiled DB operations (most frequently used)
-@profile_db_query("find_user_by_telegram_id")
-@profile_db_query("find_user_by_telegram_id")
 # MIGRATED: Profiled DB operations moved to utils.db_operations
 from utils.db_operations import (
     find_user_by_telegram_id,
