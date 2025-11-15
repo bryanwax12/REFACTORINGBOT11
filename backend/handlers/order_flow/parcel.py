@@ -187,7 +187,7 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
     
     asyncio.create_task(mark_message_as_selected(update, context))
     
-    from handlers.order_flow.rates import fetch_shipping_rates
+    from handlers.order_flow.confirmation import show_data_confirmation
     
-    # Напрямую вызываем расчет тарифов (там уже есть progress message)
-    return await fetch_shipping_rates(update, context)
+    # Показываем экран подтверждения данных перед получением тарифов
+    return await show_data_confirmation(update, context)
