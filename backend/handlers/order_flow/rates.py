@@ -198,6 +198,7 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             logger.error(f"ShipStation rate request failed: {error_msg}")
             
             # Log error to session
+            from server import session_manager
             user_id = update.effective_user.id
             await session_manager.update_session_atomic(user_id, data={
                 'last_error': f'ShipStation API error: {error_msg}',
