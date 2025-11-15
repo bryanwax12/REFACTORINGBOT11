@@ -125,7 +125,10 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         
         # Build rate request using service
         from services.shipping_service import build_shipstation_rates_request
-        rate_request = build_shipstation_rates_request(data, carrier_ids)
+        # Convert carrier_ids dict to list of IDs
+        carrier_ids_list = list(carrier_ids.values())
+        logger.info(f"📦 Carrier IDs list for API: {carrier_ids_list}")
+        rate_request = build_shipstation_rates_request(data, carrier_ids_list)
         
         # Log the request for debugging
         logger.info(f"ShipStation rate request: {rate_request}")
