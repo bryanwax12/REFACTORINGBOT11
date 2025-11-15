@@ -487,51 +487,8 @@ clear_settings_cache = util_clear_settings_cache
 
 # check_shipstation_balance - imported from services/api_services.py
 
-async def generate_thank_you_message():
-    """Generate a unique thank you message using AI"""
-    try:
-        from emergentintegrations.llm.chat import LlmChat, UserMessage
-        
-        emergent_key = os.environ.get('EMERGENT_LLM_KEY')
-        if not emergent_key:
-            raise ValueError("EMERGENT_LLM_KEY not found in environment")
-        
-        # Generate unique session ID
-        session_id = f"thanks_{int(datetime.now(timezone.utc).timestamp() * 1000)}"
-        
-        # Initialize chat with model
-        chat = LlmChat(
-            api_key=emergent_key,
-            session_id=session_id,
-            system_message="Ты помощник, который создает теплые и дружелюбные слова благодарности на русском языке для клиентов, которые воспользовались сервисом доставки."
-        )
-        chat = chat.with_model("openai", "gpt-4o")
-        
-        # Create user message
-        user_message = UserMessage(
-            text="Создай короткое теплое сообщение благодарности (2-3 предложения) клиенту за использование нашего сервиса доставки. Дружелюбный тон, только текст без эмодзи. Каждый раз создавай РАЗНОЕ уникальное сообщение."
-        )
-        
-        # Get response
-        response = await chat.send_message(user_message)
-        
-        if response and len(response.strip()) > 10:
-            logger.info(f"Generated thank you message: {response[:50]}...")
-            return response.strip()
-        else:
-            raise ValueError("Empty or invalid response from AI")
-            
-    except Exception as e:
-        logger.error(f"Error generating thank you message: {e}")
-        # Use varied fallback messages
-        fallback_messages = [
-            "Спасибо за использование нашего сервиса! Желаем вам приятной доставки.",
-            "Благодарим вас за доверие! Надеемся, что наш сервис оправдал ваши ожидания.",
-            "Спасибо, что выбрали нас! Мы ценим ваше время и доверие.",
-            "Благодарим за заказ! Желаем, чтобы ваша посылка прибыла быстро и в целости.",
-            "Спасибо за сотрудничество! Будем рады видеть вас снова."
-        ]
-        return random.choice(fallback_messages)
+# DEPRECATED: Use utils.telegram_utils.generate_thank_you_message instead
+generate_thank_you_message = util_generate_thank_you_message
 
 app = FastAPI(title="Telegram Shipping Bot")
 
