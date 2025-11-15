@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 from utils.handler_decorators import with_user_session, safe_handler
 from handlers.common_handlers import safe_telegram_call, mark_message_as_selected, check_stale_interaction
+from handlers.order_flow.cancellation import cancel_order
 
 
 @safe_handler(fallback_state=ConversationHandler.END)
