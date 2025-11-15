@@ -233,7 +233,7 @@ async def validate_order_data_for_rates(order_data: Dict[str, Any]) -> Tuple[boo
     required_fields = [
         'from_name', 'from_city', 'from_state', 'from_zip',
         'to_name', 'to_city', 'to_state', 'to_zip',
-        'weight'
+        'parcel_weight'
     ]
     
     # Check for from_street OR from_address
