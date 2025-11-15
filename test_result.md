@@ -1037,9 +1037,11 @@ backend:
 
 metadata:
   created_by: "fork_agent"
-  version: "2.0"
-  test_sequence: 1
+  version: "2.1"
+  test_sequence: 2
   run_ui: false
+  last_tested: "2024-11-15T03:30:00Z"
+  testing_agent_status: "review_request_completed"
 
 test_plan:
   current_focus:
