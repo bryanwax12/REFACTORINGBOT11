@@ -392,6 +392,7 @@ try:
     from routers.stats import router as stats_router
     from routers.users import router as users_router
     from routers.webhooks import router as webhooks_router
+    from routers.legacy_api import router as legacy_api_router
     
     # Register routers with app (routers already have /api prefix)
     app.include_router(admin_router)
