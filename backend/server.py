@@ -4074,20 +4074,6 @@ async def broadcast_message(
         logger.error(f"Error sending broadcast: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# MOVED TO routers/
-# @api_router.get("/maintenance/status")
-async def get_maintenance_status(authenticated: bool = Depends(verify_admin_key)):
-    """Get current maintenance mode status"""
-    try:
-        settings = await db.settings.find_one({"key": "maintenance_mode"})
-        is_maintenance = settings.get("value", False) if settings else False
-        
-        return {
-            "maintenance_mode": is_maintenance
-        }
-    except Exception as e:
-        logger.error(f"Error getting maintenance status: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/maintenance/enable")
 async def enable_maintenance_mode(authenticated: bool = Depends(verify_admin_key)):
