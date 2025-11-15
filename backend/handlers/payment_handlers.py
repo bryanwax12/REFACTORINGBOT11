@@ -43,13 +43,13 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE,
         query = update.callback_query
         await safe_telegram_call(query.answer())
         
-        # Load message context from last pending payment
-        payment_record = await payment_service.get_pending_payment(telegram_id, "topup")
-        
-        if payment_record and payment_record.get('payment_message_id'):
-            logger.info(f"Payment message_id: {payment_record.get('payment_message_id')}")
-            context.user_data['last_bot_message_id'] = payment_record['payment_message_id']
-            context.user_data['last_bot_message_text'] = payment_record.get('payment_message_text', '')
+        # TODO: Load message context from last pending payment
+        # payment_record = await payment_service.get_pending_payment(telegram_id, "topup")
+        # 
+        # if payment_record and payment_record.get('payment_message_id'):
+        #     logger.info(f"Payment message_id: {payment_record.get('payment_message_id')}")
+        #     context.user_data['last_bot_message_id'] = payment_record['payment_message_id']
+        #     context.user_data['last_bot_message_text'] = payment_record.get('payment_message_text', '')
         
         logger.info(f"Context before mark_message_as_selected: last_bot_message_id={context.user_data.get('last_bot_message_id')}")
         
