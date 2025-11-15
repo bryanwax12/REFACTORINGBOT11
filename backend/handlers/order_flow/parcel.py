@@ -94,9 +94,9 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
     await session_service.update_session_step(user_id, step="PARCEL_WIDTH")
     
     asyncio.create_task(mark_message_as_selected(update, context))
-    from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
+    from utils.ui_utils import get_standard_size_and_cancel_keyboard, OrderStepMessages, CallbackData
     
-    reply_markup = get_cancel_keyboard()
+    reply_markup = get_standard_size_and_cancel_keyboard(CallbackData.SKIP_PARCEL_WIDTH_HEIGHT)
     message_text = OrderStepMessages.PARCEL_WIDTH
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
