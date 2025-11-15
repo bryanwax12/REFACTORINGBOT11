@@ -13,6 +13,11 @@ import os
 @pytest_asyncio.fixture(scope='function')
 async def test_db():
     """Provide a test database connection"""
+    # CRITICAL: Reset service factory BEFORE creating new DB connection
+    # This ensures each test gets fresh services with new event loop
+    from services.service_factory import reset_service_factory
+    reset_service_factory()
+    
     mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
     client = AsyncIOMotorClient(mongo_url)
     db_name = os.environ.get('MONGODB_DB_NAME', 'telegram_shipping_bot')
@@ -47,7 +52,9 @@ async def test_db():
     await db.payments.delete_many({"telegram_id": 123456789})
     await db.pending_orders.delete_many({"telegram_id": 123456789})
     
+    # Close client and reset factory AFTER test completes
     client.close()
+    reset_service_factory()
 
 
 @pytest.fixture
