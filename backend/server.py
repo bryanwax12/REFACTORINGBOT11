@@ -6232,10 +6232,19 @@ from routers.webhooks import router as webhooks_router
 from routers.shipping import router as shipping_router
 from routers.orders import router as orders_router
 from routers.debug import router as debug_router
+from routers.bot import router as bot_router
+from routers.settings import router as settings_router
+from routers.maintenance import router as maintenance_router
+from routers.stats import router as stats_router
+
 app.include_router(webhooks_router, prefix="/api")
 app.include_router(shipping_router, prefix="/api")
 app.include_router(orders_router, prefix="/api")
 app.include_router(debug_router, prefix="/api")
+app.include_router(bot_router, prefix="/api")
+app.include_router(settings_router, prefix="/api")
+app.include_router(maintenance_router, prefix="/api")
+app.include_router(stats_router, prefix="/api")
 
 # Include admin routers (v1 and v2)
 from routers.admin_router import admin_router  # Legacy
