@@ -60,13 +60,21 @@ class ServiceFactory:
             self._services['order_service'] = OrderService(order_repo, user_repo, payment_repo)
         return self._services['order_service']
     
+    def get_template_service(self):
+        """Получить TemplateService"""
+        if 'template_service' not in self._services:
+            from services.template_service import TemplateService
+            self._services['template_service'] = TemplateService(self.db)
+        return self._services['template_service']
+    
     def get_all_services(self) -> dict:
         """Получить все сервисы"""
         return {
             'user_service': self.get_user_service(),
             'session_service': self.get_session_service(),
             'payment_service': self.get_payment_service(),
-            'order_service': self.get_order_service()
+            'order_service': self.get_order_service(),
+            'template_service': self.get_template_service()
         }
 
 
