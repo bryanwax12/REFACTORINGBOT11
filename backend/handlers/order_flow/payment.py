@@ -386,14 +386,3 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await safe_telegram_call(query.message.reply_text(f"❌ Ошибка при оплате: {str(e)}"))
         return ConversationHandler.END
 
-# MIGRATED: Use handlers.order_flow.entry_points.return_to_payment_after_topup
-return_to_payment_after_topup = handler_return_to_payment_after_topup
-
-# MIGRATED: Use handlers.payment_handlers.handle_topup_amount
-from handlers.payment_handlers import handle_topup_amount
-
-
-# MIGRATED: Use handlers.payment_handlers.handle_topup_crypto_selection
-from handlers.payment_handlers import handle_topup_crypto_selection
-
-
