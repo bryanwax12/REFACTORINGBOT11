@@ -1191,11 +1191,14 @@ class DataConfirmationUI:
         width = data.get('parcel_width', data.get('width', ''))
         height = data.get('parcel_height', data.get('height', ''))
         
-        section = "*Посылка:*\n"
-        section += f"⚖️ Вес: {weight} lb\n"
+        section = "*Информация о посылке:*\n"
+        section += f"⚖️  Вес: *{weight} lb*\n"
         
         if length and width and height:
-            section += f"📏 Размеры: {length}\" × {width}\" × {height}\"\n"
+            section += f"📐 Размеры: *{length}\" × {width}\" × {height}\"*\n"
+        
+        section += "\n" + "─" * 30 + "\n"
+        section += "✅ Подтвердите данные или отредактируйте"
         
         return section
     
