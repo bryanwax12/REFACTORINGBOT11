@@ -1223,55 +1223,9 @@ async def continue_order_after_template(update: Update, context: ContextTypes.DE
     # Return to data confirmation screen
     return await show_data_confirmation(update, context)
 
-async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Show user's templates list"""
-    query = update.callback_query
-    await safe_telegram_call(query.answer())
-    
-    # Mark previous message as selected (remove buttons from choice menu)
-    asyncio.create_task(mark_message_as_selected(update, context))
-    
-    telegram_id = query.from_user.id
-    
-    # Get user templates
-    templates = await find_user_templates(telegram_id, limit=10)
-    logger.info(f"📋 my_templates_menu: user {telegram_id} has {len(templates)} templates")
-    
-    if not templates:
-        from utils.ui_utils import TemplateManagementUI
-        reply_markup = TemplateManagementUI.build_no_templates_keyboard()
-        
-        await safe_telegram_call(query.message.reply_text(
-            TemplateManagementUI.no_templates_message(),
-            reply_markup=reply_markup,
-            parse_mode='Markdown'
-        ))
-        return ConversationHandler.END
-    
-    # Build template list message
-    from utils.ui_utils import TemplateManagementUI
-    message = TemplateManagementUI.templates_list_header()
-    
-    keyboard = []
-    for i, template in enumerate(templates, 1):
-        # Add compact template info to message
-        message += TemplateManagementUI.format_template_item(i, template)
-        
-        # Create button with just number and name
-        keyboard.append([InlineKeyboardButton(
-            f"{i}. {template['name']}", 
-            callback_data=f'template_view_{template["id"]}'
-        )])
-    
-    # Add main menu button at the bottom
-    keyboard.append([InlineKeyboardButton("🔙 Главное меню", callback_data='start')])
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    bot_msg = await safe_telegram_call(query.message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown'))
-    # Save last message context for button protection
-    context.user_data['last_bot_message_id'] = bot_msg.message_id
-    context.user_data['last_bot_message_text'] = message
-    # Don't return state - working outside ConversationHandler
+# MIGRATED: Use handlers.template_handlers.my_templates_menu
+# Keeping alias for backward compatibility
+my_templates_menu = handler_my_templates_menu
 
 # MIGRATED: Use handlers.template_handlers.view_template
 # Keeping alias for backward compatibility
