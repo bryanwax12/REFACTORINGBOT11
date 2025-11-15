@@ -2550,16 +2550,6 @@ async def root():
 
 # Debug endpoints removed - were causing startup issues and memory_handler references
 
-@api_router.get("/orders/{order_id}")
-async def get_order(order_id: str):
-    from repositories import get_repositories
-    repos = get_repositories()
-    order = await repos.orders.find_by_id(order_id)
-    if not order:
-        raise HTTPException(status_code=404, detail="Order not found")
-    return order
-
-
 @api_router.get("/labels/{label_id}/download")
 async def download_label(label_id: str):
     """
