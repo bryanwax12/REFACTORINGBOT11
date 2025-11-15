@@ -565,10 +565,10 @@ async def save_rates_to_cache_and_session(
     shipstation_cache.set(
         from_zip=order_data['from_zip'],
         to_zip=order_data['to_zip'],
-        weight=order_data['weight'],
-        length=order_data.get('length', 10),
-        width=order_data.get('width', 10),
-        height=order_data.get('height', 10),
+        weight=order_data.get('weight') or order_data.get('parcel_weight', 1.0),
+        length=order_data.get('parcel_length') or order_data.get('length', 10),
+        width=order_data.get('parcel_width') or order_data.get('width', 10),
+        height=order_data.get('parcel_height') or order_data.get('height', 10),
         rates=rates
     )
     
