@@ -2550,55 +2550,6 @@ async def root():
 
 # Debug endpoints removed - were causing startup issues and memory_handler references
 
-@api_router.get("/orders", response_model=List[dict])
-async def get_orders(telegram_id: Optional[int] = None):
-    from repositories import get_repositories
-    repos = get_repositories()
-    query = {"telegram_id": telegram_id} if telegram_id else {}
-    orders = await repos.orders.find_with_filter(query, limit=100)
-    
-    result = []
-    
-    # For each order, create separate rows for each label
-    for order in orders:
-        # Get ALL labels for this order
-        labels = await db.shipping_labels.find(
-            {"order_id": order['id']},
-            {"_id": 0}
-        ).sort("created_at", -1).to_list(100)
-        
-        # Get user info once using Repository Pattern
-        from repositories import get_user_repo
-        user_repo = get_user_repo()
-        user = await user_repo.find_by_telegram_id(order["telegram_id"])
-        user_name = user.get('first_name', 'Unknown') if user else 'Unknown'
-        user_username = user.get('username', '') if user else ''
-        
-        if labels:
-            # Create a row for each label
-            for label in labels:
-                order_row = order.copy()
-                order_row['tracking_number'] = label.get('tracking_number', '')
-                order_row['label_url'] = label.get('label_url', '')
-                order_row['carrier'] = label.get('carrier', '')
-                order_row['label_id'] = label.get('label_id', '')
-                order_row['label_created_at'] = label.get('created_at', '')
-                order_row['user_name'] = user_name
-                order_row['user_username'] = user_username
-                result.append(order_row)
-        else:
-            # No labels - add order without label info
-            order['tracking_number'] = ''
-            order['label_url'] = ''
-            order['carrier'] = ''
-            order['label_id'] = ''
-            order['label_created_at'] = ''
-            order['user_name'] = user_name
-            order['user_username'] = user_username
-            result.append(order)
-    
-    return result
-
 @api_router.get("/orders/{order_id}")
 async def get_order(order_id: str):
     from repositories import get_repositories
