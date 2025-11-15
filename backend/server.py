@@ -2,9 +2,14 @@ from fastapi import FastAPI, APIRouter, Request
 from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv
 from pathlib import Path
+import os
+
+# CRITICAL: Load .env BEFORE any other imports that use environment variables
+ROOT_DIR = Path(__file__).parent
+load_dotenv(ROOT_DIR / '.env')
+
 from bot_protection import BotProtection
 from telegram_safety import TelegramSafetySystem, TelegramBestPractices
-import os
 import logging
 import httpx
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
