@@ -26,6 +26,20 @@ async def test_db():
     db_name = os.environ.get('MONGODB_DB_NAME', 'telegram_shipping_bot')
     db = client[db_name]
     
+    # CRITICAL: Replace global db in server.py module to avoid event loop issues
+    # When handlers import from server, they use the global db object
+    # We need to replace it with our test db that has a fresh event loop
+    import server
+    old_db = server.db
+    old_client = server.client
+    server.db = db
+    server.client = client
+    
+    # Also reinitialize session_manager with new db
+    from session_manager import SessionManager
+    old_session_manager = server.session_manager
+    server.session_manager = SessionManager(db)
+    
     # Initialize repositories first, then service factory
     from repositories import init_repositories
     from services.service_factory import init_service_factory
