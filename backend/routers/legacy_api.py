@@ -32,8 +32,12 @@ async def legacy_get_expense_stats(
     date_to: Optional[str] = None,
     api_key: str = Depends(verify_api_key)
 ):
-    """Legacy expense stats endpoint"""
-    return {"expenses": [], "total": 0}
+    """Legacy expense stats endpoint - returns real expense data"""
+    from server import db
+    from handlers.admin_handlers import get_expense_stats_data
+    
+    stats = await get_expense_stats_data(db, date_from, date_to)
+    return stats
 
 
 @router.get("/orders")
