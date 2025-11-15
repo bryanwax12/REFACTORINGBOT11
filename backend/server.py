@@ -2514,39 +2514,6 @@ async def debug_persistence():
 
 
 @api_router.post("/users/{telegram_id}/balance/add")
-async def add_balance(telegram_id: int, amount: float):
-    try:
-        if amount <= 0:
-            raise HTTPException(status_code=400, detail="Amount must be positive")
-        
-        # Use payment service
-        success, new_balance, error = await payment_service.add_balance(
-            telegram_id=telegram_id,
-            amount=amount,
-            db=db,
-            find_user_func=find_user_by_telegram_id
-        )
-        
-        if not success:
-            if error == "User not found":
-                raise HTTPException(status_code=404, detail=error)
-            raise HTTPException(status_code=500, detail=error)
-        
-        # Notify user via Telegram
-        if bot_instance:
-            await safe_telegram_call(bot_instance.send_message(
-                chat_id=telegram_id,
-                text=f"""💰 Баланс пополнен администратором!
-
-Зачислено: ${amount:.2f}
-Новый баланс: ${new_balance:.2f}"""
-            ))
-        
-        return {"success": True, "new_balance": new_balance, "added": amount}
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/users/{telegram_id}/balance/deduct")
 async def deduct_balance(telegram_id: int, amount: float):
