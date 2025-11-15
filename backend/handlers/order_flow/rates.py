@@ -7,7 +7,7 @@ import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 from handlers.common_handlers import safe_telegram_call
-from utils.notifications import notify_admin_error
+from handlers.admin_handlers import notify_admin_error
 
 logger = logging.getLogger(__name__)
 
