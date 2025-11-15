@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 from server import CONFIRM_DATA
 
 # Get ShipStation API key from environment
-SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY_PROD') or os.environ.get('SHIPSTATION_API_KEY_TEST')
+SHIPSTATION_API_KEY = os.environ.get('SHIPSTATION_API_KEY_TEST') or os.environ.get('SHIPSTATION_API_KEY_PROD')  # ⚠️ TEST MODE ENABLED
 
 async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Fetch shipping rates from ShipStation with caching"""
