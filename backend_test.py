@@ -7326,13 +7326,12 @@ def test_atomic_operations_flow():
         return False
 
 def main():
-    """Run comprehensive Telegram Bot backend tests per review request"""
-    print("🚀 КОМПЛЕКСНОЕ ТЕСТИРОВАНИЕ TELEGRAM БОТА")
-    print("🎯 COMPREHENSIVE TESTING per Review Request")
+    """Run Telegram Bot Basic Flow Tests per Review Request"""
+    print("🚀 TELEGRAM BOT BASIC FLOW TESTING")
+    print("🎯 REVIEW REQUEST: Test /start command, 'Новый заказ' flow, sender name/address entry")
     print(f"Backend URL: {BACKEND_URL}")
     print(f"API Base: {API_BASE}")
-    print(f"MongoDB: mongodb://localhost:27017")
-    print(f"Database: telegram_shipping_bot")
+    print(f"Bot Mode: Polling (localhost:8001)")
     print("=" * 80)
     
     # Run critical tests as specified in review request
