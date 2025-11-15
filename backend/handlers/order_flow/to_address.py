@@ -48,7 +48,7 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     
     # Update session via repository
     # Session service injected via decorator
-    await session_service.save_order_field(user_id, {'to_name': name})
+    await session_service.save_order_field(user_id, 'to_name', name)
     await session_service.update_session_step(user_id, step="TO_ADDRESS")
     
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
@@ -95,7 +95,7 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     
     # Update session via repository
     # Session service injected via decorator
-    await session_service.save_order_field(user_id, {'to_address': address})
+    await session_service.save_order_field(user_id, 'to_address', address)
     await session_service.update_session_step(user_id, step="TO_ADDRESS2")
     
     asyncio.create_task(mark_message_as_selected(update, context))
@@ -140,7 +140,7 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE, 
     
     # Update session via repository
     # Session service injected via decorator
-    await session_service.save_order_field(user_id, {'to_address2': address2})
+    await session_service.save_order_field(user_id, 'to_address2', address2)
     await session_service.update_session_step(user_id, step="TO_CITY")
     
     asyncio.create_task(mark_message_as_selected(update, context))
@@ -187,7 +187,7 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     
     # Update session via repository
     # Session service injected via decorator
-    await session_service.save_order_field(user_id, {'to_city': city})
+    await session_service.save_order_field(user_id, 'to_city', city)
     await session_service.update_session_step(user_id, step="TO_STATE")
     
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
@@ -233,7 +233,7 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     
     # Update session via repository
     # Session service injected via decorator
-    await session_service.save_order_field(user_id, {'to_state': state})
+    await session_service.save_order_field(user_id, 'to_state', state)
     await session_service.update_session_step(user_id, step="TO_ZIP")
     
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
@@ -279,7 +279,7 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, sessi
     
     # Update session via repository
     # Session service injected via decorator
-    await session_service.save_order_field(user_id, {'to_zip': zip_code})
+    await session_service.save_order_field(user_id, 'to_zip', zip_code)
     await session_service.update_session_step(user_id, step="TO_PHONE")
     
     asyncio.create_task(mark_message_as_selected(update, context))
@@ -326,7 +326,7 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     
     # Update session via repository
     # Session service injected via decorator
-    await session_service.save_order_field(user_id, {'to_phone': formatted_phone})
+    await session_service.save_order_field(user_id, 'to_phone', formatted_phone)
     await session_service.update_session_step(user_id, step="PARCEL_WEIGHT")
     
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
