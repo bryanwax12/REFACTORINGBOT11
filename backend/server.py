@@ -2573,43 +2573,6 @@ async def get_user_details(telegram_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@api_router.post("/users/{telegram_id}/block")
-async def block_user(telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
-    """Block a user from using the bot"""
-    try:
-        # Block user using Repository Pattern
-        from repositories import get_user_repo
-        user_repo = get_user_repo()
-        
-        # Check if user exists
-        user = await user_repo.find_by_telegram_id(telegram_id)
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-        
-        # Block user
-        result = await user_repo.block_user(telegram_id)
-        
-        if result:
-            # Notify user via Telegram
-            if bot_instance:
-                try:
-                    await safe_telegram_call(bot_instance.send_message(
-                        chat_id=telegram_id,
-                        text="⛔️ *Вы были заблокированы администратором.*\n\nДоступ к боту ограничен.",
-                        parse_mode='Markdown'
-                    ))
-                except Exception as e:
-                    logger.error(f"Failed to send block notification: {e}")
-            
-            return {"success": True, "message": "User blocked successfully"}
-        else:
-            return {"success": False, "message": "User already blocked"}
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error blocking user: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
 
 @api_router.post("/users/{telegram_id}/invite-channel")
 async def invite_user_to_channel(telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
