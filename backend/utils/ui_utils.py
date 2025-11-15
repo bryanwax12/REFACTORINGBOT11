@@ -985,14 +985,27 @@ ShipStation не смог проверить один или оба адреса
         # Add rate selection buttons with cleaned format
         for rate in filtered_rates:
             # Extract carrier name (remove "Stamps.com" prefix if present)
-            carrier = rate.get('carrier_friendly_name', rate.get('carrier', 'Unknown'))
-            carrier = carrier.replace('Stamps.com ', '').replace('stamps.com ', '')
+            carrier_full = rate.get('carrier_friendly_name', rate.get('carrier', 'Unknown'))
+            carrier_full = carrier_full.replace('Stamps.com ', '').replace('stamps.com ', '')
             
             service = rate.get('service_type', rate.get('service', 'Standard'))
             amount = rate.get('shipping_amount', {}).get('amount', rate.get('amount', 0.0))
             
+            # Clean carrier name: extract main carrier (USPS, UPS, FedEx)
+            carrier = carrier_full
+            for known_carrier in ['USPS', 'UPS', 'FedEx']:
+                if known_carrier.lower() in carrier_full.lower():
+                    carrier = known_carrier
+                    break
+            
+            # Remove carrier name from service if it's duplicated
+            service_clean = service
+            if carrier.lower() in service.lower():
+                # Remove carrier prefix from service
+                service_clean = service.replace(carrier, '').replace(carrier.upper(), '').strip()
+            
             # Format: "USPS Media Mail - $12.50"
-            button_text = f"{carrier} {service} - ${amount:.2f}"
+            button_text = f"{carrier} {service_clean} - ${amount:.2f}"
             
             rate_id = rate.get('rate_id', '')
             keyboard.append([InlineKeyboardButton(
