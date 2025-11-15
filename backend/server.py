@@ -2620,13 +2620,6 @@ async def oxapay_webhook(request: Request):
 # get_users moved to routers/admin_router.py
 
 
-@api_router.post("/telegram/webhook")
-async def telegram_webhook(request: Request):
-    """Handle Telegram webhook updates"""
-    return await handle_telegram_webhook(request, application)
-
-
-
 @api_router.get("/debug/clear-all-conversations")
 async def clear_all_conversations():
     """EMERGENCY: Clear all conversation states (NO AUTH) - Use GET for easy browser access"""
