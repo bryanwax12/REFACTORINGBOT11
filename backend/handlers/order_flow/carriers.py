@@ -111,9 +111,17 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.info(f"✅ Selected: {context.user_data['selected_carrier']} - {context.user_data['selected_service']}")
         logger.info(f"💰 Cost: Base=${base_cost:.2f}, Markup=${LABEL_MARKUP:.2f}, Final=${final_cost:.2f}")
         
+        # Remove old message with buttons
+        try:
+            await safe_telegram_call(query.message.edit_reply_markup(reply_markup=None))
+            # Add checkmark to selected rate
+            await query.answer("✅ Тариф выбран!")
+        except Exception as e:
+            logger.warning(f"Could not update message: {e}")
+        
         # Proceed to payment
-        from handlers.order_flow.payment import handle_payment_selection
-        return await handle_payment_selection(update, context)
+        from handlers.order_flow.payment import show_payment_methods
+        return await show_payment_methods(update, context)
     
     # Unknown action
     logger.warning(f"⚠️ Unknown carrier action: {data}")
