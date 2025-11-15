@@ -291,7 +291,7 @@ def build_shipstation_rates_request(order_data: Dict[str, Any], carrier_ids: Lis
             },
             'packages': [{
                 'weight': {
-                    'value': float(order_data['weight']),
+                    'value': float(order_data.get('weight') or order_data.get('parcel_weight', 1.0)),
                     'unit': 'pound'
                 },
                 'dimensions': {
