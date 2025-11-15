@@ -222,7 +222,9 @@ def setup_order_conversation_handler():
             PAYMENT_METHOD: [
                 CallbackQueryHandler(return_to_order, pattern='^return_to_order$'),
                 CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
-                CallbackQueryHandler(process_payment, pattern='^(pay_from_balance|pay_with_crypto|top_up_balance|back_to_rates|cancel_order)')
+                CallbackQueryHandler(handle_order_summary, pattern='^order_summary$'),
+                CallbackQueryHandler(handle_proceed_to_payment, pattern='^proceed_to_payment$'),
+                CallbackQueryHandler(process_payment, pattern='^(pay_from_balance|pay_with_crypto|top_up_balance|topup_for_order|back_to_rates|cancel_order)')
             ],
             TOPUP_AMOUNT: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, handle_topup_amount)
