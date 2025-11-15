@@ -106,7 +106,7 @@ async def skip_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     return await handle_skip_field(
         update, context,
-        field_name='to_street2',
+        field_name='to_address2',
         field_value=None,
         next_step_const=TO_CITY,
         next_step_name='TO_CITY',
