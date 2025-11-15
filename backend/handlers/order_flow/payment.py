@@ -90,36 +90,16 @@ async def handle_pay_from_balance(update: Update, context: ContextTypes.DEFAULT_
 
 @safe_handler(fallback_state=ConversationHandler.END)
 @with_user_session(create_user=False, require_session=True)
-async def handle_pay_crypto(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle crypto payment selection"""
-    from server import (
-        safe_telegram_call,
-        mark_message_as_selected,
-        PAYMENT_METHOD
-    )
-    from utils.ui_utils import PaymentFlowUI
-    import asyncio
-    
-    query = update.callback_query
-    await safe_telegram_call(query.answer())
-    
-    # Mark previous message as selected (non-blocking)
-    asyncio.create_task(mark_message_as_selected(update, context))
-    
-    # Get order amount
-    selected_rate = context.user_data.get('selected_rate', {})
-    amount = context.user_data.get('final_amount', selected_rate.get('amount', 0))
-    
-    # Show crypto selection
-    message = PaymentFlowUI.topup_crypto_selection(amount)
-    reply_markup = PaymentFlowUI.build_crypto_selection_keyboard()
-    
-    await safe_telegram_call(query.message.reply_text(
-        message,
-        reply_markup=reply_markup
-    ))
-    
-    return PAYMENT_METHOD
+async def handle_order_summary(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle order summary button"""
+    return await show_order_summary(update, context)
+
+
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=False, require_session=True)
+async def handle_proceed_to_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle proceed to payment button - return to payment screen"""
+    return await show_payment_methods(update, context)
 
 
 @safe_handler(fallback_state=ConversationHandler.END)
