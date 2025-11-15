@@ -79,6 +79,7 @@ def setup_order_conversation_handler():
         skip_parcel_width_height,
         skip_parcel_height
     )
+    from handlers.order_flow.rates import fetch_shipping_rates
     from handlers.order_flow.cancellation import (
         cancel_order,
         confirm_cancel_order,
