@@ -1053,33 +1053,9 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # Skip handlers moved to handlers/order_flow/skip_handlers.py
 
 
-async def show_data_confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Show summary of entered data with edit option"""
-    from utils.ui_utils import DataConfirmationUI
-    
-    data = context.user_data
-    
-    # Format the summary message using UI utils
-    message = DataConfirmationUI.confirmation_header()
-    message += DataConfirmationUI.format_address_section("Отправитель", data, "from")
-    message += DataConfirmationUI.format_address_section("Получатель", data, "to")
-    message += DataConfirmationUI.format_parcel_section(data)
-    
-    # Build keyboard using UI utils
-    reply_markup = DataConfirmationUI.build_confirmation_keyboard()
-    
-    # Check if it's a message or callback query
-    if hasattr(update, 'callback_query') and update.callback_query:
-        bot_msg = await safe_telegram_call(update.callback_query.message.reply_text(message, reply_markup=reply_markup))
-    else:
-        bot_msg = await safe_telegram_call(update.message.reply_text(message, reply_markup=reply_markup))
-    
-    # Save last bot message context for button protection
-    if bot_msg:
-        context.user_data['last_bot_message_id'] = bot_msg.message_id
-        context.user_data['last_bot_message_text'] = message
-        context.user_data['last_state'] = STATE_NAMES[CONFIRM_DATA]  # Save state for cancel return
-    return CONFIRM_DATA
+# MIGRATED: Use handlers.order_flow.confirmation.show_data_confirmation
+# Keeping alias for backward compatibility
+show_data_confirmation = handler_show_data_confirmation
 
 async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle user's choice on data confirmation"""
