@@ -240,7 +240,12 @@ async def skip_parcel_width_height(update: Update, context: ContextTypes.DEFAULT
     
     query = update.callback_query
     await safe_telegram_call(query.answer())
-    await safe_telegram_call(query.message.reply_text("✅ Используются стандартные размеры для ширины и высоты: 10x10 дюймов"))
+    
+    # Edit message to remove buttons and show confirmation
+    await safe_telegram_call(query.message.edit_text(
+        "✅ Используются стандартные размеры для ширины и высоты: 10x10 дюймов",
+        reply_markup=None  # Remove keyboard
+    ))
     
     # Set standard width and height
     user_id = update.effective_user.id
