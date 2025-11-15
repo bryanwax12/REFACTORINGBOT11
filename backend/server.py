@@ -1051,80 +1051,8 @@ save_template_name = handler_save_template_name
     context.user_data['saved_template_name'] = template_name
     
 
-async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Update existing template with current order data"""
-    query = update.callback_query
-    await safe_telegram_call(query.answer())
-    
-    # Mark previous message as selected (non-blocking)
-    asyncio.create_task(mark_message_as_selected(update, context))
-    
-    template_id = query.data.replace('template_update_', '')
-    telegram_id = query.from_user.id
-    
-    # Get user using Repository Pattern
-    from repositories import get_user_repo
-    user_repo = get_user_repo()
-    user = await user_repo.find_by_telegram_id(telegram_id)
-    if not user:
-        await safe_telegram_call(query.message.reply_text("❌ Ошибка: пользователь не найден"))
-        return ConversationHandler.END
-    
-    # Update template
-    update_data = {
-        "from_name": context.user_data.get('from_name', ''),
-        "from_street1": context.user_data.get('from_street', ''),
-        "from_street2": context.user_data.get('from_street2', ''),
-        "from_city": context.user_data.get('from_city', ''),
-        "from_state": context.user_data.get('from_state', ''),
-        "from_zip": context.user_data.get('from_zip', ''),
-        "from_phone": context.user_data.get('from_phone', ''),
-        "to_name": context.user_data.get('to_name', ''),
-        "to_street1": context.user_data.get('to_street', ''),
-        "to_street2": context.user_data.get('to_street2', ''),
-        "to_city": context.user_data.get('to_city', ''),
-        "to_state": context.user_data.get('to_state', ''),
-        "to_zip": context.user_data.get('to_zip', ''),
-        "to_phone": context.user_data.get('to_phone', ''),
-        "updated_at": datetime.now(timezone.utc)
-    }
-    
-    # Update template using Repository Pattern with additional telegram_id check
-    from repositories import get_repositories
-    repos = get_repositories()
-    result = await repos.templates.collection.update_one(
-        {"id": template_id, "telegram_id": telegram_id},
-        {"$set": update_data}
-    )
-    
-    if result.modified_count > 0:
-        template_name = context.user_data.get('pending_template_name', 'шаблон')
-        keyboard = [
-            [InlineKeyboardButton("📦 Продолжить создание заказа", callback_data='continue_order')],
-            [InlineKeyboardButton("🏠 Главное меню", callback_data='start')]
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        
-        message_text = f"""✅ *Шаблон "{template_name}" обновлен!*
-
-Данные шаблона обновлены текущими адресами.
-
-*Продолжить создание этого заказа?*"""
-        
-        bot_msg = await safe_telegram_call(query.message.reply_text(
-            message_text,
-            reply_markup=reply_markup,
-            parse_mode='Markdown'
-        ))
-        
-        # Save last bot message context for button protection
-        context.user_data['last_bot_message_id'] = bot_msg.message_id
-        context.user_data['last_bot_message_text'] = message_text
-        context.user_data['saved_template_name'] = template_name
-    else:
-        await safe_telegram_call(query.message.reply_text("❌ Не удалось обновить шаблон"))
-        return ConversationHandler.END
-
+# MIGRATED: Use handlers.order_flow.template_save.handle_template_update
+handle_template_update = handler_handle_template_update
 
 async def handle_template_new_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Ask user to enter a new template name"""
