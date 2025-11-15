@@ -164,13 +164,31 @@ class TestOrderFlowE2E:
         self,
         mock_update_callback,
         mock_context,
-        sample_order_data
+        sample_order_data,
+        test_db
     ):
         """
         Test data confirmation screen
         """
         from handlers.order_flow.confirmation import show_data_confirmation
         from server import CONFIRM_DATA
+        
+        # Setup: Create user and session in DB
+        await test_db.users.insert_one({
+            "id": "user123",
+            "telegram_id": 123456789,
+            "username": "testuser",
+            "first_name": "Test",
+            "balance": 50.0,
+            "created_at": "2024-01-01T00:00:00Z"
+        })
+        
+        from repositories.session_repository import SessionRepository
+        session_repo = SessionRepository(test_db)
+        await session_repo.get_or_create_session(
+            user_id=123456789,
+            session_type="conversation"
+        )
         
         # Setup: User has entered all data
         mock_context.user_data.update(sample_order_data)
@@ -181,11 +199,8 @@ class TestOrderFlowE2E:
         mock_reply_msg.message_id = 111
         mock_update_callback.message.reply_text = AsyncMock(return_value=mock_reply_msg)
         
-        with patch('server.safe_telegram_call') as mock_safe_call, \
-             patch('server.session_manager') as mock_session:
-            
+        with patch('server.safe_telegram_call') as mock_safe_call:
             mock_safe_call.return_value = mock_reply_msg
-            mock_session.update_session_atomic = AsyncMock()
             
             result = await show_data_confirmation(mock_update_callback, mock_context)
             
