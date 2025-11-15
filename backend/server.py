@@ -412,6 +412,10 @@ class SecurityLogger:
 
 # verify_admin_key moved to handlers/admin_handlers.py
 
+# Error handling middleware (должен быть первым!)
+from middleware.error_handler_middleware import error_handler_middleware
+app.middleware("http")(error_handler_middleware)
+
 # Request logging middleware
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
