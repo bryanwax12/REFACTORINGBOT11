@@ -1330,43 +1330,8 @@ async def skip_address_validation(update: Update, context: ContextTypes.DEFAULT_
     # Call fetch_shipping_rates which will now skip validation
     return await fetch_shipping_rates(update, context)
 
-async def display_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYPE, rates: list) -> int:
-    """
-    Display shipping rates to user (reusable for both cached and fresh rates)
-    
-    Args:
-        update: Telegram update
-        context: Telegram context
-        rates: List of rate dictionaries
-    
-    Returns:
-        int: SELECT_CARRIER state
-    """
-    from utils.ui_utils import ShippingRatesUI
-    
-    query = update.callback_query
-    
-    # Get user balance using Repository Pattern
-    telegram_id = query.from_user.id
-    from repositories import get_user_repo
-    user_repo = get_user_repo()
-    user_balance = await user_repo.get_balance(telegram_id)
-    
-    # Format message and keyboard using UI utils
-    message = ShippingRatesUI.format_rates_message(rates, user_balance)
-    reply_markup = ShippingRatesUI.build_rates_keyboard(rates)
-    
-    # Save state
-    context.user_data['last_state'] = STATE_NAMES[SELECT_CARRIER]
-    
-    # Send message
-    bot_msg = await safe_telegram_call(query.message.reply_text(message, reply_markup=reply_markup, parse_mode='HTML'))
-    
-    if bot_msg:
-        context.user_data['last_bot_message_id'] = bot_msg.message_id
-        context.user_data['last_bot_message_text'] = message
-    
-    return SELECT_CARRIER
+# MIGRATED: Use handlers.order_handlers.display_shipping_rates
+display_shipping_rates = handler_display_shipping_rates
 
 
 async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYPE):
