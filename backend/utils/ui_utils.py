@@ -1153,23 +1153,30 @@ class DataConfirmationUI:
         Returns:
             Formatted address section string
         """
-        name = data.get(f'{prefix}_name', '')
+        name = data.get(f'{prefix}_name', '').strip()
         # Try both 'address' and 'street' field names
-        street = data.get(f'{prefix}_address', data.get(f'{prefix}_street', ''))
+        street = data.get(f'{prefix}_address', data.get(f'{prefix}_street', '')).strip()
         street2 = data.get(f'{prefix}_address2', data.get(f'{prefix}_street2', ''))
-        city = data.get(f'{prefix}_city', '')
-        state = data.get(f'{prefix}_state', '')
-        zip_code = data.get(f'{prefix}_zip', '')
-        phone = data.get(f'{prefix}_phone', '')
+        city = data.get(f'{prefix}_city', '').strip()
+        state = data.get(f'{prefix}_state', '').strip()
+        zip_code = data.get(f'{prefix}_zip', '').strip()
+        phone = data.get(f'{prefix}_phone', '').strip()
+        
+        # Clean street2 - only show if it has real content (not None, not empty, not just whitespace)
+        if street2:
+            street2 = street2.strip()
+            # Skip if it's empty or looks like random characters (less than 3 chars and no digits)
+            if not street2 or len(street2) < 3:
+                street2 = None
         
         section = f"*{title}:*\n"
-        section += f"👤 *{name}*\n"
-        section += f"📍 {street}\n"
+        section += f"  👤  *{name}*\n"
+        section += f"  📍  {street}\n"
         if street2:
-            section += f"    {street2}\n"
-        section += f"🏙️ {city}, {state} {zip_code}\n"
+            section += f"       {street2}\n"
+        section += f"  🏙️  {city}, {state} {zip_code}\n"
         if phone:
-            section += f"📱 {phone}\n"
+            section += f"  📱  {phone}\n"
         section += "\n"
         
         return section
