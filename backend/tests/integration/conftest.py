@@ -58,9 +58,10 @@ async def test_db():
     await db.payments.delete_many({"telegram_id": 123456789})
     await db.pending_orders.delete_many({"telegram_id": 123456789})
     
-    # Close client and reset factory AFTER test completes
+    # Close client and reset factory + repositories AFTER test completes
     client.close()
     reset_service_factory()
+    reset_repositories()
 
 
 @pytest.fixture
