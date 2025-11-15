@@ -295,7 +295,12 @@ async def skip_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE)
     
     query = update.callback_query
     await safe_telegram_call(query.answer())
-    await safe_telegram_call(query.message.reply_text("✅ Используется стандартная высота: 10 дюймов"))
+    
+    # Edit message to remove buttons and show confirmation
+    await safe_telegram_call(query.message.edit_text(
+        "✅ Используется стандартная высота: 10 дюймов",
+        reply_markup=None  # Remove keyboard
+    ))
     
     # Set standard height
     user_id = update.effective_user.id
