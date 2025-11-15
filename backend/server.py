@@ -4856,7 +4856,8 @@ async def broadcast_message(
         logger.error(f"Error sending broadcast: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@api_router.get("/maintenance/status")
+# MOVED TO routers/
+# @api_router.get("/maintenance/status")
 async def get_maintenance_status(authenticated: bool = Depends(verify_admin_key)):
     """Get current maintenance mode status"""
     try:
