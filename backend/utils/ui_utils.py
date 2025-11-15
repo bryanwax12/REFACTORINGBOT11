@@ -927,6 +927,39 @@ ShipStation не смог проверить один или оба адреса
         return message
     
     @staticmethod
+    def filter_popular_rates(rates: list) -> list:
+        """
+        Filter rates to show only popular services from top carriers
+        
+        Popular services by carrier:
+        - USPS: Priority Mail, Media Mail, First Class Mail
+        - FedEx: Ground, Home Delivery, 2Day
+        - UPS: Ground, 3 Day Select, 2nd Day Air
+        """
+        POPULAR_SERVICES = {
+            'USPS': ['Priority Mail', 'Media Mail', 'First Class Mail', 'Priority Mail Express'],
+            'FedEx': ['Ground', 'Home Delivery', '2Day', 'Express Saver'],
+            'UPS': ['Ground', '3 Day Select', '2nd Day Air', 'Next Day Air']
+        }
+        
+        filtered = []
+        for rate in rates:
+            carrier = rate.get('carrier_friendly_name', rate.get('carrier', ''))
+            service = rate.get('service_type', rate.get('service', ''))
+            
+            # Check if carrier is in popular list
+            for popular_carrier, popular_services in POPULAR_SERVICES.items():
+                if popular_carrier.lower() in carrier.lower():
+                    # Check if service is popular
+                    for popular_service in popular_services:
+                        if popular_service.lower() in service.lower():
+                            filtered.append(rate)
+                            break
+                    break
+        
+        return filtered if filtered else rates  # Return all if no matches
+    
+    @staticmethod
     def build_rates_keyboard(rates: list) -> InlineKeyboardMarkup:
         """
         Build keyboard with rate selection buttons
@@ -937,14 +970,27 @@ ShipStation не смог проверить один или оба адреса
         Returns:
             InlineKeyboardMarkup with rate buttons
         """
+        # Filter to show only popular rates
+        filtered_rates = ShippingRatesUI.filter_popular_rates(rates)
+        
         keyboard = []
         
-        # Add rate selection buttons
-        for i, rate in enumerate(rates):
-            button_text = f"{rate['carrier']} - {rate['service']} - ${rate['amount']:.2f}"
+        # Add rate selection buttons with cleaned format
+        for rate in filtered_rates:
+            # Extract carrier name (remove "Stamps.com" prefix if present)
+            carrier = rate.get('carrier_friendly_name', rate.get('carrier', 'Unknown'))
+            carrier = carrier.replace('Stamps.com ', '').replace('stamps.com ', '')
+            
+            service = rate.get('service_type', rate.get('service', 'Standard'))
+            amount = rate.get('shipping_amount', {}).get('amount', rate.get('amount', 0.0))
+            
+            # Format: "USPS Media Mail - $12.50"
+            button_text = f"{carrier} {service} - ${amount:.2f}"
+            
+            rate_id = rate.get('rate_id', '')
             keyboard.append([InlineKeyboardButton(
                 button_text,
-                callback_data=f'select_carrier_{i}'
+                callback_data=f'select_carrier_{rate_id}'
             )])
         
         # Add refresh and cancel buttons
