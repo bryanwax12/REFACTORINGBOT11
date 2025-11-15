@@ -2385,21 +2385,6 @@ async def root():
 
 @api_router.post("/admin/create-label-manual", dependencies=[Depends(verify_admin_key)])
 @api_router.post("/oxapay/webhook")
-async def oxapay_webhook(request: Request):
-    """Handle Oxapay payment webhooks"""
-    return await handle_oxapay_webhook(
-        request, 
-        db, 
-        bot_instance, 
-        safe_telegram_call, 
-        find_user_by_telegram_id, 
-        find_pending_order, 
-        create_and_send_label
-    )
-
-# get_users moved to routers/admin_router.py
-
-
 
 @api_router.get("/debug/active-conversations")
 
@@ -2418,18 +2403,6 @@ async def oxapay_webhook(request: Request):
 @api_router.get("/stats")
 # Direct endpoint for clearing conversations (easier access)
 @app.get("/clear-conversations")
-async def clear_conversations_direct(admin_verified: bool = Depends(verify_admin_key)):
-    """Clear all stuck conversation states - Admin only"""
-    try:
-        result = await db.bot_persistence.delete_many({"_id": {"$regex": "^conversation_"}})
-        return {
-            "success": True,
-            "deleted": result.deleted_count,
-            "message": f"Cleared {result.deleted_count} conversation states"
-        }
-    except Exception as e:
-        return {"success": False, "error": str(e)}
-
 
 @app.get("/api/performance/stats")
 async def get_performance_statistics(admin_verified: bool = Depends(verify_admin_key)):
