@@ -171,10 +171,15 @@ async def skip_parcel_dimensions(update: Update, context: ContextTypes.DEFAULT_T
     
     # Load session data to ensure we have all order data (weight, addresses, etc)
     from server import session_manager
+    import logging
+    logger = logging.getLogger(__name__)
+    
     session = await session_manager.get_session(user_id)
     if session and session.get('session_data'):
         # Merge session data into context.user_data
         session_data = session['session_data']
+        logger.info(f"Session data keys: {list(session_data.keys())}")
+        
         for key, value in session_data.items():
             if key not in context.user_data:
                 context.user_data[key] = value
@@ -182,6 +187,7 @@ async def skip_parcel_dimensions(update: Update, context: ContextTypes.DEFAULT_T
         # Map parcel_weight to weight for fetch_shipping_rates
         if 'parcel_weight' in context.user_data and 'weight' not in context.user_data:
             context.user_data['weight'] = context.user_data['parcel_weight']
+            logger.info(f"Mapped parcel_weight to weight: {context.user_data['weight']}")
         
         # Map parcel dimensions to short names
         if 'parcel_length' in context.user_data and 'length' not in context.user_data:
@@ -190,6 +196,10 @@ async def skip_parcel_dimensions(update: Update, context: ContextTypes.DEFAULT_T
             context.user_data['width'] = context.user_data['parcel_width']
         if 'parcel_height' in context.user_data and 'height' not in context.user_data:
             context.user_data['height'] = context.user_data['parcel_height']
+        
+        logger.info(f"Context.user_data has 'weight': {'weight' in context.user_data}")
+    else:
+        logger.error(f"No session data found for user {user_id}")
     
     # Update session with dimensions
     await session_manager.update_session_atomic(
