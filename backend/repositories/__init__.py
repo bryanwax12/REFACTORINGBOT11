@@ -95,6 +95,25 @@ def get_session_repo() -> SessionRepository:
     return get_repositories().sessions
 
 
+def get_payment_repo() -> PaymentRepository:
+    """Получить payment repository"""
+    return get_repositories().payments
+
+
+def get_template_repo() -> TemplateRepository:
+    """Получить template repository"""
+    return get_repositories().templates
+
+
+def reset_repositories():
+    """
+    Сбросить глобальный экземпляр RepositoryManager
+    Используется в тестах для обеспечения изоляции
+    """
+    global _repository_manager
+    _repository_manager = None
+
+
 """
 ИСПОЛЬЗОВАНИЕ:
 =============
