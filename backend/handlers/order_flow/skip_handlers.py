@@ -157,7 +157,7 @@ async def skip_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
 @with_user_session(create_user=False, require_session=True)
 async def skip_parcel_dimensions(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Skip all dimensions (L/W/H) - use standard 10x10x10 inches"""
-    from server import CALCULATING_RATES
+    from handlers.order_flow.rates import fetch_shipping_rates
     
     query = update.callback_query
     await safe_telegram_call(query.answer())
@@ -181,14 +181,8 @@ async def skip_parcel_dimensions(update: Update, context: ContextTypes.DEFAULT_T
         }
     )
     
-    return await handle_skip_field(
-        update, context,
-        field_name='dimensions_set',
-        field_value=True,
-        next_step_const=CALCULATING_RATES,
-        next_step_name='CALCULATING_RATES',
-        next_message=OrderStepMessages.CALCULATING_RATES
-    )
+    # Call fetch_shipping_rates to calculate and show rates
+    return await fetch_shipping_rates(update, context)
 
 
 @safe_handler(fallback_state=ConversationHandler.END)
