@@ -393,20 +393,20 @@ try:
     from routers.users import router as users_router
     from routers.webhooks import router as webhooks_router
     
-    # Register routers with app
-    app.include_router(admin_router, prefix="/api")
-    app.include_router(admin_labels_router, prefix="/api")
-    app.include_router(api_config_router, prefix="/api")
-    app.include_router(bot_router, prefix="/api")
-    app.include_router(bot_config_router, prefix="/api")
-    app.include_router(broadcast_router, prefix="/api")
-    app.include_router(monitoring_router, prefix="/api")
-    app.include_router(orders_router, prefix="/api")
-    app.include_router(settings_router, prefix="/api")
-    app.include_router(shipping_router, prefix="/api")
-    app.include_router(stats_router, prefix="/api")
-    app.include_router(users_router, prefix="/api")
-    app.include_router(webhooks_router, prefix="/api")
+    # Register routers with app (routers already have /api prefix)
+    app.include_router(admin_router)
+    app.include_router(admin_labels_router)
+    app.include_router(api_config_router)
+    app.include_router(bot_router)
+    app.include_router(bot_config_router)
+    app.include_router(broadcast_router)
+    app.include_router(monitoring_router)
+    app.include_router(orders_router)
+    app.include_router(settings_router)
+    app.include_router(shipping_router)
+    app.include_router(stats_router)
+    app.include_router(users_router)
+    app.include_router(webhooks_router)
     
     logger.info("✅ All API routers registered successfully")
 except Exception as e:
