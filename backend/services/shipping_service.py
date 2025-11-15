@@ -45,7 +45,9 @@ async def display_shipping_rates(
     query = update.callback_query
     
     # Get user balance
-    telegram_id = query.from_user.id
+    telegram_id = update.effective_user.id if update.effective_user else None
+    if not telegram_id:
+        raise ValueError("Cannot get user ID from update")
     user = await find_user_by_telegram_id_func(telegram_id)
     user_balance = user.get('balance', 0.0) if user else 0.0
     
