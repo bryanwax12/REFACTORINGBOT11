@@ -1414,48 +1414,9 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['last_bot_message_text'] = message
     # Don't return state - working outside ConversationHandler
 
-async def view_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """View specific template details"""
-    query = update.callback_query
-    template_id = query.data.replace('template_view_', '')
-    
-    # Execute in parallel: answer query, mark selected, fetch template
-    await safe_telegram_call(query.answer())
-    asyncio.create_task(mark_message_as_selected(update, context))
-    template = await find_template_by_id(template_id)
-    
-    if not template:
-        await safe_telegram_call(query.message.reply_text("❌ Шаблон не найден"))
-        return ConversationHandler.END
-    
-    # Format template details
-    message = f"""📋 *Шаблон: "{template['name']}"*
-
-📤 *Отправитель:*
-{template.get('from_name', '')}
-{template.get('from_street1', '')}
-{template.get('from_street2', '') + ', ' if template.get('from_street2') else ''}{template.get('from_city', '')}, {template.get('from_state', '')} {template.get('from_zip', '')}
-{('📞 ' + template.get('from_phone', '')) if template.get('from_phone') else ''}
-
-📥 *Получатель:*
-{template.get('to_name', '')}
-{template.get('to_street1', '')}
-{template.get('to_street2', '') + ', ' if template.get('to_street2') else ''}{template.get('to_city', '')}, {template.get('to_state', '')} {template.get('to_zip', '')}
-{('📞 ' + template.get('to_phone', '')) if template.get('to_phone') else ''}"""
-    
-    keyboard = [
-        [InlineKeyboardButton("📦 Использовать шаблон", callback_data=f'template_use_{template_id}')],
-        [InlineKeyboardButton("✏️ Переименовать", callback_data=f'template_rename_{template_id}')],
-        [InlineKeyboardButton("🗑️ Удалить", callback_data=f'template_delete_{template_id}')],
-        [InlineKeyboardButton("🔙 К списку шаблонов", callback_data='my_templates')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    
-    bot_msg = await safe_telegram_call(query.message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown'))
-    # Save last message context for button protection
-    context.user_data['last_bot_message_id'] = bot_msg.message_id
-    context.user_data['last_bot_message_text'] = message
-    # Don't return state - working outside ConversationHandler
+# MIGRATED: Use handlers.template_handlers.view_template
+# Keeping alias for backward compatibility
+view_template = handler_view_template
 
 async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Load template data into context and start order via ConversationHandler"""
