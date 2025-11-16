@@ -284,6 +284,7 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
             
             # Save top-up payment
             payment = Payment(
+                telegram_id=telegram_id,  # Add telegram_id here
                 order_id=f"topup_{user['id']}",
                 amount=topup_amount,
                 invoice_id=track_id,
@@ -292,7 +293,6 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
             )
             payment_dict = payment.model_dump()
             payment_dict['created_at'] = payment_dict['created_at'].isoformat()
-            payment_dict['telegram_id'] = telegram_id
             payment_dict['type'] = 'topup'
             await insert_payment(payment_dict)
             
