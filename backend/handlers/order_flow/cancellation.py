@@ -154,9 +154,26 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Special handling for SELECT_CARRIER (shipping rates screen)
     if last_state == 'SELECT_CARRIER':
         logger.info("🔄 Returning to shipping rates screen")
-        from handlers.order_flow.rates import display_shipping_rates
-        # Show rates again using cached data
-        return await display_shipping_rates(update, context)
+        from services.shipping_service import display_shipping_rates
+        from repositories import get_user_repo
+        from server import STATE_NAMES, SELECT_CARRIER
+        
+        # Check if we have cached rates
+        if 'rates' in context.user_data:
+            user_repo = get_user_repo()
+            return await display_shipping_rates(
+                update, 
+                context, 
+                context.user_data['rates'],
+                find_user_by_telegram_id_func=user_repo.find_by_telegram_id,
+                safe_telegram_call_func=safe_telegram_call,
+                STATE_NAMES=STATE_NAMES,
+                SELECT_CARRIER=SELECT_CARRIER
+            )
+        else:
+            # No cached rates, fetch new ones
+            from handlers.order_flow.rates import fetch_shipping_rates
+            return await fetch_shipping_rates(update, context)
     
     keyboard, message_text = OrderStepMessages.get_step_keyboard_and_message(last_state)
     
