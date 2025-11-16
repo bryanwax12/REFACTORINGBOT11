@@ -143,6 +143,38 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception as e:
             logger.warning(f"Could not update message: {e}")
         
+        # CREATE ORDER with status "pending" (NEW LOGIC)
+        from server import create_order_in_db, db
+        from repositories import get_user_repo
+        
+        # Get user
+        user_repo = get_user_repo()
+        user = await user_repo.find_by_telegram_id(query.from_user.id)
+        
+        if not user:
+            await safe_telegram_call(query.message.reply_text("❌ Ошибка: пользователь не найден"))
+            from server import SELECT_CARRIER
+            return SELECT_CARRIER
+        
+        # Get discount info
+        user_discount = context.user_data.get('user_discount', 0)
+        discount_amount = context.user_data.get('discount_amount', 0)
+        
+        # Create order with status "pending"
+        logger.info(f"📦 Creating pending order for user {query.from_user.id}")
+        order = await create_order_in_db(
+            user=user, 
+            data=context.user_data, 
+            selected_rate=selected_rate, 
+            amount=final_cost, 
+            user_discount=user_discount, 
+            discount_amount=discount_amount
+        )
+        
+        # Save order_id in context for later use
+        context.user_data['order_id'] = order['order_id']
+        logger.info(f"✅ Order created: {order['order_id']}, status=pending")
+        
         # Proceed to payment
         from handlers.order_flow.payment import show_payment_methods
         return await show_payment_methods(update, context)
