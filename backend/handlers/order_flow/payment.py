@@ -376,6 +376,11 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 context.user_data['order_completed'] = True
             
         elif query.data == 'pay_with_crypto':
+            # Import required functions
+            from server import create_order_in_db, Payment, session_manager
+            from services.api_services import create_oxapay_invoice
+            from utils.db_operations import insert_payment
+            
             # Create order
             order = await create_order_in_db(user, data, selected_rate, amount, user_discount, discount_amount)
             
