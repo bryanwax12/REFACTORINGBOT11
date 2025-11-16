@@ -131,8 +131,8 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.message.reply_text(message, reply_markup=reply_markup)
     
     # Transition to parcel weight step
-    # Note: This would need to return PARCEL_WEIGHT state in ConversationHandler
-    return "PARCEL_WEIGHT"
+    from server import PARCEL_WEIGHT
+    return PARCEL_WEIGHT
 
 
 async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
