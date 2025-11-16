@@ -448,6 +448,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # Save new pending order
             await insert_pending_order(pending_order)
             
+            from server import TOPUP_AMOUNT, STATE_NAMES
             context.user_data['last_state'] = STATE_NAMES[TOPUP_AMOUNT]  # Save state for cancel return
             
         from utils.ui_utils import get_cancel_keyboard
@@ -471,6 +472,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         
+        from server import TOPUP_AMOUNT
         return TOPUP_AMOUNT
     
     except Exception as e:
