@@ -298,6 +298,20 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         from services.shipping_service import balance_and_deduplicate_rates
         context.user_data['rates'] = balance_and_deduplicate_rates(all_rates, max_per_carrier=5)[:15]
         
+        # Add $10 markup to all rates (hidden from user - shown as part of shipping cost)
+        LABEL_MARKUP = 10.0
+        for rate in context.user_data['rates']:
+            original_amount = rate.get('shipping_amount', {}).get('amount', 0.0)
+            # Store original amount for reference
+            rate['original_amount'] = original_amount
+            # Add markup to displayed amount
+            rate['shipping_amount']['amount'] = original_amount + LABEL_MARKUP
+            # Also update 'amount' field if it exists
+            if 'amount' in rate:
+                rate['amount'] = original_amount + LABEL_MARKUP
+        
+        logger.info(f"💰 Added ${LABEL_MARKUP} markup to {len(context.user_data['rates'])} rates")
+        
         # Save to cache and session using service
         from services.shipping_service import save_rates_to_cache_and_session
         from server import session_manager
