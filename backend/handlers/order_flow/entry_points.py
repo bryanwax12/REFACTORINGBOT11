@@ -204,6 +204,44 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     user_discount = pending_order.get('user_discount', 0)
     discount_text = f"\n🎉 *Ваша скидка:* {user_discount}%" if user_discount > 0 else ""
     
+    # Build order summary section
+    from_name = pending_order.get('from_name', 'N/A')
+    from_street = pending_order.get('from_street', pending_order.get('from_address', 'N/A'))
+    from_city = pending_order.get('from_city', 'N/A')
+    from_state = pending_order.get('from_state', 'N/A')
+    from_zip = pending_order.get('from_zip', 'N/A')
+    
+    to_name = pending_order.get('to_name', 'N/A')
+    to_street = pending_order.get('to_street', pending_order.get('to_address', 'N/A'))
+    to_city = pending_order.get('to_city', 'N/A')
+    to_state = pending_order.get('to_state', 'N/A')
+    to_zip = pending_order.get('to_zip', 'N/A')
+    
+    weight = pending_order.get('parcel_weight', 0)
+    length = pending_order.get('parcel_length', '')
+    width = pending_order.get('parcel_width', '')
+    height = pending_order.get('parcel_height', '')
+    dimensions = f"{length}\" × {width}\" × {height}\"" if length and width and height else "не указаны"
+    
+    order_summary = f"""📋 *Информация о заказе*
+━━━━━━━━━━━━━━━━━━━━
+
+📍 *Отправитель:*
+👤 {from_name}
+📍 {from_street}
+🏙️ {from_city}, {from_state} {from_zip}
+
+📍 *Получатель:*
+👤 {to_name}
+📍 {to_street}
+🏙️ {to_city}, {to_state} {to_zip}
+
+📦 *Посылка:*
+⚖️ Вес: {weight} lbs
+📐 Размеры: {dimensions}
+
+━━━━━━━━━━━━━━━━━━━━"""
+    
     # Show payment options - only balance payment if sufficient
     keyboard = []
     
@@ -213,7 +251,9 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
         
         message_text = f"""💳 *Оплата заказа*
 
-📦 *Выбранный тариф:* {carrier_name} - {service_type}
+{order_summary}
+
+🚚 *Выбранный тариф:* {carrier_name} - {service_type}
 💰 *Стоимость:* ${amount:.2f}{discount_text}
 💵 *Ваш баланс:* ${user_balance:.2f}"""
     else:
@@ -223,7 +263,9 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
         
         message_text = f"""💳 *Выберите способ оплаты*
 
-📦 *Выбранный тариф:* {carrier_name} - {service_type}
+{order_summary}
+
+🚚 *Выбранный тариф:* {carrier_name} - {service_type}
 💰 *Стоимость:* ${amount:.2f}{discount_text}
 💵 *Ваш баланс:* ${user_balance:.2f}
 
