@@ -258,7 +258,6 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
 💵 *Ваш баланс:* ${user_balance:.2f}"""
     else:
         # Not enough balance
-        keyboard.append([InlineKeyboardButton("🪙 Оплатить криптовалютой", callback_data='pay_with_crypto')])
         keyboard.append([InlineKeyboardButton("💵 Пополнить баланс", callback_data='topup_for_order')])
         
         message_text = f"""💳 *Оплата заказа*
@@ -269,7 +268,7 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
 💰 *Стоимость:* ${amount:.2f}{discount_text}
 💵 *Ваш баланс:* ${user_balance:.2f}
 
-⚠️ Недостаточно средств на балансе"""
+⚠️ Недостаточно средств на балансе. Пополните баланс для оплаты заказа."""
     
     keyboard.append([InlineKeyboardButton("🔙 Назад к тарифам", callback_data='back_to_rates')])
     keyboard.append([InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')])
