@@ -148,11 +148,19 @@ async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Import required functions
     from server import db, safe_telegram_call
     from utils.db_operations import find_template_by_id
+    import logging
+    logger = logging.getLogger(__name__)
     
     query = update.callback_query
     await safe_telegram_call(query.answer())
     
     template_id = query.data.replace('template_delete_', '')
+    
+    # Remove buttons from template view message
+    try:
+        await safe_telegram_call(query.message.edit_reply_markup(reply_markup=None))
+    except Exception as e:
+        logger.debug(f"Could not remove template buttons: {e}")
     
     from utils.ui_utils import TemplateMessages, get_template_delete_confirmation_keyboard
     
