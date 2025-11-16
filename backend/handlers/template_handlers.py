@@ -55,12 +55,15 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['last_bot_message_text'] = message
 
 
-async def view_template(update: Update, context: ContextTypes.DEFAULT_TYPE, db, find_template_by_id, safe_telegram_call):
+async def view_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     View template details
     
     Shows full address information and action buttons
     """
+    # Import required functions
+    from server import db, find_template_by_id, safe_telegram_call
+    
     query = update.callback_query
     await safe_telegram_call(query.answer())
     
