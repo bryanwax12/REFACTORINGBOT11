@@ -961,8 +961,10 @@ ShipStation не смог проверить один или оба адреса
         logger = logging.getLogger(__name__)
         
         # Popular services by carrier
+        # Note: Stamps.com is USPS reseller, so we treat it as USPS
         POPULAR_SERVICES = {
             'USPS': ['priority mail', 'media mail', 'first class', 'ground advantage', 'express'],
+            'Stamps.com': ['priority mail', 'media mail', 'first class', 'ground advantage', 'express'],  # USPS via Stamps.com
             'FedEx': ['ground', 'home delivery', '2day', 'express saver', '2 day'],
             'UPS': ['ground', '3 day select', '2nd day air', 'next day air', 'second day']
         }
