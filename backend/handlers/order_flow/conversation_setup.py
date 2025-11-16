@@ -98,12 +98,16 @@ def setup_order_conversation_handler():
         handle_proceed_to_payment
     )
     
+    # Import use_template handler
+    from handlers.template_handlers import use_template
+    
     # Build the conversation handler
     order_conv_handler = ConversationHandler(
         entry_points=[
             CallbackQueryHandler(new_order_start, pattern='^new_order$'),
             CallbackQueryHandler(start_order_with_template, pattern='^start_order_with_template$'),
-            CallbackQueryHandler(return_to_payment_after_topup, pattern='^return_to_payment$')
+            CallbackQueryHandler(return_to_payment_after_topup, pattern='^return_to_payment$'),
+            CallbackQueryHandler(use_template, pattern='^template_use_')  # Add template as entry point
         ],
         states={
             FROM_NAME: [
