@@ -39,12 +39,15 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
         status = body.get('status')  # Waiting, Confirming, Paying, Paid, Expired, etc.
         paid_amount = body.get('paidAmount') or body.get('paid_amount') or body.get('amount', 0)  # Actual paid amount
         
-        # Convert track_id to int if it's a string number
-        if track_id and isinstance(track_id, str) and track_id.isdigit():
-            track_id = int(track_id)
+        # Keep track_id as string to match database (invoice_id stored as string)
+        if track_id:
+            track_id = str(track_id)
+        
+        print(f"🔍 Looking for payment with invoice_id: {track_id} (type: {type(track_id)})")
         
         if status == 'Paid':
             payment = await db.payments.find_one({"invoice_id": track_id}, {"_id": 0})
+            print(f"💾 Payment found: {payment is not None}")
             if payment:
                 # Update payment status
                 await db.payments.update_one(
