@@ -247,7 +247,8 @@ __all__ = [
     'handle_order_summary',
     'handle_proceed_to_payment',
     'handle_topup_for_order',
-    'handle_back_to_rates'
+    'handle_back_to_rates',
+    'process_payment'
 ]
 async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
