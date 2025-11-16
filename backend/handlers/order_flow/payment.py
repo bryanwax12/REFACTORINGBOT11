@@ -401,6 +401,13 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     await safe_telegram_call(query.message.reply_text(f"❌ Ошибка обработки платежа: {error}"))
                     return ConversationHandler.END
                 
+                # Update order status to "paid" (NEW LOGIC)
+                await db.orders.update_one(
+                    {"order_id": order_id},
+                    {"$set": {"payment_status": "paid"}}
+                )
+                logger.info(f"✅ Order {order_id} status updated to 'paid'")
+                
                 # Get new balance after payment
                 from repositories import get_user_repo
                 user_repo = get_user_repo()
