@@ -59,13 +59,14 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if 'rates_cache_key' in context.user_data:
             del context.user_data['rates_cache_key']
         
-        # Remove old message with buttons
+        # Delete old message with rates and buttons
         try:
-            await safe_telegram_call(query.message.edit_reply_markup(reply_markup=None))
+            await safe_telegram_call(query.message.delete())
+            logger.info("🗑️ Deleted old rates message")
         except Exception as e:
-            logger.warning(f"Could not remove old buttons: {e}")
+            logger.warning(f"Could not delete old message: {e}")
         
-        # Just answer without message
+        # Answer the callback query
         await query.answer()
         
         return await fetch_shipping_rates(update, context)
