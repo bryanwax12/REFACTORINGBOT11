@@ -704,8 +704,8 @@ async def send_label_to_user(
     try:
         # Create file-like object
         pdf_file = io.BytesIO(pdf_bytes)
-        # Include tracking number in filename for easy identification
-        pdf_file.name = f"label_tracking_{tracking_number}.pdf"
+        # Use only tracking number as filename
+        pdf_file.name = f"{tracking_number}.pdf"
         
         # Caption message
         caption = f"""✅ Shipping Label
