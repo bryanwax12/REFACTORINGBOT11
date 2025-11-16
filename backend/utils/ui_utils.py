@@ -922,6 +922,16 @@ ShipStation не смог проверить один или оба адреса
         # Count unique carriers
         unique_carriers = len(set(r['carrier'] for r in filtered_rates))
         
+        # Helper function for Russian pluralization
+        def pluralize_days(n):
+            """Return correct Russian form for 'day(s)'"""
+            if n % 10 == 1 and n % 100 != 11:
+                return f"{n} день"
+            elif n % 10 in [2, 3, 4] and n % 100 not in [12, 13, 14]:
+                return f"{n} дня"
+            else:
+                return f"{n} дней"
+        
         # Build message
         message = f"📦 Найдено {len(filtered_rates)} тарифов от {unique_carriers} курьеров:\n\n"
         
@@ -932,7 +942,7 @@ ShipStation не смог проверить один или оба адреса
             
             carrier_rates = rates_by_carrier[carrier]
             for idx, rate in carrier_rates:
-                days_text = f" ({rate['days']} дней)" if rate['days'] else ""
+                days_text = f" ({pluralize_days(rate['days'])})" if rate['days'] else ""
                 
                 # Calculate estimated delivery date
                 if rate['days']:
