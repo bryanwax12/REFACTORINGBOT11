@@ -248,7 +248,8 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
     context.user_data.pop('renaming_template_id', None)
     
     # Return END to exit conversation
-    return "END"
+    from telegram.ext import ConversationHandler
+    return ConversationHandler.END
 
 
 # Helper function to save new template after successful order
