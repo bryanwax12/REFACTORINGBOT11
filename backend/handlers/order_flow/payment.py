@@ -310,7 +310,8 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
             from utils.ui_utils import PaymentFlowUI
             
             # Get payment service
-            payment_service = ServiceFactory().get_payment_service()
+            service_factory = ServiceFactory(db)
+            payment_service = service_factory.get_payment_service()
             
             if user.get('balance', 0) < amount:
                 await safe_telegram_call(query.message.reply_text(PaymentFlowUI.insufficient_balance_error()))
