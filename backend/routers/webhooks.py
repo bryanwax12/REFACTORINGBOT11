@@ -13,8 +13,8 @@ router = APIRouter(tags=["webhooks"])
 @router.post("/oxapay/webhook")
 async def oxapay_webhook(request: Request):
     """Handle Oxapay payment webhooks"""
+    from handlers.webhook_handlers import handle_oxapay_webhook
     from server import (
-        handle_oxapay_webhook,
         db,
         bot_instance,
         safe_telegram_call,
