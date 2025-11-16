@@ -896,12 +896,15 @@ ShipStation не смог проверить один или оба адреса
         # Sort by carrier first, then by price within each carrier
         def sort_key(rate):
             carrier = rate.get('carrier_friendly_name', rate.get('carrier', ''))
-            # Determine carrier priority
+            # Determine carrier priority (Stamps.com = USPS)
             carrier_priority = 999
-            for known_carrier, priority in CARRIER_ORDER.items():
-                if known_carrier.lower() in carrier.lower():
-                    carrier_priority = priority
-                    break
+            if 'stamps' in carrier.lower():
+                carrier_priority = CARRIER_ORDER.get('USPS', 1)
+            else:
+                for known_carrier, priority in CARRIER_ORDER.items():
+                    if known_carrier.lower() in carrier.lower():
+                        carrier_priority = priority
+                        break
             # Get price
             price = rate.get('shipping_amount', {}).get('amount', rate.get('amount', 999999.0))
             return (carrier_priority, price)
@@ -1024,12 +1027,15 @@ ShipStation не смог проверить один или оба адреса
         # Sort by carrier first, then by price within each carrier
         def sort_key(rate):
             carrier = rate.get('carrier_friendly_name', rate.get('carrier', ''))
-            # Determine carrier priority
+            # Determine carrier priority (Stamps.com = USPS)
             carrier_priority = 999
-            for known_carrier, priority in CARRIER_ORDER.items():
-                if known_carrier.lower() in carrier.lower():
-                    carrier_priority = priority
-                    break
+            if 'stamps' in carrier.lower():
+                carrier_priority = CARRIER_ORDER.get('USPS', 1)
+            else:
+                for known_carrier, priority in CARRIER_ORDER.items():
+                    if known_carrier.lower() in carrier.lower():
+                        carrier_priority = priority
+                        break
             # Get price
             price = rate.get('shipping_amount', {}).get('amount', rate.get('amount', 999999.0))
             return (carrier_priority, price)
