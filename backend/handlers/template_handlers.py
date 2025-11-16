@@ -199,11 +199,19 @@ async def rename_template_start(update: Update, context: ContextTypes.DEFAULT_TY
     """
     # Import required functions
     from server import safe_telegram_call
+    import logging
+    logger = logging.getLogger(__name__)
     
     query = update.callback_query
     await safe_telegram_call(query.answer())
     
     template_id = query.data.replace('template_rename_', '')
+    
+    # Remove buttons from template view message
+    try:
+        await safe_telegram_call(query.message.edit_reply_markup(reply_markup=None))
+    except Exception as e:
+        logger.debug(f"Could not remove template buttons: {e}")
     
     from utils.ui_utils import TemplateMessages, get_template_rename_keyboard
     
