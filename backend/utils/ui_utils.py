@@ -1048,11 +1048,15 @@ ShipStation не смог проверить один или оба адреса
             amount = rate.get('shipping_amount', {}).get('amount', rate.get('amount', 0.0))
             
             # Clean carrier name: extract main carrier (USPS, UPS, FedEx)
+            # Note: Stamps.com is USPS reseller, treat as USPS
             carrier = carrier_full
-            for known_carrier in ['USPS', 'UPS', 'FedEx']:
-                if known_carrier.lower() in carrier_full.lower():
-                    carrier = known_carrier
-                    break
+            if 'stamps' in carrier_full.lower():
+                carrier = 'USPS'
+            else:
+                for known_carrier in ['USPS', 'UPS', 'FedEx']:
+                    if known_carrier.lower() in carrier_full.lower():
+                        carrier = known_carrier
+                        break
             
             # Remove carrier name from service if it's duplicated
             service_clean = service
