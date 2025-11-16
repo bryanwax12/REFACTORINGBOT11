@@ -785,7 +785,7 @@ def get_payment_keyboard(balance: float, amount: float) -> InlineKeyboardMarkup:
         # Insufficient funds - show top-up button
         keyboard.append([InlineKeyboardButton(
             "💵 Пополнить баланс",
-            callback_data='top_up_balance'
+            callback_data='topup_for_order'
         )])
     
     keyboard.append([
