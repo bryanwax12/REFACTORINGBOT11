@@ -283,17 +283,19 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
             pay_link = invoice_result['payLink']
             
             # Save top-up payment
+            from datetime import datetime, timezone
             payment = Payment(
-                telegram_id=telegram_id,  # Add telegram_id here
+                telegram_id=telegram_id,
                 order_id=f"topup_{user['id']}",
                 amount=topup_amount,
                 invoice_id=track_id,
-                pay_url=pay_link,
-                status="pending"
+                status="pending",
+                created_at=datetime.now(timezone.utc).isoformat(),
+                type="topup"
             )
             payment_dict = payment.model_dump()
-            payment_dict['created_at'] = payment_dict['created_at'].isoformat()
-            payment_dict['type'] = 'topup'
+            # Remove pay_url as it's not in Payment model
+            payment_dict['pay_url'] = pay_link
             await insert_payment(payment_dict)
             
             keyboard = [[InlineKeyboardButton("💳 Оплатить", url=pay_link)]]
