@@ -2,6 +2,7 @@
 Order Flow: Payment Handlers
 Handles payment method selection and processing
 """
+import asyncio
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes, ConversationHandler
@@ -10,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 from utils.handler_decorators import with_user_session, safe_handler
 from handlers.common_handlers import check_stale_interaction
-from server import safe_telegram_call
+from server import safe_telegram_call, mark_message_as_selected
 
 
 @safe_handler(fallback_state=ConversationHandler.END)
