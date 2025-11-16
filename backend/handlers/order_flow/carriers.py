@@ -117,18 +117,15 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['selected_carrier'] = selected_rate.get('carrier_friendly_name', 'Unknown')
         context.user_data['selected_service'] = selected_rate.get('service_type', 'Standard')
         
-        # Get base shipping cost from API
-        base_cost = selected_rate.get('shipping_amount', {}).get('amount', 0.0)
+        # Get shipping cost (already includes $10 markup from rates.py)
+        final_cost = selected_rate.get('shipping_amount', {}).get('amount', 0.0)
+        original_cost = selected_rate.get('original_amount', final_cost)  # Get original if stored
         
-        # Add $10 markup (hidden from user)
-        LABEL_MARKUP = 10.0
-        final_cost = base_cost + LABEL_MARKUP
-        
-        context.user_data['shipping_cost'] = base_cost  # Original cost
-        context.user_data['final_amount'] = final_cost  # Cost with markup for billing
+        context.user_data['shipping_cost'] = original_cost  # Original cost without markup
+        context.user_data['final_amount'] = final_cost  # Cost with markup (what user pays)
         
         logger.info(f"✅ Selected: {context.user_data['selected_carrier']} - {context.user_data['selected_service']}")
-        logger.info(f"💰 Cost: Base=${base_cost:.2f}, Markup=${LABEL_MARKUP:.2f}, Final=${final_cost:.2f}")
+        logger.info(f"💰 Cost: Original=${original_cost:.2f}, Final=${final_cost:.2f} (includes $10 markup)")
         
         # Remove old message with buttons
         try:
