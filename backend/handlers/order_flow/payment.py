@@ -349,6 +349,11 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     await safe_telegram_call(query.message.reply_text(f"❌ Ошибка обработки платежа: {error}"))
                     return ConversationHandler.END
                 
+                # Get new balance after payment
+                from repositories import get_user_repo
+                user_repo = get_user_repo()
+                new_balance = await user_repo.get_balance(telegram_id)
+                
                 from utils.ui_utils import PaymentFlowUI
                 keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
