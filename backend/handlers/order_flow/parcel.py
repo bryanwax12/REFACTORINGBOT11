@@ -100,9 +100,16 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
     await session_service.update_session_step(user_id, step="PARCEL_WIDTH")
     
     asyncio.create_task(mark_message_as_selected(update, context))
-    from utils.ui_utils import get_standard_size_and_cancel_keyboard, OrderStepMessages, CallbackData
+    from utils.ui_utils import get_standard_size_and_cancel_keyboard, get_cancel_keyboard, OrderStepMessages, CallbackData
     
-    reply_markup = get_standard_size_and_cancel_keyboard(CallbackData.SKIP_PARCEL_WIDTH_HEIGHT)
+    # Check weight to decide if we show "Use standard sizes" button
+    weight = context.user_data.get('parcel_weight', 0)
+    if weight > 10:
+        reply_markup = get_cancel_keyboard()
+        logger.info(f"⚠️ Weight {weight} lbs > 10, hiding standard size button")
+    else:
+        reply_markup = get_standard_size_and_cancel_keyboard(CallbackData.SKIP_PARCEL_WIDTH_HEIGHT)
+    
     message_text = OrderStepMessages.PARCEL_WIDTH
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
