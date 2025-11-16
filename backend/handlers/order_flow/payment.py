@@ -317,23 +317,16 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await safe_telegram_call(query.message.reply_text(PaymentFlowUI.insufficient_balance_error()))
                 return ConversationHandler.END
             
-            # Check if order already exists (to prevent duplicates on retry)
-            from repositories import get_order_repo
-            order_repo = get_order_repo()
-            
-            # Generate order_id (same as in create_order_in_db)
-            from datetime import datetime, timezone
-            timestamp = datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')
-            import uuid
-            unique_part = str(uuid.uuid4())[:8]
-            order_id = f"ORD-{timestamp}-{unique_part}"
-            
-            # Try to find existing order first
-            existing_order = await order_repo.find_by_order_id(order_id)
+            # Check if there's already a pending order for this user with same amount to prevent duplicates
+            existing_order = await db.orders.find_one({
+                "telegram_id": telegram_id,
+                "amount": amount,
+                "status": "pending"
+            }, {"_id": 0})
             
             if existing_order:
                 # Order already exists, use it
-                print(f"⚠️ Order {order_id} already exists, using existing order")
+                print(f"⚠️ Found existing pending order {existing_order['order_id'][:16]}... for user {telegram_id}, reusing")
                 order = existing_order
             else:
                 # Create new order
