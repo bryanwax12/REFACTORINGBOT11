@@ -319,10 +319,12 @@ try:
     from routers.users import router as users_router
     from routers.webhooks import router as webhooks_router
     from routers.legacy_api import router as legacy_api_router
+    from routers.admin import admin_router_v2  # New modular admin router with balance endpoints
     
     # Register routers with app (routers already have /api prefix)
     app.include_router(legacy_api_router)  # Legacy endpoints for frontend compatibility
     app.include_router(admin_router)
+    app.include_router(admin_router_v2)  # New admin router with balance management
     app.include_router(admin_labels_router)
     app.include_router(api_config_router)
     app.include_router(bot_router)
