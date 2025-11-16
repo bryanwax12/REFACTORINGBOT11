@@ -69,8 +69,8 @@ class PaymentService:
         # Списать с баланса
         success = await self.user_repo.update_balance(
             telegram_id,
-            -amount,
-            f"Payment for order {order_id}"
+            amount,
+            operation="subtract"
         )
         
         if not success:
