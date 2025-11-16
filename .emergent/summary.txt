@@ -1,264 +1,67 @@
 <analysis>**original_problem_statement:**
-Изначально задача состояла в рефакторинге и аудите Telegram-бота. После архитектурного рефакторинга возникли множественные ошибки в основном флоу, которые агент последовательно исправлял. Текущие задачи — восстановить полную функциональность флоу создания заказа, включая получение тарифов, работу всех кнопок и корректное отображение информации.
+Изначально задача состояла в рефакторинге и аудите Telegram-бота. После архитектурного рефакторинга возникли множественные ошибки в основном флоу, которые агент последовательно исправлял. В ходе текущей сессии агент устранял проблемы с обновлением тарифов, отображением тарифов USPS, восстанавливал недостающие экраны (подтверждение заказа), исправлял форматирование UI, а также отлаживал сложный процесс пополнения баланса через Oxapay, включая обработку вебхуков.
 
 PRODUCT REQUIREMENTS:
 1.  **Стабильность и производительность**: Приложение должно быть полностью асинхронным и отказоустойчивым.
 2.  **Безопасность**: Все административные и чувствительные к данным эндпоинты должны быть защищены.
 3.  **Качество кода**: Код должен быть модульным, структурированным, с минимальным дублированием.
 4.  **Конфигурируемость**: Система должна легко настраиваться через  файл.
-5.  **Функциональность**: Основной флоу Telegram-бота по созданию заказа должен работать без ошибок, включая все кнопки (Использовать стандартные размеры, Отменить заказ, Вернуться к заказу, Обновить тарифы). Тарифы должны фильтроваться, сортироваться и отображаться корректно. Должна быть добавлена скрытая наценка в 0.
+5.  **Функциональность**: Основной флоу Telegram-бота по созданию заказа, включая выбор тарифа и оплату, должен работать без ошибок. Это включает все кнопки (Использовать стандартные размеры, Отменить заказ, Вернуться к заказу, Обновить тарифы, Пополнить баланс, Оплатить заказ). Флоу пополнения баланса через Oxapay должен корректно обновлять баланс пользователя и предоставлять возможность завершить оплату заказа. Админ-панель должна быть полностью функциональна.
 
 **User's preferred language**: Русский
 
 **what currently exists?**
-Бот успешно проходит флоу создания заказа до шага отображения тарифов. Реализована логика получения тарифов из ShipStation API в тестовом режиме (Sandbox). Добавлена фильтрация для отображения только популярных тарифов от USPS, FedEx и UPS, а также их сортировка (сначала по перевозчику, затем по цене). Внедрена скрытая наценка в 0 на каждый лейбл. Кнопки выбора тарифа, отмены и обновления были частично реализованы, но содержат ошибки. Были исправлены многочисленные критические проблемы, связанные с кешированием модулей Python, конфликтами polling-сессий Telegram, порядком загрузки переменных окружения и несоответствием ключей данных.
+Большинство функций Telegram-бота восстановлено и работает. Флоу создания заказа (ввод адресов, веса, размеров), получения и отображения тарифов (включая USPS через псевдоним Stamps.com), а также сортировка и скрытая наценка в 0 функционируют корректно. Были исправлены многочисленные ошибки, связанные с форматированием, логикой кнопок и обработкой состояний.
+Процесс пополнения баланса через Oxapay был почти полностью отлажен: создание инвойса работает, вебхук-эндпоинт () доступен и корректно обрабатывает входящие запросы от Oxapay, обновляя статус платежа в БД и баланс пользователя.
+Был исправлен роутинг в админ-панели, но пользователь не подтвердил исправление.
 
 **Last working item**:
-    - Last item agent was working: Агент пытался исправить три проблемы, о которых сообщил пользователь: 1) Кнопка Обновить тарифы не делает новый запрос к API, а использует кешированные данные. 2) При обновлении тарифов не появляется сообщение о поиске, как при первом запросе. 3) В списке тарифов не отображаются сервисы USPS.
+    - Last item agent was working: Агент отлаживал проблему, из-за которой кнопка Оплатить заказ не появляется в сообщении об успешном пополнении баланса, когда у пользователя был активный заказ. Агент выяснил, что  не создается в базе данных, и обнаружил несоответствие в  для кнопки пополнения баланса.
     - Status: IN PROGRESS
     - Agent Testing Done: N
-    - Which testing method agent to use? backend testing agent (manual bot testing).
+    - Which testing method agent to use? manual testing by bot (необходимо пройти флоу заказа до момента пополнения баланса и проверить логику).
     - User Testing Done: N
 
 **All Pending/In progress Issue list**:
-  - Issue 1: (P0) Кнопка 🔄 Обновить тарифы не работает корректно.
-  - Issue 2: (P1) Тарифы USPS не отображаются в списке.
-  - Issue 3: (P2) Кнопки ↩️ Вернуться к заказу и ✅ Да, отменить не были полностью протестированы после рефакторинга.
+  - Issue 1: (P0) Кнопка Оплатить заказ не появляется после пополнения баланса для завершения заказа.
+  - Issue 2: (P1) Кнопки в админ-панели (, , , ) не работали.
+  - Issue 3: (P2) Тестовый бот не отображается в списке ботов в админ-панели.
   
   Issues Detail:
   - Issue 1: 
-     - Attempted fixes: Агент добавил очистку  и  и удаление старого сообщения с кнопками. Однако пользователь сообщил, что это не решило проблему, и предположил, что дело в .
+     - Attempted fixes: Агент добавил логирование и выяснил, что документ  не создается. Последняя гипотеза заключается в том, что кнопка пополнения отправляет , в то время как обработчик, создающий  в файле , ожидает .
      - Next debug checklist: 
-        1. Открыть файл .
-        2. В обработчике , в блоке , найти и очистить кеш из , используя ключ, сохраненный в .
-        3. После очистки кеша вызвать функцию . Это должно принудительно сделать новый API-запрос и показать сообщение о поиске.
-        4. Убедиться, что старое сообщение с кнопками удаляется с помощью .
-     - Why fix this issue and what will be achieved with the fix? Пользователь не может получить актуальные тарифы, что делает функцию обновления бесполезной.
+        1. Открыть .
+        2. В функции, обрабатывающей пополнение баланса во время заказа (вероятно,  или связанная с ней), найти условие .
+        3. Заменить  на , чтобы оно соответствовало  кнопки.
+        4. Перезапустить бэкенд.
+        5. Попросить пользователя полностью протестировать флоу: создать заказ, дойти до экрана оплаты, нажать Пополнить баланс, оплатить через Oxapay и убедиться, что в сообщении об успехе появилась кнопка Оплатить заказ.
+     - Why fix this issue and what will be achieved with the fix? Это критически важный баг, который ломает основной сценарий использования. Пользователь не может завершить заказ после пополнения баланса и вынужден начинать все сначала.
      - Status:  IN PROGRESS
      - Is recurring issue? Y
      - Should Test frontend/backend/both after fix? backend
-     - Blocked on other issue: Нет
+     - Blocked on other issue: Нет.
   - Issue 2: 
-     - Attempted fixes: Агент добавил детальное логирование в функцию  в файле  для отслеживания, какие тарифы проходят фильтрацию.
+     - Attempted fixes:  определил, что роутер  не был зарегистрирован в . Агент добавил необходимый .
      - Next debug checklist: 
-        1. Попросить пользователя запустить флоу получения тарифов.
-        2. Сразу после этого проверить лог бэкенда (🔑 ShipStation API Key loading: PROD=SET, TEST=SET, DEFAULT=SET, FINAL=SET (len=43)
-🔵 PREVIEW DATABASE: telegram_shipping_bot
-📦 Repository Manager initialized successfully
-🔵 BOT CONFIGURATION:
-   Environment: TEST
-   Mode: 🔄 POLLING
-   Active Bot: @whitelabel_shipping_bot_test_bot
-✅ Bot instance created: @whitelabel_shipping_bot_test_bot
-🔑 ShipStation API Key loading: PROD=SET, TEST=SET, DEFAULT=SET, FINAL=SET (len=43)
-🔵 PREVIEW DATABASE: telegram_shipping_bot
-📦 Repository Manager initialized successfully
-🔵 BOT CONFIGURATION:
-   Environment: TEST
-   Mode: 🔄 POLLING
-   Active Bot: @whitelabel_shipping_bot_test_bot
-✅ Bot instance created: @whitelabel_shipping_bot_test_bot
-🔑 ShipStation API Key loading: PROD=SET, TEST=SET, DEFAULT=SET, FINAL=SET (len=43)
-🔵 PREVIEW DATABASE: telegram_shipping_bot
-📦 Repository Manager initialized successfully
-🔵 BOT CONFIGURATION:
-   Environment: TEST
-   Mode: 🔄 POLLING
-   Active Bot: @whitelabel_shipping_bot_test_bot
-✅ Bot instance created: @whitelabel_shipping_bot_test_bot
-🔑 ShipStation API Key loading: PROD=SET, TEST=SET, DEFAULT=SET, FINAL=SET (len=43)
-🔵 PREVIEW DATABASE: telegram_shipping_bot
-📦 Repository Manager initialized successfully
-🔵 BOT CONFIGURATION:
-   Environment: TEST
-   Mode: 🔄 POLLING
-   Active Bot: @whitelabel_shipping_bot_test_bot
-✅ Bot instance created: @whitelabel_shipping_bot_test_bot
-🔑 ShipStation API Key loading: PROD=SET, TEST=SET, DEFAULT=SET, FINAL=SET (len=48)
-🔵 PREVIEW DATABASE: telegram_shipping_bot
-📦 Repository Manager initialized successfully
-🔵 BOT CONFIGURATION:
-   Environment: TEST
-   Mode: 🔄 POLLING
-   Active Bot: @whitelabel_shipping_bot_test_bot
-✅ Bot instance created: @whitelabel_shipping_bot_test_bot
-🔑 ShipStation API Key loading: PROD=SET, TEST=SET, DEFAULT=SET, FINAL=SET (len=48)
-🔵 PREVIEW DATABASE: telegram_shipping_bot
-📦 Repository Manager initialized successfully
-🔵 BOT CONFIGURATION:
-   Environment: TEST
-   Mode: 🔄 POLLING
-   Active Bot: @whitelabel_shipping_bot_test_bot
-✅ Bot instance created: @whitelabel_shipping_bot_test_bot
-🔑 ShipStation API Key loading: PROD=SET, TEST=SET, DEFAULT=SET, FINAL=SET (len=48)
-🔵 PREVIEW DATABASE: telegram_shipping_bot
-📦 Repository Manager initialized successfully
-🔵 BOT CONFIGURATION:
-   Environment: TEST
-   Mode: 🔄 POLLING
-   Active Bot: @whitelabel_shipping_bot_test_bot
-✅ Bot instance created: @whitelabel_shipping_bot_test_bot
-🔑 ShipStation API Key loading: PROD=SET, TEST=SET, DEFAULT=SET, FINAL=SET (len=48)
-🔵 PREVIEW DATABASE: telegram_shipping_bot
-📦 Repository Manager initialized successfully
-🔵 BOT CONFIGURATION:
-   Environment: TEST
-   Mode: 🔄 POLLING
-   Active Bot: @whitelabel_shipping_bot_test_bot
-✅ Bot instance created: @whitelabel_shipping_bot_test_bot
-🔑 ShipStation API Key loading: PROD=SET, TEST=SET, DEFAULT=SET, FINAL=SET (len=48)
-🔵 PREVIEW DATABASE: telegram_shipping_bot
-📦 Repository Manager initialized successfully
-🔵 BOT CONFIGURATION:
-   Environment: TEST
-   Mode: 🔄 POLLING
-   Active Bot: @whitelabel_shipping_bot_test_bot
-✅ Bot instance created: @whitelabel_shipping_bot_test_bot
-🔑 ShipStation API Key loading: PROD=SET, TEST=SET, DEFAULT=SET, FINAL=SET (len=48)
-🔵 PREVIEW DATABASE: telegram_shipping_bot
-📦 Repository Manager initialized successfully
-🔵 BOT CONFIGURATION:
-   Environment: TEST
-   Mode: 🔄 POLLING
-   Active Bot: @whitelabel_shipping_bot_test_bot
-✅ Bot instance created: @whitelabel_shipping_bot_test_bot
-🔑 ShipStation API Key loading: PROD=SET, TEST=SET, DEFAULT=SET, FINAL=SET (len=48)
-🔵 PREVIEW DATABASE: telegram_shipping_bot
-📦 Repository Manager initialized successfully
-🔵 BOT CONFIGURATION:
-   Environment: TEST
-   Mode: 🔄 POLLING
-   Active Bot: @whitelabel_shipping_bot_test_bot
-✅ Bot instance created: @whitelabel_shipping_bot_test_bot
-🔑 ShipStation API Key loading: PROD=SET, TEST=SET, DEFAULT=SET, FINAL=SET (len=48)
-🔵 PREVIEW DATABASE: telegram_shipping_bot
-📦 Repository Manager initialized successfully
-🔵 BOT CONFIGURATION:
-   Environment: TEST
-   Mode: 🔄 POLLING
-   Active Bot: @whitelabel_shipping_bot_test_bot
-✅ Bot instance created: @whitelabel_shipping_bot_test_bot
-🔑 ShipStation API Key loading: PROD=SET, TEST=SET, DEFAULT=SET, FINAL=SET (len=48)
-🔵 PREVIEW DATABASE: telegram_shipping_bot
-📦 Repository Manager initialized successfully
-🔵 BOT CONFIGURATION:
-   Environment: TEST
-   Mode: 🔄 POLLING
-   Active Bot: @whitelabel_shipping_bot_test_bot
-✅ Bot instance created: @whitelabel_shipping_bot_test_bot
-🔑 ShipStation API Key loading: PROD=SET, TEST=SET, DEFAULT=SET, FINAL=SET (len=48)
-🔵 PREVIEW DATABASE: telegram_shipping_bot
-📦 Repository Manager initialized successfully
-🔵 BOT CONFIGURATION:
-   Environment: TEST
-   Mode: 🔄 POLLING
-   Active Bot: @whitelabel_shipping_bot_test_bot
-✅ Bot instance created: @whitelabel_shipping_bot_test_bot
-🔑 ShipStation API Key loading: PROD=SET, TEST=SET, DEFAULT=SET, FINAL=SET (len=48)
-🔵 PREVIEW DATABASE: telegram_shipping_bot
-📦 Repository Manager initialized successfully
-🔵 BOT CONFIGURATION:
-   Environment: TEST
-   Mode: 🔄 POLLING
-   Active Bot: @whitelabel_shipping_bot_test_bot
-✅ Bot instance created: @whitelabel_shipping_bot_test_bot
-🔑 ShipStation API Key loading: PROD=SET, TEST=SET, DEFAULT=SET, FINAL=SET (len=48)
-🔵 PREVIEW DATABASE: telegram_shipping_bot
-📦 Repository Manager initialized successfully
-🔵 BOT CONFIGURATION:
-   Environment: TEST
-   Mode: 🔄 POLLING
-   Active Bot: @whitelabel_shipping_bot_test_bot
-✅ Bot instance created: @whitelabel_shipping_bot_test_bot
-🔑 ShipStation API Key loading: PROD=SET, TEST=SET, DEFAULT=SET, FINAL=SET (len=48)
-🔵 PREVIEW DATABASE: telegram_shipping_bot
-📦 Repository Manager initialized successfully
-🔵 BOT CONFIGURATION:
-   Environment: TEST
-   Mode: 🔄 POLLING
-   Active Bot: @whitelabel_shipping_bot_test_bot
-✅ Bot instance created: @whitelabel_shipping_bot_test_bot
-🔑 ShipStation API Key loading: PROD=SET, TEST=SET, DEFAULT=SET, FINAL=SET (len=48)
-🔵 PREVIEW DATABASE: telegram_shipping_bot
-📦 Repository Manager initialized successfully
-🔵 BOT CONFIGURATION:
-   Environment: TEST
-   Mode: 🔄 POLLING
-   Active Bot: @whitelabel_shipping_bot_test_bot
-✅ Bot instance created: @whitelabel_shipping_bot_test_bot
-🔑 ShipStation API Key loading: PROD=SET, TEST=SET, DEFAULT=SET, FINAL=SET (len=48)
-🔵 PREVIEW DATABASE: telegram_shipping_bot
-📦 Repository Manager initialized successfully
-🔵 BOT CONFIGURATION:
-   Environment: TEST
-   Mode: 🔄 POLLING
-   Active Bot: @whitelabel_shipping_bot_test_bot
-✅ Bot instance created: @whitelabel_shipping_bot_test_bot
-🔑 ShipStation API Key loading: PROD=SET, TEST=SET, DEFAULT=SET, FINAL=SET (len=48)
-🔵 PREVIEW DATABASE: telegram_shipping_bot
-📦 Repository Manager initialized successfully
-🔵 BOT CONFIGURATION:
-   Environment: TEST
-   Mode: 🔄 POLLING
-   Active Bot: @whitelabel_shipping_bot_test_bot
-✅ Bot instance created: @whitelabel_shipping_bot_test_bot
-🔑 ShipStation API Key loading: PROD=SET, TEST=SET, DEFAULT=SET, FINAL=SET (len=48)
-🔵 PREVIEW DATABASE: telegram_shipping_bot
-📦 Repository Manager initialized successfully
-🔵 BOT CONFIGURATION:
-   Environment: TEST
-   Mode: 🔄 POLLING
-   Active Bot: @whitelabel_shipping_bot_test_bot
-✅ Bot instance created: @whitelabel_shipping_bot_test_bot
-🔑 ShipStation API Key loading: PROD=SET, TEST=SET, DEFAULT=SET, FINAL=SET (len=48)
-🔵 PREVIEW DATABASE: telegram_shipping_bot
-📦 Repository Manager initialized successfully
-🔵 BOT CONFIGURATION:
-   Environment: TEST
-   Mode: 🔄 POLLING
-   Active Bot: @whitelabel_shipping_bot_test_bot
-✅ Bot instance created: @whitelabel_shipping_bot_test_bot
-🔑 ShipStation API Key loading: PROD=SET, TEST=SET, DEFAULT=SET, FINAL=SET (len=48)
-🔵 PREVIEW DATABASE: telegram_shipping_bot
-📦 Repository Manager initialized successfully
-🔵 BOT CONFIGURATION:
-   Environment: TEST
-   Mode: 🔄 POLLING
-   Active Bot: @whitelabel_shipping_bot_test_bot
-✅ Bot instance created: @whitelabel_shipping_bot_test_bot
-🔑 ShipStation API Key loading: PROD=SET, TEST=SET, DEFAULT=SET, FINAL=SET (len=48)
-🔵 PREVIEW DATABASE: telegram_shipping_bot
-📦 Repository Manager initialized successfully
-🔵 BOT CONFIGURATION:
-   Environment: TEST
-   Mode: 🔄 POLLING
-   Active Bot: @whitelabel_shipping_bot_test_bot
-✅ Bot instance created: @whitelabel_shipping_bot_test_bot
-🔑 ShipStation API Key loading: PROD=SET, TEST=SET, DEFAULT=SET, FINAL=SET (len=48)
-🔵 PREVIEW DATABASE: telegram_shipping_bot
-📦 Repository Manager initialized successfully
-🔵 BOT CONFIGURATION:
-   Environment: TEST
-   Mode: 🔄 POLLING
-   Active Bot: @whitelabel_shipping_bot_test_bot
-✅ Bot instance created: @whitelabel_shipping_bot_test_bot).
-        3. Найти в логах строки  и .
-        4. Проанализировать, почему тарифы USPS (если они приходят от API) не проходят фильтрацию. Возможно, проблема в неточном совпадении названий в  или в логике .
-     - Why fix this issue and what will be achieved with the fix? Пользователь не видит одного из ключевых перевозчиков.
-     - Status:  IN PROGRESS
+        1. Попросить пользователя зайти в админ-панель.
+        2. Проверить работоспособность кнопок , , ,  в разделе .
+        3. Убедиться, что вместо ошибки 404 Not Found открываются соответствующие страницы/модальные окна.
+     - Why fix this issue and what will be achieved with the fix? Восстановит базовую функциональность админ-панели для управления пользователями.
+     - Status:  USER VERIFICATION PENDING
      - Is recurring issue? Y
      - Should Test frontend/backend/both after fix? backend
-     - Blocked on other issue: Нет
+     - Blocked on other issue: Нет.
   - Issue 3: 
-     - Attempted fixes: Агент реализовал логику кнопок отмены в файле , но пользователь не подтвердил их работоспособность.
+     - Attempted fixes: Нет. Пользователь упомянул проблему, но приоритет был отдан исправлению основного бота.
      - Next debug checklist: 
-        1. После исправления P0 и P1, попросить пользователя протестировать кнопки отмены на разных этапах.
-        2. Проверить, что  корректно завершается или возвращается на предыдущий шаг.
-     - Why fix this issue and what will be achieved with the fix? Улучшает пользовательский опыт, позволяя отменять действия.
+        1. Изучить логику регистрации и отображения ботов в админ-панели.
+        2. Проверить, как боты из  попадают в базу данных или конфигурацию, которую читает админка.
+     - Why fix this issue and what will be achieved with the fix? Позволит администраторам управлять всеми ботами из единого интерфейса.
      - Status:  NOT STARTED
      - Is recurring issue? N
      - Should Test frontend/backend/both after fix? backend
-     - Blocked on other issue: Нет
+     - Blocked on other issue: Нет.
 
 **In progress Task List**:
 Нет.
@@ -315,138 +118,127 @@ E402 Module level import not at top of file
    |
 
 F821 Undefined name `confirm_cancel_order`
-   --> backend/handlers/order_flow/confirmation.py:157:22
+   --> backend/handlers/order_flow/confirmation.py:162:22
     |
-156 |     if query.data == 'confirm_cancel':
-157 |         return await confirm_cancel_order(update, context)
+161 |     if query.data == 'confirm_cancel':
+162 |         return await confirm_cancel_order(update, context)
     |                      ^^^^^^^^^^^^^^^^^^^^
-158 |     
-159 |     if query.data == 'return_to_order':
+163 |     
+164 |     if query.data == 'return_to_order':
     |
 
 F821 Undefined name `return_to_order`
-   --> backend/handlers/order_flow/confirmation.py:160:22
-    |
-159 |     if query.data == 'return_to_order':
-160 |         return await return_to_order(update, context)
-    |                      ^^^^^^^^^^^^^^^
-161 |     
-162 |     if query.data == 'confirm_data':
-    |
-
-F821 Undefined name `fetch_shipping_rates`
    --> backend/handlers/order_flow/confirmation.py:165:22
     |
-163 |         # User confirmed data, proceed to fetch rates
-164 |         logger.info("✅ User confirmed data, calling fetch_shipping_rates...")
-165 |         return await fetch_shipping_rates(update, context)
-    |                      ^^^^^^^^^^^^^^^^^^^^
+164 |     if query.data == 'return_to_order':
+165 |         return await return_to_order(update, context)
+    |                      ^^^^^^^^^^^^^^^
 166 |     
-167 |     if query.data == 'save_template':
+167 |     if query.data == 'confirm_data':
     |
 
 F821 Undefined name `TEMPLATE_NAME`
-   --> backend/handlers/order_flow/confirmation.py:176:16
+   --> backend/handlers/order_flow/confirmation.py:182:16
     |
-174 |             parse_mode='Markdown',
-175 |         ))
-176 |         return TEMPLATE_NAME
+180 |             parse_mode='Markdown',
+181 |         ))
+182 |         return TEMPLATE_NAME
     |                ^^^^^^^^^^^^^
-177 |     
-178 |     if query.data == 'edit_data':
+183 |     
+184 |     if query.data == 'edit_data':
     |
 
 F821 Undefined name `STATE_NAMES`
-   --> backend/handlers/order_flow/confirmation.py:200:43
+   --> backend/handlers/order_flow/confirmation.py:206:43
     |
-198 |         if bot_msg:
-199 |             context.user_data['last_bot_message_id'] = bot_msg.message_id
-200 |         context.user_data['last_state'] = STATE_NAMES[FROM_NAME]
+204 |         if bot_msg:
+205 |             context.user_data['last_bot_message_id'] = bot_msg.message_id
+206 |         context.user_data['last_state'] = STATE_NAMES[FROM_NAME]
     |                                           ^^^^^^^^^^^
-201 |         return FROM_NAME
+207 |         return FROM_NAME
     |
 
 F821 Undefined name `FROM_NAME`
-   --> backend/handlers/order_flow/confirmation.py:200:55
+   --> backend/handlers/order_flow/confirmation.py:206:55
     |
-198 |         if bot_msg:
-199 |             context.user_data['last_bot_message_id'] = bot_msg.message_id
-200 |         context.user_data['last_state'] = STATE_NAMES[FROM_NAME]
+204 |         if bot_msg:
+205 |             context.user_data['last_bot_message_id'] = bot_msg.message_id
+206 |         context.user_data['last_state'] = STATE_NAMES[FROM_NAME]
     |                                                       ^^^^^^^^^
-201 |         return FROM_NAME
+207 |         return FROM_NAME
     |
 
 F821 Undefined name `FROM_NAME`
-   --> backend/handlers/order_flow/confirmation.py:201:16
+   --> backend/handlers/order_flow/confirmation.py:207:16
     |
-199 |             context.user_data['last_bot_message_id'] = bot_msg.message_id
-200 |         context.user_data['last_state'] = STATE_NAMES[FROM_NAME]
-201 |         return FROM_NAME
+205 |             context.user_data['last_bot_message_id'] = bot_msg.message_id
+206 |         context.user_data['last_state'] = STATE_NAMES[FROM_NAME]
+207 |         return FROM_NAME
     |                ^^^^^^^^^
-202 |     
-203 |     if query.data == 'edit_to_address':
+208 |     
+209 |     if query.data == 'edit_to_address':
     |
 
 F821 Undefined name `STATE_NAMES`
-   --> backend/handlers/order_flow/confirmation.py:217:43
+   --> backend/handlers/order_flow/confirmation.py:223:43
     |
-215 |         if bot_msg:
-216 |             context.user_data['last_bot_message_id'] = bot_msg.message_id
-217 |         context.user_data['last_state'] = STATE_NAMES[TO_NAME]
+221 |         if bot_msg:
+222 |             context.user_data['last_bot_message_id'] = bot_msg.message_id
+223 |         context.user_data['last_state'] = STATE_NAMES[TO_NAME]
     |                                           ^^^^^^^^^^^
-218 |         return TO_NAME
+224 |         return TO_NAME
     |
 
 F821 Undefined name `TO_NAME`
-   --> backend/handlers/order_flow/confirmation.py:217:55
+   --> backend/handlers/order_flow/confirmation.py:223:55
     |
-215 |         if bot_msg:
-216 |             context.user_data['last_bot_message_id'] = bot_msg.message_id
-217 |         context.user_data['last_state'] = STATE_NAMES[TO_NAME]
+221 |         if bot_msg:
+222 |             context.user_data['last_bot_message_id'] = bot_msg.message_id
+223 |         context.user_data['last_state'] = STATE_NAMES[TO_NAME]
     |                                                       ^^^^^^^
-218 |         return TO_NAME
+224 |         return TO_NAME
     |
 
 F821 Undefined name `TO_NAME`
-   --> backend/handlers/order_flow/confirmation.py:218:16
+   --> backend/handlers/order_flow/confirmation.py:224:16
     |
-216 |             context.user_data['last_bot_message_id'] = bot_msg.message_id
-217 |         context.user_data['last_state'] = STATE_NAMES[TO_NAME]
-218 |         return TO_NAME
+222 |             context.user_data['last_bot_message_id'] = bot_msg.message_id
+223 |         context.user_data['last_state'] = STATE_NAMES[TO_NAME]
+224 |         return TO_NAME
     |                ^^^^^^^
-219 |     
-220 |     if query.data == 'edit_parcel':
+225 |     
+226 |     if query.data == 'edit_parcel':
     |
 
 F821 Undefined name `STATE_NAMES`
-   --> backend/handlers/order_flow/confirmation.py:234:43
+   --> backend/handlers/order_flow/confirmation.py:240:43
     |
-232 |         if bot_msg:
-233 |             context.user_data['last_bot_message_id'] = bot_msg.message_id
-234 |         context.user_data['last_state'] = STATE_NAMES[PARCEL_WEIGHT]
+238 |         if bot_msg:
+239 |             context.user_data['last_bot_message_id'] = bot_msg.message_id
+240 |         context.user_data['last_state'] = STATE_NAMES[PARCEL_WEIGHT]
     |                                           ^^^^^^^^^^^
-235 |         return PARCEL_WEIGHT
+241 |         return PARCEL_WEIGHT
     |
 
 F821 Undefined name `PARCEL_WEIGHT`
-   --> backend/handlers/order_flow/confirmation.py:234:55
+   --> backend/handlers/order_flow/confirmation.py:240:55
     |
-232 |         if bot_msg:
-233 |             context.user_data['last_bot_message_id'] = bot_msg.message_id
-234 |         context.user_data['last_state'] = STATE_NAMES[PARCEL_WEIGHT]
+238 |         if bot_msg:
+239 |             context.user_data['last_bot_message_id'] = bot_msg.message_id
+240 |         context.user_data['last_state'] = STATE_NAMES[PARCEL_WEIGHT]
     |                                                       ^^^^^^^^^^^^^
-235 |         return PARCEL_WEIGHT
+241 |         return PARCEL_WEIGHT
     |
 
 F821 Undefined name `PARCEL_WEIGHT`
-   --> backend/handlers/order_flow/confirmation.py:235:16
+   --> backend/handlers/order_flow/confirmation.py:241:16
     |
-233 |             context.user_data['last_bot_message_id'] = bot_msg.message_id
-234 |         context.user_data['last_state'] = STATE_NAMES[PARCEL_WEIGHT]
-235 |         return PARCEL_WEIGHT
+239 |             context.user_data['last_bot_message_id'] = bot_msg.message_id
+240 |         context.user_data['last_state'] = STATE_NAMES[PARCEL_WEIGHT]
+241 |         return PARCEL_WEIGHT
     |                ^^^^^^^^^^^^^
-236 |     
-237 |     if query.data == 'back_to_confirmation':
+242 |     
+243 |     if query.data == 'back_to_confirmation':
     |
 
 F811 Redefinition of unused `select_carrier` from line 33
@@ -554,390 +346,201 @@ E402 Module level import not at top of file
    |
 
 E402 Module level import not at top of file
-  --> backend/handlers/order_flow/payment.py:11:1
+  --> backend/handlers/order_flow/payment.py:12:1
    |
- 9 | logger = logging.getLogger(__name__)
-10 |
-11 | from utils.handler_decorators import with_user_session, safe_handler
+10 | logger = logging.getLogger(__name__)
+11 |
+12 | from utils.handler_decorators import with_user_session, safe_handler
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+13 | from handlers.common_handlers import check_stale_interaction
+14 | from server import safe_telegram_call, mark_message_as_selected
    |
 
-F821 Undefined name `check_stale_interaction`
-   --> backend/handlers/order_flow/payment.py:172:14
-    |
-171 |     # Check for stale interaction
-172 |     if await check_stale_interaction(query, context):
-    |              ^^^^^^^^^^^^^^^^^^^^^^^
-173 |         return ConversationHandler.END
-    |
+E402 Module level import not at top of file
+  --> backend/handlers/order_flow/payment.py:13:1
+   |
+12 | from utils.handler_decorators import with_user_session, safe_handler
+13 | from handlers.common_handlers import check_stale_interaction
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+14 | from server import safe_telegram_call, mark_message_as_selected
+   |
 
-F821 Undefined name `safe_telegram_call`
-   --> backend/handlers/order_flow/payment.py:175:11
-    |
-173 |         return ConversationHandler.END
-174 |     
-175 |     await safe_telegram_call(query.answer())
-    |           ^^^^^^^^^^^^^^^^^^
-176 |     
-177 |     if query.data == 'cancel_order':
-    |
+E402 Module level import not at top of file
+  --> backend/handlers/order_flow/payment.py:14:1
+   |
+12 | from utils.handler_decorators import with_user_session, safe_handler
+13 | from handlers.common_handlers import check_stale_interaction
+14 | from server import safe_telegram_call, mark_message_as_selected
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
 
-F821 Undefined name `cancel_order`
-   --> backend/handlers/order_flow/payment.py:178:22
+F841 Local variable `balance` is assigned to but never used
+   --> backend/handlers/order_flow/payment.py:208:5
     |
-177 |     if query.data == 'cancel_order':
-178 |         return await cancel_order(update, context)
-    |                      ^^^^^^^^^^^^
-179 |     
-180 |     if query.data == 'confirm_cancel':
-    |
-
-F821 Undefined name `confirm_cancel_order`
-   --> backend/handlers/order_flow/payment.py:181:22
-    |
-180 |     if query.data == 'confirm_cancel':
-181 |         return await confirm_cancel_order(update, context)
-    |                      ^^^^^^^^^^^^^^^^^^^^
-182 |     
-183 |     if query.data == 'return_to_order':
-    |
-
-F821 Undefined name `return_to_order`
-   --> backend/handlers/order_flow/payment.py:184:22
-    |
-183 |     if query.data == 'return_to_order':
-184 |         return await return_to_order(update, context)
-    |                      ^^^^^^^^^^^^^^^
-185 |     
-186 |     # Handle back to rates
-    |
-
-F821 Undefined name `asyncio`
-   --> backend/handlers/order_flow/payment.py:189:9
-    |
-187 |     if query.data == 'back_to_rates':
-188 |         # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-189 |         asyncio.create_task(mark_message_as_selected(update, context))
-    |         ^^^^^^^
-190 |         # Return to rate selection - call fetch_shipping_rates again
-191 |         return await fetch_shipping_rates(update, context)
-    |
-
-F821 Undefined name `mark_message_as_selected`
-   --> backend/handlers/order_flow/payment.py:189:29
-    |
-187 |     if query.data == 'back_to_rates':
-188 |         # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-189 |         asyncio.create_task(mark_message_as_selected(update, context))
-    |                             ^^^^^^^^^^^^^^^^^^^^^^^^
-190 |         # Return to rate selection - call fetch_shipping_rates again
-191 |         return await fetch_shipping_rates(update, context)
-    |
-
-F821 Undefined name `fetch_shipping_rates`
-   --> backend/handlers/order_flow/payment.py:191:22
-    |
-189 |         asyncio.create_task(mark_message_as_selected(update, context))
-190 |         # Return to rate selection - call fetch_shipping_rates again
-191 |         return await fetch_shipping_rates(update, context)
-    |                      ^^^^^^^^^^^^^^^^^^^^
-192 |     
-193 |     # Mark previous message as selected (remove buttons)
-    |
-
-F821 Undefined name `asyncio`
-   --> backend/handlers/order_flow/payment.py:194:5
-    |
-193 |     # Mark previous message as selected (remove buttons)
-194 |     asyncio.create_task(mark_message_as_selected(update, context))
+206 |     telegram_id = query.from_user.id
+207 |     user_repo = get_user_repo()
+208 |     balance = await user_repo.get_balance(telegram_id)
     |     ^^^^^^^
-195 |     
-196 |     telegram_id = query.from_user.id
+209 |     
+210 |     # Build keyboard
     |
-
-F821 Undefined name `mark_message_as_selected`
-   --> backend/handlers/order_flow/payment.py:194:25
-    |
-193 |     # Mark previous message as selected (remove buttons)
-194 |     asyncio.create_task(mark_message_as_selected(update, context))
-    |                         ^^^^^^^^^^^^^^^^^^^^^^^^
-195 |     
-196 |     telegram_id = query.from_user.id
-    |
-
-F821 Undefined name `safe_telegram_call`
-   --> backend/handlers/order_flow/payment.py:213:23
-    |
-211 |             from utils.ui_utils import PaymentFlowUI
-212 |             if user.get('balance', 0) < amount:
-213 |                 await safe_telegram_call(query.message.reply_text(PaymentFlowUI.insufficient_balance_error()))
-    |                       ^^^^^^^^^^^^^^^^^^
-214 |                 return ConversationHandler.END
-    |
+help: Remove assignment to unused variable `balance`
 
 F821 Undefined name `create_order_in_db`
-   --> backend/handlers/order_flow/payment.py:217:27
+   --> backend/handlers/order_flow/payment.py:308:27
     |
-216 |             # Create order
-217 |             order = await create_order_in_db(user, data, selected_rate, amount, user_discount, discount_amount)
+307 |             # Create order
+308 |             order = await create_order_in_db(user, data, selected_rate, amount, user_discount, discount_amount)
     |                           ^^^^^^^^^^^^^^^^^^
-218 |             
-219 |             # Try to create shipping label first
+309 |             
+310 |             # Try to create shipping label first
     |
 
 F821 Undefined name `create_and_send_label`
-   --> backend/handlers/order_flow/payment.py:220:35
+   --> backend/handlers/order_flow/payment.py:311:35
     |
-219 |             # Try to create shipping label first
-220 |             label_created = await create_and_send_label(order['id'], telegram_id, query.message)
+310 |             # Try to create shipping label first
+311 |             label_created = await create_and_send_label(order['id'], telegram_id, query.message)
     |                                   ^^^^^^^^^^^^^^^^^^^^^
-221 |             
-222 |             if label_created:
+312 |             
+313 |             if label_created:
     |
 
 F821 Undefined name `payment_service`
-   --> backend/handlers/order_flow/payment.py:224:53
+   --> backend/handlers/order_flow/payment.py:315:53
     |
-222 |             if label_created:
-223 |                 # Only deduct balance if label was created successfully using payment service
-224 |                 success, new_balance, error = await payment_service.process_balance_payment(
+313 |             if label_created:
+314 |                 # Only deduct balance if label was created successfully using payment service
+315 |                 success, new_balance, error = await payment_service.process_balance_payment(
     |                                                     ^^^^^^^^^^^^^^^
-225 |                     telegram_id=telegram_id,
-226 |                     amount=amount,
+316 |                     telegram_id=telegram_id,
+317 |                     amount=amount,
     |
 
 F821 Undefined name `db`
-   --> backend/handlers/order_flow/payment.py:228:24
+   --> backend/handlers/order_flow/payment.py:319:24
     |
-226 |                     amount=amount,
-227 |                     order_id=order['id'],
-228 |                     db=db,
+317 |                     amount=amount,
+318 |                     order_id=order['id'],
+319 |                     db=db,
     |                        ^^
-229 |                     find_user_func=find_user_by_telegram_id,
-230 |                     update_order_func=update_order
+320 |                     find_user_func=find_user_by_telegram_id,
+321 |                     update_order_func=update_order
     |
 
 F821 Undefined name `find_user_by_telegram_id`
-   --> backend/handlers/order_flow/payment.py:229:36
+   --> backend/handlers/order_flow/payment.py:320:36
     |
-227 |                     order_id=order['id'],
-228 |                     db=db,
-229 |                     find_user_func=find_user_by_telegram_id,
+318 |                     order_id=order['id'],
+319 |                     db=db,
+320 |                     find_user_func=find_user_by_telegram_id,
     |                                    ^^^^^^^^^^^^^^^^^^^^^^^^
-230 |                     update_order_func=update_order
-231 |                 )
+321 |                     update_order_func=update_order
+322 |                 )
     |
 
 F821 Undefined name `update_order`
-   --> backend/handlers/order_flow/payment.py:230:39
+   --> backend/handlers/order_flow/payment.py:321:39
     |
-228 |                     db=db,
-229 |                     find_user_func=find_user_by_telegram_id,
-230 |                     update_order_func=update_order
+319 |                     db=db,
+320 |                     find_user_func=find_user_by_telegram_id,
+321 |                     update_order_func=update_order
     |                                       ^^^^^^^^^^^^
-231 |                 )
-    |
-
-F821 Undefined name `safe_telegram_call`
-   --> backend/handlers/order_flow/payment.py:236:27
-    |
-234 |                     logger.error(f"Failed to process payment: {error}")
-235 |                     # This shouldn't happen as we checked balance earlier
-236 |                     await safe_telegram_call(query.message.reply_text(f"❌ Ошибка обработки платежа: {error}"))
-    |                           ^^^^^^^^^^^^^^^^^^
-237 |                     return ConversationHandler.END
-    |
-
-F821 Undefined name `safe_telegram_call`
-   --> backend/handlers/order_flow/payment.py:243:23
-    |
-241 |                 reply_markup = InlineKeyboardMarkup(keyboard)
-242 |                 
-243 |                 await safe_telegram_call(query.message.reply_text(
-    |                       ^^^^^^^^^^^^^^^^^^
-244 |                     PaymentFlowUI.payment_success_balance(amount, new_balance, order.get('order_id')),
-245 |                     reply_markup=reply_markup
-    |
-
-F821 Undefined name `safe_telegram_call`
-   --> backend/handlers/order_flow/payment.py:263:23
-    |
-261 |                 reply_markup = InlineKeyboardMarkup(keyboard)
-262 |                 
-263 |                 await safe_telegram_call(query.message.reply_text(
-    |                       ^^^^^^^^^^^^^^^^^^
-264 |             """❌ Не удалось создать shipping label.
-265 |             Оплата не списана. Ваш баланс не изменился.
+322 |                 )
     |
 
 F821 Undefined name `create_order_in_db`
-   --> backend/handlers/order_flow/payment.py:276:27
+   --> backend/handlers/order_flow/payment.py:367:27
     |
-274 |         elif query.data == 'pay_with_crypto':
-275 |             # Create order
-276 |             order = await create_order_in_db(user, data, selected_rate, amount, user_discount, discount_amount)
+365 |         elif query.data == 'pay_with_crypto':
+366 |             # Create order
+367 |             order = await create_order_in_db(user, data, selected_rate, amount, user_discount, discount_amount)
     |                           ^^^^^^^^^^^^^^^^^^
-277 |             
-278 |             # Create Oxapay invoice
+368 |             
+369 |             # Create Oxapay invoice
     |
 
 F821 Undefined name `create_oxapay_invoice`
-   --> backend/handlers/order_flow/payment.py:279:36
+   --> backend/handlers/order_flow/payment.py:370:36
     |
-278 |             # Create Oxapay invoice
-279 |             invoice_result = await create_oxapay_invoice(
+369 |             # Create Oxapay invoice
+370 |             invoice_result = await create_oxapay_invoice(
     |                                    ^^^^^^^^^^^^^^^^^^^^^
-280 |                 amount=amount,
-281 |                 order_id=order['id'],
+371 |                 amount=amount,
+372 |                 order_id=order['id'],
     |
 
 F821 Undefined name `Payment`
-   --> backend/handlers/order_flow/payment.py:289:27
+   --> backend/handlers/order_flow/payment.py:380:27
     |
-287 |                 pay_link = invoice_result['payLink']
-288 |                 
-289 |                 payment = Payment(
+378 |                 pay_link = invoice_result['payLink']
+379 |                 
+380 |                 payment = Payment(
     |                           ^^^^^^^
-290 |                     order_id=order['id'],
-291 |                     amount=amount,
+381 |                     order_id=order['id'],
+382 |                     amount=amount,
     |
 
 F821 Undefined name `insert_payment`
-   --> backend/handlers/order_flow/payment.py:297:23
+   --> backend/handlers/order_flow/payment.py:388:23
     |
-295 |                 payment_dict = payment.model_dump()
-296 |                 payment_dict['created_at'] = payment_dict['created_at'].isoformat()
-297 |                 await insert_payment(payment_dict)
+386 |                 payment_dict = payment.model_dump()
+387 |                 payment_dict['created_at'] = payment_dict['created_at'].isoformat()
+388 |                 await insert_payment(payment_dict)
     |                       ^^^^^^^^^^^^^^
-298 |                 
-299 |                 keyboard = [[InlineKeyboardButton("💳 Оплатить", url=pay_link)],
+389 |                 
+390 |                 keyboard = [[InlineKeyboardButton("💳 Оплатить", url=pay_link)],
     |
 
 F821 Undefined name `session_manager`
-   --> backend/handlers/order_flow/payment.py:305:33
+   --> backend/handlers/order_flow/payment.py:396:33
     |
-303 |                 # Get order_id from session for display
-304 |                 from utils.order_utils import format_order_id_for_display
-305 |                 session = await session_manager.get_session(telegram_id)
+394 |                 # Get order_id from session for display
+395 |                 from utils.order_utils import format_order_id_for_display
+396 |                 session = await session_manager.get_session(telegram_id)
     |                                 ^^^^^^^^^^^^^^^
-306 |                 order_id_display = ""
-307 |                 if session and session.get('order_id'):
-    |
-
-F821 Undefined name `safe_telegram_call`
-   --> backend/handlers/order_flow/payment.py:311:23
-    |
-309 |                     order_id_display = f"\n📦 Номер заказа: #{display_id}\n"
-310 |                 
-311 |                 await safe_telegram_call(query.message.reply_text(
-    |                       ^^^^^^^^^^^^^^^^^^
-312 |                     f"""✅ Заказ создан!{order_id_display}
-    |
-
-F821 Undefined name `safe_telegram_call`
-   --> backend/handlers/order_flow/payment.py:324:23
-    |
-322 |             else:
-323 |                 error_msg = invoice_result.get('error', 'Unknown error')
-324 |                 await safe_telegram_call(query.message.reply_text(f"❌ Ошибка создания инвойса: {error_msg}"))
-    |                       ^^^^^^^^^^^^^^^^^^
-325 |         elif query.data == 'top_up_balance':
-326 |             # Save order data to database before top-up so user can return to payment after
+397 |                 order_id_display = ""
+398 |                 if session and session.get('order_id'):
     |
 
 F821 Undefined name `datetime`
-   --> backend/handlers/order_flow/payment.py:351:31
+   --> backend/handlers/order_flow/payment.py:442:31
     |
-349 |                 'parcel_width': data.get('parcel_width'),
-350 |                 'parcel_height': data.get('parcel_height'),
-351 |                 'created_at': datetime.now(timezone.utc).isoformat()
+440 |                 'parcel_width': data.get('parcel_width'),
+441 |                 'parcel_height': data.get('parcel_height'),
+442 |                 'created_at': datetime.now(timezone.utc).isoformat()
     |                               ^^^^^^^^
-352 |             }
+443 |             }
     |
 
 F821 Undefined name `timezone`
-   --> backend/handlers/order_flow/payment.py:351:44
+   --> backend/handlers/order_flow/payment.py:442:44
     |
-349 |                 'parcel_width': data.get('parcel_width'),
-350 |                 'parcel_height': data.get('parcel_height'),
-351 |                 'created_at': datetime.now(timezone.utc).isoformat()
+440 |                 'parcel_width': data.get('parcel_width'),
+441 |                 'parcel_height': data.get('parcel_height'),
+442 |                 'created_at': datetime.now(timezone.utc).isoformat()
     |                                            ^^^^^^^^
-352 |             }
+443 |             }
     |
 
 F821 Undefined name `db`
-   --> backend/handlers/order_flow/payment.py:355:19
+   --> backend/handlers/order_flow/payment.py:446:19
     |
-354 |             # Delete any existing pending order for this user
-355 |             await db.pending_orders.delete_many({"telegram_id": telegram_id})
-    |                   ^^
-356 |             # Save new pending order
-357 |             await insert_pending_order(pending_order)
+445 | …     # Delete any existing pending order for this user
+446 | …     await db.pending_orders.delete_many({"telegram_id": telegram_id})
+    |             ^^
+447 | …     # Save new pending order
+448 | …     print(f"💾 Saving pending order: telegram_id={telegram_id}, has_selected_rate={pending_order.get('selected_rate') is not None}, …
     |
 
 F821 Undefined name `insert_pending_order`
-   --> backend/handlers/order_flow/payment.py:357:19
+   --> backend/handlers/order_flow/payment.py:449:19
     |
-355 |             await db.pending_orders.delete_many({"telegram_id": telegram_id})
-356 |             # Save new pending order
-357 |             await insert_pending_order(pending_order)
-    |                   ^^^^^^^^^^^^^^^^^^^^
-358 |             
-359 |             context.user_data['last_state'] = STATE_NAMES[TOPUP_AMOUNT]  # Save state for cancel return
-    |
-
-F821 Undefined name `STATE_NAMES`
-   --> backend/handlers/order_flow/payment.py:359:47
-    |
-357 |             await insert_pending_order(pending_order)
-358 |             
-359 |             context.user_data['last_state'] = STATE_NAMES[TOPUP_AMOUNT]  # Save state for cancel return
-    |                                               ^^^^^^^^^^^
-360 |             
-361 |         from utils.ui_utils import get_cancel_keyboard
-    |
-
-F821 Undefined name `TOPUP_AMOUNT`
-   --> backend/handlers/order_flow/payment.py:359:59
-    |
-357 |             await insert_pending_order(pending_order)
-358 |             
-359 |             context.user_data['last_state'] = STATE_NAMES[TOPUP_AMOUNT]  # Save state for cancel return
-    |                                                           ^^^^^^^^^^^^
-360 |             
-361 |         from utils.ui_utils import get_cancel_keyboard
-    |
-
-F821 Undefined name `safe_telegram_call`
-   --> backend/handlers/order_flow/payment.py:373:25
-    |
-371 | Максимальная сумма: $1000"""
-372 |         
-373 |         bot_msg = await safe_telegram_call(query.message.reply_text(
-    |                         ^^^^^^^^^^^^^^^^^^
-374 |             message_text,
-375 |             reply_markup=reply_markup
-    |
-
-F821 Undefined name `TOPUP_AMOUNT`
-   --> backend/handlers/order_flow/payment.py:382:16
-    |
-380 |         context.user_data['last_bot_message_text'] = message_text
-381 |         
-382 |         return TOPUP_AMOUNT
-    |                ^^^^^^^^^^^^
-383 |     
-384 |     except Exception as e:
-    |
-
-F821 Undefined name `safe_telegram_call`
-   --> backend/handlers/order_flow/payment.py:386:15
-    |
-384 |     except Exception as e:
-385 |         logger.error(f"Payment error: {e}")
-386 |         await safe_telegram_call(query.message.reply_text(f"❌ Ошибка при оплате: {str(e)}"))
-    |               ^^^^^^^^^^^^^^^^^^
-387 |         return ConversationHandler.END
+447 | …     # Save new pending order
+448 | …     print(f"💾 Saving pending order: telegram_id={telegram_id}, has_selected_rate={pending_order.get('selected_rate') is not None}, …
+449 | …     await insert_pending_order(pending_order)
+    |             ^^^^^^^^^^^^^^^^^^^^
+450 | …     print("✅ Pending order saved!")
     |
 
 E402 Module level import not at top of file
@@ -1566,19 +1169,19 @@ E402 Module level import not at top of file
     |
 
 E402 Module level import not at top of file
-   --> backend/server.py:381:1
+   --> backend/server.py:383:1
     |
-380 | # Error handling middleware (должен быть первым!)
-381 | from middleware.error_handler_middleware import error_handler_middleware
+382 | # Error handling middleware (должен быть первым!)
+383 | from middleware.error_handler_middleware import error_handler_middleware
     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-382 | app.middleware("http")(error_handler_middleware)
+384 | app.middleware("http")(error_handler_middleware)
     |
 
 E402 Module level import not at top of file
-   --> backend/server.py:636:1
+   --> backend/server.py:638:1
     |
-635 | # MIGRATED: Use handlers.order_flow.entry_points.order_from_template_list
-636 | from handlers.order_flow.entry_points import order_from_template_list
+637 | # MIGRATED: Use handlers.order_flow.entry_points.order_from_template_list
+638 | from handlers.order_flow.entry_points import order_from_template_list
     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     |
 
@@ -1981,24 +1584,29 @@ F841 Local variable `last_error` is assigned to but never used
     |
 help: Remove assignment to unused variable `last_error`
 
-Found 162 errors (6 fixed, 156 remaining).
-No fixes available (26 hidden fixes can be enabled with the `--unsafe-fixes` option). и вручную исправить оставшиеся ошибки.
+Found 146 errors (9 fixed, 137 remaining).
+No fixes available (27 hidden fixes can be enabled with the `--unsafe-fixes` option). и вручную исправить оставшиеся ошибки (отложено из предыдущего форка).
  Future Tasks:
     - Внедрение кеширования на Redis.
     - Структурированное логирование (JSON).
     - Улучшение CI/CD пайплайна.
 
 **Completed work in this session**
-- **Устранен конфликт Polling**: Решена фундаментальная проблема с , вызванная флагом  в uvicorn и, вероятно, отозванным токеном. Бот теперь стабильно получает сообщения.
-- **Исправлена загрузка API ключа**: Решена критическая проблема с кешированием модуля и порядком импорта, из-за которой API ключ ShipStation не загружался. Логика загрузки была перенесена внутрь функций.
-- **Переключение на Sandbox API**: Приоритет загрузки API-ключей изменен на TEST -> PROD, чтобы заказы создавались в тестовом окружении.
-- **Восстановлен основной флоу**: Исправлена длинная цепочка , , , , что позволило дойти до шага отображения тарифов.
-- **Реализована фильтрация и сортировка тарифов**: Тарифы фильтруются по популярным сервисам (USPS, FedEx, UPS) и сортируются (по перевозчику, затем по цене).
-- **Добавлена скрытая наценка**: Реализована логика добавления 0 к стоимости каждого лейбла.
-- **Исправлен UX кнопок**: Убрано дублирование сообщений и реализовано удаление кнопок после их использования.
+- **Кнопка Обновить тарифы**: Исправлена путем очистки  принудительно.
+- **Отображение тарифов USPS**: Восстановлено путем добавления обработки псевдонима Stamps.com при фильтрации, сортировке и отображении.
+- **Восстановление экрана подтверждения**: Возвращен утерянный экран summary перед поиском тарифов.
+- **Корректность данных на экране подтверждения**: Исправлены ключи (, ) для корректного отображения веса и адресов.
+- **UI/UX улучшения**: Исправлено форматирование (отступы, эмодзи, порядок секций) на экранах подтверждения и со списком тарифов; добавлено правильное склонение слова день.
+- **Логика кнопки Стандартные размеры**: Реализовано скрытие кнопки, если вес посылки превышает 10 lbs, на всех этапах ввода размеров, включая возврат к заказу.
+- **Отладка флоу пополнения баланса (Oxapay)**:
+    - Исправлены многочисленные ,  и циклические импорты в файлах , , , что мешало работе кнопок оплаты.
+    - Исправлена ошибка , которая приводила к сбою при расчете стоимости тарифа.
+    - Восстановлена работа вебхука Oxapay: исправлен URL в , добавлен префикс  к роутеру, решены проблемы с циклическими импортами, исправлена логика поиска платежа в БД (string vs int ).
+- **Наценка на тарифы**: Реализована логика добавления скрытой наценки 0 к каждому тарифу *перед* отображением пользователю, а не после выбора.
+- **Информация о заказе**: Восстановлена и дополнена информация на экране Информация о заказе, который появляется перед выбором способа оплаты.
 
 **Earlier issues found/mentioned but not fixed**
-   - **Линтинг-ошибки**: Около 100 ошибок , исправление которых было отложено.
+   - **Линтинг-ошибки**: Около 100 ошибок , исправление которых было отложено для фокуса на критических багах.
 
 **Known issue recurrence from previous fork**
   - Нет.
@@ -2007,60 +1615,70 @@ No fixes available (26 hidden fixes can be enabled with the `--unsafe-fixes` opt
 
 
 **Key Technical Concepts**
-- Python Module Caching & Import Order
 - Telegram Bot  & 
--  и его влияние на polling-ботов
-- Отладка API запросов (формат, авторизация, ключи)
-- Разделение логики на сервисы и обработчики
+- Отладка циклических импортов в Python (использование локальных импортов внутри функций как временное решение)
+- Интеграция с внешним API платежей (Oxapay)
+- Отладка вебхуков (проверка URL, префиксов роутера, обработка данных, логирование)
+- Работа с асинхронным кодом ()
+- Взаимодействие с MongoDB и Pydantic моделями
 
 **key DB schema**
-  - : используется для хранения сессий бота.
+  - : хранит состояние  для каждого пользователя.
+  - : хранит записи о платежах, включая  от Oxapay,  ('pending', 'paid'), , .
+  - : временно хранит данные заказа, когда пользователь уходит на пополнение баланса, чтобы вернуться к оплате заказа позже.
+  - : хранит завершенные заказы.
 
 **changes in tech stack**
   - Нет.
 
 **All files**
-- **Созданы:**
-  - : Для обработки выбора тарифов, их обновления и отмены.
 - **Существенно изменены:**
-  - : Перемещен  в начало файла для корректной загрузки env-переменных. Удален флаг  из команды supervisor.
-  - : Исправлен формат авторизации ShipStation ( -> ). Логика загрузки API-ключа перенесена внутрь функций для обхода проблем с кешированием. Изменен приоритет на TEST-ключ.
-  - : Множество исправлений , , , . Теперь вызывает  с правильными аргументами.
-  - : Добавлена сложная логика для фильтрации популярных тарифов и их сортировки (по перевозчику, затем по цене).
-  - : Создан и доработан для обработки выбора тарифа, обновления и отмены.
-  - : Удален флаг  для .
+  - : Множественные исправления импортов, ошибок , логики кнопок, добавление информации о заказе.
+  - : Добавлена отладочная печать, исправлена логика поиска платежа в БД по  (string).
+  - : Исправлены циклические импорты, добавлен префикс  к роутеру для корректной работы.
+  - : Множество исправлений форматирования, логики фильтрации и сортировки тарифов (Stamps.com -> USPS), склонения слов.
+  - : Реализовано добавление наценки перед отображением, исправлен .
+  - : Исправлена логика возврата на экран тарифов.
+  - : Добавлено сохранение  в .
+  - : Добавлена логика скрытия кнопки стандартные размеры при весе > 10 lbs.
+  - : Исправлена ошибка  на  и .
+  - : Исправлен параметр  для Oxapay API.
+  - : Исправлены ошибки валидации Pydantic и циклические импорты.
+  - : Добавлен роутер .
+  - : Удалена дублирующая переменная .
 
 **Areas that need refactoring**:
-- Логика  все еще сложна. Обработка кнопок и состояний разбросана по нескольким файлам, что приводит к ошибкам.
+- **Циклические импорты**: В коде много локальных импортов внутри функций (например, в , ), которые были добавлены для исправления  ошибок. Это является code smell и указывает на необходимость реструктуризации кода (например, вынести константы состояний и общие утилиты в отдельные, независимые модули).
+- **Сложность **: Логика состояний и обработчики разбросаны по множеству файлов, что усложняет отладку и поддержку.
 
 **key api endpoints**
-- **ShipStation API V2**:
-  - : для получения списка перевозчиков.
-  - : для получения тарифов.
+- **ShipStation API**: 
+- **Oxapay API**: 
+- **Внутренний Webhook**: 
 
 **Critical Info for New Agent**
-- **Приоритет №1 (P0)**: Исправить кнопку Обновить тарифы. Проблема, скорее всего, в том, что нужно очищать , а не только .
-- **Приоритет №2 (P1)**: Выяснить, почему не отображаются тарифы USPS. Проверьте логи, которые были добавлены в , чтобы увидеть, почему они отфильтровываются.
-- **КЕШИРОВАНИЕ**: Хотя проблемы с кешированием модулей Python решены, помните о кешировании на уровне приложения (например, ).
+- **Приоритет №1 (P0)**: Исправить несоответствие  для кнопки пополнения баланса ( вместо ) в файле . Это должно восстановить создание  и вернуть кнопку Оплатить заказ после пополнения.
+- **Приоритет №2 (P1)**: Связаться с пользователем для проверки исправления админ-панели. Если проблема осталась, продолжить отладку.
+- **Архитектурные проблемы**: Будьте внимательны к циклическим импортам. Добавление новых зависимостей между модулями ,  и  может легко их спровоцировать. Старайтесь избегать импорта из  в других модулях.
 - **Язык**: ОБЯЗАТЕЛЬНО продолжайте общение с пользователем на **русском языке**.
 
 **documents created in this job**
   - Нет.
 
 **Last 5 User Messages and any pending user messages**
- - **User:** обновить тарифы к апи не обращается, так же при нажатии на обновить тарифы должна появляться функция что ищется как в первый раз - **Status:** IN PROGRESS. Кнопка Обновить тарифы не работает как надо.
- - **User:** юспс не появляется - **Status:** IN PROGRESS. Тарифы USPS не отображаются.
- - **User:** при нажатии на покупку тарифа ошибка - **Status:** RESOLVED. Агент исправил .
- - **User:** нет мне нужны, только популряные тарифы, по трем службам - **Status:** RESOLVED. Агент вернул фильтрацию по популярным тарифам.
- - **User:** не попорядку - **Status:** RESOLVED. Агент исправил сортировку тарифов.
+ - **User:** сюда надо добавить кнопку оплатить заказ, иначе его надо начинать заново - **Status:** IN PROGRESS. Пользователь сообщает, что после пополнения баланса нет кнопки для завершения оплаты заказа.
+ - **User:** дошел и оплатил, но не появляется пополнение в боте - **Status:** RESOLVED. Это привело к отладке вебхуков, проблема была решена.
+ - **User:** раньше отправлял мгновенно и сразу баланс пополнялся перед рефакторингом - **Status:** RESOLVED. Проблема с задержкой вебхука была найдена и исправлена (ошибка в ).
+ - **User:** кнопки перейти к оплате и пополнить баланс не работают - **Status:** RESOLVED. Проблема была в серии циклических импортов и .
+ - **User:** кнопки не работают в админке и не выполняют своих функций - **Status:** USER VERIFICATION PENDING. Агент применил исправление, но пользователь не подтвердил его.
 
 **Project Health Check:**
-- **Broken:** Ключевые функции (обновление тарифов) и отображение данных (USPS тарифы) не работают.
+- **Broken:** Основной флоу заказ - баланса - заказа разорван. Пользователь не может завершить заказ после пополнения.
 - **Mocked:** Нет.
 
 **Testing status**
   - Testing agent used after significant changes: NO
-  - Troubleshoot agent used after agent stuck in loop: YES
+  - Troubleshoot agent used after agent stuck in loop: YES (успешно для админ-панели и вебхуков)
   - Test files created: []
   - Known regressions: Нет.
 
@@ -2068,4 +1686,4 @@ No fixes available (26 hidden fixes can be enabled with the `--unsafe-fixes` opt
 Не требуются. Все ключи находятся в  файле.
 
 **What agent forgot to execute**
-Агент отложил исправление ошибок линтера, чтобы сфокусироваться на критических багах, о которых сообщал пользователь. Это было правильным решением.</analysis>
+Агент не вернулся к проверке исправления админ-панели после того, как пользователь переключил контекст обратно на бота. Также было отложено исправление ошибок линтера.</analysis>

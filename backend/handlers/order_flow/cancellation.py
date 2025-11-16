@@ -178,7 +178,6 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard, message_text = OrderStepMessages.get_step_keyboard_and_message(last_state)
     
     # Special handling for parcel dimension states: check weight to decide keyboard
-    from utils.ui_utils import CallbackData, get_standard_size_and_cancel_keyboard
     weight = context.user_data.get('parcel_weight', 0)
     
     if last_state in ['PARCEL_LENGTH', 'PARCEL_WIDTH', 'PARCEL_HEIGHT'] and weight > 10:

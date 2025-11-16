@@ -123,7 +123,6 @@ async def show_order_summary(update: Update, context: ContextTypes.DEFAULT_TYPE)
     """Show order summary with selected rate details"""
     from server import safe_telegram_call, PAYMENT_METHOD
     from repositories import get_user_repo
-    import asyncio
     
     query = update.callback_query
     await safe_telegram_call(query.answer())
@@ -448,7 +447,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # Save new pending order
             print(f"💾 Saving pending order: telegram_id={telegram_id}, has_selected_rate={pending_order.get('selected_rate') is not None}, final_amount={pending_order.get('final_amount')}")
             await insert_pending_order(pending_order)
-            print(f"✅ Pending order saved!")
+            print("✅ Pending order saved!")
             
             from server import TOPUP_AMOUNT, STATE_NAMES
             context.user_data['last_state'] = STATE_NAMES[TOPUP_AMOUNT]  # Save state for cancel return
