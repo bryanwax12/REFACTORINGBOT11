@@ -446,7 +446,9 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # Delete any existing pending order for this user
             await db.pending_orders.delete_many({"telegram_id": telegram_id})
             # Save new pending order
+            print(f"💾 Saving pending order: telegram_id={telegram_id}, has_selected_rate={pending_order.get('selected_rate') is not None}, final_amount={pending_order.get('final_amount')}")
             await insert_pending_order(pending_order)
+            print(f"✅ Pending order saved!")
             
             from server import TOPUP_AMOUNT, STATE_NAMES
             context.user_data['last_state'] = STATE_NAMES[TOPUP_AMOUNT]  # Save state for cancel return
