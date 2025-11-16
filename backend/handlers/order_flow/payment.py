@@ -415,6 +415,9 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 error_msg = invoice_result.get('error', 'Unknown error')
                 await safe_telegram_call(query.message.reply_text(f"❌ Ошибка создания инвойса: {error_msg}"))
         elif query.data == 'topup_for_order':
+            # Import db and insert function
+            from server import db, insert_pending_order
+            
             # Save order data to database before top-up so user can return to payment after
             pending_order = {
                 'telegram_id': telegram_id,
