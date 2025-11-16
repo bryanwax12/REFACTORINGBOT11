@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 load_dotenv('/app/frontend/.env')
 
 # Get backend URL from environment
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://shipping-bot-fix.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://parcel-tracker-40.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
 def test_telegram_order_flow_comprehensive():

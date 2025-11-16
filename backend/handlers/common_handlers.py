@@ -415,12 +415,12 @@ async def check_stale_interaction(query, context: ContextTypes.DEFAULT_TYPE) -> 
     logger.info(f"Order data check: keys in user_data={list(context.user_data.keys())}, has_order_data={has_order_data}")
     
     if not has_order_data:
-        print(f"⚠️ Blocking stale interaction - no order data")
+        print("⚠️ Blocking stale interaction - no order data")
         logger.info("Stale interaction detected - no order data in user_data, silently ignoring")
         await safe_telegram_call(query.answer())
         return True
     
-    print(f"✅ Stale check passed, proceeding with action")
+    print("✅ Stale check passed, proceeding with action")
     return False
     
     # Check if order was already completed (has order_completed flag)

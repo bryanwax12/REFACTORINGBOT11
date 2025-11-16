@@ -141,7 +141,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
     """Handle user's choice on data confirmation"""
     import logging
     logger = logging.getLogger(__name__)
-    print(f"🎯 handle_data_confirmation CALLED!")
+    print("🎯 handle_data_confirmation CALLED!")
     logger.info(f"🎯 handle_data_confirmation called with query.data={update.callback_query.data if update.callback_query else 'None'}")
     
     query = update.callback_query

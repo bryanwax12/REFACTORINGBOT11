@@ -62,7 +62,7 @@ async def view_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     Shows full address information and action buttons
     """
     # Import required functions
-    from server import db, safe_telegram_call
+    from server import safe_telegram_call
     from utils.db_operations import find_template_by_id
     import logging
     logger = logging.getLogger(__name__)
@@ -100,7 +100,7 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     Use template to start order with pre-filled addresses
     """
     # Import required functions
-    from server import db, safe_telegram_call
+    from server import safe_telegram_call
     from utils.db_operations import find_template_by_id
     
     query = update.callback_query
@@ -154,7 +154,7 @@ async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     Confirm template deletion
     """
     # Import required functions
-    from server import db, safe_telegram_call
+    from server import safe_telegram_call
     from utils.db_operations import find_template_by_id
     import logging
     logger = logging.getLogger(__name__)

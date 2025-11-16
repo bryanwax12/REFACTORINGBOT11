@@ -61,7 +61,6 @@ async def telegram_webhook(request: Request):
     try:
         import server as srv
         from telegram import Update
-        import json
         
         # Get the update data from the request
         update_data = await request.json()

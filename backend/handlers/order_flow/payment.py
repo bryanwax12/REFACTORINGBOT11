@@ -301,7 +301,6 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if query.data == 'pay_from_balance':
             # Import required functions
             from server import create_and_send_label, db
-            from utils.db_operations import find_user_by_telegram_id, update_order
             from services.service_factory import ServiceFactory
             from utils.ui_utils import PaymentFlowUI
             
