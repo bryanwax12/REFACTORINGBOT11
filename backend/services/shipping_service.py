@@ -710,7 +710,6 @@ async def send_label_to_user(
         # Caption message
         caption = f"""✅ Shipping Label
 
-Order: #{order_id[:8]}
 Carrier: {carrier}
 Tracking: {tracking_number}"""
         
