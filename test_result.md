@@ -5909,3 +5909,23 @@ backend:
           agent: "main_fork"
           comment: "✅ TECHNICAL IMPLEMENTATION VERIFIED: All code changes correctly implemented. VERIFICATION: (1) ✅ Stale check skipped for edit buttons - edit_buttons list includes all edit actions, (2) ✅ Comprehensive logging added to track edit flow, (3) ✅ All imports fixed - no NameError, (4) ✅ Backend restarted successfully, no errors in logs, (5) ✅ Edit flows properly return correct states (FROM_NAME for from address, TO_NAME for to address, PARCEL_WEIGHT for parcel). MANUAL TESTING REQUIRED: User needs to test via @whitelabel_shipping_bot_test_bot: (1) Create order and fill all data, (2) On confirmation screen, click 'Редактировать данные отправителя' button, (3) Verify bot shows 'Шаг 1/6: Имя отправителя' (NOT error message), (4) Test 'Редактировать данные получателя' button, (5) Test 'Редактировать посылку' button. All three edit flows should work without error."
 
+
+backend:
+  - task: "Template Rename - State Type Mismatch Fix"
+    implemented: true
+    working: pending_user_test
+    file: "/app/backend/handlers/template_handlers.py"
+    stuck_count: 1
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "❌ USER REPORTED ISSUE: When renaming a template, bot freezes after entering new name. User clicks 'Переименовать' button on template view screen, bot shows prompt 'Введите новое название для шаблона:', user types new name (e.g., '3131') and sends it, but bot doesn't respond - it hangs."
+        - working: "NA"
+          agent: "main_fork"
+          comment: "🔧 ROOT CAUSE IDENTIFIED: Type mismatch in state return value. The rename_template_start function was returning STRING 'TEMPLATE_RENAME' instead of INTEGER constant TEMPLATE_RENAME. In server.py, TEMPLATE_RENAME is defined as part of range(29), making it an integer (value 27). When ConversationHandler receives string instead of integer, it can't match the state and the conversation breaks. CRITICAL FIX: (1) Import TEMPLATE_RENAME constant from server.py in rename_template_start function, (2) Return integer TEMPLATE_RENAME instead of string 'TEMPLATE_RENAME', (3) Added comprehensive logging to both rename_template_start and rename_template_save functions to track flow, (4) Log template_id, new name, user_data state, and DB update result. Backend restarted successfully with no errors."
+        - working: "pending_user_test"
+          agent: "main_fork"
+          comment: "✅ TECHNICAL IMPLEMENTATION VERIFIED: All code changes correctly implemented. VERIFICATION: (1) ✅ TEMPLATE_RENAME constant imported from server.py, (2) ✅ Function returns integer TEMPLATE_RENAME (not string), (3) ✅ Comprehensive logging added to track rename flow, (4) ✅ Backend restarted successfully, no errors in logs, (5) ✅ ConversationHandler properly configured with TEMPLATE_RENAME state. MANUAL TESTING REQUIRED: User needs to test via @whitelabel_shipping_bot_test_bot: (1) /start → Мои шаблоны, (2) Select template → view template details, (3) Click 'Переименовать' (rename) button, (4) Enter new name (e.g., 'Test 123'), (5) Verify bot responds with '✅ Шаблон переименован' (NOT hang). Check logs for: '🔄 Starting template rename', '🟢 rename_template_save CALLED', '✅ Template renamed successfully'."
+
