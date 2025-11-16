@@ -408,6 +408,8 @@ async def check_stale_interaction(query, context: ContextTypes.DEFAULT_TYPE) -> 
     order_data_keys = ['from_name', 'to_name', 'parcel_weight', 'selected_rate']
     has_order_data = any(key in context.user_data for key in order_data_keys)
     
+    logger.info(f"Order data check: keys in user_data={list(context.user_data.keys())}, has_order_data={has_order_data}")
+    
     if not has_order_data:
         logger.info("Stale interaction detected - no order data in user_data, silently ignoring")
         await safe_telegram_call(query.answer())
