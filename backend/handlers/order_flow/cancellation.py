@@ -24,6 +24,12 @@ async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.callback_query:
         query = update.callback_query
         await safe_telegram_call(query.answer())
+        
+        # Remove buttons from the message that triggered cancel
+        try:
+            await safe_telegram_call(query.message.edit_reply_markup(reply_markup=None))
+        except Exception as e:
+            logger.warning(f"Could not remove buttons from previous message: {e}")
     
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
     asyncio.create_task(mark_message_as_selected(update, context))
