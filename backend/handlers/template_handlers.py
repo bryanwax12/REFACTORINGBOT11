@@ -184,7 +184,7 @@ async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_
         await query.message.reply_text(TemplateMessages.delete_error())
     
     # Return to templates menu
-    await my_templates_menu(update, context, db, safe_telegram_call, None, None, None)
+    await my_templates_menu(update, context)
 
 
 async def rename_template_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
