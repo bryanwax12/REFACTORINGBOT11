@@ -64,9 +64,17 @@ async def view_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Import required functions
     from server import db, safe_telegram_call
     from utils.db_operations import find_template_by_id
+    import logging
+    logger = logging.getLogger(__name__)
     
     query = update.callback_query
     await safe_telegram_call(query.answer())
+    
+    # Remove buttons from template list message
+    try:
+        await safe_telegram_call(query.message.edit_reply_markup(reply_markup=None))
+    except Exception as e:
+        logger.debug(f"Could not remove template list buttons: {e}")
     
     # Extract template ID from callback data
     template_id = query.data.replace('template_view_', '')
@@ -84,7 +92,7 @@ async def view_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = TemplateMessages.template_details(template)
     reply_markup = get_template_view_keyboard(template_id)
     
-    await query.message.reply_text(message, reply_markup=reply_markup)
+    await query.message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown')
 
 
 async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
