@@ -7,7 +7,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(tags=["webhooks"])
+router = APIRouter(prefix="/api", tags=["webhooks"])
 
 
 @router.post("/oxapay/webhook")
