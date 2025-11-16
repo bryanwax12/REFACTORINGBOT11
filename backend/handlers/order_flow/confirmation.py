@@ -234,6 +234,8 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         # Mark previous message as selected (non-blocking)
         asyncio.create_task(mark_message_as_selected(update, context))
         
+        logger.info(f"🔧 Starting PARCEL edit - user_data keys: {list(context.user_data.keys())}")
+        
         # Edit parcel dimensions
         context.user_data['editing_parcel'] = True
         from utils.ui_utils import get_cancel_keyboard
@@ -245,6 +247,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         if bot_msg:
             context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_state'] = STATE_NAMES[PARCEL_WEIGHT]
+        logger.info(f"✅ Returning PARCEL_WEIGHT state for editing")
         return PARCEL_WEIGHT
     
     if query.data == 'back_to_confirmation':
