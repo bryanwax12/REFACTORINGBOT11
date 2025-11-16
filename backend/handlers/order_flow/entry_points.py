@@ -206,13 +206,13 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     
     # Build order summary section
     from_name = pending_order.get('from_name', 'N/A')
-    from_street = pending_order.get('from_street', pending_order.get('from_address', 'N/A'))
+    from_street = pending_order.get('from_address', 'N/A')  # Use 'from_address' (correct key)
     from_city = pending_order.get('from_city', 'N/A')
     from_state = pending_order.get('from_state', 'N/A')
     from_zip = pending_order.get('from_zip', 'N/A')
     
     to_name = pending_order.get('to_name', 'N/A')
-    to_street = pending_order.get('to_street', pending_order.get('to_address', 'N/A'))
+    to_street = pending_order.get('to_address', 'N/A')  # Use 'to_address' (correct key)
     to_city = pending_order.get('to_city', 'N/A')
     to_state = pending_order.get('to_state', 'N/A')
     to_zip = pending_order.get('to_zip', 'N/A')
