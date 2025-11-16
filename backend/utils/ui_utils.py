@@ -1010,7 +1010,13 @@ ShipStation не смог проверить один или оба адреса
                     # Check if any popular keyword is in the service name
                     for keyword in popular_keywords:
                         if keyword in service_lower:
-                            filtered.append(rate)
+                            # Normalize carrier name: Stamps.com -> USPS
+                            rate_copy = rate.copy()
+                            if popular_carrier == 'Stamps.com':
+                                rate_copy['carrier'] = 'USPS'
+                            else:
+                                rate_copy['carrier'] = popular_carrier
+                            filtered.append(rate_copy)
                             logger.info(f"   ✅ Service matched: {popular_carrier} - {service}")
                             matched = True
                             break  # Found match, move to next rate
