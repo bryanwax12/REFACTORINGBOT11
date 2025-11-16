@@ -5869,3 +5869,23 @@ street2 = data.get(f'{prefix}_address2', data.get(f'{prefix}_street2', ''))
 ### 📋 Готово к тестированию:
 Создайте заказ и проверьте экран подтверждения - все данные должны отображаться красиво и структурированно.
 
+
+backend:
+  - task: "Templates Feature - Use Template Handler Registration Fix"
+    implemented: true
+    working: pending_user_test
+    file: "/app/backend/handlers/template_handlers.py, /app/backend/handlers/order_flow/conversation_setup.py, /app/backend/server.py"
+    stuck_count: 1
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "❌ USER REPORTED ISSUE: Bot freezes after using template and entering parcel weight. User clicks 'Мои шаблоны' → selects template → clicks 'Использовать шаблон' → bot asks for weight → user enters weight (e.g., '1') → bot does not respond and freezes. Expected behavior: bot should ask for parcel dimensions (length, width, height) after weight is entered."
+        - working: "NA"
+          agent: "main_fork"
+          comment: "🔧 ROOT CAUSE IDENTIFIED: The use_template handler was registered as GLOBAL CallbackQueryHandler (line 1302 in server.py) OUTSIDE of ConversationHandler. When it returned PARCEL_WEIGHT state, this return value was ignored because it wasn't inside ConversationHandler. This prevented bot from transitioning to PARCEL_WEIGHT state properly. ARCHITECTURAL FIX: (1) Added use_template as ENTRY POINT to order_conv_handler in conversation_setup.py (line 108), (2) Removed use_template from global handlers registration in server.py (line 1302 deleted), (3) Added comprehensive logging to use_template function to track template loading and state transitions, (4) Added logging to order_parcel_weight handler to track when it's invoked, (5) Modified use_template to show weight prompt immediately after loading template (combining confirmation + weight input in one message). Now when user clicks 'Использовать шаблон', use_template enters ConversationHandler as entry point and properly transitions to PARCEL_WEIGHT state. Backend restarted successfully. Ready for manual testing via Telegram bot."
+        - working: "pending_user_test"
+          agent: "main_fork"
+          comment: "✅ TECHNICAL IMPLEMENTATION VERIFIED: All code changes correctly implemented. VERIFICATION: (1) ✅ use_template added as entry_point in order_conv_handler with pattern '^template_use_', (2) ✅ use_template removed from global handlers (no longer registered outside ConversationHandler), (3) ✅ Comprehensive logging added to both use_template and order_parcel_weight functions, (4) ✅ Template data loading includes all address fields (from_name, from_address, to_name, to_address, etc.), (5) ✅ Weight prompt now combined with template loaded message, (6) ✅ Backend restarted successfully, no errors in logs. MANUAL TESTING REQUIRED: User needs to test complete flow via @whitelabel_shipping_bot_test_bot: (1) Send /start command, (2) Click 'Мои шаблоны' button, (3) Select any template from list, (4) Click 'Использовать шаблон' button, (5) Enter weight (e.g., '1'), (6) Verify bot asks for parcel length (not freeze). Check backend logs at /var/log/supervisor/backend.out.log for messages: '🔵 use_template called', 'Template data loaded', '🔵 use_template returning PARCEL_WEIGHT state', '🟢 order_parcel_weight HANDLER INVOKED'."
+
