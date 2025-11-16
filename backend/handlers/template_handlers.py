@@ -62,7 +62,8 @@ async def view_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     Shows full address information and action buttons
     """
     # Import required functions
-    from server import db, find_template_by_id, safe_telegram_call
+    from server import db, safe_telegram_call
+    from utils.db_operations import find_template_by_id
     
     query = update.callback_query
     await safe_telegram_call(query.answer())
