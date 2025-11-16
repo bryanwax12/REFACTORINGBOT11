@@ -348,6 +348,8 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
     
     # Clear state
     context.user_data.pop('renaming_template_id', None)
+    context.user_data.pop('rename_prompt_message_id', None)
+    context.user_data.pop('rename_prompt_chat_id', None)
     
     # Return END to exit conversation
     from telegram.ext import ConversationHandler
