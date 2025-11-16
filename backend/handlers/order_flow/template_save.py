@@ -224,9 +224,11 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
     from server import (
         TOPUP_AMOUNT,
         safe_telegram_call, mark_message_as_selected,
-        insert_payment, db, Payment
+        db
     )
     from services.api_services import create_oxapay_invoice
+    from utils.db_operations import insert_payment
+    from models.payment import Payment
     from repositories import get_user_repo
     
     # Mark previous message as selected (remove "Отмена" button)
