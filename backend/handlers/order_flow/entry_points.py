@@ -175,12 +175,16 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     
     # Mark previous message as selected (non-blocking)
     asyncio.create_task(mark_message_as_selected(update, context))
+    print("🔵 Message marked as selected")
     
     if not pending_order or not pending_order.get('selected_rate'):
+        print("🔴 ERROR: No pending order or no selected_rate")
         await safe_telegram_call(query.message.reply_text(
             "❌ Не найдены данные незавершенного заказа.\n\nПожалуйста, создайте новый заказ."
         ))
         return ConversationHandler.END
+    
+    print("🔵 Pending order validated")
     
     # Restore order data to context
     context.user_data.update(pending_order)
