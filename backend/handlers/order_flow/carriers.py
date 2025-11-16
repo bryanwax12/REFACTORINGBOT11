@@ -157,8 +157,8 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return SELECT_CARRIER
         
         # Get discount info
-        user_discount = context.user_data.get('user_discount', 0)
-        discount_amount = context.user_data.get('discount_amount', 0)
+        discount_percent = context.user_data.get('user_discount', 0)
+        discount_amount_val = context.user_data.get('discount_amount', 0)
         
         # Create order with status "pending"
         logger.info(f"📦 Creating pending order for user {query.from_user.id}")
@@ -167,8 +167,8 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
             data=context.user_data, 
             selected_rate=selected_rate, 
             amount=final_cost, 
-            user_discount=user_discount, 
-            discount_amount=discount_amount
+            discount_percent=discount_percent, 
+            discount_amount=discount_amount_val
         )
         
         # Save order_id in context for later use
