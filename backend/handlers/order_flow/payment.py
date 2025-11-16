@@ -131,23 +131,68 @@ async def show_order_summary(update: Update, context: ContextTypes.DEFAULT_TYPE)
     selected_service = data.get('selected_service', 'Standard')
     amount = data.get('final_amount', 0)
     
-    from_address = f"{data.get('from_name', 'N/A')}\n{data.get('from_street', 'N/A')}\n{data.get('from_city', 'N/A')}, {data.get('from_state', 'N/A')} {data.get('from_zip', 'N/A')}"
-    to_address = f"{data.get('to_name', 'N/A')}\n{data.get('to_street', 'N/A')}\n{data.get('to_city', 'N/A')}, {data.get('to_state', 'N/A')} {data.get('to_zip', 'N/A')}"
+    # Format addresses with proper field names
+    from_name = data.get('from_name', 'N/A')
+    from_street = data.get('from_address', data.get('from_street', 'N/A'))
+    from_street2 = data.get('from_address2', data.get('from_street2', ''))
+    from_city = data.get('from_city', 'N/A')
+    from_state = data.get('from_state', 'N/A')
+    from_zip = data.get('from_zip', 'N/A')
+    from_phone = data.get('from_phone', '')
     
+    to_name = data.get('to_name', 'N/A')
+    to_street = data.get('to_address', data.get('to_street', 'N/A'))
+    to_street2 = data.get('to_address2', data.get('to_street2', ''))
+    to_city = data.get('to_city', 'N/A')
+    to_state = data.get('to_state', 'N/A')
+    to_zip = data.get('to_zip', 'N/A')
+    to_phone = data.get('to_phone', '')
+    
+    # Parcel details
     weight = data.get('parcel_weight', 0)
+    length = data.get('parcel_length', '')
+    width = data.get('parcel_width', '')
+    height = data.get('parcel_height', '')
     
     # Build summary message
     summary = f"""📦 <b>Информация о заказе</b>
 {'='*30}
 
 <b>📍 Отправитель:</b>
-{from_address}
+👤 {from_name}
+📍 {from_street}"""
+    
+    if from_street2 and from_street2.strip():
+        summary += f"\n🏢 {from_street2}"
+    
+    summary += f"\n🏙️ {from_city}, {from_state} {from_zip}"
+    
+    if from_phone:
+        summary += f"\n📱 {from_phone}"
+    
+    summary += f"""
 
 <b>📍 Получатель:</b>
-{to_address}
+👤 {to_name}
+📍 {to_street}"""
+    
+    if to_street2 and to_street2.strip():
+        summary += f"\n🏢 {to_street2}"
+    
+    summary += f"\n🏙️ {to_city}, {to_state} {to_zip}"
+    
+    if to_phone:
+        summary += f"\n📱 {to_phone}"
+    
+    summary += f"""
 
 <b>📦 Посылка:</b>
-Вес: {weight} lbs
+⚖️ Вес: {weight} lbs"""
+    
+    if length and width and height:
+        summary += f"\n📐 Размеры: {length}\" × {width}\" × {height}\""
+    
+    summary += f"""
 
 <b>🚚 Выбранный тариф:</b>
 {selected_carrier} - {selected_service}
