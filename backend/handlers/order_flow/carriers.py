@@ -178,8 +178,10 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         "amount": final_cost
                     }}
                 )
-                order = existing_order
-                order['order_id'] = existing_order_id
+                # Reload order from DB to get updated values
+                order = await db.orders.find_one({"order_id": existing_order_id}, {"_id": 0})
+                if not order:
+                    order = existing_order
                 logger.info(f"✅ Order {existing_order_id} updated with new rate")
             else:
                 # Old order was paid/cancelled, create new one
