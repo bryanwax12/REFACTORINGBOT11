@@ -1347,13 +1347,13 @@ Label будет создан и отправлен вам в течение м�
     def payment_method_selection(amount: float, balance: float) -> str:
         """Payment method selection screen"""
         if balance >= amount:
-            return f"""💳 Выберите способ оплаты:
+            return f"""💳 *Оплата заказа*
 
 Сумма к оплате: ${amount:.2f}
 Ваш баланс: ${balance:.2f}"""
         else:
             deficit = amount - balance
-            return f"""💳 Выберите способ оплаты:
+            return f"""💳 *Оплата заказа*
 
 Сумма к оплате: ${amount:.2f}
 Ваш баланс: ${balance:.2f}
