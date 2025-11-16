@@ -935,8 +935,12 @@ ShipStation не смог проверить один или оба адреса
         # Build message
         message = f"📦 Найдено {len(filtered_rates)} тарифов от {unique_carriers} курьеров:\n\n"
         
-        # Display rates grouped by carrier
-        for carrier in sorted(rates_by_carrier.keys()):
+        # Display rates grouped by carrier (sorted by priority: USPS, FedEx, UPS)
+        # Sort carriers by their priority, not alphabetically
+        def carrier_sort_key(carrier_name):
+            return CARRIER_ORDER.get(carrier_name, 999)
+        
+        for carrier in sorted(rates_by_carrier.keys(), key=carrier_sort_key):
             carrier_icon = ShippingRatesUI.CARRIER_ICONS.get(carrier, '📦')
             message += f"{'='*30}\n<b>{carrier_icon}</b>\n{'='*30}\n\n"
             
