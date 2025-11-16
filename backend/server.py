@@ -1298,8 +1298,8 @@ async def startup_event():
             application.add_handler(CommandHandler("balance", my_balance_command))
             
             # Template handlers (must be before generic button_callback)
+            # NOTE: use_template is now handled as entry point in order_conv_handler
             application.add_handler(CallbackQueryHandler(view_template, pattern='^template_view_'))
-            application.add_handler(CallbackQueryHandler(use_template, pattern='^template_use_'))
             application.add_handler(CallbackQueryHandler(delete_template, pattern='^template_delete_'))
             application.add_handler(CallbackQueryHandler(confirm_delete_template, pattern='^template_confirm_delete_'))
             # rename_template_start is now handled by template_rename_handler ConversationHandler
