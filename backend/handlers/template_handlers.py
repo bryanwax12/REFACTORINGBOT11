@@ -227,7 +227,7 @@ async def rename_template_start(update: Update, context: ContextTypes.DEFAULT_TY
     Start template rename flow
     """
     # Import required functions
-    from server import safe_telegram_call
+    from server import safe_telegram_call, TEMPLATE_RENAME
     import logging
     logger = logging.getLogger(__name__)
     
@@ -235,6 +235,8 @@ async def rename_template_start(update: Update, context: ContextTypes.DEFAULT_TY
     await safe_telegram_call(query.answer())
     
     template_id = query.data.replace('template_rename_', '')
+    
+    logger.info(f"🔄 Starting template rename for template_id: {template_id}")
     
     # Remove buttons from template view message
     try:
@@ -253,7 +255,8 @@ async def rename_template_start(update: Update, context: ContextTypes.DEFAULT_TY
     await query.message.reply_text(message, reply_markup=reply_markup)
     
     # Transition to TEMPLATE_RENAME state
-    return "TEMPLATE_RENAME"
+    logger.info(f"✅ Returning TEMPLATE_RENAME state (value: {TEMPLATE_RENAME})")
+    return TEMPLATE_RENAME
 
 
 async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYPE):
