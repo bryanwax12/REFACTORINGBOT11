@@ -68,7 +68,10 @@ async def find_user_templates(telegram_id: int, limit: int = 10):
     """Профилируемый поиск шаблонов пользователя"""
     from repositories import get_repositories
     repos = get_repositories()
-    return await repos.templates.get_user_templates(telegram_id, limit=limit)
+    # Note: get_user_templates doesn't accept limit parameter
+    templates = await repos.templates.get_user_templates(telegram_id)
+    # Apply limit manually if needed
+    return templates[:limit] if templates else []
 
 
 @profile_db_query("update_order")
