@@ -108,11 +108,14 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     template_id = query.data.replace('template_use_', '')
     
-    from utils.ui_utils import TemplateMessages, get_cancel_keyboard
+    logger.info(f"🔵 use_template called with template_id: {template_id}")
+    
+    from utils.ui_utils import TemplateMessages, get_cancel_keyboard, OrderStepMessages
     
     template = await find_template_by_id(template_id)
     
     if not template:
+        logger.error(f"❌ Template {template_id} not found")
         await query.message.reply_text(TemplateMessages.template_not_found())
         return
     
@@ -133,6 +136,8 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['to_zip'] = template.get('to_zip')
     context.user_data['to_phone'] = template.get('to_phone')
     
+    logger.info(f"✅ Template data loaded into context: from_name={context.user_data.get('from_name')}, to_name={context.user_data.get('to_name')}")
+    
     # Remove buttons from template view message
     try:
         await safe_telegram_call(query.message.edit_reply_markup(reply_markup=None))
@@ -140,12 +145,20 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.debug(f"Could not remove template buttons: {e}")
     
     message = TemplateMessages.template_loaded(template.get('name'))
+    
+    # Send prompt for weight input
+    weight_prompt = f"{message}\n\n{OrderStepMessages.PARCEL_WEIGHT}"
     reply_markup = get_cancel_keyboard()
     
-    await query.message.reply_text(message, reply_markup=reply_markup)
+    bot_msg = await query.message.reply_text(weight_prompt, reply_markup=reply_markup)
+    
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = weight_prompt
     
     # Transition to parcel weight step
     from server import PARCEL_WEIGHT
+    logger.info(f"🔵 use_template returning PARCEL_WEIGHT state (value: {PARCEL_WEIGHT})")
     return PARCEL_WEIGHT
 
 
