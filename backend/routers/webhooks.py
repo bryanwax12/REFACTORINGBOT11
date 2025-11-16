@@ -58,6 +58,25 @@ async def oxapay_webhook(request: Request):
 @router.post("/telegram/webhook")
 async def telegram_webhook(request: Request):
     """Handle Telegram webhook updates"""
-    from server import handle_telegram_webhook, application
-    
-    return await handle_telegram_webhook(request, application)
+    try:
+        import server as srv
+        from telegram import Update
+        import json
+        
+        # Get the update data from the request
+        update_data = await request.json()
+        
+        # Create a Telegram Update object
+        update = Update.de_json(update_data, srv.bot_instance)
+        
+        if update and srv.application:
+            # Process the update through the application
+            await srv.application.process_update(update)
+            return {"ok": True}
+        else:
+            logger.warning("No update or application not initialized")
+            return {"ok": False, "error": "Application not ready"}
+            
+    except Exception as e:
+        logger.error(f"Error processing Telegram webhook: {e}", exc_info=True)
+        return {"ok": False, "error": str(e)}
