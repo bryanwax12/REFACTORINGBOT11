@@ -1209,13 +1209,13 @@ class DataConfirmationUI:
                 street2 = None
         
         section = f"*{title}:*\n"
-        section += f"  👤  *{name}*\n"
-        section += f"  📍  {street}\n"
+        section += f"👤  *{name}*\n"
+        section += f"📍  {street}\n"
         if street2:
-            section += f"  🏢  {street2}\n"
-        section += f"  🏙️  {city}, {state} {zip_code}\n"
+            section += f"🏢  {street2}\n"
+        section += f"🏙️  {city}, {state} {zip_code}\n"
         if phone:
-            section += f"  📱  {phone}\n"
+            section += f"📱  {phone}\n"
         section += "\n"
         
         return section
