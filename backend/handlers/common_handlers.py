@@ -397,10 +397,19 @@ async def check_stale_interaction(query, context: ContextTypes.DEFAULT_TYPE) -> 
         await safe_telegram_call(query.answer("⚠️ Пожалуйста, подождите..."))
         return True  # Block this interaction
     
-    # If user_data is empty or doesn't have active order data, it's likely stale
+    # If user_data is completely empty, it's likely a stale button from a completed order
     if not context.user_data or len(context.user_data) == 0:
         logger.info("Stale interaction detected - empty user_data, silently ignoring")
         # Silently ignore stale button clicks - just answer the callback
+        await safe_telegram_call(query.answer())
+        return True
+    
+    # If user_data exists but has no order-related data, it's also stale
+    order_data_keys = ['from_name', 'to_name', 'parcel_weight', 'selected_rate']
+    has_order_data = any(key in context.user_data for key in order_data_keys)
+    
+    if not has_order_data:
+        logger.info("Stale interaction detected - no order data in user_data, silently ignoring")
         await safe_telegram_call(query.answer())
         return True
     
