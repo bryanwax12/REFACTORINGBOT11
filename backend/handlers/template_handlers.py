@@ -125,6 +125,12 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['to_zip'] = template.get('to_zip')
     context.user_data['to_phone'] = template.get('to_phone')
     
+    # Remove buttons from template view message
+    try:
+        await safe_telegram_call(query.message.edit_reply_markup(reply_markup=None))
+    except Exception as e:
+        logger.debug(f"Could not remove template buttons: {e}")
+    
     message = TemplateMessages.template_loaded(template.get('name'))
     reply_markup = get_cancel_keyboard()
     
