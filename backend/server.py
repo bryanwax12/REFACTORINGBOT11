@@ -664,8 +664,8 @@ async def create_order_in_db(user, data, selected_rate, amount, discount_percent
         telegram_id=user['telegram_id'],
         address_from=Address(
             name=data['from_name'],
-            street1=data['from_street'],
-            street2=data.get('from_street2'),
+            street1=data.get('from_address', data.get('from_street', '')),  # Use from_address (correct key)
+            street2=data.get('from_address2', data.get('from_street2', '')),
             city=data['from_city'],
             state=data['from_state'],
             zip=data['from_zip'],
@@ -674,8 +674,8 @@ async def create_order_in_db(user, data, selected_rate, amount, discount_percent
         ),
         address_to=Address(
             name=data['to_name'],
-            street1=data['to_street'],
-            street2=data.get('to_street2'),
+            street1=data.get('to_address', data.get('to_street', '')),  # Use to_address (correct key)
+            street2=data.get('to_address2', data.get('to_street2', '')),
             city=data['to_city'],
             state=data['to_state'],
             zip=data['to_zip'],
