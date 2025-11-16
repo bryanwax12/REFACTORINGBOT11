@@ -29,9 +29,13 @@ async def oxapay_webhook(request: Request):
         
         user_repo = get_user_repo()
         
-        # Simple pending order lookup using db directly
-        async def find_pending_order(order_id):
-            return await srv.db.pending_orders.find_one({"order_id": order_id}, {"_id": 0})
+        # Simple pending order lookup by telegram_id (for topup flow) or order_id (for order flow)
+        async def find_pending_order(identifier):
+            # Try telegram_id first (for topup), then order_id (for order payment)
+            result = await srv.db.pending_orders.find_one({"telegram_id": identifier}, {"_id": 0})
+            if not result:
+                result = await srv.db.pending_orders.find_one({"order_id": identifier}, {"_id": 0})
+            return result
         
         print("🚀 About to call handle_oxapay_webhook...")
         result = await handle_oxapay_webhook(
