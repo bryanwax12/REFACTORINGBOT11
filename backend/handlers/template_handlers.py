@@ -278,20 +278,24 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
     logger.info(f"   Message text: {update.message.text}")
     logger.info(f"   context.user_data keys: {list(context.user_data.keys())}")
     
-    # Remove buttons from the prompt message
+    # Remove buttons from the prompt message using bot instance
     rename_prompt_msg_id = context.user_data.get('rename_prompt_message_id')
     rename_prompt_chat_id = context.user_data.get('rename_prompt_chat_id')
     
     if rename_prompt_msg_id and rename_prompt_chat_id:
         try:
-            await update.effective_chat.bot.edit_message_reply_markup(
+            # Use the bot from context
+            bot = context.bot
+            await bot.edit_message_reply_markup(
                 chat_id=rename_prompt_chat_id,
                 message_id=rename_prompt_msg_id,
                 reply_markup=None
             )
-            logger.info(f"✅ Removed buttons from prompt message")
+            logger.info(f"✅ Removed buttons from prompt message {rename_prompt_msg_id}")
         except Exception as e:
-            logger.debug(f"Could not remove prompt buttons: {e}")
+            logger.warning(f"Could not remove prompt buttons: {e}")
+    else:
+        logger.warning(f"No prompt message IDs found in context")
     
     new_name = update.message.text.strip()
     
