@@ -1173,7 +1173,7 @@ class DataConfirmationUI:
         section += f"  👤  *{name}*\n"
         section += f"  📍  {street}\n"
         if street2:
-            section += f"       {street2}\n"
+            section += f"  🏢  {street2}\n"
         section += f"  🏙️  {city}, {state} {zip_code}\n"
         if phone:
             section += f"  📱  {phone}\n"
