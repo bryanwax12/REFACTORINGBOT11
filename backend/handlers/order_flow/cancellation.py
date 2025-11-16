@@ -87,6 +87,26 @@ async def confirm_cancel_order(update: Update, context: ContextTypes.DEFAULT_TYP
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
     asyncio.create_task(mark_message_as_selected(update, context))
     
+    # Cancel pending order if exists (NEW LOGIC)
+    order_id = context.user_data.get('order_id')
+    if order_id:
+        from server import db
+        
+        # Find order
+        order = await db.orders.find_one({"order_id": order_id}, {"_id": 0})
+        
+        if order and order.get('payment_status') == 'pending':
+            # Update status to "cancelled"
+            await db.orders.update_one(
+                {"order_id": order_id},
+                {"$set": {"payment_status": "cancelled", "shipping_status": "cancelled"}}
+            )
+            logger.info(f"✅ Order {order_id} cancelled")
+        elif order and order.get('payment_status') == 'paid':
+            logger.warning(f"⚠️ Cannot cancel paid order {order_id}")
+        else:
+            logger.info(f"ℹ️ Order {order_id} not found or already cancelled")
+    
     # Clear session and context data
     user_id = update.effective_user.id
     
