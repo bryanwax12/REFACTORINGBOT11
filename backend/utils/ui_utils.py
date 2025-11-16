@@ -1203,7 +1203,7 @@ class DataConfirmationUI:
         section += f"  🏙️  {city}, {state} {zip_code}\n"
         if phone:
             section += f"  📱  {phone}\n"
-        section += "\n\n"
+        section += "\n"
         
         return section
     
