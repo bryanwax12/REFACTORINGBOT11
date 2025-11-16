@@ -452,10 +452,10 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
             from server import TOPUP_AMOUNT, STATE_NAMES
             context.user_data['last_state'] = STATE_NAMES[TOPUP_AMOUNT]  # Save state for cancel return
             
-        from utils.ui_utils import get_cancel_keyboard
-        reply_markup = get_cancel_keyboard()
-        
-        message_text = """💵 Пополнение баланса
+            from utils.ui_utils import get_cancel_keyboard
+            reply_markup = get_cancel_keyboard()
+            
+            message_text = """💵 Пополнение баланса
 
 Введите сумму пополнения в долларах США (USD):
 
@@ -463,18 +463,18 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 Минимальная сумма: $5
 Максимальная сумма: $1000"""
-        
-        bot_msg = await safe_telegram_call(query.message.reply_text(
-            message_text,
-            reply_markup=reply_markup
-        ))
-        
-        # Save message context for button protection
-        context.user_data['last_bot_message_id'] = bot_msg.message_id
-        context.user_data['last_bot_message_text'] = message_text
-        
-        from server import TOPUP_AMOUNT
-        return TOPUP_AMOUNT
+            
+            bot_msg = await safe_telegram_call(query.message.reply_text(
+                message_text,
+                reply_markup=reply_markup
+            ))
+            
+            # Save message context for button protection
+            context.user_data['last_bot_message_id'] = bot_msg.message_id
+            context.user_data['last_bot_message_text'] = message_text
+            
+            from server import TOPUP_AMOUNT
+            return TOPUP_AMOUNT
     
     except Exception as e:
         logger.error(f"Payment error: {e}")
