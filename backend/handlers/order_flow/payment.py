@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 from utils.handler_decorators import with_user_session, safe_handler
 from handlers.common_handlers import check_stale_interaction
+from server import safe_telegram_call
 
 
 @safe_handler(fallback_state=ConversationHandler.END)
