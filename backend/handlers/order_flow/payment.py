@@ -263,12 +263,15 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await safe_telegram_call(query.answer())
     
     if query.data == 'cancel_order':
+        from handlers.order_flow.cancellation import cancel_order
         return await cancel_order(update, context)
     
     if query.data == 'confirm_cancel':
+        from handlers.order_flow.cancellation import confirm_cancel_order
         return await confirm_cancel_order(update, context)
     
     if query.data == 'return_to_order':
+        from handlers.order_flow.cancellation import return_to_order
         return await return_to_order(update, context)
     
     # Handle back to rates
@@ -276,6 +279,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Mark previous message as selected (remove buttons and add "✅ Выбрано")
         asyncio.create_task(mark_message_as_selected(update, context))
         # Return to rate selection - call fetch_shipping_rates again
+        from handlers.order_flow.rates import fetch_shipping_rates
         return await fetch_shipping_rates(update, context)
     
     # Mark previous message as selected (remove buttons)
