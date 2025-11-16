@@ -296,12 +296,36 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
         {"$set": {"name": new_name}}
     )
     
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+    
     if result.modified_count > 0:
         logger.info(f"✅ Template renamed successfully")
-        await update.message.reply_text(f"✅ Шаблон переименован в '{new_name}'")
+        
+        # Create keyboard with navigation buttons
+        keyboard = [
+            [InlineKeyboardButton("📋 Вернуться к шаблонам", callback_data='my_templates')],
+            [InlineKeyboardButton("🏠 Главное меню", callback_data='start')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await update.message.reply_text(
+            f"✅ Шаблон переименован в '{new_name}'",
+            reply_markup=reply_markup
+        )
     else:
         logger.error(f"❌ Template update failed - modified_count: {result.modified_count}")
-        await update.message.reply_text("❌ Ошибка при переименовании")
+        
+        # Even on error, provide navigation
+        keyboard = [
+            [InlineKeyboardButton("📋 Вернуться к шаблонам", callback_data='my_templates')],
+            [InlineKeyboardButton("🏠 Главное меню", callback_data='start')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await update.message.reply_text(
+            "❌ Ошибка при переименовании",
+            reply_markup=reply_markup
+        )
     
     # Clear state
     context.user_data.pop('renaming_template_id', None)
