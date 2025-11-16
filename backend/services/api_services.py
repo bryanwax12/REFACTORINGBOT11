@@ -40,17 +40,21 @@ async def create_oxapay_invoice(amount: float, order_id: str, description: str =
         }
         
         # Prepare payload according to official documentation (using camelCase for Oxapay)
+        webhook_url = f"{os.environ.get('WEBHOOK_BASE_URL', 'https://shipping-rates-4.preview.emergentagent.com')}/api/oxapay/webhook"
         payload = {
             "amount": amount,
             "currency": "USD",
             "lifeTime": 30,  # 30 minutes
             "feePaidByPayer": 0,  # Merchant pays fees
             "underPaidCoverage": 2,  # Accept 2% underpayment
-            "callbackUrl": f"{os.environ.get('WEBHOOK_BASE_URL', 'https://shipping-rates-4.preview.emergentagent.com')}/api/oxapay/webhook",
+            "callbackUrl": webhook_url,
             "returnUrl": f"https://t.me/{os.environ.get('BOT_USERNAME', '')}",
             "description": description,
             "orderId": order_id
         }
+        
+        print(f"🔗 Creating Oxapay invoice with callbackUrl: {webhook_url}")
+        logger.info(f"Creating Oxapay invoice: amount=${amount}, callbackUrl={webhook_url}")
         
         # Profile Oxapay API call (now truly async!)
         api_start_time = time.perf_counter()
