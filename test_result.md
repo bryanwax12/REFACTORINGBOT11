@@ -5889,3 +5889,23 @@ backend:
           agent: "main_fork"
           comment: "✅ TECHNICAL IMPLEMENTATION VERIFIED: All code changes correctly implemented. VERIFICATION: (1) ✅ use_template added as entry_point in order_conv_handler with pattern '^template_use_', (2) ✅ use_template removed from global handlers (no longer registered outside ConversationHandler), (3) ✅ Comprehensive logging added to both use_template and order_parcel_weight functions, (4) ✅ Template data loading includes all address fields (from_name, from_address, to_name, to_address, etc.), (5) ✅ Weight prompt now combined with template loaded message, (6) ✅ Backend restarted successfully, no errors in logs. MANUAL TESTING REQUIRED: User needs to test complete flow via @whitelabel_shipping_bot_test_bot: (1) Send /start command, (2) Click 'Мои шаблоны' button, (3) Select any template from list, (4) Click 'Использовать шаблон' button, (5) Enter weight (e.g., '1'), (6) Verify bot asks for parcel length (not freeze). Check backend logs at /var/log/supervisor/backend.out.log for messages: '🔵 use_template called', 'Template data loaded', '🔵 use_template returning PARCEL_WEIGHT state', '🟢 order_parcel_weight HANDLER INVOKED'."
 
+
+backend:
+  - task: "Edit Data Buttons - Stale Interaction Check Fix"
+    implemented: true
+    working: pending_user_test
+    file: "/app/backend/handlers/order_flow/confirmation.py"
+    stuck_count: 1
+    priority: "critical"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "❌ USER REPORTED ISSUE: When clicking edit buttons (edit FROM address, edit TO address, edit parcel weight) from data confirmation screen, bot shows error '❌ Произошла ошибка. Пожалуйста, попробуйте снова или используйте /start'. This happens for all three edit buttons."
+        - working: "NA"
+          agent: "main_fork"
+          comment: "🔧 ROOT CAUSE IDENTIFIED: The check_stale_interaction function was blocking edit button clicks because it checks if order data exists in context.user_data. When using templates or in certain states, this check was too aggressive and blocked legitimate edit actions. ARCHITECTURAL FIX: (1) Modified handle_data_confirmation to SKIP stale check for edit buttons (edit_from_address, edit_to_address, edit_parcel, edit_data), (2) Added comprehensive logging to track user_data state when edit buttons are clicked, (3) Fixed import errors - added all required imports (FROM_NAME, TO_NAME, PARCEL_WEIGHT, STATE_NAMES) at function start, (4) Edit buttons now work regardless of stale interaction checks since they should always be valid when user is on CONFIRM_DATA screen. Backend restarted successfully with no import errors. Ready for manual testing."
+        - working: "pending_user_test"
+          agent: "main_fork"
+          comment: "✅ TECHNICAL IMPLEMENTATION VERIFIED: All code changes correctly implemented. VERIFICATION: (1) ✅ Stale check skipped for edit buttons - edit_buttons list includes all edit actions, (2) ✅ Comprehensive logging added to track edit flow, (3) ✅ All imports fixed - no NameError, (4) ✅ Backend restarted successfully, no errors in logs, (5) ✅ Edit flows properly return correct states (FROM_NAME for from address, TO_NAME for to address, PARCEL_WEIGHT for parcel). MANUAL TESTING REQUIRED: User needs to test via @whitelabel_shipping_bot_test_bot: (1) Create order and fill all data, (2) On confirmation screen, click 'Редактировать данные отправителя' button, (3) Verify bot shows 'Шаг 1/6: Имя отправителя' (NOT error message), (4) Test 'Редактировать данные получателя' button, (5) Test 'Редактировать посылку' button. All three edit flows should work without error."
+
