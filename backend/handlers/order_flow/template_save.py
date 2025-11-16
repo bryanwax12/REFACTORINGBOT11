@@ -230,6 +230,10 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
     from utils.db_operations import insert_payment
     from models.payment import Payment
     from repositories import get_user_repo
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+    import time
+    import uuid
+    import asyncio
     
     # Mark previous message as selected (remove "Отмена" button)
     asyncio.create_task(mark_message_as_selected(update, context))
