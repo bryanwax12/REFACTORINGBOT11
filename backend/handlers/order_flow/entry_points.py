@@ -210,7 +210,7 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     else:
         # Not enough balance
         keyboard.append([InlineKeyboardButton("🪙 Оплатить криптовалютой", callback_data='pay_with_crypto')])
-        keyboard.append([InlineKeyboardButton("💵 Пополнить баланс", callback_data='top_up_balance')])
+        keyboard.append([InlineKeyboardButton("💵 Пополнить баланс", callback_data='topup_for_order')])
         
         message_text = f"""💳 *Выберите способ оплаты*
 
