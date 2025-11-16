@@ -301,13 +301,25 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         # Add $10 markup to all rates (hidden from user - shown as part of shipping cost)
         LABEL_MARKUP = 10.0
         for rate in context.user_data['rates']:
-            original_amount = rate.get('shipping_amount', {}).get('amount', 0.0)
+            # Get original amount from shipping_amount dict or amount field
+            if 'shipping_amount' in rate and isinstance(rate['shipping_amount'], dict):
+                original_amount = rate['shipping_amount'].get('amount', 0.0)
+            elif 'amount' in rate:
+                original_amount = rate['amount']
+            else:
+                original_amount = 0.0
+            
             # Store original amount for reference
             rate['original_amount'] = original_amount
+            
             # Add markup to displayed amount
-            rate['shipping_amount']['amount'] = original_amount + LABEL_MARKUP
-            # Also update 'amount' field if it exists
-            if 'amount' in rate:
+            if 'shipping_amount' in rate and isinstance(rate['shipping_amount'], dict):
+                rate['shipping_amount']['amount'] = original_amount + LABEL_MARKUP
+            elif 'amount' in rate:
+                rate['amount'] = original_amount + LABEL_MARKUP
+            else:
+                # Create shipping_amount structure if it doesn't exist
+                rate['shipping_amount'] = {'amount': original_amount + LABEL_MARKUP}
                 rate['amount'] = original_amount + LABEL_MARKUP
         
         logger.info(f"💰 Added ${LABEL_MARKUP} markup to {len(context.user_data['rates'])} rates")
