@@ -1213,9 +1213,9 @@ class DataConfirmationUI:
     def build_confirmation_keyboard() -> InlineKeyboardMarkup:
         """Build keyboard for data confirmation screen"""
         keyboard = [
-            [InlineKeyboardButton("✅ Всё верно, показать тарифы", callback_data='show_rates')],
+            [InlineKeyboardButton("✅ Всё верно, показать тарифы", callback_data='confirm_data')],
             [InlineKeyboardButton("✏️ Редактировать данные", callback_data='edit_data')],
-            [InlineKeyboardButton("💾 Сохранить как шаблон", callback_data='save_as_template')],
+            [InlineKeyboardButton("💾 Сохранить как шаблон", callback_data='save_template')],
             [InlineKeyboardButton(ButtonTexts.CANCEL, callback_data=CallbackData.CANCEL_ORDER)]
         ]
         return InlineKeyboardMarkup(keyboard)
