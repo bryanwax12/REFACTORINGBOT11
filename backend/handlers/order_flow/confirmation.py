@@ -140,6 +140,12 @@ async def show_edit_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle user's choice on data confirmation"""
     import logging
+    from server import (
+        FROM_NAME, FROM_ADDRESS, FROM_CITY, FROM_STATE, FROM_ZIP, FROM_PHONE,
+        TO_NAME, TO_ADDRESS, TO_CITY, TO_STATE, TO_ZIP, TO_PHONE,
+        PARCEL_WEIGHT, TEMPLATE_NAME, STATE_NAMES
+    )
+    
     logger = logging.getLogger(__name__)
     print("🎯 handle_data_confirmation CALLED!")
     logger.info(f"🎯 handle_data_confirmation called with query.data={update.callback_query.data if update.callback_query else 'None'}")
