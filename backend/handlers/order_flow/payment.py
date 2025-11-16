@@ -317,20 +317,43 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await safe_telegram_call(query.message.reply_text(PaymentFlowUI.insufficient_balance_error()))
                 return ConversationHandler.END
             
-            # Check if there's already a pending order for this user with same amount to prevent duplicates
+            # Check if there's already a recent order for this user with same rate to prevent duplicates
+            # Look for orders created in the last 5 minutes with same carrier/service
+            from datetime import datetime, timezone, timedelta
+            five_minutes_ago = (datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat()
+            
             existing_order = await db.orders.find_one({
                 "telegram_id": telegram_id,
                 "amount": amount,
-                "status": "pending"
+                "selected_carrier": selected_rate.get('carrier'),
+                "selected_service": selected_rate.get('service'),
+                "created_at": {"$gte": five_minutes_ago}
             }, {"_id": 0})
             
             if existing_order:
                 # Order already exists, use it
-                print(f"⚠️ Found existing pending order {existing_order['order_id'][:16]}... for user {telegram_id}, reusing")
+                print(f"⚠️ Found existing recent order {existing_order['order_id'][:16]}... for user {telegram_id}, reusing")
                 order = existing_order
             else:
-                # Create new order
-                order = await create_order_in_db(user, data, selected_rate, amount, user_discount, discount_amount)
+                # Create new order - wrap in try/catch to handle duplicate key error
+                try:
+                    order = await create_order_in_db(user, data, selected_rate, amount, user_discount, discount_amount)
+                except Exception as e:
+                    if 'duplicate key error' in str(e):
+                        # Order was just created (race condition), find and use it
+                        print(f"⚠️ Duplicate key error, finding existing order...")
+                        existing_order = await db.orders.find_one({
+                            "telegram_id": telegram_id,
+                            "amount": amount,
+                            "selected_carrier": selected_rate.get('carrier')
+                        }, {"_id": 0}, sort=[("created_at", -1)])
+                        if existing_order:
+                            print(f"✅ Found and reusing order {existing_order['order_id'][:16]}...")
+                            order = existing_order
+                        else:
+                            raise e
+                    else:
+                        raise e
             
             # Show progress indicator while creating label
             progress_msg = await safe_telegram_call(query.message.reply_text(
