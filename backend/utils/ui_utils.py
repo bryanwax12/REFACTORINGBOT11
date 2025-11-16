@@ -1014,8 +1014,15 @@ ShipStation не смог проверить один или оба адреса
                             rate_copy = rate.copy()
                             if popular_carrier == 'Stamps.com':
                                 rate_copy['carrier'] = 'USPS'
+                                rate_copy['carrier_friendly_name'] = 'USPS'
                             else:
                                 rate_copy['carrier'] = popular_carrier
+                                rate_copy['carrier_friendly_name'] = popular_carrier
+                            
+                            # Ensure service_type exists (fallback to service or service_name)
+                            if 'service_type' not in rate_copy:
+                                rate_copy['service_type'] = rate_copy.get('service', rate_copy.get('service_name', 'Standard'))
+                            
                             filtered.append(rate_copy)
                             logger.info(f"   ✅ Service matched: {popular_carrier} - {service}")
                             matched = True
