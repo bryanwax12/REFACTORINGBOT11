@@ -150,6 +150,14 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return last_state
     
     # last_state is a string (state name like "FROM_CITY")
+    
+    # Special handling for SELECT_CARRIER (shipping rates screen)
+    if last_state == 'SELECT_CARRIER':
+        logger.info("🔄 Returning to shipping rates screen")
+        from handlers.order_flow.rates import display_shipping_rates
+        # Show rates again using cached data
+        return await display_shipping_rates(update, context)
+    
     keyboard, message_text = OrderStepMessages.get_step_keyboard_and_message(last_state)
     
     # Special handling for parcel dimension states: check weight to decide keyboard
