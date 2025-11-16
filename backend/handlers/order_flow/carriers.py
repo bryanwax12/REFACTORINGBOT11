@@ -160,20 +160,59 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
         discount_percent = context.user_data.get('user_discount', 0)
         discount_amount_val = context.user_data.get('discount_amount', 0)
         
-        # Create order with status "pending"
-        logger.info(f"📦 Creating pending order for user {query.from_user.id}")
-        order = await create_order_in_db(
-            user=user, 
-            data=context.user_data, 
-            selected_rate=selected_rate, 
-            amount=final_cost, 
-            discount_percent=discount_percent, 
-            discount_amount=discount_amount_val
-        )
+        # Check if there's already an order_id in context from previous selection
+        existing_order_id = context.user_data.get('order_id')
         
-        # Save order_id in context for later use
-        context.user_data['order_id'] = order['order_id']
-        logger.info(f"✅ Order created: {order['order_id']}, status=pending")
+        if existing_order_id:
+            # Check if this order exists and is pending
+            existing_order = await db.orders.find_one({"order_id": existing_order_id}, {"_id": 0})
+            
+            if existing_order and existing_order.get('payment_status') == 'pending':
+                # Update existing order with new rate
+                logger.info(f"📦 Updating existing pending order {existing_order_id}")
+                await db.orders.update_one(
+                    {"order_id": existing_order_id},
+                    {"$set": {
+                        "selected_carrier": selected_rate.get('carrier_friendly_name', 'Unknown'),
+                        "selected_service": selected_rate.get('service_type', 'Standard'),
+                        "amount": final_cost
+                    }}
+                )
+                order = existing_order
+                order['order_id'] = existing_order_id
+                logger.info(f"✅ Order {existing_order_id} updated with new rate")
+            else:
+                # Old order was paid/cancelled, create new one
+                # Remove old order_id from context
+                if 'order_id' in context.user_data:
+                    del context.user_data['order_id']
+                
+                logger.info(f"📦 Creating new pending order for user {query.from_user.id}")
+                order = await create_order_in_db(
+                    user=user, 
+                    data=context.user_data, 
+                    selected_rate=selected_rate, 
+                    amount=final_cost, 
+                    discount_percent=discount_percent, 
+                    discount_amount=discount_amount_val
+                )
+                context.user_data['order_id'] = order['order_id']
+                logger.info(f"✅ Order created: {order['order_id']}, status=pending")
+        else:
+            # No existing order_id, create new order
+            logger.info(f"📦 Creating pending order for user {query.from_user.id}")
+            order = await create_order_in_db(
+                user=user, 
+                data=context.user_data, 
+                selected_rate=selected_rate, 
+                amount=final_cost, 
+                discount_percent=discount_percent, 
+                discount_amount=discount_amount_val
+            )
+            
+            # Save order_id in context for later use
+            context.user_data['order_id'] = order['order_id']
+            logger.info(f"✅ Order created: {order['order_id']}, status=pending")
         
         # Proceed to payment
         from handlers.order_flow.payment import show_payment_methods
