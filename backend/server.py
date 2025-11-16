@@ -970,20 +970,26 @@ Label PDF: {label_download_url}
                 
                 # Format admin notification
                 admin_message = f"""📦 *Новый лейбл создан!*
+━━━━━━━━━━━━━━━━━━━━━━
 
 👤 *Пользователь:* {user_display}
 
-📤 *От:* {order['address_from']['name']}
-   {order['address_from']['street1']}, {order['address_from']['city']}, {order['address_from']['state']} {order['address_from']['zip']}
+📍 *От:* {order['address_from']['name']}
+    📍 {order['address_from']['street1']}
+    🏙️ {order['address_from']['city']}, {order['address_from']['state']} {order['address_from']['zip']}
 
-📥 *Кому:* {order['address_to']['name']}  
-   {order['address_to']['street1']}, {order['address_to']['city']}, {order['address_to']['state']} {order['address_to']['zip']}
+📍 *Кому:* {order['address_to']['name']}
+    📍 {order['address_to']['street1']}
+    🏙️ {order['address_to']['city']}, {order['address_to']['state']} {order['address_to']['zip']}
+
+━━━━━━━━━━━━━━━━━━━━━━
 
 🚚 *Перевозчик:* {order['selected_carrier']} - {order['selected_service']}
-📋 *Трекинг:* `{tracking_number}`
+📦 *Трекинг:* `{tracking_number}`
 💰 *Цена:* ${order['amount']:.2f}
 ⚖️ *Вес:* {order['parcel']['weight']} lb
 
+━━━━━━━━━━━━━━━━━━━━━━
 🕐 *Время:* {datetime.now(timezone.utc).strftime('%d.%m.%Y %H:%M UTC')}"""
 
                 # Send to admin
