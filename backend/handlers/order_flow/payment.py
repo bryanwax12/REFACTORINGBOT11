@@ -300,11 +300,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         if query.data == 'pay_from_balance':
             # Import required functions
-            from server import (
-                create_order_in_db, 
-                create_and_send_label, 
-                db
-            )
+            from server import create_and_send_label, db
             from utils.db_operations import find_user_by_telegram_id, update_order
             from services.service_factory import ServiceFactory
             from utils.ui_utils import PaymentFlowUI
@@ -317,43 +313,36 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await safe_telegram_call(query.message.reply_text(PaymentFlowUI.insufficient_balance_error()))
                 return ConversationHandler.END
             
-            # Check if there's already a recent order for this user with same rate to prevent duplicates
-            # Look for orders created in the last 5 minutes with same carrier/service
-            from datetime import datetime, timezone, timedelta
-            five_minutes_ago = (datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat()
+            # NEW LOGIC: Get order_id from context (created when rate was selected)
+            order_id = context.user_data.get('order_id')
             
-            existing_order = await db.orders.find_one({
-                "telegram_id": telegram_id,
-                "amount": amount,
-                "selected_carrier": selected_rate.get('carrier'),
-                "selected_service": selected_rate.get('service'),
-                "created_at": {"$gte": five_minutes_ago}
-            }, {"_id": 0})
+            if not order_id:
+                logger.error("❌ order_id not found in context!")
+                await safe_telegram_call(query.message.reply_text(
+                    "❌ Ошибка: заказ не найден. Пожалуйста, начните заново."
+                ))
+                return ConversationHandler.END
             
-            if existing_order:
-                # Order already exists, use it
-                print(f"⚠️ Found existing recent order {existing_order['order_id'][:16]}... for user {telegram_id}, reusing")
-                order = existing_order
-            else:
-                # Create new order - wrap in try/catch to handle duplicate key error
-                try:
-                    order = await create_order_in_db(user, data, selected_rate, amount, user_discount, discount_amount)
-                except Exception as e:
-                    if 'duplicate key error' in str(e):
-                        # Order was just created (race condition), find and use it
-                        print(f"⚠️ Duplicate key error, finding existing order...")
-                        existing_order = await db.orders.find_one({
-                            "telegram_id": telegram_id,
-                            "amount": amount,
-                            "selected_carrier": selected_rate.get('carrier')
-                        }, {"_id": 0}, sort=[("created_at", -1)])
-                        if existing_order:
-                            print(f"✅ Found and reusing order {existing_order['order_id'][:16]}...")
-                            order = existing_order
-                        else:
-                            raise e
-                    else:
-                        raise e
+            # Find order in database
+            order = await db.orders.find_one({"order_id": order_id}, {"_id": 0})
+            
+            if not order:
+                logger.error(f"❌ Order {order_id} not found in database!")
+                await safe_telegram_call(query.message.reply_text(
+                    "❌ Ошибка: заказ не найден в базе данных."
+                ))
+                return ConversationHandler.END
+            
+            # Check order status - must be "pending"
+            order_status = order.get('payment_status', 'pending')
+            if order_status == 'paid':
+                logger.warning(f"⚠️ Order {order_id} already paid!")
+                await safe_telegram_call(query.message.reply_text(
+                    "✅ Этот заказ уже оплачен!"
+                ))
+                return ConversationHandler.END
+            
+            logger.info(f"✅ Found pending order {order_id}, proceeding with payment")
             
             # Show progress indicator while creating label
             progress_msg = await safe_telegram_call(query.message.reply_text(
