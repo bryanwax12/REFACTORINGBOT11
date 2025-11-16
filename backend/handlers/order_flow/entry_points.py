@@ -269,7 +269,7 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
 💰 *Стоимость:* ${amount:.2f}{discount_text}
 💵 *Ваш баланс:* ${user_balance:.2f}
 
-Пополните баланс или оплатите криптовалютой:"""
+⚠️ Недостаточно средств на балансе"""
     
     keyboard.append([InlineKeyboardButton("🔙 Назад к тарифам", callback_data='back_to_rates')])
     keyboard.append([InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')])
