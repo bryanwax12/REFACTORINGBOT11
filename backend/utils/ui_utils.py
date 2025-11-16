@@ -1204,8 +1204,9 @@ class DataConfirmationUI:
         if length and width and height:
             section += f"  📐  Размеры: *{length}\" × {width}\" × {height}\"*\n"
         
-        section += "\n" + "─" * 30 + "\n"
-        section += "✅ *Подтвердите данные или отредактируйте*"
+        section += "\n\n"
+        
+        return section
         
         return section
     
