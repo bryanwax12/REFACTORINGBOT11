@@ -399,13 +399,9 @@ async def check_stale_interaction(query, context: ContextTypes.DEFAULT_TYPE) -> 
     
     # If user_data is empty or doesn't have active order data, it's likely stale
     if not context.user_data or len(context.user_data) == 0:
-        logger.info("Stale interaction detected - empty user_data")
-        await safe_telegram_call(query.answer("⚠️ Этот заказ уже завершён"))
-        await safe_telegram_call(query.message.reply_text(
-            "⚠️ *Этот заказ уже завершён или отменён.*\n\n"
-            "Для создания нового заказа используйте меню в нижней части экрана.",
-            parse_mode='Markdown'
-        ))
+        logger.info("Stale interaction detected - empty user_data, silently ignoring")
+        # Silently ignore stale button clicks - just answer the callback
+        await safe_telegram_call(query.answer())
         return True
     
     # Check if order was already completed (has order_completed flag)
