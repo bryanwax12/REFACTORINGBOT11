@@ -329,21 +329,27 @@ class TemplateMessages:
     @staticmethod
     def template_details(template: dict) -> str:
         """Format template details message"""
-        return f"""📄 Шаблон: {template.get('name', 'Без названия')}
+        from_street2 = f"\n📍 {template.get('from_street2')}" if template.get('from_street2') else ""
+        to_street2 = f"\n📍 {template.get('to_street2')}" if template.get('to_street2') else ""
+        
+        return f"""📄 *Шаблон: {template.get('name', 'Без названия')}*
+━━━━━━━━━━━━━━━━━━━━━━
 
-📍 Адрес отправителя:
-{template.get('from_name')}
-{template.get('from_street1')}
-{template.get('from_street2') or ''}
-{template.get('from_city')}, {template.get('from_state')} {template.get('from_zip')}
+📤 *ОТПРАВИТЕЛЬ*
+👤 {template.get('from_name')}
+📍 {template.get('from_street1')}{from_street2}
+🏙️ {template.get('from_city')}, {template.get('from_state')} {template.get('from_zip')}
 📞 {template.get('from_phone') or 'Не указан'}
 
-📍 Адрес получателя:
-{template.get('to_name')}
-{template.get('to_street1')}
-{template.get('to_street2') or ''}
-{template.get('to_city')}, {template.get('to_state')} {template.get('to_zip')}
-📞 {template.get('to_phone') or 'Не указан'}"""
+━━━━━━━━━━━━━━━━━━━━━━
+
+📥 *ПОЛУЧАТЕЛЬ*
+👤 {template.get('to_name')}
+📍 {template.get('to_street1')}{to_street2}
+🏙️ {template.get('to_city')}, {template.get('to_state')} {template.get('to_zip')}
+📞 {template.get('to_phone') or 'Не указан'}
+
+━━━━━━━━━━━━━━━━━━━━━━"""
     
     @staticmethod
     def template_loaded(template_name: str) -> str:
