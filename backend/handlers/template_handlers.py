@@ -268,7 +268,7 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
     Save new template name
     """
     # Import required functions
-    from server import db
+    from server import db, safe_telegram_call
     from utils.ui_utils import TemplateMessages
     import logging
     logger = logging.getLogger(__name__)
@@ -277,6 +277,21 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
     logger.info(f"   User ID: {update.effective_user.id}")
     logger.info(f"   Message text: {update.message.text}")
     logger.info(f"   context.user_data keys: {list(context.user_data.keys())}")
+    
+    # Remove buttons from the prompt message
+    rename_prompt_msg_id = context.user_data.get('rename_prompt_message_id')
+    rename_prompt_chat_id = context.user_data.get('rename_prompt_chat_id')
+    
+    if rename_prompt_msg_id and rename_prompt_chat_id:
+        try:
+            await update.effective_chat.bot.edit_message_reply_markup(
+                chat_id=rename_prompt_chat_id,
+                message_id=rename_prompt_msg_id,
+                reply_markup=None
+            )
+            logger.info(f"✅ Removed buttons from prompt message")
+        except Exception as e:
+            logger.debug(f"Could not remove prompt buttons: {e}")
     
     new_name = update.message.text.strip()
     
