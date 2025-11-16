@@ -332,8 +332,49 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 # Create new order
                 order = await create_order_in_db(user, data, selected_rate, amount, user_discount, discount_amount)
             
-            # Try to create shipping label first
+            # Show progress indicator while creating label
+            progress_msg = await safe_telegram_call(query.message.reply_text(
+                "⏳ Создаем shipping label... 0 сек",
+                parse_mode='Markdown'
+            ))
+            
+            # Start progress updater in background
+            import asyncio
+            progress_task = None
+            if progress_msg:
+                async def update_progress():
+                    seconds = 0
+                    try:
+                        while True:
+                            await asyncio.sleep(1)
+                            seconds += 1
+                            await safe_telegram_call(progress_msg.edit_text(
+                                f"⏳ Создаем shipping label... {seconds} сек",
+                                parse_mode='Markdown'
+                            ))
+                    except asyncio.CancelledError:
+                        pass
+                    except Exception as e:
+                        logger.debug(f"Progress update error: {e}")
+                
+                progress_task = asyncio.create_task(update_progress())
+            
+            # Try to create shipping label
             label_created = await create_and_send_label(order['id'], telegram_id, query.message)
+            
+            # Stop progress indicator and delete message
+            if progress_task:
+                progress_task.cancel()
+                try:
+                    await progress_task
+                except asyncio.CancelledError:
+                    pass
+            
+            if progress_msg:
+                try:
+                    await safe_telegram_call(progress_msg.delete())
+                except Exception as e:
+                    logger.debug(f"Failed to delete progress message: {e}")
             
             if label_created:
                 # Only deduct balance if label was created successfully using payment service
