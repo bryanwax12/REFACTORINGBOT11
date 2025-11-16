@@ -91,15 +91,19 @@ async def generate_thank_you_message():
         )
         
         # Get response
+        print(f"🤖 Sending request to AI...")
         response = await chat.send_message(user_message)
+        print(f"🤖 AI Response received: {response[:50] if response else 'EMPTY'}...")
         
         if response and len(response.strip()) > 10:
-            logger.info(f"Generated thank you message: {response[:50]}...")
+            logger.info(f"✅ Generated AI thank you message: {response[:50]}...")
+            print(f"✅ Using AI-generated message")
             return response.strip()
         else:
             raise ValueError("Empty or invalid response from AI")
             
     except Exception as e:
+        print(f"❌ AI Error: {e}")
         logger.error(f"Error generating thank you message: {e}")
         # Use varied fallback messages
         fallback_messages = [
