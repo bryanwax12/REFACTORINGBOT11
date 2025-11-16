@@ -303,10 +303,9 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
             from server import (
                 create_order_in_db, 
                 create_and_send_label, 
-                db, 
-                find_user_by_telegram_id,
-                update_order
+                db
             )
+            from utils.db_operations import find_user_by_telegram_id, update_order
             from services.service_factory import ServiceFactory
             from utils.ui_utils import PaymentFlowUI
             
