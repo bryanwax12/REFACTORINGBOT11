@@ -162,10 +162,13 @@ async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.message.reply_text(message, reply_markup=reply_markup)
 
 
-async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE, db, safe_telegram_call):
+async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Actually delete the template
     """
+    # Import required functions
+    from server import db, safe_telegram_call
+    
     query = update.callback_query
     await safe_telegram_call(query.answer())
     
