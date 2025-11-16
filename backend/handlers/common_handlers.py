@@ -385,6 +385,9 @@ async def handle_orphaned_button(update: Update, context: ContextTypes.DEFAULT_T
 
 async def check_stale_interaction(query, context: ContextTypes.DEFAULT_TYPE) -> bool:
     """Check if button press is from an old/completed interaction"""
+    
+    print(f"🔍 check_stale_interaction START: query.data={query.data if query else 'None'}")
+    
     logger.info(f"check_stale_interaction called - user_data keys: {list(context.user_data.keys())}")
     
     # Check for rapid multiple clicks (debouncing)
