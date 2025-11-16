@@ -28,7 +28,11 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
     """Step 15/17: Collect parcel weight"""
     from server import PARCEL_WEIGHT, PARCEL_LENGTH, STATE_NAMES
     
-    
+    logger.info(f"🟢 order_parcel_weight HANDLER INVOKED")
+    logger.info(f"   User ID: {update.effective_user.id}")
+    logger.info(f"   Message text: {update.message.text}")
+    logger.info(f"   context.user_data keys: {list(context.user_data.keys())}")
+    logger.info(f"   Has template data? from_name={context.user_data.get('from_name')}, to_name={context.user_data.get('to_name')}")
     
     weight_str = update.message.text.strip()
     
