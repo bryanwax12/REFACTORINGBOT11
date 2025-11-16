@@ -198,6 +198,8 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         return await show_edit_menu(update, context)
     
     if query.data == 'edit_from_address':
+        from server import FROM_NAME, STATE_NAMES
+        
         # Mark previous message as selected (non-blocking)
         asyncio.create_task(mark_message_as_selected(update, context))
         
