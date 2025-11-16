@@ -213,10 +213,12 @@ async def rename_template_start(update: Update, context: ContextTypes.DEFAULT_TY
     return "TEMPLATE_RENAME"
 
 
-async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYPE, db):
+async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Save new template name
     """
+    # Import required functions
+    from server import db
     from utils.ui_utils import TemplateMessages
     
     new_name = update.message.text.strip()
