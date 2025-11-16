@@ -68,6 +68,9 @@ async def generate_thank_you_message():
         from emergentintegrations.llm.chat import LlmChat, UserMessage
         
         emergent_key = os.environ.get('EMERGENT_LLM_KEY')
+        print(f"🔑 EMERGENT_LLM_KEY loaded: {bool(emergent_key)}, len={len(emergent_key) if emergent_key else 0}")
+        logger.info(f"🔑 EMERGENT_LLM_KEY loaded: {bool(emergent_key)}")
+        
         if not emergent_key:
             raise ValueError("EMERGENT_LLM_KEY not found in environment")
         
