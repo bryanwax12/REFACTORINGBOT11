@@ -25,11 +25,10 @@ async def show_data_confirmation(update: Update, context: ContextTypes.DEFAULT_T
     
     # Format the summary message using UI utils
     message = DataConfirmationUI.confirmation_header()
-    message += DataConfirmationUI.format_address_section("Отправитель", data, "from")
-    message += DataConfirmationUI.format_address_section("Получатель", data, "to")
+    message += "📤 " + DataConfirmationUI.format_address_section("ОТПРАВИТЕЛЬ", data, "from")
+    message += "📥 " + DataConfirmationUI.format_address_section("ПОЛУЧАТЕЛЬ", data, "to")
     message += DataConfirmationUI.format_parcel_section(data)
-    message += "─" * 30 + "\n"
-    message += "✅ *Подтвердите данные или отредактируйте*"
+    message += "\n✅ *Подтвердите данные или отредактируйте*"
     
     # Build keyboard using UI utils
     reply_markup = DataConfirmationUI.build_confirmation_keyboard()
