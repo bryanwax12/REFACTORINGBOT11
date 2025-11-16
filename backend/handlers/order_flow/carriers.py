@@ -118,14 +118,22 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['selected_service'] = selected_rate.get('service_type', 'Standard')
         
         # Get shipping cost (already includes $10 markup from rates.py)
-        final_cost = selected_rate.get('shipping_amount', {}).get('amount', 0.0)
-        original_cost = selected_rate.get('original_amount', final_cost)  # Get original if stored
+        # Try shipping_amount dict first, then fallback to amount field
+        if 'shipping_amount' in selected_rate and isinstance(selected_rate['shipping_amount'], dict):
+            final_cost = selected_rate['shipping_amount'].get('amount', 0.0)
+        elif 'amount' in selected_rate:
+            final_cost = selected_rate['amount']
+        else:
+            final_cost = 0.0
+            
+        original_cost = selected_rate.get('original_amount', final_cost - 10.0)  # Get original (final - markup)
         
         context.user_data['shipping_cost'] = original_cost  # Original cost without markup
         context.user_data['final_amount'] = final_cost  # Cost with markup (what user pays)
         
         logger.info(f"✅ Selected: {context.user_data['selected_carrier']} - {context.user_data['selected_service']}")
         logger.info(f"💰 Cost: Original=${original_cost:.2f}, Final=${final_cost:.2f} (includes $10 markup)")
+        logger.info(f"📊 Selected rate structure: {list(selected_rate.keys())}")
         
         # Remove old message with buttons
         try:
