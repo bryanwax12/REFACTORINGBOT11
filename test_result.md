@@ -1067,7 +1067,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Telegram Bot Basic Flow - Review Request Testing (COMPLETED)"
+    - "Comprehensive Telegram Order Flow Testing - Review Request (COMPLETED)"
   stuck_tasks:
     []
   test_all: false
