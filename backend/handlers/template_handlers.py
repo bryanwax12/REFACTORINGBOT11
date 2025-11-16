@@ -266,18 +266,29 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
     # Import required functions
     from server import db
     from utils.ui_utils import TemplateMessages
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    logger.info(f"🟢 rename_template_save CALLED")
+    logger.info(f"   User ID: {update.effective_user.id}")
+    logger.info(f"   Message text: {update.message.text}")
+    logger.info(f"   context.user_data keys: {list(context.user_data.keys())}")
     
     new_name = update.message.text.strip()
     
     if len(new_name) > 50:
+        logger.warning(f"❌ Template name too long: {len(new_name)} chars")
         await update.message.reply_text(TemplateMessages.name_too_long())
         return
     
     template_id = context.user_data.get('renaming_template_id')
     
     if not template_id:
+        logger.error(f"❌ No template_id in context.user_data")
         await update.message.reply_text("❌ Ошибка: шаблон не найден")
         return
+    
+    logger.info(f"📝 Updating template {template_id} with new name: {new_name}")
     
     # Update template name
     result = await db.templates.update_one(
@@ -286,8 +297,10 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
     )
     
     if result.modified_count > 0:
+        logger.info(f"✅ Template renamed successfully")
         await update.message.reply_text(f"✅ Шаблон переименован в '{new_name}'")
     else:
+        logger.error(f"❌ Template update failed - modified_count: {result.modified_count}")
         await update.message.reply_text("❌ Ошибка при переименовании")
     
     # Clear state
@@ -295,6 +308,7 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
     
     # Return END to exit conversation
     from telegram.ext import ConversationHandler
+    logger.info(f"✅ Exiting template rename conversation")
     return ConversationHandler.END
 
 
