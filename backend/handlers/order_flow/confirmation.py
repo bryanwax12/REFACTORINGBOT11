@@ -143,13 +143,20 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
     logger = logging.getLogger(__name__)
     print("🎯 handle_data_confirmation CALLED!")
     logger.info(f"🎯 handle_data_confirmation called with query.data={update.callback_query.data if update.callback_query else 'None'}")
+    logger.info(f"🎯 user_data keys at start: {list(context.user_data.keys())}")
     
     query = update.callback_query
     print(f"🎯 Query data: {query.data if query else 'None'}")
     
-    # Check for stale interaction
-    if await check_stale_interaction(query, context):
-        return ConversationHandler.END
+    # Skip stale check for edit buttons - they should always work if we're in CONFIRM_DATA state
+    edit_buttons = ['edit_from_address', 'edit_to_address', 'edit_parcel', 'edit_data']
+    if query.data not in edit_buttons:
+        # Check for stale interaction
+        if await check_stale_interaction(query, context):
+            logger.warning(f"❌ Stale interaction detected for query.data={query.data}")
+            return ConversationHandler.END
+    else:
+        logger.info(f"✅ Skipping stale check for edit button: {query.data}")
     
     await safe_telegram_call(query.answer())
     
