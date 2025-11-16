@@ -220,6 +220,8 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         return FROM_NAME
     
     if query.data == 'edit_to_address':
+        from server import TO_NAME, STATE_NAMES
+        
         # Mark previous message as selected (non-blocking)
         asyncio.create_task(mark_message_as_selected(update, context))
         
