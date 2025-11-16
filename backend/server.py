@@ -683,10 +683,10 @@ async def create_order_in_db(user, data, selected_rate, amount, discount_percent
             phone=data.get('to_phone', '')
         ),
         parcel=Parcel(
-            length=data.get('length', 10),
-            width=data.get('width', 10),
-            height=data.get('height', 10),
-            weight=data['weight'],
+            length=data.get('parcel_length', data.get('length', 10)),
+            width=data.get('parcel_width', data.get('width', 10)),
+            height=data.get('parcel_height', data.get('height', 10)),
+            weight=data.get('parcel_weight', data.get('weight', 1)),
             distance_unit="in",
             mass_unit="lb"
         ),
