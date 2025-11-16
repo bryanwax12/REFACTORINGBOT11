@@ -187,10 +187,13 @@ async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_
     await my_templates_menu(update, context, db, safe_telegram_call, None, None, None)
 
 
-async def rename_template_start(update: Update, context: ContextTypes.DEFAULT_TYPE, safe_telegram_call):
+async def rename_template_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Start template rename flow
     """
+    # Import required functions
+    from server import safe_telegram_call
+    
     query = update.callback_query
     await safe_telegram_call(query.answer())
     
