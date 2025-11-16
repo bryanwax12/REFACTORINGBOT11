@@ -214,6 +214,8 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         # Mark previous message as selected (non-blocking)
         asyncio.create_task(mark_message_as_selected(update, context))
         
+        logger.info(f"🔧 Starting TO address edit - user_data keys: {list(context.user_data.keys())}")
+        
         # Edit to address
         context.user_data['editing_to_address'] = True
         from utils.ui_utils import get_cancel_keyboard
@@ -225,6 +227,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         if bot_msg:
             context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_state'] = STATE_NAMES[TO_NAME]
+        logger.info(f"✅ Returning TO_NAME state for editing")
         return TO_NAME
     
     if query.data == 'edit_parcel':
