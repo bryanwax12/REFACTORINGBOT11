@@ -970,7 +970,7 @@ Label PDF: {label_download_url}
                 
                 # Format admin notification
                 admin_message = f"""📦 *Новый лейбл создан!*
-━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━
 
 👤 *Пользователь:* {user_display}
 
@@ -982,14 +982,14 @@ Label PDF: {label_download_url}
     📍 {order['address_to']['street1']}
     🏙️ {order['address_to']['city']}, {order['address_to']['state']} {order['address_to']['zip']}
 
-━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━
 
 🚚 *Перевозчик:* {order['selected_carrier']} - {order['selected_service']}
 📦 *Трекинг:* `{tracking_number}`
 💰 *Цена:* ${order['amount']:.2f}
 ⚖️ *Вес:* {order['parcel']['weight']} lb
 
-━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━
 🕐 *Время:* {datetime.now(timezone.utc).strftime('%d.%m.%Y %H:%M UTC')}"""
 
                 # Send to admin
