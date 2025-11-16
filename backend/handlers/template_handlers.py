@@ -86,10 +86,13 @@ async def view_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.message.reply_text(message, reply_markup=reply_markup)
 
 
-async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE, db, find_template_by_id, safe_telegram_call):
+async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Use template to start order with pre-filled addresses
     """
+    # Import required functions
+    from server import db, find_template_by_id, safe_telegram_call
+    
     query = update.callback_query
     await safe_telegram_call(query.answer())
     
