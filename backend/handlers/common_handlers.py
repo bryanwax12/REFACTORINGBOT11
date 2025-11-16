@@ -406,13 +406,9 @@ async def check_stale_interaction(query, context: ContextTypes.DEFAULT_TYPE) -> 
     
     # Check if order was already completed (has order_completed flag)
     if context.user_data.get('order_completed'):
-        logger.info("Stale interaction detected - order_completed flag set")
-        await safe_telegram_call(query.answer("⚠️ Этот заказ уже завершён"))
-        await safe_telegram_call(query.message.reply_text(
-            "⚠️ *Этот заказ уже завершён.*\n\n"
-            "Для создания нового заказа используйте меню в нижней части экрана.",
-            parse_mode='Markdown'
-        ))
+        logger.info("Stale interaction detected - order_completed flag set, silently ignoring")
+        # Silently ignore stale button clicks - just answer the callback
+        await safe_telegram_call(query.answer())
         return True
     
     logger.info("Interaction is valid - proceeding")
