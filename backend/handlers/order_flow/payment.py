@@ -339,7 +339,6 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ))
             
             # Start progress updater in background
-            import asyncio
             progress_task = None
             if progress_msg:
                 async def update_progress():
