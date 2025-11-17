@@ -119,11 +119,20 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
                     if bot_instance:
                         print(f"✅ Bot instance available, sending notification to {telegram_id}")
                         logger.info(f"✅ Bot instance available, sending notification to {telegram_id}")
-                        from utils.ui_utils import MessageTemplates, get_payment_success_keyboard
                         
-                        user = await find_user_by_telegram_id(telegram_id)
-                        new_balance = user.get('balance', 0)
-                        logger.info(f"💰 User balance: ${new_balance}")
+                        try:
+                            from utils.ui_utils import MessageTemplates, get_payment_success_keyboard
+                            print(f"📦 Imported MessageTemplates and keyboard")
+                            
+                            user = await find_user_by_telegram_id(telegram_id)
+                            print(f"👤 Found user: {user is not None}")
+                            if not user:
+                                logger.error(f"❌ User not found for telegram_id={telegram_id}")
+                                return
+                            
+                            new_balance = user.get('balance', 0)
+                            print(f"💰 User balance: ${new_balance}")
+                            logger.info(f"💰 User balance: ${new_balance}")
                         
                         pending_order = await find_pending_order(telegram_id)
                         print(f"🔍 Pending order search: telegram_id={telegram_id}, found={pending_order is not None}")
