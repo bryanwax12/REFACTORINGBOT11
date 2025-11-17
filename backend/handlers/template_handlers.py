@@ -295,12 +295,12 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
     Save new template name
     """
     # Import required functions
-    from server import db, safe_telegram_call
+    from server import db
     from utils.ui_utils import TemplateMessages
     import logging
     logger = logging.getLogger(__name__)
     
-    logger.info(f"🟢 rename_template_save CALLED")
+    logger.info("🟢 rename_template_save CALLED")
     logger.info(f"   User ID: {update.effective_user.id}")
     logger.info(f"   Message text: {update.message.text}")
     logger.info(f"   context.user_data keys: {list(context.user_data.keys())}")
@@ -322,7 +322,7 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
         except Exception as e:
             logger.warning(f"Could not remove prompt buttons: {e}")
     else:
-        logger.warning(f"No prompt message IDs found in context")
+        logger.warning("No prompt message IDs found in context")
     
     new_name = update.message.text.strip()
     
@@ -334,7 +334,7 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
     template_id = context.user_data.get('renaming_template_id')
     
     if not template_id:
-        logger.error(f"❌ No template_id in context.user_data")
+        logger.error("❌ No template_id in context.user_data")
         await update.message.reply_text("❌ Ошибка: шаблон не найден")
         return
     
@@ -349,7 +349,7 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
     from telegram import InlineKeyboardButton, InlineKeyboardMarkup
     
     if result.modified_count > 0:
-        logger.info(f"✅ Template renamed successfully")
+        logger.info("✅ Template renamed successfully")
         
         # Create keyboard with navigation buttons
         keyboard = [
@@ -384,7 +384,7 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
     
     # Return END to exit conversation
     from telegram.ext import ConversationHandler
-    logger.info(f"✅ Exiting template rename conversation")
+    logger.info("✅ Exiting template rename conversation")
     return ConversationHandler.END
 
 
@@ -519,7 +519,7 @@ async def edit_template_from_address(update: Update, context: ContextTypes.DEFAU
     Start editing FROM address in template
     """
     from server import safe_telegram_call, db, FROM_NAME
-    from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
+    from utils.ui_utils import get_cancel_keyboard
     import logging
     logger = logging.getLogger(__name__)
     
@@ -575,7 +575,7 @@ async def edit_template_to_address(update: Update, context: ContextTypes.DEFAULT
     Start editing TO address in template
     """
     from server import safe_telegram_call, db, TO_NAME
-    from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
+    from utils.ui_utils import get_cancel_keyboard
     import logging
     logger = logging.getLogger(__name__)
     

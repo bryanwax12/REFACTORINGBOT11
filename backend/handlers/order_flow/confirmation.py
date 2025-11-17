@@ -150,9 +150,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
     """Handle user's choice on data confirmation"""
     import logging
     from server import (
-        FROM_NAME, FROM_ADDRESS, FROM_CITY, FROM_STATE, FROM_ZIP, FROM_PHONE,
-        TO_NAME, TO_ADDRESS, TO_CITY, TO_STATE, TO_ZIP, TO_PHONE,
-        PARCEL_WEIGHT, TEMPLATE_NAME, STATE_NAMES
+        FROM_NAME, TO_NAME, PARCEL_WEIGHT, TEMPLATE_NAME, STATE_NAMES
     )
     
     logger = logging.getLogger(__name__)
@@ -235,7 +233,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         if bot_msg:
             context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_state'] = STATE_NAMES[FROM_NAME]
-        logger.info(f"✅ Returning FROM_NAME state for editing")
+        logger.info("✅ Returning FROM_NAME state for editing")
         return FROM_NAME
     
     if query.data == 'edit_to_address':
@@ -255,7 +253,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         if bot_msg:
             context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_state'] = STATE_NAMES[TO_NAME]
-        logger.info(f"✅ Returning TO_NAME state for editing")
+        logger.info("✅ Returning TO_NAME state for editing")
         return TO_NAME
     
     if query.data == 'edit_parcel':
@@ -275,7 +273,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         if bot_msg:
             context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_state'] = STATE_NAMES[PARCEL_WEIGHT]
-        logger.info(f"✅ Returning PARCEL_WEIGHT state for editing")
+        logger.info("✅ Returning PARCEL_WEIGHT state for editing")
         return PARCEL_WEIGHT
     
     if query.data == 'back_to_confirmation':

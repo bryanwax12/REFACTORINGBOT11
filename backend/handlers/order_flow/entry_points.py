@@ -338,7 +338,6 @@ async def order_from_template_list(update: Update, context: ContextTypes.DEFAULT
     from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
     from utils.ui_utils import get_template_selection_keyboard, OrderFlowMessages
     from server import TEMPLATE_LIST
-    from utils.db_operations import find_user_templates
     from telegram.ext import ConversationHandler
     import asyncio
     

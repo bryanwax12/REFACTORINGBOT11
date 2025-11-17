@@ -40,7 +40,7 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
                 message_id=message_id,
                 reply_markup=None
             )
-            logger.info(f"✅ Removed cancel button from template prompt")
+            logger.info("✅ Removed cancel button from template prompt")
         except Exception as e:
             logger.warning(f"Could not remove cancel button: {e}")
     
@@ -267,7 +267,7 @@ async def handle_template_new_name(update: Update, context: ContextTypes.DEFAULT
 async def continue_order_after_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Continue order creation after saving template"""
     from handlers.order_flow.rates import fetch_shipping_rates
-    from server import safe_telegram_call, mark_message_as_selected
+    from server import mark_message_as_selected
     import asyncio
     
     # Mark previous message as selected (remove buttons)
