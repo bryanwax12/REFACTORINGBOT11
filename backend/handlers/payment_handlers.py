@@ -167,6 +167,17 @@ async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAUL
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
+        # Remove old keyboard from previous message (where user entered amount)
+        if context.user_data.get('last_bot_message_id'):
+            try:
+                await context.bot.edit_message_reply_markup(
+                    chat_id=update.effective_chat.id,
+                    message_id=context.user_data['last_bot_message_id'],
+                    reply_markup=None
+                )
+            except Exception as e:
+                logger.debug(f"Could not remove old keyboard: {e}")
+        
         bot_message = await update.message.reply_text(
             message,
             reply_markup=reply_markup,
