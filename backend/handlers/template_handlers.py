@@ -553,12 +553,25 @@ async def edit_template_from_address(update: Update, context: ContextTypes.DEFAU
         for field in order_fields:
             context.user_data.pop(field, None)
         
-        # Save template ID and mark editing mode
+        # Save template ID and mark editing mode IN BOTH context AND DB session
         context.user_data['editing_template_id'] = template_id
         context.user_data['editing_template_from'] = True
         
+        # CRITICAL: Save flags to DB session so they persist across handler calls
+        from services.session_service import SessionService
+        from server import db
+        user_id = update.effective_user.id
+        session_service = SessionService(db)
+        await session_service.session_repo.update_temp_data(
+            user_id,
+            {
+                'editing_template_id': template_id,
+                'editing_template_from': True
+            }
+        )
+        
         logger.info(f"✅ FLAGS SET: editing_template_from=True, editing_template_id={template_id}")
-        logger.info(f"📝 context.user_data keys after setting flags: {list(context.user_data.keys())}")
+        logger.info(f"📝 Flags saved to BOTH context.user_data AND DB session")
         
         # Load current FROM data
         context.user_data['from_name'] = template.get('from_name', '')
