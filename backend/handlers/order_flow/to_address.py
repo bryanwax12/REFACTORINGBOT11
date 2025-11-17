@@ -200,10 +200,11 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     user_id = update.effective_user.id
     context.user_data['to_city'] = city
     
-    # Update session via repository
+    # Update session via repository (skip if editing template)
     # Session service injected via decorator
-    await session_service.save_order_field(user_id, 'to_city', city)
-    await session_service.update_session_step(user_id, step="TO_STATE")
+    if not context.user_data.get('editing_template_to'):
+        await session_service.save_order_field(user_id, 'to_city', city)
+        await session_service.update_session_step(user_id, step="TO_STATE")
     
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
     asyncio.create_task(mark_message_as_selected(update, context))
