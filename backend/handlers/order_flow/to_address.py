@@ -38,16 +38,39 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     logger.info(f"🔍 DEBUG: All user_data keys: {list(context.user_data.keys())}")
     
     # Remove cancel button from prompt if exists
-    if 'last_prompt_message_id' in context.user_data:
+    # Try to get message_id from context first, then from DB
+    message_id_to_remove = context.user_data.get('last_prompt_message_id')
+    
+    if not message_id_to_remove:
+        # Load from DB if not in context
+        from server import db
+        session = await db.user_sessions.find_one(
+            {"user_id": update.effective_user.id, "is_active": True},
+            {"_id": 0, "last_prompt_message_id": 1}
+        )
+        if session:
+            message_id_to_remove = session.get('last_prompt_message_id')
+            logger.info(f"🔄 Loaded last_prompt_message_id from DB: {message_id_to_remove}")
+    
+    if message_id_to_remove:
         try:
+            logger.info(f"🗑️ Attempting to remove cancel button from message_id={message_id_to_remove}")
             await update.effective_chat.bot.edit_message_reply_markup(
                 chat_id=update.effective_chat.id,
-                message_id=context.user_data['last_prompt_message_id'],
+                message_id=message_id_to_remove,
                 reply_markup=None
             )
             context.user_data.pop('last_prompt_message_id', None)
+            
+            # Remove from DB too
+            from server import db
+            await db.user_sessions.update_one(
+                {"user_id": update.effective_user.id, "is_active": True},
+                {"$unset": {"last_prompt_message_id": ""}}
+            )
+            logger.info(f"✅ Cancel button removed successfully")
         except Exception as e:
-            logger.debug(f"Could not remove prompt button: {e}")
+            logger.warning(f"⚠️ Could not remove cancel button: {e}")
     
     name = update.message.text.strip()
     name = sanitize_string(name, max_length=50)
