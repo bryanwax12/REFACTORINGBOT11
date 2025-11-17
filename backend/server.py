@@ -1334,10 +1334,22 @@ async def startup_event():
             application.add_handler(CallbackQueryHandler(my_templates_menu, pattern='^my_templates$'))
             application.add_handler(CallbackQueryHandler(order_from_template_list, pattern='^order_from_template$'))
             
-            # Handler for topup amount input (text messages) - only when not in conversation
-            # This handler should NOT interfere with ConversationHandler
-            # Removed to fix message processing issue - topup is handled in ConversationHandler
-            # application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_topup_amount_input))
+            # Handler for topup amount input (text messages)
+            # Uses custom filter to only handle when awaiting topup
+            from telegram.ext import filters as telegram_filters
+            
+            async def topup_filter(update):
+                """Custom filter: only process if awaiting topup amount"""
+                return update.message and update.message.text and application.user_data.get(update.effective_user.id, {}).get('awaiting_topup_amount', False)
+            
+            from handlers.payment_handlers import handle_topup_amount_input
+            application.add_handler(MessageHandler(
+                telegram_filters.TEXT & ~telegram_filters.COMMAND & telegram_filters.BaseFilter(topup_filter),
+                lambda update, context: handle_topup_amount_input(
+                    update, context, db, create_oxapay_invoice, safe_telegram_call, mark_message_as_selected
+                )
+            ))
+            
             application.add_handler(CallbackQueryHandler(button_callback))
             
             
