@@ -294,10 +294,11 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, sessi
     user_id = update.effective_user.id
     context.user_data['to_zip'] = zip_code
     
-    # Update session via repository
+    # Update session via repository (skip if editing template)
     # Session service injected via decorator
-    await session_service.save_order_field(user_id, 'to_zip', zip_code)
-    await session_service.update_session_step(user_id, step="TO_PHONE")
+    if not context.user_data.get('editing_template_to'):
+        await session_service.save_order_field(user_id, 'to_zip', zip_code)
+        await session_service.update_session_step(user_id, step="TO_PHONE")
     
     asyncio.create_task(mark_message_as_selected(update, context))
     
