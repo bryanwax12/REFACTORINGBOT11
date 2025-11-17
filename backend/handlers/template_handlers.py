@@ -459,3 +459,154 @@ async def handle_template_new_name(update: Update, context: ContextTypes.DEFAULT
     context.user_data.pop('last_bot_message_text', None)
     return TEMPLATE_NAME
 
+
+
+async def edit_template_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Show menu for editing template addresses
+    """
+    from server import safe_telegram_call, db
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    query = update.callback_query
+    await safe_telegram_call(query.answer())
+    
+    template_id = query.data.replace('template_edit_', '')
+    
+    logger.info(f"📝 Edit template menu: template_id={template_id}")
+    
+    # Remove buttons from template view message
+    try:
+        await safe_telegram_call(query.message.edit_reply_markup(reply_markup=None))
+    except Exception as e:
+        logger.debug(f"Could not remove template buttons: {e}")
+    
+    # Get template to show current name
+    template = await db.templates.find_one({"id": template_id}, {"_id": 0})
+    
+    if not template:
+        await query.message.reply_text("❌ Шаблон не найден")
+        return
+    
+    # Create edit menu
+    keyboard = [
+        [InlineKeyboardButton("📤 Редактировать адрес отправителя", callback_data=f'template_edit_from_{template_id}')],
+        [InlineKeyboardButton("📥 Редактировать адрес получателя", callback_data=f'template_edit_to_{template_id}')],
+        [InlineKeyboardButton("🔙 Назад к шаблону", callback_data=f'template_view_{template_id}')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    message = f"""📝 *Редактирование шаблона*
+━━━━━━━━━━━━━━━━━━━━
+
+📁 *Шаблон:* {template.get('name')}
+
+Выберите, что хотите отредактировать:"""
+    
+    await query.message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown')
+
+
+async def edit_template_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Start editing FROM address in template
+    """
+    from server import safe_telegram_call, db, FROM_NAME
+    from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    query = update.callback_query
+    await safe_telegram_call(query.answer())
+    
+    template_id = query.data.replace('template_edit_from_', '')
+    
+    logger.info(f"📤 Editing FROM address for template: {template_id}")
+    
+    # Remove buttons
+    try:
+        await safe_telegram_call(query.message.edit_reply_markup(reply_markup=None))
+    except Exception as e:
+        logger.debug(f"Could not remove buttons: {e}")
+    
+    # Load current template data into context
+    template = await db.templates.find_one({"id": template_id}, {"_id": 0})
+    
+    if not template:
+        await query.message.reply_text("❌ Шаблон не найден")
+        return
+    
+    # Save template ID and mark editing mode
+    context.user_data['editing_template_id'] = template_id
+    context.user_data['editing_template_from'] = True
+    
+    # Load current FROM data
+    context.user_data['from_name'] = template.get('from_name', '')
+    context.user_data['from_address'] = template.get('from_street1', '')
+    context.user_data['from_address2'] = template.get('from_street2', '')
+    context.user_data['from_city'] = template.get('from_city', '')
+    context.user_data['from_state'] = template.get('from_state', '')
+    context.user_data['from_zip'] = template.get('from_zip', '')
+    context.user_data['from_phone'] = template.get('from_phone', '')
+    
+    # Start FROM address input
+    reply_markup = get_cancel_keyboard()
+    await query.message.reply_text(
+        "📤 Редактирование адреса отправителя\n\nШаг 1/7: Имя отправителя\nНапример: John Smith",
+        reply_markup=reply_markup
+    )
+    
+    return FROM_NAME
+
+
+async def edit_template_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Start editing TO address in template
+    """
+    from server import safe_telegram_call, db, TO_NAME
+    from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    query = update.callback_query
+    await safe_telegram_call(query.answer())
+    
+    template_id = query.data.replace('template_edit_to_', '')
+    
+    logger.info(f"📥 Editing TO address for template: {template_id}")
+    
+    # Remove buttons
+    try:
+        await safe_telegram_call(query.message.edit_reply_markup(reply_markup=None))
+    except Exception as e:
+        logger.debug(f"Could not remove buttons: {e}")
+    
+    # Load current template data into context
+    template = await db.templates.find_one({"id": template_id}, {"_id": 0})
+    
+    if not template:
+        await query.message.reply_text("❌ Шаблон не найден")
+        return
+    
+    # Save template ID and mark editing mode
+    context.user_data['editing_template_id'] = template_id
+    context.user_data['editing_template_to'] = True
+    
+    # Load current TO data
+    context.user_data['to_name'] = template.get('to_name', '')
+    context.user_data['to_address'] = template.get('to_street1', '')
+    context.user_data['to_address2'] = template.get('to_street2', '')
+    context.user_data['to_city'] = template.get('to_city', '')
+    context.user_data['to_state'] = template.get('to_state', '')
+    context.user_data['to_zip'] = template.get('to_zip', '')
+    context.user_data['to_phone'] = template.get('to_phone', '')
+    
+    # Start TO address input
+    reply_markup = get_cancel_keyboard()
+    await query.message.reply_text(
+        "📥 Редактирование адреса получателя\n\nШаг 1/7: Имя получателя\nНапример: Jane Doe",
+        reply_markup=reply_markup
+    )
+    
+    return TO_NAME
