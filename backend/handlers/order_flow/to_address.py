@@ -33,6 +33,10 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     import logging
     logger = logging.getLogger(__name__)
     
+    logger.info(f"🔵 order_to_name CALLED - User: {update.effective_user.id}")
+    logger.info(f"🔍 DEBUG: editing_template_from={context.user_data.get('editing_template_from')}, editing_template_to={context.user_data.get('editing_template_to')}")
+    logger.info(f"🔍 DEBUG: All user_data keys: {list(context.user_data.keys())}")
+    
     # Remove cancel button from prompt if exists
     if 'last_prompt_message_id' in context.user_data:
         try:
