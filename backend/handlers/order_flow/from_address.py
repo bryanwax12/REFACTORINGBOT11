@@ -141,9 +141,15 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
     asyncio.create_task(mark_message_as_selected(update, context))
     
+    # Use different messages for template editing (7 steps) vs order creation (18 steps)
+    from utils.ui_utils import TemplateEditMessages
+    if context.user_data.get('editing_template_from'):
+        message_text = TemplateEditMessages.FROM_ADDRESS
+    else:
+        message_text = OrderStepMessages.FROM_ADDRESS
+    
     # Show next step
     reply_markup = get_cancel_keyboard()
-    message_text = OrderStepMessages.FROM_ADDRESS
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
