@@ -558,16 +558,16 @@ async def edit_template_from_address(update: Update, context: ContextTypes.DEFAU
         context.user_data['editing_template_from'] = True
         
         # CRITICAL: Save flags to DB session so they persist across handler calls
-        from services.session_service import SessionService
         from server import db
         user_id = update.effective_user.id
-        session_service = SessionService(db)
-        await session_service.session_repo.update_temp_data(
-            user_id,
-            {
-                'editing_template_id': template_id,
-                'editing_template_from': True
-            }
+        
+        # Update session temp_data directly in MongoDB
+        await db.user_sessions.update_one(
+            {"user_id": user_id, "is_active": True},
+            {"$set": {
+                "temp_data.editing_template_id": template_id,
+                "temp_data.editing_template_from": True
+            }}
         )
         
         logger.info(f"✅ FLAGS SET: editing_template_from=True, editing_template_id={template_id}")
