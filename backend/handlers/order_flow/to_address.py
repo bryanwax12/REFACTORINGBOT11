@@ -332,6 +332,13 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
     asyncio.create_task(mark_message_as_selected(update, context))
     
+    # Check if we're editing only TO address
+    if context.user_data.get('editing_to_address'):
+        logger.info("✅ TO address edit complete, returning to confirmation")
+        context.user_data.pop('editing_to_address', None)
+        from handlers.order_flow.confirmation import show_data_confirmation
+        return await show_data_confirmation(update, context)
+    
     reply_markup = get_cancel_keyboard()
     message_text = OrderStepMessages.PARCEL_WEIGHT
     
