@@ -129,6 +129,9 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
     # Save template name for potential continuation
     context.user_data['saved_template_name'] = template_name
     
+    # Clear prompt message ID after successful save
+    context.user_data.pop('last_prompt_message_id', None)
+    
     return TEMPLATE_NAME
 
 
