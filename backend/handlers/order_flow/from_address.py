@@ -416,6 +416,21 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     user_id = update.effective_user.id
     context.user_data['from_phone'] = formatted_phone
     
+    # CRITICAL: Load flags from DB session if not in context (they might have been lost)
+    if 'editing_template_from' not in context.user_data:
+        from server import db
+        temp_data = await db.user_sessions.find_one(
+            {"user_id": user_id, "is_active": True},
+            {"_id": 0, "temp_data": 1}
+        )
+        if temp_data and 'temp_data' in temp_data:
+            editing_template_from = temp_data['temp_data'].get('editing_template_from', False)
+            editing_template_id = temp_data['temp_data'].get('editing_template_id')
+            if editing_template_from:
+                context.user_data['editing_template_from'] = editing_template_from
+                context.user_data['editing_template_id'] = editing_template_id
+                logger.info(f"🔄 RESTORED FLAGS from DB: editing_template_from={editing_template_from}, editing_template_id={editing_template_id}")
+    
     logger.info(f"📞 FROM phone saved: {formatted_phone}")
     logger.info(f"🔍 DEBUG ALL FLAGS: editing_from_address={context.user_data.get('editing_from_address')}, editing_template_from={context.user_data.get('editing_template_from')}, editing_template_to={context.user_data.get('editing_template_to')}")
     logger.info(f"🔍 DEBUG: editing_template_id={context.user_data.get('editing_template_id')}")
