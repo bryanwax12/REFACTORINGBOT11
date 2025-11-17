@@ -473,7 +473,13 @@ async def edit_template_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
     query = update.callback_query
     await safe_telegram_call(query.answer())
     
+    # Extract template_id - callback is 'template_edit_<id>' (not template_edit_from_ or template_edit_to_)
     template_id = query.data.replace('template_edit_', '')
+    
+    # Double check this is the main edit menu, not from/to specific
+    if template_id.startswith('from_') or template_id.startswith('to_'):
+        logger.error(f"Wrong handler called for {query.data}")
+        return
     
     logger.info(f"📝 Edit template menu: template_id={template_id}")
     
