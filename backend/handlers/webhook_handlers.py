@@ -55,9 +55,12 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
                     pass
             
             print(f"💾 Payment found: {payment is not None}")
+            logger.info(f"🔍 Payment object: {payment}")
             if payment:
+                logger.info(f"✅ Inside 'if payment' block")
                 # Update payment status (use same invoice_id format that was used to find it)
                 invoice_id_for_update = payment.get('invoice_id')  # Use actual value from DB
+                logger.info(f"📝 invoice_id_for_update: {invoice_id_for_update}")
                 await db.payments.update_one(
                     {"invoice_id": invoice_id_for_update},
                     {"$set": {"status": "paid", "paid_amount": paid_amount}}
