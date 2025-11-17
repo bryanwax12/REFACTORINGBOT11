@@ -349,7 +349,10 @@ async def order_from_template_list(update: Update, context: ContextTypes.DEFAULT
     asyncio.create_task(mark_message_as_selected(update, context))
     
     telegram_id = query.from_user.id
-    templates = await find_user_templates(telegram_id, limit=10)
+    
+    # Get templates directly from DB (same as my_templates_menu)
+    from server import db
+    templates = await db.templates.find({"telegram_id": telegram_id}, {"_id": 0}).to_list(10)
     
     if not templates:
         await safe_telegram_call(query.message.reply_text(OrderFlowMessages.no_templates_error()))
