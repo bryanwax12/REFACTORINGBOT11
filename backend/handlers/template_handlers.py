@@ -545,6 +545,13 @@ async def edit_template_from_address(update: Update, context: ContextTypes.DEFAU
             await query.message.reply_text("❌ Шаблон не найден")
             return ConversationHandler.END
         
+        # Clear any previous order data to prevent conflicts
+        order_fields = ['from_name', 'from_address', 'from_address2', 'from_city', 'from_state', 'from_zip', 'from_phone',
+                       'to_name', 'to_address', 'to_address2', 'to_city', 'to_state', 'to_zip', 'to_phone',
+                       'parcel_weight', 'parcel_length', 'parcel_width', 'parcel_height']
+        for field in order_fields:
+            context.user_data.pop(field, None)
+        
         # Save template ID and mark editing mode
         context.user_data['editing_template_id'] = template_id
         context.user_data['editing_template_from'] = True
