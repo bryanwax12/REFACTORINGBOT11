@@ -332,12 +332,55 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
     asyncio.create_task(mark_message_as_selected(update, context))
     
-    # Check if we're editing only TO address
+    # Check if we're editing only TO address in order
     if context.user_data.get('editing_to_address'):
         logger.info("✅ TO address edit complete, returning to confirmation")
         context.user_data.pop('editing_to_address', None)
         from handlers.order_flow.confirmation import show_data_confirmation
         return await show_data_confirmation(update, context)
+    
+    # Check if we're editing template TO address
+    if context.user_data.get('editing_template_to'):
+        logger.info("✅ Template TO address edit complete, saving to template")
+        template_id = context.user_data.get('editing_template_id')
+        
+        if template_id:
+            from server import db
+            from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+            
+            # Update template in DB
+            await db.templates.update_one(
+                {"id": template_id},
+                {"$set": {
+                    "to_name": context.user_data.get('to_name', ''),
+                    "to_street1": context.user_data.get('to_address', ''),
+                    "to_street2": context.user_data.get('to_address2', ''),
+                    "to_city": context.user_data.get('to_city', ''),
+                    "to_state": context.user_data.get('to_state', ''),
+                    "to_zip": context.user_data.get('to_zip', ''),
+                    "to_phone": context.user_data.get('to_phone', '')
+                }}
+            )
+            
+            # Clear editing flags
+            context.user_data.pop('editing_template_to', None)
+            context.user_data.pop('editing_template_id', None)
+            
+            # Show success message with navigation
+            keyboard = [
+                [InlineKeyboardButton("👁️ Просмотреть шаблон", callback_data=f'template_view_{template_id}')],
+                [InlineKeyboardButton("📋 К списку шаблонов", callback_data='my_templates')],
+                [InlineKeyboardButton("🏠 Главное меню", callback_data='start')]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            await update.message.reply_text(
+                "✅ Адрес получателя в шаблоне обновлён!",
+                reply_markup=reply_markup
+            )
+            return ConversationHandler.END
+        
+        return ConversationHandler.END
     
     reply_markup = get_cancel_keyboard()
     message_text = OrderStepMessages.PARCEL_WEIGHT
