@@ -920,7 +920,8 @@ ShipStation не смог проверить один или оба адреса
         # Group rates by carrier
         rates_by_carrier = {}
         for i, rate in enumerate(filtered_rates):
-            carrier = rate['carrier']
+            # Safely get carrier name - prefer 'carrier', fallback to 'carrier_friendly_name'
+            carrier = rate.get('carrier', rate.get('carrier_friendly_name', 'UNKNOWN'))
             if carrier not in rates_by_carrier:
                 rates_by_carrier[carrier] = []
             rates_by_carrier[carrier].append((i, rate))
