@@ -662,11 +662,9 @@ async def edit_template_to_address(update: Update, context: ContextTypes.DEFAULT
         context.user_data['to_zip'] = template.get('to_zip', '')
         context.user_data['to_phone'] = template.get('to_phone', '')
         
-        # Start TO address input
-        reply_markup = get_cancel_keyboard()
+        # Start TO address input (no cancel button on first step of template editing)
         bot_msg = await query.message.reply_text(
-            "📥 Редактирование адреса получателя\n\nШаг 1/7: Имя получателя\nНапример: Jane Doe",
-            reply_markup=reply_markup
+            "📥 Редактирование адреса получателя\n\nШаг 1/7: Имя получателя\nНапример: Jane Doe"
         )
         
         # Save message ID to remove button later
