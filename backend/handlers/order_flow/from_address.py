@@ -79,11 +79,14 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     
     # Update session via service (skip if editing template)
     if not context.user_data.get('editing_template_from'):
+        logger.info(f"📝 Updating session for FROM_NAME (normal flow)")
         await session_service.update_session_step(
             user_id,
             step="FROM_ADDRESS",
             data={'from_name': name}
         )
+    else:
+        logger.info(f"⏭️ SKIPPING session update - editing template FROM address")
     
     # Log action
     await SecurityLogger.log_action(
