@@ -260,7 +260,13 @@ async def handle_template_new_name(update: Update, context: ContextTypes.DEFAULT
 @with_user_session(create_user=False, require_session=True)
 async def continue_order_after_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Continue order creation after saving template"""
-    from server import fetch_shipping_rates
+    from handlers.order_flow.rates import fetch_shipping_rates
+    from server import safe_telegram_call, mark_message_as_selected
+    import asyncio
+    
+    # Mark previous message as selected (remove buttons)
+    asyncio.create_task(mark_message_as_selected(update, context))
+    
     return await fetch_shipping_rates(update, context)
 
 
