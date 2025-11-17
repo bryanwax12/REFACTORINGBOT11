@@ -67,9 +67,14 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     name = update.message.text.strip()
     name = sanitize_string(name, max_length=50)
     
+    logger.info(f"📝 Validating name: '{name}' (length: {len(name)})")
+    
     # Validate using centralized validator
     is_valid, error_msg = validate_name(name)
+    logger.info(f"✅ Validation result: is_valid={is_valid}, error_msg='{error_msg}'")
+    
     if not is_valid:
+        logger.warning(f"❌ Name validation FAILED for '{name}': {error_msg}")
         await safe_telegram_call(update.message.reply_text(error_msg))
         return FROM_NAME
     
