@@ -143,12 +143,18 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
                         
                         reply_markup = get_payment_success_keyboard(has_pending_order, order_amount)
                         
+                        logger.info(f"📨 Sending message to chat_id={telegram_id}")
                         bot_msg = await safe_telegram_call(bot_instance.send_message(
                             chat_id=telegram_id,
                             text=message_text,
                             reply_markup=reply_markup,
                             parse_mode='Markdown'
                         ))
+                        
+                        if bot_msg:
+                            logger.info(f"✅ Notification sent successfully! message_id={bot_msg.message_id}")
+                        else:
+                            logger.error(f"❌ Failed to send notification - bot_msg is None")
                         
                         # Save message context in pending_orders for button protection
                         await db.pending_orders.update_one(
