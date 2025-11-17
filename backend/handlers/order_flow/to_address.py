@@ -393,9 +393,18 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
                 }}
             )
             
-            # Clear editing flags
+            # Clear editing flags from both context AND DB session
             context.user_data.pop('editing_template_to', None)
             context.user_data.pop('editing_template_id', None)
+            
+            # Clear from DB session
+            await db.user_sessions.update_one(
+                {"user_id": user_id, "is_active": True},
+                {"$unset": {
+                    "editing_template_to": "",
+                    "editing_template_id": ""
+                }}
+            )
             
             # Show success message with navigation
             keyboard = [
