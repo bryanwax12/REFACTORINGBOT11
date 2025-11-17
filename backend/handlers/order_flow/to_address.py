@@ -395,6 +395,11 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
         
         return ConversationHandler.END
     
+    # Update session via repository (for normal order flow)
+    # Session service injected via decorator
+    await session_service.save_order_field(user_id, 'to_phone', formatted_phone)
+    await session_service.update_session_step(user_id, step="PARCEL_WEIGHT")
+    
     reply_markup = get_cancel_keyboard()
     message_text = OrderStepMessages.PARCEL_WEIGHT
     
