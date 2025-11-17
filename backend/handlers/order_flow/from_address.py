@@ -141,12 +141,13 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE,
     user_id = update.effective_user.id
     context.user_data['from_address'] = address
     
-    # Update session via service
-    await session_service.update_session_step(
-        user_id,
-        step="FROM_ADDRESS2",
-        data={'from_address': address}
-    )
+    # Update session via service (skip if editing template)
+    if not context.user_data.get('editing_template_from'):
+        await session_service.update_session_step(
+            user_id,
+            step="FROM_ADDRESS2",
+            data={'from_address': address}
+        )
     
     await SecurityLogger.log_action(
         "order_input",
