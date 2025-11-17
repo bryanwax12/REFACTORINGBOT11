@@ -157,9 +157,11 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
                                 requested_amount, actual_amount, new_balance
                             )
                         
-                        reply_markup = get_payment_success_keyboard(has_pending_order, order_amount)
-                        
-                        logger.info(f"📨 Sending message to chat_id={telegram_id}")
+                            reply_markup = get_payment_success_keyboard(has_pending_order, order_amount)
+                            print(f"⌨️ Keyboard created")
+                            
+                            logger.info(f"📨 Sending message to chat_id={telegram_id}")
+                            print(f"📨 About to call bot_instance.send_message...")
                         bot_msg = await safe_telegram_call(bot_instance.send_message(
                             chat_id=telegram_id,
                             text=message_text,
