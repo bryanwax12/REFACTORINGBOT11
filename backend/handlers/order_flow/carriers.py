@@ -114,8 +114,10 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         # Save selected rate
         context.user_data['selected_rate'] = selected_rate
-        context.user_data['selected_carrier'] = selected_rate.get('carrier_friendly_name', 'Unknown')
-        context.user_data['selected_service'] = selected_rate.get('service_type', 'Standard')
+        # Use 'carrier' field first (from formatted rates), fallback to carrier_friendly_name
+        context.user_data['selected_carrier'] = selected_rate.get('carrier', selected_rate.get('carrier_friendly_name', 'Unknown'))
+        # Use 'service' field first (from formatted rates), fallback to service_type
+        context.user_data['selected_service'] = selected_rate.get('service', selected_rate.get('service_type', 'Standard'))
         
         # Get shipping cost (already includes $10 markup from rates.py)
         # Try shipping_amount dict first, then fallback to amount field
