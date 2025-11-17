@@ -634,11 +634,22 @@ async def edit_template_to_address(update: Update, context: ContextTypes.DEFAULT
             await query.message.reply_text("❌ Шаблон не найден")
             return ConversationHandler.END
         
-        # Save template ID and mark editing mode
+        # Save template ID and mark editing mode IN BOTH context AND DB session
         context.user_data['editing_template_id'] = template_id
         context.user_data['editing_template_to'] = True
         
+        # CRITICAL: Save flags to DB session so they persist across handler calls
+        user_id = update.effective_user.id
+        await db.user_sessions.update_one(
+            {"user_id": user_id, "is_active": True},
+            {"$set": {
+                "temp_data.editing_template_id": template_id,
+                "temp_data.editing_template_to": True
+            }}
+        )
+        
         logger.info(f"✅ FLAGS SET: editing_template_to=True, editing_template_id={template_id}")
+        logger.info(f"📝 Flags saved to BOTH context.user_data AND DB session")
         
         # Load current TO data
         context.user_data['to_name'] = template.get('to_name', '')
