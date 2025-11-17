@@ -427,24 +427,24 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     user_id = update.effective_user.id
     context.user_data['from_phone'] = formatted_phone
     
-    # CRITICAL: Load flags from DB session (they are lost between handler calls)
+    logger.info(f"📞 FROM phone saved: {formatted_phone}")
+    
+    # CRITICAL: Check DB session DIRECTLY for editing flags (don't rely on context.user_data)
     from server import db
     session = await db.user_sessions.find_one(
         {"user_id": user_id, "is_active": True},
-        {"_id": 0, "editing_template_from": 1, "editing_template_id": 1}
+        {"_id": 0, "editing_template_from": 1, "editing_template_to": 1, "editing_template_id": 1}
     )
-    if session:
-        editing_template_from = session.get('editing_template_from', False)
-        editing_template_id = session.get('editing_template_id')
-        if editing_template_from:
-            context.user_data['editing_template_from'] = editing_template_from
-            context.user_data['editing_template_id'] = editing_template_id
-            logger.info(f"🔄 RESTORED FLAGS from DB: editing_template_from={editing_template_from}, editing_template_id={editing_template_id}")
     
-    logger.info(f"📞 FROM phone saved: {formatted_phone}")
-    logger.info(f"🔍 DEBUG ALL FLAGS: editing_from_address={context.user_data.get('editing_from_address')}, editing_template_from={context.user_data.get('editing_template_from')}, editing_template_to={context.user_data.get('editing_template_to')}")
-    logger.info(f"🔍 DEBUG: editing_template_id={context.user_data.get('editing_template_id')}")
-    logger.info(f"🔍 DEBUG: All user_data keys: {list(context.user_data.keys())}")
+    logger.info(f"🔍 DEBUG: DB session found: {session is not None}")
+    if session:
+        logger.info(f"🔍 DEBUG: DB session editing_template_from={session.get('editing_template_from')}, editing_template_id={session.get('editing_template_id')}")
+    
+    editing_template_from_db = session.get('editing_template_from', False) if session else False
+    editing_template_id_db = session.get('editing_template_id') if session else None
+    
+    logger.info(f"🔍 DEBUG: FROM DB - editing_template_from={editing_template_from_db}, editing_template_id={editing_template_id_db}")
+    logger.info(f"🔍 DEBUG: FROM context - editing_from_address={context.user_data.get('editing_from_address')}, editing_template_from={context.user_data.get('editing_template_from')}")
     
     # Check if we're editing only FROM address in order
     if context.user_data.get('editing_from_address'):
@@ -454,8 +454,8 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, s
         from handlers.order_flow.confirmation import show_data_confirmation
         return await show_data_confirmation(update, context)
     
-    # Check if we're editing template FROM address
-    if context.user_data.get('editing_template_from'):
+    # Check if we're editing template FROM address (CHECK DB DIRECTLY, not context.user_data)
+    if editing_template_from_db and editing_template_id_db:
         logger.info("✅ Template FROM address edit complete, saving to template")
         template_id = context.user_data.get('editing_template_id')
         
