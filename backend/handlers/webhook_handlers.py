@@ -162,19 +162,19 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
                         
                         logger.info(f"📨 Sending message to chat_id={telegram_id}")
                         print(f"📨 About to call bot_instance.send_message...")
-                            bot_msg = await safe_telegram_call(bot_instance.send_message(
-                                chat_id=telegram_id,
-                                text=message_text,
-                                reply_markup=reply_markup,
-                                parse_mode='Markdown'
-                            ))
-                            
-                            if bot_msg:
-                                print(f"✅ Message sent! message_id={bot_msg.message_id}")
-                                logger.info(f"✅ Notification sent successfully! message_id={bot_msg.message_id}")
-                            else:
-                                print(f"❌ bot_msg is None")
-                                logger.error(f"❌ Failed to send notification - bot_msg is None")
+                        bot_msg = await safe_telegram_call(bot_instance.send_message(
+                            chat_id=telegram_id,
+                            text=message_text,
+                            reply_markup=reply_markup,
+                            parse_mode='Markdown'
+                        ))
+                        
+                        if bot_msg:
+                            print(f"✅ Message sent! message_id={bot_msg.message_id}")
+                            logger.info(f"✅ Notification sent successfully! message_id={bot_msg.message_id}")
+                        else:
+                            print(f"❌ bot_msg is None")
+                            logger.error(f"❌ Failed to send notification - bot_msg is None")
                         
                         except Exception as notify_ex:
                             logger.error(f"❌ Exception while sending notification: {notify_ex}", exc_info=True)
