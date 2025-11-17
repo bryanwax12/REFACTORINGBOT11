@@ -145,10 +145,15 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE, s
         await session_service.update_session_step(user_id, step="TO_ADDRESS2")
     
     asyncio.create_task(mark_message_as_selected(update, context))
-    from utils.ui_utils import get_skip_and_cancel_keyboard, OrderStepMessages, CallbackData
+    from utils.ui_utils import get_skip_and_cancel_keyboard, OrderStepMessages, CallbackData, TemplateEditMessages
+    
+    # Use different messages for template editing vs order creation
+    if context.user_data.get('editing_template_to'):
+        message_text = TemplateEditMessages.TO_ADDRESS2
+    else:
+        message_text = OrderStepMessages.TO_ADDRESS2
     
     reply_markup = get_skip_and_cancel_keyboard(CallbackData.SKIP_TO_ADDRESS2)
-    message_text = OrderStepMessages.TO_ADDRESS2
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
