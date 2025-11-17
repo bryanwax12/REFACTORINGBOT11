@@ -568,11 +568,18 @@ async def edit_template_from_address(update: Update, context: ContextTypes.DEFAU
         reply_markup=reply_markup
     )
     
-    # Save message ID to remove button later
-    if bot_msg:
-        context.user_data['last_prompt_message_id'] = bot_msg.message_id
+        # Save message ID to remove button later
+        if bot_msg:
+            context.user_data['last_prompt_message_id'] = bot_msg.message_id
+        
+        logger.info(f"✅ edit_template_from_address COMPLETED - returning FROM_NAME state")
+        return FROM_NAME
     
-    return FROM_NAME
+    except Exception as e:
+        logger.error(f"❌ ERROR in edit_template_from_address: {e}", exc_info=True)
+        if update.callback_query:
+            await update.callback_query.message.reply_text(f"❌ Ошибка: {str(e)}")
+        return ConversationHandler.END
 
 
 async def edit_template_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
