@@ -26,6 +26,18 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
     from utils.db_operations import insert_template, count_user_templates
     from services import template_service
     
+    # Remove cancel button from previous message if it exists
+    if 'last_prompt_message_id' in context.user_data:
+        try:
+            await update.effective_chat.bot.edit_message_reply_markup(
+                chat_id=update.effective_chat.id,
+                message_id=context.user_data['last_prompt_message_id'],
+                reply_markup=None
+            )
+            logger.info(f"✅ Removed cancel button from template prompt")
+        except Exception as e:
+            logger.debug(f"Could not remove cancel button: {e}")
+    
     template_name = update.message.text.strip()[:30]  # Limit to 30 chars
     
     if not template_name:
