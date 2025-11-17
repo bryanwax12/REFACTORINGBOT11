@@ -68,9 +68,14 @@ async def handle_save_as_template(update: Update, context: ContextTypes.DEFAULT_
     # Mark previous message as selected (non-blocking)
     asyncio.create_task(mark_message_as_selected(update, context))
     
-    # Prompt for template name
+    # Prompt for template name with cancel button
+    from utils.ui_utils import get_cancel_keyboard
+    reply_markup = get_cancel_keyboard()
+    
     await safe_telegram_call(query.message.reply_text(
-        TemplateManagementUI.template_name_prompt()
+        TemplateManagementUI.template_name_prompt(),
+        reply_markup=reply_markup,
+        parse_mode='Markdown'
     ))
     
     # Clear last_bot_message to not interfere with text input
