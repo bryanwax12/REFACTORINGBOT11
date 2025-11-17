@@ -72,11 +72,15 @@ async def handle_save_as_template(update: Update, context: ContextTypes.DEFAULT_
     from utils.ui_utils import get_cancel_keyboard
     reply_markup = get_cancel_keyboard()
     
-    await safe_telegram_call(query.message.reply_text(
+    bot_msg = await safe_telegram_call(query.message.reply_text(
         TemplateManagementUI.template_name_prompt(),
         reply_markup=reply_markup,
         parse_mode='Markdown'
     ))
+    
+    # Save prompt message ID to remove button later
+    if bot_msg:
+        context.user_data['last_prompt_message_id'] = bot_msg.message_id
     
     # Clear last_bot_message to not interfere with text input
     context.user_data.pop('last_bot_message_id', None)
