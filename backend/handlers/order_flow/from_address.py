@@ -45,6 +45,7 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     from server import SecurityLogger, sanitize_string, FROM_NAME, FROM_ADDRESS, STATE_NAMES
     
     logger.info(f"🔵 order_from_name - User: {update.effective_user.id}")
+    logger.info(f"🔍 DEBUG: editing_template_from={context.user_data.get('editing_template_from')}, editing_template_id={context.user_data.get('editing_template_id')}")
     
     # Remove cancel button from prompt if exists
     if 'last_prompt_message_id' in context.user_data:
