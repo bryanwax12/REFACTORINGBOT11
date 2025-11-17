@@ -133,8 +133,8 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
                             new_balance = user.get('balance', 0)
                             print(f"💰 User balance: ${new_balance}")
                             logger.info(f"💰 User balance: ${new_balance}")
-                        
-                        pending_order = await find_pending_order(telegram_id)
+                            
+                            pending_order = await find_pending_order(telegram_id)
                         print(f"🔍 Pending order search: telegram_id={telegram_id}, found={pending_order is not None}")
                         if pending_order:
                             print(f"📦 Pending order details: telegram_id={pending_order.get('telegram_id')}, has_selected_rate={pending_order.get('selected_rate') is not None}")
