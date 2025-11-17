@@ -982,22 +982,22 @@ Label PDF: {label_download_url}
                 user_display = f"{user_name}" + (f" (@{username})" if username else f" (ID: {telegram_id})")
                 
                 # Format admin notification
-                # Format FROM address
+                # Format FROM address with proper alignment
                 from_addr_lines = []
                 from_addr_lines.append(f"📍 *От:* {order['address_from']['name']}")
-                from_addr_lines.append(f"     📍 {order['address_from']['street1']}")
+                from_addr_lines.append(f"      📍 {order['address_from']['street1']}")
                 if order['address_from'].get('street2'):
-                    from_addr_lines.append(f"     📍 {order['address_from']['street2']}")
-                from_addr_lines.append(f"     🏙️ {order['address_from']['city']}, {order['address_from']['state']} {order['address_from']['zip']}")
+                    from_addr_lines.append(f"      📍 {order['address_from']['street2']}")
+                from_addr_lines.append(f"      🏙️ {order['address_from']['city']}, {order['address_from']['state']} {order['address_from']['zip']}")
                 from_addr_str = '\n'.join(from_addr_lines)
                 
-                # Format TO address
+                # Format TO address with proper alignment
                 to_addr_lines = []
                 to_addr_lines.append(f"📍 *Кому:* {order['address_to']['name']}")
-                to_addr_lines.append(f"     📍 {order['address_to']['street1']}")
+                to_addr_lines.append(f"      📍 {order['address_to']['street1']}")
                 if order['address_to'].get('street2'):
-                    to_addr_lines.append(f"     📍 {order['address_to']['street2']}")
-                to_addr_lines.append(f"     🏙️ {order['address_to']['city']}, {order['address_to']['state']} {order['address_to']['zip']}")
+                    to_addr_lines.append(f"      📍 {order['address_to']['street2']}")
+                to_addr_lines.append(f"      🏙️ {order['address_to']['city']}, {order['address_to']['state']} {order['address_to']['zip']}")
                 to_addr_str = '\n'.join(to_addr_lines)
                 
                 admin_message = f"""📦 *Новый лейбл создан!*
