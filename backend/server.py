@@ -983,31 +983,31 @@ Label PDF: {label_download_url}
                 
                 # Format admin notification
                 # Format FROM address
-                from_lines = [order['address_from']['name']]
-                from_lines.append(order['address_from']['street1'])
+                from_addr_lines = []
+                from_addr_lines.append(f"📍 *От:* {order['address_from']['name']}")
+                from_addr_lines.append(f"     📍 {order['address_from']['street1']}")
                 if order['address_from'].get('street2'):
-                    from_lines.append(order['address_from']['street2'])
-                from_lines.append(f"{order['address_from']['city']}, {order['address_from']['state']} {order['address_from']['zip']}")
+                    from_addr_lines.append(f"     📍 {order['address_from']['street2']}")
+                from_addr_lines.append(f"     🏙️ {order['address_from']['city']}, {order['address_from']['state']} {order['address_from']['zip']}")
+                from_addr_str = '\n'.join(from_addr_lines)
                 
                 # Format TO address
-                to_lines = [order['address_to']['name']]
-                to_lines.append(order['address_to']['street1'])
+                to_addr_lines = []
+                to_addr_lines.append(f"📍 *Кому:* {order['address_to']['name']}")
+                to_addr_lines.append(f"     📍 {order['address_to']['street1']}")
                 if order['address_to'].get('street2'):
-                    to_lines.append(order['address_to']['street2'])
-                to_lines.append(f"{order['address_to']['city']}, {order['address_to']['state']} {order['address_to']['zip']}")
+                    to_addr_lines.append(f"     📍 {order['address_to']['street2']}")
+                to_addr_lines.append(f"     🏙️ {order['address_to']['city']}, {order['address_to']['state']} {order['address_to']['zip']}")
+                to_addr_str = '\n'.join(to_addr_lines)
                 
                 admin_message = f"""📦 *Новый лейбл создан!*
 ━━━━━━━━━━━━━━━━━━━━
 
 👤 *Пользователь:* {user_display}
 
-📍 *От:* {from_lines[0]}
-     📍 {from_lines[1]}
-{('     📍 ' + from_lines[2] + '\\n') if len(from_lines) == 4 else ''}     🏙️ {from_lines[-1]}
+{from_addr_str}
 
-📍 *Кому:* {to_lines[0]}
-     📍 {to_lines[1]}
-{('     📍 ' + to_lines[2] + '\\n') if len(to_lines) == 4 else ''}     🏙️ {to_lines[-1]}
+{to_addr_str}
 
 ━━━━━━━━━━━━━━━━━━━━
 
