@@ -523,10 +523,12 @@ async def edit_template_from_address(update: Update, context: ContextTypes.DEFAU
     import logging
     logger = logging.getLogger(__name__)
     
-    query = update.callback_query
-    await safe_telegram_call(query.answer())
-    
-    template_id = query.data.replace('template_edit_from_', '')
+    try:
+        query = update.callback_query
+        await safe_telegram_call(query.answer())
+        
+        template_id = query.data.replace('template_edit_from_', '')
+        logger.info(f"🚀 edit_template_from_address STARTED for template_id: {template_id}")
     
     logger.info(f"📤 Editing FROM address for template: {template_id}")
     
