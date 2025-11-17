@@ -456,8 +456,8 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     
     # Check if we're editing template FROM address (CHECK DB DIRECTLY, not context.user_data)
     if editing_template_from_db and editing_template_id_db:
-        logger.info("✅ Template FROM address edit complete, saving to template")
-        template_id = context.user_data.get('editing_template_id')
+        logger.info(f"✅ Template FROM address edit complete, saving to template_id={editing_template_id_db}")
+        template_id = editing_template_id_db
         
         if template_id:
             from server import db
