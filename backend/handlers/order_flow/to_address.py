@@ -106,10 +106,11 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     user_id = update.effective_user.id
     context.user_data['to_address'] = address
     
-    # Update session via repository
+    # Update session via repository (skip if editing template)
     # Session service injected via decorator
-    await session_service.save_order_field(user_id, 'to_address', address)
-    await session_service.update_session_step(user_id, step="TO_ADDRESS2")
+    if not context.user_data.get('editing_template_to'):
+        await session_service.save_order_field(user_id, 'to_address', address)
+        await session_service.update_session_step(user_id, step="TO_ADDRESS2")
     
     asyncio.create_task(mark_message_as_selected(update, context))
     from utils.ui_utils import get_skip_and_cancel_keyboard, OrderStepMessages, CallbackData
