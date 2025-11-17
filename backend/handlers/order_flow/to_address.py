@@ -346,6 +346,21 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     user_id = update.effective_user.id
     context.user_data['to_phone'] = formatted_phone
     
+    # CRITICAL: Load flags from DB session if not in context (they might have been lost)
+    if 'editing_template_to' not in context.user_data:
+        from server import db
+        temp_data = await db.user_sessions.find_one(
+            {"user_id": user_id, "is_active": True},
+            {"_id": 0, "temp_data": 1}
+        )
+        if temp_data and 'temp_data' in temp_data:
+            editing_template_to = temp_data['temp_data'].get('editing_template_to', False)
+            editing_template_id = temp_data['temp_data'].get('editing_template_id')
+            if editing_template_to:
+                context.user_data['editing_template_to'] = editing_template_to
+                context.user_data['editing_template_id'] = editing_template_id
+                logger.info(f"🔄 RESTORED FLAGS from DB: editing_template_to={editing_template_to}, editing_template_id={editing_template_id}")
+    
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
     asyncio.create_task(mark_message_as_selected(update, context))
     
