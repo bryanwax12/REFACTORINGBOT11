@@ -1337,6 +1337,7 @@ async def startup_event():
             # Handler for topup amount input (text messages)
             # Will only process if awaiting_topup_amount flag is set
             from handlers.payment_handlers import handle_topup_amount_input
+            from services.api_services import create_oxapay_invoice
             from telegram.ext import filters as telegram_filters
             
             async def wrapped_topup_handler(update, context):
