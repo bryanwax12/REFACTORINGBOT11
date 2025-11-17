@@ -48,20 +48,41 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     logger.info(f"🔍 DEBUG: editing_template_from={context.user_data.get('editing_template_from')}, editing_template_id={context.user_data.get('editing_template_id')}")
     
     # Remove cancel button from prompt if exists
-    if 'last_prompt_message_id' in context.user_data:
+    # Try to get message_id from context first, then from DB
+    message_id_to_remove = context.user_data.get('last_prompt_message_id')
+    
+    if not message_id_to_remove:
+        # Load from DB if not in context
+        from server import db
+        session = await db.user_sessions.find_one(
+            {"user_id": update.effective_user.id, "is_active": True},
+            {"_id": 0, "last_prompt_message_id": 1}
+        )
+        if session:
+            message_id_to_remove = session.get('last_prompt_message_id')
+            logger.info(f"🔄 Loaded last_prompt_message_id from DB: {message_id_to_remove}")
+    
+    if message_id_to_remove:
         try:
-            logger.info(f"🗑️ Attempting to remove cancel button from message_id={context.user_data['last_prompt_message_id']}")
+            logger.info(f"🗑️ Attempting to remove cancel button from message_id={message_id_to_remove}")
             await update.effective_chat.bot.edit_message_reply_markup(
                 chat_id=update.effective_chat.id,
-                message_id=context.user_data['last_prompt_message_id'],
+                message_id=message_id_to_remove,
                 reply_markup=None
             )
             context.user_data.pop('last_prompt_message_id', None)
-            logger.info(f"✅ Cancel button removed successfully")
+            
+            # Remove from DB too
+            from server import db
+            await db.user_sessions.update_one(
+                {"user_id": update.effective_user.id, "is_active": True},
+                {"$unset": {"last_prompt_message_id": ""}}
+            )
+            logger.info(f"✅ Cancel button removed successfully from message {message_id_to_remove}")
         except Exception as e:
             logger.warning(f"⚠️ Could not remove cancel button: {e}")
     else:
-        logger.info(f"ℹ️ No last_prompt_message_id found in context.user_data")
+        logger.info(f"ℹ️ No last_prompt_message_id found")
     
     # Skip if user is in topup flow
     if context.user_data.get('awaiting_topup_amount'):
