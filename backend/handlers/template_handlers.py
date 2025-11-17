@@ -63,7 +63,6 @@ async def view_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     # Import required functions
     from server import safe_telegram_call
-    from utils.db_operations import find_template_by_id
     import logging
     logger = logging.getLogger(__name__)
     
