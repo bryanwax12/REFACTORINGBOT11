@@ -57,7 +57,7 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
             print(f"💾 Payment found: {payment is not None}")
             logger.info(f"🔍 Payment object: {payment}")
             if payment:
-                logger.info(f"✅ Inside 'if payment' block")
+                logger.info("✅ Inside 'if payment' block")
                 # Update payment status (use same invoice_id format that was used to find it)
                 invoice_id_for_update = payment.get('invoice_id')  # Use actual value from DB
                 logger.info(f"📝 invoice_id_for_update: {invoice_id_for_update}")
@@ -122,7 +122,7 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
                         
                         try:
                             from utils.ui_utils import MessageTemplates, get_payment_success_keyboard
-                            print(f"📦 Imported MessageTemplates and keyboard")
+                            print("📦 Imported MessageTemplates and keyboard")
                             
                             user = await find_user_by_telegram_id(telegram_id)
                             print(f"👤 Found user: {user is not None}")
@@ -158,10 +158,10 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
                                 )
                             
                             reply_markup = get_payment_success_keyboard(has_pending_order, order_amount)
-                            print(f"⌨️ Keyboard created")
+                            print("⌨️ Keyboard created")
                             
                             logger.info(f"📨 Sending message to chat_id={telegram_id}")
-                            print(f"📨 About to call bot_instance.send_message...")
+                            print("📨 About to call bot_instance.send_message...")
                             bot_msg = await safe_telegram_call(bot_instance.send_message(
                                 chat_id=telegram_id,
                                 text=message_text,
@@ -173,8 +173,8 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
                                 print(f"✅ Message sent! message_id={bot_msg.message_id}")
                                 logger.info(f"✅ Notification sent successfully! message_id={bot_msg.message_id}")
                             else:
-                                print(f"❌ bot_msg is None")
-                                logger.error(f"❌ Failed to send notification - bot_msg is None")
+                                print("❌ bot_msg is None")
+                                logger.error("❌ Failed to send notification - bot_msg is None")
                         
                         except Exception as notify_ex:
                             logger.error(f"❌ Exception while sending notification: {notify_ex}", exc_info=True)
