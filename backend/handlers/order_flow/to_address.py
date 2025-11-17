@@ -342,11 +342,6 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     user_id = update.effective_user.id
     context.user_data['to_phone'] = formatted_phone
     
-    # Update session via repository
-    # Session service injected via decorator
-    await session_service.save_order_field(user_id, 'to_phone', formatted_phone)
-    await session_service.update_session_step(user_id, step="PARCEL_WEIGHT")
-    
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
     asyncio.create_task(mark_message_as_selected(update, context))
     
