@@ -634,6 +634,7 @@ def get_template_view_keyboard(template_id: str) -> InlineKeyboardMarkup:
     """
     keyboard = [
         [InlineKeyboardButton("✅ Использовать шаблон", callback_data=f'template_use_{template_id}')],
+        [InlineKeyboardButton("📝 Редактировать адреса", callback_data=f'template_edit_{template_id}')],
         [InlineKeyboardButton("✏️ Переименовать", callback_data=f'template_rename_{template_id}')],
         [InlineKeyboardButton("🗑 Удалить", callback_data=f'template_delete_{template_id}')],
         [InlineKeyboardButton("🔙 К списку шаблонов", callback_data=CallbackData.MY_TEMPLATES)]
