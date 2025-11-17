@@ -84,15 +84,14 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     
     # CRITICAL: Check and restore flags from DB session if missing
     from server import db
-    temp_data = await db.user_sessions.find_one(
+    session = await db.user_sessions.find_one(
         {"user_id": user_id, "is_active": True},
-        {"_id": 0, "temp_data": 1}
+        {"_id": 0, "editing_template_from": 1, "editing_template_id": 1}
     )
-    if temp_data and 'temp_data' in temp_data:
-        if temp_data['temp_data'].get('editing_template_from'):
-            context.user_data['editing_template_from'] = True
-            context.user_data['editing_template_id'] = temp_data['temp_data'].get('editing_template_id')
-            logger.info(f"🔄 RESTORED editing_template_from flag in order_from_name")
+    if session and session.get('editing_template_from'):
+        context.user_data['editing_template_from'] = True
+        context.user_data['editing_template_id'] = session.get('editing_template_id')
+        logger.info(f"🔄 RESTORED editing_template_from flag in order_from_name")
     
     # Update session via service (skip if editing template)
     if not context.user_data.get('editing_template_from'):
