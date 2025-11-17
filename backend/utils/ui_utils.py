@@ -430,7 +430,12 @@ class OrderFlowMessages:
     @staticmethod
     def select_template() -> str:
         """Select template for order"""
-        return "📋 *Выберите шаблон:*\n\n"
+        return """📋 *Выберите шаблон:*
+━━━━━━━━━━━━━━━━━━━━
+
+💡 Адреса из шаблона автоматически заполнятся в заказ.
+
+"""
     
     @staticmethod
     def no_templates_error() -> str:
