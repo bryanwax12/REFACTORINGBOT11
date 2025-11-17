@@ -435,9 +435,15 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     asyncio.create_task(mark_message_as_selected(update, context))
     
     # Show with SKIP option
-    from utils.ui_utils import get_skip_and_cancel_keyboard, OrderStepMessages, CallbackData
+    from utils.ui_utils import get_skip_and_cancel_keyboard, OrderStepMessages, CallbackData, TemplateEditMessages
+    
+    # Use different messages for template editing vs order creation  
+    if context.user_data.get('editing_template_from'):
+        message_text = TemplateEditMessages.FROM_PHONE
+    else:
+        message_text = OrderStepMessages.FROM_PHONE
+    
     reply_markup = get_skip_and_cancel_keyboard(CallbackData.SKIP_FROM_PHONE)
-    message_text = OrderStepMessages.FROM_PHONE
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
