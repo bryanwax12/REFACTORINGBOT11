@@ -191,11 +191,13 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
     
     if query.data == 'save_template':
         # Save current order data as template
+        from utils.ui_utils import TemplateManagementUI, get_cancel_keyboard
+        
+        reply_markup = get_cancel_keyboard()
+        
         await safe_telegram_call(query.message.reply_text(
-            """💾 Сохранить как шаблон,
-            Введите название для шаблона (до 30 символов):,
-            *Например:* "Склад NY", "Доставка маме", "Офис",
-            _Шаблон сохранит оба адреса для быстрого использования в будущем._""",
+            TemplateManagementUI.template_name_prompt(),
+            reply_markup=reply_markup,
             parse_mode='Markdown',
         ))
         return TEMPLATE_NAME
