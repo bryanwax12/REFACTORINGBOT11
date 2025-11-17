@@ -401,18 +401,14 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     user_id = update.effective_user.id
     context.user_data['from_phone'] = formatted_phone
     
-    # Update session via repository
-    # Session service injected via decorator
-    await session_service.save_order_field(user_id, 'from_phone', formatted_phone)
-    await session_service.update_session_step(user_id, step="TO_NAME")
-    
-    from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
-    asyncio.create_task(mark_message_as_selected(update, context))
+    logger.info(f"📞 FROM phone saved: {formatted_phone}")
+    logger.info(f"🔍 Checking flags: editing_from_address={context.user_data.get('editing_from_address')}, editing_template_from={context.user_data.get('editing_template_from')}")
     
     # Check if we're editing only FROM address in order
     if context.user_data.get('editing_from_address'):
-        logger.info("✅ FROM address edit complete, returning to confirmation")
+        logger.info("✅ FROM address edit complete (ORDER), returning to confirmation")
         context.user_data.pop('editing_from_address', None)
+        # Don't update session for editing mode
         from handlers.order_flow.confirmation import show_data_confirmation
         return await show_data_confirmation(update, context)
     
