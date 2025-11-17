@@ -80,15 +80,20 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
     
     keyboard = [
         [InlineKeyboardButton("📦 Продолжить создание заказа", callback_data='continue_order')],
-        [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]
+        [InlineKeyboardButton("📋 Мои шаблоны", callback_data='my_templates')],
+        [InlineKeyboardButton("🏠 Главное меню", callback_data='start')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    message_text = f"""✅ *Шаблон "{template_name}" сохранен!*
+    message_text = f"""✅ *Шаблон сохранён!*
+━━━━━━━━━━━━━━━━━━━━
 
-Теперь вы можете использовать его для быстрого создания заказов.
+📁 *Название:* {template_name}
 
-*Продолжить создание этого заказа?*"""
+💡 Теперь вы можете использовать этот шаблон для быстрого создания заказов с готовыми адресами.
+
+━━━━━━━━━━━━━━━━━━━━
+*Что дальше?*"""
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
