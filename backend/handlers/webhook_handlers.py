@@ -114,8 +114,10 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
                         logger.warning("No topup_input_message_id found in payment record")
                     
                     # Notify user
+                    print(f"📤 Attempting to send notification. bot_instance exists: {bot_instance is not None}")
                     logger.info(f"📤 Attempting to send notification. bot_instance exists: {bot_instance is not None}")
                     if bot_instance:
+                        print(f"✅ Bot instance available, sending notification to {telegram_id}")
                         logger.info(f"✅ Bot instance available, sending notification to {telegram_id}")
                         from utils.ui_utils import MessageTemplates, get_payment_success_keyboard
                         
