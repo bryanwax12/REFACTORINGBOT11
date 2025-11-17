@@ -927,7 +927,7 @@ ShipStation не смог проверить один или оба адреса
             rates_by_carrier[carrier].append((i, rate))
         
         # Count unique carriers
-        unique_carriers = len(set(r['carrier'] for r in filtered_rates))
+        unique_carriers = len(set(r.get('carrier', r.get('carrier_friendly_name', 'UNKNOWN')) for r in filtered_rates))
         
         # Helper function for Russian pluralization
         def pluralize_days(n):
