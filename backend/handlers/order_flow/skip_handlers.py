@@ -197,11 +197,71 @@ async def skip_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
 @with_user_session(create_user=False, require_session=True)
 async def skip_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Skip TO phone - generates random US phone number"""
-    from server import PARCEL_WEIGHT, generate_random_phone
+    from server import PARCEL_WEIGHT, generate_random_phone, db
+    from telegram.ext import ConversationHandler
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+    import logging
+    logger = logging.getLogger(__name__)
     
     # Generate random phone
     random_phone = generate_random_phone()
+    context.user_data['to_phone'] = random_phone
     
+    # CRITICAL: Check if we're editing template TO address
+    user_id = update.effective_user.id
+    session = await db.user_sessions.find_one(
+        {"user_id": user_id, "is_active": True},
+        {"_id": 0, "editing_template_to": 1, "editing_template_id": 1}
+    )
+    
+    editing_template_to_db = session.get('editing_template_to', False) if session else False
+    editing_template_id_db = session.get('editing_template_id') if session else None
+    
+    logger.info(f"⏭️ SKIP TO PHONE: editing_template_to={editing_template_to_db}, template_id={editing_template_id_db}")
+    
+    if editing_template_to_db and editing_template_id_db:
+        logger.info(f"✅ Template TO address edit complete (via skip), saving to template_id={editing_template_id_db}")
+        
+        # Update template in DB
+        await db.templates.update_one(
+            {"id": editing_template_id_db},
+            {"$set": {
+                "to_name": context.user_data.get('to_name', ''),
+                "to_street1": context.user_data.get('to_address', ''),
+                "to_street2": context.user_data.get('to_address2', ''),
+                "to_city": context.user_data.get('to_city', ''),
+                "to_state": context.user_data.get('to_state', ''),
+                "to_zip": context.user_data.get('to_zip', ''),
+                "to_phone": random_phone
+            }}
+        )
+        
+        # Clear flags from DB session
+        await db.user_sessions.update_one(
+            {"user_id": user_id, "is_active": True},
+            {"$unset": {
+                "editing_template_to": "",
+                "editing_template_id": ""
+            }}
+        )
+        
+        # Show success message
+        keyboard = [
+            [InlineKeyboardButton("👁️ Просмотреть шаблон", callback_data=f'template_view_{editing_template_id_db}')],
+            [InlineKeyboardButton("📋 К списку шаблонов", callback_data='my_templates')],
+            [InlineKeyboardButton("🏠 Главное меню", callback_data='start')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        query = update.callback_query
+        await query.answer()
+        await query.message.reply_text(
+            "✅ Адрес получателя в шаблоне обновлён!",
+            reply_markup=reply_markup
+        )
+        return ConversationHandler.END
+    
+    # Normal flow
     return await handle_skip_field(
         update, context,
         field_name='to_phone',
