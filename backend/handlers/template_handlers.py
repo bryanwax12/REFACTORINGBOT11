@@ -515,6 +515,7 @@ async def edit_template_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 
 async def edit_template_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """NOTE: This handler needs session_service but doesn't use decorators to avoid conflicts"""
     """
     Start editing FROM address in template
     """
