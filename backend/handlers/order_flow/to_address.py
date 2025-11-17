@@ -196,10 +196,15 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE, 
         await session_service.update_session_step(user_id, step="TO_CITY")
     
     asyncio.create_task(mark_message_as_selected(update, context))
-    from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
+    from utils.ui_utils import get_cancel_keyboard, OrderStepMessages, TemplateEditMessages
+    
+    # Use different messages for template editing vs order creation
+    if context.user_data.get('editing_template_to'):
+        message_text = TemplateEditMessages.TO_CITY
+    else:
+        message_text = OrderStepMessages.TO_CITY
     
     reply_markup = get_cancel_keyboard()
-    message_text = OrderStepMessages.TO_CITY
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
