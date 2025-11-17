@@ -646,8 +646,9 @@ async def edit_template_to_address(update: Update, context: ContextTypes.DEFAULT
         await db.user_sessions.update_one(
             {"user_id": user_id, "is_active": True},
             {"$set": {
-                "temp_data.editing_template_id": template_id,
-                "temp_data.editing_template_to": True
+                "editing_template_id": template_id,
+                "editing_template_to": True,
+                "editing_template_from": False
             }}
         )
         
