@@ -412,7 +412,9 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     context.user_data['from_phone'] = formatted_phone
     
     logger.info(f"📞 FROM phone saved: {formatted_phone}")
-    logger.info(f"🔍 Checking flags: editing_from_address={context.user_data.get('editing_from_address')}, editing_template_from={context.user_data.get('editing_template_from')}")
+    logger.info(f"🔍 DEBUG ALL FLAGS: editing_from_address={context.user_data.get('editing_from_address')}, editing_template_from={context.user_data.get('editing_template_from')}, editing_template_to={context.user_data.get('editing_template_to')}")
+    logger.info(f"🔍 DEBUG: editing_template_id={context.user_data.get('editing_template_id')}")
+    logger.info(f"🔍 DEBUG: All user_data keys: {list(context.user_data.keys())}")
     
     # Check if we're editing only FROM address in order
     if context.user_data.get('editing_from_address'):
