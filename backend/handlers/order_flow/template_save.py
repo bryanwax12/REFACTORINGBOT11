@@ -21,10 +21,12 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
     """Save template with user-provided name"""
     from server import (
         TEMPLATE_NAME,
-        db, safe_telegram_call,
-        template_service
+        db, safe_telegram_call
     )
     from utils.db_operations import insert_template, count_user_templates
+    from services.service_factory import get_template_service
+    
+    template_service = get_template_service()
     
     template_name = update.message.text.strip()[:30]  # Limit to 30 chars
     
