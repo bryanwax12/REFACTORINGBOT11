@@ -208,23 +208,38 @@ async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_
     """
     # Import required functions
     from server import db, safe_telegram_call
+    import logging
+    logger = logging.getLogger(__name__)
     
     query = update.callback_query
     await safe_telegram_call(query.answer())
     
     template_id = query.data.replace('template_confirm_delete_', '')
     
+    logger.info(f"🗑️ Confirming template deletion: template_id={template_id}")
+    
     from utils.ui_utils import TemplateMessages
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
     
     result = await db.templates.delete_one({"id": template_id})
     
     if result.deleted_count > 0:
-        await query.message.reply_text(TemplateMessages.template_deleted())
+        logger.info(f"✅ Template {template_id} deleted successfully")
+        
+        # Show success message with navigation buttons
+        keyboard = [
+            [InlineKeyboardButton("📋 Мои шаблоны", callback_data='my_templates')],
+            [InlineKeyboardButton("🏠 Главное меню", callback_data='start')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await query.message.reply_text(
+            TemplateMessages.template_deleted(),
+            reply_markup=reply_markup
+        )
     else:
+        logger.error(f"❌ Failed to delete template {template_id}")
         await query.message.reply_text(TemplateMessages.delete_error())
-    
-    # Return to templates menu
-    await my_templates_menu(update, context)
 
 
 async def rename_template_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
