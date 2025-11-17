@@ -207,12 +207,17 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE,
         "success"
     )
     
-    from utils.ui_utils import get_skip_and_cancel_keyboard, OrderStepMessages, CallbackData
+    from utils.ui_utils import get_skip_and_cancel_keyboard, OrderStepMessages, CallbackData, TemplateEditMessages
     asyncio.create_task(mark_message_as_selected(update, context))
+    
+    # Use different messages for template editing vs order creation
+    if context.user_data.get('editing_template_from'):
+        message_text = TemplateEditMessages.FROM_ADDRESS2
+    else:
+        message_text = OrderStepMessages.FROM_ADDRESS2
     
     # Show next step with SKIP option
     reply_markup = get_skip_and_cancel_keyboard(CallbackData.SKIP_FROM_ADDRESS2)
-    message_text = OrderStepMessages.FROM_ADDRESS2
     
     bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
