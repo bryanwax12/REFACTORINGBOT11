@@ -55,7 +55,7 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     if message_id_to_remove:
         try:
             logger.info(f"🗑️ Attempting to remove cancel button from message_id={message_id_to_remove}")
-            await update.effective_chat.bot.edit_message_reply_markup(
+            await context.bot.edit_message_reply_markup(
                 chat_id=update.effective_chat.id,
                 message_id=message_id_to_remove,
                 reply_markup=None
