@@ -614,9 +614,13 @@ async def edit_template_to_address(update: Update, context: ContextTypes.DEFAULT
     
     # Start TO address input
     reply_markup = get_cancel_keyboard()
-    await query.message.reply_text(
+    bot_msg = await query.message.reply_text(
         "📥 Редактирование адреса получателя\n\nШаг 1/7: Имя получателя\nНапример: Jane Doe",
         reply_markup=reply_markup
     )
+    
+    # Save message ID to remove button later
+    if bot_msg:
+        context.user_data['last_prompt_message_id'] = bot_msg.message_id
     
     return TO_NAME
