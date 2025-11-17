@@ -46,6 +46,18 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     
     logger.info(f"🔵 order_from_name - User: {update.effective_user.id}")
     
+    # Remove cancel button from prompt if exists
+    if 'last_prompt_message_id' in context.user_data:
+        try:
+            await update.effective_chat.bot.edit_message_reply_markup(
+                chat_id=update.effective_chat.id,
+                message_id=context.user_data['last_prompt_message_id'],
+                reply_markup=None
+            )
+            context.user_data.pop('last_prompt_message_id', None)
+        except Exception as e:
+            logger.debug(f"Could not remove prompt button: {e}")
+    
     # Skip if user is in topup flow
     if context.user_data.get('awaiting_topup_amount'):
         logger.info("⏭️ Skipping - user in topup flow")
