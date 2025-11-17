@@ -75,6 +75,7 @@ from handlers.template_handlers import (
     edit_template_menu as handler_edit_template_menu,
     edit_template_from_address as handler_edit_template_from_address,
     edit_template_to_address as handler_edit_template_to_address,
+    delete_template as handler_delete_template,
     confirm_delete_template as handler_confirm_delete_template,
     rename_template_start as handler_rename_template_start,
     rename_template_save as handler_rename_template_save,
