@@ -44,11 +44,11 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not templates:
         message = TemplateMessages.no_templates()
         reply_markup = get_back_to_menu_keyboard()
+        bot_message = await send_method(message, reply_markup=reply_markup, parse_mode='Markdown')
     else:
         message = TemplateMessages.templates_list(len(templates), max_templates=10)
         reply_markup = get_templates_list_keyboard(templates)
-    
-    bot_message = await send_method(message, reply_markup=reply_markup, parse_mode='Markdown')
+        bot_message = await send_method(message, reply_markup=reply_markup, parse_mode='Markdown')
     
     if bot_message:
         context.user_data['last_bot_message_id'] = bot_message.message_id
