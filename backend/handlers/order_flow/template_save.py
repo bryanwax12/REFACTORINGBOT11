@@ -217,10 +217,23 @@ async def handle_template_new_name(update: Update, context: ContextTypes.DEFAULT
     # Mark previous message as selected (non-blocking)
     asyncio.create_task(mark_message_as_selected(update, context))
     
+    from utils.ui_utils import get_cancel_keyboard
+    reply_markup = get_cancel_keyboard()
+    
     await safe_telegram_call(query.message.reply_text(
-        """📝 Введите новое название для шаблона:
+        """📝 *Новое название шаблона*
+━━━━━━━━━━━━━━━━━━━━
 
-Например: Доставка маме 2, Офис NY"""
+Введите уникальное название для шаблона.
+
+*Примеры:*
+• _"Дом → Офис 2"_
+• _"Склад NY"_
+• _"Родителям (зима)"_
+
+💬 *Введите название:*""",
+        reply_markup=reply_markup,
+        parse_mode='Markdown'
     ))
     # Clear last_bot_message to prevent interfering with text input
     context.user_data.pop('last_bot_message_id', None)
