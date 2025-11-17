@@ -558,6 +558,9 @@ class OrderStepMessages:
     
     # Parcel steps
     PARCEL_WEIGHT = step_message.__func__(15, 18, "📦 Вес посылки (в фунтах)\nНапример: 5 или 5.5")
+    PARCEL_LENGTH = step_message.__func__(16, 18, "📏 Длина посылки (в дюймах)\nНапример: 10 или 10.5")
+    PARCEL_WIDTH = step_message.__func__(17, 18, "📐 Ширина посылки (в дюймах)\nНапример: 8 или 8.5")
+    PARCEL_HEIGHT = step_message.__func__(18, 18, "📦 Высота посылки (в дюймах)\nНапример: 6 или 6.5")
 
 
 class TemplateEditMessages:
