@@ -61,15 +61,21 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE,
         asyncio.create_task(mark_message_as_selected(update, context))
         send_method = update.message.reply_text
     
-    from utils.ui_utils import get_cancel_and_menu_keyboard
+    from utils.ui_utils import get_back_to_menu_keyboard
     
-    message = f"""💳 Ваш баланс: ${balance:.2f}
+    message = f"""💰 *Пополнение баланса*
+━━━━━━━━━━━━━━━━━━━━
+
+💳 *Ваш баланс:* ${balance:.2f}
 
 Вы можете использовать баланс для оплаты заказов.
 
-Введите сумму для пополнения (минимум $10):"""
+━━━━━━━━━━━━━━━━━━━━
+
+💵 *Введите сумму для пополнения*
+(минимум $10):"""
     
-    reply_markup = get_cancel_and_menu_keyboard()
+    reply_markup = get_back_to_menu_keyboard()
     
     # Set state to wait for amount input
     context.user_data['awaiting_topup_amount'] = True
