@@ -106,8 +106,9 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     Use template to start order with pre-filled addresses
     """
     # Import required functions
-    from server import safe_telegram_call
-    from utils.db_operations import find_template_by_id
+    from server import safe_telegram_call, db
+    import logging
+    logger = logging.getLogger(__name__)
     
     query = update.callback_query
     await safe_telegram_call(query.answer())
@@ -118,7 +119,8 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     from utils.ui_utils import TemplateMessages, get_cancel_keyboard, OrderStepMessages
     
-    template = await find_template_by_id(template_id)
+    # Get template directly from DB
+    template = await db.templates.find_one({"id": template_id}, {"_id": 0})
     
     if not template:
         logger.error(f"❌ Template {template_id} not found")
