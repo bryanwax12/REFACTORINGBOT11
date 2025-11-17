@@ -620,6 +620,11 @@ view_template = handler_view_template
 # Keeping alias for backward compatibility
 use_template = handler_use_template
 
+# Template editing handlers
+edit_template_menu = handler_edit_template_menu
+edit_template_from_address = handler_edit_template_from_address
+edit_template_to_address = handler_edit_template_to_address
+
 # MIGRATED: Use handlers.order_flow.entry_points.start_order_with_template
 # Keeping alias for backward compatibility
 start_order_with_template = handler_start_order_with_template
