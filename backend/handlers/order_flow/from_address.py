@@ -467,6 +467,8 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, s
         
         return ConversationHandler.END
     
+    logger.info(f"⚠️ NORMAL FLOW: Proceeding to TO_NAME (no editing flags detected)")
+    
     reply_markup = get_cancel_keyboard()
     message_text = OrderStepMessages.TO_NAME
     
@@ -480,4 +482,5 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, s
         context.user_data['last_bot_message_text'] = message_text
         context.user_data['last_state'] = STATE_NAMES[TO_NAME]
     
+    logger.info(f"🔵 order_from_phone returning TO_NAME")
     return TO_NAME
