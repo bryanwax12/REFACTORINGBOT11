@@ -562,12 +562,13 @@ async def edit_template_from_address(update: Update, context: ContextTypes.DEFAU
         from server import db
         user_id = update.effective_user.id
         
-        # Update session temp_data directly in MongoDB
+        # Save editing flags as TOP-LEVEL session fields (not in temp_data)
         await db.user_sessions.update_one(
             {"user_id": user_id, "is_active": True},
             {"$set": {
-                "temp_data.editing_template_id": template_id,
-                "temp_data.editing_template_from": True
+                "editing_template_id": template_id,
+                "editing_template_from": True,
+                "editing_template_to": False
             }}
         )
         
