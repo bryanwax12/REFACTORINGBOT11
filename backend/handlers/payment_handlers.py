@@ -163,8 +163,7 @@ async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAUL
 После оплаты баланс будет автоматически пополнен."""
         
         keyboard = [
-            [InlineKeyboardButton(ButtonTexts.GO_TO_PAYMENT, url=invoice_result.get('payLink'))],
-            [InlineKeyboardButton(ButtonTexts.BACK_TO_MENU, callback_data=CallbackData.START)]
+            [InlineKeyboardButton(ButtonTexts.GO_TO_PAYMENT, url=invoice_result.get('payLink'))]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
