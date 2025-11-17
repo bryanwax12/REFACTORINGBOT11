@@ -143,9 +143,9 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
                             has_pending_order = False
                             
                             if pending_order and pending_order.get('selected_rate'):
-                            has_pending_order = True
-                            order_amount = pending_order.get('final_amount', pending_order['selected_rate']['amount'])
-                            print(f"✅ Has pending order! amount=${order_amount}")
+                                has_pending_order = True
+                                order_amount = pending_order.get('final_amount', pending_order['selected_rate']['amount'])
+                                print(f"✅ Has pending order! amount=${order_amount}")
                         
                         # Build message using template
                         if has_pending_order:
