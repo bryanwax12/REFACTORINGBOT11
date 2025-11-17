@@ -397,6 +397,13 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
     asyncio.create_task(mark_message_as_selected(update, context))
     
+    # Check if we're editing only FROM address
+    if context.user_data.get('editing_from_address'):
+        logger.info("✅ FROM address edit complete, returning to confirmation")
+        context.user_data.pop('editing_from_address', None)
+        from handlers.order_flow.confirmation import show_data_confirmation
+        return await show_data_confirmation(update, context)
+    
     reply_markup = get_cancel_keyboard()
     message_text = OrderStepMessages.TO_NAME
     
