@@ -30,8 +30,20 @@ from telegram.ext import ConversationHandler
 async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE, session_service):
     """Step 8/13: Collect recipient name"""
     from server import sanitize_string, TO_NAME, TO_ADDRESS, STATE_NAMES
+    import logging
+    logger = logging.getLogger(__name__)
     
-    
+    # Remove cancel button from prompt if exists
+    if 'last_prompt_message_id' in context.user_data:
+        try:
+            await update.effective_chat.bot.edit_message_reply_markup(
+                chat_id=update.effective_chat.id,
+                message_id=context.user_data['last_prompt_message_id'],
+                reply_markup=None
+            )
+            context.user_data.pop('last_prompt_message_id', None)
+        except Exception as e:
+            logger.debug(f"Could not remove prompt button: {e}")
     
     name = update.message.text.strip()
     name = sanitize_string(name, max_length=50)
