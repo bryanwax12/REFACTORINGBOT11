@@ -529,45 +529,45 @@ async def edit_template_from_address(update: Update, context: ContextTypes.DEFAU
         
         template_id = query.data.replace('template_edit_from_', '')
         logger.info(f"🚀 edit_template_from_address STARTED for template_id: {template_id}")
-    
-    logger.info(f"📤 Editing FROM address for template: {template_id}")
-    
-    # Remove buttons
-    try:
-        await safe_telegram_call(query.message.edit_reply_markup(reply_markup=None))
-    except Exception as e:
-        logger.debug(f"Could not remove buttons: {e}")
-    
-    # Load current template data into context
-    template = await db.templates.find_one({"id": template_id}, {"_id": 0})
-    
-    if not template:
-        await query.message.reply_text("❌ Шаблон не найден")
-        return
-    
-    # Save template ID and mark editing mode
-    context.user_data['editing_template_id'] = template_id
-    context.user_data['editing_template_from'] = True
-    
-    logger.info(f"✅ FLAGS SET: editing_template_from=True, editing_template_id={template_id}")
-    logger.info(f"📝 context.user_data keys after setting flags: {list(context.user_data.keys())}")
-    
-    # Load current FROM data
-    context.user_data['from_name'] = template.get('from_name', '')
-    context.user_data['from_address'] = template.get('from_street1', '')
-    context.user_data['from_address2'] = template.get('from_street2', '')
-    context.user_data['from_city'] = template.get('from_city', '')
-    context.user_data['from_state'] = template.get('from_state', '')
-    context.user_data['from_zip'] = template.get('from_zip', '')
-    context.user_data['from_phone'] = template.get('from_phone', '')
-    
-    # Start FROM address input
-    reply_markup = get_cancel_keyboard()
-    bot_msg = await query.message.reply_text(
-        "📤 Редактирование адреса отправителя\n\nШаг 1/7: Имя отправителя\nНапример: John Smith",
-        reply_markup=reply_markup
-    )
-    
+        
+        logger.info(f"📤 Editing FROM address for template: {template_id}")
+        
+        # Remove buttons
+        try:
+            await safe_telegram_call(query.message.edit_reply_markup(reply_markup=None))
+        except Exception as e:
+            logger.debug(f"Could not remove buttons: {e}")
+        
+        # Load current template data into context
+        template = await db.templates.find_one({"id": template_id}, {"_id": 0})
+        
+        if not template:
+            await query.message.reply_text("❌ Шаблон не найден")
+            return ConversationHandler.END
+        
+        # Save template ID and mark editing mode
+        context.user_data['editing_template_id'] = template_id
+        context.user_data['editing_template_from'] = True
+        
+        logger.info(f"✅ FLAGS SET: editing_template_from=True, editing_template_id={template_id}")
+        logger.info(f"📝 context.user_data keys after setting flags: {list(context.user_data.keys())}")
+        
+        # Load current FROM data
+        context.user_data['from_name'] = template.get('from_name', '')
+        context.user_data['from_address'] = template.get('from_street1', '')
+        context.user_data['from_address2'] = template.get('from_street2', '')
+        context.user_data['from_city'] = template.get('from_city', '')
+        context.user_data['from_state'] = template.get('from_state', '')
+        context.user_data['from_zip'] = template.get('from_zip', '')
+        context.user_data['from_phone'] = template.get('from_phone', '')
+        
+        # Start FROM address input
+        reply_markup = get_cancel_keyboard()
+        bot_msg = await query.message.reply_text(
+            "📤 Редактирование адреса отправителя\n\nШаг 1/7: Имя отправителя\nНапример: John Smith",
+            reply_markup=reply_markup
+        )
+        
         # Save message ID to remove button later
         if bot_msg:
             context.user_data['last_prompt_message_id'] = bot_msg.message_id
