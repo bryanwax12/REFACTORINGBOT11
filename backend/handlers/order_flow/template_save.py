@@ -166,15 +166,21 @@ async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_T
         template_name = context.user_data.get('pending_template_name', 'шаблон')
         keyboard = [
             [InlineKeyboardButton("📦 Продолжить создание заказа", callback_data='continue_order')],
+            [InlineKeyboardButton("📋 Мои шаблоны", callback_data='my_templates')],
             [InlineKeyboardButton("🏠 Главное меню", callback_data='start')]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
-        message_text = f"""✅ *Шаблон "{template_name}" обновлен!*
+        message_text = f"""✅ *Шаблон обновлён!*
+━━━━━━━━━━━━━━━━━━━━
 
-Данные шаблона обновлены текущими адресами.
+📁 *Название:* {template_name}
+🔄 *Статус:* Адреса обновлены
 
-*Продолжить создание этого заказа?*"""
+💡 Шаблон теперь содержит актуальные адреса из текущего заказа.
+
+━━━━━━━━━━━━━━━━━━━━
+*Что дальше?*"""
         
         bot_msg = await safe_telegram_call(query.message.reply_text(
             message_text,
