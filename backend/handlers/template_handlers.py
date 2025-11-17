@@ -167,8 +167,7 @@ async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     Confirm template deletion
     """
     # Import required functions
-    from server import safe_telegram_call
-    from utils.db_operations import find_template_by_id
+    from server import safe_telegram_call, db
     import logging
     logger = logging.getLogger(__name__)
     
@@ -176,6 +175,8 @@ async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await safe_telegram_call(query.answer())
     
     template_id = query.data.replace('template_delete_', '')
+    
+    logger.info(f"🗑️ Delete template requested: template_id={template_id}")
     
     # Remove buttons from template view message
     try:
@@ -185,11 +186,15 @@ async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     from utils.ui_utils import TemplateMessages, get_template_delete_confirmation_keyboard
     
-    template = await find_template_by_id(template_id)
+    # Get template directly from DB
+    template = await db.templates.find_one({"id": template_id}, {"_id": 0})
     
     if not template:
+        logger.error(f"❌ Template {template_id} not found")
         await query.message.reply_text(TemplateMessages.template_not_found())
         return
+    
+    logger.info(f"✅ Template found: {template.get('name')}")
     
     message = TemplateMessages.confirm_delete(template.get('name'))
     reply_markup = get_template_delete_confirmation_keyboard(template_id)
