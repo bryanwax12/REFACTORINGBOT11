@@ -79,14 +79,20 @@ async def view_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Extract template ID from callback data
     template_id = query.data.replace('template_view_', '')
     
+    logger.info(f"📋 Viewing template: template_id={template_id}")
+    
     # Get template from database
     from utils.ui_utils import TemplateMessages, get_template_view_keyboard
+    from server import db
     
-    template = await find_template_by_id(template_id)
+    template = await db.templates.find_one({"id": template_id}, {"_id": 0})
     
     if not template:
+        logger.error(f"❌ Template {template_id} not found")
         await query.message.reply_text(TemplateMessages.template_not_found())
         return
+    
+    logger.info(f"✅ Template found: {template.get('name')}")
     
     # Format template info
     message = TemplateMessages.template_details(template)
