@@ -591,48 +591,59 @@ async def edit_template_to_address(update: Update, context: ContextTypes.DEFAULT
     import logging
     logger = logging.getLogger(__name__)
     
-    query = update.callback_query
-    await safe_telegram_call(query.answer())
-    
-    template_id = query.data.replace('template_edit_to_', '')
-    
-    logger.info(f"📥 Editing TO address for template: {template_id}")
-    
-    # Remove buttons
     try:
-        await safe_telegram_call(query.message.edit_reply_markup(reply_markup=None))
+        query = update.callback_query
+        await safe_telegram_call(query.answer())
+        
+        template_id = query.data.replace('template_edit_to_', '')
+        logger.info(f"🚀 edit_template_to_address STARTED for template_id: {template_id}")
+        
+        logger.info(f"📥 Editing TO address for template: {template_id}")
+        
+        # Remove buttons
+        try:
+            await safe_telegram_call(query.message.edit_reply_markup(reply_markup=None))
+        except Exception as e:
+            logger.debug(f"Could not remove buttons: {e}")
+        
+        # Load current template data into context
+        template = await db.templates.find_one({"id": template_id}, {"_id": 0})
+        
+        if not template:
+            await query.message.reply_text("❌ Шаблон не найден")
+            return ConversationHandler.END
+        
+        # Save template ID and mark editing mode
+        context.user_data['editing_template_id'] = template_id
+        context.user_data['editing_template_to'] = True
+        
+        logger.info(f"✅ FLAGS SET: editing_template_to=True, editing_template_id={template_id}")
+        
+        # Load current TO data
+        context.user_data['to_name'] = template.get('to_name', '')
+        context.user_data['to_address'] = template.get('to_street1', '')
+        context.user_data['to_address2'] = template.get('to_street2', '')
+        context.user_data['to_city'] = template.get('to_city', '')
+        context.user_data['to_state'] = template.get('to_state', '')
+        context.user_data['to_zip'] = template.get('to_zip', '')
+        context.user_data['to_phone'] = template.get('to_phone', '')
+        
+        # Start TO address input
+        reply_markup = get_cancel_keyboard()
+        bot_msg = await query.message.reply_text(
+            "📥 Редактирование адреса получателя\n\nШаг 1/7: Имя получателя\nНапример: Jane Doe",
+            reply_markup=reply_markup
+        )
+        
+        # Save message ID to remove button later
+        if bot_msg:
+            context.user_data['last_prompt_message_id'] = bot_msg.message_id
+        
+        logger.info(f"✅ edit_template_to_address COMPLETED - returning TO_NAME state")
+        return TO_NAME
+    
     except Exception as e:
-        logger.debug(f"Could not remove buttons: {e}")
-    
-    # Load current template data into context
-    template = await db.templates.find_one({"id": template_id}, {"_id": 0})
-    
-    if not template:
-        await query.message.reply_text("❌ Шаблон не найден")
-        return
-    
-    # Save template ID and mark editing mode
-    context.user_data['editing_template_id'] = template_id
-    context.user_data['editing_template_to'] = True
-    
-    # Load current TO data
-    context.user_data['to_name'] = template.get('to_name', '')
-    context.user_data['to_address'] = template.get('to_street1', '')
-    context.user_data['to_address2'] = template.get('to_street2', '')
-    context.user_data['to_city'] = template.get('to_city', '')
-    context.user_data['to_state'] = template.get('to_state', '')
-    context.user_data['to_zip'] = template.get('to_zip', '')
-    context.user_data['to_phone'] = template.get('to_phone', '')
-    
-    # Start TO address input
-    reply_markup = get_cancel_keyboard()
-    bot_msg = await query.message.reply_text(
-        "📥 Редактирование адреса получателя\n\nШаг 1/7: Имя получателя\nНапример: Jane Doe",
-        reply_markup=reply_markup
-    )
-    
-    # Save message ID to remove button later
-    if bot_msg:
-        context.user_data['last_prompt_message_id'] = bot_msg.message_id
-    
-    return TO_NAME
+        logger.error(f"❌ ERROR in edit_template_to_address: {e}", exc_info=True)
+        if update.callback_query:
+            await update.callback_query.message.reply_text(f"❌ Ошибка: {str(e)}")
+        return ConversationHandler.END
