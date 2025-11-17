@@ -5929,3 +5929,23 @@ backend:
           agent: "main_fork"
           comment: "✅ TECHNICAL IMPLEMENTATION VERIFIED: All code changes correctly implemented. VERIFICATION: (1) ✅ TEMPLATE_RENAME constant imported from server.py, (2) ✅ Function returns integer TEMPLATE_RENAME (not string), (3) ✅ Comprehensive logging added to track rename flow, (4) ✅ Backend restarted successfully, no errors in logs, (5) ✅ ConversationHandler properly configured with TEMPLATE_RENAME state. MANUAL TESTING REQUIRED: User needs to test via @whitelabel_shipping_bot_test_bot: (1) /start → Мои шаблоны, (2) Select template → view template details, (3) Click 'Переименовать' (rename) button, (4) Enter new name (e.g., 'Test 123'), (5) Verify bot responds with '✅ Шаблон переименован' (NOT hang). Check logs for: '🔄 Starting template rename', '🟢 rename_template_save CALLED', '✅ Template renamed successfully'."
 
+
+backend:
+  - task: "Shipping Rates Display - Carrier Name Shows UNKNOWN"
+    implemented: true
+    working: pending_user_test
+    file: "/app/backend/utils/ui_utils.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "❌ USER REPORTED ISSUE: When viewing shipping rates, carrier name shows as 'Carrier: UNKNOWN' instead of actual carrier name (USPS, FedEx, etc.). This happens in the rates selection screen after entering parcel details."
+        - working: "NA"
+          agent: "main_fork"
+          comment: "🔧 ROOT CAUSE IDENTIFIED: In format_rates_message function (ui_utils.py line 923-927), code accessed rate['carrier'] directly without checking if key exists. When rates don't go through filter_popular_rates function, they only have 'carrier_friendly_name' field, not 'carrier' field. This caused KeyError or returned wrong value. FIX IMPLEMENTED: (1) Line 926: Changed rate['carrier'] to rate.get('carrier', rate.get('carrier_friendly_name', 'UNKNOWN')), (2) Line 931: Same fix for unique_carriers count, (3) Added safe fallback chain: first try 'carrier', then 'carrier_friendly_name', finally 'UNKNOWN'. Backend restarted successfully."
+        - working: "pending_user_test"
+          agent: "main_fork"
+          comment: "✅ TECHNICAL IMPLEMENTATION VERIFIED: All code changes correctly implemented. VERIFICATION: (1) ✅ Safe dictionary access with .get() method, (2) ✅ Fallback chain implemented for carrier name, (3) ✅ Same fix applied to both places using carrier field, (4) ✅ Backend restarted successfully. MANUAL TESTING REQUIRED: User needs to test via bot: (1) Create order, fill addresses and parcel details, (2) View shipping rates, (3) Verify carrier names show correctly (USPS, FedEx, UPS, NOT 'UNKNOWN'), (4) Check that all rate cards display proper carrier names."
+
