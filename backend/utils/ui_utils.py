@@ -456,11 +456,19 @@ class OrderFlowMessages:
         to_state = template.get('to_state', '')
         to_zip = template.get('to_zip', '')
         
+        # Truncate long addresses for list view
+        from_street_short = from_street[:25] + '...' if len(from_street) > 25 else from_street
+        to_street_short = to_street[:25] + '...' if len(to_street) > 25 else to_street
+        
         return f"""*{i}. {template['name']}*
-📤 От: {from_name}
-   {from_street}, {from_city}, {from_state} {from_zip}
-📥 Кому: {to_name}
-   {to_street}, {to_city}, {to_state} {to_zip}
+━━━━━━━━━━━━━━━━━━━━
+📤 *От:* {from_name}
+   📍 {from_street_short}
+   🏙️ {from_city}, {from_state} {from_zip}
+
+📥 *Кому:* {to_name}
+   📍 {to_street_short}
+   🏙️ {to_city}, {to_state} {to_zip}
 
 """
 
