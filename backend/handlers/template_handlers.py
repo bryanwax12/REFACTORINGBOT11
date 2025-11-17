@@ -679,9 +679,15 @@ async def edit_template_to_address(update: Update, context: ContextTypes.DEFAULT
             reply_markup=reply_markup
         )
         
-        # Save message ID to remove button later
+        # Save message ID to remove button later (both in context and DB)
         if bot_msg:
             context.user_data['last_prompt_message_id'] = bot_msg.message_id
+            # Also save to DB session so it persists
+            await db.user_sessions.update_one(
+                {"user_id": user_id, "is_active": True},
+                {"$set": {"last_prompt_message_id": bot_msg.message_id}}
+            )
+            logger.info(f"💾 Saved last_prompt_message_id={bot_msg.message_id} to both context and DB")
         
         logger.info(f"✅ edit_template_to_address COMPLETED - returning TO_NAME state")
         return TO_NAME
