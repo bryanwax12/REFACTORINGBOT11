@@ -594,6 +594,9 @@ async def edit_template_from_address(update: Update, context: ContextTypes.DEFAU
         # Save message ID to remove button later
         if bot_msg:
             context.user_data['last_prompt_message_id'] = bot_msg.message_id
+            logger.info(f"💾 Saved last_prompt_message_id={bot_msg.message_id} for cancel button removal")
+        else:
+            logger.warning(f"⚠️ bot_msg is None, cannot save message_id")
         
         logger.info(f"✅ edit_template_from_address COMPLETED - returning FROM_NAME state")
         return FROM_NAME
