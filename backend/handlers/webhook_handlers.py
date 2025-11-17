@@ -56,11 +56,13 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
             
             print(f"💾 Payment found: {payment is not None}")
             if payment:
-                # Update payment status
+                # Update payment status (use same invoice_id format that was used to find it)
+                invoice_id_for_update = payment.get('invoice_id')  # Use actual value from DB
                 await db.payments.update_one(
-                    {"invoice_id": track_id},
+                    {"invoice_id": invoice_id_for_update},
                     {"$set": {"status": "paid", "paid_amount": paid_amount}}
                 )
+                logger.info(f"✅ Payment status updated to 'paid' for invoice_id={invoice_id_for_update}")
                 
                 # Check if it's a top-up
                 if payment.get('type') == 'topup':
