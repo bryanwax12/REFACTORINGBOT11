@@ -626,6 +626,10 @@ edit_template_menu = handler_edit_template_menu
 edit_template_from_address = handler_edit_template_from_address
 edit_template_to_address = handler_edit_template_to_address
 
+# Template deletion handlers
+delete_template = handler_delete_template
+confirm_delete_template = handler_confirm_delete_template
+
 # MIGRATED: Use handlers.order_flow.entry_points.start_order_with_template
 # Keeping alias for backward compatibility
 start_order_with_template = handler_start_order_with_template
