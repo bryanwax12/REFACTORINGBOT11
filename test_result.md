@@ -5949,3 +5949,23 @@ backend:
           agent: "main_fork"
           comment: "✅ TECHNICAL IMPLEMENTATION VERIFIED: All code changes correctly implemented. VERIFICATION: (1) ✅ Safe dictionary access with .get() method, (2) ✅ Fallback chain implemented for carrier name, (3) ✅ Same fix applied to both places using carrier field, (4) ✅ Backend restarted successfully. MANUAL TESTING REQUIRED: User needs to test via bot: (1) Create order, fill addresses and parcel details, (2) View shipping rates, (3) Verify carrier names show correctly (USPS, FedEx, UPS, NOT 'UNKNOWN'), (4) Check that all rate cards display proper carrier names."
 
+
+backend:
+  - task: "Label Display - Carrier Shows 'Unknown' in Admin Notification + Template Save Screen UX"
+    implemented: true
+    working: pending_user_test
+    file: "/app/backend/handlers/order_flow/carriers.py, /app/backend/utils/ui_utils.py, /app/backend/handlers/order_flow/confirmation.py"
+    stuck_count: 2
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        - working: false
+          agent: "user"
+          comment: "❌ USER REPORTED TWO ISSUES: (1) In created shipping label admin notification, carrier shows as 'Unknown - Standard' instead of real carrier name (USPS, FedEx, etc.), (2) Template save screen looks plain and needs better formatting."
+        - working: "NA"
+          agent: "main_fork"
+          comment: "🔧 ROOT CAUSE & FIX: ISSUE 1 - Carrier 'Unknown': In carriers.py line 117-118, code saves carrier using carrier_friendly_name and service_type from raw ShipStation API response. But formatted rates use 'carrier' and 'service' fields. Fixed by using .get() chain: first try 'carrier' (from formatted rates), fallback to 'carrier_friendly_name' (from raw API). Same for service field. ISSUE 2 - Template Save UX: Enhanced template_name_prompt in ui_utils.py to include: decorative separator lines, helpful examples (e.g. 'Дом → Офис'), descriptive text about template purpose. Added cancel button with get_cancel_keyboard(). Added Markdown parse_mode for better formatting. Backend restarted successfully."
+        - working: "pending_user_test"
+          agent: "main_fork"
+          comment: "✅ TECHNICAL IMPLEMENTATION VERIFIED: ISSUE 1: (1) ✅ carriers.py line 117: context.user_data['selected_carrier'] uses rate.get('carrier', rate.get('carrier_friendly_name', 'Unknown')), (2) ✅ carriers.py line 119: context.user_data['selected_service'] uses rate.get('service', rate.get('service_type', 'Standard')), (3) ✅ Proper fallback chain ensures correct carrier name in admin notification. ISSUE 2: (1) ✅ Enhanced template_name_prompt with decorative UI, (2) ✅ Added examples and descriptive text, (3) ✅ Added cancel button, (4) ✅ Markdown formatting enabled. MANUAL TESTING REQUIRED: TEST 1 (Carrier fix): Create complete order, pay, receive label, check admin notification shows correct carrier name (NOT 'Unknown'). TEST 2 (Template UX): After filling order data, click 'Сохранить шаблон', verify beautiful formatted prompt with examples and cancel button appears."
+
