@@ -273,7 +273,8 @@ async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAUL
     """Handle custom topup amount input"""
     from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
     from services.api_services import create_oxapay_invoice
-    from server import insert_payment, Payment
+    from utils.db_operations import insert_payment
+    from server import Payment, db
     import asyncio
     import time
     import uuid
