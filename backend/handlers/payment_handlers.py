@@ -272,7 +272,8 @@ async def deduct_balance(telegram_id: int, amount: float, db):
 async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle custom topup amount input"""
     from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
-    from server import create_oxapay_invoice, insert_payment, Payment
+    from services.api_services import create_oxapay_invoice
+    from server import insert_payment, Payment
     import asyncio
     import time
     import uuid
