@@ -547,6 +547,9 @@ async def edit_template_from_address(update: Update, context: ContextTypes.DEFAU
     context.user_data['editing_template_id'] = template_id
     context.user_data['editing_template_from'] = True
     
+    logger.info(f"✅ FLAGS SET: editing_template_from=True, editing_template_id={template_id}")
+    logger.info(f"📝 context.user_data keys after setting flags: {list(context.user_data.keys())}")
+    
     # Load current FROM data
     context.user_data['from_name'] = template.get('from_name', '')
     context.user_data['from_address'] = template.get('from_street1', '')
