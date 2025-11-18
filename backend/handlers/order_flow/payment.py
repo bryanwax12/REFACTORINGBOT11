@@ -390,7 +390,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 # Only deduct balance if label was created successfully using payment service
                 success, error = await payment_service.process_balance_payment(
                     telegram_id=telegram_id,
-                    order_id=order['_id'],
+                    order_id=order['order_id'],
                     amount=amount
                 )
                 
