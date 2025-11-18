@@ -105,6 +105,21 @@
 user_problem_statement: "КОМПЛЕКСНОЕ ТЕСТИРОВАНИЕ ГЛОБАЛЬНОГО РЕФАКТОРИНГА системы управления состоянием last_state. Проблема: context.user_data['last_state'] сохранялся как целочисленная константа (FROM_NAME = 0), а при чтении ожидалась строка ('FROM_NAME'). Это вызывало KeyError при нажатии кнопок 'Отмена' → 'Вернуться к заказу'. Исправлено: создан словарь STATE_NAMES для маппинга INT → STRING, обновлено 32 места присваивания last_state."
 
 backend:
+  - task: "Balance Notification System - Admin Panel Balance Changes"
+    implemented: true
+    working: false
+    file: "/app/backend/routers/legacy_admin_endpoints.py, /app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "🔍 BALANCE NOTIFICATION TESTING НАЧАТО: Тестирование функции отправки уведомлений из админ-панели после изменения баланса пользователя. КОНТЕКСТ: Telegram бот для shipping labels, админка может изменять баланс пользователей, после изменения баланса пользователь должен получать красивое уведомление в Telegram, недавно был исправлен баг с доступом к bot_instance через app.state. ТЕСТИРУЕМЫЕ ЭНДПОИНТЫ: (1) POST /api/users/{telegram_id}/balance/add с query param amount и headers x-api-key, (2) POST /api/users/{telegram_id}/balance/deduct с query param amount и headers x-api-key. ТЕСТОВЫЙ ПОЛЬЗОВАТЕЛЬ: telegram_id=5594152712, ADMIN API KEY: sk_admin_e19063c3f82f447ba4ccf49cd97dd9fd_2024."
+        - working: false
+          agent: "testing"
+          comment: "❌ BALANCE NOTIFICATION SYSTEM НЕ РАБОТАЕТ: Comprehensive testing показал что эндпоинты работают корректно, но уведомления не отправляются. РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ: (1) ✅ Balance Add Endpoint: POST /api/users/5594152712/balance/add?amount=1.00 возвращает HTTP 200 OK с success: true и new_balance: 113.30, (2) ✅ Balance Deduct Endpoint: POST /api/users/5594152712/balance/deduct?amount=0.50 возвращает HTTP 200 OK с success: true и new_balance: 112.80, (3) ❌ КРИТИЧЕСКАЯ ПРОБЛЕМА: В логах НЕТ строк 'Attempting to send balance notification' или 'Balance notification sent to user', (4) ❌ bot_instance status: НЕ найден в логах (ожидался 'bot_instance=AVAILABLE'), (5) ✅ Нет ошибок в backend.err.log связанных с balance/notification. ДИАГНОСТИКА: Эндпоинты /api/users/{telegram_id}/balance/add и /api/users/{telegram_id}/balance/deduct работают и обновляют баланс в БД, но bot_instance недоступен для отправки уведомлений. ВОЗМОЖНЫЕ ПРИЧИНЫ: (1) bot_instance не инициализирован в app.state, (2) Telegram bot работает в polling mode вместо webhook mode, что создает конфликты, (3) bot_instance = None в момент вызова notification функции. ЗАКЛЮЧЕНИЕ: Функция отправки уведомлений НЕ РАБОТАЕТ - пользователи не получают уведомления об изменении баланса."
+
   - task: "Handlers Refactoring - Modular Architecture Migration"
     implemented: true
     working: true
