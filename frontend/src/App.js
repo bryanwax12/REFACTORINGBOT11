@@ -1223,7 +1223,7 @@ const Dashboard = () => {
                     </thead>
                     <tbody>
                       {orders.map((order, idx) => (
-                        <tr key={`${order.id}-${order.label_id || idx}`} className="border-b last:border-0 hover:bg-muted/50" data-testid="order-row">
+                        <tr key={order.id || order.order_id || idx} className="border-b last:border-0 hover:bg-muted/50" data-testid="order-row">
                           <td className="py-3">
                             <div className="text-xs">
                               <div className="font-medium">{order.user_name || 'Unknown'}</div>
