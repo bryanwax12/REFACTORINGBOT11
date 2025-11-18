@@ -1286,8 +1286,8 @@ const Dashboard = () => {
                           </td>
                           <td className="py-3">
                             <div className="text-xs">
-                              <div>{order.address_from.city}, {order.address_from.state}</div>
-                              <div className="text-muted-foreground">→ {order.address_to.city}, {order.address_to.state}</div>
+                              <div>{order.address_from?.city || 'N/A'}, {order.address_from?.state || 'N/A'}</div>
+                              <div className="text-muted-foreground">→ {order.address_to?.city || 'N/A'}, {order.address_to?.state || 'N/A'}</div>
                             </div>
                           </td>
                           <td className="py-3">
@@ -1298,7 +1298,7 @@ const Dashboard = () => {
                               </div>
                             </div>
                           </td>
-                          <td className="py-3 font-semibold">${order.amount}</td>
+                          <td className="py-3 font-semibold">${order.amount || 0}</td>
                           <td className="py-3">
                             <div className="flex flex-col gap-1">
                               <Badge variant={order.payment_status === 'paid' ? 'default' : 'secondary'} className="w-fit">
