@@ -24,7 +24,7 @@ async def oxapay_webhook(request: Request):
         # Import from server inside function to avoid circular import
         import server as srv
         
-        print("✅ All imports successful")
+        logger.debug("✅ All imports successful")
         logger.info("✅ All imports successful")
         
         user_repo = get_user_repo()
