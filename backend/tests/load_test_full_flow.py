@@ -370,9 +370,9 @@ class RealisticLoadTester:
             success_rate = (self.results['successful_orders'] / self.results['total_operations']) * 100
             print(f"📊 Процент успеха: {success_rate:.2f}%")
         
-        print(f"\n{'─'*80}")
+        print("\n" + "─" * 80)
         print("📈 Статистика по шагам:")
-        print(f"{'─'*80}")
+        print("─" * 80)
         print(f"   ✅ Шагов завершено: {self.results['steps_completed']}")
         print(f"   ❌ Шагов провалено: {self.results['steps_failed']}")
         avg_steps = self.results['steps_completed'] / max(self.results['total_operations'], 1)
