@@ -2465,55 +2465,25 @@ const Dashboard = () => {
               {/* User Info */}
               <div>
                 <h3 className="font-semibold mb-4">User Information</h3>
-                <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {userDetailsModal.details.user && (
-                    <div className="border rounded-lg p-4 space-y-2">(
-                      <div key={order.id || Math.random()} className="border rounded-lg p-4 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">Order #{order.id ? order.id.substring(0, 8) : 'N/A'}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {formatKyivDateTime(order.created_at)}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-semibold">${order.amount || 0}</p>
-                            <div className="flex gap-2 mt-1">
-                              <Badge variant={order.payment_status === 'paid' ? 'default' : 'secondary'}>
-                                {order.payment_status || 'unknown'}
-                              </Badge>
-                              <Badge variant="outline">{order.shipping_status}</Badge>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <p className="font-medium">From:</p>
-                            <p className="text-muted-foreground">
-                              {order.address_from.name}<br />
-                              {order.address_from.street1}
-                              {order.address_from.street2 && <>, {order.address_from.street2}</>}<br />
-                              {order.address_from.city}, {order.address_from.state} {order.address_from.zip}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="font-medium">To:</p>
-                            <p className="text-muted-foreground">
-                              {order.address_to.name}<br />
-                              {order.address_to.street1}
-                              {order.address_to.street2 && <>, {order.address_to.street2}</>}<br />
-                              {order.address_to.city}, {order.address_to.state} {order.address_to.zip}
-                            </p>
-                          </div>
-                        </div>
-                        {order.selected_carrier && (
-                          <p className="text-sm">
-                            <span className="font-medium">Carrier:</span> {order.selected_carrier} - {order.selected_service}
-                          </p>
-                        )}
-                      </div>
-                    ))
-                  )}
+                <div className="border rounded-lg p-4 space-y-3">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Created</p>
+                      <p className="font-medium">{formatKyivDateTime(userDetailsModal.details.user.created_at)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Discount</p>
+                      <p className="font-medium">{userDetailsModal.details.user.discount || 0}%</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Channel Member</p>
+                      <p className="font-medium">{userDetailsModal.details.user.is_channel_member ? '✅ Yes' : '❌ No'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Bot Blocked</p>
+                      <p className="font-medium">{userDetailsModal.details.user.bot_blocked_by_user ? '❌ Yes' : '✅ No'}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>
