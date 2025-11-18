@@ -203,9 +203,6 @@ async def show_order_summary(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 {'='*30}"""
     
-    # Get user balance
-    telegram_id = query.from_user.id
-    
     # Build keyboard
     keyboard = []
     keyboard.append([InlineKeyboardButton("💳 Перейти к оплате", callback_data='proceed_to_payment')])
