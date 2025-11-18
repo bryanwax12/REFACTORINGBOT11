@@ -95,7 +95,7 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     asyncio.create_task(mark_message_as_selected(update, context))
     
     # Use different messages for template editing vs order creation
-    if context.user_data.get('editing_template_to'):
+    if context.user_data.get('editing_template_to') or context.user_data.get('editing_to_address'):
         message_text = TemplateEditMessages.TO_ADDRESS
     else:
         message_text = OrderStepMessages.TO_ADDRESS
@@ -148,7 +148,7 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     from utils.ui_utils import get_skip_and_cancel_keyboard, OrderStepMessages, CallbackData, TemplateEditMessages
     
     # Use different messages for template editing vs order creation
-    if context.user_data.get('editing_template_to'):
+    if context.user_data.get('editing_template_to') or context.user_data.get('editing_to_address'):
         message_text = TemplateEditMessages.TO_ADDRESS2
     else:
         message_text = OrderStepMessages.TO_ADDRESS2
@@ -199,7 +199,7 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE, 
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages, TemplateEditMessages
     
     # Use different messages for template editing vs order creation
-    if context.user_data.get('editing_template_to'):
+    if context.user_data.get('editing_template_to') or context.user_data.get('editing_to_address'):
         message_text = TemplateEditMessages.TO_CITY
     else:
         message_text = OrderStepMessages.TO_CITY
@@ -252,7 +252,7 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     asyncio.create_task(mark_message_as_selected(update, context))
     
     # Use different messages for template editing vs order creation
-    if context.user_data.get('editing_template_to'):
+    if context.user_data.get('editing_template_to') or context.user_data.get('editing_to_address'):
         message_text = TemplateEditMessages.TO_STATE
     else:
         message_text = OrderStepMessages.TO_STATE
@@ -304,7 +304,7 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     asyncio.create_task(mark_message_as_selected(update, context))
     
     # Use different messages for template editing vs order creation
-    if context.user_data.get('editing_template_to'):
+    if context.user_data.get('editing_template_to') or context.user_data.get('editing_to_address'):
         message_text = TemplateEditMessages.TO_ZIP
     else:
         message_text = OrderStepMessages.TO_ZIP
@@ -357,7 +357,7 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, sessi
     from utils.ui_utils import get_skip_and_cancel_keyboard, OrderStepMessages, CallbackData, TemplateEditMessages
     
     # Use different messages for template editing vs order creation
-    if context.user_data.get('editing_template_to'):
+    if context.user_data.get('editing_template_to') or context.user_data.get('editing_to_address'):
         message_text = TemplateEditMessages.TO_PHONE
     else:
         message_text = OrderStepMessages.TO_PHONE
@@ -424,7 +424,7 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
         return await show_data_confirmation(update, context)
     
     # Check if we're editing template TO address
-    if context.user_data.get('editing_template_to'):
+    if context.user_data.get('editing_template_to') or context.user_data.get('editing_to_address'):
         logger.info("✅ Template TO address edit complete, saving to template")
         template_id = context.user_data.get('editing_template_id')
         
