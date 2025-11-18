@@ -398,8 +398,7 @@ _Если вы оплатите другую сумму, деньги НЕ по�
 async def handle_topup_crypto_selection(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle cryptocurrency selection for top-up"""
     from handlers.common_handlers import safe_telegram_call
-    from handlers.order_flow.cancellation import cancel_order, confirm_cancel_order
-    from handlers.order_flow.skip_handlers import return_to_order
+    from handlers.order_flow.cancellation import cancel_order, confirm_cancel_order, return_to_order
     from server import create_oxapay_invoice, insert_payment, Payment
     import time
     import uuid
