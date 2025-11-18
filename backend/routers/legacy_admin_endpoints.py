@@ -2,7 +2,7 @@
 Legacy Admin Endpoints for Frontend Compatibility
 These endpoints don't have /admin prefix for backward compatibility
 """
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from handlers.admin_handlers import verify_admin_key
 import logging
 
