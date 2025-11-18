@@ -161,7 +161,7 @@ def test_admin_api_endpoints():
             try:
                 error_data = response.json()
                 print(f"      Error: {error_data}")
-            except:
+            except Exception:
                 print(f"      Error: {response.text}")
             return False
         
