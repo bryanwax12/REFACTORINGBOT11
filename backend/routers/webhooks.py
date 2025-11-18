@@ -47,7 +47,7 @@ async def oxapay_webhook(request: Request):
             find_pending_order,
             srv.create_and_send_label
         )
-        print(f"✅ Webhook processed: {result}")
+        logger.info(f"✅ Webhook processed: {result}")
         logger.info(f"✅ Webhook processed: {result}")
         return result
     except Exception as e:
