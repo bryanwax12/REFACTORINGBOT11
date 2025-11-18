@@ -164,7 +164,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
             # Check if editing template - return to first step of editing
             if context.user_data.get('editing_template_from'):
-                logger.info(f"Returning to first step of FROM address editing")
+                logger.info("Returning to first step of FROM address editing")
                 from server import FROM_NAME
                 from utils.ui_utils import TemplateEditMessages, get_cancel_keyboard
                 
@@ -175,7 +175,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 return FROM_NAME
                 
             elif context.user_data.get('editing_template_to'):
-                logger.info(f"Returning to first step of TO address editing")
+                logger.info("Returning to first step of TO address editing")
                 from server import TO_NAME
                 from utils.ui_utils import TemplateEditMessages, get_cancel_keyboard
                 
