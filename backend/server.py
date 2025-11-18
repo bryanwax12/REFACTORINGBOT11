@@ -129,9 +129,7 @@ from utils.settings_cache import (
 )
 
 # MIGRATED: Profiled DB operations moved to utils.db_operations
-from utils.db_operations import (
-    delete_template
-)
+# (delete_template now imported from handlers.template_handlers instead)
 
 # Debug logging removed - was causing startup issues
 
