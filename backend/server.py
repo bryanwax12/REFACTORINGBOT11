@@ -344,6 +344,10 @@ try:
     from routers.refunds import router as refunds_router
     app.include_router(refunds_router)
     
+    # Legacy admin endpoints (without /admin prefix for frontend compatibility)
+    from routers.legacy_admin_endpoints import legacy_admin_router
+    app.include_router(legacy_admin_router)
+    
     logger.info("✅ All API routers registered successfully")
 except Exception as e:
     logger.error(f"❌ Error registering routers: {e}")
