@@ -648,6 +648,7 @@ async def add_user_balance_legacy(
 
 @admin_router.post("/users/{telegram_id}/balance/deduct")
 async def deduct_user_balance_legacy(
+    request: Request,
     telegram_id: int,
     amount: float = Query(..., gt=0),
     authenticated: bool = Depends(verify_admin_key)
@@ -656,8 +657,11 @@ async def deduct_user_balance_legacy(
     Legacy endpoint to deduct balance from user
     Used by frontend - subtracts specified amount from user balance
     """
-    from server import db, bot_instance
+    from server import db
     from handlers.common_handlers import safe_telegram_call
+    
+    # Get bot_instance from app.state
+    bot_instance = getattr(request.app.state, 'bot_instance', None)
     
     try:
         # Get current balance first
