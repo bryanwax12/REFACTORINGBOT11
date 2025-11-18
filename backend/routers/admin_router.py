@@ -78,10 +78,13 @@ async def block_user(request: Request, telegram_id: int, authenticated: bool = D
 
 
 @admin_router.post("/users/{telegram_id}/unblock")
-async def unblock_user(telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
+async def unblock_user(request: Request, telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
     """Unblock a user to allow bot usage"""
-    from server import db, bot_instance
+    from server import db
     from handlers.common_handlers import safe_telegram_call
+    
+    # Get bot_instance from app.state
+    bot_instance = getattr(request.app.state, 'bot_instance', None)
     
     try:
         # Check if user exists
