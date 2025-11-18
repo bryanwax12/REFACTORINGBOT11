@@ -1007,6 +1007,7 @@ const Dashboard = () => {
           <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
           <TabsTrigger value="orders" data-testid="tab-orders">Orders</TabsTrigger>
           <TabsTrigger value="users" data-testid="tab-users">Users</TabsTrigger>
+          <TabsTrigger value="refunds" data-testid="tab-refunds">💰 Refunds</TabsTrigger>
           <TabsTrigger value="topups" data-testid="tab-topups">Top-ups</TabsTrigger>
           <TabsTrigger value="broadcast" data-testid="tab-broadcast">📢 Broadcast</TabsTrigger>
           <TabsTrigger value="create-label" data-testid="tab-create-label">Create Label</TabsTrigger>
