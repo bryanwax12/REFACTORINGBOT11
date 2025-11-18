@@ -12,6 +12,13 @@ from bot_protection import BotProtection
 from telegram_safety import TelegramSafetySystem, TelegramBestPractices
 import logging
 import httpx
+
+# Configure logging for production
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import Optional
 from datetime import datetime, timezone
