@@ -13,7 +13,7 @@ router = APIRouter(prefix="/api", tags=["webhooks"])
 @router.post("/oxapay/webhook")
 async def oxapay_webhook(request: Request):
     """Handle Oxapay payment webhooks"""
-    print("🔔 [OXAPAY_WEBHOOK] Webhook endpoint called!")
+    logger.info("🔔 [OXAPAY_WEBHOOK] Webhook endpoint called!")
     
     try:
         from handlers.webhook_handlers import handle_oxapay_webhook
@@ -23,7 +23,7 @@ async def oxapay_webhook(request: Request):
         
         # Get bot_instance from app.state instead of server module
         bot_instance = getattr(request.app.state, 'bot_instance', None)
-        print(f"🔔 [OXAPAY_WEBHOOK] bot_instance from app.state: {'AVAILABLE' if bot_instance else 'NONE'}")
+        logger.info(f"🔔 [OXAPAY_WEBHOOK] bot_instance from app.state: {'AVAILABLE' if bot_instance else 'NONE'}")
         
         user_repo = get_user_repo()
         
@@ -35,7 +35,7 @@ async def oxapay_webhook(request: Request):
                 result = await srv.db.pending_orders.find_one({"order_id": identifier}, {"_id": 0})
             return result
         
-        print("🔔 [OXAPAY_WEBHOOK] About to call handle_oxapay_webhook")
+        logger.info("🔔 [OXAPAY_WEBHOOK] About to call handle_oxapay_webhook")
         result = await handle_oxapay_webhook(
             request, 
             srv.db, 
@@ -45,10 +45,10 @@ async def oxapay_webhook(request: Request):
             find_pending_order,
             srv.create_and_send_label
         )
-        print(f"✅ [OXAPAY_WEBHOOK] Webhook processed: {result}")
+        logger.info(f"✅ [OXAPAY_WEBHOOK] Webhook processed: {result}")
         return result
     except Exception as e:
-        print(f"❌ [OXAPAY_WEBHOOK] Webhook error: {e}")
+        logger.info(f"❌ [OXAPAY_WEBHOOK] Webhook error: {e}")
         logger.error(f"❌ Webhook error: {e}", exc_info=True)
         return {"status": "error", "message": str(e)}
 
