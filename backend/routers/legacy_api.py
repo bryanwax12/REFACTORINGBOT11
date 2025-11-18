@@ -248,7 +248,7 @@ async def legacy_enable_maintenance(api_key: str = Depends(verify_api_key)):
                     )
                 )
                 users_notified += 1
-            except:
+            except Exception:
                 pass
     
     return {"success": True, "message": "Maintenance mode enabled", "users_notified": users_notified}
@@ -290,7 +290,7 @@ async def legacy_disable_maintenance(api_key: str = Depends(verify_api_key)):
                     )
                 )
                 users_notified += 1
-            except:
+            except Exception:
                 pass
     
     return {"success": True, "message": "Maintenance mode disabled", "users_notified": users_notified}
