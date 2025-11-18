@@ -428,9 +428,9 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 # Label creation failed - don't charge user
                 from repositories import get_repositories
                 repos = get_repositories()
-                await repos.orders.update_by_id(
-                    order['order_id'],
-                    {"payment_status": "failed", "shipping_status": "failed"}
+                await repos.orders.update_one(
+                    {"order_id": order['order_id']},
+                    {"$set": {"payment_status": "failed", "shipping_status": "failed"}}
                 )
                 
                 keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
