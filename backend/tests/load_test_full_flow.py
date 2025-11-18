@@ -411,7 +411,7 @@ class RealisticLoadTester:
         else:
             print("❌ ПЛОХО - Система не справляется с нагрузкой")
         
-        print(f"{'='*80}\n")
+        print("=" * 80 + "\n")
     
     async def cleanup(self):
         """Очистка ресурсов"""
