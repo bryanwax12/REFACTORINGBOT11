@@ -6,7 +6,7 @@ import logging
 import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes, ConversationHandler
-from datetime import datetime, timezone
+from datetime import datetime
 import httpx
 
 logger = logging.getLogger(__name__)

@@ -154,7 +154,7 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
 
 async def return_to_payment_after_topup(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Return user to payment screen after topping up balance"""
-    logger.debug(f"🔵 return_to_payment_after_topup: START")
+    logger.debug("🔵 return_to_payment_after_topup: START")
     from server import (
         PAYMENT_METHOD,
         safe_telegram_call, mark_message_as_selected
@@ -167,7 +167,7 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     
     query = update.callback_query
     await safe_telegram_call(query.answer())
-    logger.debug(f"🔵 Query answered")
+    logger.debug("🔵 Query answered")
     
     telegram_id = query.from_user.id
     
@@ -183,16 +183,16 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     
     # Mark previous message as selected (non-blocking)
     asyncio.create_task(mark_message_as_selected(update, context))
-    logger.debug(f"🔵 Message marked as selected")
+    logger.debug("🔵 Message marked as selected")
     
     if not pending_order or not pending_order.get('selected_rate'):
-        logger.error(f"🔴 ERROR: No pending order or no selected_rate")
+        logger.error("🔴 ERROR: No pending order or no selected_rate")
         await safe_telegram_call(query.message.reply_text(
             "❌ Не найдены данные незавершенного заказа.\n\nПожалуйста, создайте новый заказ."
         ))
         return ConversationHandler.END
     
-    logger.debug(f"🔵 Pending order validated")
+    logger.debug("🔵 Pending order validated")
     
     # Restore order data to context
     context.user_data.update(pending_order)

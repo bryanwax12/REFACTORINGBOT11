@@ -1496,9 +1496,9 @@ async def startup_event():
     
     # Final check: verify bot_instance is available
     if bot_instance:
-        logger.info(f"✅✅✅ bot_instance is AVAILABLE and ready for notifications!")
+        logger.info("✅✅✅ bot_instance is AVAILABLE and ready for notifications!")
     else:
-        logger.warning(f"⚠️⚠️⚠️ bot_instance is NOT set! Notifications will NOT work!")
+        logger.warning("⚠️⚠️⚠️ bot_instance is NOT set! Notifications will NOT work!")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():

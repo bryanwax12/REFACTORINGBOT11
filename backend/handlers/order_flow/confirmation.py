@@ -154,7 +154,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
     )
     
     logger = logging.getLogger(__name__)
-    logger.debug(f"🎯 handle_data_confirmation CALLED!")
+    logger.debug("🎯 handle_data_confirmation CALLED!")
     logger.info(f"🎯 handle_data_confirmation called with query.data={update.callback_query.data if update.callback_query else 'None'}")
     logger.info(f"🎯 user_data keys at start: {list(context.user_data.keys())}")
     

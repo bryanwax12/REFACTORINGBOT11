@@ -62,13 +62,13 @@ async def create_test_refund():
         
         await db.refund_requests.insert_one(refund_doc)
         
-        print(f"\n✅ Created test refund request!")
+        print("\n✅ Created test refund request!")
         print(f"   Request ID: {request_id}")
         print(f"   User ID: {TEST_USER_ID}")
         print(f"   Labels: {len(label_ids)}")
         for label_id in label_ids:
             print(f"      • {label_id}")
-        print(f"\n📋 Check admin panel at: Refunds tab")
+        print("\n📋 Check admin panel at: Refunds tab")
         
     finally:
         client.close()

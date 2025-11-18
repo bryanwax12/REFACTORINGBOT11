@@ -133,7 +133,7 @@ class ConcurrentUserTester:
         print("=" * 80)
         print(f"👥 Testing {NUM_USERS} concurrent users")
         print(f"📊 Each user performs {STEPS_PER_USER} steps")
-        print(f"🎯 Goal: Verify no state conflicts between users")
+        print("🎯 Goal: Verify no state conflicts between users")
         print("=" * 80)
         print()
         

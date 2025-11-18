@@ -16,7 +16,6 @@
 import asyncio
 import random
 import time
-import json
 from datetime import datetime
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
