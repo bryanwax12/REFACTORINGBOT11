@@ -477,3 +477,113 @@ async def check_shipstation_balance_endpoint(authenticated: bool = Depends(verif
 # - broadcast
 # - check_bot_access
 # - check_user_channel_status
+
+
+
+# ============================================================
+# LEGACY COMPATIBILITY ENDPOINTS (for frontend)
+# ============================================================
+
+@admin_router.get("/users/{telegram_id}/details")
+async def get_user_details_legacy(telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
+    """
+    Legacy endpoint for user details
+    Used by frontend - provides detailed user statistics
+    """
+    from server import db
+    from services.admin.user_admin_service import user_admin_service
+    
+    try:
+        stats = await user_admin_service.get_user_stats(db, telegram_id)
+        
+        if "error" in stats:
+            raise HTTPException(status_code=404, detail=stats["error"])
+        
+        return stats
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting user details: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@admin_router.post("/users/{telegram_id}/balance/add")
+async def add_user_balance_legacy(
+    telegram_id: int,
+    amount: float = Query(..., gt=0),
+    authenticated: bool = Depends(verify_admin_key)
+):
+    """
+    Legacy endpoint to add balance to user
+    Used by frontend - adds specified amount to user balance
+    """
+    from server import db
+    from services.admin.user_admin_service import user_admin_service
+    
+    try:
+        success, new_balance, error = await user_admin_service.update_user_balance(
+            db,
+            telegram_id,
+            amount,
+            operation="add"
+        )
+        
+        if success:
+            return {
+                "success": True,
+                "new_balance": new_balance,
+                "message": f"Added ${amount} to balance"
+            }
+        else:
+            raise HTTPException(status_code=400, detail=error)
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error adding balance: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@admin_router.post("/users/{telegram_id}/balance/deduct")
+async def deduct_user_balance_legacy(
+    telegram_id: int,
+    amount: float = Query(..., gt=0),
+    authenticated: bool = Depends(verify_admin_key)
+):
+    """
+    Legacy endpoint to deduct balance from user
+    Used by frontend - subtracts specified amount from user balance
+    """
+    from server import db
+    from services.admin.user_admin_service import user_admin_service
+    
+    try:
+        # Get current balance first
+        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0, "balance": 1})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        current_balance = user.get("balance", 0)
+        new_balance = max(0, current_balance - amount)
+        
+        # Update balance
+        await db.users.update_one(
+            {"telegram_id": telegram_id},
+            {"$set": {"balance": new_balance}}
+        )
+        
+        logger.info(f"Admin deducted ${amount} from user {telegram_id}. New balance: ${new_balance}")
+        
+        return {
+            "success": True,
+            "new_balance": new_balance,
+            "message": f"Deducted ${amount} from balance"
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deducting balance: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
