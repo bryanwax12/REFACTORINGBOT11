@@ -22,7 +22,6 @@ _DEFAULT_KEY = os.environ.get('SHIPSTATION_API_KEY', '')
 SHIPSTATION_API_KEY = _TEST_KEY or _PROD_KEY or _DEFAULT_KEY  # ⚠️ TEST MODE ENABLED
 
 # Debug logging for API key loading
-print(f"🔑 ShipStation API Key loading: PROD={'SET' if _PROD_KEY else 'NOT SET'}, TEST={'SET' if _TEST_KEY else 'NOT SET'}, DEFAULT={'SET' if _DEFAULT_KEY else 'NOT SET'}, FINAL={'SET (len={})'.format(len(SHIPSTATION_API_KEY)) if SHIPSTATION_API_KEY else 'NOT SET'}")
 logger.info(f"🔑 ShipStation API Key loading: PROD={'SET' if _PROD_KEY else 'NOT SET'}, TEST={'SET' if _TEST_KEY else 'NOT SET'}, DEFAULT={'SET' if _DEFAULT_KEY else 'NOT SET'}, FINAL={'SET (len={})'.format(len(SHIPSTATION_API_KEY)) if SHIPSTATION_API_KEY else 'NOT SET'}")
 
 
