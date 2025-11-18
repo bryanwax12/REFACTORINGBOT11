@@ -2458,10 +2458,10 @@ const Dashboard = () => {
                     <p className="text-center text-muted-foreground py-4">No orders yet</p>
                   ) : (
                     userDetailsModal.details.orders.map((order) => (
-                      <div key={order.id} className="border rounded-lg p-4 space-y-2">
+                      <div key={order.id || Math.random()} className="border rounded-lg p-4 space-y-2">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="font-medium">Order #{order.id.substring(0, 8)}</p>
+                            <p className="font-medium">Order #{order.id ? order.id.substring(0, 8) : 'N/A'}</p>
                             <p className="text-sm text-muted-foreground">
                               {formatKyivDateTime(order.created_at)}
                             </p>
