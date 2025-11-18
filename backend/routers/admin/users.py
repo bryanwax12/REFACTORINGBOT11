@@ -88,6 +88,7 @@ async def get_user(
 
 @router.post("/{telegram_id}/block")
 async def block_user(
+    request: Request,
     telegram_id: int,
     send_notification: bool = True,
     authenticated: bool = Depends(lambda: True)
@@ -98,8 +99,11 @@ async def block_user(
     Query Parameters:
     - send_notification: Whether to notify user via Telegram
     """
-    from server import db, bot_instance
+    from server import db
     from services.admin.user_admin_service import user_admin_service
+    
+    # Get bot_instance from app.state
+    bot_instance = getattr(request.app.state, 'bot_instance', None)
     
     try:
         # Check if user exists
