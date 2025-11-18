@@ -114,6 +114,7 @@ async def add_balance_legacy(
 
 @legacy_admin_router.post("/users/{telegram_id}/balance/deduct")
 async def deduct_balance_legacy(
+    request: Request,
     telegram_id: int,
     amount: float = Query(..., gt=0),
     authenticated: bool = Depends(verify_admin_key)
@@ -122,8 +123,11 @@ async def deduct_balance_legacy(
     Deduct balance from user (legacy endpoint for frontend)
     Frontend calls: /api/users/{telegram_id}/balance/deduct
     """
-    from server import db, bot_instance
+    from server import db
     from handlers.common_handlers import safe_telegram_call
+    
+    # Get bot_instance from app.state
+    bot_instance = getattr(request.app.state, 'bot_instance', None)
     
     try:
         user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0, "balance": 1})
