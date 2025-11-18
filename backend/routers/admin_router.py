@@ -2,7 +2,7 @@
 Admin API Router - Complete Implementation
 All admin endpoints migrated from server.py
 """
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from typing import Optional
 from handlers.admin_handlers import verify_admin_key, get_stats_data, get_expense_stats_data
 import logging
