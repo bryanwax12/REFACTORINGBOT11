@@ -322,8 +322,8 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 ))
                 return ConversationHandler.END
             
-            # Find order in database
-            order = await db.orders.find_one({"order_id": order_id}, {"_id": 0})
+            # Find order in database (need _id for create_and_send_label)
+            order = await db.orders.find_one({"order_id": order_id})
             
             if not order:
                 logger.error(f"❌ Order {order_id} not found in database!")
@@ -369,8 +369,8 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 
                 progress_task = asyncio.create_task(update_progress())
             
-            # Try to create shipping label
-            label_created = await create_and_send_label(order['id'], telegram_id, query.message)
+            # Try to create shipping label (pass _id which is used by repos.orders.find_by_id)
+            label_created = await create_and_send_label(order['_id'], telegram_id, query.message)
             
             # Stop progress indicator and delete message
             if progress_task:
