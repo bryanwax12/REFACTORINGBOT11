@@ -2577,7 +2577,7 @@ const Dashboard = () => {
             <CardHeader>
               <CardTitle>🔄 Refund Order & Void Label</CardTitle>
               <CardDescription>
-                Order #{refundModal.order.id ? refundModal.order.id.substring(0, 8) : 'N/A'} - ${refundModal.order.amount}
+                Order #{refundModal.order.id ? refundModal.order.id.substring(0, 8) : 'N/A'} - ${refundModal.order.amount || 0}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -2585,7 +2585,7 @@ const Dashboard = () => {
                 <p className="font-medium text-yellow-900">This will:</p>
                 <ul className="list-disc list-inside text-yellow-800 mt-1">
                   <li>Void label on ShipStation (cancel shipment)</li>
-                  <li>Return ${refundModal.order.amount} to user balance</li>
+                  <li>Return ${refundModal.order.amount || 0} to user balance</li>
                   <li>Cancel shipping status</li>
                   <li>Notify user via Telegram</li>
                 </ul>
