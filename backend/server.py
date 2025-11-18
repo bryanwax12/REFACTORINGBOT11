@@ -340,6 +340,10 @@ try:
     app.include_router(users_router)
     app.include_router(webhooks_router)
     
+    # Refunds router
+    from routers.refunds import router as refunds_router
+    app.include_router(refunds_router)
+    
     logger.info("✅ All API routers registered successfully")
 except Exception as e:
     logger.error(f"❌ Error registering routers: {e}")
