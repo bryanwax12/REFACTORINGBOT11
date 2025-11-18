@@ -151,6 +151,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if last_state is None:
         # Try to restore state that was saved before cancel
         saved_state = context.user_data.get('saved_state_before_cancel')
+        logger.info(f"🔍 last_state is None, saved_state_before_cancel = {saved_state}")
         if saved_state:
             logger.info(f"✅ Restoring saved state: {saved_state}")
             last_state = saved_state
