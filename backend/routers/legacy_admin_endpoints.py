@@ -54,8 +54,9 @@ async def add_balance_legacy(
     Add balance to user (legacy endpoint for frontend)
     Frontend calls: /api/users/{telegram_id}/balance/add
     """
-    from server import db
+    from server import db, bot_instance
     from services.admin.user_admin_service import user_admin_service
+    from handlers.common_handlers import safe_telegram_call
     
     try:
         success, new_balance, error = await user_admin_service.update_user_balance(
@@ -66,6 +67,23 @@ async def add_balance_legacy(
         )
         
         if success:
+            # Send notification to user
+            if bot_instance:
+                try:
+                    message = (
+                        f"💰 *Баланс пополнен!*\n\n"
+                        f"Администратор добавил *${amount:.2f}* на ваш баланс.\n\n"
+                        f"Новый баланс: *${new_balance:.2f}*"
+                    )
+                    await safe_telegram_call(bot_instance.send_message(
+                        chat_id=telegram_id,
+                        text=message,
+                        parse_mode='Markdown'
+                    ))
+                    logger.info(f"Balance notification sent to user {telegram_id}")
+                except Exception as e:
+                    logger.error(f"Failed to send balance notification: {e}")
+            
             return {
                 "success": True,
                 "new_balance": new_balance,
