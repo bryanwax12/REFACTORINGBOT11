@@ -278,7 +278,7 @@ class SystemAdminService:
                 logs = result.stdout.split('\n')
                 # Filter by level if specified
                 if level and level != "ALL":
-                    logs = [l for l in logs if level in l]
+                    logs = [line for line in logs if level in line]
                 
                 return {
                     "logs": logs[-limit:],
