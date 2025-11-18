@@ -40,7 +40,7 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
         paid_amount = body.get('paidAmount') or body.get('paid_amount') or body.get('amount', 0)  # Actual paid amount
         
         # Try to find payment by invoice_id (could be string or int in DB)
-        print(f"🔍 Looking for payment with track_id: {track_id}")
+        logger.info(f"🔍 Looking for payment with track_id: {track_id}")
         
         if status == 'Paid':
             # Try both string and int formats
@@ -50,11 +50,11 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
                 try:
                     track_id_int = int(track_id)
                     payment = await db.payments.find_one({"invoice_id": track_id_int}, {"_id": 0})
-                    print(f"🔄 Retried with int type: {track_id_int}")
+                    logger.info(f"🔄 Retried with int type: {track_id_int}")
                 except (ValueError, TypeError):
                     pass
             
-            print(f"💾 Payment found: {payment is not None}")
+            logger.info(f"💾 Payment found: {payment is not None}")
             logger.info(f"🔍 Payment object: {payment}")
             if payment:
                 logger.info("✅ Inside 'if payment' block")
@@ -114,30 +114,30 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
                         logger.warning("No topup_input_message_id found in payment record")
                     
                     # Notify user
-                    print(f"📤 Attempting to send notification. bot_instance exists: {bot_instance is not None}")
+                    logger.info(f"📤 Attempting to send notification. bot_instance exists: {bot_instance is not None}")
                     logger.info(f"📤 Attempting to send notification. bot_instance exists: {bot_instance is not None}")
                     if bot_instance:
-                        print(f"✅ Bot instance available, sending notification to {telegram_id}")
+                        logger.info(f"✅ Bot instance available, sending notification to {telegram_id}")
                         logger.info(f"✅ Bot instance available, sending notification to {telegram_id}")
                         
                         try:
                             from utils.ui_utils import MessageTemplates, get_payment_success_keyboard
-                            print("📦 Imported MessageTemplates and keyboard")
+                            logger.info("📦 Imported MessageTemplates and keyboard")
                             
                             user = await find_user_by_telegram_id(telegram_id)
-                            print(f"👤 Found user: {user is not None}")
+                            logger.info(f"👤 Found user: {user is not None}")
                             if not user:
                                 logger.error(f"❌ User not found for telegram_id={telegram_id}")
                                 return
                             
                             new_balance = user.get('balance', 0)
-                            print(f"💰 User balance: ${new_balance}")
+                            logger.info(f"💰 User balance: ${new_balance}")
                             logger.info(f"💰 User balance: ${new_balance}")
                             
                             pending_order = await find_pending_order(telegram_id)
-                            print(f"🔍 Pending order search: telegram_id={telegram_id}, found={pending_order is not None}")
+                            logger.info(f"🔍 Pending order search: telegram_id={telegram_id}, found={pending_order is not None}")
                             if pending_order:
-                                print(f"📦 Pending order details: telegram_id={pending_order.get('telegram_id')}, has_selected_rate={pending_order.get('selected_rate') is not None}")
+                                logger.info(f"📦 Pending order details: telegram_id={pending_order.get('telegram_id')}, has_selected_rate={pending_order.get('selected_rate') is not None}")
                             
                             order_amount = 0.0
                             has_pending_order = False
@@ -145,7 +145,7 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
                             if pending_order and pending_order.get('selected_rate'):
                                 has_pending_order = True
                                 order_amount = pending_order.get('final_amount', pending_order['selected_rate']['amount'])
-                                print(f"✅ Has pending order! amount=${order_amount}")
+                                logger.info(f"✅ Has pending order! amount=${order_amount}")
                             
                             # Build message using template
                             if has_pending_order:
@@ -158,10 +158,10 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
                                 )
                             
                             reply_markup = get_payment_success_keyboard(has_pending_order, order_amount)
-                            print("⌨️ Keyboard created")
+                            logger.info("⌨️ Keyboard created")
                             
                             logger.info(f"📨 Sending message to chat_id={telegram_id}")
-                            print("📨 About to call bot_instance.send_message...")
+                            logger.info("📨 About to call bot_instance.send_message...")
                             bot_msg = await safe_telegram_call(bot_instance.send_message(
                                 chat_id=telegram_id,
                                 text=message_text,
@@ -170,15 +170,15 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
                             ))
                             
                             if bot_msg:
-                                print(f"✅ Message sent! message_id={bot_msg.message_id}")
+                                logger.info(f"✅ Message sent! message_id={bot_msg.message_id}")
                                 logger.info(f"✅ Notification sent successfully! message_id={bot_msg.message_id}")
                             else:
-                                print("❌ bot_msg is None")
+                                logger.info("❌ bot_msg is None")
                                 logger.error("❌ Failed to send notification - bot_msg is None")
                         
                         except Exception as notify_ex:
                             logger.error(f"❌ Exception while sending notification: {notify_ex}", exc_info=True)
-                            print(f"❌ Exception: {notify_ex}")
+                            logger.info(f"❌ Exception: {notify_ex}")
                         
                         # Save message context in pending_orders for button protection
                         await db.pending_orders.update_one(
