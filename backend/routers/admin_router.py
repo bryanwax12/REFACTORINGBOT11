@@ -433,10 +433,13 @@ async def get_debug_logs(
 
 
 @admin_router.get("/health")
-async def get_bot_health(authenticated: bool = Depends(verify_admin_key)):
+async def get_bot_health(request: Request, authenticated: bool = Depends(verify_admin_key)):
     """Get bot health status"""
-    from server import bot_instance, db, application
+    from server import db, application
     from datetime import datetime, timezone
+    
+    # Get bot_instance from app.state
+    bot_instance = getattr(request.app.state, 'bot_instance', None)
     
     try:
         health_status = {
