@@ -1290,9 +1290,11 @@ async def startup_event():
                 .build()
             )
             
-            # Update bot_instance with the application's bot
+            # CRITICAL: Update global bot_instance with the application's bot for notifications
+            # Without this, notifications will NOT work!
+            global bot_instance
             bot_instance = application.bot
-            logger.info(f"✅ Bot instance updated for notifications: @{get_bot_username()}")
+            logger.info(f"🔔 Bot instance updated for notifications: @{get_bot_username()}")
             
             # Conversation handler for order creation
             # Template rename conversation handler
