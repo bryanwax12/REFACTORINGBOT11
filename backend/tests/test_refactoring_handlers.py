@@ -95,11 +95,11 @@ def test_telegram_webhook_endpoint():
             # Check response format
             try:
                 response_data = response.json()
-                if response_data.get('ok') == True:
+                if response_data.get('ok'):
                     print("   ✅ Webhook returns correct response format")
                 else:
                     print(f"   ⚠️ Webhook response format: {response_data}")
-            except:
+            except Exception:
                 print("   ⚠️ Webhook response not JSON (may be expected)")
         else:
             print(f"   ❌ Webhook failed to process valid update: {response.status_code}")
