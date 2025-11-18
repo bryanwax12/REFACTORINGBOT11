@@ -736,7 +736,7 @@ async def create_and_send_label(order_id, telegram_id, message):
         # Get order using Repository Pattern
         from repositories import get_repositories
         repos = get_repositories()
-        order = await repos.orders.find_by_id(order_id)
+        order = await repos.orders.find_by_order_id(order_id)
         
         logger.info(f"Creating label for order {order_id}")
         
