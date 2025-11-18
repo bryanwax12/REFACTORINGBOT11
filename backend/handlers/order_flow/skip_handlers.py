@@ -221,7 +221,7 @@ async def skip_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     random_phone = generate_random_phone()
     context.user_data['to_phone'] = random_phone
     
-    # CRITICAL: Check if we're editing template TO address
+    # CRITICAL: Check if we're editing template TO address OR editing order TO address
     user_id = update.effective_user.id
     session = await db.user_sessions.find_one(
         {"user_id": user_id, "is_active": True},
@@ -230,8 +230,9 @@ async def skip_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     editing_template_to_db = session.get('editing_template_to', False) if session else False
     editing_template_id_db = session.get('editing_template_id') if session else None
+    editing_to_address = context.user_data.get('editing_to_address', False)
     
-    logger.info(f"⏭️ SKIP TO PHONE: editing_template_to={editing_template_to_db}, template_id={editing_template_id_db}")
+    logger.info(f"⏭️ SKIP TO PHONE: editing_template_to={editing_template_to_db}, template_id={editing_template_id_db}, editing_to_address={editing_to_address}")
     
     if editing_template_to_db and editing_template_id_db:
         logger.info(f"✅ Template TO address edit complete (via skip), saving to template_id={editing_template_id_db}")
