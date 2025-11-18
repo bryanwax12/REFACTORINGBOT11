@@ -47,6 +47,14 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     logger.info(f"🔵 order_from_name - User: {update.effective_user.id}")
     logger.info(f"🔍 DEBUG: editing_template_from={context.user_data.get('editing_template_from')}, editing_template_id={context.user_data.get('editing_template_id')}")
     
+    # CRITICAL: Clear editing flags if starting new order (not editing)
+    # This prevents leftover flags from previous operations
+    if not context.user_data.get('editing_template_from') and not context.user_data.get('editing_from_address'):
+        # Starting new order - clear any leftover flags
+        context.user_data.pop('editing_from_address', None)
+        context.user_data.pop('editing_to_address', None)
+        logger.info("✅ Cleared leftover editing flags for new order")
+    
     # Remove cancel button from prompt if exists
     # Try to get message_id from context first, then from DB
     message_id_to_remove = context.user_data.get('last_prompt_message_id')
