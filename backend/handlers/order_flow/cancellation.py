@@ -39,6 +39,7 @@ async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # SAVE last_state for return_to_order to restore
     context.user_data['saved_state_before_cancel'] = last_state
+    logger.info(f"💾 SAVED state before cancel: {last_state}")
     
     # Add "Check Data" button only if on shipping rates selection screen
     if last_state == STATE_NAMES[SELECT_CARRIER]:
