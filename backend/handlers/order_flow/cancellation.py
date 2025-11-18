@@ -162,41 +162,28 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             logger.warning("return_to_order: No last_state or saved_state found!")
             
-            # Check if editing template - show menu only if no saved state
-            if context.user_data.get('editing_template_from') or context.user_data.get('editing_template_to'):
-                template_id = context.user_data.get('editing_template_id')
-                if template_id:
-                    logger.info(f"Returning to template edit menu for template {template_id}")
-                    
-                    # Get template from DB
-                    from server import db
-                    template = await db.templates.find_one({"id": template_id}, {"_id": 0})
-                    
-                    if template:
-                        # Show edit menu
-                        from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-                        keyboard = [
-                            [InlineKeyboardButton("📤 Редактировать адрес отправителя", callback_data=f'template_edit_from_{template_id}')],
-                            [InlineKeyboardButton("📥 Редактировать адрес получателя", callback_data=f'template_edit_to_{template_id}')],
-                            [InlineKeyboardButton("🔙 Назад к шаблону", callback_data=f'template_view_{template_id}')]
-                        ]
-                        reply_markup = InlineKeyboardMarkup(keyboard)
-                        
-                        message = f"""✅ Редактирование отменено.
-
-📝 *Редактирование шаблона*
-━━━━━━━━━━━━━━━━━━━━
-
-📁 *Шаблон:* {template.get('name')}
-
-Выберите, что хотите отредактировать:"""
-                        
-                        await safe_telegram_call(query.message.reply_text(
-                            message, 
-                            reply_markup=reply_markup, 
-                            parse_mode='Markdown'
-                        ))
-                        return ConversationHandler.END
+            # Check if editing template - return to first step of editing
+            if context.user_data.get('editing_template_from'):
+                logger.info(f"Returning to first step of FROM address editing")
+                from server import FROM_NAME
+                from utils.ui_utils import TemplateEditMessages, get_cancel_keyboard
+                
+                await safe_telegram_call(query.message.reply_text(
+                    TemplateEditMessages.FROM_NAME,
+                    reply_markup=get_cancel_keyboard()
+                ))
+                return FROM_NAME
+                
+            elif context.user_data.get('editing_template_to'):
+                logger.info(f"Returning to first step of TO address editing")
+                from server import TO_NAME
+                from utils.ui_utils import TemplateEditMessages, get_cancel_keyboard
+                
+                await safe_telegram_call(query.message.reply_text(
+                    TemplateEditMessages.TO_NAME,
+                    reply_markup=get_cancel_keyboard()
+                ))
+                return TO_NAME
             
             await safe_telegram_call(query.message.reply_text("Продолжаем оформление заказа..."))
             return FROM_NAME
