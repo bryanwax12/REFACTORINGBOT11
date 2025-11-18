@@ -151,15 +151,16 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Try to restore state that was saved before cancel
         saved_state = context.user_data.get('saved_state_before_cancel')
         if saved_state:
-            logger.info(f"Restoring saved state: {saved_state}")
+            logger.info(f"✅ Restoring saved state: {saved_state}")
             last_state = saved_state
             context.user_data['last_state'] = saved_state
             # Clear saved state
             context.user_data.pop('saved_state_before_cancel', None)
+            # Continue to use this state below - don't return here!
         else:
             logger.warning("return_to_order: No last_state or saved_state found!")
             
-            # Check if editing template
+            # Check if editing template - show menu only if no saved state
             if context.user_data.get('editing_template_from') or context.user_data.get('editing_template_to'):
                 template_id = context.user_data.get('editing_template_id')
                 if template_id:
