@@ -205,8 +205,6 @@ async def show_order_summary(update: Update, context: ContextTypes.DEFAULT_TYPE)
     
     # Get user balance
     telegram_id = query.from_user.id
-    user_repo = get_user_repo()
-    balance = await user_repo.get_balance(telegram_id)
     
     # Build keyboard
     keyboard = []
