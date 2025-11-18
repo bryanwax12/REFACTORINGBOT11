@@ -247,9 +247,20 @@ async def unblock_user_legacy(telegram_id: int, authenticated: bool = Depends(ve
         if result.modified_count > 0:
             if bot_instance:
                 try:
+                    message = (
+                        "┏━━━━━━━━━━━━━━━━━━━━━┓\n"
+                        "┃ ✅ *АККАУНТ РАЗБЛОКИРОВАН* ┃\n"
+                        "┗━━━━━━━━━━━━━━━━━━━━━┛\n\n"
+                        "🎉 Отличные новости!\n"
+                        "Ваш доступ к боту восстановлен.\n\n"
+                        "━━━━━━━━━━━━━━━━━━━━━\n\n"
+                        "✨ Теперь вы можете снова\n"
+                        "пользоваться всеми функциями!\n\n"
+                        "💫 Добро пожаловать обратно!"
+                    )
                     await safe_telegram_call(bot_instance.send_message(
                         chat_id=telegram_id,
-                        text="✅ *Вы были разблокированы!*\n\nТеперь вы можете снова использовать бот.",
+                        text=message,
                         parse_mode='Markdown'
                     ))
                 except Exception as e:
