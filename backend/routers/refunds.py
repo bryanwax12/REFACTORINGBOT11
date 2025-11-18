@@ -318,8 +318,8 @@ async def update_refund_status(
             # Send rejection notification
             if bot_instance:
                 message = (
-                    f"❌ *Заявка на возврат отклонена*\n\n"
-                    f"К сожалению, ваша заявка на возврат была отклонена.\n\n"
+                    "❌ *Заявка на возврат отклонена*\n\n"
+                    "К сожалению, ваша заявка на возврат была отклонена.\n\n"
                 )
                 
                 if update.admin_notes:
