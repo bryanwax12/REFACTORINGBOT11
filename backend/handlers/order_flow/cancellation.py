@@ -146,31 +146,40 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.info(f"return_to_order: last_state = {last_state}, type = {type(last_state)}")
     logger.info(f"return_to_order: user_data keys = {list(context.user_data.keys())}")
     
-    # If no last_state - check if we're editing template
+    # If no last_state - try to restore saved state before cancel
     if last_state is None:
-        logger.warning("return_to_order: No last_state found!")
-        
-        # Check if editing template
-        if context.user_data.get('editing_template_from') or context.user_data.get('editing_template_to'):
-            template_id = context.user_data.get('editing_template_id')
-            if template_id:
-                logger.info(f"Returning to template edit menu for template {template_id}")
-                
-                # Get template from DB
-                from server import db
-                template = await db.templates.find_one({"id": template_id}, {"_id": 0})
-                
-                if template:
-                    # Show edit menu
-                    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-                    keyboard = [
-                        [InlineKeyboardButton("📤 Редактировать адрес отправителя", callback_data=f'template_edit_from_{template_id}')],
-                        [InlineKeyboardButton("📥 Редактировать адрес получателя", callback_data=f'template_edit_to_{template_id}')],
-                        [InlineKeyboardButton("🔙 Назад к шаблону", callback_data=f'template_view_{template_id}')]
-                    ]
-                    reply_markup = InlineKeyboardMarkup(keyboard)
+        # Try to restore state that was saved before cancel
+        saved_state = context.user_data.get('saved_state_before_cancel')
+        if saved_state:
+            logger.info(f"Restoring saved state: {saved_state}")
+            last_state = saved_state
+            context.user_data['last_state'] = saved_state
+            # Clear saved state
+            context.user_data.pop('saved_state_before_cancel', None)
+        else:
+            logger.warning("return_to_order: No last_state or saved_state found!")
+            
+            # Check if editing template
+            if context.user_data.get('editing_template_from') or context.user_data.get('editing_template_to'):
+                template_id = context.user_data.get('editing_template_id')
+                if template_id:
+                    logger.info(f"Returning to template edit menu for template {template_id}")
                     
-                    message = f"""✅ Редактирование отменено.
+                    # Get template from DB
+                    from server import db
+                    template = await db.templates.find_one({"id": template_id}, {"_id": 0})
+                    
+                    if template:
+                        # Show edit menu
+                        from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+                        keyboard = [
+                            [InlineKeyboardButton("📤 Редактировать адрес отправителя", callback_data=f'template_edit_from_{template_id}')],
+                            [InlineKeyboardButton("📥 Редактировать адрес получателя", callback_data=f'template_edit_to_{template_id}')],
+                            [InlineKeyboardButton("🔙 Назад к шаблону", callback_data=f'template_view_{template_id}')]
+                        ]
+                        reply_markup = InlineKeyboardMarkup(keyboard)
+                        
+                        message = f"""✅ Редактирование отменено.
 
 📝 *Редактирование шаблона*
 ━━━━━━━━━━━━━━━━━━━━
@@ -178,16 +187,16 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
 📁 *Шаблон:* {template.get('name')}
 
 Выберите, что хотите отредактировать:"""
-                    
-                    await safe_telegram_call(query.message.reply_text(
-                        message, 
-                        reply_markup=reply_markup, 
-                        parse_mode='Markdown'
-                    ))
-                    return ConversationHandler.END
-        
-        await safe_telegram_call(query.message.reply_text("Продолжаем оформление заказа..."))
-        return FROM_NAME
+                        
+                        await safe_telegram_call(query.message.reply_text(
+                            message, 
+                            reply_markup=reply_markup, 
+                            parse_mode='Markdown'
+                        ))
+                        return ConversationHandler.END
+            
+            await safe_telegram_call(query.message.reply_text("Продолжаем оформление заказа..."))
+            return FROM_NAME
     
     # If last_state is a number (state constant), we need the string name
     # Check if it's a string (state name) or int (state constant)
