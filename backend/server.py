@@ -711,9 +711,14 @@ async def create_order_in_db(user, data, selected_rate, amount, discount_percent
     order_dict['selected_carrier'] = selected_rate.get('carrier', selected_rate.get('carrier_friendly_name', 'Unknown'))
     order_dict['selected_service'] = selected_rate.get('service', selected_rate.get('service_type', 'Standard'))
     order_dict['selected_service_code'] = selected_rate.get('service_code', '')  # Add service_code
-    order_dict['rate_id'] = selected_rate['rate_id']
-    order_dict['original_amount'] = selected_rate['original_amount']  # Store original GoShippo price
-    order_dict['markup'] = selected_rate['amount'] - selected_rate['original_amount']  # Store markup amount before discount
+    order_dict['rate_id'] = selected_rate.get('rate_id', '')
+    
+    # Get original_amount safely
+    rate_amount = selected_rate.get('amount', amount)
+    original_amount = selected_rate.get('original_amount', rate_amount)
+    
+    order_dict['original_amount'] = original_amount  # Store original GoShippo price
+    order_dict['markup'] = rate_amount - original_amount  # Store markup amount before discount
     order_dict['discount_percent'] = discount_percent  # Store discount percentage
     order_dict['discount_amount'] = discount_amount  # Store discount amount
     
