@@ -183,6 +183,19 @@ async def skip_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return ConversationHandler.END
     
+    # Check if we're editing FROM address in order creation flow
+    if editing_from_address:
+        logger.info(f"✅ Order FROM address edit complete (via skip), returning to confirmation")
+        
+        # Clear editing flag
+        context.user_data.pop('editing_from_address', None)
+        
+        # Return to confirmation screen
+        from handlers.order_flow.confirmation import show_data_confirmation
+        query = update.callback_query
+        await query.answer()
+        return await show_data_confirmation(update, context)
+    
     # Normal flow
     return await handle_skip_field(
         update, context,
