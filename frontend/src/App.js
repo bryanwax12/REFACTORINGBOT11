@@ -846,6 +846,33 @@ const Dashboard = () => {
     }
   };
 
+
+  const handleRefundStatus = async (requestId, status, amount = null, notes = '') => {
+    try {
+      const payload = {
+        status,
+        admin_notes: notes || null
+      };
+      
+      if (status === 'processed' && amount) {
+        payload.refund_amount = parseFloat(amount);
+      }
+      
+      await axios.patch(
+        `${BACKEND_URL}/api/refunds/requests/${requestId}/status`,
+        payload
+      );
+      
+      toast.success(`Refund request ${status}`);
+      loadData();
+      setRefundStatusModal({ open: false, request: null });
+      setRefundAmount('');
+      setRefundNotes('');
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Failed to update refund status");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
