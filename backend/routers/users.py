@@ -119,8 +119,6 @@ async def add_user_balance(telegram_id: int, amount: float, description: str = "
     """Add balance to user account"""
     from repositories import get_user_repo
     
-    logger.info(f"🔴 [USERS_ROUTER] add_user_balance called for telegram_id={telegram_id}, amount={amount}")
-    
     try:
         if amount <= 0:
             raise HTTPException(status_code=400, detail="Amount must be positive")
