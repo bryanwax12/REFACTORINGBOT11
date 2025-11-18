@@ -149,13 +149,39 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         # Check if editing template
         if context.user_data.get('editing_template_from') or context.user_data.get('editing_template_to'):
-            # Return to template list
-            logger.info(f"Returning to template list after cancel")
-            from handlers.template_handlers import my_templates_menu
-            await safe_telegram_call(query.message.reply_text(
-                "✅ Редактирование отменено. Возвращаю к списку шаблонов..."
-            ))
-            return await my_templates_menu(update, context)
+            template_id = context.user_data.get('editing_template_id')
+            if template_id:
+                logger.info(f"Returning to template edit menu for template {template_id}")
+                
+                # Get template from DB
+                from server import db
+                template = await db.templates.find_one({"id": template_id}, {"_id": 0})
+                
+                if template:
+                    # Show edit menu
+                    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+                    keyboard = [
+                        [InlineKeyboardButton("📤 Редактировать адрес отправителя", callback_data=f'template_edit_from_{template_id}')],
+                        [InlineKeyboardButton("📥 Редактировать адрес получателя", callback_data=f'template_edit_to_{template_id}')],
+                        [InlineKeyboardButton("🔙 Назад к шаблону", callback_data=f'template_view_{template_id}')]
+                    ]
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+                    
+                    message = f"""✅ Редактирование отменено.
+
+📝 *Редактирование шаблона*
+━━━━━━━━━━━━━━━━━━━━
+
+📁 *Шаблон:* {template.get('name')}
+
+Выберите, что хотите отредактировать:"""
+                    
+                    await safe_telegram_call(query.message.reply_text(
+                        message, 
+                        reply_markup=reply_markup, 
+                        parse_mode='Markdown'
+                    ))
+                    return ConversationHandler.END
         
         await safe_telegram_call(query.message.reply_text("Продолжаем оформление заказа..."))
         return FROM_NAME
