@@ -420,7 +420,7 @@ async def check_stale_interaction(query, context: ContextTypes.DEFAULT_TYPE) -> 
         await safe_telegram_call(query.answer())
         return True
     
-    print("✅ Stale check passed, proceeding with action")
+    logger.debug("✅ Stale check passed, proceeding with action")
     return False
     
     # Check if order was already completed (has order_completed flag)
