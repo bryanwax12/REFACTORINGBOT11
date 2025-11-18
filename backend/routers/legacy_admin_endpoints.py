@@ -60,6 +60,8 @@ async def add_balance_legacy(
     
     # Get bot_instance from app.state
     bot_instance = getattr(request.app.state, 'bot_instance', None)
+    logger.info(f"💬 [ADD_BALANCE] Endpoint called for telegram_id={telegram_id}, amount={amount}")
+    logger.info(f"💬 [ADD_BALANCE] bot_instance from app.state: {'AVAILABLE' if bot_instance else 'NONE'}")
     
     try:
         success, new_balance, error = await user_admin_service.update_user_balance(
@@ -69,9 +71,11 @@ async def add_balance_legacy(
             operation="add"
         )
         
+        logger.info(f"💬 [ADD_BALANCE] update_user_balance result: success={success}, new_balance={new_balance}")
+        
         if success:
             # Send beautiful notification to user
-            logger.info(f"Attempting to send balance notification to {telegram_id}, bot_instance={'AVAILABLE' if bot_instance else 'NONE'}")
+            logger.info(f"💬 [ADD_BALANCE] Attempting to send balance notification to {telegram_id}, bot_instance={'AVAILABLE' if bot_instance else 'NONE'}")
             if bot_instance:
                 try:
                     message = (
