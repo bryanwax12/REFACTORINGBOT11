@@ -1330,6 +1330,35 @@ async def startup_event():
 # Old ConversationHandler definition removed - see handlers/order_flow/conversation_setup.py
             
             application.add_handler(template_rename_handler)
+            
+            # Refund conversation handler
+            from handlers.refund_handlers import (
+                refund_menu,
+                process_refund_labels,
+                cancel_refund,
+                my_refunds,
+                REFUND_INPUT
+            )
+            
+            refund_conv_handler = ConversationHandler(
+                entry_points=[
+                    CallbackQueryHandler(refund_menu, pattern='^refund_menu$')
+                ],
+                states={
+                    REFUND_INPUT: [
+                        MessageHandler(filters.TEXT & ~filters.COMMAND, process_refund_labels)
+                    ]
+                },
+                fallbacks=[
+                    CallbackQueryHandler(cancel_refund, pattern='^start$'),
+                    CommandHandler('start', start_command)
+                ],
+                name='refund_conversation',
+                persistent=False
+            )
+            
+            application.add_handler(refund_conv_handler)
+            application.add_handler(CallbackQueryHandler(my_refunds, pattern='^my_refunds$'))
             application.add_handler(order_conv_handler)
             application.add_handler(CommandHandler("start", start_command))
             application.add_handler(CommandHandler("help", help_command))
