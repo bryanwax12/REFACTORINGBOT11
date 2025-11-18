@@ -42,8 +42,6 @@ async def display_shipping_rates(
     """
     from utils.ui_utils import ShippingRatesUI
     
-    query = update.callback_query
-    
     # Get user balance
     telegram_id = update.effective_user.id if update.effective_user else None
     if not telegram_id:
