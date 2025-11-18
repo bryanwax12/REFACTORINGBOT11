@@ -30,7 +30,6 @@ def setup_order_conversation_handler():
         EDIT_MENU, SELECT_CARRIER, PAYMENT_METHOD, TOPUP_AMOUNT,
         TEMPLATE_NAME, TEMPLATE_LIST, TEMPLATE_VIEW, TEMPLATE_LOADED,
         # Handler functions from server.py (large functions)
-        select_carrier,
         order_from_template_list, use_template, view_template,
         delete_template, confirm_delete_template, my_templates_menu,
         start_command
