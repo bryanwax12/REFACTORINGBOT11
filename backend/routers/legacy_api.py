@@ -139,11 +139,14 @@ async def legacy_get_api_mode(api_key: str = Depends(verify_api_key)):
 
 
 @router.post("/settings/api-mode")
-async def legacy_set_api_mode(request: dict, api_key: str = Depends(verify_api_key)):
+async def legacy_set_api_mode(req: Request, request: dict, api_key: str = Depends(verify_api_key)):
     """Legacy API mode endpoint - set mode"""
-    from server import db, clear_settings_cache, bot_instance, ADMIN_TELEGRAM_ID
+    from server import db, clear_settings_cache, ADMIN_TELEGRAM_ID
     from handlers.common_handlers import safe_telegram_call
     import os
+    
+    # Get bot_instance from app.state
+    bot_instance = getattr(req.app.state, 'bot_instance', None)
     
     mode = request.get("mode", "production")
     if mode not in ["production", "test", "preview"]:
