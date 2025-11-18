@@ -195,7 +195,7 @@ async def skip_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Check if we're editing FROM address in order creation flow
     if editing_from_address:
-        logger.info(f"✅ Order FROM address edit complete (via skip), returning to confirmation")
+        logger.info("✅ Order FROM address edit complete (via skip), returning to confirmation")
         
         # Clear editing flag
         context.user_data.pop('editing_from_address', None)
@@ -288,7 +288,7 @@ async def skip_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Check if we're editing TO address in order creation flow
     if editing_to_address:
-        logger.info(f"✅ Order TO address edit complete (via skip), returning to confirmation")
+        logger.info("✅ Order TO address edit complete (via skip), returning to confirmation")
         
         # Clear editing flag
         context.user_data.pop('editing_to_address', None)
