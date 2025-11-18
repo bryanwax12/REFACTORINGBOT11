@@ -438,7 +438,7 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     from utils.ui_utils import get_skip_and_cancel_keyboard, OrderStepMessages, CallbackData, TemplateEditMessages
     
     # Use different messages for template editing vs order creation  
-    if context.user_data.get('editing_template_from'):
+    if context.user_data.get('editing_template_from') or context.user_data.get('editing_from_address'):
         message_text = TemplateEditMessages.FROM_PHONE
     else:
         message_text = OrderStepMessages.FROM_PHONE
