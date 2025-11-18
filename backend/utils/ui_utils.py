@@ -96,7 +96,7 @@ def get_main_menu_keyboard(user_balance: float = 0.0) -> InlineKeyboardMarkup:
         [InlineKeyboardButton(ButtonTexts.MY_TEMPLATES, callback_data=CallbackData.MY_TEMPLATES)],
         [
             InlineKeyboardButton("💰 Refund Label", callback_data="refund_menu"),
-            InlineKeyboardButton("📋 Мои заявки", callback_data="my_refunds")
+            InlineKeyboardButton("📝 Мои заявки", callback_data="my_refunds")
         ],
         [InlineKeyboardButton(ButtonTexts.HELP, callback_data=CallbackData.HELP)],
         [InlineKeyboardButton(ButtonTexts.FAQ, callback_data=CallbackData.FAQ)]
