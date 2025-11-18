@@ -215,6 +215,7 @@ async def block_user_legacy(
         )
         
         if result.modified_count > 0:
+            print(f"💬 [BLOCK_USER] Attempting to send notification, bot_instance={'AVAILABLE' if bot_instance else 'NONE'}")
             if bot_instance:
                 try:
                     message = (
@@ -232,8 +233,11 @@ async def block_user_legacy(
                         text=message,
                         parse_mode='Markdown'
                     ))
+                    print(f"✅ Block notification sent to user {telegram_id}")
                 except Exception as e:
-                    logger.error(f"Failed to send block notification: {e}")
+                    print(f"❌ Failed to send block notification: {e}")
+            else:
+                print(f"⚠️ bot_instance is None for block")
             
             return {"success": True, "message": "User blocked successfully"}
         else:
