@@ -196,9 +196,19 @@ async def block_user_legacy(telegram_id: int, authenticated: bool = Depends(veri
         if result.modified_count > 0:
             if bot_instance:
                 try:
+                    message = (
+                        "┏━━━━━━━━━━━━━━━━━━━━━┓\n"
+                        "┃ ⛔️ *АККАУНТ ЗАБЛОКИРОВАН* ┃\n"
+                        "┗━━━━━━━━━━━━━━━━━━━━━┛\n\n"
+                        "🚫 Ваш доступ к боту ограничен\n"
+                        "администратором.\n\n"
+                        "━━━━━━━━━━━━━━━━━━━━━\n\n"
+                        "📞 Для разблокировки обратитесь\n"
+                        "в службу поддержки."
+                    )
                     await safe_telegram_call(bot_instance.send_message(
                         chat_id=telegram_id,
-                        text="⛔️ *Вы были заблокированы администратором.*\n\nДоступ к боту ограничен.",
+                        text=message,
                         parse_mode='Markdown'
                     ))
                 except Exception as e:
