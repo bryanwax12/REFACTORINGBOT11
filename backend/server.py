@@ -1199,8 +1199,8 @@ async def debug_bot_state():
 @app.post("/api/debug/test-balance")
 async def debug_test_balance(telegram_id: int):
     """DEBUG: Test balance endpoint with full logging"""
-    logger.info(f"🟢🟢🟢 DEBUG TEST BALANCE CALLED: telegram_id={telegram_id}")
-    logger.info(f"🟢 bot_instance from app.state: {getattr(app.state, 'bot_instance', 'NONE')}")
+    print(f"🟢🟢🟢 DEBUG TEST BALANCE CALLED: telegram_id={telegram_id}")
+    print(f"🟢 bot_instance from app.state: {getattr(app.state, 'bot_instance', 'NONE')}")
     return {"status": "debug", "telegram_id": telegram_id, "bot_available": hasattr(app.state, 'bot_instance')}
 
 
