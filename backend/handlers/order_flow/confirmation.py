@@ -247,7 +247,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         from utils.ui_utils import get_cancel_keyboard
         reply_markup = get_cancel_keyboard()
         bot_msg = await safe_telegram_call(query.message.reply_text(
-            "📥 Редактирование адреса получателя\n\nШаг 1/6: Имя получателя\nНапример: Jane Doe",
+            "📥 Редактирование адреса получателя\n\nШаг 1/7: Имя получателя\nНапример: Jane Doe",
             reply_markup=reply_markup,
         ))
         if bot_msg:
