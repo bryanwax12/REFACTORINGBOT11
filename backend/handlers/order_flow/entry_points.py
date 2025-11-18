@@ -51,6 +51,14 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     logger.info(f"📝 User {telegram_id} starting new order flow")
     
+    # CRITICAL: Clear any leftover editing flags from previous operations
+    context.user_data.pop('editing_from_address', None)
+    context.user_data.pop('editing_to_address', None)
+    context.user_data.pop('editing_template_from', None)
+    context.user_data.pop('editing_template_to', None)
+    context.user_data.pop('editing_template_id', None)
+    logger.info("✅ Cleared editing flags for new order")
+    
     # Session is already handled by @with_user_session decorator
     # Available in context.user_data['session']
     session = context.user_data.get('session', {})
