@@ -2,7 +2,7 @@
 Admin Users Router
 Handles user management endpoints
 """
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel
 from handlers.admin_handlers import verify_admin_key
 import logging
