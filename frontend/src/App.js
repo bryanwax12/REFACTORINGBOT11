@@ -245,7 +245,13 @@ const Dashboard = () => {
     if (!refundModal.order) return;
     
     try {
-      await axios.post(`${API}/orders/${refundModal.order.id}/refund`, null, {
+      const orderId = refundModal.order.id || refundModal.order.order_id;
+      if (!orderId) {
+        toast.error('Order ID not found');
+        return;
+      }
+      
+      await axios.post(`${API}/orders/${orderId}/refund`, null, {
         params: { refund_reason: refundReason || 'Admin refund' }
       });
       
