@@ -317,7 +317,7 @@ const Dashboard = () => {
   };
 
   const createLabelManually = async (order) => {
-    if (!window.confirm(`Create shipping label for Order ${order.id.substring(0, 8)}?\n\nThis will generate a label using ShipStation API.`)) {
+    if (!window.confirm(`Create shipping label for Order ${order.id ? order.id.substring(0, 8) : 'N/A'}?\n\nThis will generate a label using ShipStation API.`)) {
       return;
     }
 
