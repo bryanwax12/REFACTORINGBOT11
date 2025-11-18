@@ -267,7 +267,7 @@ async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE
     asyncio.create_task(mark_message_as_selected(update, context))
     
     # Use different messages for template editing vs order creation
-    if context.user_data.get('editing_template_from'):
+    if context.user_data.get('editing_template_from') or context.user_data.get('editing_from_address'):
         message_text = TemplateEditMessages.FROM_CITY
     else:
         message_text = OrderStepMessages.FROM_CITY
