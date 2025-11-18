@@ -1237,9 +1237,9 @@ const Dashboard = () => {
                           </td>
                           <td className="py-3">
                             <div className="flex items-center gap-2">
-                              <span className="font-mono text-xs">{order.id.substring(0, 8)}</span>
+                              <span className="font-mono text-xs">{order.id ? order.id.substring(0, 8) : 'N/A'}</span>
                               <button
-                                onClick={() => copyToClipboard(order.id)}
+                                onClick={() => copyToClipboard(order.id || '')}
                                 className="text-muted-foreground hover:text-foreground"
                                 title="Copy Order ID"
                               >
