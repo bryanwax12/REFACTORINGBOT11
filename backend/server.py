@@ -724,7 +724,10 @@ async def create_order_in_db(user, data, selected_rate, amount, discount_percent
     
     # Insert order using Repository Pattern
     repos = get_repositories()
-    await repos.orders.collection.insert_one(order_dict)
+    result = await repos.orders.collection.insert_one(order_dict)
+    
+    # Add MongoDB _id as 'id' field for compatibility
+    order_dict['id'] = result.inserted_id
     
     return order_dict
 
