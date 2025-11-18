@@ -104,9 +104,9 @@ async def create_indexes():
     if await safe_create_index(db.user_sessions, "user_id", unique=True, name="idx_user_id_unique"):
         logger.info("✅ Created unique index: user_sessions.user_id")
     
-    # 2. TTL index on last_updated (auto-cleanup after 30 minutes)
-    if await safe_create_index(db.user_sessions, "last_updated", expireAfterSeconds=1800, name="idx_session_ttl"):
-        logger.info("✅ Created TTL index: user_sessions.last_updated (30 min expiry)")
+    # 2. TTL index on last_updated (auto-cleanup after 60 minutes)
+    if await safe_create_index(db.user_sessions, "last_updated", expireAfterSeconds=3600, name="idx_session_ttl"):
+        logger.info("✅ Created TTL index: user_sessions.last_updated (60 min expiry)")
     
     # ============================================================
     # PAYMENTS COLLECTION INDEXES
