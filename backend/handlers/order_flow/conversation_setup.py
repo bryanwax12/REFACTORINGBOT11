@@ -100,6 +100,7 @@ def setup_order_conversation_handler():
         handle_order_summary,
         handle_proceed_to_payment
     )
+    from handlers.payment_handlers import handle_topup_crypto_selection
     
     # Import template editing handlers
     from handlers.template_handlers import edit_template_from_address, edit_template_to_address
