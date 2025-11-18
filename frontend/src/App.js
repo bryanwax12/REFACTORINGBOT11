@@ -2438,38 +2438,36 @@ const Dashboard = () => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Card>
                   <CardContent className="pt-6">
-                    <div className="text-2xl font-bold">{userDetailsModal.details.stats.total_orders}</div>
+                    <div className="text-2xl font-bold">{userDetailsModal.details.statistics?.total_orders || 0}</div>
                     <p className="text-xs text-muted-foreground">Total Orders</p>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="pt-6">
-                    <div className="text-2xl font-bold">{userDetailsModal.details.stats.paid_orders}</div>
-                    <p className="text-xs text-muted-foreground">Paid Orders</p>
+                    <div className="text-2xl font-bold">${(userDetailsModal.details.statistics?.current_balance || 0).toFixed(2)}</div>
+                    <p className="text-xs text-muted-foreground">Balance</p>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="pt-6">
-                    <div className="text-2xl font-bold">${userDetailsModal.details.stats.total_spent.toFixed(2)}</div>
+                    <div className="text-2xl font-bold">${(userDetailsModal.details.statistics?.total_spent || 0).toFixed(2)}</div>
                     <p className="text-xs text-muted-foreground">Total Spent</p>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="pt-6">
-                    <div className="text-2xl font-bold">${userDetailsModal.details.stats.average_order_value.toFixed(2)}</div>
-                    <p className="text-xs text-muted-foreground">Avg Order</p>
+                    <div className="text-2xl font-bold">{userDetailsModal.details.statistics?.templates_count || 0}</div>
+                    <p className="text-xs text-muted-foreground">Templates</p>
                   </CardContent>
                 </Card>
               </div>
 
-              {/* Orders History */}
+              {/* User Info */}
               <div>
-                <h3 className="font-semibold mb-4">Orders History</h3>
+                <h3 className="font-semibold mb-4">User Information</h3>
                 <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {userDetailsModal.details.orders.length === 0 ? (
-                    <p className="text-center text-muted-foreground py-4">No orders yet</p>
-                  ) : (
-                    userDetailsModal.details.orders.map((order) => (
+                  {userDetailsModal.details.user && (
+                    <div className="border rounded-lg p-4 space-y-2">(
                       <div key={order.id || Math.random()} className="border rounded-lg p-4 space-y-2">
                         <div className="flex items-center justify-between">
                           <div>
