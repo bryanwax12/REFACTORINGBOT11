@@ -654,7 +654,7 @@ def get_notification_service() -> NotificationService:
        user_ids,
        "🎉 Новая функция доступна!"
    )
-   print(f"Sent to {stats['sent']} users")
+   logger.info(f"Sent to {stats['sent']} users")
    ```
 
 ПРЕИМУЩЕСТВА:
