@@ -2479,10 +2479,10 @@ const Dashboard = () => {
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-semibold">${order.amount}</p>
+                            <p className="font-semibold">${order.amount || 0}</p>
                             <div className="flex gap-2 mt-1">
                               <Badge variant={order.payment_status === 'paid' ? 'default' : 'secondary'}>
-                                {order.payment_status}
+                                {order.payment_status || 'unknown'}
                               </Badge>
                               <Badge variant="outline">{order.shipping_status}</Badge>
                             </div>
