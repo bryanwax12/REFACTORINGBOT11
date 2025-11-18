@@ -708,8 +708,8 @@ async def create_order_in_db(user, data, selected_rate, amount, discount_percent
     
     order_dict = order.model_dump()
     order_dict['created_at'] = order_dict['created_at'].isoformat()
-    order_dict['selected_carrier'] = selected_rate['carrier']
-    order_dict['selected_service'] = selected_rate['service']
+    order_dict['selected_carrier'] = selected_rate.get('carrier', selected_rate.get('carrier_friendly_name', 'Unknown'))
+    order_dict['selected_service'] = selected_rate.get('service', selected_rate.get('service_type', 'Standard'))
     order_dict['selected_service_code'] = selected_rate.get('service_code', '')  # Add service_code
     order_dict['rate_id'] = selected_rate['rate_id']
     order_dict['original_amount'] = selected_rate['original_amount']  # Store original GoShippo price
