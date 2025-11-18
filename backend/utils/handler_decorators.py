@@ -659,7 +659,7 @@ def with_user_session(create_user=True, require_session=False):
             
             # Update last_updated to keep session alive (for TTL)
             from datetime import datetime, timezone
-            await session_repo.db.user_sessions.update_one(
+            await session_repo.update_one(
                 {"user_id": user_id, "is_active": True},
                 {"$set": {"last_updated": datetime.now(timezone.utc)}}
             )
