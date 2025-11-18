@@ -108,6 +108,11 @@ async def skip_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE)
 async def skip_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Skip TO address line 2"""
     from server import TO_CITY
+    from utils.ui_utils import TemplateEditMessages
+    
+    # Check if editing - use different message
+    editing = context.user_data.get('editing_template_to') or context.user_data.get('editing_to_address')
+    next_message = TemplateEditMessages.TO_CITY if editing else OrderStepMessages.TO_CITY
     
     return await handle_skip_field(
         update, context,
@@ -115,7 +120,7 @@ async def skip_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE):
         field_value=None,
         next_step_const=TO_CITY,
         next_step_name='TO_CITY',
-        next_message=OrderStepMessages.TO_CITY
+        next_message=next_message
     )
 
 
