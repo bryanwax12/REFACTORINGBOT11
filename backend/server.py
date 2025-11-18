@@ -1267,7 +1267,7 @@ async def startup_event():
     
     if TELEGRAM_BOT_TOKEN and TELEGRAM_BOT_TOKEN != "your_telegram_bot_token_here":
         try:
-            global application  # Use global application variable for webhook access
+            global application, bot_instance  # Use global variables for webhook access
             
             # Prevent duplicate bot initialization
             if application is not None:
@@ -1289,6 +1289,10 @@ async def startup_event():
                 # Keep default rate limiter to prevent Telegram ban
                 .build()
             )
+            
+            # Update bot_instance with the application's bot
+            bot_instance = application.bot
+            logger.info(f"✅ Bot instance updated for notifications: @{get_bot_username()}")
             
             # Conversation handler for order creation
             # Template rename conversation handler
