@@ -369,8 +369,8 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 
                 progress_task = asyncio.create_task(update_progress())
             
-            # Try to create shipping label (pass _id which is used by repos.orders.find_by_id)
-            label_created = await create_and_send_label(order['_id'], telegram_id, query.message)
+            # Try to create shipping label (pass order_id string, not MongoDB _id)
+            label_created = await create_and_send_label(order['order_id'], telegram_id, query.message)
             
             # Stop progress indicator and delete message
             if progress_task:
