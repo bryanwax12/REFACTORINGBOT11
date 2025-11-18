@@ -29,15 +29,19 @@ def setup_order_conversation_handler():
         PARCEL_LENGTH, PARCEL_WIDTH, PARCEL_HEIGHT, CALCULATING_RATES, CONFIRM_DATA,
         EDIT_MENU, SELECT_CARRIER, PAYMENT_METHOD, TOPUP_AMOUNT,
         TEMPLATE_NAME, TEMPLATE_LIST, TEMPLATE_VIEW, TEMPLATE_LOADED,
-        # Handler functions from server.py (large functions)
-        order_from_template_list, use_template, view_template,
-        delete_template, confirm_delete_template, my_templates_menu,
         start_command
     )
     # Import handlers from their actual locations
     from handlers.order_flow.payment import process_payment
     from handlers.order_flow.confirmation import handle_data_confirmation
-    from handlers.order_flow.entry_points import order_new
+    from handlers.order_flow.entry_points import order_new, order_from_template_list
+    from handlers.template_handlers import (
+        use_template,
+        view_template,
+        delete_template,
+        confirm_delete_template,
+        my_templates_menu
+    )
     
     # Import handlers from order_flow modules
     from handlers.order_flow.entry_points import (
