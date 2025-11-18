@@ -151,11 +151,11 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if context.user_data.get('editing_template_from') or context.user_data.get('editing_template_to'):
             # Return to template list
             logger.info(f"Returning to template list after cancel")
-            from handlers.template_handlers import list_templates
+            from handlers.template_handlers import my_templates_menu
             await safe_telegram_call(query.message.reply_text(
                 "✅ Редактирование отменено. Возвращаю к списку шаблонов..."
             ))
-            return await list_templates(update, context)
+            return await my_templates_menu(update, context)
         
         await safe_telegram_call(query.message.reply_text("Продолжаем оформление заказа..."))
         return FROM_NAME
