@@ -309,6 +309,58 @@ async def set_api_mode(request: dict, authenticated: bool = Depends(verify_admin
         raise HTTPException(status_code=500, detail=str(e))
 
 
+
+# Legacy compatibility endpoints for frontend
+@admin_router.get("/settings/api-mode")
+async def get_api_mode_legacy(authenticated: bool = Depends(verify_admin_key)):
+    """Get current API mode (legacy endpoint for frontend compatibility)"""
+    from server import db
+    
+    try:
+        setting = await db.settings.find_one({"key": "api_mode"})
+        api_mode = setting.get("value", "production") if setting else "production"
+        
+        return {
+            "mode": api_mode,  # Frontend expects 'mode' key
+            "message": f"API mode is set to {api_mode}"
+        }
+    except Exception as e:
+        logger.error(f"Error getting API mode: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@admin_router.post("/settings/api-mode")
+async def set_api_mode_legacy(request: dict, authenticated: bool = Depends(verify_admin_key)):
+    """Set API mode (legacy endpoint for frontend compatibility)"""
+    from server import db, clear_settings_cache
+    
+    try:
+        mode = request.get("mode", "production")
+        if mode not in ["production", "test", "preview"]:
+            raise HTTPException(status_code=400, detail="Invalid mode. Use 'production', 'test' or 'preview'")
+        
+        await db.settings.update_one(
+            {"key": "api_mode"},
+            {"$set": {"value": mode}},
+            upsert=True
+        )
+        clear_settings_cache()
+        
+        logger.info(f"API mode changed to: {mode}")
+        
+        return {
+            "success": True,
+            "mode": mode,
+            "message": f"API mode set to {mode}"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error setting API mode: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
 # ============================================================
 # DEBUGGING & LOGGING
 # ============================================================
