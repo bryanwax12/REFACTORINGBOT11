@@ -37,7 +37,7 @@ async def oxapay_webhook(request: Request):
                 result = await srv.db.pending_orders.find_one({"order_id": identifier}, {"_id": 0})
             return result
         
-        print("🚀 About to call handle_oxapay_webhook...")
+        logger.debug("🚀 About to call handle_oxapay_webhook")
         result = await handle_oxapay_webhook(
             request, 
             srv.db, 
