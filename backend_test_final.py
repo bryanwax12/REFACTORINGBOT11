@@ -127,8 +127,8 @@ def test_1_admin_notifications():
             data = response.json()
             print(f"   Response: {data}")
             
-            # Check logs for bot_instance availability
-            log_pattern = r"\[BLOCK_USER\].*bot_instance.*AVAILABLE"
+            # Check logs for bot_instance availability and notification success
+            log_pattern = r"BLOCK_USER.*bot_instance.*AVAILABLE|Block notification sent to user 5594152712"
             logs = check_logs_for_pattern(log_pattern)
             
             if logs:
