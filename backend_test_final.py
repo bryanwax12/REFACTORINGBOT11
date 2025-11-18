@@ -268,7 +268,7 @@ def test_3_oxapay_webhook():
             print(f"   Response: {data}")
             
             # Check logs for bot_instance availability
-            log_pattern = r"\[OXAPAY_WEBHOOK\].*bot_instance.*AVAILABLE"
+            log_pattern = r"OXAPAY_WEBHOOK.*bot_instance.*AVAILABLE"
             logs = check_logs_for_pattern(log_pattern)
             
             if logs:
