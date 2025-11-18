@@ -143,7 +143,7 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     
     # Use different messages for template editing (7 steps) vs order creation (18 steps)
     from utils.ui_utils import TemplateEditMessages
-    if context.user_data.get('editing_template_from'):
+    if context.user_data.get('editing_template_from') or context.user_data.get('editing_from_address'):
         message_text = TemplateEditMessages.FROM_ADDRESS
     else:
         message_text = OrderStepMessages.FROM_ADDRESS
