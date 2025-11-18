@@ -101,8 +101,8 @@ def setup_order_conversation_handler():
         handle_proceed_to_payment
     )
     
-    # Import template handlers
-    from handlers.template_handlers import use_template, edit_template_from_address, edit_template_to_address
+    # Import template editing handlers
+    from handlers.template_handlers import edit_template_from_address, edit_template_to_address
     
     # Build the conversation handler
     order_conv_handler = ConversationHandler(
