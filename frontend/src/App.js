@@ -2771,6 +2771,106 @@ const Dashboard = () => {
           </Card>
         </div>
       )}
+
+
+      {/* Refund Status Modal */}
+      {refundStatusModal.open && refundStatusModal.request && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <RefreshCw className="h-5 w-5" />
+                Обработка возврата
+              </CardTitle>
+              <CardDescription>
+                Пользователь: {refundStatusModal.request.user?.first_name || 'Unknown'} 
+                (ID: {refundStatusModal.request.telegram_id})
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Labels summary */}
+              <div className="bg-gray-50 p-3 rounded-md">
+                <p className="text-sm font-semibold mb-2">
+                  Лейблы к возврату ({refundStatusModal.request.label_ids?.length || 0})
+                </p>
+                <div className="max-h-32 overflow-y-auto space-y-1">
+                  {refundStatusModal.request.label_details?.map((label, idx) => (
+                    <div key={idx} className="text-xs flex justify-between">
+                      <span className="font-mono">{label.label_id}</span>
+                      <span className="font-semibold text-green-600">
+                        ${label.cost?.toFixed(2) || '0.00'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Refund amount input */}
+              <div className="space-y-2">
+                <Label>Сумма возврата ($)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  placeholder="0.00"
+                  value={refundAmount}
+                  onChange={(e) => setRefundAmount(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Рекомендуемая сумма: $
+                  {(refundStatusModal.request.label_details?.reduce((sum, l) => sum + (l.cost || 0), 0) || 0).toFixed(2)}
+                </p>
+              </div>
+
+              {/* Admin notes */}
+              <div className="space-y-2">
+                <Label>Заметки (необязательно)</Label>
+                <Textarea
+                  placeholder="Добавьте заметки для истории..."
+                  value={refundNotes}
+                  onChange={(e) => setRefundNotes(e.target.value)}
+                  rows={3}
+                />
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => {
+                    if (!refundAmount || parseFloat(refundAmount) <= 0) {
+                      toast.error('Введите корректную сумму возврата');
+                      return;
+                    }
+                    if (window.confirm(
+                      `Выполнить возврат $${parseFloat(refundAmount).toFixed(2)} пользователю?`
+                    )) {
+                      handleRefundStatus(
+                        refundStatusModal.request.request_id,
+                        'processed',
+                        refundAmount,
+                        refundNotes
+                      );
+                    }
+                  }}
+                  className="flex-1 bg-green-600 hover:bg-green-700"
+                >
+                  💰 Выполнить возврат
+                </Button>
+                <Button
+                  onClick={() => {
+                    setRefundStatusModal({ open: false, request: null });
+                    setRefundAmount('');
+                    setRefundNotes('');
+                  }}
+                  variant="outline"
+                >
+                  Отмена
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
     </div>
   );
 };
