@@ -147,6 +147,7 @@ async def deduct_balance_legacy(
         )
         
         # Send beautiful notification to user
+        print(f"💬 [DEDUCT_BALANCE] Attempting to send notification, bot_instance={'AVAILABLE' if bot_instance else 'NONE'}")
         if bot_instance:
             try:
                 message = (
@@ -166,9 +167,11 @@ async def deduct_balance_legacy(
                     text=message,
                     parse_mode='Markdown'
                 ))
-                logger.info(f"Balance deduction notification sent to user {telegram_id}")
+                print(f"✅ Balance deduction notification sent to user {telegram_id}")
             except Exception as e:
-                logger.error(f"Failed to send balance deduction notification: {e}")
+                print(f"❌ Failed to send balance deduction notification: {e}")
+        else:
+            print(f"⚠️ bot_instance is None for deduction")
         
         logger.info(f"Admin deducted ${amount} from user {telegram_id}. New balance: ${new_balance}")
         
