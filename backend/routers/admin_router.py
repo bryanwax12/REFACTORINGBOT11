@@ -630,8 +630,8 @@ async def deduct_user_balance_legacy(
     Legacy endpoint to deduct balance from user
     Used by frontend - subtracts specified amount from user balance
     """
-    from server import db
-    from services.admin.user_admin_service import user_admin_service
+    from server import db, bot_instance
+    from handlers.common_handlers import safe_telegram_call
     
     try:
         # Get current balance first
@@ -647,6 +647,23 @@ async def deduct_user_balance_legacy(
             {"telegram_id": telegram_id},
             {"$set": {"balance": new_balance}}
         )
+        
+        # Send notification to user
+        if bot_instance:
+            try:
+                message = (
+                    f"⚠️ *Баланс изменен*\n\n"
+                    f"Администратор снял *${amount:.2f}* с вашего баланса.\n\n"
+                    f"Новый баланс: *${new_balance:.2f}*"
+                )
+                await safe_telegram_call(bot_instance.send_message(
+                    chat_id=telegram_id,
+                    text=message,
+                    parse_mode='Markdown'
+                ))
+                logger.info(f"Balance deduction notification sent to user {telegram_id}")
+            except Exception as e:
+                logger.error(f"Failed to send balance deduction notification: {e}")
         
         logger.info(f"Admin deducted ${amount} from user {telegram_id}. New balance: ${new_balance}")
         
