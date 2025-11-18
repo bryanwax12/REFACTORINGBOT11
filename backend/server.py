@@ -1015,7 +1015,6 @@ Label PDF: {label_download_url}
                 to_addr_str = '\n'.join(to_addr_lines)
                 
                 admin_message = f"""📦 *Новый лейбл создан!*
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 👤 *Пользователь:* {user_display}
 
@@ -1023,14 +1022,10 @@ Label PDF: {label_download_url}
 
 {to_addr_str}
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
 🚚 *Перевозчик:* {order['selected_carrier']} - {order['selected_service']}
 📦 *Трекинг:* `{tracking_number}`
 💰 *Цена:* ${order['amount']:.2f}
 ⚖️ *Вес:* {order['parcel']['weight']} lb
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 🕐 *Время:* {datetime.now(timezone.utc).strftime('%d.%m.%Y %H:%M UTC')}"""
 
