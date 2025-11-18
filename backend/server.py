@@ -1184,6 +1184,16 @@ async def root():
     return {"message": "Telegram Shipping Bot API", "status": "running"}
 
 
+@app.get("/debug/bot-state")
+async def debug_bot_state():
+    """DEBUG: Check if bot_instance is in app.state"""
+    return {
+        "has_bot_instance": hasattr(app.state, 'bot_instance'),
+        "bot_instance_value": str(getattr(app.state, 'bot_instance', None)),
+        "app_state_attrs": [attr for attr in dir(app.state) if not attr.startswith('_')]
+    }
+
+
 # Debug endpoints removed - were causing startup issues and memory_handler references
 
 # Old API decorators removed - endpoints moved to routers/
