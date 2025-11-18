@@ -150,11 +150,13 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Check if editing template
         if context.user_data.get('editing_template_from') or context.user_data.get('editing_template_to'):
             # Return to template edit screen
-            from handlers.template_handlers import show_template_details
             template_id = context.user_data.get('editing_template_id')
             if template_id:
                 logger.info(f"Returning to template edit screen for template {template_id}")
-                return await show_template_details(update, context, template_id)
+                # Simulate callback with template_view_{id}
+                query.data = f'template_view_{template_id}'
+                from handlers.template_handlers import view_template
+                return await view_template(update, context)
         
         await safe_telegram_call(query.message.reply_text("Продолжаем оформление заказа..."))
         return FROM_NAME
