@@ -52,7 +52,7 @@ async def create_oxapay_invoice(amount: float, order_id: str, description: str =
             "orderId": order_id
         }
         
-        print(f"🔗 Creating Oxapay invoice with callbackUrl: {webhook_url}")
+        logger.info(f"🔗 Creating Oxapay invoice with callbackUrl: {webhook_url}")
         logger.info(f"Creating Oxapay invoice: amount=${amount}, callbackUrl={webhook_url}")
         
         # Profile Oxapay API call (now truly async!)
