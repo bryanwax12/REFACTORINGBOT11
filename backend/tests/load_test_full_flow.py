@@ -387,9 +387,9 @@ class RealisticLoadTester:
             print(f"   Максимальное: {self.results['max_order_time']:.2f}с")
         
         if self.results['errors']:
-            print(f"\n{'─'*80}")
+            print("\n" + "─" * 80)
             print("⚠️  Первые 10 ошибок:")
-            print(f"{'─'*80}")
+            print("─" * 80)
             for error in self.results['errors'][:10]:
                 print(f"   • {error}")
         
