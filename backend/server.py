@@ -1300,7 +1300,7 @@ async def startup_event():
             # CRITICAL: Also store in app.state for FastAPI routers to access
             app.state.bot_instance = application.bot
             logger.info(f"🔔 Bot instance updated for notifications: @{get_bot_username()}")
-            logger.info(f"✅ Bot instance also stored in app.state for routers")
+            logger.info("✅ Bot instance also stored in app.state for routers")
             
             # Conversation handler for order creation
             # Template rename conversation handler

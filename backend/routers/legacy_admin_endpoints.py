@@ -161,7 +161,7 @@ async def deduct_balance_legacy(
             except Exception as e:
                 logger.error(f"❌ Failed to send balance deduction notification: {e}")
         else:
-            logger.warning(f"⚠️ bot_instance is None for deduction")
+            logger.warning("⚠️ bot_instance is None for deduction")
         
         logger.info(f"Admin deducted ${amount} from user {telegram_id}. New balance: ${new_balance}")
         
@@ -222,7 +222,7 @@ async def block_user_legacy(
                 except Exception as e:
                     logger.error(f"❌ Failed to send block notification: {e}")
             else:
-                logger.warning(f"⚠️ bot_instance is None for block")
+                logger.warning("⚠️ bot_instance is None for block")
             
             return {"success": True, "message": "User blocked successfully"}
         else:
@@ -280,7 +280,7 @@ async def unblock_user_legacy(
                 except Exception as e:
                     logger.error(f"❌ Failed to send unblock notification: {e}")
             else:
-                logger.warning(f"⚠️ bot_instance is None for unblock")
+                logger.warning("⚠️ bot_instance is None for unblock")
             
             return {"success": True, "message": "User unblocked successfully"}
         else:

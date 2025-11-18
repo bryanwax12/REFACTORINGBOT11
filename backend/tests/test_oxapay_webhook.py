@@ -22,7 +22,7 @@ async def test_oxapay_webhook():
         "telegram_id": 5594152712  # Test user
     }
     
-    print(f"📝 Sending test webhook payload:")
+    print("📝 Sending test webhook payload:")
     print(json.dumps(payload, indent=2))
     
     async with httpx.AsyncClient(timeout=30) as client:
@@ -36,11 +36,11 @@ async def test_oxapay_webhook():
             print(f"   Response: {response.json()}")
             
             if response.status_code == 200:
-                print(f"\n✅ Webhook endpoint accessible")
-                print(f"\n📋 Check logs for bot_instance status:")
-                print(f"   tail -n 50 /var/log/supervisor/backend.out.log | grep OXAPAY_WEBHOOK")
+                print("\n✅ Webhook endpoint accessible")
+                print("\n📋 Check logs for bot_instance status:")
+                print("   tail -n 50 /var/log/supervisor/backend.out.log | grep OXAPAY_WEBHOOK")
             else:
-                print(f"\n❌ Webhook failed")
+                print("\n❌ Webhook failed")
                 
         except Exception as e:
             print(f"\n❌ Exception: {e}")

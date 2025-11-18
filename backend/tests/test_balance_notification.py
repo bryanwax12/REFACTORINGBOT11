@@ -36,10 +36,10 @@ async def test_add_balance_notification():
             if response.status_code == 200:
                 data = response.json()
                 if data.get("success"):
-                    print(f"   ✅ Balance added successfully!")
+                    print("   ✅ Balance added successfully!")
                     print(f"   💰 New balance: ${data.get('new_balance', 0):.2f}")
-                    print(f"\n📱 Check Telegram for notification!")
-                    print(f"   Expected: User should receive beautiful notification")
+                    print("\n📱 Check Telegram for notification!")
+                    print("   Expected: User should receive beautiful notification")
                 else:
                     print(f"   ❌ Failed: {data}")
             else:
