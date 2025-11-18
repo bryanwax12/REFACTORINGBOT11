@@ -106,7 +106,7 @@ def test_telegram_webhook_endpoint():
             try:
                 error_data = response.json()
                 print(f"      Error: {error_data}")
-            except:
+            except Exception:
                 print(f"      Error: {response.text}")
             return False
         
