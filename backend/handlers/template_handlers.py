@@ -573,7 +573,7 @@ async def edit_template_from_address(update: Update, context: ContextTypes.DEFAU
         )
         
         logger.info(f"✅ FLAGS SET: editing_template_from=True, editing_template_id={template_id}")
-        logger.info(f"📝 Flags saved to BOTH context.user_data AND DB session")
+        logger.info("📝 Flags saved to BOTH context.user_data AND DB session")
         
         # Load current FROM data
         context.user_data['from_name'] = template.get('from_name', '')
@@ -601,9 +601,9 @@ async def edit_template_from_address(update: Update, context: ContextTypes.DEFAU
             )
             logger.info(f"💾 Saved last_prompt_message_id={bot_msg.message_id} to both context and DB")
         else:
-            logger.warning(f"⚠️ bot_msg is None, cannot save message_id")
+            logger.warning("⚠️ bot_msg is None, cannot save message_id")
         
-        logger.info(f"✅ edit_template_from_address COMPLETED - returning FROM_NAME state")
+        logger.info("✅ edit_template_from_address COMPLETED - returning FROM_NAME state")
         return FROM_NAME
     
     except Exception as e:
@@ -661,7 +661,7 @@ async def edit_template_to_address(update: Update, context: ContextTypes.DEFAULT
         )
         
         logger.info(f"✅ FLAGS SET: editing_template_to=True, editing_template_id={template_id}")
-        logger.info(f"📝 Flags saved to BOTH context.user_data AND DB session")
+        logger.info("📝 Flags saved to BOTH context.user_data AND DB session")
         
         # Load current TO data
         context.user_data['to_name'] = template.get('to_name', '')
@@ -689,7 +689,7 @@ async def edit_template_to_address(update: Update, context: ContextTypes.DEFAULT
             )
             logger.info(f"💾 Saved last_prompt_message_id={bot_msg.message_id} to both context and DB")
         
-        logger.info(f"✅ edit_template_to_address COMPLETED - returning TO_NAME state")
+        logger.info("✅ edit_template_to_address COMPLETED - returning TO_NAME state")
         return TO_NAME
     
     except Exception as e:

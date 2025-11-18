@@ -150,7 +150,7 @@ async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAUL
         await db.payments.insert_one(payment_record)
         
         # Show payment link
-        from utils.ui_utils import ButtonTexts, CallbackData
+        from utils.ui_utils import ButtonTexts
         
         message = f"""✅ Счёт на пополнение создан!
 
@@ -284,7 +284,7 @@ async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAUL
     from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
     from services.api_services import create_oxapay_invoice
     from utils.db_operations import insert_payment
-    from server import Payment, db
+    from server import Payment
     import asyncio
     import time
     import uuid

@@ -82,7 +82,7 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
         except Exception as e:
             logger.warning(f"⚠️ Could not remove cancel button: {e}")
     else:
-        logger.info(f"ℹ️ No last_prompt_message_id found")
+        logger.info("ℹ️ No last_prompt_message_id found")
     
     # Skip if user is in topup flow
     if context.user_data.get('awaiting_topup_amount'):
@@ -116,18 +116,18 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     if session and session.get('editing_template_from'):
         context.user_data['editing_template_from'] = True
         context.user_data['editing_template_id'] = session.get('editing_template_id')
-        logger.info(f"🔄 RESTORED editing_template_from flag in order_from_name")
+        logger.info("🔄 RESTORED editing_template_from flag in order_from_name")
     
     # Update session via service (skip if editing template)
     if not context.user_data.get('editing_template_from'):
-        logger.info(f"📝 Updating session for FROM_NAME (normal flow)")
+        logger.info("📝 Updating session for FROM_NAME (normal flow)")
         await session_service.update_session_step(
             user_id,
             step="FROM_ADDRESS",
             data={'from_name': name}
         )
     else:
-        logger.info(f"⏭️ SKIPPING session update - editing template FROM address")
+        logger.info("⏭️ SKIPPING session update - editing template FROM address")
     
     # Log action
     await SecurityLogger.log_action(
@@ -563,7 +563,7 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, s
         
         return ConversationHandler.END
     
-    logger.info(f"⚠️ NORMAL FLOW: Proceeding to TO_NAME (no editing flags detected)")
+    logger.info("⚠️ NORMAL FLOW: Proceeding to TO_NAME (no editing flags detected)")
     
     reply_markup = get_cancel_keyboard()
     message_text = OrderStepMessages.TO_NAME
@@ -578,5 +578,5 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, s
         context.user_data['last_bot_message_text'] = message_text
         context.user_data['last_state'] = STATE_NAMES[TO_NAME]
     
-    logger.info(f"🔵 order_from_phone returning TO_NAME")
+    logger.info("🔵 order_from_phone returning TO_NAME")
     return TO_NAME

@@ -68,7 +68,7 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
                 {"user_id": update.effective_user.id, "is_active": True},
                 {"$unset": {"last_prompt_message_id": ""}}
             )
-            logger.info(f"✅ Cancel button removed successfully")
+            logger.info("✅ Cancel button removed successfully")
         except Exception as e:
             logger.warning(f"⚠️ Could not remove cancel button: {e}")
     
