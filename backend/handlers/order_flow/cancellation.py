@@ -143,9 +143,19 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.info(f"return_to_order: last_state = {last_state}, type = {type(last_state)}")
     logger.info(f"return_to_order: user_data keys = {list(context.user_data.keys())}")
     
-    # If no last_state - just continue
+    # If no last_state - check if we're editing template
     if last_state is None:
         logger.warning("return_to_order: No last_state found!")
+        
+        # Check if editing template
+        if context.user_data.get('editing_template_from') or context.user_data.get('editing_template_to'):
+            # Return to template edit screen
+            from handlers.template_handlers import show_template_details
+            template_id = context.user_data.get('editing_template_id')
+            if template_id:
+                logger.info(f"Returning to template edit screen for template {template_id}")
+                return await show_template_details(update, context, template_id)
+        
         await safe_telegram_call(query.message.reply_text("Продолжаем оформление заказа..."))
         return FROM_NAME
     
