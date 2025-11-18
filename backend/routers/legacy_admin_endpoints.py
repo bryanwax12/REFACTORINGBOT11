@@ -67,14 +67,21 @@ async def add_balance_legacy(
         )
         
         if success:
-            # Send notification to user
+            # Send beautiful notification to user
             logger.info(f"Attempting to send balance notification to {telegram_id}, bot_instance={'AVAILABLE' if bot_instance else 'NONE'}")
             if bot_instance:
                 try:
                     message = (
-                        f"💰 *Баланс пополнен!*\n\n"
-                        f"Администратор добавил *${amount:.2f}* на ваш баланс.\n\n"
-                        f"Новый баланс: *${new_balance:.2f}*"
+                        "┏━━━━━━━━━━━━━━━━━━━━━┓\n"
+                        "┃ 💰 *БАЛАНС ПОПОЛНЕН* ┃\n"
+                        "┗━━━━━━━━━━━━━━━━━━━━━┛\n\n"
+                        f"✨ Администратор добавил на ваш счёт:\n"
+                        f"💵 *+${amount:.2f}*\n\n"
+                        f"━━━━━━━━━━━━━━━━━━━━━\n"
+                        f"💳 Ваш текущий баланс:\n"
+                        f"💰 *${new_balance:.2f}*\n"
+                        f"━━━━━━━━━━━━━━━━━━━━━\n\n"
+                        f"🎉 Спасибо за использование нашего сервиса!"
                     )
                     await safe_telegram_call(bot_instance.send_message(
                         chat_id=telegram_id,
