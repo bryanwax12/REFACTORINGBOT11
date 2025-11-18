@@ -3,6 +3,7 @@ Refund Request Handlers for Telegram Bot
 Handles user refund requests for labels
 """
 import logging
+import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes, ConversationHandler
 from datetime import datetime, timezone
@@ -13,8 +14,8 @@ logger = logging.getLogger(__name__)
 # Conversation states
 REFUND_INPUT = 0
 
-# Backend API
-BACKEND_URL = "http://localhost:8001"
+# Backend API - use environment variable or localhost for development
+BACKEND_URL = os.environ.get('BACKEND_URL', 'http://localhost:8001')
 
 
 async def refund_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
