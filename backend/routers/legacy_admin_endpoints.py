@@ -182,13 +182,20 @@ async def deduct_balance_legacy(
 
 
 @legacy_admin_router.post("/users/{telegram_id}/block")
-async def block_user_legacy(telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
+async def block_user_legacy(
+    request: Request,
+    telegram_id: int,
+    authenticated: bool = Depends(verify_admin_key)
+):
     """
     Block user (legacy endpoint for frontend)
     Frontend calls: /api/users/{telegram_id}/block
     """
-    from server import db, bot_instance
+    from server import db
     from handlers.common_handlers import safe_telegram_call
+    
+    # Get bot_instance from app.state
+    bot_instance = getattr(request.app.state, 'bot_instance', None)
     
     try:
         user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
