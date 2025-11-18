@@ -565,6 +565,7 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     
     logger.info("⚠️ NORMAL FLOW: Proceeding to TO_NAME (no editing flags detected)")
     
+    from utils.ui_utils import get_cancel_keyboard
     reply_markup = get_cancel_keyboard()
     message_text = OrderStepMessages.TO_NAME
     
