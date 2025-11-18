@@ -142,7 +142,7 @@ async def deduct_balance_legacy(
         )
         
         # Send beautiful notification to user
-        print(f"💬 [DEDUCT_BALANCE] Attempting to send notification, bot_instance={'AVAILABLE' if bot_instance else 'NONE'}")
+        logger.info(f"💬 [DEDUCT_BALANCE] Attempting to send notification, bot_instance={'AVAILABLE' if bot_instance else 'NONE'}")
         if bot_instance:
             try:
                 message = (
@@ -157,11 +157,11 @@ async def deduct_balance_legacy(
                     text=message,
                     parse_mode='Markdown'
                 ))
-                print(f"✅ Balance deduction notification sent to user {telegram_id}")
+                logger.info(f"✅ Balance deduction notification sent to user {telegram_id}")
             except Exception as e:
-                print(f"❌ Failed to send balance deduction notification: {e}")
+                logger.error(f"❌ Failed to send balance deduction notification: {e}")
         else:
-            print(f"⚠️ bot_instance is None for deduction")
+            logger.warning(f"⚠️ bot_instance is None for deduction")
         
         logger.info(f"Admin deducted ${amount} from user {telegram_id}. New balance: ${new_balance}")
         
@@ -205,7 +205,7 @@ async def block_user_legacy(
         )
         
         if result.modified_count > 0:
-            print(f"💬 [BLOCK_USER] Attempting to send notification, bot_instance={'AVAILABLE' if bot_instance else 'NONE'}")
+            logger.info(f"💬 [BLOCK_USER] Attempting to send notification, bot_instance={'AVAILABLE' if bot_instance else 'NONE'}")
             if bot_instance:
                 try:
                     message = (
@@ -218,11 +218,11 @@ async def block_user_legacy(
                         text=message,
                         parse_mode='Markdown'
                     ))
-                    print(f"✅ Block notification sent to user {telegram_id}")
+                    logger.info(f"✅ Block notification sent to user {telegram_id}")
                 except Exception as e:
-                    print(f"❌ Failed to send block notification: {e}")
+                    logger.error(f"❌ Failed to send block notification: {e}")
             else:
-                print(f"⚠️ bot_instance is None for block")
+                logger.warning(f"⚠️ bot_instance is None for block")
             
             return {"success": True, "message": "User blocked successfully"}
         else:
@@ -262,7 +262,7 @@ async def unblock_user_legacy(
         )
         
         if result.modified_count > 0:
-            print(f"💬 [UNBLOCK_USER] Attempting to send notification, bot_instance={'AVAILABLE' if bot_instance else 'NONE'}")
+            logger.info(f"💬 [UNBLOCK_USER] Attempting to send notification, bot_instance={'AVAILABLE' if bot_instance else 'NONE'}")
             if bot_instance:
                 try:
                     message = (
@@ -276,11 +276,11 @@ async def unblock_user_legacy(
                         text=message,
                         parse_mode='Markdown'
                     ))
-                    print(f"✅ Unblock notification sent to user {telegram_id}")
+                    logger.info(f"✅ Unblock notification sent to user {telegram_id}")
                 except Exception as e:
-                    print(f"❌ Failed to send unblock notification: {e}")
+                    logger.error(f"❌ Failed to send unblock notification: {e}")
             else:
-                print(f"⚠️ bot_instance is None for unblock")
+                logger.warning(f"⚠️ bot_instance is None for unblock")
             
             return {"success": True, "message": "User unblocked successfully"}
         else:
