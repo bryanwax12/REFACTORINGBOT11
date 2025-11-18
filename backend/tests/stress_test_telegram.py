@@ -105,11 +105,11 @@ class TelegramBotStressTester:
     async def run_test(self):
         """Run the stress test"""
         print(f"\n{'='*70}")
-        print(f"🔥 STRESS TEST - Telegram Bot Full Flow")
+        print("🔥 STRESS TEST - Telegram Bot Full Flow")
         print(f"{'='*70}")
         print(f"👥 Concurrent Users: {NUM_USERS}")
-        print(f"⏱️  Test Duration: 60 seconds")
-        print(f"🎯 Target: ~1500 requests total")
+        print("⏱️  Test Duration: 60 seconds")
+        print("🎯 Target: ~1500 requests total")
         print(f"{'='*70}\n")
         print(f"🚀 Starting test at {datetime.now().strftime('%H:%M:%S')}\n")
         
@@ -134,7 +134,7 @@ class TelegramBotStressTester:
     def print_results(self, total_time: float):
         """Print detailed test results"""
         print(f"\n{'='*70}")
-        print(f"📊 STRESS TEST RESULTS")
+        print("📊 STRESS TEST RESULTS")
         print(f"{'='*70}\n")
         
         print(f"⏱️  Total Duration: {total_time:.2f}s")
@@ -153,7 +153,7 @@ class TelegramBotStressTester:
             min_time = min(self.results['response_times'])
             
             print(f"\n{'─'*70}")
-            print(f"⏱️  Response Times:")
+            print("⏱️  Response Times:")
             print(f"{'─'*70}")
             print(f"   Average: {avg_time*1000:.2f}ms")
             print(f"   Min: {min_time*1000:.2f}ms")
@@ -161,7 +161,7 @@ class TelegramBotStressTester:
         
         if self.results['operations']:
             print(f"\n{'─'*70}")
-            print(f"📋 Operations Breakdown:")
+            print("📋 Operations Breakdown:")
             print(f"{'─'*70}")
             for op, data in self.results['operations'].items():
                 if data['times']:
@@ -182,7 +182,7 @@ class TelegramBotStressTester:
                 print(f"   ... and {len(self.results['errors']) - 10} more")
         
         print(f"\n{'='*70}")
-        print(f"🎯 Performance Assessment:")
+        print("🎯 Performance Assessment:")
         print(f"{'─'*70}")
         
         if self.results['response_times']:

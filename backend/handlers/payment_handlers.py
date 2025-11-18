@@ -31,7 +31,6 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE,
     - UserService injection
     """
     from server import safe_telegram_call, mark_message_as_selected
-    import asyncio
     
     # Get user and balance from injected services
     user = context.user_data['db_user']
@@ -170,7 +169,6 @@ async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAUL
     from services.api_services import create_oxapay_invoice
     from utils.db_operations import insert_payment
     from server import Payment
-    import asyncio
     import time
     import uuid
     from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -279,7 +277,6 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
     """Handle custom top-up amount input and create Oxapay invoice directly"""
     from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
     from server import create_oxapay_invoice, insert_payment, Payment, TOPUP_AMOUNT
-    import asyncio
     import time
     import uuid
     from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -406,7 +403,6 @@ async def handle_topup_crypto_selection(update: Update, context: ContextTypes.DE
     from server import create_oxapay_invoice, insert_payment, Payment
     import time
     import uuid
-    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
     from telegram.ext import ConversationHandler
     
     query = update.callback_query

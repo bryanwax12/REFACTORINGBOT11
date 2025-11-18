@@ -123,7 +123,6 @@ async def handle_topup_for_order(update: Update, context: ContextTypes.DEFAULT_T
 async def show_order_summary(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Show order summary with selected rate details"""
     from server import safe_telegram_call, PAYMENT_METHOD
-    from repositories import get_user_repo
     
     query = update.callback_query
     await safe_telegram_call(query.answer())

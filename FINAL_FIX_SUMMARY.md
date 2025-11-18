@@ -164,7 +164,7 @@ else:
 
 ### Preview окружение (текущее)
 ```
-WEBHOOK_BASE_URL = "https://oxapay-webhook.preview.emergentagent.com"
+WEBHOOK_BASE_URL = "https://shipbot-revival.preview.emergentagent.com"
                                      ↓
               Содержит "preview" → НЕ production
                                      ↓

@@ -117,7 +117,7 @@ class LoadTester:
     async def run_load_test(self):
         """Run load test with multiple concurrent users"""
         print(f"\n{'='*60}")
-        print(f"🚀 Starting Load Test")
+        print("🚀 Starting Load Test")
         print(f"{'='*60}")
         print(f"👥 Users: {NUM_USERS}")
         print(f"⏱️  Duration: {TEST_DURATION}s")
@@ -154,7 +154,7 @@ class LoadTester:
     def print_results(self, total_time: float):
         """Print load test results"""
         print(f"\n{'='*60}")
-        print(f"📊 Load Test Results")
+        print("📊 Load Test Results")
         print(f"{'='*60}\n")
         
         print(f"⏱️  Total Duration: {total_time:.2f}s")
@@ -165,14 +165,14 @@ class LoadTester:
         print(f"⚡ Requests/sec: {self.results['total_requests']/total_time:.2f}")
         
         print(f"\n{'─'*60}")
-        print(f"⏱️  Response Times:")
+        print("⏱️  Response Times:")
         print(f"{'─'*60}")
         print(f"   Average: {self.results['avg_response_time']*1000:.2f}ms")
         print(f"   Min: {self.results['min_response_time']*1000:.2f}ms")
         print(f"   Max: {self.results['max_response_time']*1000:.2f}ms")
         
         print(f"\n{'─'*60}")
-        print(f"📋 Operations Breakdown:")
+        print("📋 Operations Breakdown:")
         print(f"{'─'*60}")
         for op, data in self.results['operations'].items():
             print(f"   {op}:")
@@ -185,7 +185,7 @@ class LoadTester:
         avg_time_ms = self.results['avg_response_time'] * 1000
         success_rate = (self.results['successful']/self.results['total_requests']*100)
         
-        print(f"\n🎯 Performance Assessment:")
+        print("\n🎯 Performance Assessment:")
         print(f"{'─'*60}")
         
         if success_rate == 100 and avg_time_ms < 100:
