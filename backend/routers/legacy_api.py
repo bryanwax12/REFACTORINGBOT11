@@ -261,10 +261,13 @@ async def legacy_enable_maintenance(request: Request, api_key: str = Depends(ver
 
 
 @router.post("/maintenance/disable")
-async def legacy_disable_maintenance(api_key: str = Depends(verify_api_key)):
+async def legacy_disable_maintenance(request: Request, api_key: str = Depends(verify_api_key)):
     """Legacy maintenance disable endpoint"""
-    from server import db, clear_settings_cache, bot_instance
+    from server import db, clear_settings_cache
     from handlers.common_handlers import safe_telegram_call
+    
+    # Get bot_instance from app.state
+    bot_instance = getattr(request.app.state, 'bot_instance', None)
     
     await db.settings.update_one(
         {"key": "maintenance_mode"},
