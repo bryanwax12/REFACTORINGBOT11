@@ -15,7 +15,7 @@ async def oxapay_webhook(request: Request):
     """Handle Oxapay payment webhooks"""
     import logging
     logger = logging.getLogger(__name__)
-    print("🔔🔔🔔 WEBHOOK ENDPOINT CALLED! 🔔🔔🔔")
+    logger.info("🔔 WEBHOOK ENDPOINT CALLED")
     logger.info("🔔 Webhook endpoint called!")
     
     try:
