@@ -154,7 +154,7 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
 
 async def return_to_payment_after_topup(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Return user to payment screen after topping up balance"""
-    print("🔵 return_to_payment_after_topup: START")
+    logger.debug(f"🔵 return_to_payment_after_topup: START")
     from server import (
         PAYMENT_METHOD,
         safe_telegram_call, mark_message_as_selected
@@ -163,18 +163,18 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     from repositories import get_user_repo
     
     logger.info(f"return_to_payment_after_topup called - user_id: {update.effective_user.id}")
-    print(f"🔵 User ID: {update.effective_user.id}")
+    logger.debug(f"🔵 User ID: {update.effective_user.id}")
     
     query = update.callback_query
     await safe_telegram_call(query.answer())
-    print("🔵 Query answered")
+    logger.debug(f"🔵 Query answered")
     
     telegram_id = query.from_user.id
     
     # Get pending order data from database to load message context
     pending_order = await find_pending_order(telegram_id)
     logger.info(f"Pending order data found: {pending_order is not None}")
-    print(f"🔵 Pending order found: {pending_order is not None}")
+    logger.debug(f"🔵 Pending order found: {pending_order is not None}")
     
     # Load message context for button protection
     if pending_order:
@@ -183,16 +183,16 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     
     # Mark previous message as selected (non-blocking)
     asyncio.create_task(mark_message_as_selected(update, context))
-    print("🔵 Message marked as selected")
+    logger.debug(f"🔵 Message marked as selected")
     
     if not pending_order or not pending_order.get('selected_rate'):
-        print("🔴 ERROR: No pending order or no selected_rate")
+        logger.error(f"🔴 ERROR: No pending order or no selected_rate")
         await safe_telegram_call(query.message.reply_text(
             "❌ Не найдены данные незавершенного заказа.\n\nПожалуйста, создайте новый заказ."
         ))
         return ConversationHandler.END
     
-    print("🔵 Pending order validated")
+    logger.debug(f"🔵 Pending order validated")
     
     # Restore order data to context
     context.user_data.update(pending_order)

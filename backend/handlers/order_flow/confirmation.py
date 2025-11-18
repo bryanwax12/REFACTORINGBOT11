@@ -154,12 +154,12 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
     )
     
     logger = logging.getLogger(__name__)
-    print("🎯 handle_data_confirmation CALLED!")
+    logger.debug(f"🎯 handle_data_confirmation CALLED!")
     logger.info(f"🎯 handle_data_confirmation called with query.data={update.callback_query.data if update.callback_query else 'None'}")
     logger.info(f"🎯 user_data keys at start: {list(context.user_data.keys())}")
     
     query = update.callback_query
-    print(f"🎯 Query data: {query.data if query else 'None'}")
+    logger.debug(f"🎯 Query data: {query.data if query else 'None'}")
     
     # Skip stale check for edit buttons - they should always work if we're in CONFIRM_DATA state
     edit_buttons = ['edit_from_address', 'edit_to_address', 'edit_parcel', 'edit_data']
