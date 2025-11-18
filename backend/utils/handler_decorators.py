@@ -72,6 +72,33 @@ def safe_handler(fallback_state=ConversationHandler.END, error_message="❌ Пр
                     exc_info=True
                 )
                 
+                # Send error notification to admin
+                try:
+                    import os
+                    from telegram import Bot
+                    admin_id = os.getenv('ADMIN_TELEGRAM_ID')
+                    if admin_id:
+                        bot = Bot(os.getenv('TELEGRAM_BOT_TOKEN'))
+                        error_text = f"""🚨 *Ошибка в боте*
+━━━━━━━━━━━━━━━━━━━━
+
+👤 *User ID:* `{user_id}`
+💬 *Chat ID:* `{chat_id}`
+⚙️ *Handler:* `{handler_name}`
+
+❌ *Error:* {type(e).__name__}
+📝 *Details:* {str(e)[:200]}
+
+🕐 *Time:* {datetime.now(timezone.utc).strftime('%d.%m.%Y %H:%M UTC')}"""
+                        
+                        await bot.send_message(
+                            chat_id=admin_id,
+                            text=error_text,
+                            parse_mode='Markdown'
+                        )
+                except Exception as admin_error:
+                    logger.error(f"Failed to send error notification to admin: {admin_error}")
+                
                 # Send error message to user
                 try:
                     if update.message:
