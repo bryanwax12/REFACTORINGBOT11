@@ -282,7 +282,7 @@ class OxapayGateway(PaymentGateway):
                 # Попытаться распарсить дату оплаты
                 try:
                     invoice.paid_at = datetime.fromisoformat(data['date'])
-                except:
+                except Exception:
                     invoice.paid_at = datetime.now(timezone.utc)
             
             return invoice
