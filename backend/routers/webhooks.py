@@ -13,10 +13,7 @@ router = APIRouter(prefix="/api", tags=["webhooks"])
 @router.post("/oxapay/webhook")
 async def oxapay_webhook(request: Request):
     """Handle Oxapay payment webhooks"""
-    import logging
-    logger = logging.getLogger(__name__)
-    logger.info("🔔 WEBHOOK ENDPOINT CALLED")
-    logger.info("🔔 Webhook endpoint called!")
+    print("🔔 [OXAPAY_WEBHOOK] Webhook endpoint called!")
     
     try:
         from handlers.webhook_handlers import handle_oxapay_webhook
@@ -24,8 +21,9 @@ async def oxapay_webhook(request: Request):
         # Import from server inside function to avoid circular import
         import server as srv
         
-        logger.debug("✅ All imports successful")
-        logger.info("✅ All imports successful")
+        # Get bot_instance from app.state instead of server module
+        bot_instance = getattr(request.app.state, 'bot_instance', None)
+        print(f"🔔 [OXAPAY_WEBHOOK] bot_instance from app.state: {'AVAILABLE' if bot_instance else 'NONE'}")
         
         user_repo = get_user_repo()
         
@@ -37,20 +35,20 @@ async def oxapay_webhook(request: Request):
                 result = await srv.db.pending_orders.find_one({"order_id": identifier}, {"_id": 0})
             return result
         
-        logger.debug("🚀 About to call handle_oxapay_webhook")
+        print("🔔 [OXAPAY_WEBHOOK] About to call handle_oxapay_webhook")
         result = await handle_oxapay_webhook(
             request, 
             srv.db, 
-            srv.bot_instance, 
+            bot_instance,  # Use bot_instance from app.state
             srv.safe_telegram_call, 
             user_repo.find_by_telegram_id,
             find_pending_order,
             srv.create_and_send_label
         )
-        logger.info(f"✅ Webhook processed: {result}")
-        logger.info(f"✅ Webhook processed: {result}")
+        print(f"✅ [OXAPAY_WEBHOOK] Webhook processed: {result}")
         return result
     except Exception as e:
+        print(f"❌ [OXAPAY_WEBHOOK] Webhook error: {e}")
         logger.error(f"❌ Webhook error: {e}", exc_info=True)
         return {"status": "error", "message": str(e)}
 
