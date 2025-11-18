@@ -2565,7 +2565,7 @@ const Dashboard = () => {
             <CardHeader>
               <CardTitle>🔄 Refund Order & Void Label</CardTitle>
               <CardDescription>
-                Order #{refundModal.order.id.substring(0, 8)} - ${refundModal.order.amount}
+                Order #{refundModal.order.id ? refundModal.order.id.substring(0, 8) : 'N/A'} - ${refundModal.order.amount}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
