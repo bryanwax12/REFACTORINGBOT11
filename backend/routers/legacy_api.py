@@ -2,7 +2,7 @@
 Legacy API Router
 Provides backward compatibility for old API endpoints used by frontend
 """
-from fastapi import APIRouter, Header, HTTPException, Depends
+from fastapi import APIRouter, Header, HTTPException, Depends, Request
 from typing import Optional
 
 router = APIRouter(prefix="/api", tags=["legacy"])
