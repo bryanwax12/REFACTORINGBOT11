@@ -1277,12 +1277,11 @@ async def startup_event():
                 Application.builder()
                 .token(TELEGRAM_BOT_TOKEN)
                 # NO PERSISTENCE - in-memory state for stability
-                .concurrent_updates(True)  # Process updates concurrently
+                .concurrent_updates(True)  # Process updates concurrently for multiple users
                 .connect_timeout(10)  # Balanced: fast but stable
                 .read_timeout(10)   # Prevents premature timeout
                 .write_timeout(10)  # Reliable message delivery
                 .pool_timeout(5)    # Connection pool optimization
-                .pool_timeout(1)  # Super fast pool acquisition
                 # Keep default rate limiter to prevent Telegram ban
                 .build()
             )
