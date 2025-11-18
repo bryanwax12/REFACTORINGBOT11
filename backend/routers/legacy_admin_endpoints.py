@@ -68,6 +68,7 @@ async def add_balance_legacy(
         
         if success:
             # Send notification to user
+            logger.info(f"Attempting to send balance notification to {telegram_id}, bot_instance={'AVAILABLE' if bot_instance else 'NONE'}")
             if bot_instance:
                 try:
                     message = (
@@ -80,9 +81,11 @@ async def add_balance_legacy(
                         text=message,
                         parse_mode='Markdown'
                     ))
-                    logger.info(f"Balance notification sent to user {telegram_id}")
+                    logger.info(f"✅ Balance notification sent to user {telegram_id}")
                 except Exception as e:
-                    logger.error(f"Failed to send balance notification: {e}")
+                    logger.error(f"❌ Failed to send balance notification: {e}")
+            else:
+                logger.warning(f"⚠️ bot_instance is None, cannot send notification to {telegram_id}")
             
             return {
                 "success": True,
