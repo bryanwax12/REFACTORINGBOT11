@@ -1847,6 +1847,274 @@ const Dashboard = () => {
         </TabsContent>
 
 
+        {/* Refunds Tab */}
+        <TabsContent value="refunds" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <RefreshCw className="h-5 w-5" />
+                Заявки на возврат лейблов
+              </CardTitle>
+              <CardDescription>Управление заявками пользователей на возврат средств за лейблы</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {/* Filter buttons */}
+              <div className="flex gap-2 mb-4 flex-wrap">
+                <Button
+                  variant={refundFilter === 'all' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setRefundFilter('all')}
+                >
+                  Все ({refunds.length})
+                </Button>
+                <Button
+                  variant={refundFilter === 'pending' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setRefundFilter('pending')}
+                >
+                  ⏳ На рассмотрении ({refunds.filter(r => r.status === 'pending').length})
+                </Button>
+                <Button
+                  variant={refundFilter === 'approved' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setRefundFilter('approved')}
+                >
+                  ✅ Одобрено ({refunds.filter(r => r.status === 'approved').length})
+                </Button>
+                <Button
+                  variant={refundFilter === 'processed' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setRefundFilter('processed')}
+                >
+                  💰 Выполнено ({refunds.filter(r => r.status === 'processed').length})
+                </Button>
+                <Button
+                  variant={refundFilter === 'rejected' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setRefundFilter('rejected')}
+                >
+                  ❌ Отклонено ({refunds.filter(r => r.status === 'rejected').length})
+                </Button>
+              </div>
+
+              {/* Refunds table */}
+              {refunds.filter(r => refundFilter === 'all' || r.status === refundFilter).length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">
+                  Нет заявок {refundFilter !== 'all' && `со статусом "${refundFilter}"`}
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {refunds
+                    .filter(r => refundFilter === 'all' || r.status === refundFilter)
+                    .map((refund) => (
+                      <Card key={refund.request_id} className="border-2">
+                        <CardContent className="pt-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Left column - User & Request Info */}
+                            <div className="space-y-3">
+                              <div>
+                                <p className="text-sm text-muted-foreground">Пользователь</p>
+                                <p className="font-semibold text-lg">
+                                  {refund.user?.first_name || 'Unknown'}
+                                  {refund.user?.username && (
+                                    <span className="text-sm text-muted-foreground ml-2">
+                                      @{refund.user.username}
+                                    </span>
+                                  )}
+                                </p>
+                                <p className="text-sm font-mono text-muted-foreground">
+                                  ID: {refund.telegram_id}
+                                </p>
+                              </div>
+                              
+                              <div>
+                                <p className="text-sm text-muted-foreground">Статус</p>
+                                <Badge 
+                                  variant={
+                                    refund.status === 'pending' ? 'secondary' :
+                                    refund.status === 'approved' ? 'default' :
+                                    refund.status === 'processed' ? 'default' :
+                                    'destructive'
+                                  }
+                                  className="mt-1"
+                                >
+                                  {
+                                    refund.status === 'pending' ? '⏳ На рассмотрении' :
+                                    refund.status === 'approved' ? '✅ Одобрено' :
+                                    refund.status === 'processed' ? '💰 Выполнено' :
+                                    '❌ Отклонено'
+                                  }
+                                </Badge>
+                              </div>
+
+                              <div>
+                                <p className="text-sm text-muted-foreground">Дата заявки</p>
+                                <p className="font-medium">{formatKyivDateTime(refund.created_at)}</p>
+                              </div>
+
+                              {refund.refund_amount && (
+                                <div>
+                                  <p className="text-sm text-muted-foreground">Сумма возврата</p>
+                                  <p className="text-xl font-bold text-green-600">
+                                    ${refund.refund_amount.toFixed(2)}
+                                  </p>
+                                </div>
+                              )}
+
+                              {refund.admin_notes && (
+                                <div>
+                                  <p className="text-sm text-muted-foreground">Заметки администратора</p>
+                                  <p className="text-sm italic">{refund.admin_notes}</p>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Right column - Labels Info */}
+                            <div className="space-y-3">
+                              <div>
+                                <p className="text-sm text-muted-foreground mb-2">
+                                  Лейблы ({refund.label_ids?.length || 0})
+                                </p>
+                                <div className="bg-gray-50 p-3 rounded-md max-h-48 overflow-y-auto">
+                                  {refund.label_details && refund.label_details.length > 0 ? (
+                                    <div className="space-y-2">
+                                      {refund.label_details.map((label, idx) => (
+                                        <div key={idx} className="text-sm border-b pb-2 last:border-0">
+                                          <p className="font-mono font-semibold text-xs">
+                                            {label.label_id}
+                                          </p>
+                                          <p className="text-muted-foreground">
+                                            {label.carrier} - {label.service}
+                                          </p>
+                                          <p className="text-green-600 font-semibold">
+                                            ${label.cost?.toFixed(2) || '0.00'}
+                                          </p>
+                                          <p className="text-xs text-muted-foreground">
+                                            {formatKyivDate(label.created_at)}
+                                          </p>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <div className="space-y-1">
+                                      {refund.label_ids?.map((labelId, idx) => (
+                                        <p key={idx} className="font-mono text-xs">
+                                          {labelId}
+                                        </p>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Action buttons */}
+                              <div className="flex gap-2 flex-wrap">
+                                {refund.status === 'pending' && (
+                                  <>
+                                    <Button
+                                      size="sm"
+                                      variant="default"
+                                      onClick={() => {
+                                        setRefundStatusModal({ open: true, request: refund });
+                                        setRefundNotes('');
+                                        // Calculate total refund amount
+                                        const total = refund.label_details?.reduce((sum, l) => sum + (l.cost || 0), 0) || 0;
+                                        setRefundAmount(total.toString());
+                                      }}
+                                    >
+                                      ✅ Обработать
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="destructive"
+                                      onClick={() => {
+                                        if (window.confirm('Отклонить заявку на возврат?')) {
+                                          const notes = prompt('Причина отклонения (необязательно):');
+                                          handleRefundStatus(refund.request_id, 'rejected', null, notes || '');
+                                        }
+                                      }}
+                                    >
+                                      ❌ Отклонить
+                                    </Button>
+                                  </>
+                                )}
+                                
+                                {refund.status === 'approved' && (
+                                  <Button
+                                    size="sm"
+                                    variant="default"
+                                    onClick={() => {
+                                      setRefundStatusModal({ open: true, request: refund });
+                                      setRefundNotes('');
+                                      const total = refund.label_details?.reduce((sum, l) => sum + (l.cost || 0), 0) || 0;
+                                      setRefundAmount(total.toString());
+                                    }}
+                                  >
+                                    💰 Выполнить возврат
+                                  </Button>
+                                )}
+
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(refund.request_id);
+                                    toast.success('ID скопирован');
+                                  }}
+                                >
+                                  <Copy className="h-4 w-4 mr-1" />
+                                  Копировать ID
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Refunds Summary */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Статистика возвратов</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Всего заявок</p>
+                  <p className="text-2xl font-bold">{refunds.length}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">На рассмотрении</p>
+                  <p className="text-2xl font-bold text-yellow-600">
+                    {refunds.filter(r => r.status === 'pending').length}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Выполнено</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {refunds.filter(r => r.status === 'processed').length}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground">Сумма возвратов</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    ${refunds
+                      .filter(r => r.status === 'processed')
+                      .reduce((sum, r) => sum + (r.refund_amount || 0), 0)
+                      .toFixed(2)}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+
+
         <TabsContent value="leaderboard" className="space-y-4">
           <Card>
             <CardHeader>
