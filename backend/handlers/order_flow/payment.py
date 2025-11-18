@@ -429,7 +429,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 from repositories import get_repositories
                 repos = get_repositories()
                 await repos.orders.update_by_id(
-                    order['id'],
+                    order['_id'],
                     {"payment_status": "failed", "shipping_status": "failed"}
                 )
                 
