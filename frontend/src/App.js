@@ -330,7 +330,13 @@ const Dashboard = () => {
     try {
       toast.info('Creating label... Please wait');
       
-      const response = await axios.post(`${API}/admin/create-label/${order.id}`);
+      const orderId = order.id || order.order_id;
+      if (!orderId) {
+        toast.error('Order ID not found');
+        return;
+      }
+      
+      const response = await axios.post(`${API}/admin/create-label/${orderId}`);
       
       toast.success('Label created successfully!');
       
