@@ -34,11 +34,12 @@ async def get_users(authenticated: bool = Depends(verify_admin_key)):
 @admin_router.post("/users/{telegram_id}/block")
 async def block_user(telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
     """Block a user from using the bot"""
-    from server import db, bot_instance, find_user_by_telegram_id
+    from server import db, bot_instance
     from handlers.common_handlers import safe_telegram_call
     
     try:
-        user = await find_user_by_telegram_id(telegram_id)
+        # Check if user exists
+        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
