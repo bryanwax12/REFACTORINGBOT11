@@ -205,7 +205,10 @@ async def get_topups(authenticated: bool = Depends(verify_admin_key)):
     from server import db
     
     try:
-        topups = await db.payments.find({"type": "topup"}).sort("created_at", -1).to_list(1000)
+        topups = await db.payments.find(
+            {"type": "topup"},
+            {"_id": 0}  # Exclude ObjectId to avoid serialization issues
+        ).sort("created_at", -1).to_list(1000)
         return topups
     except Exception as e:
         logger.error(f"Error getting topups: {e}")
