@@ -2,7 +2,7 @@
 Broadcast Router
 Эндпоинты для рассылки сообщений
 """
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from typing import Optional
 import asyncio
 import logging
@@ -14,6 +14,7 @@ router = APIRouter(prefix="/broadcast", tags=["broadcast"])
 
 @router.post("")
 async def broadcast_message(
+    request: Request,
     message: str,
     target: str = "all",
     image_url: Optional[str] = None
@@ -26,8 +27,11 @@ async def broadcast_message(
         target: Target audience ('all', 'active', 'premium')
         image_url: Optional image URL to attach
     """
-    from server import bot_instance, safe_telegram_call
+    from server import safe_telegram_call
     from repositories import get_user_repo
+    
+    # Get bot_instance from app.state
+    bot_instance = getattr(request.app.state, 'bot_instance', None)
     
     try:
         if not bot_instance:
