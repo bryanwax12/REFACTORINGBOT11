@@ -379,9 +379,9 @@ class RealisticLoadTester:
         print(f"   📊 Среднее шагов на заказ: {avg_steps:.1f}")
         
         if self.order_times:
-            print(f"\n{'─'*80}")
+            print("\n" + "─" * 80)
             print("⏱️  Время создания заказа:")
-            print(f"{'─'*80}")
+            print("─" * 80)
             print(f"   Среднее: {self.results['avg_order_time']:.2f}с")
             print(f"   Минимальное: {self.results['min_order_time']:.2f}с")
             print(f"   Максимальное: {self.results['max_order_time']:.2f}с")
