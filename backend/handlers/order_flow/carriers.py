@@ -175,8 +175,8 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await db.orders.update_one(
                     {"order_id": existing_order_id},
                     {"$set": {
-                        "selected_carrier": selected_rate.get('carrier_friendly_name', 'Unknown'),
-                        "selected_service": selected_rate.get('service_type', 'Standard'),
+                        "selected_carrier": selected_rate.get('carrier', selected_rate.get('carrier_friendly_name', 'Unknown')),
+                        "selected_service": selected_rate.get('service', selected_rate.get('service_type', 'Standard')),
                         "amount": final_cost
                     }}
                 )
