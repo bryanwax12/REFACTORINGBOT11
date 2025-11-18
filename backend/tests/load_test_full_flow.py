@@ -393,14 +393,14 @@ class RealisticLoadTester:
             for error in self.results['errors'][:10]:
                 print(f"   • {error}")
         
-        print(f"\n{'='*80}")
+        print("\n" + "=" * 80)
         
         # Оценка производительности
         success_rate = (self.results['successful_orders'] / max(self.results['total_operations'], 1)) * 100
         avg_time = self.results.get('avg_order_time', 999)
         
         print("\n🎯 Оценка производительности:")
-        print(f"{'─'*80}")
+        print("─" * 80)
         
         if success_rate >= 90 and avg_time < 30:
             print("✅ ОТЛИЧНО - Система справляется с нагрузкой идеально!")
