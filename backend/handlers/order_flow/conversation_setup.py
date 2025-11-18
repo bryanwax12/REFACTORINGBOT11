@@ -234,6 +234,7 @@ def setup_order_conversation_handler():
                 CallbackQueryHandler(confirm_cancel_order, pattern='^confirm_cancel$'),
                 CallbackQueryHandler(handle_order_summary, pattern='^order_summary$'),
                 CallbackQueryHandler(handle_proceed_to_payment, pattern='^proceed_to_payment$'),
+                CallbackQueryHandler(handle_topup_crypto_selection, pattern='^topup_crypto_'),
                 CallbackQueryHandler(process_payment, pattern='^(pay_from_balance|pay_with_crypto|top_up_balance|topup_for_order|back_to_rates|cancel_order)')
             ],
             TOPUP_AMOUNT: [
