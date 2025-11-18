@@ -2417,7 +2417,7 @@ const Dashboard = () => {
                 <div>
                   <CardTitle className="flex items-center gap-2">
                     {userDetailsModal.details.user.first_name} 
-                    <Badge variant="outline">{userDetailsModal.details.stats.rating_level}</Badge>
+                    {userDetailsModal.details.user.blocked && <Badge variant="destructive">Blocked</Badge>}
                   </CardTitle>
                   <CardDescription>
                     @{userDetailsModal.details.user.username || 'no_username'} • ID: {userDetailsModal.details.user.telegram_id}
