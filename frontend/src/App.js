@@ -95,6 +95,13 @@ const Dashboard = () => {
   const [loadingMaintenance, setLoadingMaintenance] = useState(false);
   const [apiMode, setApiMode] = useState('production'); // 'test' or 'production'
   const [loadingApiMode, setLoadingApiMode] = useState(false);
+  
+  // Refunds state
+  const [refunds, setRefunds] = useState([]);
+  const [refundFilter, setRefundFilter] = useState('all'); // all, pending, approved, rejected, processed
+  const [refundStatusModal, setRefundStatusModal] = useState({ open: false, request: null });
+  const [refundAmount, setRefundAmount] = useState('');
+  const [refundNotes, setRefundNotes] = useState('');
 
 
   useEffect(() => {
