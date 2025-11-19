@@ -9,7 +9,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/broadcast", tags=["broadcast"])
+router = APIRouter(prefix="/api/broadcast", tags=["broadcast"])
 
 
 @router.post("")
