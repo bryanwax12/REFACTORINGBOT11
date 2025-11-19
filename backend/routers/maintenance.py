@@ -99,7 +99,8 @@ async def enable_maintenance(message: Optional[str] = None):
 @router.post("/disable", dependencies=[Depends(verify_admin_key)])
 async def disable_maintenance():
     """Disable maintenance mode - ADMIN ONLY"""
-    from server import db
+    from server import db, bot_instance
+    from utils.telegram_utils import safe_telegram_call
     
     try:
         await db.bot_settings.update_one(
@@ -114,6 +115,36 @@ async def disable_maintenance():
         )
         
         logger.info("✅ Maintenance mode DISABLED")
+        
+        # Broadcast notification to all users
+        if bot_instance:
+            try:
+                logger.info("📢 Broadcasting maintenance disabled notification to all users...")
+                users = await db.users.find(
+                    {"bot_blocked_by_user": {"$ne": True}},
+                    {"_id": 0, "telegram_id": 1}
+                ).to_list(10000)
+                
+                notification_text = "✅ *Бот снова работает!*\n\nТехническое обслуживание завершено. Вы можете продолжить пользоваться ботом."
+                
+                success_count = 0
+                failed_count = 0
+                
+                for user in users:
+                    try:
+                        await safe_telegram_call(bot_instance.send_message(
+                            chat_id=user['telegram_id'],
+                            text=notification_text,
+                            parse_mode='Markdown'
+                        ))
+                        success_count += 1
+                    except Exception as send_error:
+                        failed_count += 1
+                        logger.warning(f"Failed to notify user {user['telegram_id']}: {send_error}")
+                
+                logger.info(f"✅ Maintenance disabled notification sent: {success_count} success, {failed_count} failed")
+            except Exception as broadcast_error:
+                logger.error(f"Error broadcasting maintenance disabled notification: {broadcast_error}")
         
         return {
             "status": "disabled",
