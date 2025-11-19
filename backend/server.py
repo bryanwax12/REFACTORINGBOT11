@@ -690,7 +690,7 @@ async def create_order_in_db(user, data, selected_rate, amount, discount_percent
     order_id = data.get('order_id') or generate_order_id(telegram_id=user['telegram_id'])
     
     order = Order(
-        user_id=user['id'],
+        user_id=user.get('id', user.get('_id', str(user['telegram_id']))),
         order_id=order_id,  # Add unique order_id
         telegram_id=user['telegram_id'],
         address_from=Address(
