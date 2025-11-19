@@ -469,6 +469,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 )
                 payment_dict = payment.model_dump()
                 payment_dict['created_at'] = payment_dict['created_at'].isoformat()
+                payment_dict['track_id'] = track_id  # Store track_id for webhook lookup
                 await insert_payment(payment_dict)
                 
                 keyboard = [[InlineKeyboardButton("💳 Оплатить", url=pay_link)],
