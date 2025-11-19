@@ -2,7 +2,8 @@
 Bot Management Router
 Эндпоинты для управления ботом
 """
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
+from handlers.admin_handlers import verify_admin_key
 import logging
 
 logger = logging.getLogger(__name__)
