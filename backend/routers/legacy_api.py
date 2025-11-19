@@ -42,10 +42,49 @@ async def legacy_get_expense_stats(
 
 @router.get("/orders")
 async def legacy_get_orders(api_key: str = Depends(verify_api_key)):
-    """Legacy orders endpoint - returns array directly"""
+    """Legacy orders endpoint - returns array directly with user enrichment"""
     from server import db
-    orders = await db.orders.find({}, {"_id": 0}).limit(100).to_list(100)
-    return orders
+    from repositories import get_user_repo
+    import logging
+    
+    logger = logging.getLogger(__name__)
+    
+    # Get orders
+    orders = await db.orders.find({}, {"_id": 0}).sort("created_at", -1).limit(100).to_list(100)
+    
+    # Enrich with user data
+    user_repo = get_user_repo()
+    enriched_orders = []
+    
+    for order in orders:
+        telegram_id = order.get('telegram_id')
+        if telegram_id:
+            user = await user_repo.find_by_telegram_id(telegram_id)
+            
+            enriched_order = order.copy()
+            if user:
+                # Add user fields for frontend compatibility
+                enriched_order['user_name'] = user.get('first_name', 'Unknown')
+                enriched_order['user_username'] = user.get('username', 'no_username')
+                enriched_order['first_name'] = user.get('first_name', 'Unknown')  # Legacy field
+                enriched_order['username'] = user.get('username', 'no_username')  # Legacy field
+            else:
+                enriched_order['user_name'] = 'Unknown'
+                enriched_order['user_username'] = 'no_username'
+                enriched_order['first_name'] = 'Unknown'
+                enriched_order['username'] = 'no_username'
+            
+            enriched_orders.append(enriched_order)
+        else:
+            # No telegram_id - add defaults
+            enriched_order = order.copy()
+            enriched_order['user_name'] = 'Unknown'
+            enriched_order['user_username'] = 'no_username'
+            enriched_order['first_name'] = 'Unknown'
+            enriched_order['username'] = 'no_username'
+            enriched_orders.append(enriched_order)
+    
+    return enriched_orders
 
 
 @router.get("/users")
