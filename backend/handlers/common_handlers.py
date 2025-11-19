@@ -17,20 +17,13 @@ logger = logging.getLogger(__name__)
 
 async def safe_telegram_call(coro, timeout=10, error_message="❌ Превышено время ожидания. Попробуйте еще раз.", chat_id=None):
     """
-    Universal wrapper with rate limiting and timeout protection
-    Fast responses + ban prevention
+    Universal wrapper with timeout protection
+    Fast responses + error handling
     
     Usage:
         await safe_telegram_call(update.message.reply_text("Hello"), chat_id=update.effective_chat.id)
     """
     try:
-        # Import rate_limiter from server module when needed
-        from server import rate_limiter
-        
-        # Apply rate limiting if chat_id provided
-        if chat_id:
-            await rate_limiter.acquire(chat_id)
-        
         return await asyncio.wait_for(coro, timeout=timeout)
     except asyncio.TimeoutError:
         logger.error(f"Telegram API timeout after {timeout}s")
