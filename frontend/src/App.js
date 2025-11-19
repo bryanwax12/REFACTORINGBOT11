@@ -1344,21 +1344,6 @@ const Dashboard = () => {
                                   Label
                                 </Button>
                               )}
-                              {order.payment_status === 'paid' && order.refund_status !== 'refunded' && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => {
-                                    setRefundModal({ open: true, order });
-                                    setRefundReason('');
-                                  }}
-                                  title="Refund & Void Label"
-                                  className="w-[120px] justify-start text-red-600 hover:text-red-700 border-red-300 hover:bg-red-50"
-                                >
-                                  <RefreshCw className="h-4 w-4 mr-2" />
-                                  Refund
-                                </Button>
-                              )}
                             </div>
                           </td>
                         </tr>
