@@ -21,13 +21,13 @@ class BroadcastRequest(BaseModel):
     image_url: Optional[str] = None
     file_id: Optional[str] = None
 
-@router.post("")
+@router.post("", dependencies=[Depends(verify_admin_key)])
 async def broadcast_message(
     request: Request,
     broadcast: BroadcastRequest
 ):
     """
-    Broadcast message to users
+    Broadcast message to users - ADMIN ONLY
     
     Args:
         broadcast: Broadcast request with message, target, image_url, file_id
