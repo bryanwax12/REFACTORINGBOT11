@@ -1541,4 +1541,4 @@ async def startup_event():
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
-    client.close()
+    client.close()# Hot reload test - Wed Nov 19 23:31:03 UTC 2025
