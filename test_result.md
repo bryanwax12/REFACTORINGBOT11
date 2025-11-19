@@ -6106,3 +6106,20 @@ backend:
         - working: true
           agent: "e1_fork_2"
           comment: "✅ ALL ADMIN PANEL BUTTONS VERIFIED: Все 6 кнопок админ-панели работают корректно (100% success rate). TEST RESULTS: (1) ✅ Кнопка 'Переключить API': test ↔ production переключение работает, (2) ✅ Кнопка 'Режим обслуживания': включение/выключение работает с уведомлениями, (3) ✅ Кнопка 'Details': показывает полную информацию о пользователе (имя, баланс, заказы, статус блокировки), (4) ✅ Кнопка 'Add Balance': добавление баланса работает ($0 → $125 при добавлении $10 - с учётом предыдущих транзакций), отправка уведомления в Telegram, (5) ✅ Кнопка 'Deduct Balance': снятие баланса работает (с предварительным пополнением при недостатке средств), отправка уведомления в Telegram, (6) ✅ Кнопки 'Block'/'Unblock': блокировка и разблокировка пользователя работают, отправка уведомлений в Telegram. IMPORTANT FIXES: Создан правильный тест с корректными эндпоинтами (/api-config/switch-environment, /api/maintenance/*, /api/admin/users/*), добавлена загрузка .env в тест-скрипте, исправлен header name (X-Api-Key). CONCLUSION: Все кнопки админ-панели полностью функциональны и готовы к использованию."
+
+
+frontend:
+  - task: "Fix User Display in Topups History Table"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js, /app/backend/routers/legacy_api.py"
+    stuck_count: 0
+    priority: "P2"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "e1_fork_2"
+          comment: "❌ USER REPORTED ISSUE: В таблице 'История пополнений баланса' в колонке 'Пользователь' везде отображается 'N/A' вместо имён пользователей. INVESTIGATION: (1) Frontend использует поля topup.first_name и topup.username для отображения, (2) Backend API /api/topups должен был возвращать enriched data с user_name и user_username, но фактически вызывался legacy endpoint /api/topups из legacy_api.py, который возвращал сырые данные без обогащения пользователями."
+        - working: true
+          agent: "e1_fork_2"
+          comment: "✅ USER DISPLAY ISSUE FIXED: Исправлено отображение пользователей в истории пополнений баланса. ROOT CAUSE: Frontend вызывал legacy endpoint /api/topups (из legacy_api.py строки 59-67), который возвращал только сырые данные из БД payments без enrichment пользователями. Правильный endpoint /stats/topups существовал, но не использовался. FIXES APPLIED: (1) ✅ Обновлён /app/backend/routers/legacy_api.py: добавлено обогащение данных пользователями в legacy endpoint /api/topups (теперь вызывает user_repo.find_by_telegram_id и добавляет поля user_name, user_username, first_name, username для полной совместимости), (2) ✅ Обновлён /app/frontend/src/App.js: изменена строка 1808 для использования обоих вариантов полей (topup.user_name || topup.first_name) для обратной совместимости. TEST RESULTS: ✅ API endpoint теперь возвращает корректные данные: user_name: 'White Label Shipping Bot Agent', first_name: 'White Label Shipping Bot Agent', username: 'White_Label_Shipping_Bot_Agent', ✅ Проверено на 75 записях topup, все содержат данные пользователей. CONCLUSION: Имена пользователей теперь корректно отображаются в таблице 'История пополнений баланса' админ-панели."
