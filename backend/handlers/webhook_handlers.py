@@ -69,6 +69,13 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
             logger.info(f"🔍 Payment object: {payment}")
             if payment:
                 logger.info("✅ Inside 'if payment' block")
+                
+                # CRITICAL: Check if payment was already processed (duplicate webhook protection)
+                current_status = payment.get('status')
+                if current_status == 'paid':
+                    logger.warning(f"⚠️ DUPLICATE WEBHOOK DETECTED: Payment {track_id} already processed with status 'paid'. Ignoring.")
+                    return {"status": "ok", "message": "Payment already processed"}
+                
                 # Update payment status (use same invoice_id format that was used to find it)
                 invoice_id_for_update = payment.get('invoice_id')  # Use actual value from DB
                 logger.info(f"📝 invoice_id_for_update: {invoice_id_for_update}")
