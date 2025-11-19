@@ -23,7 +23,9 @@ async def cleanup_database():
     """Очистка базы данных"""
     print("🔌 Подключение к MongoDB...")
     client = AsyncIOMotorClient(MONGO_URL)
-    db = client.whitelabel_shipping
+    db_name = os.getenv("DB_NAME", "telegram_shipping_bot")
+    print(f"📂 Используется БД: {db_name}")
+    db = client[db_name]
     
     try:
         # 1. Найти целевого пользователя
