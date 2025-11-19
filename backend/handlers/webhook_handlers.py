@@ -192,13 +192,14 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
                             logger.info(f"❌ Exception: {notify_ex}")
                         
                         # Save message context in pending_orders for button protection
-                        await db.pending_orders.update_one(
-                            {"telegram_id": telegram_id},
-                            {"$set": {
-                                "topup_success_message_id": bot_msg.message_id,
-                                "topup_success_message_text": message_text
-                            }}
-                        )
+                        if bot_msg:
+                            await db.pending_orders.update_one(
+                                {"telegram_id": telegram_id},
+                                {"$set": {
+                                    "topup_success_message_id": bot_msg.message_id,
+                                    "topup_success_message_text": message_text
+                                }}
+                            )
                 else:
                     # Regular order payment
                     # Update order
