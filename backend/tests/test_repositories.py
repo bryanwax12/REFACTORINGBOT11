@@ -63,7 +63,7 @@ class TestUserRepository:
         
         result = await user_repo.update_balance(12345, 50.0, operation="add")
         
-        assert result == True
+        assert result
         
         # Проверить что вызван update_one с правильными параметрами
         call_args = user_repo.collection.update_one.call_args
@@ -77,7 +77,7 @@ class TestUserRepository:
         
         result = await user_repo.update_balance(12345, 30.0, operation="subtract")
         
-        assert result == True
+        assert result
         
         call_args = user_repo.collection.update_one.call_args
         assert call_args[0][1]['$inc']['balance'] == -30.0
@@ -92,7 +92,7 @@ class TestUserRepository:
         
         result = await user_repo.is_admin(12345)
         
-        assert result == True
+        assert result
     
     @pytest.mark.asyncio
     async def test_block_user(self, user_repo):
@@ -101,7 +101,7 @@ class TestUserRepository:
         
         result = await user_repo.block_user(12345)
         
-        assert result == True
+        assert result
 
 
 class TestOrderRepository:
@@ -157,7 +157,7 @@ class TestOrderRepository:
         
         result = await order_repo.update_status("ORDER123", "completed", notes="Done")
         
-        assert result == True
+        assert result
         
         call_args = order_repo.collection.update_one.call_args
         assert call_args[0][0] == {"order_id": "ORDER123"}
@@ -175,7 +175,7 @@ class TestOrderRepository:
             payment_data={"invoice_id": "INV123"}
         )
         
-        assert result == True
+        assert result
         
         call_args = order_repo.collection.update_one.call_args
         assert call_args[0][1]['$set']['payment_status'] == "paid"
@@ -192,4 +192,4 @@ class TestOrderRepository:
             carrier="USPS"
         )
         
-        assert result == True
+        assert result

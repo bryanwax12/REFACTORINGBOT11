@@ -113,10 +113,10 @@ class TestAPIConfigManager:
         """Тест проверки конфигурации"""
         manager = APIConfigManager()
         
-        assert manager.is_shipstation_configured('test') == True
-        assert manager.is_shipstation_configured('production') == True
-        assert manager.is_oxapay_configured() == True
-        assert manager.is_cryptobot_configured() == True
+        assert manager.is_shipstation_configured('test')
+        assert manager.is_shipstation_configured('production')
+        assert manager.is_oxapay_configured()
+        assert manager.is_cryptobot_configured()
     
     @patch.dict(os.environ, {
         'SHIPSTATION_API_KEY_TEST': 'test_key',
@@ -180,9 +180,9 @@ class TestAPIConfigManager:
         status = manager.get_all_keys_status()
         
         assert status['environment'] == 'test'
-        assert status['shipstation']['test_configured'] == True
-        assert status['shipstation']['prod_configured'] == False
-        assert status['oxapay']['configured'] == True
+        assert status['shipstation']['test_configured']
+        assert not status['shipstation']['prod_configured']
+        assert status['oxapay']['configured']
     
     @patch.dict(os.environ, {'SHIPSTATION_API_KEY_TEST': 'cached_key'})
     def test_key_caching(self):

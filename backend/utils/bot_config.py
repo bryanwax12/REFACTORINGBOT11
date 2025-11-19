@@ -41,7 +41,7 @@ class BotConfig:
         self.webhook_path = os.environ.get('WEBHOOK_PATH', '/api/telegram/webhook')
         
         # Legacy поддержка (для обратной совместимости)
-        legacy_token = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+        os.environ.get('TELEGRAM_BOT_TOKEN', '')
         
         # Validate configuration
         self._validate_config()

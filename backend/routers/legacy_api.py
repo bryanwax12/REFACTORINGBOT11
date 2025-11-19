@@ -47,7 +47,7 @@ async def legacy_get_orders(api_key: str = Depends(verify_api_key)):
     from repositories import get_user_repo
     import logging
     
-    logger = logging.getLogger(__name__)
+    logging.getLogger(__name__)
     
     # Get orders
     orders = await db.orders.find({}, {"_id": 0}).sort("created_at", -1).limit(100).to_list(100)
@@ -102,7 +102,7 @@ async def legacy_get_topups(api_key: str = Depends(verify_api_key)):
     from repositories import get_user_repo
     import logging
     
-    logger = logging.getLogger(__name__)
+    logging.getLogger(__name__)
     
     # Get topups
     topups = await db.payments.find(

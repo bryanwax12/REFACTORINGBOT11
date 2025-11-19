@@ -73,8 +73,8 @@ class TestPaymentInvoice:
             user_id=12345
         )
         
-        assert invoice_paid.is_paid() == True
-        assert invoice_pending.is_paid() == False
+        assert invoice_paid.is_paid()
+        assert not invoice_pending.is_paid()
 
 
 class TestOxapayGateway:

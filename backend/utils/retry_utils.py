@@ -139,7 +139,6 @@ async def retry_async_operation(
             order_data=data
         )
     """
-    last_error = None
     
     for attempt in range(1, max_attempts + 1):
         try:
@@ -149,7 +148,6 @@ async def retry_async_operation(
             return result
             
         except Exception as e:
-            last_error = e
             logger.warning(f"⚠️ Attempt {attempt}/{max_attempts} failed: {operation_name} - {str(e)}")
             
             if attempt < max_attempts:

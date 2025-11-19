@@ -50,7 +50,7 @@ async def get_bot_config_full(authenticated: bool = Depends(verify_admin_key)):
         Полная конфигурация бота
     """
     config = get_bot_config()
-    summary = config.get_config_summary()
+    config.get_config_summary()
     
     return {
         "success": True,

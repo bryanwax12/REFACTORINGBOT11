@@ -72,7 +72,7 @@ async def test_rate_limiter():
     # Test basic acquire
     chat_id = 12345
     result = await rate_limiter.acquire(chat_id)
-    assert result == True, "First acquire should succeed"
+    assert result, "First acquire should succeed"
     print("✅ Rate limiter acquire() works")
     
     # Test multiple rapid acquires (should succeed but with rate limiting)

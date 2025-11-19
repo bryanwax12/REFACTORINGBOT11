@@ -224,7 +224,7 @@ class AdminPanelTester:
                     users = response.json()
                     user = next((u for u in users if u.get("telegram_id") == TEST_USER_ID), None)
                     
-                    if user and user.get("blocked") == True:
+                    if user and user.get("blocked"):
                         self.log_test("Block User", True, "User successfully blocked")
                     else:
                         self.log_test("Block User", False, "Blocked status not updated")
@@ -254,7 +254,7 @@ class AdminPanelTester:
                     users = response.json()
                     user = next((u for u in users if u.get("telegram_id") == TEST_USER_ID), None)
                     
-                    if user and user.get("blocked") == False:
+                    if user and not user.get("blocked"):
                         self.log_test("Unblock User", True, "User successfully unblocked")
                     else:
                         self.log_test("Unblock User", False, "Blocked status not updated")

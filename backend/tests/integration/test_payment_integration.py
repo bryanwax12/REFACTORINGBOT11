@@ -24,7 +24,6 @@ class TestPaymentIntegration:
         from services.payment_service import validate_payment_amount
         
         # Setup: User has sufficient balance
-        telegram_id = 123456789
         amount = 15.50
         user_balance = 100.0
         
@@ -57,7 +56,6 @@ class TestPaymentIntegration:
         """
         from services.payment_service import validate_payment_amount
         
-        telegram_id = 123456789
         amount = 150.0  # More than balance
         user_balance = 100.0
         

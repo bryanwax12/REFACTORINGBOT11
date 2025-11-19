@@ -84,7 +84,7 @@ class LoadTester:
     
     async def test_create_order(self, user_id: int):
         """Simulate order creation"""
-        order_data = {
+        {
             'user_id': user_id,
             'telegram_id': user_id + 7000000000,
             'order_id': f'TEST-{user_id}-{int(time.time())}',
@@ -97,20 +97,20 @@ class LoadTester:
     
     async def test_view_templates(self, user_id: int):
         """Simulate viewing templates"""
-        templates = await self.db.templates.find(
+        await self.db.templates.find(
             {'user_id': user_id + 7000000000}
         ).limit(10).to_list(10)
     
     async def test_get_balance(self, user_id: int):
         """Simulate getting user balance"""
-        user = await self.db.users.find_one(
+        await self.db.users.find_one(
             {'telegram_id': user_id + 7000000000},
             {'_id': 0, 'balance': 1}
         )
     
     async def test_view_orders(self, user_id: int):
         """Simulate viewing orders"""
-        orders = await self.db.orders.find(
+        await self.db.orders.find(
             {'telegram_id': user_id + 7000000000}
         ).limit(10).to_list(10)
     

@@ -169,7 +169,7 @@ class BaseRepository(ABC, Generic[T]):
             if add_timestamps:
                 document = self._add_timestamps(document, update=False)
             
-            result = await self.collection.insert_one(document)
+            await self.collection.insert_one(document)
             
             logger.info(f"✅ {self.collection_name}.insert_one: Success")
             
@@ -200,7 +200,7 @@ class BaseRepository(ABC, Generic[T]):
                     for doc in documents
                 ]
             
-            result = await self.collection.insert_many(documents)
+            await self.collection.insert_many(documents)
             
             logger.info(f"✅ {self.collection_name}.insert_many: Inserted {len(documents)} documents")
             
