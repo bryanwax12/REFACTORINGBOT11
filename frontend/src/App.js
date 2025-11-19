@@ -838,7 +838,7 @@ const Dashboard = () => {
     try {
       const endpoint = balanceModal.action === 'add' ? 'add' : 'deduct';
       const response = await axios.post(
-        `${API}/users/${balanceModal.telegram_id}/balance/${endpoint}`,
+        `${API}/admin/users/${balanceModal.telegram_id}/balance/${endpoint}`,
         null,
         { params: { amount } }
       );
