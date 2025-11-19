@@ -1805,8 +1805,8 @@ const Dashboard = () => {
                           </td>
                           <td className="p-2">
                             <div>
-                              <p className="font-medium">{topup.first_name || 'N/A'}</p>
-                              {topup.username && <p className="text-sm text-muted-foreground">@{topup.username}</p>}
+                              <p className="font-medium">{topup.user_name || topup.first_name || 'N/A'}</p>
+                              {(topup.user_username || topup.username) && <p className="text-sm text-muted-foreground">@{topup.user_username || topup.username}</p>}
                             </div>
                           </td>
                           <td className="p-2 font-mono text-sm">{topup.telegram_id}</td>
