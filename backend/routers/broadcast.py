@@ -66,7 +66,7 @@ async def broadcast_message(
                     users.append(user)
         elif target == "premium":
             # Users with balance > 0
-            users = await user_repo.find_all(limit=10000)
+            users = await user_repo.find_many({}, limit=10000)
             users = [u for u in users if u.get('balance', 0) > 0]
         else:
             raise HTTPException(status_code=400, detail="Invalid target. Use: all, active, or premium")
