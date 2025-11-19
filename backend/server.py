@@ -243,7 +243,7 @@ if TELEGRAM_BOT_TOKEN:
     # Note: Bot() constructor doesn't accept timeout params directly in PTB 20.x
     bot_instance = Bot(token=TELEGRAM_BOT_TOKEN)
     print(f"✅ Bot instance created: @{get_bot_username()}")
-    print(f"⚡ Performance optimizations will be applied in Application.builder()")
+    print("⚡ Performance optimizations will be applied in Application.builder()")
 
 # Simple in-memory cache for frequently accessed settings
 # Cache moved to utils/cache.py
@@ -255,8 +255,6 @@ BUTTON_DEBOUNCE_SECONDS = 0.1  # Максимально быстрый: 100ms м
 
 # Rate limiting для защиты от Telegram бана
 # Using optimized rate limiter from middleware
-from middleware.rate_limiter import rate_limiter, TelegramRateLimiter
-from config.performance_config import performance_monitor
 
 # Note: Old simple RateLimiter replaced with advanced TelegramRateLimiter
 # from middleware.rate_limiter which has:

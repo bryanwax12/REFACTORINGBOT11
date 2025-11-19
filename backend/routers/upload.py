@@ -4,12 +4,10 @@ Endpoints for file uploads
 """
 from fastapi import APIRouter, UploadFile, File, HTTPException, Request, Depends
 from handlers.admin_handlers import verify_admin_key
-from fastapi.responses import JSONResponse
 import logging
 import os
 from pathlib import Path
 import aiofiles
-from typing import Optional
 import uuid
 
 router = APIRouter(prefix="/api", tags=["upload"])
@@ -76,7 +74,6 @@ async def upload_image(
             try:
                 # Send to a safe chat (can be admin chat or file channel)
                 # For now, we'll use the bot's own chat to get file_id
-                from telegram import InputFile
                 import io
                 
                 # Send photo to get file_id

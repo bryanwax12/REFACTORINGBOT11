@@ -52,9 +52,9 @@ async def migrate_tracking_numbers():
                 updated_count += 1
                 print(f'   ✅ Updated order {order_id}: tracking={tracking_number}')
         
-        print(f'\n' + '=' * 70)
-        print(f'MIGRATION COMPLETE')
-        print(f'=' * 70)
+        print('\n' + '=' * 70)
+        print('MIGRATION COMPLETE')
+        print('=' * 70)
         print(f'✅ Updated orders: {updated_count}')
         print(f'⚠️  Skipped (no tracking): {skipped_count}')
         print(f'📊 Total processed: {len(labels)}')

@@ -168,7 +168,7 @@ async def get_bot_metrics():
     """Get bot metrics and statistics"""
     from server import db
     from repositories import get_user_repo, get_order_repo
-    from datetime import datetime, timedelta
+    from datetime import datetime
     
     try:
         user_repo = get_user_repo()

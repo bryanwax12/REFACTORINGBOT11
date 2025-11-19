@@ -100,7 +100,7 @@ async def test_admin_buttons():
                 
                 if response.status_code == 200:
                     new_mode = not current_mode
-                    print(f'   ✅ Переключение режима: РАБОТАЕТ')
+                    print('   ✅ Переключение режима: РАБОТАЕТ')
                     print(f'      {"Включен" if new_mode else "Выключен"} → {"Выключен" if current_mode else "Включен"}')
                     results['passed'] += 1
                     
@@ -109,7 +109,7 @@ async def test_admin_buttons():
                         await client.post(f'{base_url}/api/maintenance/disable', headers=headers)
                     else:
                         await client.post(f'{base_url}/api/maintenance/enable', headers=headers)
-                    print(f'   🔄 Возврат к исходному состоянию: успешно')
+                    print('   🔄 Возврат к исходному состоянию: успешно')
                 else:
                     print(f'   ❌ Переключение не работает: {response.status_code}')
                     results['failed'] += 1
@@ -151,7 +151,7 @@ async def test_admin_buttons():
                     )
                     if response.status_code == 200:
                         details = response.json()
-                        print(f'       ✅ РАБОТАЕТ')
+                        print('       ✅ РАБОТАЕТ')
                         print(f'          Имя: {details.get("first_name", "Unknown")}')
                         print(f'          Баланс: ${details.get("balance", 0):.2f}')
                         print(f'          Заказов: {len(details.get("orders", []))}')
@@ -184,9 +184,9 @@ async def test_admin_buttons():
                     if response.status_code == 200:
                         result = response.json()
                         new_balance = result.get('new_balance', 0)
-                        print(f'       ✅ РАБОТАЕТ')
+                        print('       ✅ РАБОТАЕТ')
                         print(f'          Было: ${old_balance:.2f}')
-                        print(f'          Добавлено: $10.00')
+                        print('          Добавлено: $10.00')
                         print(f'          Стало: ${new_balance:.2f}')
                         results['passed'] += 1
                         
@@ -224,9 +224,9 @@ async def test_admin_buttons():
                         if response.status_code == 200:
                             result = response.json()
                             new_balance = result.get('new_balance', 0)
-                            print(f'       ✅ РАБОТАЕТ')
+                            print('       ✅ РАБОТАЕТ')
                             print(f'          Было: ${old_balance:.2f}')
-                            print(f'          Снято: $5.00')
+                            print('          Снято: $5.00')
                             print(f'          Стало: ${new_balance:.2f}')
                             results['passed'] += 1
                             
@@ -241,7 +241,7 @@ async def test_admin_buttons():
                             results['failed'] += 1
                     else:
                         print(f'       ⚠️  Недостаточно баланса для теста (${old_balance:.2f} < $5)')
-                        print(f'       Добавляю баланс для теста...')
+                        print('       Добавляю баланс для теста...')
                         # Add balance first
                         await client.post(
                             f'{base_url}/api/admin/users/{telegram_id}/balance/add',
@@ -255,7 +255,7 @@ async def test_admin_buttons():
                             params={'amount': 5}
                         )
                         if response.status_code == 200:
-                            print(f'       ✅ РАБОТАЕТ (с предварительным пополнением)')
+                            print('       ✅ РАБОТАЕТ (с предварительным пополнением)')
                             results['passed'] += 1
                             # Restore by deducting the added amount
                             await client.post(
@@ -280,7 +280,7 @@ async def test_admin_buttons():
                         headers=headers
                     )
                     if response.status_code == 200:
-                        print(f'       ✅ Block: РАБОТАЕТ')
+                        print('       ✅ Block: РАБОТАЕТ')
                         
                         # Unblock user
                         response = await client.post(
@@ -288,7 +288,7 @@ async def test_admin_buttons():
                             headers=headers
                         )
                         if response.status_code == 200:
-                            print(f'       ✅ Unblock: РАБОТАЕТ')
+                            print('       ✅ Unblock: РАБОТАЕТ')
                             results['passed'] += 1
                         else:
                             print(f'       ❌ Unblock НЕ РАБОТАЕТ: {response.status_code}')

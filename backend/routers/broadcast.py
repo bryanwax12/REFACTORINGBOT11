@@ -36,7 +36,6 @@ async def broadcast_message(
     target = broadcast.target
     image_url = broadcast.image_url
     file_id = broadcast.file_id
-    from server import safe_telegram_call
     from repositories import get_user_repo
     
     # Get bot_instance from app.state
