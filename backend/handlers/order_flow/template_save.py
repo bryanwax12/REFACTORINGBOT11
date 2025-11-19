@@ -110,7 +110,9 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
             parse_mode='Markdown',
             reply_markup=reply_markup
         ))
-        return ConversationHandler.END
+        # Return to ORDER_CONFIRMATION state instead of ending conversation
+        from server import ORDER_CONFIRMATION
+        return ORDER_CONFIRMATION
     
     keyboard = [
         [InlineKeyboardButton("📦 Продолжить создание заказа", callback_data='continue_order')],
