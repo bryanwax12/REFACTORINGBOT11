@@ -74,7 +74,6 @@ async def upload_image(
             try:
                 # Send to admin chat to get file_id
                 import io
-                import os
                 admin_telegram_id = os.getenv('ADMIN_TELEGRAM_ID')
                 
                 if admin_telegram_id:
