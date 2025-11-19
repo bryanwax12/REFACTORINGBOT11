@@ -238,10 +238,7 @@ if config_summary['webhook_enabled'] and config_summary['webhook_url']:
 bot_instance = None
 application = None  # Global Telegram Application instance for webhook
 if TELEGRAM_BOT_TOKEN:
-    # Import performance config
-    from config.performance_config import BotPerformanceConfig
-    
-    # Create optimized bot instance
+    # Create optimized bot instance with performance settings
     bot_settings = BotPerformanceConfig.get_optimized_bot_settings()
     bot_instance = Bot(token=TELEGRAM_BOT_TOKEN, **bot_settings)
     print(f"✅ Bot instance created: @{get_bot_username()}")
