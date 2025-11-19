@@ -142,6 +142,7 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
     # Save last_state BEFORE sending (so it's saved even if send fails)
     context.user_data['last_state'] = STATE_NAMES[PARCEL_WEIGHT]
     context.user_data['last_bot_message_text'] = message_text
+    logger.error(f"🔍 start_order_with_template: SET last_state to {STATE_NAMES[PARCEL_WEIGHT]}")
     
     # Send new message immediately without waiting for mark_message_as_selected
     bot_msg = await safe_telegram_call(query.message.reply_text(
