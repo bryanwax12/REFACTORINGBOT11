@@ -2,7 +2,8 @@
 Broadcast Router
 Эндпоинты для рассылки сообщений
 """
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Depends
+from handlers.admin_handlers import verify_admin_key
 from typing import Optional
 import asyncio
 import logging
