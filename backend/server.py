@@ -344,6 +344,10 @@ try:
     app.include_router(users_router)
     app.include_router(webhooks_router)
     
+    # Upload router
+    from routers.upload import router as upload_router
+    app.include_router(upload_router)
+    
     # Refunds router
     from routers.refunds import router as refunds_router
     app.include_router(refunds_router)
