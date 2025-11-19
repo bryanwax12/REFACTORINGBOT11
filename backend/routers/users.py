@@ -174,7 +174,7 @@ async def deduct_user_balance(telegram_id: int, amount: float, description: str 
                 detail=f"Insufficient balance. Current: ${current_balance}, Required: ${amount}"
             )
         
-        success = await user_repo.update_balance(telegram_id, -amount, description)
+        success = await user_repo.update_balance(telegram_id, amount, operation="subtract")
         
         if not success:
             raise HTTPException(status_code=500, detail="Failed to deduct balance")
