@@ -41,8 +41,12 @@ async def broadcast_message(
     
     # Fix image_url if it's relative path
     if image_url and not image_url.startswith('http'):
-        # Get base URL from request or env
+        # Get base URL from request - force HTTPS for external access
         base_url = str(request.base_url).rstrip('/')
+        # Replace http:// with https:// for external URLs
+        if base_url.startswith('http://') and 'emergentagent.com' in base_url:
+            base_url = base_url.replace('http://', 'https://')
+        
         if image_url.startswith('/'):
             image_url = f"{base_url}{image_url}"
         else:
