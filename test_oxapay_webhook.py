@@ -28,7 +28,8 @@ async def test_webhook_flow():
     
     # Connect to MongoDB
     client = AsyncIOMotorClient(MONGO_URL)
-    db = client['labelgen']
+    # Use the same DB as the backend (preview environment)
+    db = client['telegram_shipping_bot']
     
     print("=" * 60)
     print("🧪 TESTING OXAPAY WEBHOOK FLOW")
