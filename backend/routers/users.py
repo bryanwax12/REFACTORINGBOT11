@@ -432,7 +432,8 @@ async def check_user_bot_access(telegram_id: int):
 @router.get("/{telegram_id}/channel-status")
 async def get_user_channel_status(telegram_id: int):
     """Check if user is member of required channel"""
-    from server import bot_instance, CHANNEL_ID
+    from server import bot_instance, CHANNEL_ID, db
+    from datetime import datetime, timezone
     
     try:
         if not bot_instance or not CHANNEL_ID:
@@ -446,6 +447,18 @@ async def get_user_channel_status(telegram_id: int):
             member = await bot_instance.get_chat_member(CHANNEL_ID, telegram_id)
             is_member = member.status in ['member', 'administrator', 'creator']
             
+            # Update database with channel status
+            await db.users.update_one(
+                {"telegram_id": telegram_id},
+                {
+                    "$set": {
+                        "is_channel_member": is_member,
+                        "channel_status_checked_at": datetime.now(timezone.utc).isoformat()
+                    }
+                }
+            )
+            logger.info(f"✅ Updated channel status for {telegram_id}: is_member={is_member}")
+            
             return {
                 "required": True,
                 "is_member": is_member,
@@ -453,6 +466,16 @@ async def get_user_channel_status(telegram_id: int):
             }
         except Exception as e:
             logger.warning(f"Cannot check channel status for {telegram_id}: {e}")
+            # Update DB that user is NOT a member (could be left or bot has no access)
+            await db.users.update_one(
+                {"telegram_id": telegram_id},
+                {
+                    "$set": {
+                        "is_channel_member": False,
+                        "channel_status_checked_at": datetime.now(timezone.utc).isoformat()
+                    }
+                }
+            )
             return {
                 "required": True,
                 "is_member": False,
