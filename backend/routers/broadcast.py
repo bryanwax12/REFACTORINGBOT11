@@ -84,7 +84,23 @@ async def broadcast_message(
             try:
                 telegram_id = user['telegram_id']
                 
-                if image_url:
+                # Check if user blocked the bot
+                if user.get('bot_blocked_by_user', False):
+                    fail_count += 1
+                    continue
+                
+                # Send with image (file_id or URL)
+                if file_id:
+                    # Use file_id (faster, no need to re-download)
+                    await safe_telegram_call(
+                        bot_instance.send_photo(
+                            chat_id=telegram_id,
+                            photo=file_id,
+                            caption=message
+                        )
+                    )
+                elif image_url:
+                    # Use URL (will download image)
                     await safe_telegram_call(
                         bot_instance.send_photo(
                             chat_id=telegram_id,
@@ -93,6 +109,7 @@ async def broadcast_message(
                         )
                     )
                 else:
+                    # Text only message
                     await safe_telegram_call(
                         bot_instance.send_message(
                             chat_id=telegram_id,
