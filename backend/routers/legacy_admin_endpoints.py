@@ -358,3 +358,88 @@ async def invite_to_channel_legacy(
     except Exception as e:
         logger.error(f"Error sending channel invite: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+
+@legacy_admin_router.post("/users/invite-all-channel")
+async def invite_all_to_channel_legacy(
+    request: Request,
+    authenticated: bool = Depends(verify_admin_key)
+):
+    """
+    Send channel invite to all users (legacy endpoint for frontend)
+    Frontend calls: /api/users/invite-all-channel
+    """
+    from server import db
+    from handlers.common_handlers import safe_telegram_call
+    from datetime import datetime, timezone
+    import os
+    
+    # Get bot_instance from app.state
+    bot_instance = getattr(request.app.state, 'bot_instance', None)
+    
+    try:
+        if not bot_instance:
+            return {"success": False, "message": "Bot not initialized", "sent": 0, "failed": 0}
+        
+        # Get all users who haven't been invited yet
+        users = await db.users.find(
+            {
+                "bot_blocked_by_user": {"$ne": True},
+                "channel_invite_sent": {"$ne": True}
+            },
+            {"_id": 0, "telegram_id": 1}
+        ).to_list(10000)
+        
+        channel_link = os.getenv('CHANNEL_INVITE_LINK', 'https://t.me/WHITE_LABEL_SHIPPING_BOTCHANNEL')
+        message = (
+            "📢 *Приглашение в канал*\n\n"
+            "Присоединяйтесь к нашему официальному каналу для получения:\n\n"
+            "• Новостей и обновлений\n"
+            "• Полезной информации\n"
+            "• Специальных предложений\n\n"
+            f"👉 [Перейти в канал]({channel_link})"
+        )
+        
+        sent_count = 0
+        failed_count = 0
+        
+        for user in users:
+            try:
+                await safe_telegram_call(bot_instance.send_message(
+                    chat_id=user['telegram_id'],
+                    text=message,
+                    parse_mode='Markdown'
+                ))
+                
+                # Update database
+                await db.users.update_one(
+                    {"telegram_id": user['telegram_id']},
+                    {
+                        "$set": {
+                            "channel_invite_sent": True,
+                            "channel_invite_sent_at": datetime.now(timezone.utc).isoformat()
+                        }
+                    }
+                )
+                sent_count += 1
+                
+            except Exception as e:
+                logger.error(f"Failed to send invite to {user['telegram_id']}: {e}")
+                failed_count += 1
+                if "bot was blocked" in str(e).lower():
+                    await db.users.update_one(
+                        {"telegram_id": user['telegram_id']},
+                        {"$set": {"bot_blocked_by_user": True}}
+                    )
+        
+        return {
+            "success": True,
+            "message": f"Invitations sent to {sent_count} users",
+            "sent": sent_count,
+            "failed": failed_count
+        }
+    
+    except Exception as e:
+        logger.error(f"Error sending channel invites: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
