@@ -35,9 +35,9 @@ async def get_maintenance_status():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/enable")
+@router.post("/enable", dependencies=[Depends(verify_admin_key)])
 async def enable_maintenance(message: Optional[str] = None):
-    """Enable maintenance mode"""
+    """Enable maintenance mode - ADMIN ONLY"""
     from server import db
     
     try:
