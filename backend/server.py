@@ -256,26 +256,16 @@ button_click_tracker = {}  # {user_id: {button_data: last_click_timestamp}}
 BUTTON_DEBOUNCE_SECONDS = 0.1  # Максимально быстрый: 100ms между нажатиями
 
 # Rate limiting для защиты от Telegram бана
-# Telegram API limits: 30 msg/sec per chat, burst of 20
-from collections import defaultdict
+# Using optimized rate limiter from middleware
+from middleware.rate_limiter import rate_limiter, TelegramRateLimiter
+from config.performance_config import performance_monitor
 
-class RateLimiter:
-    """Smart rate limiter: fast responses, prevents Telegram bans"""
-    def __init__(self):
-        self.locks = defaultdict(asyncio.Lock)
-        self.last_call = defaultdict(float)
-        self.min_interval = 0.01  # 10ms minimum between calls (allows 100 msg/sec - максимум)
-    
-    async def acquire(self, chat_id: int):
-        """Acquire lock with minimal delay for fast responses"""
-        async with self.locks[chat_id]:
-            now = time.time()
-            elapsed = now - self.last_call[chat_id]
-            if elapsed < self.min_interval:
-                await asyncio.sleep(self.min_interval - elapsed)
-            self.last_call[chat_id] = time.time()
-
-rate_limiter = RateLimiter()
+# Note: Old simple RateLimiter replaced with advanced TelegramRateLimiter
+# from middleware.rate_limiter which has:
+# - Per-chat and global rate limiting
+# - Smart retry logic for "Too Many Requests" errors
+# - Semaphore-based concurrency control
+# - Safe message sending with automatic rate limiting
 
 # Helper function for session management
 # DEPRECATED: Use utils.session_utils.save_to_session instead
