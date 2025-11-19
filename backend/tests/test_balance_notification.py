@@ -2,13 +2,11 @@
 Test script for verifying balance notification functionality
 This tests if admin panel can send notifications to users via Telegram
 """
-import os
-import sys
 import httpx
 import asyncio
 
 # Configuration
-BACKEND_URL = "https://tg-fixer-hub.preview.emergentagent.com"
+BACKEND_URL = "https://shipping-admin-fix.preview.emergentagent.com"
 ADMIN_API_KEY = "sk_admin_e19063c3f82f447ba4ccf49cd97dd9fd_2024"
 TEST_USER_TELEGRAM_ID = 5594152712  # Test user from database
 

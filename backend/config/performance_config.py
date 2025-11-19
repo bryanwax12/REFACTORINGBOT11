@@ -2,9 +2,6 @@
 Performance Configuration for Production Bot
 Optimized settings for fast response times and stability
 """
-import asyncio
-from telegram.ext import Application
-from telegram import Bot
 import httpx
 
 

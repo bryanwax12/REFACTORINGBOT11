@@ -28,7 +28,7 @@ async def test_oxapay_webhook():
     async with httpx.AsyncClient(timeout=30) as client:
         try:
             response = await client.post(
-                "https://tg-fixer-hub.preview.emergentagent.com/api/oxapay/webhook",
+                "https://shipping-admin-fix.preview.emergentagent.com/api/oxapay/webhook",
                 json=payload
             )
             

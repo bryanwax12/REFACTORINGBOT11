@@ -176,7 +176,7 @@
 
 ## 🖥️ ЧАСТЬ 2: АДМИН-ПАНЕЛЬ
 
-### URL админки: https://tg-fixer-hub.preview.emergentagent.com
+### URL админки: https://shipping-admin-fix.preview.emergentagent.com
 
 ---
 
