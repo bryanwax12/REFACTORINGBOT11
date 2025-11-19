@@ -53,20 +53,26 @@ async def get_topups():
         user_repo = get_user_repo()
         enriched_topups = []
         
+        logger.info(f"Processing {len(topups)} topups for user enrichment")
+        
         for topup in topups:
-            user = await user_repo.find_by_telegram_id(topup['telegram_id'])
+            telegram_id = topup.get('telegram_id')
+            user = await user_repo.find_by_telegram_id(telegram_id)
             
             enriched_topup = topup.copy()
             if user:
                 enriched_topup['user_name'] = user.get('first_name', 'Unknown')
                 enriched_topup['user_username'] = user.get('username', '')
+                logger.debug(f"User found for telegram_id {telegram_id}: {user.get('first_name')}")
             else:
                 enriched_topup['user_name'] = 'Unknown'
                 enriched_topup['user_username'] = ''
+                logger.warning(f"User NOT found for telegram_id {telegram_id}")
             
             enriched_topups.append(enriched_topup)
         
+        logger.info(f"Enriched {len(enriched_topups)} topups successfully")
         return enriched_topups
     except Exception as e:
-        logger.error(f"Error getting topups: {e}")
+        logger.error(f"Error getting topups: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
