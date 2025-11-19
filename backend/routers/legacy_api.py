@@ -58,13 +58,43 @@ async def legacy_get_users(api_key: str = Depends(verify_api_key)):
 
 @router.get("/topups")
 async def legacy_get_topups(api_key: str = Depends(verify_api_key)):
-    """Legacy topups endpoint - returns array directly"""
+    """Legacy topups endpoint - returns array directly with user enrichment"""
     from server import db
-    payments = await db.payments.find(
+    from repositories import get_user_repo
+    import logging
+    
+    logger = logging.getLogger(__name__)
+    
+    # Get topups
+    topups = await db.payments.find(
         {"type": "topup"},
         {"_id": 0}
-    ).limit(100).to_list(100)
-    return payments
+    ).sort("created_at", -1).limit(100).to_list(100)
+    
+    # Enrich with user data
+    user_repo = get_user_repo()
+    enriched_topups = []
+    
+    for topup in topups:
+        telegram_id = topup.get('telegram_id')
+        user = await user_repo.find_by_telegram_id(telegram_id)
+        
+        enriched_topup = topup.copy()
+        if user:
+            # Add user fields for frontend compatibility
+            enriched_topup['user_name'] = user.get('first_name', 'Unknown')
+            enriched_topup['user_username'] = user.get('username', '')
+            enriched_topup['first_name'] = user.get('first_name', 'Unknown')  # Legacy field
+            enriched_topup['username'] = user.get('username', '')  # Legacy field
+        else:
+            enriched_topup['user_name'] = 'Unknown'
+            enriched_topup['user_username'] = ''
+            enriched_topup['first_name'] = 'Unknown'
+            enriched_topup['username'] = ''
+        
+        enriched_topups.append(enriched_topup)
+    
+    return enriched_topups
 
 
 @router.get("/users/leaderboard")
