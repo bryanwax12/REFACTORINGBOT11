@@ -367,6 +367,7 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
             payment_dict = payment.model_dump()
             # Remove pay_url as it's not in Payment model
             payment_dict['pay_url'] = pay_link
+            payment_dict['track_id'] = track_id  # Store track_id for webhook lookup
             await insert_payment(payment_dict)
             
             keyboard = [[InlineKeyboardButton("💳 Оплатить", url=pay_link)]]
