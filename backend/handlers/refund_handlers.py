@@ -258,11 +258,18 @@ async def cancel_refund(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Cancel refund request process
     """
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+    
     query = update.callback_query
     await query.answer()
     
+    # Add button to return to main menu
+    keyboard = [[InlineKeyboardButton("🏠 Главное меню", callback_data="start")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
     await query.edit_message_text(
-        "❌ Создание заявки отменено."
+        "❌ Создание заявки отменено.",
+        reply_markup=reply_markup
     )
     
     return ConversationHandler.END
