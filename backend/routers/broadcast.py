@@ -52,7 +52,7 @@ async def broadcast_message(
         
         # Get target users
         if target == "all":
-            users = await user_repo.find_all(limit=10000)
+            users = await user_repo.find_many({}, limit=10000)
         elif target == "active":
             # Users with at least one order
             from repositories import get_order_repo
