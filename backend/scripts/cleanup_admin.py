@@ -36,7 +36,7 @@ async def cleanup_database():
             print("❌ Целевой пользователь не найден!")
             return
         
-        print(f"✅ Найден: {target_user.get('username')} (ID: {target_user['id']})")
+        print(f"✅ Найден: {target_user.get('username')} (ID: {target_user.get('id', user.get('_id', str(user['telegram_id'])))})")
         
         # 2. Подсчет данных перед удалением
         print("\n📊 Текущее состояние БД:")

@@ -357,7 +357,7 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
             from datetime import datetime, timezone
             payment = Payment(
                 telegram_id=telegram_id,
-                order_id=f"topup_{user['id']}",
+                order_id=f"topup_{user.get('id', user.get('_id', str(user['telegram_id'])))}",
                 amount=topup_amount,
                 invoice_id=track_id,
                 status="pending",

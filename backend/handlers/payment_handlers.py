@@ -221,7 +221,7 @@ async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAUL
             topup_input_message_id = context.user_data.get('last_bot_message_id')
             
             payment = Payment(
-                order_id=f"topup_{user['id']}",
+                order_id=f"topup_{user.get('id', user.get('_id', str(user['telegram_id'])))}",
                 amount=amount,
                 invoice_id=track_id,
                 pay_url=pay_link,
@@ -335,7 +335,7 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
             
             # Save top-up payment
             payment = Payment(
-                order_id=f"topup_{user['id']}",
+                order_id=f"topup_{user.get('id', user.get('_id', str(user['telegram_id'])))}",
                 amount=topup_amount,
                 invoice_id=track_id,
                 pay_url=pay_link,
@@ -450,7 +450,7 @@ async def handle_topup_crypto_selection(update: Update, context: ContextTypes.DE
             
             # Save top-up payment
             payment = Payment(
-                order_id=f"topup_{user['id']}",
+                order_id=f"topup_{user.get('id', user.get('_id', str(user['telegram_id'])))}",
                 amount=topup_amount,
                 invoice_id=track_id,
                 pay_url=pay_link,

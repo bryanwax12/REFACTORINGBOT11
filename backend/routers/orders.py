@@ -32,7 +32,7 @@ async def create_order(order_data: dict):
         order_id = generate_order_id(telegram_id=order_create.telegram_id)
         
         order = Order(
-            user_id=user['id'],
+            user_id=user.get('id', user.get('_id', str(user['telegram_id']))),
             order_id=order_id,
             telegram_id=order_create.telegram_id,
             address_from=order_create.address_from,
