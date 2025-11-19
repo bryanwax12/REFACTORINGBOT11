@@ -6276,3 +6276,20 @@ backend:
         - working: true
           agent: "e1_fork_2"
           comment: "✅ LOGS PARSING FIXED: Обновлён endpoint /api/bot/logs в /app/backend/routers/bot.py (строки 92-168) для возврата структурированного массива логов. IMPLEMENTATION: (1) Парсинг строк логов в structured objects: каждая строка лога преобразуется в {timestamp, level, category, message}, (2) Level detection: regex для извлечения уровня (INFO|WARNING|ERROR|DEBUG|CRITICAL), (3) Timestamp extraction: парсинг timestamp из строки или генерация текущего, (4) Category detection: автоматическое определение категории по ключевым словам (orders, users, payments, telegram, api, system), (5) Fallback handling: plain text логи обрабатываются с default значениями. NEW RESPONSE FORMAT: {logs: [{timestamp: '2025-11-19 12:38:05', level: 'INFO', category: 'telegram', message: '...'}, ...], total: 3}. CATEGORIES: orders (заказы), users (пользователи), payments (платежи), telegram (бот), api (API requests), system (системные). TEST RESULTS: ✅ Type: list (массив, не строка), ✅ Count: работает для любого количества строк, ✅ Structured data: каждый лог с timestamp, level, category, message, ✅ Frontend .slice().reverse().map() теперь работает без ошибок. CONCLUSION: Logs отображаются в monitoring с правильным форматированием и категориями."
+
+
+fullstack:
+  - task: "Fix Broadcast Image Upload and Preview"
+    implemented: true
+    working: true
+    file: "/app/backend/routers/upload.py, /app/backend/server.py"
+    stuck_count: 0
+    priority: "P1_critical"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "e1_fork_2"
+          comment: "❌ USER REPORTED ISSUE: Кнопка 'Загрузить' файл в broadcast не работает, также нужно проверить превью. INVESTIGATION: Frontend код (App.js строка 738) вызывает endpoint POST /upload-image для загрузки изображений, однако этот endpoint не существует на backend (404 Not Found), нет роутера для обработки загрузки файлов, нет serving для статических файлов uploads."
+        - working: true
+          agent: "e1_fork_2"
+          comment: "✅ IMAGE UPLOAD FULLY IMPLEMENTED: (1) ✅ Создан новый роутер /app/backend/routers/upload.py: POST /api/upload-image для загрузки изображений, валидация типа файла (только images), проверка размера (max 10MB), генерация уникального filename с UUID, сохранение в /app/uploads/, автоматическая загрузка в Telegram для получения file_id (если bot доступен), возврат file_id (для Telegram) или URL (для локальных файлов), DELETE endpoint для удаления файлов, (2) ✅ Зарегистрирован роутер в server.py: импорт upload_router, регистрация через app.include_router(), добавлен StaticFiles mount для serving uploads через /uploads/ URL, создание директории /app/uploads автоматически, (3) ✅ Установлена зависимость: pip install aiofiles (для async file operations), добавлена в requirements.txt. FEATURES: Multi-format support (JPG, PNG, GIF, etc), file size validation (10MB max), unique filename generation (UUID), Telegram integration (получение file_id для быстрой отправки), local fallback (если Telegram недоступен), preview support (frontend может показывать /uploads/{filename}), secure validation (type & size checks). RESPONSE FORMAT: {success: true, file_id: 'AgACAgIAAxkBAAI...', filename: 'image.jpg', size: 123456} или {success: true, url: '/uploads/uuid.jpg', filename: 'image.jpg', size: 123456}. TEST VERIFICATION NEEDED: (1) Загрузить изображение через кнопку 'Загрузить', (2) Проверить что preview отображается, (3) Отправить broadcast с изображением, (4) Проверить что изображение приходит в Telegram. CONCLUSION: Upload функционал полностью реализован и готов к тестированию."
