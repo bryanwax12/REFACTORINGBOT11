@@ -12,21 +12,29 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/broadcast", tags=["broadcast"])
 
 
+from pydantic import BaseModel
+
+class BroadcastRequest(BaseModel):
+    message: str
+    target: str = "all"
+    image_url: Optional[str] = None
+    file_id: Optional[str] = None
+
 @router.post("")
 async def broadcast_message(
     request: Request,
-    message: str,
-    target: str = "all",
-    image_url: Optional[str] = None
+    broadcast: BroadcastRequest
 ):
     """
     Broadcast message to users
     
     Args:
-        message: Message text to send
-        target: Target audience ('all', 'active', 'premium')
-        image_url: Optional image URL to attach
+        broadcast: Broadcast request with message, target, image_url, file_id
     """
+    message = broadcast.message
+    target = broadcast.target
+    image_url = broadcast.image_url
+    file_id = broadcast.file_id
     from server import safe_telegram_call
     from repositories import get_user_repo
     
