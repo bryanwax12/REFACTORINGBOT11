@@ -57,7 +57,7 @@ async def broadcast_message(
             # Users with at least one order
             from repositories import get_order_repo
             order_repo = get_order_repo()
-            orders = await order_repo.find_all(limit=10000)
+            orders = await order_repo.find_many({}, limit=10000)
             active_telegram_ids = list(set([o['telegram_id'] for o in orders]))
             users = []
             for tid in active_telegram_ids:
