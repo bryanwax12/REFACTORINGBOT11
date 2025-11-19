@@ -381,6 +381,7 @@ async def create_payment_invoice(
             'order_id': f"topup_{telegram_id}",
             'amount': amount,
             'invoice_id': track_id,
+            'track_id': track_id,  # Store track_id for webhook lookup
             'pay_url': pay_link,
             'status': 'pending',
             'telegram_id': telegram_id,
