@@ -1,4 +1,5 @@
 from fastapi import FastAPI, APIRouter, Request
+from fastapi.staticfiles import StaticFiles
 from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv
 from pathlib import Path
