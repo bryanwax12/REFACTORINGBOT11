@@ -380,19 +380,19 @@ export default function MonitoringTab() {
               <div className="p-4 bg-green-50 rounded-lg">
                 <div className="text-sm text-gray-600">Общая выручка</div>
                 <div className="text-3xl font-bold text-green-600">
-                  ${metrics.revenue.total.toFixed(2)}
+                  ${metrics?.revenue?.total?.toFixed(2) || '0.00'}
                 </div>
               </div>
               <div className="p-4 bg-blue-50 rounded-lg">
                 <div className="text-sm text-gray-600">Средний заказ</div>
                 <div className="text-3xl font-bold text-blue-600">
-                  ${metrics.revenue.average_order.toFixed(2)}
+                  ${metrics?.revenue?.average_order?.toFixed(2) || '0.00'}
                 </div>
               </div>
               <div className="p-4 bg-purple-50 rounded-lg">
                 <div className="text-sm text-gray-600">Активные пользователи</div>
                 <div className="text-3xl font-bold text-purple-600">
-                  {metrics.users.active_today}
+                  {metrics?.users?.active_today || 0}
                 </div>
               </div>
             </div>
