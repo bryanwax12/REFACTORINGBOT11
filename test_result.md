@@ -6372,3 +6372,21 @@ backend:
           comment: "✅ OXAPAY WEBHOOK FIXED: (1) ✅ Добавлено поле track_id во всех местах создания платежей: /app/backend/services/payment_service.py строка 384: добавлен 'track_id': track_id, /app/backend/handlers/payment_handlers.py строки 234, 349, 466: добавлен payment_dict['track_id'] = track_id, /app/backend/handlers/order_flow/payment.py строка 472: добавлен payment_dict['track_id'] = track_id, /app/backend/handlers/order_flow/template_save.py строка 370: добавлен payment_dict['track_id'] = track_id. (2) ✅ Исправлена ошибка 'NoneType has no attribute message_id': В webhook_handlers.py строка 195 добавлена проверка if bot_msg перед сохранением message_id в pending_orders. TEST RESULTS: ✅ Симуляция полного цикла платежа: создан платеж с track_id='TEST_TRACK_12345', отправлен webhook POST с track_id и status='Paid', баланс пользователя обновлен с $100 → $150, статус платежа изменен с 'pending' → 'paid', webhook возвращает {'status': 'ok'} без ошибок. ✅ Тест пройден успешно 3 раза подряд (balance: $0→$50, $50→$100, $100→$150). CONCLUSION: Webhook Oxapay полностью исправлен и работает корректно. Баланс пользователей теперь автоматически пополняется при получении платежа."
 
 
+
+backend:
+  - task: "Add Duplicate Webhook Protection"
+    implemented: true
+    working: true
+    file: "/app/backend/handlers/webhook_handlers.py"
+    stuck_count: 0
+    priority: "P0_critical"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "testing_agent"
+          comment: "❌ SECURITY BUG FOUND: Testing выявило критическую уязвимость - система не защищена от дублирующихся webhook'ов. При отправке одного и того же webhook дважды баланс пользователя пополняется два раза. IMPACT: Возможность двойного списания/зачисления средств. TEST EVIDENCE: Balance $0 → $50 (first webhook) → $100 (duplicate webhook). Expected: second webhook should be ignored."
+        - working: true
+          agent: "e1_fork_4"
+          comment: "✅ DUPLICATE PROTECTION IMPLEMENTED: Добавлена критическая защита от дублирования webhook'ов в /app/backend/handlers/webhook_handlers.py (строки 74-77). IMPLEMENTATION: Перед обновлением баланса проверяется текущий статус платежа: if current_status == 'paid': return {'status': 'ok', 'message': 'Payment already processed'}. LOGIC: (1) Webhook получен → (2) Платеж найден в БД → (3) Проверка статуса → (4) Если статус уже 'paid' - webhook игнорируется → (5) Если статус 'pending' - обработка продолжается → (6) Баланс обновляется → (7) Статус меняется на 'paid'. TESTING RESULTS: ✅ First webhook: status 'pending' → 'paid', balance updated, ✅ Second webhook (duplicate): detected as duplicate, returned 'Payment already processed', status remained 'paid', balance NOT updated (no double charging). ✅ 3/3 comprehensive tests passed: Basic functionality ✅, Duplicate protection ✅, Non-existent payment handling ✅. SECURITY: Система теперь защищена от повторной обработки одного и того же платежа. Даже если Oxapay отправит webhook несколько раз, баланс обновится только один раз. PRODUCTION READY."
+
+
