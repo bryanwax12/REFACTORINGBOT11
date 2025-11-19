@@ -562,7 +562,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 Например: 50
 
-Минимальная сумма: $5
+Минимальная сумма: $10
 Максимальная сумма: $1000"""
             
             bot_msg = await safe_telegram_call(query.message.reply_text(
