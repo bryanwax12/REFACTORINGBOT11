@@ -63,7 +63,7 @@ async def get_topups():
             if user:
                 enriched_topup['user_name'] = user.get('first_name', 'Unknown')
                 enriched_topup['user_username'] = user.get('username', '')
-                logger.debug(f"User found for telegram_id {telegram_id}: {user.get('first_name')}")
+                logger.info(f"User found for telegram_id {telegram_id}: {user.get('first_name')}")
             else:
                 enriched_topup['user_name'] = 'Unknown'
                 enriched_topup['user_username'] = ''
