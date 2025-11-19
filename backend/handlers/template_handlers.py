@@ -157,14 +157,18 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     weight_prompt = f"{message}\n\n{OrderStepMessages.PARCEL_WEIGHT}"
     reply_markup = get_cancel_keyboard()
     
+    # Save last_state BEFORE sending (so cancel can return here)
+    from server import PARCEL_WEIGHT, STATE_NAMES
+    context.user_data['last_state'] = STATE_NAMES[PARCEL_WEIGHT]
+    context.user_data['last_bot_message_text'] = weight_prompt
+    logger.error(f"🔍 use_template: SET last_state to {STATE_NAMES[PARCEL_WEIGHT]}")
+    
     bot_msg = await query.message.reply_text(weight_prompt, reply_markup=reply_markup)
     
     if bot_msg:
         context.user_data['last_bot_message_id'] = bot_msg.message_id
-        context.user_data['last_bot_message_text'] = weight_prompt
     
     # Transition to parcel weight step
-    from server import PARCEL_WEIGHT
     logger.info(f"🔵 use_template returning PARCEL_WEIGHT state (value: {PARCEL_WEIGHT})")
     return PARCEL_WEIGHT
 
