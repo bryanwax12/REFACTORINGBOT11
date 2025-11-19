@@ -1277,17 +1277,20 @@ async def startup_event():
                 return
             
             logger.info("Initializing Telegram Bot...")
-            # Build application - using in-memory state (STABLE)
+            # Build application - using in-memory state (STABLE) with performance optimizations
+            
+            # Get optimized settings from performance config
+            app_settings = BotPerformanceConfig.get_optimized_application_settings()
             
             application = (
                 Application.builder()
                 .token(TELEGRAM_BOT_TOKEN)
                 # NO PERSISTENCE - in-memory state for stability
-                .concurrent_updates(True)  # Process updates concurrently for multiple users
-                .connect_timeout(10)  # Balanced: fast but stable
-                .read_timeout(10)   # Prevents premature timeout
-                .write_timeout(10)  # Reliable message delivery
-                .pool_timeout(5)    # Connection pool optimization
+                .concurrent_updates(app_settings['concurrent_updates'])  # Handle many updates concurrently
+                .connect_timeout(app_settings['connect_timeout'])  # Fast connection
+                .read_timeout(app_settings['read_timeout'])   # Optimized read timeout
+                .write_timeout(app_settings['write_timeout'])  # Reliable message delivery
+                .pool_timeout(app_settings['pool_timeout'])    # Connection pool optimization
                 # Keep default rate limiter to prevent Telegram ban
                 .build()
             )
