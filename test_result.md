@@ -6140,3 +6140,20 @@ backend:
         - working: true
           agent: "e1_fork_2"
           comment: "✅ ALL ISSUES FIXED: (1) ✅ CHANNEL_INVITE_LINK исправлена: Удалена дублированная старая ссылка (https://t.me/+vxZrZuZbN3IyZDIx), оставлена только правильная публичная ссылка (https://t.me/WHITE_LABEL_SHIPPING_BOTCHANNEL), CHANNEL_ID: -1003417145879, (2) ✅ Discount button починена: Исправлено имя параметра (discount_percent → discount), исправлен метод обновления (user_repo.update() → user_repo.update_user_field()), добавлен правильный префикс роутера (/users → /api/users), (3) ✅ Bulk check buttons реализованы: Создан эндпоинт POST /api/users/check-all-channel-status для массовой проверки членства в канале (проверяет is_channel_member через bot.get_chat_member, обновляет channel_status_checked_at), создан эндпоинт POST /api/users/check-all-bot-access для проверки доступности бота (проверяет bot_blocked_by_user через bot.get_chat, обновляет bot_access_checked_at и bot_blocked_at), оба эндпоинта возвращают статистику (checked_count, member_count/accessible_count/blocked_count). TEST RESULTS: ✅ Discount endpoint: успешно устанавливает discount (tested: 25%), обновляет БД корректно, ✅ Channel link: правильная PUBLIC ссылка в .env, ✅ Bulk check endpoints: зарегистрированы в OpenAPI schema, доступны через /api/users/*. CONCLUSION: Все кнопки админ-панели и настройки канала исправлены и работают корректно."
+
+
+backend:
+  - task: "Fix User Names and Tracking Numbers Display in Orders Table"
+    implemented: true
+    working: true
+    file: "/app/backend/routers/legacy_api.py, /app/backend/server.py, /app/backend/scripts/migrate_tracking_numbers.py"
+    stuck_count: 0
+    priority: "P2"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "e1_fork_2"
+          comment: "❌ USER REPORTED ISSUE: В таблице Orders админ-панели (1) В колонке 'User' везде отображается 'Unknown @no_username' вместо реальных имен пользователей, (2) Tracking numbers не отображаются. INVESTIGATION: (1) Legacy API endpoint /api/orders возвращает сырые данные из БД orders без обогащения информацией о пользователях (та же проблема, что была с topups), (2) В orders collection отсутствует поле tracking_number - оно сохраняется только в shipping_labels collection, но не копируется в orders при создании лейбла (строка 914 в server.py обновляет только shipping_status)."
+        - working: true
+          agent: "e1_fork_2"
+          comment: "✅ USER DISPLAY AND TRACKING ISSUES FIXED: (1) ✅ User names enrichment: Обновлён /app/backend/routers/legacy_api.py endpoint /api/orders - добавлено обогащение данных пользователями (использует user_repo.find_by_telegram_id), добавляет поля user_name, user_username, first_name, username для compatibility, обрабатывает случаи отсутствия telegram_id, (2) ✅ Tracking number fix: Исправлен /app/backend/server.py функция create_and_send_label (строка 914) - теперь обновляет order с полями tracking_number, label_id, shipment_id при создании лейбла, создан migration script /app/backend/scripts/migrate_tracking_numbers.py для обновления существующих заказов, миграция выполнена успешно: 21 order обновлен tracking numbers из shipping_labels collection. TEST RESULTS: ✅ Orders API: Total 32 orders, все с правильными user names ('White Label Shipping Bot' Agent @White_Label_Shipping_Bot_Agent), 21 orders с tracking numbers (65.6% coverage), примеры tracking: 9449050899563000368116, 794625178209, 1ZXXXXXXXXXXXXXXXX. CONCLUSION: Имена пользователей и tracking numbers теперь корректно отображаются в таблице Orders админ-панели."
