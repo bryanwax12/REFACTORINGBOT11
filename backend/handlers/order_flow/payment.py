@@ -309,22 +309,34 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # NEW LOGIC: Get order_id from context (created when rate was selected)
             order_id = context.user_data.get('order_id')
             
+            # FALLBACK: If order_id not in context, try to find most recent pending order
             if not order_id:
-                logger.error("❌ order_id not found in context!")
-                await safe_telegram_call(query.message.reply_text(
-                    "❌ Ошибка: заказ не найден. Пожалуйста, начните заново."
-                ))
-                return ConversationHandler.END
-            
-            # Find order in database (need _id for create_and_send_label)
-            order = await db.orders.find_one({"order_id": order_id})
-            
-            if not order:
-                logger.error(f"❌ Order {order_id} not found in database!")
-                await safe_telegram_call(query.message.reply_text(
-                    "❌ Ошибка: заказ не найден в базе данных."
-                ))
-                return ConversationHandler.END
+                logger.warning("⚠️ order_id not found in context, searching in DB...")
+                order = await db.orders.find_one(
+                    {"telegram_id": telegram_id, "payment_status": "pending"},
+                    sort=[("created_at", -1)]
+                )
+                
+                if order:
+                    order_id = order.get('order_id')
+                    context.user_data['order_id'] = order_id  # Restore to context
+                    logger.info(f"✅ Restored order_id from DB: {order_id}")
+                else:
+                    logger.error("❌ No pending orders found in database!")
+                    await safe_telegram_call(query.message.reply_text(
+                        "❌ Ошибка: заказ не найден. Пожалуйста, начните заново."
+                    ))
+                    return ConversationHandler.END
+            else:
+                # Find order in database (need _id for create_and_send_label)
+                order = await db.orders.find_one({"order_id": order_id})
+                
+                if not order:
+                    logger.error(f"❌ Order {order_id} not found in database!")
+                    await safe_telegram_call(query.message.reply_text(
+                        "❌ Ошибка: заказ не найден в базе данных."
+                    ))
+                    return ConversationHandler.END
             
             # Check order status - must be "pending"
             order_status = order.get('payment_status', 'pending')
