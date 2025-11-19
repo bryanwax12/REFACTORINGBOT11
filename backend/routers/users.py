@@ -212,10 +212,7 @@ async def set_user_discount(telegram_id: int, discount: float):
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
-        await user_repo.update(
-            telegram_id,
-            {"discount": discount}
-        )
+        await user_repo.update_user_field(telegram_id, "discount", discount)
         
         logger.info(f"🎁 Set {discount}% discount for user {telegram_id}")
         
