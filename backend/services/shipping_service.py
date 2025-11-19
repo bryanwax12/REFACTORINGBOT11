@@ -427,23 +427,12 @@ def balance_and_deduplicate_rates(
         
         # Format rates
         for rate in top_rates:
-            # Get original carrier name from API
+            # Use original carrier name from API as is
             original_carrier = rate.get('carrier_friendly_name', 'Unknown')
             
-            # Clean carrier name: extract main carrier (USPS, UPS, FedEx)
-            # Note: Stamps.com is USPS reseller, treat as USPS
-            carrier_clean = original_carrier
-            if 'stamps' in original_carrier.lower():
-                carrier_clean = 'USPS'
-            else:
-                for known_carrier in ['USPS', 'UPS', 'FedEx']:
-                    if known_carrier.lower() in original_carrier.lower():
-                        carrier_clean = known_carrier
-                        break
-            
             formatted_rate = {
-                'carrier': carrier_clean,  # Use cleaned carrier name
-                'carrier_friendly_name': original_carrier,  # Keep original for reference
+                'carrier': original_carrier,  # Use original carrier name as is
+                'carrier_friendly_name': original_carrier,  # Keep same value
                 'carrier_code': rate.get('carrier_code'),
                 'service': rate.get('service_type', 'Standard'),
                 'service_code': rate.get('service_code'),
