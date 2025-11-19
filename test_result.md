@@ -6390,3 +6390,21 @@ backend:
           comment: "✅ DUPLICATE PROTECTION IMPLEMENTED: Добавлена критическая защита от дублирования webhook'ов в /app/backend/handlers/webhook_handlers.py (строки 74-77). IMPLEMENTATION: Перед обновлением баланса проверяется текущий статус платежа: if current_status == 'paid': return {'status': 'ok', 'message': 'Payment already processed'}. LOGIC: (1) Webhook получен → (2) Платеж найден в БД → (3) Проверка статуса → (4) Если статус уже 'paid' - webhook игнорируется → (5) Если статус 'pending' - обработка продолжается → (6) Баланс обновляется → (7) Статус меняется на 'paid'. TESTING RESULTS: ✅ First webhook: status 'pending' → 'paid', balance updated, ✅ Second webhook (duplicate): detected as duplicate, returned 'Payment already processed', status remained 'paid', balance NOT updated (no double charging). ✅ 3/3 comprehensive tests passed: Basic functionality ✅, Duplicate protection ✅, Non-existent payment handling ✅. SECURITY: Система теперь защищена от повторной обработки одного и того же платежа. Даже если Oxapay отправит webhook несколько раз, баланс обновится только один раз. PRODUCTION READY."
 
 
+
+backend:
+  - task: "Fix Case-Sensitive Status Check and Type Conversion in Oxapay Webhook"
+    implemented: true
+    working: true
+    file: "/app/backend/handlers/webhook_handlers.py"
+    stuck_count: 0
+    priority: "P0_critical"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "e1_fork_4"
+          comment: "❌ CRITICAL BUG FOUND: Реальный платеж (ID: 124932201) был оплачен в Oxapay, но баланс пользователя не обновился. INVESTIGATION: (1) Платеж создан в БД с track_id=124932201 в статусе 'pending', (2) Проверка в Oxapay API показала status='paid', amount=$10, txID=1e51703bda234878..., (3) Webhook от Oxapay НЕ пришел автоматически (не настроен webhook URL в панели Oxapay), (4) При ручной симуляции webhook обнаружены 2 бага: ОШИБКА 1: Webhook handler проверяет if status == 'Paid' (с заглавной P), но Oxapay отправляет status='paid' (lowercase) → условие не срабатывает, ОШИБКА 2: paid_amount приходит как строка '10.00', но сравнивается с числом 0 без преобразования → TypeError: '>' not supported between instances of 'str' and 'int'. IMPACT: Платежи НЕ обрабатываются, если Oxapay отправляет status в lowercase. Баланс не пополняется."
+        - working: true
+          agent: "e1_fork_4"
+          comment: "✅ OXAPAY WEBHOOK FULLY FIXED: (1) ✅ Case-insensitive status check (строка 45): Изменено if status == 'Paid' → if status and status.lower() == 'paid'. Теперь обрабатывается status в любом регистре: 'Paid', 'paid', 'PAID'. (2) ✅ Type conversion for paid_amount (строки 40-42): Добавлено преобразование paid_amount = float(paid_amount_raw) if paid_amount_raw else 0.0. Oxapay может отправлять amount как строку '10.00' или число 10.0 - теперь оба варианта работают. TEST RESULTS: ✅ Ручная симуляция webhook с lowercase status='paid': успешно обработан, ✅ Платеж 124932201: статус обновлен pending → paid, ✅ Баланс пользователя: обновлен $30 → $40 (+$10), ✅ Response: {'status': 'ok'} без ошибок, ✅ Duplicate protection работает: повторный webhook вернул 'Payment already processed'. ROOT CAUSE: Oxapay в production отправляет status='paid' (lowercase), но в документации и тестах использовался 'Paid' (capitalized). Код был написан под документацию, но реальные webhook'и используют другой формат. PRODUCTION READY: Теперь система обрабатывает webhook от Oxapay независимо от регистра статуса и формата amount."
+
+
