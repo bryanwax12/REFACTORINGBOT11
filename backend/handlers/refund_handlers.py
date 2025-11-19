@@ -243,14 +243,20 @@ async def my_refunds(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     parse_mode='Markdown'
                 )
             else:
+                keyboard = [[InlineKeyboardButton("🏠 Главное меню", callback_data="start")]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
                 await query.edit_message_text(
-                    "❌ Ошибка при получении списка заявок. Попробуйте позже."
+                    "❌ Ошибка при получении списка заявок. Попробуйте позже.",
+                    reply_markup=reply_markup
                 )
     
     except Exception as e:
         logger.error(f"Error getting user refunds: {e}")
+        keyboard = [[InlineKeyboardButton("🏠 Главное меню", callback_data="start")]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
         await query.edit_message_text(
-            f"❌ Произошла ошибка: {str(e)}"
+            f"❌ Произошла ошибка: {str(e)}",
+            reply_markup=reply_markup
         )
 
 
