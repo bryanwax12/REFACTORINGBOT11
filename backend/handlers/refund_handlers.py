@@ -268,6 +268,19 @@ async def my_refunds(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
 
+async def return_to_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Return to main menu from any context
+    """
+    from handlers.common_handlers import start_command
+    
+    # Clear any conversation state
+    context.user_data.clear()
+    
+    # Call start_command to show main menu
+    return await start_command(update, context)
+
+
 async def cancel_refund(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Cancel refund request process
