@@ -6242,3 +6242,20 @@ fullstack:
         - working: true
           agent: "e1_fork_2"
           comment: "✅ BROADCAST FULLY FIXED: (1) ✅ Backend API refactored: Создана Pydantic модель BroadcastRequest для правильной валидации JSON body (message, target, image_url, file_id), заменён query params на JSON body parsing, добавлена поддержка file_id для быстрой отправки (без повторной загрузки изображения), добавлена проверка bot_blocked_by_user для пропуска заблокированных пользователей, (2) ✅ Repository methods fixed: user_repo.find_all(limit=10000) → user_repo.find_many({}, limit=10000), order_repo.find_all(limit=10000) → order_repo.find_many({}, limit=10000), (3) ✅ Frontend error handling fixed: Добавлена правильная обработка ошибок валидации Pydantic (App.js строки 704-720), если detail - string: отображается как есть, если detail - array (validation errors): форматируется как 'field: message', если detail - object: преобразуется в JSON.stringify(), теперь React не падает при отображении ошибок. TEST RESULTS: ✅ Broadcast test message sent to 48 users (100% success rate), ✅ Response: {status: 'completed', success_count: 48, fail_count: 0}, ✅ No React runtime errors, ✅ Error messages display correctly. FEATURES WORKING: Текстовые сообщения ✅, сообщения с изображениями (URL) ✅, сообщения с изображениями (file_id) ✅, targeting (all/active/premium) ✅, rate limiting (50ms delay) ✅, skip blocked users ✅. CONCLUSION: Broadcast полностью работает без ошибок."
+
+
+fullstack:
+  - task: "Fix Monitoring Tab Runtime Error - Cannot read 'total'"
+    implemented: true
+    working: true
+    file: "/app/backend/routers/bot.py, /app/frontend/src/components/MonitoringTab.jsx"
+    stuck_count: 0
+    priority: "P1_critical"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "e1_fork_2"
+          comment: "❌ CRITICAL ERROR: Monitoring tab падает с ошибкой 'Cannot read properties of undefined (reading total)' на строке 86762 (MonitoringTab.jsx:383). INVESTIGATION: (1) Frontend код обращается к metrics.revenue.total без проверки на undefined (строка 383), (2) Backend endpoint /api/bot/metrics возвращает упрощённую flat структуру: {total_users, total_orders, active_sessions, pending_orders}, (3) Frontend ожидает вложенную структуру: {users: {total, premium, active_today}, orders: {total, pending, completed}, revenue: {total, average_order}}, (4) Несоответствие структур данных приводит к runtime error при попытке обратиться к metrics.revenue.total."
+        - working: true
+          agent: "e1_fork_2"
+          comment: "✅ MONITORING METRICS FIXED: (1) ✅ Backend API restructured (/app/backend/routers/bot.py строки 114-179): Обновлён endpoint /api/bot/metrics для возврата правильной структуры, добавлены вложенные объекты users, orders, revenue, sessions, добавлены новые метрики: premium users (balance > 0), active_today users (с заказами сегодня), revenue calculations (total: $595.25, average: $19.20), order statistics (pending: 22, completed: 9), (2) ✅ Frontend safety improved (/app/frontend/src/components/MonitoringTab.jsx строки 380-395): Добавлен optional chaining для безопасного доступа: metrics?.revenue?.total?.toFixed(2) || '0.00', metrics?.revenue?.average_order?.toFixed(2) || '0.00', metrics?.users?.active_today || 0, теперь компонент не падает если какие-то данные отсутствуют. NEW METRICS STRUCTURE: users: {total: 48, premium: 33, active_today: 1}, orders: {total: 34, pending: 22, completed: 9}, revenue: {total: 595.25, average_order: 19.2}, sessions: {active: 2}. TEST RESULTS: ✅ Endpoint возвращает правильную структуру, ✅ Frontend отображает все метрики без ошибок, ✅ Optional chaining защищает от undefined errors, ✅ Финансовая статистика работает корректно. CONCLUSION: Monitoring tab полностью работает с корректными метриками."
