@@ -349,6 +349,11 @@ try:
     from routers.upload import router as upload_router
     app.include_router(upload_router)
     
+    # Mount static files for uploads
+    uploads_dir = Path("/app/uploads")
+    uploads_dir.mkdir(parents=True, exist_ok=True)
+    app.mount("/uploads", StaticFiles(directory=str(uploads_dir)), name="uploads")
+    
     # Refunds router
     from routers.refunds import router as refunds_router
     app.include_router(refunds_router)
