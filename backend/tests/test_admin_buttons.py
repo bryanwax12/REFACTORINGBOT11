@@ -14,7 +14,7 @@ async def test_admin_buttons():
     admin_key = os.environ.get('ADMIN_API_KEY', '')
     base_url = 'http://localhost:8001'
     
-    headers = {'X-Admin-Key': admin_key}
+    headers = {'x-api-key': admin_key}
     
     print('=' * 70)
     print('ПРОВЕРКА КНОПОК АДМИН-ПАНЕЛИ')
