@@ -670,6 +670,12 @@ def with_user_session(create_user=True, require_session=False):
             
             context.user_data['db_user'] = user
             
+            # Store user discount for order flow
+            user_discount = user.get('discount', 0)
+            if user_discount > 0:
+                context.user_data['user_discount'] = user_discount
+                logger.info(f"User {user_id} has discount: {user_discount}%")
+            
             # Handle session
             session = await session_repo.get_session(user_id)
             
