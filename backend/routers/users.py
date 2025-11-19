@@ -266,7 +266,7 @@ async def check_all_channel_status():
                     {"telegram_id": telegram_id},
                     {"$set": {
                         "is_channel_member": is_member,
-                        "channel_status_checked_at": str(asyncio.get_event_loop().time())
+                        "channel_status_checked_at": datetime.now(timezone.utc).isoformat()
                     }}
                 )
                 
