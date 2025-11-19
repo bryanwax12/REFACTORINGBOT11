@@ -36,6 +36,9 @@ async def broadcast_message(
     target = broadcast.target
     image_url = broadcast.image_url
     file_id = broadcast.file_id
+    
+    logger.info(f"📨 Broadcast request: image_url={image_url}, file_id={file_id}")
+    
     from repositories import get_user_repo
     
     # Get bot_instance from app.state
