@@ -703,7 +703,22 @@ const Dashboard = () => {
       }
     } catch (error) {
       console.error('Error sending broadcast:', error);
-      toast.error(error.response?.data?.detail || 'Failed to send broadcast');
+      
+      // Handle error message properly (can be string or validation error object)
+      let errorMessage = 'Failed to send broadcast';
+      if (error.response?.data?.detail) {
+        const detail = error.response.data.detail;
+        if (typeof detail === 'string') {
+          errorMessage = detail;
+        } else if (Array.isArray(detail)) {
+          // Pydantic validation errors
+          errorMessage = detail.map(err => `${err.loc.join('.')}: ${err.msg}`).join(', ');
+        } else if (typeof detail === 'object') {
+          errorMessage = JSON.stringify(detail);
+        }
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setSendingBroadcast(false);
     }
