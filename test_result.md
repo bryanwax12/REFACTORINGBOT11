@@ -6174,3 +6174,20 @@ fullstack:
         - working: true
           agent: "e1_fork_2"
           comment: "✅ ALL ISSUES FIXED: (1) ✅ Broadcast починен: Исправлен префикс роутера в /app/backend/routers/broadcast.py (строка 12): /broadcast → /api/broadcast, endpoint теперь доступен через /api/broadcast (POST), функционал отправки сообщений всем пользователям работает, (2) ✅ Мониторинг починен: Исправлен префикс роутера в /app/backend/routers/monitoring_router.py (строка 17): /monitoring → /api/monitoring, все endpoints теперь доступны: /api/monitoring/health ✅, /api/monitoring/metrics ✅, /api/monitoring/system ✅, /api/monitoring/combined ✅, (3) ✅ Кнопки удалены: Удалена кнопка Refund из Orders таблицы (строки 1347-1361 в App.js) - теперь только кнопка Download Label, удалена ссылка Create Order из navigation (строка 3216-3218 в App.js) - остались только Dashboard и Мониторинг. TEST RESULTS: ✅ Broadcast endpoint: зарегистрирован и доступен (POST /api/broadcast), ✅ Monitoring endpoints: 4 эндпоинта доступны (health, metrics, system, combined), ✅ Frontend: кнопки Refund и Create Order удалены из UI. CONCLUSION: Broadcast и Мониторинг полностью функциональны, ненужные кнопки удалены из интерфейса."
+
+
+backend:
+  - task: "Fix Deduct Balance Button (was adding instead of subtracting)"
+    implemented: true
+    working: true
+    file: "/app/backend/routers/users.py"
+    stuck_count: 0
+    priority: "P1_critical"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "e1_fork_2"
+          comment: "❌ CRITICAL USER REPORTED BUG: Кнопка 'Deduct Balance' плюсует баланс вместо того, чтобы отнимать. ROOT CAUSE INVESTIGATION: В /app/backend/routers/users.py endpoint /api/users/{telegram_id}/balance/deduct (строка 177) вызывает user_repo.update_balance(telegram_id, -amount, description) с отрицательным amount, НО метод update_balance в user_repository.py (строки 126-153) принимает третий параметр operation (не description!), который по умолчанию = 'add'. Метод делает amount = abs(amount) для operation='add' (строка 146), превращая отрицательное значение в положительное. RESULT: Deduct всегда плюсует баланс вместо вычитания!"
+        - working: true
+          agent: "e1_fork_2"
+          comment: "✅ DEDUCT BALANCE BUTTON FIXED: Исправлены вызовы метода update_balance в /app/backend/routers/users.py: (1) ✅ Строка 132 (Add Balance): update_balance(telegram_id, amount, description) → update_balance(telegram_id, amount, operation='add'), (2) ✅ Строка 177 (Deduct Balance): update_balance(telegram_id, -amount, description) → update_balance(telegram_id, amount, operation='subtract'). TECHNICAL DETAILS: Метод update_balance принимает параметры (telegram_id, amount, operation='add'), если operation='subtract', то делает amount = -abs(amount) (строка 144), если operation='add', то делает amount = abs(amount) (строка 146), использует MongoDB $inc для атомарного обновления. TEST RESULTS: ✅ Add Balance (+10): изменение +$10.0 ✓ ПРАВИЛЬНО, ✅ Deduct Balance (-5): изменение -$5.0 ✓ ПРАВИЛЬНО (раньше плюсовал +$5!), ✅ Протестировано на реальном пользователе (telegram_id: 5594152712). CONCLUSION: Критический баг исправлен, кнопка Deduct Balance теперь корректно вычитает баланс."
