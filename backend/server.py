@@ -141,15 +141,19 @@ from utils.settings_cache import (
 # Debug logging removed - was causing startup issues
 
 # MongoDB connection with connection pooling for high load
+# Import performance config for optimized settings
+from config.performance_config import BotPerformanceConfig
+
 mongo_url = os.environ['MONGO_URL']
+mongodb_config = BotPerformanceConfig.get_mongodb_config()
 client = AsyncIOMotorClient(
     mongo_url,
-    maxPoolSize=20,  # Optimized for Preview environment (was 200)
-    minPoolSize=2,   # Lower minimum for resource efficiency (was 10)
-    maxIdleTimeMS=30000,  # Close idle connections faster (was 45000)
-    waitQueueTimeoutMS=3000,  # Shorter wait time (was 5000)
-    serverSelectionTimeoutMS=3000,  # Faster timeout (was 5000)
-    connectTimeoutMS=3000  # Add connection timeout
+    maxPoolSize=mongodb_config['maxPoolSize'],
+    minPoolSize=mongodb_config['minPoolSize'],
+    maxIdleTimeMS=mongodb_config['maxIdleTimeMS'],
+    serverSelectionTimeoutMS=mongodb_config['serverSelectionTimeoutMS'],
+    connectTimeoutMS=mongodb_config['connectTimeoutMS'],
+    socketTimeoutMS=mongodb_config['socketTimeoutMS']
 )
 
 # Auto-select database name based on environment
