@@ -1427,7 +1427,7 @@ async def startup_event():
             
             # Global error handler for catching all exceptions
             async def global_error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
-                """Log all errors"""
+                """Log all errors and notify admin"""
                 logger.error(f"🔥 GLOBAL ERROR HANDLER CAUGHT: {context.error}")
                 logger.error(f"Update: {update}")
                 logger.error("Traceback:", exc_info=context.error)
@@ -1440,6 +1440,24 @@ async def startup_event():
                         ))
                 except Exception as e:
                     logger.error(f"Failed to send error message to user: {e}")
+                
+                # Notify admin about the error
+                try:
+                    if isinstance(update, Update) and update.effective_user:
+                        from repositories import get_user_repo
+                        user_repo = get_user_repo()
+                        user = await user_repo.find_by_telegram_id(update.effective_user.id)
+                        
+                        if user:
+                            error_details = f"{type(context.error).__name__}: {str(context.error)[:300]}"
+                            await notify_admin_error(
+                                user_info=user,
+                                error_type="Global Bot Error",
+                                error_details=error_details
+                            )
+                            logger.info("✅ Admin notified about error")
+                except Exception as notify_error:
+                    logger.error(f"Failed to notify admin about error: {notify_error}")
             
             application.add_error_handler(global_error_handler)
 
