@@ -83,47 +83,60 @@ async def broadcast_message(
         for user in users:
             try:
                 telegram_id = user['telegram_id']
+                username = user.get('username', 'unknown')
                 
                 # Check if user blocked the bot
                 if user.get('bot_blocked_by_user', False):
+                    logger.warning(f"❌ Пропуск пользователя {username} ({telegram_id}): заблокировал бота")
                     fail_count += 1
                     continue
                 
                 # Send with image (file_id or URL)
-                if file_id:
-                    # Use file_id (faster, no need to re-download)
-                    await safe_telegram_call(
-                        bot_instance.send_photo(
-                            chat_id=telegram_id,
-                            photo=file_id,
-                            caption=message
+                try:
+                    if file_id:
+                        # Use file_id (faster, no need to re-download)
+                        logger.info(f"📤 Отправка с file_id пользователю {username} ({telegram_id})")
+                        result = await safe_telegram_call(
+                            bot_instance.send_photo(
+                                chat_id=telegram_id,
+                                photo=file_id,
+                                caption=message
+                            )
                         )
-                    )
-                elif image_url:
-                    # Use URL (will download image)
-                    await safe_telegram_call(
-                        bot_instance.send_photo(
-                            chat_id=telegram_id,
-                            photo=image_url,
-                            caption=message
+                        logger.info(f"✅ Успешно отправлено {username}: {result}")
+                    elif image_url:
+                        # Use URL (will download image)
+                        logger.info(f"📤 Отправка с URL пользователю {username} ({telegram_id})")
+                        result = await safe_telegram_call(
+                            bot_instance.send_photo(
+                                chat_id=telegram_id,
+                                photo=image_url,
+                                caption=message
+                            )
                         )
-                    )
-                else:
-                    # Text only message
-                    await safe_telegram_call(
-                        bot_instance.send_message(
-                            chat_id=telegram_id,
-                            text=message
+                        logger.info(f"✅ Успешно отправлено {username}: {result}")
+                    else:
+                        # Text only message
+                        logger.info(f"📤 Отправка текста пользователю {username} ({telegram_id})")
+                        result = await safe_telegram_call(
+                            bot_instance.send_message(
+                                chat_id=telegram_id,
+                                text=message
+                            )
                         )
-                    )
-                
-                success_count += 1
+                        logger.info(f"✅ Успешно отправлено {username}: {result}")
+                    
+                    success_count += 1
+                except Exception as telegram_err:
+                    logger.error(f"❌ Telegram API error для {username} ({telegram_id}): {telegram_err}")
+                    fail_count += 1
+                    continue
                 
                 # Rate limiting
                 await asyncio.sleep(0.05)  # 50ms delay between messages
                 
             except Exception as e:
-                logger.error(f"Failed to send to {telegram_id}: {e}")
+                logger.error(f"❌ Общая ошибка для пользователя {telegram_id}: {e}")
                 fail_count += 1
         
         logger.info(f"✅ Broadcast complete. Success: {success_count}, Failed: {fail_count}")
