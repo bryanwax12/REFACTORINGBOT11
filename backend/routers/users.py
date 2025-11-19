@@ -198,12 +198,12 @@ async def deduct_user_balance(telegram_id: int, amount: float, description: str 
 
 
 @router.post("/{telegram_id}/discount")
-async def set_user_discount(telegram_id: int, discount_percent: float):
+async def set_user_discount(telegram_id: int, discount: float):
     """Set discount percentage for user"""
     from repositories import get_user_repo
     
     try:
-        if discount_percent < 0 or discount_percent > 100:
+        if discount < 0 or discount > 100:
             raise HTTPException(status_code=400, detail="Discount must be between 0 and 100")
         
         user_repo = get_user_repo()
@@ -214,15 +214,15 @@ async def set_user_discount(telegram_id: int, discount_percent: float):
         
         await user_repo.update(
             telegram_id,
-            {"discount_percent": discount_percent}
+            {"discount": discount}
         )
         
-        logger.info(f"🎁 Set {discount_percent}% discount for user {telegram_id}")
+        logger.info(f"🎁 Set {discount}% discount for user {telegram_id}")
         
         return {
             "status": "success",
             "telegram_id": telegram_id,
-            "discount_percent": discount_percent
+            "discount": discount
         }
     except HTTPException:
         raise
