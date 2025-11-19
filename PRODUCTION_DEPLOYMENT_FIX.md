@@ -113,7 +113,7 @@ curl https://crypto-shipping.emergent.host/api/telegram/status | jq
 ### Preview (Тестовый бот) - WORKING ✅
 ```env
 TELEGRAM_BOT_TOKEN="8560388458:AAEogOidGIJSEjVNxipDu60pu8WwZ2gOCPQ"
-WEBHOOK_BASE_URL="https://shipping-admin-fix.preview.emergentagent.com"
+WEBHOOK_BASE_URL="https://telegram-admin-fix-2.preview.emergentagent.com"
 # NO WEBHOOK_URL → POLLING mode (правильно для preview)
 ```
 
