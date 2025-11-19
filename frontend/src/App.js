@@ -3198,9 +3198,6 @@ const Home = () => {
               <Link to="/">
                 <Button variant="ghost" data-testid="nav-dashboard">Dashboard</Button>
               </Link>
-              <Link to="/create">
-                <Button variant="ghost" data-testid="nav-create">Create Order</Button>
-              </Link>
               <Link to="/monitoring">
                 <Button variant="ghost" data-testid="nav-monitoring">🛡️ Мониторинг</Button>
               </Link>
