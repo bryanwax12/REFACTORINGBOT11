@@ -39,6 +39,16 @@ async def broadcast_message(
     
     logger.info(f"📨 Broadcast request: image_url={image_url}, file_id={file_id}")
     
+    # Fix image_url if it's relative path
+    if image_url and not image_url.startswith('http'):
+        # Get base URL from request or env
+        base_url = str(request.base_url).rstrip('/')
+        if image_url.startswith('/'):
+            image_url = f"{base_url}{image_url}"
+        else:
+            image_url = f"{base_url}/{image_url}"
+        logger.info(f"🔧 Fixed image_url to: {image_url}")
+    
     from repositories import get_user_repo
     
     # Get bot_instance from app.state
