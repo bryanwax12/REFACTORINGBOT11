@@ -210,6 +210,35 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
                                     "topup_success_message_text": message_text
                                 }}
                             )
+                        
+                        # Notify admin about balance top-up
+                        try:
+                            from server import ADMIN_TELEGRAM_ID
+                            if ADMIN_TELEGRAM_ID and bot_instance:
+                                user_display = f"{user.get('first_name', 'Unknown')}"
+                                if user.get('username'):
+                                    user_display += f" (@{user.get('username')})"
+                                else:
+                                    user_display += f" (ID: {telegram_id})"
+                                
+                                admin_notification = f"""💰 *Пополнение баланса*
+
+👤 *Пользователь:* {user_display}
+
+💵 *Сумма:* ${actual_amount:.2f}
+💳 *Новый баланс:* ${new_balance:.2f}
+
+🔖 *Track ID:* `{track_id}`
+🕐 *Время:* {datetime.now(timezone.utc).strftime('%d.%m.%Y %H:%M UTC')}"""
+                                
+                                await safe_telegram_call(bot_instance.send_message(
+                                    chat_id=int(ADMIN_TELEGRAM_ID),
+                                    text=admin_notification,
+                                    parse_mode='Markdown'
+                                ))
+                                logger.info("✅ Admin notified about balance top-up")
+                        except Exception as admin_notify_error:
+                            logger.error(f"Failed to notify admin about top-up: {admin_notify_error}")
                 else:
                     # Regular order payment
                     # Update order
