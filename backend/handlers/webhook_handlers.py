@@ -43,13 +43,24 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
         logger.info(f"🔍 Looking for payment with track_id: {track_id}")
         
         if status == 'Paid':
-            # Try both string and int formats
-            payment = await db.payments.find_one({"invoice_id": track_id}, {"_id": 0})
+            # Search by both invoice_id and track_id to support different payment flows
+            payment = await db.payments.find_one({
+                "$or": [
+                    {"invoice_id": track_id},
+                    {"track_id": track_id}
+                ]
+            }, {"_id": 0})
+            
             if not payment and track_id:
                 # Try as integer if string search failed
                 try:
                     track_id_int = int(track_id)
-                    payment = await db.payments.find_one({"invoice_id": track_id_int}, {"_id": 0})
+                    payment = await db.payments.find_one({
+                        "$or": [
+                            {"invoice_id": track_id_int},
+                            {"track_id": track_id_int}
+                        ]
+                    }, {"_id": 0})
                     logger.info(f"🔄 Retried with int type: {track_id_int}")
                 except (ValueError, TypeError):
                     pass
