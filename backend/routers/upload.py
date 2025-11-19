@@ -23,13 +23,13 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 MAX_FILE_SIZE = 10 * 1024 * 1024
 
 
-@router.post("/upload-image")
+@router.post("/upload-image", dependencies=[Depends(verify_admin_key)])
 async def upload_image(
     request: Request,
     file: UploadFile = File(...)
 ):
     """
-    Upload image and optionally send to Telegram bot to get file_id
+    Upload image and optionally send to Telegram bot to get file_id - ADMIN ONLY
     
     Returns:
         {
