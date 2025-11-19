@@ -73,8 +73,7 @@ export default function MonitoringTab() {
   const checkBotHealth = async () => {
     try {
       const response = await axios.get(`${API}/api/bot/health`, { 
-        timeout: 3000,
-        headers: { "X-Api-Key": ADMIN_API_KEY }
+        timeout: 3000
       });
       console.log("Health check response:", response.data.status);
       return response.data.status === "healthy";
