@@ -72,21 +72,25 @@ async def upload_image(
         
         if bot_instance:
             try:
-                # Send to a safe chat (can be admin chat or file channel)
-                # For now, we'll use the bot's own chat to get file_id
+                # Send to admin chat to get file_id
                 import io
+                import os
+                admin_telegram_id = os.getenv('ADMIN_TELEGRAM_ID')
                 
-                # Send photo to get file_id
-                message = await bot_instance.send_photo(
-                    chat_id=bot_instance.bot.id,  # Send to self
-                    photo=io.BytesIO(content),
-                    caption="Uploaded via admin panel"
-                )
-                
-                if message.photo:
-                    # Get largest photo size
-                    file_id = message.photo[-1].file_id
-                    logger.info(f"Got Telegram file_id: {file_id}")
+                if admin_telegram_id:
+                    # Send photo to admin to get file_id
+                    message = await bot_instance.send_photo(
+                        chat_id=int(admin_telegram_id),
+                        photo=io.BytesIO(content),
+                        caption="📸 Файл загружен для рассылки (можно удалить)"
+                    )
+                    
+                    if message.photo:
+                        # Get largest photo size
+                        file_id = message.photo[-1].file_id
+                        logger.info(f"✅ Got Telegram file_id: {file_id}")
+                else:
+                    logger.warning("ADMIN_TELEGRAM_ID not set, cannot get file_id")
             except Exception as e:
                 logger.warning(f"Could not upload to Telegram: {e}")
         
