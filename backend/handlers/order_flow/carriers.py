@@ -114,8 +114,21 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         # Save selected rate
         context.user_data['selected_rate'] = selected_rate
-        # Use 'carrier' field first (from formatted rates), fallback to carrier_friendly_name
-        context.user_data['selected_carrier'] = selected_rate.get('carrier', selected_rate.get('carrier_friendly_name', 'Unknown'))
+        
+        # Clean carrier name same as in UI (ui_utils.py)
+        carrier_original = selected_rate.get('carrier', selected_rate.get('carrier_friendly_name', 'Unknown'))
+        
+        # Apply same cleaning logic as in UI
+        carrier_clean = carrier_original
+        if 'stamps' in carrier_original.lower():
+            carrier_clean = 'USPS'
+        else:
+            for known_carrier in ['USPS', 'UPS', 'FedEx']:
+                if known_carrier.lower() in carrier_original.lower():
+                    carrier_clean = known_carrier
+                    break
+        
+        context.user_data['selected_carrier'] = carrier_clean
         # Use 'service' field first (from formatted rates), fallback to service_type
         context.user_data['selected_service'] = selected_rate.get('service', selected_rate.get('service_type', 'Standard'))
         
