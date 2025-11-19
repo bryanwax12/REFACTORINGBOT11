@@ -7,7 +7,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/bot", tags=["bot"])
+router = APIRouter(prefix="/api/bot", tags=["bot"])
 
 
 @router.get("/health")
