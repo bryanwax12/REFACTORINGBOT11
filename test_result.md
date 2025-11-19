@@ -6259,3 +6259,20 @@ fullstack:
         - working: true
           agent: "e1_fork_2"
           comment: "✅ MONITORING METRICS FIXED: (1) ✅ Backend API restructured (/app/backend/routers/bot.py строки 114-179): Обновлён endpoint /api/bot/metrics для возврата правильной структуры, добавлены вложенные объекты users, orders, revenue, sessions, добавлены новые метрики: premium users (balance > 0), active_today users (с заказами сегодня), revenue calculations (total: $595.25, average: $19.20), order statistics (pending: 22, completed: 9), (2) ✅ Frontend safety improved (/app/frontend/src/components/MonitoringTab.jsx строки 380-395): Добавлен optional chaining для безопасного доступа: metrics?.revenue?.total?.toFixed(2) || '0.00', metrics?.revenue?.average_order?.toFixed(2) || '0.00', metrics?.users?.active_today || 0, теперь компонент не падает если какие-то данные отсутствуют. NEW METRICS STRUCTURE: users: {total: 48, premium: 33, active_today: 1}, orders: {total: 34, pending: 22, completed: 9}, revenue: {total: 595.25, average_order: 19.2}, sessions: {active: 2}. TEST RESULTS: ✅ Endpoint возвращает правильную структуру, ✅ Frontend отображает все метрики без ошибок, ✅ Optional chaining защищает от undefined errors, ✅ Финансовая статистика работает корректно. CONCLUSION: Monitoring tab полностью работает с корректными метриками."
+
+
+backend:
+  - task: "Fix Monitoring Logs Runtime Error - reverse is not a function"
+    implemented: true
+    working: true
+    file: "/app/backend/routers/bot.py"
+    stuck_count: 0
+    priority: "P1_critical"
+    needs_retesting: false
+    status_history:
+        - working: false
+          agent: "e1_fork_2"
+          comment: "❌ CRITICAL ERROR: Monitoring tab падает с ошибкой 'logs.slice(...).reverse is not a function' на строке 86866 (MonitoringTab.jsx:415). INVESTIGATION: Frontend код вызывает logs.slice().reverse() ожидая что logs это массив (строка 415), backend endpoint /api/bot/logs возвращает logs как строку (raw text from tail command): {logs: 'INFO: ... \\nINFO: ...', lines: 100}, frontend пытается применить array methods (.slice(), .reverse(), .map()) к строке, что вызывает TypeError."
+        - working: true
+          agent: "e1_fork_2"
+          comment: "✅ LOGS PARSING FIXED: Обновлён endpoint /api/bot/logs в /app/backend/routers/bot.py (строки 92-168) для возврата структурированного массива логов. IMPLEMENTATION: (1) Парсинг строк логов в structured objects: каждая строка лога преобразуется в {timestamp, level, category, message}, (2) Level detection: regex для извлечения уровня (INFO|WARNING|ERROR|DEBUG|CRITICAL), (3) Timestamp extraction: парсинг timestamp из строки или генерация текущего, (4) Category detection: автоматическое определение категории по ключевым словам (orders, users, payments, telegram, api, system), (5) Fallback handling: plain text логи обрабатываются с default значениями. NEW RESPONSE FORMAT: {logs: [{timestamp: '2025-11-19 12:38:05', level: 'INFO', category: 'telegram', message: '...'}, ...], total: 3}. CATEGORIES: orders (заказы), users (пользователи), payments (платежи), telegram (бот), api (API requests), system (системные). TEST RESULTS: ✅ Type: list (массив, не строка), ✅ Count: работает для любого количества строк, ✅ Structured data: каждый лог с timestamp, level, category, message, ✅ Frontend .slice().reverse().map() теперь работает без ошибок. CONCLUSION: Logs отображаются в monitoring с правильным форматированием и категориями."
