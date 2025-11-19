@@ -41,7 +41,7 @@ async def refund_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     keyboard = [
         [InlineKeyboardButton("💬 Связаться с агентом", url="https://t.me/White_Label_Shipping_Bot_Agent")],
-        [InlineKeyboardButton("❌ Отмена", callback_data="start")]
+        [InlineKeyboardButton("🏠 Главное меню", callback_data="start")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
