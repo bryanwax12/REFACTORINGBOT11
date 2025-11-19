@@ -336,6 +336,21 @@ backend:
           agent: "testing"
           comment: "✅ КОМПЛЕКСНОЕ ТЕСТИРОВАНИЕ OXAPAY ЗАВЕРШЕНО: Проведено полное регрессионное тестирование после всех исправлений. РЕЗУЛЬТАТЫ: (1) ✅ API конфигурация корректна - URL: https://api.oxapay.com, endpoint: /v1/payment/invoice, API ключ в headers как merchant_api_key, все параметры в snake_case формате, (2) ✅ Создание инвойса успешно с суммой $15 - получен trackId: 141871818 и payLink: https://pay.oxapay.com/10720216/141871818, (3) ✅ Нет ошибки валидации (result code 101) - исправление устранило проблему, (4) ✅ Длина order_id корректна - новый формат 'top_{timestamp}_{uuid[:8]}' генерирует 23 символа (значительно меньше лимита 50), (5) ✅ Нет ошибки '50 characters' - API возвращает статус 200, (6) ✅ Все критические исправления работают. Oxapay интеграция полностью функциональна для пополнения баланса пользователей."
 
+  - task: "Oxapay Webhook - Duplicate Protection Fix"
+    implemented: true
+    working: true
+    file: "/app/backend/handlers/webhook_handlers.py"
+    stuck_count: 0
+    priority: "critical"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "main"
+          comment: "🔧 DUPLICATE WEBHOOK PROTECTION IMPLEMENTED: Added protection against duplicate webhook processing in handle_oxapay_webhook function. PROBLEM: Oxapay может отправлять дублирующиеся webhook'и для одного платежа, что приводило к повторному начислению баланса. SOLUTION: Добавлена проверка статуса платежа перед обновлением баланса - если платеж уже имеет статус 'paid', webhook игнорируется с сообщением 'Payment already processed'. IMPLEMENTATION: В строках 74-77 файла /app/backend/handlers/webhook_handlers.py добавлена проверка: if current_status == 'paid': logger.warning('DUPLICATE WEBHOOK DETECTED...') return {'status': 'ok', 'message': 'Payment already processed'}. Это предотвращает повторное начисление баланса при получении дублирующихся webhook'ов от Oxapay."
+        - working: true
+          agent: "testing"
+          comment: "✅ DUPLICATE WEBHOOK PROTECTION VERIFIED: Comprehensive testing confirms the duplicate protection fix is working perfectly. TESTING RESULTS: (1) ✅ Test 1 - Basic Webhook Functionality: PASSED - webhook endpoint accessible and processing correctly, (2) ✅ Test 2 - Duplicate Webhook Protection: PASSED - first webhook processed payment (status changed from 'pending' to 'paid'), second webhook detected as duplicate and returned 'Payment already processed' message, payment status remained 'paid' (no double processing), (3) ✅ Test 3 - Non-existent Payment Handling: PASSED - webhook handles missing payments gracefully. CRITICAL SUCCESS: 3/3 tests passed (100% success rate). LOG VERIFICATION: Backend logs show exact duplicate detection: '⚠️ DUPLICATE WEBHOOK DETECTED: Payment duplicate_test_456 already processed with status paid. Ignoring.' CONCLUSION: The duplicate webhook protection is working correctly - prevents double balance crediting and ensures payment integrity. Users will not receive duplicate balance top-ups even if Oxapay sends multiple webhook notifications for the same payment."
+
   - task: "ShipStation V2 API Rate Request Fix"
     implemented: true
     working: true
