@@ -93,6 +93,7 @@ async def broadcast_message(
                 
                 # Send with image (file_id or URL)
                 try:
+                    result = None
                     if file_id:
                         # Use file_id (faster, no need to re-download)
                         logger.info(f"📤 Отправка с file_id пользователю {username} ({telegram_id})")
@@ -103,7 +104,6 @@ async def broadcast_message(
                                 caption=message
                             )
                         )
-                        logger.info(f"✅ Успешно отправлено {username}: {result}")
                     elif image_url:
                         # Use URL (will download image)
                         logger.info(f"📤 Отправка с URL пользователю {username} ({telegram_id})")
@@ -114,7 +114,6 @@ async def broadcast_message(
                                 caption=message
                             )
                         )
-                        logger.info(f"✅ Успешно отправлено {username}: {result}")
                     else:
                         # Text only message
                         logger.info(f"📤 Отправка текста пользователю {username} ({telegram_id})")
@@ -124,9 +123,15 @@ async def broadcast_message(
                                 text=message
                             )
                         )
-                        logger.info(f"✅ Успешно отправлено {username}: {result}")
                     
-                    success_count += 1
+                    # Check if send was successful (safe_telegram_call returns None on error)
+                    if result is not None:
+                        logger.info(f"✅ Успешно отправлено {username} ({telegram_id})")
+                        success_count += 1
+                    else:
+                        logger.error(f"❌ Ошибка отправки {username} ({telegram_id}): safe_telegram_call returned None")
+                        fail_count += 1
+                        
                 except Exception as telegram_err:
                     logger.error(f"❌ Telegram API error для {username} ({telegram_id}): {telegram_err}")
                     fail_count += 1
