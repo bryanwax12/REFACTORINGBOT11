@@ -185,10 +185,22 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if existing_order and existing_order.get('payment_status') == 'pending':
                 # Update existing order with new rate
                 logger.info(f"📦 Updating existing pending order {existing_order_id}")
+                
+                # Clean carrier name same as above
+                carrier_original = selected_rate.get('carrier', selected_rate.get('carrier_friendly_name', 'Unknown'))
+                carrier_clean = carrier_original
+                if 'stamps' in carrier_original.lower():
+                    carrier_clean = 'USPS'
+                else:
+                    for known_carrier in ['USPS', 'UPS', 'FedEx']:
+                        if known_carrier.lower() in carrier_original.lower():
+                            carrier_clean = known_carrier
+                            break
+                
                 await db.orders.update_one(
                     {"order_id": existing_order_id},
                     {"$set": {
-                        "selected_carrier": selected_rate.get('carrier', selected_rate.get('carrier_friendly_name', 'Unknown')),
+                        "selected_carrier": carrier_clean,
                         "selected_service": selected_rate.get('service', selected_rate.get('service_type', 'Standard')),
                         "amount": final_cost
                     }}
