@@ -301,7 +301,7 @@ async def legacy_enable_maintenance(request: Request, api_key: str = Depends(ver
     # Notify all users
     users_notified = 0
     if bot_instance:
-        users = await db.users.find({"blocked": False, "bot_blocked_by_user": {"$ne": True}}, {"_id": 0}).to_list(1000)
+        users = await db.users.find({"bot_blocked_by_user": {"$ne": True}}, {"_id": 0}).to_list(1000)
         message = (
             "🔧 *Технические работы*\n\n"
             "Уважаемый пользователь!\n\n"
@@ -348,7 +348,7 @@ async def legacy_disable_maintenance(request: Request, api_key: str = Depends(ve
     # Notify all users
     users_notified = 0
     if bot_instance:
-        users = await db.users.find({"blocked": False, "bot_blocked_by_user": {"$ne": True}}, {"_id": 0}).to_list(1000)
+        users = await db.users.find({"bot_blocked_by_user": {"$ne": True}}, {"_id": 0}).to_list(1000)
         message = (
             "✅ *Технические работы завершены!*\n\n"
             "Добрый день!\n\n"
