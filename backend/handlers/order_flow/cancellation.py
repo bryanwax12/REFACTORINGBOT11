@@ -142,6 +142,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Get the state we were in when cancel was pressed
     last_state = context.user_data.get('last_state')
+    logger.error(f'🔍 DEBUG return_to_order: last_state={last_state}, user_data keys={list(context.user_data.keys())}')
     
     logger.info(f"return_to_order: last_state = {last_state}, type = {type(last_state)}")
     logger.info(f"return_to_order: user_data keys = {list(context.user_data.keys())}")
