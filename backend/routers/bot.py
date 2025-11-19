@@ -116,6 +116,7 @@ async def get_bot_metrics():
     """Get bot metrics and statistics"""
     from server import db
     from repositories import get_user_repo, get_order_repo
+    from datetime import datetime, timedelta
     
     try:
         user_repo = get_user_repo()
@@ -127,13 +128,47 @@ async def get_bot_metrics():
         
         # Get recent activity
         active_sessions = await db.user_sessions.count_documents({})
-        pending_orders = await db.pending_orders.count_documents({})
+        
+        # Get users with balance > 0
+        premium_users = await db.users.count_documents({"balance": {"$gt": 0}})
+        
+        # Get active users today
+        today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+        active_today = await db.orders.distinct("telegram_id", {
+            "created_at": {"$gte": today_start.isoformat()}
+        })
+        
+        # Calculate revenue
+        orders = await db.orders.find(
+            {"payment_status": "paid"},
+            {"_id": 0, "amount": 1}
+        ).to_list(10000)
+        
+        total_revenue = sum(order.get("amount", 0) for order in orders)
+        average_order = total_revenue / len(orders) if orders else 0
+        
+        # Get pending/completed orders
+        pending_orders = await db.orders.count_documents({"shipping_status": {"$in": ["pending", "processing"]}})
+        completed_orders = await db.orders.count_documents({"shipping_status": "label_created"})
         
         return {
-            "total_users": total_users,
-            "total_orders": total_orders,
-            "active_sessions": active_sessions,
-            "pending_orders": pending_orders
+            "users": {
+                "total": total_users,
+                "premium": premium_users,
+                "active_today": len(active_today)
+            },
+            "orders": {
+                "total": total_orders,
+                "pending": pending_orders,
+                "completed": completed_orders
+            },
+            "revenue": {
+                "total": round(total_revenue, 2),
+                "average_order": round(average_order, 2)
+            },
+            "sessions": {
+                "active": active_sessions
+            }
         }
     except Exception as e:
         logger.error(f"Error getting bot metrics: {e}")
