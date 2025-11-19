@@ -66,9 +66,9 @@ async def telegram_status():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/restart")
+@router.post("/restart", dependencies=[Depends(verify_admin_key)])
 async def restart_bot():
-    """Restart bot (supervisor restart)"""
+    """Restart bot (supervisor restart) - ADMIN ONLY"""
     import subprocess
     
     try:
