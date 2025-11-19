@@ -115,9 +115,9 @@ async def upload_image(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.delete("/upload-image/{filename}")
+@router.delete("/upload-image/{filename}", dependencies=[Depends(verify_admin_key)])
 async def delete_uploaded_image(filename: str):
-    """Delete uploaded image"""
+    """Delete uploaded image - ADMIN ONLY"""
     try:
         file_path = UPLOAD_DIR / filename
         
