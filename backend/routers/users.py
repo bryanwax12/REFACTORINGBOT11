@@ -329,13 +329,14 @@ async def check_all_bot_access():
                 
             except Forbidden:
                 # User blocked the bot
-                await user_repo.update(
-                    telegram_id,
-                    {
+                from server import db
+                await db.users.update_one(
+                    {"telegram_id": telegram_id},
+                    {"$set": {
                         "bot_blocked_by_user": True,
                         "bot_blocked_at": datetime.utcnow().isoformat(),
                         "bot_access_checked_at": datetime.utcnow().isoformat()
-                    }
+                    }}
                 )
                 blocked_count += 1
                 checked_count += 1
