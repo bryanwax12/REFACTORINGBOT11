@@ -2,7 +2,8 @@
 Upload Router
 Endpoints for file uploads
 """
-from fastapi import APIRouter, UploadFile, File, HTTPException, Request
+from fastapi import APIRouter, UploadFile, File, HTTPException, Request, Depends
+from handlers.admin_handlers import verify_admin_key
 from fastapi.responses import JSONResponse
 import logging
 import os
