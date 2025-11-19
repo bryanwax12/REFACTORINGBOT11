@@ -231,6 +231,136 @@ async def set_user_discount(telegram_id: int, discount: float):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.post("/check-all-channel-status")
+async def check_all_channel_status():
+    """Check channel membership status for all users"""
+    from repositories import get_user_repo
+    from server import bot_instance
+    from telegram.error import TelegramError
+    import os
+    
+    if not bot_instance:
+        raise HTTPException(status_code=503, detail="Bot instance not available")
+    
+    try:
+        channel_id = os.getenv('CHANNEL_ID')
+        if not channel_id:
+            raise HTTPException(status_code=400, detail="CHANNEL_ID not configured")
+        
+        user_repo = get_user_repo()
+        users = await user_repo.find_all(limit=10000)
+        
+        checked_count = 0
+        member_count = 0
+        
+        for user in users:
+            telegram_id = user['telegram_id']
+            
+            try:
+                # Check channel membership
+                member = await bot_instance.get_chat_member(chat_id=channel_id, user_id=telegram_id)
+                is_member = member.status in ['member', 'administrator', 'creator']
+                
+                # Update user record
+                await user_repo.update(
+                    telegram_id,
+                    {
+                        "is_channel_member": is_member,
+                        "channel_status_checked_at": str(asyncio.get_event_loop().time())
+                    }
+                )
+                
+                if is_member:
+                    member_count += 1
+                checked_count += 1
+                
+            except TelegramError as e:
+                logger.warning(f"Failed to check channel status for user {telegram_id}: {e}")
+                continue
+        
+        logger.info(f"✅ Checked channel status for {checked_count} users. Members: {member_count}")
+        
+        return {
+            "success": True,
+            "checked_count": checked_count,
+            "member_count": member_count
+        }
+    except Exception as e:
+        logger.error(f"Error checking all channel status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/check-all-bot-access")
+async def check_all_bot_access():
+    """Check bot accessibility for all users"""
+    from repositories import get_user_repo
+    from server import bot_instance
+    from telegram.error import TelegramError, Forbidden
+    import asyncio
+    from datetime import datetime
+    
+    if not bot_instance:
+        raise HTTPException(status_code=503, detail="Bot instance not available")
+    
+    try:
+        user_repo = get_user_repo()
+        users = await user_repo.find_all(limit=10000)
+        
+        checked_count = 0
+        accessible_count = 0
+        blocked_count = 0
+        
+        for user in users:
+            telegram_id = user['telegram_id']
+            
+            try:
+                # Try to send a test action (get chat info)
+                await bot_instance.get_chat(chat_id=telegram_id)
+                
+                # Bot is accessible
+                await user_repo.update(
+                    telegram_id,
+                    {
+                        "bot_blocked_by_user": False,
+                        "bot_access_checked_at": datetime.utcnow().isoformat()
+                    }
+                )
+                accessible_count += 1
+                checked_count += 1
+                
+            except Forbidden:
+                # User blocked the bot
+                await user_repo.update(
+                    telegram_id,
+                    {
+                        "bot_blocked_by_user": True,
+                        "bot_blocked_at": datetime.utcnow().isoformat(),
+                        "bot_access_checked_at": datetime.utcnow().isoformat()
+                    }
+                )
+                blocked_count += 1
+                checked_count += 1
+                
+            except TelegramError as e:
+                logger.warning(f"Failed to check bot access for user {telegram_id}: {e}")
+                continue
+            
+            # Small delay to avoid rate limiting
+            await asyncio.sleep(0.05)
+        
+        logger.info(f"✅ Checked bot access for {checked_count} users. Accessible: {accessible_count}, Blocked: {blocked_count}")
+        
+        return {
+            "success": True,
+            "checked_count": checked_count,
+            "accessible_count": accessible_count,
+            "blocked_count": blocked_count
+        }
+    except Exception as e:
+        logger.error(f"Error checking all bot access: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/leaderboard")
 async def get_users_leaderboard(limit: int = 10):
     """Get users leaderboard by orders count"""
