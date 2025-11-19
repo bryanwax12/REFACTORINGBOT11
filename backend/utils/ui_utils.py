@@ -94,10 +94,7 @@ def get_main_menu_keyboard(user_balance: float = 0.0) -> InlineKeyboardMarkup:
         [InlineKeyboardButton(ButtonTexts.CREATE_ORDER, callback_data=CallbackData.NEW_ORDER)],
         [InlineKeyboardButton(ButtonTexts.my_balance(user_balance), callback_data=CallbackData.MY_BALANCE)],
         [InlineKeyboardButton(ButtonTexts.MY_TEMPLATES, callback_data=CallbackData.MY_TEMPLATES)],
-        [
-            InlineKeyboardButton("💰 Refund Label", callback_data="refund_menu"),
-            InlineKeyboardButton("📝 Мои заявки", callback_data="my_refunds")
-        ],
+        [InlineKeyboardButton("💰 Refund Label", callback_data="refund_menu")],
         [InlineKeyboardButton(ButtonTexts.HELP, callback_data=CallbackData.HELP)],
         [InlineKeyboardButton(ButtonTexts.FAQ, callback_data=CallbackData.FAQ)]
     ]
