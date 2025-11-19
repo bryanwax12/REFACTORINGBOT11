@@ -259,12 +259,13 @@ async def check_all_channel_status():
                 is_member = member.status in ['member', 'administrator', 'creator']
                 
                 # Update user record
-                await user_repo.update(
-                    telegram_id,
-                    {
+                from server import db
+                await db.users.update_one(
+                    {"telegram_id": telegram_id},
+                    {"$set": {
                         "is_channel_member": is_member,
                         "channel_status_checked_at": str(asyncio.get_event_loop().time())
-                    }
+                    }}
                 )
                 
                 if is_member:
