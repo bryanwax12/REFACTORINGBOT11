@@ -42,7 +42,8 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
         # Try to find payment by invoice_id (could be string or int in DB)
         logger.info(f"🔍 Looking for payment with track_id: {track_id}")
         
-        if status == 'Paid':
+        # CRITICAL: Oxapay может отправлять status в разных регистрах (Paid, paid, PAID)
+        if status and status.lower() == 'paid':
             # Search by both invoice_id and track_id to support different payment flows
             payment = await db.payments.find_one({
                 "$or": [
