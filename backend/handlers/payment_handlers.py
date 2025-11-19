@@ -230,6 +230,7 @@ async def handle_topup_amount_input(update: Update, context: ContextTypes.DEFAUL
             payment_dict = payment.model_dump()
             payment_dict['created_at'] = payment_dict['created_at'].isoformat()
             payment_dict['telegram_id'] = telegram_id
+            payment_dict['track_id'] = track_id  # Store track_id for webhook lookup
             payment_dict['type'] = 'topup'
             payment_dict['topup_input_message_id'] = topup_input_message_id
             await insert_payment(payment_dict)
