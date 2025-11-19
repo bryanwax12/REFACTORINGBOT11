@@ -217,8 +217,25 @@ class TelegramErrorHandler:
             except Exception as send_error:
                 logger.error(f"Failed to send error message to user: {send_error}")
         
-        # Можно добавить отправку уведомления администратору
-        # await notify_admin_about_error(update, error)
+        # Отправка уведомления администратору об ошибке
+        try:
+            from handlers.admin_handlers import notify_admin_error
+            from repositories import get_user_repo
+            
+            # Получаем информацию о пользователе
+            if update and update.effective_user:
+                user_repo = get_user_repo()
+                user = await user_repo.find_by_telegram_id(update.effective_user.id)
+                
+                if user:
+                    error_details = f"{type(error).__name__}: {str(error)[:200]}"
+                    await notify_admin_error(
+                        user_info=user,
+                        error_type="Telegram Bot Error",
+                        error_details=error_details
+                    )
+        except Exception as notify_error:
+            logger.error(f"Failed to notify admin about error: {notify_error}")
 
 
 # Вспомогательные функции для специфических типов ошибок
