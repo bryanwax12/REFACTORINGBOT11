@@ -96,11 +96,19 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
     )
     
     if not success:
+        # Add navigation buttons for error case
+        keyboard = [
+            [InlineKeyboardButton("📦 Вернуться к заказу", callback_data='continue_order')],
+            [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
         await safe_telegram_call(update.message.reply_text(
             f"""❌ *Ошибка сохранения шаблона*
 
 {error}""",
-            parse_mode='Markdown'
+            parse_mode='Markdown',
+            reply_markup=reply_markup
         ))
         return ConversationHandler.END
     
