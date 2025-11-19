@@ -129,7 +129,7 @@ async def add_user_balance(telegram_id: int, amount: float, description: str = "
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
-        success = await user_repo.update_balance(telegram_id, amount, description)
+        success = await user_repo.update_balance(telegram_id, amount, operation="add")
         
         if not success:
             raise HTTPException(status_code=500, detail="Failed to add balance")
