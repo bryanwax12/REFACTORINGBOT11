@@ -94,42 +94,62 @@ async def broadcast_message(
                 # Send with image (file_id or URL)
                 try:
                     result = None
+                    send_error = None
+                    
                     if file_id:
                         # Use file_id (faster, no need to re-download)
                         logger.info(f"📤 Отправка с file_id пользователю {username} ({telegram_id})")
-                        result = await safe_telegram_call(
-                            bot_instance.send_photo(
+                        try:
+                            result = await bot_instance.send_photo(
                                 chat_id=telegram_id,
                                 photo=file_id,
                                 caption=message
                             )
-                        )
+                        except Exception as e:
+                            send_error = str(e)
+                            result = None
                     elif image_url:
                         # Use URL (will download image)
                         logger.info(f"📤 Отправка с URL пользователю {username} ({telegram_id})")
-                        result = await safe_telegram_call(
-                            bot_instance.send_photo(
+                        try:
+                            result = await bot_instance.send_photo(
                                 chat_id=telegram_id,
                                 photo=image_url,
                                 caption=message
                             )
-                        )
+                        except Exception as e:
+                            send_error = str(e)
+                            result = None
                     else:
                         # Text only message
                         logger.info(f"📤 Отправка текста пользователю {username} ({telegram_id})")
-                        result = await safe_telegram_call(
-                            bot_instance.send_message(
+                        try:
+                            result = await bot_instance.send_message(
                                 chat_id=telegram_id,
                                 text=message
                             )
-                        )
+                        except Exception as e:
+                            send_error = str(e)
+                            result = None
                     
-                    # Check if send was successful (safe_telegram_call returns None on error)
+                    # Check if send was successful
                     if result is not None:
                         logger.info(f"✅ Успешно отправлено {username} ({telegram_id})")
                         success_count += 1
                     else:
-                        logger.error(f"❌ Ошибка отправки {username} ({telegram_id}): safe_telegram_call returned None")
+                        # Log specific error
+                        if send_error:
+                            logger.error(f"❌ Ошибка отправки {username} ({telegram_id}): {send_error}")
+                            
+                            # If chat not found or user blocked - mark in DB
+                            if "chat not found" in send_error.lower() or "bot was blocked" in send_error.lower() or "user is deactivated" in send_error.lower():
+                                logger.warning(f"⚠️ Пометка пользователя {username} ({telegram_id}) как заблокировавшего бота")
+                                await user_repo.update_one(
+                                    {"telegram_id": telegram_id},
+                                    {"$set": {"bot_blocked_by_user": True}}
+                                )
+                        else:
+                            logger.error(f"❌ Ошибка отправки {username} ({telegram_id}): unknown error")
                         fail_count += 1
                         
                 except Exception as telegram_err:
