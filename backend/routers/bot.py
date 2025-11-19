@@ -93,6 +93,8 @@ async def restart_bot():
 async def get_bot_logs(lines: int = 100):
     """Get recent bot logs"""
     import subprocess
+    import re
+    from datetime import datetime
     
     try:
         result = subprocess.run(
@@ -102,9 +104,58 @@ async def get_bot_logs(lines: int = 100):
             timeout=5
         )
         
+        # Parse logs into structured format
+        log_lines = result.stdout.strip().split('\n')
+        parsed_logs = []
+        
+        for line in log_lines:
+            if not line.strip():
+                continue
+            
+            # Try to parse structured logs (level:module:message format)
+            log_entry = {
+                "timestamp": "",
+                "level": "INFO",
+                "category": "system",
+                "message": line
+            }
+            
+            # Match pattern: LEVEL:module:message or LEVEL - message
+            level_match = re.match(r'^(INFO|WARNING|ERROR|DEBUG|CRITICAL)[:\s-]+(.+)$', line)
+            if level_match:
+                log_entry["level"] = level_match.group(1)
+                log_entry["message"] = level_match.group(2)
+                
+                # Try to extract timestamp if present
+                time_match = re.search(r'(\d{4}-\d{2}-\d{2}[T\s]\d{2}:\d{2}:\d{2})', line)
+                if time_match:
+                    log_entry["timestamp"] = time_match.group(1)
+                else:
+                    log_entry["timestamp"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+                
+                # Try to extract category/module
+                if "order" in line.lower():
+                    log_entry["category"] = "orders"
+                elif "user" in line.lower():
+                    log_entry["category"] = "users"
+                elif "payment" in line.lower():
+                    log_entry["category"] = "payments"
+                elif "telegram" in line.lower() or "bot" in line.lower():
+                    log_entry["category"] = "telegram"
+                elif "uvicorn" in line.lower() or "GET" in line or "POST" in line:
+                    log_entry["category"] = "api"
+                else:
+                    log_entry["category"] = "system"
+            else:
+                # Plain text line
+                log_entry["timestamp"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+                log_entry["category"] = "system"
+            
+            parsed_logs.append(log_entry)
+        
         return {
-            "logs": result.stdout,
-            "lines": lines
+            "logs": parsed_logs,
+            "total": len(parsed_logs)
         }
     except Exception as e:
         logger.error(f"Error getting bot logs: {e}")
