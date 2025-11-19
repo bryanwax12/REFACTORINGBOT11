@@ -38,7 +38,8 @@ async def get_maintenance_status():
 @router.post("/enable", dependencies=[Depends(verify_admin_key)])
 async def enable_maintenance(message: Optional[str] = None):
     """Enable maintenance mode - ADMIN ONLY"""
-    from server import db
+    from server import db, bot_instance
+    from utils.telegram_utils import safe_telegram_call
     
     try:
         maintenance_message = message or "Бот временно на техническом обслуживании. Попробуйте позже."
@@ -55,6 +56,36 @@ async def enable_maintenance(message: Optional[str] = None):
         )
         
         logger.info("🔧 Maintenance mode ENABLED")
+        
+        # Broadcast notification to all users
+        if bot_instance:
+            try:
+                logger.info("📢 Broadcasting maintenance notification to all users...")
+                users = await db.users.find(
+                    {"bot_blocked_by_user": {"$ne": True}},
+                    {"_id": 0, "telegram_id": 1}
+                ).to_list(10000)
+                
+                notification_text = f"🔧 *Режим обслуживания*\n\n{maintenance_message}"
+                
+                success_count = 0
+                failed_count = 0
+                
+                for user in users:
+                    try:
+                        await safe_telegram_call(bot_instance.send_message(
+                            chat_id=user['telegram_id'],
+                            text=notification_text,
+                            parse_mode='Markdown'
+                        ))
+                        success_count += 1
+                    except Exception as send_error:
+                        failed_count += 1
+                        logger.warning(f"Failed to notify user {user['telegram_id']}: {send_error}")
+                
+                logger.info(f"✅ Maintenance notification sent: {success_count} success, {failed_count} failed")
+            except Exception as broadcast_error:
+                logger.error(f"Error broadcasting maintenance notification: {broadcast_error}")
         
         return {
             "status": "enabled",
