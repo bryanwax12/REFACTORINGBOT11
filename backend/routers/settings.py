@@ -28,9 +28,9 @@ async def get_api_mode():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/api-mode")
+@router.post("/api-mode", dependencies=[Depends(verify_admin_key)])
 async def set_api_mode(mode: str):
-    """Set API mode (production/test)"""
+    """Set API mode (production/test) - ADMIN ONLY"""
     from server import api_config_manager
     
     try:
