@@ -62,23 +62,28 @@ async def telegram_webhook(request: Request):
         
         # Get the update data from the request
         update_data = await request.json()
+        logger.info(f"📩 WEBHOOK RECEIVED: {update_data.get('message', {}).get('text', 'no message')}")
         
         # Check if application is initialized
         if not srv.application:
-            logger.error("Application not initialized")
+            logger.error("❌ Application not initialized")
             return {"ok": False, "error": "Application not ready"}
+        
+        logger.info(f"✅ Application is initialized")
         
         # Create a Telegram Update object using application's bot
         update = Update.de_json(update_data, srv.application.bot)
         
         if update:
+            logger.info(f"✅ Update created, processing...")
             # Process the update through the application
             await srv.application.process_update(update)
+            logger.info(f"✅ Update processed successfully")
             return {"ok": True}
         else:
-            logger.warning("Update is None")
+            logger.warning("⚠️ Update is None")
             return {"ok": False, "error": "Invalid update"}
             
     except Exception as e:
-        logger.error(f"Error processing Telegram webhook: {e}", exc_info=True)
+        logger.error(f"❌ Error processing Telegram webhook: {e}", exc_info=True)
         return {"ok": False, "error": str(e)}
