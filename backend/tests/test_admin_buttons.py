@@ -6,8 +6,14 @@ import asyncio
 import httpx
 import os
 import sys
+from dotenv import load_dotenv
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Load .env file
+ROOT_DIR = Path(__file__).parent.parent
+load_dotenv(ROOT_DIR / '.env')
 
 
 async def test_admin_buttons():
