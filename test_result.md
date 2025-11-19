@@ -761,9 +761,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Handlers Refactoring - Modular Architecture Migration"
+    - "Oxapay Webhook Flow - Duplicate Protection Fix"
   stuck_tasks:
-    []
+    - "Oxapay Webhook Flow - Duplicate Protection Fix"
   test_all: false
   test_priority: "high_first"
   manual_testing_required:
