@@ -1377,6 +1377,8 @@ async def startup_event():
             
             application.add_handler(refund_conv_handler)
             application.add_handler(CallbackQueryHandler(my_refunds, pattern='^my_refunds$'))
+            from handlers.refund_handlers import return_to_main_menu
+            application.add_handler(CallbackQueryHandler(return_to_main_menu, pattern='^main_menu$'))
             application.add_handler(order_conv_handler)
             application.add_handler(CommandHandler("start", start_command))
             application.add_handler(CommandHandler("help", help_command))
