@@ -98,7 +98,7 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if not success:
         # Add navigation buttons for error case
         keyboard = [
-            [InlineKeyboardButton("📦 Вернуться к заказу", callback_data='continue_order')],
+            [InlineKeyboardButton("📦 Вернуться к заказу", callback_data='confirm_data')],
             [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
