@@ -203,7 +203,8 @@ async def enable_maintenance_mode(authenticated: bool = Depends(verify_admin_key
 @admin_router.post("/maintenance/disable")
 async def disable_maintenance_mode(authenticated: bool = Depends(verify_admin_key)):
     """Disable maintenance mode"""
-    from server import db, clear_settings_cache
+    from server import db, clear_settings_cache, bot_instance
+    from utils.telegram_utils import safe_telegram_call
     
     try:
         await db.settings.update_one(
@@ -212,6 +213,41 @@ async def disable_maintenance_mode(authenticated: bool = Depends(verify_admin_ke
             upsert=True
         )
         clear_settings_cache()
+        
+        # Broadcast notification to all users
+        if bot_instance:
+            try:
+                logger.info("📢 Broadcasting maintenance DISABLED notification to all users...")
+                users = await db.users.find(
+                    {"bot_blocked_by_user": {"$ne": True}},
+                    {"_id": 0, "telegram_id": 1}
+                ).to_list(10000)
+                
+                notification_text = "✅ *Бот снова работает!*\n\nТехническое обслуживание завершено. Вы можете продолжить пользоваться ботом."
+                
+                success_count = 0
+                failed_count = 0
+                
+                for user in users:
+                    try:
+                        await safe_telegram_call(bot_instance.send_message(
+                            chat_id=user['telegram_id'],
+                            text=notification_text,
+                            parse_mode='Markdown'
+                        ))
+                        success_count += 1
+                    except Exception as send_error:
+                        failed_count += 1
+                        if "bot was blocked" in str(send_error).lower():
+                            await db.users.update_one(
+                                {"telegram_id": user['telegram_id']},
+                                {"$set": {"bot_blocked_by_user": True}}
+                            )
+                
+                logger.info(f"✅ Maintenance DISABLED notification sent: {success_count} success, {failed_count} failed")
+            except Exception as broadcast_error:
+                logger.error(f"Error broadcasting maintenance disabled notification: {broadcast_error}")
+        
         return {"success": True, "message": "Maintenance mode disabled"}
     except Exception as e:
         logger.error(f"Error disabling maintenance mode: {e}")
