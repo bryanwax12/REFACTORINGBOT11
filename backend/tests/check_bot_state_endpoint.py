@@ -18,7 +18,7 @@ async def check_bot_state():
     async with httpx.AsyncClient(timeout=10) as client:
         try:
             response = await client.get(
-                "https://telegram-admin-fix-2.preview.emergentagent.com/api/stats",
+                "https://telemend.preview.emergentagent.com/api/stats",
                 headers={"x-api-key": "sk_admin_e19063c3f82f447ba4ccf49cd97dd9fd_2024"}
             )
             

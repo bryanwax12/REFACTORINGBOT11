@@ -7,10 +7,12 @@
 5.  Устранить критические ошибки , , .
 6.  Решить проблему с истечением сессии пользователя.
 7.  Провести очистку кода, линтинг и нагрузочное тестирование.
-8.  Починить неработающие кнопки в админ-панели (, , , ).
+8.  Починить неработающие кнопки в админ-панели (, , , , , , ).
 9.  Создать новую функцию: система запроса возврата средств (рефанда) за лейблы старше 5 дней, с UI в боте и админ-панели.
 10. Убедиться, что состояния пользователей не пересекаются под нагрузкой.
 11. Исправить неработающие уведомления при изменении баланса из админки.
+12. Удалить ненужные элементы интерфейса (, ).
+13. Реализовать загрузку файлов для рассылок.
 
 PRODUCT REQUIREMENTS:
 1.  **Стабильность**: Основной флоу Telegram-бота и админки должен работать без ошибок, зависаний и сбоев.
@@ -22,1302 +24,129 @@ PRODUCT REQUIREMENTS:
 **User's preferred language**: Русский
 
 **what currently exists?**
-Агент провел масштабный рефакторинг и исправление ошибок. Ключевая проблема с отправкой уведомлений из админ-панели была решена путем передачи экземпляра бота через  вместо небезопасного глобального импорта. Была проведена полная ревизия кода: все прямые импорты  заменены на новый подход, настроено корректное логирование уровня , а временные  заменены на .
-
-Были исправлены многочисленные баги, обнаруженные пользователем в реальном времени, включая:
--   Неработающая кнопка Details в админ-панели.
--   Некорректный выбор перевозчика (UPS/USPS).
--   Неработающие кнопки в диалогах (отмена пополнения, ошибка сохранения шаблона).
--   Некорректное завершение диалога при отмене рефанда.
--   UI/UX был улучшен по просьбе пользователя (дизайн уведомлений, тексты и кнопки в меню).
+Агент стабилизировал приложение, исправив множество критических ошибок. Была отлажена и исправлена функция рассылки (включая рассылку с изображениями), проведена очистка базы данных по запросу пользователя. Агент успешно защитил ключевые административные эндпоинты авторизацией и выполнил линтинг кода, исправив десятки ошибок. Были решены многочисленные проблемы с развертыванием в production (неправильные переменные окружения, неработающий webhook), бот успешно запущен и работает на preview URL. Также исправлены системные ошибки в логике состояний () при отмене заказа, особенно при использовании шаблонов.
 
 **Last working item**:
-    - Last item agent was working: По запросу пользователя агент начал работу над повышением производительности и стабильности бота перед деплоем. Были созданы файлы для реализации rate limiting и других оптимизаций ( и ), но они еще не были интегрированы в основной файл приложения .
+    - Last item agent was working: Отладка вебхука от Oxapay. Пользователь попросил протестировать платежи. Агент симулировал получение вебхука и обнаружил, что баланс пользователя не обновляется, поскольку система не может найти соответствующий платеж в базе данных.
     - Status: IN PROGRESS
     - Agent Testing Done: N
-    - Which testing method agent to use? backend testing agent (для проверки отсутствия регрессий и оценки производительности после внедрения оптимизаций).
+    - Which testing method agent to use? backend testing agent. Необходимо симулировать полный цикл: 1. Создать запись о платеже в БД с . 2. Отправить POST-запрос на эндпоинт вебхука, имитирующий данные от Oxapay. 3. Проверить, что баланс пользователя обновился, а статус платежа изменился с  на .
     - User Testing Done: N
 
 **All Pending/In progress Issue list**:
-  - Issue 1: (P0) Интеграция оптимизаций производительности и стабильности.
-  - Issue 2: (P1) Автоматические вебхуки от Oxapay не приходят на сервер после реальной оплаты.
-  - Issue 3: (P2) Тестовый бот не отображается в списке ботов в админ-панели.
-  - Issue 4: (P3) Кнопки в админ-панели (, , ) не были комплексно проверены пользователем после всех исправлений.
+  - Issue 1: (P0) Вебхук от Oxapay не обновляет баланс пользователя.
+  - Issue 2: (P1) Production URL недоступен.
+  - Issue 3: (P2) Тестовый бот не отображается в админ-панели.
   
   Issues Detail:
   - Issue 1: 
-     - Attempted fixes: Созданы файлы конфигурации и middleware.
+     - Attempted fixes: Агент симулировал получение вебхука и обнаружил, что платеж не находится в БД. Расследование показало, что обработчик ищет платеж по полю , в то время как данные от Oxapay (и созданный для теста платеж) содержат .
      - Next debug checklist: 
-        1. В файле  импортировать созданные middleware и конфигурации.
-        2. Применить rate-limiting middleware к приложению FastAPI.
-        3. Убедиться, что настройки таймаутов и пула соединений для  применяются корректно.
-        4. Провести нагрузочное тестирование, чтобы убедиться, что производительность не ухудшилась, а стабильность повысилась.
-     - Why fix this issue and what will be achieved with the fix? Обеспечение быстрой и стабильной работы бота в продакшн-среде, защита от флуда и потенциальных банов со стороны Telegram.
+        1. Открыть файл .
+        2. В функции  изменить логику поиска платежа. Запрос  на строке 47 должен быть изменен, чтобы искать по полю . Более надежным решением будет поиск по , так как именно это поле используется для создания платежа и приходит от Oxapay.
+        3. После исправления кода провести тестовую симуляцию: создать платеж и отправить вебхук.
+     - Why fix this issue and what will be achieved with the fix? Это критически важная функция для автоматического пополнения баланса пользователей.
      - Status:  IN PROGRESS
-     - Is recurring issue? N
+     - Is recurring issue? Y
      - Should Test frontend/backend/both after fix? backend
      - Blocked on other issue: Нет.
   - Issue 2: 
-     - Attempted fixes: В коде обработчик вебхука был исправлен для корректного доступа к . Однако проблема, скорее всего, внешняя.
-     - Next debug checklist: 
-        1. Четко проинструктировать пользователя войти в его аккаунт Oxapay.
-        2. Попросить его проверить, что **Callback URL** в настройках мерчанта **точно** соответствует URL превью-среды с постфиксом .
-        3. Попросить пользователя найти в Oxapay раздел с логами вебхуков и проверить статус доставки.
-     - Why fix this issue and what will be achieved with the fix? Это критически важно для автоматизации платежной системы.
-     - Status:  BLOCKED (Ожидается проверка внешней конфигурации пользователем).
+     - Attempted fixes: Агент подтвердил через , что домен  не резолвится (Could not resolve host). В качестве временного решения бот был успешно настроен и запущен на рабочем preview URL.
+     - Next debug checklist: Проблема, скорее всего, не в коде, а в конфигурации развертывания на платформе Emergent. Следующему агенту следует сообщить пользователю, что production-домен не настроен или настроен неверно, и для его активации может потребоваться проверка настроек деплоя на платформе.
+     - Why fix this issue and what will be achieved with the fix? Без рабочего production URL приложение не может считаться полностью развернутым в production.
+     - Status:  BLOCKED (ожидается действие от пользователя или проверка платформы).
      - Is recurring issue? Y
-     - Should Test frontend/backend/both after fix? backend (путем проведения реального платежа).
+     - Should Test frontend/backend/both after fix? backend (проверка доступности URL).
      - Blocked on other issue: Нет.
   - Issue 3: 
-     - Attempted fixes: Не было попыток, так как это неисследованная проблема.
+     - Attempted fixes: Не было.
      - Next debug checklist: 
-        1. Изучить логику регистрации и отображения ботов в админ-панели (файлы , ).
-        2. Проверить, как формируется список ботов и почему тестовый бот может отфильтровываться.
-     - Why fix this issue and what will be achieved with the fix? Позволит администраторам управлять всеми ботами из единого интерфейса.
+        1. Изучить эндпоинт, который отдает список ботов для админ-панели (вероятно, в  или похожем файле).
+        2. Проверить логику в репозитории: есть ли фильтры, которые могут скрывать тестового бота.
+        3. Проверить код фронтенда (), чтобы понять, как отображается список.
+     - Why fix this issue and what will be achieved with the fix? Выполнение одного из изначальных требований пользователя.
      - Status:  NOT STARTED
      - Is recurring issue? N
      - Should Test frontend/backend/both after fix? both
      - Blocked on other issue: Нет.
-  - Issue 4: 
-     - Attempted fixes: Агент исправил отправку уведомлений и протестировал эндпоинты.
-     - Next debug checklist: 
-        1. Попросить пользователя зайти в админ-панель.
-        2. Проверить работоспособность кнопок , ,  в разделе  на реальном пользователе.
-     - Why fix this issue and what will be achieved with the fix? Окончательное подтверждение того, что основная функциональность админ-панели полностью восстановлена.
-     - Status:  USER VERIFICATION PENDING
-     - Is recurring issue? N
-     - Should Test frontend/backend/both after fix? N/A
-     - Blocked on other issue: Нет.
 
 **In progress Task List**:
-  - Task 1: (P0) Завершить интеграцию оптимизаций производительности.
+  - Task 1: (P0) Исправление логики обработчика вебхуков Oxapay.
  
  Task Detail:
   - Task 1: 
-     - Where to resume: Файл .
-     - What will be achieved with this? Приложение будет готово к деплою с точки зрения производительности и защиты от флуда.
+     - Where to resume: Файл , функция .
+     - What will be achieved with this? Автоматическое зачисление средств на баланс пользователей после оплаты.
      - Status:  IN PROGRESS
      - Should Test frontend/backend/both after fix? backend
      - Blocked on something: Нет.
 
 **Upcoming and Future Tasks**
  Upcoming Tasks:
-    - (P1) **Полный линтинг**: Провести финальный полный линтинг всего проекта E402 Module level import not at top of file
-   --> backend/handlers/common_handlers.py:134:1
-    |
-132 | # ==================== COMMAND HANDLERS ====================
-133 |
-134 | from utils.handler_decorators import with_user_session, safe_handler, with_typing_action
-    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-135 |
-136 | @safe_handler(fallback_state=ConversationHandler.END)
-    |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_flow/cancellation.py:12:1
-   |
-10 | logger = logging.getLogger(__name__)
-11 |
-12 | from utils.handler_decorators import with_user_session, safe_handler, with_services
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_flow/confirmation.py:12:1
-   |
-10 | logger = logging.getLogger(__name__)
-11 |
-12 | from utils.handler_decorators import with_user_session, safe_handler
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-13 | from handlers.common_handlers import safe_telegram_call, mark_message_as_selected, check_stale_interaction
-14 | from handlers.order_flow.cancellation import cancel_order, confirm_cancel_order, return_to_order
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_flow/confirmation.py:13:1
-   |
-12 | from utils.handler_decorators import with_user_session, safe_handler
-13 | from handlers.common_handlers import safe_telegram_call, mark_message_as_selected, check_stale_interaction
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-14 | from handlers.order_flow.cancellation import cancel_order, confirm_cancel_order, return_to_order
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_flow/confirmation.py:14:1
-   |
-12 | from utils.handler_decorators import with_user_session, safe_handler
-13 | from handlers.common_handlers import safe_telegram_call, mark_message_as_selected, check_stale_interaction
-14 | from handlers.order_flow.cancellation import cancel_order, confirm_cancel_order, return_to_order
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_flow/entry_points.py:13:1
-   |
-13 | from utils.handler_decorators import with_user_session, safe_handler
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-14 |
-15 | @safe_handler(fallback_state=ConversationHandler.END)
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_flow/from_address.py:13:1
-   |
-12 | # Import shared utilities
-13 | from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-14 | from utils.validators import (
-15 |     validate_name, validate_address, validate_city,
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_flow/from_address.py:14:1
-   |
-12 |   # Import shared utilities
-13 |   from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
-14 | / from utils.validators import (
-15 | |     validate_name, validate_address, validate_city,
-16 | |     validate_state, validate_zip, validate_phone
-17 | | )
-   | |_^
-18 |   from utils.handler_decorators import with_user_session, safe_handler, with_typing_action, with_services
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_flow/from_address.py:18:1
-   |
-16 |     validate_state, validate_zip, validate_phone
-17 | )
-18 | from utils.handler_decorators import with_user_session, safe_handler, with_typing_action, with_services
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-19 |
-20 | # These will be imported from server when handlers are called
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_flow/parcel.py:13:1
-   |
-12 | # Import shared utilities
-13 | from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-14 | from utils.validators import validate_weight, validate_dimension
-15 | from utils.handler_decorators import with_user_session, safe_handler, with_typing_action, with_services
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_flow/parcel.py:14:1
-   |
-12 | # Import shared utilities
-13 | from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
-14 | from utils.validators import validate_weight, validate_dimension
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-15 | from utils.handler_decorators import with_user_session, safe_handler, with_typing_action, with_services
-16 | from telegram.ext import ConversationHandler
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_flow/parcel.py:15:1
-   |
-13 | from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
-14 | from utils.validators import validate_weight, validate_dimension
-15 | from utils.handler_decorators import with_user_session, safe_handler, with_typing_action, with_services
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-16 | from telegram.ext import ConversationHandler
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_flow/parcel.py:16:1
-   |
-14 | from utils.validators import validate_weight, validate_dimension
-15 | from utils.handler_decorators import with_user_session, safe_handler, with_typing_action, with_services
-16 | from telegram.ext import ConversationHandler
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_flow/payment.py:13:1
-   |
-11 | logger = logging.getLogger(__name__)
-12 |
-13 | from utils.handler_decorators import with_user_session, safe_handler
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-14 | from handlers.common_handlers import check_stale_interaction
-15 | from server import safe_telegram_call, mark_message_as_selected
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_flow/payment.py:14:1
-   |
-13 | from utils.handler_decorators import with_user_session, safe_handler
-14 | from handlers.common_handlers import check_stale_interaction
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-15 | from server import safe_telegram_call, mark_message_as_selected
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_flow/payment.py:15:1
-   |
-13 | from utils.handler_decorators import with_user_session, safe_handler
-14 | from handlers.common_handlers import check_stale_interaction
-15 | from server import safe_telegram_call, mark_message_as_selected
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_flow/rates.py:20:1
-   |
-19 | # Import state constants
-20 | from server import CONFIRM_DATA
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-21 |
-22 | # Get ShipStation API key from environment
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_flow/skip_handlers.py:13:1
-   |
-12 | # Import shared utilities
-13 | from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-14 | from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
-15 | from utils.handler_decorators import with_user_session, safe_handler
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_flow/skip_handlers.py:14:1
-   |
-12 | # Import shared utilities
-13 | from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
-14 | from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-15 | from utils.handler_decorators import with_user_session, safe_handler
-16 | from telegram.ext import ConversationHandler
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_flow/skip_handlers.py:15:1
-   |
-13 | from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
-14 | from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
-15 | from utils.handler_decorators import with_user_session, safe_handler
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-16 | from telegram.ext import ConversationHandler
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_flow/skip_handlers.py:16:1
-   |
-14 | from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
-15 | from utils.handler_decorators import with_user_session, safe_handler
-16 | from telegram.ext import ConversationHandler
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_flow/template_save.py:15:1
-   |
-13 | logger = logging.getLogger(__name__)
-14 |
-15 | from utils.handler_decorators import with_user_session, safe_handler
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_flow/to_address.py:13:1
-   |
-12 | # Import shared utilities
-13 | from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-14 | from utils.validators import (
-15 |     validate_name, validate_address, validate_city,
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_flow/to_address.py:14:1
-   |
-12 |   # Import shared utilities
-13 |   from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
-14 | / from utils.validators import (
-15 | |     validate_name, validate_address, validate_city,
-16 | |     validate_state, validate_zip, validate_phone
-17 | | )
-   | |_^
-18 |   from utils.handler_decorators import with_user_session, safe_handler, with_typing_action, with_services
-19 |   from telegram.ext import ConversationHandler
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_flow/to_address.py:18:1
-   |
-16 |     validate_state, validate_zip, validate_phone
-17 | )
-18 | from utils.handler_decorators import with_user_session, safe_handler, with_typing_action, with_services
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-19 | from telegram.ext import ConversationHandler
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_flow/to_address.py:19:1
-   |
-17 | )
-18 | from utils.handler_decorators import with_user_session, safe_handler, with_typing_action, with_services
-19 | from telegram.ext import ConversationHandler
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_handlers.py:87:1
-   |
-85 | """
-86 |
-87 | import logging
-   | ^^^^^^^^^^^^^^
-88 | from telegram import Update
-89 | from telegram.ext import ContextTypes
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_handlers.py:88:1
-   |
-87 | import logging
-88 | from telegram import Update
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-89 | from telegram.ext import ContextTypes
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/order_handlers.py:89:1
-   |
-87 | import logging
-88 | from telegram import Update
-89 | from telegram.ext import ContextTypes
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-90 |
-91 | logger = logging.getLogger(__name__)
-   |
-
-E402 Module level import not at top of file
-  --> backend/handlers/payment_handlers.py:18:1
-   |
-18 | from utils.handler_decorators import with_user_session, safe_handler, with_services
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-19 |
-20 | @safe_handler()
-   |
-
-E722 Do not use bare `except`
-   --> backend/handlers/refund_handlers.py:226:29
-    |
-224 | …                         dt = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
-225 | …                         created_at = dt.strftime("%d.%m.%Y %H:%M")
-226 | …                     except:
-    |                       ^^^^^^
-227 | …                         pass
-    |
-
-F841 Local variable `result` is assigned to but never used
-   --> backend/repositories/base_repository.py:172:13
-    |
-170 |                 document = self._add_timestamps(document, update=False)
-171 |             
-172 |             result = await self.collection.insert_one(document)
-    |             ^^^^^^
-173 |             
-174 |             logger.info(f"✅ {self.collection_name}.insert_one: Success")
-    |
-help: Remove assignment to unused variable `result`
-
-F841 Local variable `result` is assigned to but never used
-   --> backend/repositories/base_repository.py:203:13
-    |
-201 |                 ]
-202 |             
-203 |             result = await self.collection.insert_many(documents)
-    |             ^^^^^^
-204 |             
-205 |             logger.info(f"✅ {self.collection_name}.insert_many: Inserted {len(documents)} documents")
-    |
-help: Remove assignment to unused variable `result`
-
-F841 Local variable `summary` is assigned to but never used
-  --> backend/routers/bot_config_router.py:53:5
-   |
-51 |     """
-52 |     config = get_bot_config()
-53 |     summary = config.get_config_summary()
-   |     ^^^^^^^
-54 |     
-55 |     return {
-   |
-help: Remove assignment to unused variable `summary`
-
-E402 Module level import not at top of file
-  --> backend/server.py:11:1
-   |
- 9 | load_dotenv(ROOT_DIR / '.env')
-10 |
-11 | from bot_protection import BotProtection
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-12 | from telegram_safety import TelegramSafetySystem, TelegramBestPractices
-13 | import logging
-   |
-
-E402 Module level import not at top of file
-  --> backend/server.py:12:1
-   |
-11 | from bot_protection import BotProtection
-12 | from telegram_safety import TelegramSafetySystem, TelegramBestPractices
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-13 | import logging
-14 | import httpx
-   |
-
-E402 Module level import not at top of file
-  --> backend/server.py:13:1
-   |
-11 | from bot_protection import BotProtection
-12 | from telegram_safety import TelegramSafetySystem, TelegramBestPractices
-13 | import logging
-   | ^^^^^^^^^^^^^^
-14 | import httpx
-   |
-
-E402 Module level import not at top of file
-  --> backend/server.py:14:1
-   |
-12 | from telegram_safety import TelegramSafetySystem, TelegramBestPractices
-13 | import logging
-14 | import httpx
-   | ^^^^^^^^^^^^
-15 |
-16 | # Configure logging for production
-   |
-
-E402 Module level import not at top of file
-  --> backend/server.py:22:1
-   |
-20 |     datefmt='%Y-%m-%d %H:%M:%S'
-21 | )
-22 | from pydantic import BaseModel, Field, ConfigDict, EmailStr
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-23 | from typing import Optional
-24 | from datetime import datetime, timezone
-   |
-
-E402 Module level import not at top of file
-  --> backend/server.py:23:1
-   |
-21 | )
-22 | from pydantic import BaseModel, Field, ConfigDict, EmailStr
-23 | from typing import Optional
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-24 | from datetime import datetime, timezone
-25 | import uuid
-   |
-
-E402 Module level import not at top of file
-  --> backend/server.py:24:1
-   |
-22 | from pydantic import BaseModel, Field, ConfigDict, EmailStr
-23 | from typing import Optional
-24 | from datetime import datetime, timezone
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-25 | import uuid
-26 | import time
-   |
-
-E402 Module level import not at top of file
-  --> backend/server.py:25:1
-   |
-23 | from typing import Optional
-24 | from datetime import datetime, timezone
-25 | import uuid
-   | ^^^^^^^^^^^
-26 | import time
-27 | from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup, BotCommand, MenuButtonCommands
-   |
-
-E402 Module level import not at top of file
-  --> backend/server.py:26:1
-   |
-24 | from datetime import datetime, timezone
-25 | import uuid
-26 | import time
-   | ^^^^^^^^^^^
-27 | from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup, BotCommand, MenuButtonCommands
-28 | from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes, MessageHandler, filters, ConversationHandler
-   |
-
-E402 Module level import not at top of file
-  --> backend/server.py:27:1
-   |
-25 | import uuid
-26 | import time
-27 | from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup, BotCommand, MenuButtonCommands
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-28 | from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes, MessageHandler, filters, ConversationHandler
-29 | import asyncio
-   |
-
-E402 Module level import not at top of file
-  --> backend/server.py:28:1
-   |
-26 | import time
-27 | from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup, BotCommand, MenuButtonCommands
-28 | from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes, MessageHandler, filters, ConversationHandler
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-29 | import asyncio
-30 | import warnings
-   |
-
-E402 Module level import not at top of file
-  --> backend/server.py:29:1
-   |
-27 | from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup, BotCommand, MenuButtonCommands
-28 | from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes, MessageHandler, filters, ConversationHandler
-29 | import asyncio
-   | ^^^^^^^^^^^^^^
-30 | import warnings
-   |
-
-E402 Module level import not at top of file
-  --> backend/server.py:30:1
-   |
-28 | from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes, MessageHandler, filters, ConversationHandler
-29 | import asyncio
-30 | import warnings
-   | ^^^^^^^^^^^^^^^
-31 |
-32 | # Suppress PTBUserWarning about per_message settings (expected behavior)
-   |
-
-E402 Module level import not at top of file
-  --> backend/server.py:46:1
-   |
-45 |   # API Services
-46 | / from services.api_services import (
-47 | |     check_shipstation_balance
-48 | | )
-   | |_^
-49 |
-50 |   # Business Logic Services
-   |
-
-E402 Module level import not at top of file
-  --> backend/server.py:53:1
-   |
-52 |   # Common handlers (start, help, faq, button routing)
-53 | / from handlers.common_handlers import (
-54 | |     start_command,
-55 | |     help_command,
-56 | |     button_callback,
-57 | |     mark_message_as_selected,
-58 | |     safe_telegram_call
-59 | | )
-   | |_^
-60 |
-61 |   # Admin handlers
-   |
-
-E402 Module level import not at top of file
-  --> backend/server.py:62:1
-   |
-61 |   # Admin handlers
-62 | / from handlers.admin_handlers import (
-63 | |     notify_admin_error
-64 | | )
-   | |_^
-65 |
-66 |   # Webhook handlers
-   |
-
-E402 Module level import not at top of file
-  --> backend/server.py:73:1
-   |
-72 |   # Payment handlers
-73 | / from handlers.payment_handlers import (
-74 | |     my_balance_command as handler_my_balance_command,
-75 | | )
-   | |_^
-76 |
-77 |   # Template handlers  
-   |
-
-E402 Module level import not at top of file
-  --> backend/server.py:78:1
-   |
-77 |   # Template handlers  
-78 | / from handlers.template_handlers import (
-79 | |     my_templates_menu as handler_my_templates_menu,
-80 | |     view_template as handler_view_template,
-81 | |     use_template as handler_use_template,
-82 | |     edit_template_menu as handler_edit_template_menu,
-83 | |     edit_template_from_address as handler_edit_template_from_address,
-84 | |     edit_template_to_address as handler_edit_template_to_address,
-85 | |     delete_template as handler_delete_template,
-86 | |     confirm_delete_template as handler_confirm_delete_template,
-87 | |     rename_template_start as handler_rename_template_start,
-88 | |     rename_template_save as handler_rename_template_save,
-89 | | )
-   | |_^
-90 |
-91 |   # Order flow - cancellation handlers
-   |
-
-E402 Module level import not at top of file
-  --> backend/server.py:92:1
-   |
-91 |   # Order flow - cancellation handlers
-92 | / from handlers.order_flow.cancellation import (
-93 | |     cancel_order as handler_cancel_order,
-94 | |     confirm_cancel_order as handler_confirm_cancel_order,
-95 | | )
-   | |_^
-96 |
-97 |   # Order flow - entry point handlers
-   |
-
-E402 Module level import not at top of file
-   --> backend/server.py:98:1
-    |
- 97 |   # Order flow - entry point handlers
- 98 | / from handlers.order_flow.entry_points import (
- 99 | |     new_order_start as handler_new_order_start,
-100 | |     start_order_with_template as handler_start_order_with_template,
-101 | | )
-    | |_^
-102 |
-103 |   # Order flow - confirmation handlers
-    |
-
-E402 Module level import not at top of file
-   --> backend/server.py:104:1
-    |
-103 |   # Order flow - confirmation handlers
-104 | / from handlers.order_flow.confirmation import (
-105 | |     show_data_confirmation as handler_show_data_confirmation,
-106 | | )
-    | |_^
-107 |
-108 |   # Order handlers (shipping rates, carrier selection)
-    |
-
-E402 Module level import not at top of file
-   --> backend/server.py:109:1
-    |
-108 |   # Order handlers (shipping rates, carrier selection)
-109 | / from handlers.order_handlers import (
-110 | |     display_shipping_rates as handler_display_shipping_rates,
-111 | |     select_carrier as handler_select_carrier,
-112 | | )
-    | |_^
-113 |
-114 |   # Template save handlers
-    |
-
-E402 Module level import not at top of file
-   --> backend/server.py:115:1
-    |
-114 |   # Template save handlers
-115 | / from handlers.order_flow.template_save import (
-116 | |     save_template_name as handler_save_template_name,
-117 | |     handle_template_update as handler_handle_template_update,
-118 | | )
-    | |_^
-119 |
-120 |   # Utility functions (Phase 4 refactoring - gradually moving from server.py)
-    |
-
-E402 Module level import not at top of file
-   --> backend/server.py:123:1
-    |
-121 |   # Note: These are still defined in server.py for backward compatibility
-122 |   # TODO: Update all imports to use utils modules and remove duplicates
-123 | / from utils.telegram_utils import (
-124 | |     is_button_click_allowed as util_is_button_click_allowed,
-125 | |     generate_random_phone as util_generate_random_phone,
-126 | |     sanitize_string as util_sanitize_string,
-127 | |     generate_thank_you_message as util_generate_thank_you_message
-128 | | )
-    | |_^
-129 |   from utils.session_utils import (
-130 |       save_to_session as util_save_to_session,
-    |
-
-E402 Module level import not at top of file
-   --> backend/server.py:129:1
-    |
-127 |       generate_thank_you_message as util_generate_thank_you_message
-128 |   )
-129 | / from utils.session_utils import (
-130 | |     save_to_session as util_save_to_session,
-131 | |     handle_critical_api_error as util_handle_critical_api_error,
-132 | |     handle_step_error as util_handle_step_error
-133 | | )
-    | |_^
-134 |   from utils.settings_cache import (
-135 |       clear_settings_cache as util_clear_settings_cache
-    |
-
-E402 Module level import not at top of file
-   --> backend/server.py:134:1
-    |
-132 |       handle_step_error as util_handle_step_error
-133 |   )
-134 | / from utils.settings_cache import (
-135 | |     clear_settings_cache as util_clear_settings_cache
-136 | | )
-    | |_^
-137 |
-138 |   # MIGRATED: Profiled DB operations moved to utils.db_operations
-    |
-
-E402 Module level import not at top of file
-   --> backend/server.py:169:1
-    |
-168 | # Initialize Session Manager for state management
-169 | from session_manager import SessionManager
-    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-170 | session_manager = SessionManager(db)
-    |
-
-E402 Module level import not at top of file
-   --> backend/server.py:173:1
-    |
-172 | # Initialize Repository Manager for data access layer
-173 | from repositories import init_repositories, get_repositories
-    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-174 | repository_manager = init_repositories(db)
-175 | print("📦 Repository Manager initialized successfully")
-    |
-
-E402 Module level import not at top of file
-   --> backend/server.py:185:1
-    |
-183 | # API CONFIGURATION (Refactored with APIConfigManager)
-184 | # ============================================================
-185 | from utils.api_config import init_api_config
-    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-186 |
-187 | # Инициализировать API Config Manager
-    |
-
-E402 Module level import not at top of file
-   --> backend/server.py:209:1
-    |
-207 |   # TELEGRAM BOT CONFIGURATION (Refactored)
-208 |   # ============================================================
-209 | / from utils.bot_config import (
-210 | |     get_bot_config,
-211 | |     get_bot_token,
-212 | |     get_bot_username,
-213 | |     is_webhook_mode,
-214 | |     is_production_environment
-215 | | )
-    | |_^
-216 |
-217 |   # Получить конфигурацию бота
-    |
-
-E402 Module level import not at top of file
-   --> backend/server.py:256:1
-    |
-254 | # Rate limiting для защиты от Telegram бана
-255 | # Telegram API limits: 30 msg/sec per chat, burst of 20
-256 | from collections import defaultdict
-    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-257 |
-258 | class RateLimiter:
-    |
-
-E402 Module level import not at top of file
-   --> backend/server.py:311:1
-    |
-310 | # ==================== MIDDLEWARE ====================
-311 | from middleware.logging import RequestLoggingMiddleware
-    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-312 | from middleware.rate_limiting import RateLimitMiddleware
-    |
-
-E402 Module level import not at top of file
-   --> backend/server.py:312:1
-    |
-310 | # ==================== MIDDLEWARE ====================
-311 | from middleware.logging import RequestLoggingMiddleware
-312 | from middleware.rate_limiting import RateLimitMiddleware
-    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-313 |
-314 | # Add middleware (order matters - first added = last executed)
-    |
-
-E402 Module level import not at top of file
-   --> backend/server.py:406:1
-    |
-405 | # Error handling middleware (должен быть первым!)
-406 | from middleware.error_handler_middleware import error_handler_middleware
-    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-407 | app.middleware("http")(error_handler_middleware)
-    |
-
-E402 Module level import not at top of file
-   --> backend/server.py:670:1
-    |
-669 | # MIGRATED: Use handlers.order_flow.entry_points.order_from_template_list
-670 | from handlers.order_flow.entry_points import order_from_template_list
-    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |
-
-F841 Local variable `telegram_id` is assigned to but never used
-  --> backend/tests/integration/test_payment_integration.py:27:9
-   |
-26 |         # Setup: User has sufficient balance
-27 |         telegram_id = 123456789
-   |         ^^^^^^^^^^^
-28 |         amount = 15.50
-29 |         user_balance = 100.0
-   |
-help: Remove assignment to unused variable `telegram_id`
-
-F841 Local variable `telegram_id` is assigned to but never used
-  --> backend/tests/integration/test_payment_integration.py:60:9
-   |
-58 |         from services.payment_service import validate_payment_amount
-59 |         
-60 |         telegram_id = 123456789
-   |         ^^^^^^^^^^^
-61 |         amount = 150.0  # More than balance
-62 |         user_balance = 100.0
-   |
-help: Remove assignment to unused variable `telegram_id`
-
-F841 Local variable `result` is assigned to but never used
-  --> backend/tests/integration/test_webhook_integration.py:91:17
-   |
-89 |             # Should handle rate limit gracefully
-90 |             try:
-91 |                 result = await safe_telegram_call(rate_limited_call)
-   |                 ^^^^^^
-92 |             except RetryAfter:
-93 |                 # Expected to raise if retries exhausted
-   |
-help: Remove assignment to unused variable `result`
-
-F841 Local variable `order_data` is assigned to but never used
-  --> backend/tests/load_test.py:87:9
-   |
-85 |     async def test_create_order(self, user_id: int):
-86 |         """Simulate order creation"""
-87 |         order_data = {
-   |         ^^^^^^^^^^
-88 |             'user_id': user_id,
-89 |             'telegram_id': user_id + 7000000000,
-   |
-help: Remove assignment to unused variable `order_data`
-
-F841 Local variable `templates` is assigned to but never used
-   --> backend/tests/load_test.py:100:9
-    |
- 98 |     async def test_view_templates(self, user_id: int):
- 99 |         """Simulate viewing templates"""
-100 |         templates = await self.db.templates.find(
-    |         ^^^^^^^^^
-101 |             {'user_id': user_id + 7000000000}
-102 |         ).limit(10).to_list(10)
-    |
-help: Remove assignment to unused variable `templates`
-
-F841 Local variable `user` is assigned to but never used
-   --> backend/tests/load_test.py:106:9
-    |
-104 |     async def test_get_balance(self, user_id: int):
-105 |         """Simulate getting user balance"""
-106 |         user = await self.db.users.find_one(
-    |         ^^^^
-107 |             {'telegram_id': user_id + 7000000000},
-108 |             {'_id': 0, 'balance': 1}
-    |
-help: Remove assignment to unused variable `user`
-
-F841 Local variable `orders` is assigned to but never used
-   --> backend/tests/load_test.py:113:9
-    |
-111 |     async def test_view_orders(self, user_id: int):
-112 |         """Simulate viewing orders"""
-113 |         orders = await self.db.orders.find(
-    |         ^^^^^^
-114 |             {'telegram_id': user_id + 7000000000}
-115 |         ).limit(10).to_list(10)
-    |
-help: Remove assignment to unused variable `orders`
-
-E712 Avoid equality comparisons to `True`; use `user.get("blocked"):` for truth checks
-   --> backend/tests/test_admin_panel.py:227:33
-    |
-225 |                     user = next((u for u in users if u.get("telegram_id") == TEST_USER_ID), None)
-226 |                     
-227 |                     if user and user.get("blocked") == True:
-    |                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-228 |                         self.log_test("Block User", True, "User successfully blocked")
-229 |                     else:
-    |
-help: Replace with `user.get("blocked")`
-
-E712 Avoid equality comparisons to `False`; use `not user.get("blocked"):` for false checks
-   --> backend/tests/test_admin_panel.py:257:33
-    |
-255 |                     user = next((u for u in users if u.get("telegram_id") == TEST_USER_ID), None)
-256 |                     
-257 |                     if user and user.get("blocked") == False:
-    |                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-258 |                         self.log_test("Unblock User", True, "User successfully unblocked")
-259 |                     else:
-    |
-help: Replace with `not user.get("blocked")`
-
-E712 Avoid equality comparisons to `True`; use `manager.is_shipstation_configured('test'):` for truth checks
-   --> backend/tests/test_api_config.py:116:16
-    |
-114 |         manager = APIConfigManager()
-115 |         
-116 |         assert manager.is_shipstation_configured('test') == True
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-117 |         assert manager.is_shipstation_configured('production') == True
-118 |         assert manager.is_oxapay_configured() == True
-    |
-help: Replace with `manager.is_shipstation_configured('test')`
-
-E712 Avoid equality comparisons to `True`; use `manager.is_shipstation_configured('production'):` for truth checks
-   --> backend/tests/test_api_config.py:117:16
-    |
-116 |         assert manager.is_shipstation_configured('test') == True
-117 |         assert manager.is_shipstation_configured('production') == True
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-118 |         assert manager.is_oxapay_configured() == True
-119 |         assert manager.is_cryptobot_configured() == True
-    |
-help: Replace with `manager.is_shipstation_configured('production')`
-
-E712 Avoid equality comparisons to `True`; use `manager.is_oxapay_configured():` for truth checks
-   --> backend/tests/test_api_config.py:118:16
-    |
-116 |         assert manager.is_shipstation_configured('test') == True
-117 |         assert manager.is_shipstation_configured('production') == True
-118 |         assert manager.is_oxapay_configured() == True
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-119 |         assert manager.is_cryptobot_configured() == True
-    |
-help: Replace with `manager.is_oxapay_configured()`
-
-E712 Avoid equality comparisons to `True`; use `manager.is_cryptobot_configured():` for truth checks
-   --> backend/tests/test_api_config.py:119:16
-    |
-117 |         assert manager.is_shipstation_configured('production') == True
-118 |         assert manager.is_oxapay_configured() == True
-119 |         assert manager.is_cryptobot_configured() == True
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-120 |     
-121 |     @patch.dict(os.environ, {
-    |
-help: Replace with `manager.is_cryptobot_configured()`
-
-E712 Avoid equality comparisons to `True`; use `status['shipstation']['test_configured']:` for truth checks
-   --> backend/tests/test_api_config.py:183:16
-    |
-182 |         assert status['environment'] == 'test'
-183 |         assert status['shipstation']['test_configured'] == True
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-184 |         assert status['shipstation']['prod_configured'] == False
-185 |         assert status['oxapay']['configured'] == True
-    |
-help: Replace with `status['shipstation']['test_configured']`
-
-E712 Avoid equality comparisons to `False`; use `not status['shipstation']['prod_configured']:` for false checks
-   --> backend/tests/test_api_config.py:184:16
-    |
-182 |         assert status['environment'] == 'test'
-183 |         assert status['shipstation']['test_configured'] == True
-184 |         assert status['shipstation']['prod_configured'] == False
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-185 |         assert status['oxapay']['configured'] == True
-    |
-help: Replace with `not status['shipstation']['prod_configured']`
-
-E712 Avoid equality comparisons to `True`; use `status['oxapay']['configured']:` for truth checks
-   --> backend/tests/test_api_config.py:185:16
-    |
-183 |         assert status['shipstation']['test_configured'] == True
-184 |         assert status['shipstation']['prod_configured'] == False
-185 |         assert status['oxapay']['configured'] == True
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-186 |     
-187 |     @patch.dict(os.environ, {'SHIPSTATION_API_KEY_TEST': 'cached_key'})
-    |
-help: Replace with `status['oxapay']['configured']`
-
-E712 Avoid equality comparisons to `True`; use `invoice_paid.is_paid():` for truth checks
-  --> backend/tests/test_payment_gateway.py:76:16
-   |
-74 |         )
-75 |         
-76 |         assert invoice_paid.is_paid() == True
-   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-77 |         assert invoice_pending.is_paid() == False
-   |
-help: Replace with `invoice_paid.is_paid()`
-
-E712 Avoid equality comparisons to `False`; use `not invoice_pending.is_paid():` for false checks
-  --> backend/tests/test_payment_gateway.py:77:16
-   |
-76 |         assert invoice_paid.is_paid() == True
-77 |         assert invoice_pending.is_paid() == False
-   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   |
-help: Replace with `not invoice_pending.is_paid()`
-
-F401 `handlers.common_handlers.start_command` imported but unused; consider using `importlib.util.find_spec` to test for availability
-   --> backend/tests/test_refactoring_handlers.py:245:50
-    |
-243 |             sys.path.append('/app/backend')
-244 |             
-245 |             from handlers.common_handlers import start_command, help_command, faq_command, button_callback
-    |                                                  ^^^^^^^^^^^^^
-246 |             print("      common_handlers functions: ✅")
-    |
-help: Remove unused import
-
-F401 `handlers.common_handlers.help_command` imported but unused; consider using `importlib.util.find_spec` to test for availability
-   --> backend/tests/test_refactoring_handlers.py:245:65
-    |
-243 |             sys.path.append('/app/backend')
-244 |             
-245 |             from handlers.common_handlers import start_command, help_command, faq_command, button_callback
-    |                                                                 ^^^^^^^^^^^^
-246 |             print("      common_handlers functions: ✅")
-    |
-help: Remove unused import
-
-F401 `handlers.common_handlers.faq_command` imported but unused; consider using `importlib.util.find_spec` to test for availability
-   --> backend/tests/test_refactoring_handlers.py:245:79
-    |
-243 |             sys.path.append('/app/backend')
-244 |             
-245 |             from handlers.common_handlers import start_command, help_command, faq_command, button_callback
-    |                                                                               ^^^^^^^^^^^
-246 |             print("      common_handlers functions: ✅")
-    |
-help: Remove unused import
-
-F401 `handlers.common_handlers.button_callback` imported but unused; consider using `importlib.util.find_spec` to test for availability
-   --> backend/tests/test_refactoring_handlers.py:245:92
-    |
-243 |             sys.path.append('/app/backend')
-244 |             
-245 |             from handlers.common_handlers import start_command, help_command, faq_command, button_callback
-    |                                                                                            ^^^^^^^^^^^^^^^
-246 |             print("      common_handlers functions: ✅")
-    |
-help: Remove unused import
-
-F401 `handlers.admin_handlers.verify_admin_key` imported but unused; consider using `importlib.util.find_spec` to test for availability
-   --> backend/tests/test_refactoring_handlers.py:248:49
-    |
-246 |             print("      common_handlers functions: ✅")
-247 |             
-248 |             from handlers.admin_handlers import verify_admin_key, notify_admin_error
-    |                                                 ^^^^^^^^^^^^^^^^
-249 |             print("      admin_handlers functions: ✅")
-    |
-help: Remove unused import
-
-F401 `handlers.admin_handlers.notify_admin_error` imported but unused; consider using `importlib.util.find_spec` to test for availability
-   --> backend/tests/test_refactoring_handlers.py:248:67
-    |
-246 |             print("      common_handlers functions: ✅")
-247 |             
-248 |             from handlers.admin_handlers import verify_admin_key, notify_admin_error
-    |                                                                   ^^^^^^^^^^^^^^^^^^
-249 |             print("      admin_handlers functions: ✅")
-    |
-help: Remove unused import
-
-E712 Avoid equality comparisons to `True`; use `result:` for truth checks
-  --> backend/tests/test_repositories.py:66:16
-   |
-64 |         result = await user_repo.update_balance(12345, 50.0, operation="add")
-65 |         
-66 |         assert result == True
-   |                ^^^^^^^^^^^^^^
-67 |         
-68 |         # Проверить что вызван update_one с правильными параметрами
-   |
-help: Replace with `result`
-
-E712 Avoid equality comparisons to `True`; use `result:` for truth checks
-  --> backend/tests/test_repositories.py:80:16
-   |
-78 |         result = await user_repo.update_balance(12345, 30.0, operation="subtract")
-79 |         
-80 |         assert result == True
-   |                ^^^^^^^^^^^^^^
-81 |         
-82 |         call_args = user_repo.collection.update_one.call_args
-   |
-help: Replace with `result`
-
-E712 Avoid equality comparisons to `True`; use `result:` for truth checks
-  --> backend/tests/test_repositories.py:95:16
-   |
-93 |         result = await user_repo.is_admin(12345)
-94 |         
-95 |         assert result == True
-   |                ^^^^^^^^^^^^^^
-96 |     
-97 |     @pytest.mark.asyncio
-   |
-help: Replace with `result`
-
-E712 Avoid equality comparisons to `True`; use `result:` for truth checks
-   --> backend/tests/test_repositories.py:104:16
-    |
-102 |         result = await user_repo.block_user(12345)
-103 |         
-104 |         assert result == True
-    |                ^^^^^^^^^^^^^^
-    |
-help: Replace with `result`
-
-E712 Avoid equality comparisons to `True`; use `result:` for truth checks
-   --> backend/tests/test_repositories.py:160:16
-    |
-158 |         result = await order_repo.update_status("ORDER123", "completed", notes="Done")
-159 |         
-160 |         assert result == True
-    |                ^^^^^^^^^^^^^^
-161 |         
-162 |         call_args = order_repo.collection.update_one.call_args
-    |
-help: Replace with `result`
-
-E712 Avoid equality comparisons to `True`; use `result:` for truth checks
-   --> backend/tests/test_repositories.py:178:16
-    |
-176 |         )
-177 |         
-178 |         assert result == True
-    |                ^^^^^^^^^^^^^^
-179 |         
-180 |         call_args = order_repo.collection.update_one.call_args
-    |
-help: Replace with `result`
-
-E712 Avoid equality comparisons to `True`; use `result:` for truth checks
-   --> backend/tests/test_repositories.py:195:16
-    |
-193 |         )
-194 |         
-195 |         assert result == True
-    |                ^^^^^^^^^^^^^^
-    |
-help: Replace with `result`
-
-E402 Module level import not at top of file
-  --> backend/tests/test_session_manager.py:15:1
-   |
-14 | # Import module to test
-15 | import sys
-   | ^^^^^^^^^^
-16 | sys.path.insert(0, '/app/backend')
-17 | from session_manager import SessionManager
-   |
-
-E402 Module level import not at top of file
-  --> backend/tests/test_session_manager.py:17:1
-   |
-15 | import sys
-16 | sys.path.insert(0, '/app/backend')
-17 | from session_manager import SessionManager
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   |
-
-F841 Local variable `legacy_token` is assigned to but never used
-  --> backend/utils/bot_config.py:44:9
-   |
-43 |         # Legacy поддержка (для обратной совместимости)
-44 |         legacy_token = os.environ.get('TELEGRAM_BOT_TOKEN', '')
-   |         ^^^^^^^^^^^^
-45 |         
-46 |         # Validate configuration
-   |
-help: Remove assignment to unused variable `legacy_token`
-
-F841 Local variable `last_error` is assigned to but never used
-   --> backend/utils/retry_utils.py:152:13
-    |
-151 |         except Exception as e:
-152 |             last_error = e
-    |             ^^^^^^^^^^
-153 |             logger.warning(f"⚠️ Attempt {attempt}/{max_attempts} failed: {operation_name} - {str(e)}")
-    |
-help: Remove assignment to unused variable `last_error`
-
-Found 109 errors (5 fixed, 104 remaining).
-No fixes available (30 hidden fixes can be enabled with the `--unsafe-fixes` option). и исправить все оставшиеся ошибки (например, ).
+    - (P1) **Финальный аудит безопасности**: Проверить все административные эндпоинты на наличие защиты .
  Future Tasks:
-    - Внедрение кеширования на Redis.
-    - Структурированное логирование (JSON).
-    - Улучшение CI/CD пайплайна.
+    - (P2) Внедрение кеширования на Redis.
+    - (P3) Внедрение структурированного логирования (JSON).
+    - (P4) Улучшение CI/CD пайплайна.
 
 **Completed work in this session**
-- **Исправлена система уведомлений**: Решена ключевая проблема недоступности  в роутерах FastAPI путем рефакторинга на использование .
-- **Масштабный рефакторинг кода**: Полностью устранены небезопасные прямые импорты  из  во всех роутерах.
-- **Настроено логирование**: В  добавлена базовая конфигурация логгера (), все отладочные  заменены на .
-- **Исправлены баги админ-панели**: Починена кнопка Details, которая падала из-за несоответствия ключей API и frontend.
-- **Исправлены баги ConversationHandler**: Устранены многочисленные проблемы в логике диалогов, включая неработающие кнопки после ошибок, неправильные переходы состояний и некорректную отмену действий.
-- **Исправлена логика выбора перевозчика**: Устранена ошибка, из-за которой при выборе одного перевозчика (UPS) сохранялся другой (USPS/STAMPS.COM).
-- **Улучшен UX/UI бота**: По просьбе пользователя изменены тексты уведомлений, кнопок и сообщений в различных меню.
+- **Стабилизация рассылок**: Исправлена ошибка, из-за которой рассылки не доходили до пользователей. Добавлена автоматическая пометка пользователей, заблокировавших бота.
+- **Исправлена рассылка с изображениями**: Решена проблема с неверным URL изображения и , логика переведена на использование .
+- **Очистка данных**: По запросу пользователя из БД были удалены все пользователи, заказы и платежи, кроме одного указанного.
+- **Защита эндпоинтов**: Добавлена авторизация по API-ключу на критически важные административные эндпоинты (, , , , ).
+- **Линтинг кода**: Проведен полный линтинг бэкенда с помощью , исправлено более 30 ошибок, остальные проанализированы.
+- **Решение проблем с Production**: Диагностированы и исправлены неверные переменные окружения (, ). Webhook успешно настроен на рабочий preview URL.
+- **Исправление логики состояний**: Устранена системная ошибка с  в , из-за которой бот некорректно возвращался к предыдущему шагу при отмене заказа, особенно при использовании шаблонов.
+- **Исправлен баг с **: Отлажена и исправлена проблема с отсутствием номера отслеживания в админ-панели.
+- **Созданы документы для пользователя**: Подготовлены файлы , инструкции по настройке и генерации ключей.
 
 **Earlier issues found/mentioned but not fixed**
    - Issue 1: **Тестовый бот не отображается в админ-панели**. Эта задача из первоначального списка так и не была начата.
-   - Issue 2: **Конфликт **. Агент несколько раз сталкивался с этой ошибкой, которая мешала работе бота (например, не обновлялись кнопки меню). Это конфигурационная проблема на стороне пользователя (запуск нескольких экземпляров бота с одним токеном), которую нужно донести до него еще раз.
 
 **Known issue recurrence from previous fork**
-  - Issue recurrence in previous fork: **telegram.error.Conflict**.
-  - Recurrence count: 2+ (повторялась в этом сеансе).
-  - Status: BLOCKED (зависит от действий пользователя).
-  Note: Эта ошибка указывает, что пользователь запускает бота с тем же токеном в другом месте. Это блокирует получение обновлений от Telegram и вызывает непредсказуемое поведение. Пользователю необходимо убедиться, что запущен только один экземпляр бота.
+  - Issue recurrence in previous fork: .
+  - Recurrence count: Возникала несколько раз, была решена путем правильной настройки  на  и отключения .
+  - Status: RESOLVED
+  Note: Ошибка решена, но может вернуться, если пользователь снова попытается запустить бота в режиме polling или с тем же токеном в другом месте.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Управление состоянием в FastAPI**: Использование  для безопасной передачи объектов (таких как ) из события  в обработчики запросов. Это ключевое архитектурное исправление.
-- **Отладка **: Множественные исправления были связаны с неправильным использованием состояний, некорректными  и преждевременным завершением диалога (), что делало inline-кнопки неактивными.
-- **Устойчивость Frontend**: Применение optional chaining () и защитных проверок на фронтенде для предотвращения падения UI из-за отсутствия необязательных полей в ответе API.
+- **Отладка Webhook**: Использование  для симуляции входящих вебхуков для проверки логики бэкенда без зависимости от внешнего сервиса.
+- **Защита FastAPI**: Применение  для защиты административных эндпоинтов.
+- **State Management в **: Отладка сложной логики  и . Корневая проблема была найдена в , где  не устанавливался после загрузки шаблона.
+- **Конфигурация деплоя**: Различие между  и  средами. Настройка  и . Решение проблемы с неработающим production URL путем переключения на рабочий preview URL.
+- **Обработка ошибок Telegram API**: Диагностика и исправление ошибок, таких как ,  и .
 
 **key DB schema**
-  - Изменений в схеме БД не было.
+  - **users**:  (используется для фильтрации в рассылках).
+  - **orders**:  (данные теперь корректно мигрируют и сохраняются).
+  - **payments**: ,  (ключевые поля для отладки вебхука Oxapay).
 
 **changes in tech stack**
-  - Нет.
+  - Нет изменений в стеке, но произведены значительные исправления в существующем коде.
 
 **All files**
-- : Центральный файл. Изменен для передачи  через  и для настройки глобального уровня логирования.
--  (многие файлы): Все роутеры, использовавшие прямой импорт , были отрефакторены для его получения из .
--  (многие файлы): Исправлены многочисленные ошибки в логике диалогов,  и переходах состояний.
-- : Исправлен баг отображения данных пользователя в модальном окне Details.
-- , : [НОВЫЕ] Файлы для будущей оптимизации производительности.
+- : **Текущий файл в работе**. Содержит ошибку в логике поиска платежа.
+- : **Ключевое исправление**. Найдена и исправлена корневая причина бага с потерей состояния () после использования шаблона.
+- : Значительно переработан для исправления рассылок, в том числе с изображениями (переход на ).
+-  (bot.py, maintenance.py, settings.py, upload.py): Добавлена недостающая авторизация.
+- : Исправлена глобальная ошибка  при обработке ошибок.
+- : Новый скрипт для очистки базы данных по запросу пользователя.
 
 **Areas that need refactoring**:
-- В коде все еще много мест с длинными строками, которые не соответствуют стандартам линтера (). Требуется полный проход .
+- **Циклические импорты**: В коде много импортов внутри функций для избежания циклических зависимостей. Это приводит к большому количеству ошибок  при линтинге и усложняет чтение кода. В будущем стоит рассмотреть рефакторинг структуры проекта для их устранения.
 
 **key api endpoints**
-- Изменений в эндпоинтах не было, но была исправлена логика их работы (уведомления, обработка данных).
+-  (POST): Эндпоинт для приема вебхуков от Oxapay. **Сейчас находится в отладке.**
+-  (POST): Эндпоинт для рассылок, теперь работает корректно с текстом и изображениями (через ).
+-  (POST): Загружает изображение, отправляет его ботом самому себе (админу) для получения  и возвращает этот ID.
 
 **Critical Info for New Agent**
-- **Главный архитектурный рефакторинг завершен**: Проблема с  решена. Новый стандарт — получать его через . Все новые эндпоинты должны следовать этому паттерну.
-- **Производительность**: Следующий шаг — интегрировать созданные файлы  и  в  для подготовки к деплою.
-- **Конфликт Telegram**: Будьте готовы к ошибке . Это внешняя проблема, и если она возникнет, нужно снова напомнить пользователю, что он должен остановить все остальные экземпляры бота.
-- **Пользовательская проверка**: Несколько элементов (кнопки админки, Oxapay) ожидают проверки со стороны пользователя. Будьте готовы к его обратной связи по этим пунктам.
+- **Приоритет №1**: Исправить вебхук Oxapay. Проблема в файле  на строке 47. Система ищет платеж по , а нужно по .
+- **URL для работы**: Бот работает на **preview URL**. Production URL () **недоступен**. Не пытайтесь настроить вебхук на production URL, пока он не заработает. Сообщите пользователю, что это проблема на стороне платформы.
+- **Состояние кода**: Код содержит множество локальных импортов для обхода циклических зависимостей. Ошибки линтера  (импорт не в начале файла) следует игнорировать.
 
 **documents created in this job**
   - 
@@ -1325,27 +154,31 @@ No fixes available (30 hidden fixes can be enabled with the `--unsafe-fixes` opt
   - 
   - 
   - 
+  - 
+  - 
+  - 
+  - 
 
 **Last 5 User Messages and any pending user messages**
- - **User:** вроде готов к деплою, проверь что бы бот был быстрым и не зависал... - **Status:** IN PROGRESS. Агент начал подготовку к оптимизации.
- - **User:** вместо кнопки отмена сделай главное меню и что бы переходило сразу без подтверждения - **Status:** COMPLETED. Агент исправил кнопку и логику возврата в главное меню.
- - **User:** https://t.me/White_Label_Shipping_Bot_Agent в кнопку связать с агентом вставь этот телеграм - **Status:** COMPLETED. URL в кнопке обновлен.
- - **User:** в рефанд лейбл напиши, что заявки на рефанд обрабатываются в ручную... - **Status:** COMPLETED. Сообщение было обновлено.
- - **User:** кнопку мои заявки удали - **Status:** COMPLETED. Кнопка была удалена из главного меню.
+ - **User:** ок исправь как хочешь (ok, fix it as you want). **Status:** IN PROGRESS. Пользователь дал согласие на исправление проблемы с Oxapay.
+ - **User:** сделай сам тестовый платеж через нее (make a test payment yourself). **Status:** COMPLETED. Агент симулировал платеж и нашел ошибку.
+ - **User:** какую ссылку надо вставить на оксапей (what link should I put for oxapay). **Status:** COMPLETED. Агент предоставил правильный URL для вебхука.
+ - **User:** cannot access local variable os where it is not associated with a value. **Status:** COMPLETED. Агент исправил ошибку импорта в роутере загрузки.
+ - **User:** это происходит когда выбираешь шаблон... (this happens when you choose a template...). **Status:** COMPLETED. Агент нашел и исправил корневую причину проблемы с потерей состояния.
 
 **Project Health Check:**
-- **Broken:** Нет критически сломанных функций.
-- **Mocked:** Нет.
-- **Blocked:** Функциональность Oxapay webhooks заблокирована до тех пор, пока пользователь не проверит настройки на стороне Oxapay. Стабильность работы бота (получение обновлений) периодически блокируется из-за ошибки .
+- **Broken**: Логика обработки вебхуков Oxapay. Баланс пользователей не пополняется автоматически.
+- **Mocked**: Нет.
+- **Blocked**: Развертывание и работа на production URL заблокированы из-за недоступности домена.
 
 **Testing status**
-  - Testing agent used after significant changes: YES (backend и frontend агенты использовались многократно для проверки исправлений).
-  - Troubleshoot agent used after agent stuck in loop: NO
-  - Test files created: ['/app/backend/tests/test_balance_notification.py', '/app/backend/tests/test_oxapay_webhook.py'] (и множество других временных тестов).
+  - Testing agent used after significant changes: NO
+  - Troubleshoot agent used after agent stuck in loop: YES (агент использовал его для анализа проблемы с , что подтвердило системный характер ошибки).
+  - Test files created: []
   - Known regressions: Нет.
 
 **Credentials to test flow:**
-Ключ для API админки находится в  под переменной .
+Ключ для API админки () находится в файле .
 
 **What agent forgot to execute**
-- Агент не возвращался к задаче об **отображении тестового бота в админ-панели** (Issue 3), которая была в первоначальном списке. Эта задача была полностью проигнорирована.</analysis>
+- **Отображение тестового бота в админ-панели**: Эта задача из первоначального списка так и не была рассмотрена.</analysis>

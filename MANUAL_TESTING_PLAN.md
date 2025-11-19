@@ -176,7 +176,7 @@
 
 ## 🖥️ ЧАСТЬ 2: АДМИН-ПАНЕЛЬ
 
-### URL админки: https://telegram-admin-fix-2.preview.emergentagent.com
+### URL админки: https://telemend.preview.emergentagent.com
 
 ---
 
