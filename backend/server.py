@@ -1380,10 +1380,10 @@ async def startup_event():
             persistence = PicklePersistence(
                 filepath=str(persistence_file),
                 store_data=PersistenceInput(
-                    user_data=True,
-                    chat_data=True,
-                    bot_data=True,
-                    callback_data=True
+                    user_data=True,       # Save user data (important!)
+                    chat_data=True,       # Save chat data (important!)
+                    bot_data=True,        # Save bot data
+                    callback_data=False   # DON'T save callback data (prevents duplicate buttons!)
                 ),
                 update_interval=1  # Save every 1 second (fast updates)
             )
