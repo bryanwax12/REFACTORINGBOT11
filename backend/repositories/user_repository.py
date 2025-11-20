@@ -214,7 +214,7 @@ class UserRepository(BaseRepository):
         """
         return await self.update_one(
             {"telegram_id": telegram_id},
-            {"$set": {"is_blocked": True}}
+            {"$set": {"blocked": True, "is_blocked": True}}  # Set both for compatibility
         )
     
     async def unblock_user(self, telegram_id: int) -> bool:
