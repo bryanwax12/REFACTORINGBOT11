@@ -363,6 +363,8 @@ api_router = APIRouter(prefix="/api")
 async def debug_config_no_auth():
     """Debug endpoint to check configuration (NO AUTH REQUIRED)"""
     import os
+    from utils.simple_cache import get_cache_stats
+    
     return {
         "status": "backend_running",
         "admin_key_set": bool(os.environ.get('ADMIN_API_KEY')),
@@ -372,6 +374,8 @@ async def debug_config_no_auth():
         "mongo_url_preview": os.environ.get('MONGO_URL', '')[:30] + '...' if os.environ.get('MONGO_URL') else 'NOT_SET',
         "webhook_base_url": os.environ.get('WEBHOOK_BASE_URL', 'NOT_SET'),
         "config_file_used": os.path.exists('/app/backend/config_production.py'),
+        "cache_stats": get_cache_stats(),
+        "persistence_enabled": True,
     }
 
 # ==================== ROUTERS REGISTRATION ====================
