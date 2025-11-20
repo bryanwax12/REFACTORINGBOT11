@@ -245,8 +245,8 @@ async def check_all_channel_status():
         if not channel_id:
             raise HTTPException(status_code=400, detail="CHANNEL_ID not configured")
         
-        user_repo = get_user_repo()
-        users = await user_repo.find_all(limit=10000)
+        from server import db
+        users = await db.users.find({}, {"_id": 0, "telegram_id": 1}).to_list(10000)
         
         checked_count = 0
         member_count = 0
@@ -302,8 +302,8 @@ async def check_all_bot_access():
         raise HTTPException(status_code=503, detail="Bot instance not available")
     
     try:
-        user_repo = get_user_repo()
-        users = await user_repo.find_all(limit=10000)
+        from server import db
+        users = await db.users.find({}, {"_id": 0, "telegram_id": 1}).to_list(10000)
         
         checked_count = 0
         accessible_count = 0
