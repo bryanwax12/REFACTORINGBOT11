@@ -346,6 +346,22 @@ app.add_middleware(RateLimitMiddleware, requests_per_minute=60, requests_per_hou
 
 api_router = APIRouter(prefix="/api")
 
+# ==================== DEBUG ENDPOINT (NO AUTH) ====================
+@app.get("/api/debug/config")
+async def debug_config_no_auth():
+    """Debug endpoint to check configuration (NO AUTH REQUIRED)"""
+    import os
+    return {
+        "status": "backend_running",
+        "admin_key_set": bool(os.environ.get('ADMIN_API_KEY')),
+        "admin_key_length": len(os.environ.get('ADMIN_API_KEY', '')),
+        "admin_key_preview": os.environ.get('ADMIN_API_KEY', '')[:20] + '...' if os.environ.get('ADMIN_API_KEY') else 'NOT_SET',
+        "mongo_url_set": bool(os.environ.get('MONGO_URL')),
+        "mongo_url_preview": os.environ.get('MONGO_URL', '')[:30] + '...' if os.environ.get('MONGO_URL') else 'NOT_SET',
+        "webhook_base_url": os.environ.get('WEBHOOK_BASE_URL', 'NOT_SET'),
+        "config_file_used": os.path.exists('/app/backend/config_production.py'),
+    }
+
 # ==================== ROUTERS REGISTRATION ====================
 # Import and register all API routers
 try:
