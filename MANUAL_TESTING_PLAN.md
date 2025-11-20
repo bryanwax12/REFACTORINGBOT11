@@ -176,7 +176,7 @@
 
 ## 🖥️ ЧАСТЬ 2: АДМИН-ПАНЕЛЬ
 
-### URL админки: https://telemend.preview.emergentagent.com
+### URL админки: https://tg-bot-repair.preview.emergentagent.com
 
 ---
 

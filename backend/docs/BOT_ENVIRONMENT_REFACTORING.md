@@ -196,7 +196,7 @@ else:
 ### 1. Проверка текущей конфигурации
 
 ```bash
-curl https://telemend.preview.emergentagent.com/api/bot-config/status
+curl https://tg-bot-repair.preview.emergentagent.com/api/bot-config/status
 ```
 
 **Ответ**:
@@ -216,7 +216,7 @@ curl https://telemend.preview.emergentagent.com/api/bot-config/status
 ### 2. Полная конфигурация (с auth)
 
 ```bash
-curl https://telemend.preview.emergentagent.com/api/bot-config/full \
+curl https://tg-bot-repair.preview.emergentagent.com/api/bot-config/full \
   -H "X-API-Key: YOUR_ADMIN_KEY"
 ```
 
@@ -249,7 +249,7 @@ curl https://telemend.preview.emergentagent.com/api/bot-config/full \
 ### 3. Рекомендации
 
 ```bash
-curl https://telemend.preview.emergentagent.com/api/bot-config/recommendations
+curl https://tg-bot-repair.preview.emergentagent.com/api/bot-config/recommendations
 ```
 
 **Ответ**:
@@ -270,7 +270,7 @@ curl https://telemend.preview.emergentagent.com/api/bot-config/recommendations
 ### 4. Информация о webhook
 
 ```bash
-curl https://telemend.preview.emergentagent.com/api/bot-config/webhook-info \
+curl https://tg-bot-repair.preview.emergentagent.com/api/bot-config/webhook-info \
   -H "X-API-Key: YOUR_ADMIN_KEY"
 ```
 
@@ -281,7 +281,7 @@ curl https://telemend.preview.emergentagent.com/api/bot-config/webhook-info \
 ### Переключение окружения (требует перезапуск)
 
 ```bash
-curl -X POST https://telemend.preview.emergentagent.com/api/bot-config/switch-environment \
+curl -X POST https://tg-bot-repair.preview.emergentagent.com/api/bot-config/switch-environment \
   -H "X-API-Key: YOUR_ADMIN_KEY" \
   -H "Content-Type: application/json" \
   -d '{"environment": "production"}'
@@ -301,7 +301,7 @@ curl -X POST https://telemend.preview.emergentagent.com/api/bot-config/switch-en
 ### Переключение режима (требует перезапуск)
 
 ```bash
-curl -X POST https://telemend.preview.emergentagent.com/api/bot-config/switch-mode \
+curl -X POST https://tg-bot-repair.preview.emergentagent.com/api/bot-config/switch-mode \
   -H "X-API-Key: YOUR_ADMIN_KEY" \
   -H "Content-Type: application/json" \
   -d '{"mode": "webhook"}'

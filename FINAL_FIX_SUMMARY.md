@@ -164,7 +164,7 @@ else:
 
 ### Preview окружение (текущее)
 ```
-WEBHOOK_BASE_URL = "https://telemend.preview.emergentagent.com"
+WEBHOOK_BASE_URL = "https://tg-bot-repair.preview.emergentagent.com"
                                      ↓
               Содержит "preview" → НЕ production
                                      ↓
