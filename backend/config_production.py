@@ -4,6 +4,7 @@ Used when environment variables are concatenated or corrupted by deployment plat
 """
 
 PRODUCTION_CONFIG = {
+    # MongoDB Atlas M10 (Dedicated) - 10x faster than M0
     'MONGO_URL': 'mongodb+srv://bbeardy3_db_user:ccW9UMMYvz1sSpuJ@cluster0.zmmat7g.mongodb.net/telegram_shipping_bot?retryWrites=true&w=majority',
     'ADMIN_API_KEY': 'sk_admin_e19063c3f82f447ba4ccf49cd97dd9fd_2024',
     'WEBHOOK_BASE_URL': 'https://telegram-admin-fix-2.emergent.host',
