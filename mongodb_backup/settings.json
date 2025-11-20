@@ -1,0 +1,1 @@
+[{"_id":{"$oid":"690a7e27184c892d197afcbd"},"key":"maintenance_mode","updated_at":"2025-11-10T20:30:13.112831+00:00","value":false},{"_id":{"$oid":"690bf6dbd801e1b313271127"},"key":"api_mode","updated_at":"2025-11-10T20:43:38.576946+00:00","value":"test"}]
