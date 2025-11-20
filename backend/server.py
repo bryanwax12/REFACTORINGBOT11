@@ -10,26 +10,33 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 # WORKAROUND: Emergent platform concatenates environment variables
-# Clean them before use
-def clean_env_value(value):
-    """Remove concatenated parts from environment variables"""
+# Use production config file if env vars are corrupted
+def is_env_corrupted(value):
+    """Check if environment variable is concatenated with others"""
     if not value:
-        return value
-    # Split on common patterns and take first part
-    for split_pattern in ['REACT_APP_', 'MONGO_URL=', 'WEBHOOK_', 'BOT_', 'TELEGRAM_']:
-        if split_pattern in value and not value.startswith(split_pattern):
-            value = value.split(split_pattern)[0]
-    return value.strip()
+        return False
+    corruption_patterns = ['REACT_APP_', 'MONGO_URL=mongodb', 'WEBHOOK_BASE', 'BOT_TOKEN=', 'TELEGRAM_BOT']
+    for pattern in corruption_patterns:
+        if pattern in value and not value.startswith(pattern) and '=' in value:
+            return True
+    return False
 
-# Clean critical environment variables
-if os.environ.get('ADMIN_API_KEY'):
-    os.environ['ADMIN_API_KEY'] = clean_env_value(os.environ['ADMIN_API_KEY'])
-if os.environ.get('MONGO_URL'):
-    os.environ['MONGO_URL'] = clean_env_value(os.environ['MONGO_URL'])
-if os.environ.get('TELEGRAM_BOT_TOKEN'):
-    os.environ['TELEGRAM_BOT_TOKEN'] = clean_env_value(os.environ['TELEGRAM_BOT_TOKEN'])
-if os.environ.get('SHIPSTATION_API_KEY'):
-    os.environ['SHIPSTATION_API_KEY'] = clean_env_value(os.environ['SHIPSTATION_API_KEY'])
+# Load production config if needed
+from config_production import PRODUCTION_CONFIG
+
+# Check critical env variables and use config file if corrupted
+for key in ['ADMIN_API_KEY', 'MONGO_URL', 'TELEGRAM_BOT_TOKEN', 'WEBHOOK_BASE_URL', 'SHIPSTATION_API_KEY']:
+    current_value = os.environ.get(key)
+    if not current_value or is_env_corrupted(current_value):
+        if key in PRODUCTION_CONFIG:
+            os.environ[key] = PRODUCTION_CONFIG[key]
+            logging.info(f"⚠️ Using production config for {key} (env var corrupted or missing)")
+
+# Also set related keys if not present
+if not os.environ.get('SHIPSTATION_API_KEY_TEST'):
+    os.environ['SHIPSTATION_API_KEY_TEST'] = PRODUCTION_CONFIG.get('SHIPSTATION_API_KEY_TEST', '')
+if not os.environ.get('SHIPSTATION_API_KEY_PROD'):
+    os.environ['SHIPSTATION_API_KEY_PROD'] = PRODUCTION_CONFIG.get('SHIPSTATION_API_KEY_PROD', '')
 
 from bot_protection import BotProtection
 from telegram_safety import TelegramSafetySystem, TelegramBestPractices
