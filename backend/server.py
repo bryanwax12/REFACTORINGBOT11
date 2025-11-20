@@ -1359,10 +1359,28 @@ async def startup_event():
             # Get optimized settings from performance config
             app_settings = BotPerformanceConfig.get_optimized_application_settings()
             
+            # CRITICAL: Add persistence to save conversation state
+            from telegram.ext import PicklePersistence
+            import os
+            
+            # Create persistence directory if not exists
+            persistence_dir = Path(__file__).parent / 'data'
+            persistence_dir.mkdir(exist_ok=True)
+            persistence_file = persistence_dir / 'conversation_state.pkl'
+            
+            logger.info(f"💾 Setting up persistence: {persistence_file}")
+            
+            # Initialize persistence
+            persistence = PicklePersistence(
+                filepath=str(persistence_file),
+                store_data=True,  # Store all data
+                update_interval=1  # Save every 1 second (fast updates)
+            )
+            
             application = (
                 Application.builder()
                 .token(TELEGRAM_BOT_TOKEN)
-                # NO PERSISTENCE - in-memory state for stability
+                .persistence(persistence)  # ADD PERSISTENCE!
                 .concurrent_updates(app_settings['concurrent_updates'])  # Handle many updates concurrently
                 .connect_timeout(app_settings['connect_timeout'])  # Fast connection
                 .read_timeout(app_settings['read_timeout'])   # Optimized read timeout
@@ -1371,6 +1389,8 @@ async def startup_event():
                 # Keep default rate limiter to prevent Telegram ban
                 .build()
             )
+            
+            logger.info("✅ Persistence enabled - conversation state will be saved!")
             
             # CRITICAL: Update global bot_instance with the application's bot for notifications
             # Without this, notifications will NOT work!
