@@ -10,13 +10,27 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api", tags=["legacy"])
 
-async def verify_api_key(x_api_key: Optional[str] = Header(None)):
-    """Verify admin API key"""
+async def verify_api_key(
+    x_api_key: Optional[str] = Header(None),
+    authorization: Optional[str] = Header(None)
+):
+    """Verify admin API key - accepts both X-API-Key and Authorization headers"""
     import os
     admin_key = os.environ.get('ADMIN_API_KEY', 'sk_admin_e19063c3f82f447ba4ccf49cd97dd9fd_2024')
-    if not x_api_key or x_api_key != admin_key:
+    
+    # Try X-API-Key first
+    api_key = x_api_key
+    
+    # If not found, try Authorization header (Bearer token)
+    if not api_key and authorization:
+        if authorization.startswith("Bearer "):
+            api_key = authorization[7:]  # Remove "Bearer " prefix
+        else:
+            api_key = authorization
+    
+    if not api_key or api_key != admin_key:
         raise HTTPException(status_code=403, detail="Invalid API key")
-    return x_api_key
+    return api_key
 
 
 @router.get("/stats")
