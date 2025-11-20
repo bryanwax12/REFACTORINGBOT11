@@ -270,8 +270,7 @@ async def legacy_set_api_mode(req: Request, request: dict, api_key: str = Depend
             )
         except Exception as e:
             # Don't fail the request if admin notification fails
-            import logging
-            logging.getLogger(__name__).error(f"Failed to notify admin about API mode change: {e}")
+            logger.error(f"Failed to notify admin about API mode change: {e}")
     
     return {"success": True, "message": f"API mode set to {mode}"}
 
