@@ -15,14 +15,28 @@ import { Package, DollarSign, Users, TrendingUp, Send, MapPin, Box, Search, Down
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+// WORKAROUND: Emergent platform concatenates env variables, so we clean them
+const cleanEnvValue = (value) => {
+  if (!value) return value;
+  // Split on common patterns and take first part
+  const cleaned = value.split('REACT_APP_')[0].split('MONGO_URL')[0].trim();
+  return cleaned;
+};
+
+const BACKEND_URL = cleanEnvValue(process.env.REACT_APP_BACKEND_URL) || 'https://telegram-admin-fix-2.emergent.host';
 const API = `${BACKEND_URL}/api`;
-const ADMIN_API_KEY = process.env.REACT_APP_ADMIN_API_KEY;
+const ADMIN_API_KEY = cleanEnvValue(process.env.REACT_APP_ADMIN_API_KEY) || 'sk_admin_e19063c3f82f447ba4ccf49cd97dd9fd_2024';
 
 // Axios default headers with API key
 // Use Authorization header for deployed version (X-API-Key blocked by proxy)
 axios.defaults.headers.common['Authorization'] = `Bearer ${ADMIN_API_KEY}`;
 axios.defaults.headers.common['X-API-Key'] = ADMIN_API_KEY; // Keep for backward compatibility
+
+// Debug: log cleaned values in development
+if (process.env.NODE_ENV === 'development') {
+  console.log('Backend URL:', BACKEND_URL);
+  console.log('API Key (masked):', ADMIN_API_KEY.substring(0, 15) + '...');
+}
 
 // Helper function to format date/time in Kyiv timezone
 const formatKyivDateTime = (dateString) => {
