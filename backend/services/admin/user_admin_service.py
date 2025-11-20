@@ -204,6 +204,11 @@ class UserAdminService:
                 )
             
             if result.modified_count > 0:
+                # ⚠️ CRITICAL: Clear cache after balance update!
+                from utils.simple_cache import clear_user_cache
+                clear_user_cache(telegram_id)
+                logger.info(f"🗑️ Cleared cache for user {telegram_id} after balance update")
+                
                 # Get new balance
                 user = await db.users.find_one({"telegram_id": telegram_id}, {"balance": 1})
                 new_balance = user.get("balance", 0)
