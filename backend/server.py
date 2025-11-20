@@ -9,6 +9,28 @@ import os
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
+# WORKAROUND: Emergent platform concatenates environment variables
+# Clean them before use
+def clean_env_value(value):
+    """Remove concatenated parts from environment variables"""
+    if not value:
+        return value
+    # Split on common patterns and take first part
+    for split_pattern in ['REACT_APP_', 'MONGO_URL=', 'WEBHOOK_', 'BOT_', 'TELEGRAM_']:
+        if split_pattern in value and not value.startswith(split_pattern):
+            value = value.split(split_pattern)[0]
+    return value.strip()
+
+# Clean critical environment variables
+if os.environ.get('ADMIN_API_KEY'):
+    os.environ['ADMIN_API_KEY'] = clean_env_value(os.environ['ADMIN_API_KEY'])
+if os.environ.get('MONGO_URL'):
+    os.environ['MONGO_URL'] = clean_env_value(os.environ['MONGO_URL'])
+if os.environ.get('TELEGRAM_BOT_TOKEN'):
+    os.environ['TELEGRAM_BOT_TOKEN'] = clean_env_value(os.environ['TELEGRAM_BOT_TOKEN'])
+if os.environ.get('SHIPSTATION_API_KEY'):
+    os.environ['SHIPSTATION_API_KEY'] = clean_env_value(os.environ['SHIPSTATION_API_KEY'])
+
 from bot_protection import BotProtection
 from telegram_safety import TelegramSafetySystem, TelegramBestPractices
 import logging
