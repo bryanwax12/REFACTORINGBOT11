@@ -210,8 +210,9 @@ async def legacy_get_api_mode(api_key: str = Depends(verify_api_key)):
 @router.post("/settings/api-mode")
 async def legacy_set_api_mode(req: Request, request: dict, api_key: str = Depends(verify_api_key)):
     """Legacy API mode endpoint - set mode"""
-    from server import db, clear_settings_cache, ADMIN_TELEGRAM_ID
+    from server import db, clear_settings_cache, ADMIN_TELEGRAM_ID, api_config_manager
     from handlers.common_handlers import safe_telegram_call
+    import server
     import os
     
     # Get bot_instance from app.state
@@ -221,12 +222,25 @@ async def legacy_set_api_mode(req: Request, request: dict, api_key: str = Depend
     if mode not in ["production", "test", "preview"]:
         raise HTTPException(status_code=400, detail="Invalid mode")
     
+    # Update database
     await db.settings.update_one(
         {"key": "api_mode"},
         {"$set": {"value": mode}},
         upsert=True
     )
     clear_settings_cache()
+    
+    # ⚠️ CRITICAL: Update api_config_manager environment
+    api_config_manager.set_environment(mode)
+    
+    # ⚠️ CRITICAL: Update global SHIPSTATION_API_KEY variable
+    server.SHIPSTATION_API_KEY = api_config_manager.get_shipstation_key()
+    
+    # Log the change with masked key
+    masked_key = api_config_manager._mask_key(server.SHIPSTATION_API_KEY)
+    logger = logging.getLogger(__name__)
+    logger.info(f"✅ API mode changed to: {mode.upper()}")
+    logger.info(f"   ShipStation key updated: {masked_key}")
     
     # Notify admin about API mode change
     if bot_instance and ADMIN_TELEGRAM_ID:
@@ -237,21 +251,11 @@ async def legacy_set_api_mode(req: Request, request: dict, api_key: str = Depend
             "preview": "Превью (Preview)"
         }.get(mode, mode)
         
-        # Get API key for the selected mode
-        api_key_var = f"SHIPSTATION_API_KEY_{mode.upper()}" if mode != "production" else "SHIPSTATION_API_KEY_PROD"
-        api_key_value = os.environ.get(api_key_var, "не настроен")
-        
-        # Mask the API key (show only first and last 4 characters)
-        if api_key_value != "не настроен" and len(api_key_value) > 8:
-            masked_key = f"{api_key_value[:4]}...{api_key_value[-4:]}"
-        else:
-            masked_key = api_key_value
-        
         admin_message = (
             f"{mode_emoji} *API режим изменен*\n\n"
             f"Новый режим: *{mode_text}*\n"
             f"API ключ: `{masked_key}`\n"
-            f"Переменная: `{api_key_var}`"
+            f"✅ Все пользователи будут использовать новый API ключ"
         )
         
         try:
