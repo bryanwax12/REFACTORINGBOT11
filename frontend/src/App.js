@@ -1438,11 +1438,6 @@ const Dashboard = () => {
                           <p className="text-sm font-semibold text-emerald-600">
                             Balance: ${(user.balance || 0).toFixed(2)}
                           </p>
-                          {user.discount > 0 && (
-                            <p className="text-xs font-medium text-purple-600">
-                              🎉 Discount: {user.discount}%
-                            </p>
-                          )}
                           <p className="text-xs text-muted-foreground">
                             {formatKyivDate(user.created_at)}
                           </p>
