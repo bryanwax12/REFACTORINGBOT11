@@ -4,6 +4,7 @@ User Repository
 """
 from typing import Dict, List, Optional
 from repositories.base_repository import BaseRepository
+from utils.simple_cache import cached, cache, clear_user_cache
 import logging
 
 logger = logging.getLogger(__name__)
@@ -15,9 +16,10 @@ class UserRepository(BaseRepository):
     def __init__(self, db):
         super().__init__(db.users, "users")
     
+    @cached(ttl=30, key_prefix="user")
     async def find_by_telegram_id(self, telegram_id: int) -> Optional[Dict]:
         """
-        Найти пользователя по Telegram ID
+        Найти пользователя по Telegram ID (with 30s cache)
         
         Args:
             telegram_id: Telegram ID пользователя
