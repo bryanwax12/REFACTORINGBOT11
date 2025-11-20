@@ -1578,7 +1578,7 @@ async def startup_event():
     else:
         logger.warning("⚠️⚠️⚠️ bot_instance is NOT set! Notifications will NOT work!")
 
-@app.get("/debug/config")
+@api_router.get("/debug/config")
 async def debug_config():
     """Debug endpoint to check configuration (NO AUTH REQUIRED)"""
     import os
