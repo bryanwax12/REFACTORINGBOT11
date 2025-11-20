@@ -20,7 +20,9 @@ const API = `${BACKEND_URL}/api`;
 const ADMIN_API_KEY = process.env.REACT_APP_ADMIN_API_KEY;
 
 // Axios default headers with API key
-axios.defaults.headers.common['X-API-Key'] = ADMIN_API_KEY;
+// Use Authorization header for deployed version (X-API-Key blocked by proxy)
+axios.defaults.headers.common['Authorization'] = `Bearer ${ADMIN_API_KEY}`;
+axios.defaults.headers.common['X-API-Key'] = ADMIN_API_KEY; // Keep for backward compatibility
 
 // Helper function to format date/time in Kyiv timezone
 const formatKyivDateTime = (dateString) => {
