@@ -66,7 +66,7 @@ async def block_user(telegram_id: int, reason: Optional[str] = None):
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
-        success = await user_repo.block_user(telegram_id, reason)
+        success = await user_repo.block_user(telegram_id)
         
         if not success:
             raise HTTPException(status_code=500, detail="Failed to block user")
