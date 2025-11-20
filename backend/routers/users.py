@@ -368,8 +368,8 @@ async def get_users_leaderboard(limit: int = 10):
     from repositories import get_user_repo, get_order_repo
     
     try:
-        user_repo = get_user_repo()
-        users = await user_repo.find_all(limit=1000)
+        from server import db
+        users = await db.users.find({}, {"_id": 0, "telegram_id": 1}).to_list(1000)
         
         # Calculate orders for each user
         order_repo = get_order_repo()
