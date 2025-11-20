@@ -421,13 +421,15 @@ async def get_api_mode_legacy(authenticated: bool = Depends(verify_admin_key)):
 @admin_router.post("/settings/api-mode")
 async def set_api_mode_legacy(request: dict, authenticated: bool = Depends(verify_admin_key)):
     """Set API mode (legacy endpoint for frontend compatibility)"""
-    from server import db, clear_settings_cache
+    from server import db, clear_settings_cache, api_config_manager
+    import server
     
     try:
         mode = request.get("mode", "production")
         if mode not in ["production", "test", "preview"]:
             raise HTTPException(status_code=400, detail="Invalid mode. Use 'production', 'test' or 'preview'")
         
+        # Update database
         await db.settings.update_one(
             {"key": "api_mode"},
             {"$set": {"value": mode}},
@@ -435,7 +437,16 @@ async def set_api_mode_legacy(request: dict, authenticated: bool = Depends(verif
         )
         clear_settings_cache()
         
-        logger.info(f"API mode changed to: {mode}")
+        # ⚠️ CRITICAL: Update api_config_manager environment
+        api_config_manager.set_environment(mode)
+        
+        # ⚠️ CRITICAL: Update global SHIPSTATION_API_KEY variable
+        server.SHIPSTATION_API_KEY = api_config_manager.get_shipstation_key()
+        
+        # Log the change with masked key
+        masked_key = api_config_manager._mask_key(server.SHIPSTATION_API_KEY)
+        logger.info(f"✅ API mode changed to: {mode.upper()}")
+        logger.info(f"   ShipStation key updated: {masked_key}")
         
         return {
             "success": True,
