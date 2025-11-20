@@ -2429,10 +2429,6 @@ const Dashboard = () => {
                       <p className="font-medium">{formatKyivDateTime(userDetailsModal.details.user.created_at)}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Discount</p>
-                      <p className="font-medium">{userDetailsModal.details.user.discount || 0}%</p>
-                    </div>
-                    <div>
                       <p className="text-sm text-muted-foreground">Channel Member</p>
                       <p className="font-medium">{userDetailsModal.details.user.is_channel_member ? '✅ Yes' : '❌ No'}</p>
                     </div>
