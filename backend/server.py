@@ -30,7 +30,9 @@ for key in ['ADMIN_API_KEY', 'MONGO_URL', 'TELEGRAM_BOT_TOKEN', 'WEBHOOK_BASE_UR
     if not current_value or is_env_corrupted(current_value):
         if key in PRODUCTION_CONFIG:
             os.environ[key] = PRODUCTION_CONFIG[key]
-            logging.info(f"⚠️ Using production config for {key} (env var corrupted or missing)")
+            print(f"⚠️ Using production config for {key} (env var corrupted or missing)")
+    else:
+        print(f"✅ Using env variable for {key}: {current_value[:20]}...")
 
 # Also set related keys if not present
 if not os.environ.get('SHIPSTATION_API_KEY_TEST'):
