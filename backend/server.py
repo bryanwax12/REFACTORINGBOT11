@@ -1578,6 +1578,21 @@ async def startup_event():
     else:
         logger.warning("⚠️⚠️⚠️ bot_instance is NOT set! Notifications will NOT work!")
 
+@app.get("/debug/config")
+async def debug_config():
+    """Debug endpoint to check configuration (NO AUTH REQUIRED)"""
+    import os
+    return {
+        "status": "backend_running",
+        "admin_key_set": bool(os.environ.get('ADMIN_API_KEY')),
+        "admin_key_length": len(os.environ.get('ADMIN_API_KEY', '')),
+        "admin_key_preview": os.environ.get('ADMIN_API_KEY', '')[:20] + '...' if os.environ.get('ADMIN_API_KEY') else 'NOT_SET',
+        "mongo_url_set": bool(os.environ.get('MONGO_URL')),
+        "mongo_url_preview": os.environ.get('MONGO_URL', '')[:30] + '...' if os.environ.get('MONGO_URL') else 'NOT_SET',
+        "webhook_base_url": os.environ.get('WEBHOOK_BASE_URL', 'NOT_SET'),
+        "config_file_used": os.path.exists('/app/backend/config_production.py'),
+    }
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     """Cleanup on shutdown"""
