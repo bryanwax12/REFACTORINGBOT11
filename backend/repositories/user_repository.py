@@ -337,10 +337,14 @@ class UserRepository(BaseRepository):
         Returns:
             True если обновлено
         """
-        return await self.update_one(
+        result = await self.update_one(
             {"telegram_id": telegram_id},
             {"$set": {field: value}}
         )
+        # Clear cache for this user after update
+        if result:
+            clear_user_cache(telegram_id)
+        return result
     
     async def get_users_with_balance(self, min_balance: float = 0.01) -> List[Dict]:
         """
