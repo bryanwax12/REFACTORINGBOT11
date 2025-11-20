@@ -241,7 +241,6 @@ async def legacy_set_api_mode(req: Request, request: dict, api_key: str = Depend
     
     # Log the change with masked key
     masked_key = api_config_manager._mask_key(server.SHIPSTATION_API_KEY)
-    logger = logging.getLogger(__name__)
     logger.info(f"✅ API mode changed to: {mode.upper()}")
     logger.info(f"   ShipStation key updated: {masked_key}")
     
