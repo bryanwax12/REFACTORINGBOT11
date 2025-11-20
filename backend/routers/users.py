@@ -130,7 +130,7 @@ async def unblock_user(telegram_id: int):
         # Send notification to user
         try:
             from server import bot_instance
-            from utils.telegram_utils import safe_telegram_call
+            from handlers.common_handlers import safe_telegram_call
             
             if bot_instance:
                 unblock_message = (
