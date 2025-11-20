@@ -127,6 +127,27 @@ async def unblock_user(telegram_id: int):
         
         logger.info(f"✅ User {telegram_id} unblocked")
         
+        # Send notification to user
+        try:
+            from server import bot_instance
+            from utils.telegram_utils import safe_telegram_call
+            
+            if bot_instance:
+                unblock_message = (
+                    "✅ *Ваш аккаунт разблокирован*\n\n"
+                    "Доступ к боту восстановлен.\n"
+                    "Вы можете продолжить использовать бот."
+                )
+                
+                await safe_telegram_call(bot_instance.send_message(
+                    chat_id=telegram_id,
+                    text=unblock_message,
+                    parse_mode='Markdown'
+                ))
+                logger.info(f"✅ Unblock notification sent to user {telegram_id}")
+        except Exception as notify_error:
+            logger.warning(f"Failed to send unblock notification: {notify_error}")
+        
         return {
             "status": "unblocked",
             "telegram_id": telegram_id
