@@ -4,6 +4,9 @@ Provides backward compatibility for old API endpoints used by frontend
 """
 from fastapi import APIRouter, Header, HTTPException, Depends, Request
 from typing import Optional
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api", tags=["legacy"])
 
