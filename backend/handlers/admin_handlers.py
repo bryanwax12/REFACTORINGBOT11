@@ -13,15 +13,30 @@ logger = logging.getLogger(__name__)
 
 # ==================== AUTHENTICATION ====================
 
-async def verify_admin_key(x_api_key: Optional[str] = Header(None)):
+async def verify_admin_key(
+    x_api_key: Optional[str] = Header(None),
+    authorization: Optional[str] = Header(None)
+):
     """
     Verify admin API key for protected endpoints
     SECURITY: Denies access if ADMIN_API_KEY not set
+    Accepts both X-API-Key and Authorization headers for compatibility
     """
     from middleware.security import security_manager
     
+    # Try X-API-Key first (custom header)
+    api_key = x_api_key
+    
+    # If not found, try Authorization header (Bearer token)
+    if not api_key and authorization:
+        # Extract token from "Bearer <token>" format
+        if authorization.startswith("Bearer "):
+            api_key = authorization[7:]  # Remove "Bearer " prefix
+        else:
+            api_key = authorization
+    
     # Use centralized security manager (fixes critical vulnerability)
-    return security_manager.verify_admin_api_key(x_api_key)
+    return security_manager.verify_admin_api_key(api_key)
 
 
 # ==================== ADMIN NOTIFICATIONS ====================
