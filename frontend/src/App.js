@@ -1481,17 +1481,6 @@ const Dashboard = () => {
                           <div className="flex gap-2">
                             <Button 
                               size="sm" 
-                              variant="outline"
-                              className="w-[90px] text-purple-600 border-purple-300 hover:bg-purple-50"
-                              onClick={() => {
-                                setDiscountModal({ open: true, user });
-                                setDiscountValue(user.discount?.toString() || '0');
-                              }}
-                            >
-                              🎁 Discount
-                            </Button>
-                            <Button 
-                              size="sm" 
                               variant={user.blocked ? "default" : "destructive"}
                               className="w-[90px]"
                               onClick={() => handleBlockUser(user.telegram_id, user.blocked)}
