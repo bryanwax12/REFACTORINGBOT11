@@ -73,6 +73,29 @@ async def block_user(telegram_id: int, reason: Optional[str] = None):
         
         logger.info(f"🚫 User {telegram_id} blocked. Reason: {reason or 'No reason'}")
         
+        # Send notification to user
+        try:
+            from server import bot_instance
+            from utils.telegram_utils import safe_telegram_call
+            
+            if bot_instance:
+                block_message = (
+                    "🚫 *Ваш аккаунт заблокирован*\n\n"
+                    "Доступ к боту ограничен.\n"
+                )
+                if reason:
+                    block_message += f"Причина: {reason}\n\n"
+                block_message += "Для получения дополнительной информации свяжитесь с администратором."
+                
+                await safe_telegram_call(bot_instance.send_message(
+                    chat_id=telegram_id,
+                    text=block_message,
+                    parse_mode='Markdown'
+                ))
+                logger.info(f"✅ Block notification sent to user {telegram_id}")
+        except Exception as notify_error:
+            logger.warning(f"Failed to send block notification: {notify_error}")
+        
         return {
             "status": "blocked",
             "telegram_id": telegram_id,
