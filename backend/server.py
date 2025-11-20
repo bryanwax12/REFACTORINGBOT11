@@ -1371,9 +1371,16 @@ async def startup_event():
             logger.info(f"💾 Setting up persistence: {persistence_file}")
             
             # Initialize persistence
+            from telegram.ext import PersistenceInput
+            
             persistence = PicklePersistence(
                 filepath=str(persistence_file),
-                store_data=True,  # Store all data
+                store_data=PersistenceInput(
+                    user_data=True,
+                    chat_data=True,
+                    bot_data=True,
+                    callback_data=True
+                ),
                 update_interval=1  # Save every 1 second (fast updates)
             )
             
