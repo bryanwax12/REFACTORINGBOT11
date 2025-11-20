@@ -15,10 +15,20 @@ def is_env_corrupted(value):
     """Check if environment variable is concatenated with others"""
     if not value:
         return False
-    corruption_patterns = ['REACT_APP_', 'MONGO_URL=mongodb', 'WEBHOOK_BASE', 'BOT_TOKEN=', 'TELEGRAM_BOT']
-    for pattern in corruption_patterns:
-        if pattern in value and not value.startswith(pattern) and '=' in value:
+    # Check for obvious concatenation patterns
+    corruption_indicators = [
+        'REACT_APP_',  # Frontend var mixed in
+        'MONGO_URL=',  # Another var mixed in
+        'WEBHOOK_BASE_URL=',  # Another var mixed in
+        'BOT_TOKEN=',  # Another var mixed in
+        'TELEGRAM_BOT_TOKEN=',  # Another var mixed in
+    ]
+    for indicator in corruption_indicators:
+        if indicator in value:
             return True
+    # Check if value is suspiciously long (normal keys are < 60 chars)
+    if len(value) > 60:
+        return True
     return False
 
 # Load production config if needed
