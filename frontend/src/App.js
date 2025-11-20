@@ -2647,69 +2647,6 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* Discount Modal */}
-      {discountModal.open && discountModal.user && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" data-testid="discount-modal">
-          <Card className="w-full max-w-md mx-4">
-            <CardHeader>
-              <CardTitle>🎁 Set User Discount</CardTitle>
-              <CardDescription>
-                User: {discountModal.user.first_name} (@{discountModal.user.username || 'no_username'})
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 text-sm">
-                <p className="font-medium text-purple-900">Discount will apply to:</p>
-                <ul className="list-disc list-inside text-purple-800 mt-1">
-                  <li>All future orders</li>
-                  <li>Final price after markup</li>
-                  <li>User will be notified in Telegram</li>
-                </ul>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="discount-value">Discount Percentage</Label>
-                <Input
-                  id="discount-value"
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="1"
-                  placeholder="10"
-                  value={discountValue}
-                  onChange={(e) => setDiscountValue(e.target.value)}
-                  data-testid="discount-value-input"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Enter 0 to remove discount. Maximum 100%.
-                </p>
-              </div>
-              
-              <div className="flex gap-2">
-                <Button 
-                  onClick={handleSetDiscount}
-                  className="flex-1 bg-purple-600 hover:bg-purple-700"
-                  data-testid="confirm-discount-btn"
-                >
-                  Set Discount
-                </Button>
-                <Button 
-                  onClick={() => {
-                    setDiscountModal({ open: false, user: null });
-                    setDiscountValue('');
-                  }}
-                  variant="outline"
-                  data-testid="cancel-discount-btn"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-
       {/* Refund Status Modal */}
       {refundStatusModal.open && refundStatusModal.request && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
