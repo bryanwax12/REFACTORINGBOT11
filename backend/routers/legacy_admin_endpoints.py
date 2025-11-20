@@ -437,7 +437,9 @@ async def invite_all_to_channel_legacy(
             "success": True,
             "message": f"Invitations sent to {sent_count} users",
             "sent": sent_count,
-            "failed": failed_count
+            "failed": failed_count,
+            "success_count": sent_count,  # Frontend compatibility
+            "failed_count": failed_count   # Frontend compatibility
         }
     
     except Exception as e:
