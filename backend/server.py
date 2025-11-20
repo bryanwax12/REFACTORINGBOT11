@@ -298,8 +298,18 @@ generate_thank_you_message = util_generate_thank_you_message
 app = FastAPI(title="Telegram Shipping Bot")
 
 # ==================== MIDDLEWARE ====================
+from fastapi.middleware.cors import CORSMiddleware
 from middleware.logging import RequestLoggingMiddleware
 from middleware.rate_limiting import RateLimitMiddleware
+
+# Add CORS middleware (CRITICAL for deployed version)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins for now
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Add middleware (order matters - first added = last executed)
 app.add_middleware(RequestLoggingMiddleware, log_body=False)
