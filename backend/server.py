@@ -1411,8 +1411,8 @@ async def startup_event():
             application = (
                 Application.builder()
                 .token(TELEGRAM_BOT_TOKEN)
-                .persistence(persistence)  # RE-ENABLED after fixing concurrent_updates
-                .concurrent_updates(False)  # CRITICAL FIX: False for sequential per-user processing
+                .persistence(persistence)  # Persistence enabled
+                .concurrent_updates(True)  # REVERTED: False made it worse, back to True
                 .connect_timeout(app_settings['connect_timeout'])  # Fast connection
                 .read_timeout(app_settings['read_timeout'])   # Optimized read timeout
                 .write_timeout(app_settings['write_timeout'])  # Reliable message delivery
