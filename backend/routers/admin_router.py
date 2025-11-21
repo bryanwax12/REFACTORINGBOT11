@@ -794,3 +794,73 @@ async def deduct_user_balance_legacy(
         logger.error(f"Error deducting balance: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
+
+# ============================================================
+# DEBUG / MAINTENANCE ENDPOINTS
+# ============================================================
+
+@admin_router.post("/users/{telegram_id}/clear-session-data")
+async def clear_user_session_data(
+    telegram_id: int,
+    authenticated: bool = Depends(verify_admin_key)
+):
+    """
+    Clear all session and conversation data for a specific user
+    
+    This is useful when a user has stuck/corrupted data that causes issues
+    like the 5-second delay problem from old debounce data
+    """
+    from server import db
+    
+    try:
+        # Check if user exists
+        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Clear user session data
+        session_result = await db.user_sessions.delete_many({"user_id": telegram_id})
+        
+        logger.info(f"✅ Admin cleared session data for user {telegram_id}")
+        logger.info(f"   Sessions deleted: {session_result.deleted_count}")
+        
+        return {
+            "success": True,
+            "telegram_id": telegram_id,
+            "sessions_deleted": session_result.deleted_count,
+            "message": "User session data cleared. User needs to send /start to create new session."
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error clearing session data for user {telegram_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@admin_router.post("/clear-all-sessions")
+async def clear_all_sessions(authenticated: bool = Depends(verify_admin_key)):
+    """
+    Clear ALL user sessions (DANGER: This resets all active conversations)
+    
+    Use this to clean up after major bot changes that affect session structure
+    """
+    from server import db
+    
+    try:
+        # Delete all sessions
+        result = await db.user_sessions.delete_many({})
+        
+        logger.warning(f"⚠️ Admin cleared ALL sessions! Count: {result.deleted_count}")
+        
+        return {
+            "success": True,
+            "sessions_deleted": result.deleted_count,
+            "message": "All sessions cleared. All users need to send /start."
+        }
+    
+    except Exception as e:
+        logger.error(f"Error clearing all sessions: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
