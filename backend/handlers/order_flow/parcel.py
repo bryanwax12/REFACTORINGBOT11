@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
 from utils.validators import validate_weight, validate_dimension
 from utils.handler_decorators import with_user_session, safe_handler, with_typing_action, with_services
+from utils.debounce import debounce_input
 from telegram.ext import ConversationHandler
 
 
