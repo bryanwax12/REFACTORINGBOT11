@@ -210,10 +210,11 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE,
     if not context.user_data.get('editing_template_from'):
         # REMOVED: ConversationHandler manages state via Persistence
         # await session_service.update_session_step(
-            user_id,
-            step="FROM_ADDRESS2",
-            data={'from_address': address}
-        )
+        #     user_id,
+        #     step="FROM_ADDRESS2",
+        #     data={'from_address': address}
+        # )
+        pass
     
     await SecurityLogger.log_action(
         "order_input",
