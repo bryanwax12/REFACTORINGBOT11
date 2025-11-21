@@ -41,9 +41,18 @@ async def safe_telegram_call(coro, timeout=10, error_message="❌ Превыше
 async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Add checkmark ✅ to selected message and remove buttons
+    Also adds reaction to user's message to show it was accepted
     Runs async - doesn't block bot response
     """
     try:
+        # Add reaction to user's message if it's a text input
+        if update.message:
+            try:
+                await update.message.set_reaction("👍")
+            except Exception:
+                # Reactions might not be supported in some chats
+                pass
+        
         # Handle callback query (button press)
         if update.callback_query:
             message = update.callback_query.message
