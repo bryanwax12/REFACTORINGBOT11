@@ -176,7 +176,7 @@
 
 ## 🖥️ ЧАСТЬ 2: АДМИН-ПАНЕЛЬ
 
-### URL админки: https://bug-buster-21.preview.emergentagent.com
+### URL админки: https://bugfix-telegram.preview.emergentagent.com
 
 ---
 
