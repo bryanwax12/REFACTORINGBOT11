@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 # Store last processed message time per user+handler
 _last_processed = {}
 
-def debounce_input(min_interval: float = 0.3, show_reminder: bool = True):
+def debounce_input(min_interval: float = 0.5, show_reminder: bool = True):
     """
     Decorator to prevent processing duplicate inputs when user types very fast
     
