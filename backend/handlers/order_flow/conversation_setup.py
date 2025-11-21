@@ -273,7 +273,8 @@ def setup_order_conversation_handler():
         per_user=True,
         per_message=False,  # False is correct: we use MessageHandler (not only CallbackQueryHandler)
         allow_reentry=True,
-        block=False  # CRITICAL: Process messages from same user sequentially to prevent race conditions
+        block=False,  # CRITICAL: Process messages from same user sequentially to prevent race conditions
+        name="order_conversation"  # Name for logging/debugging
     )
     
     logger.info("✅ Order conversation handler configured successfully")
