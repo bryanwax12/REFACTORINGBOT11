@@ -49,7 +49,13 @@ class TemplateRepository(BaseRepository):
             "usage_count": 0
         }
         
-        return await self.insert_one(template_doc)
+        result = await self.insert_one(template_doc)
+        
+        # Invalidate user templates cache
+        if user_id:
+            self.cache.invalidate(user_id=user_id)
+        
+        return result
     
     async def find_by_name(
         self,
