@@ -2,7 +2,7 @@
 Webhooks Router
 Эндпоинты для обработки вебхуков
 """
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, BackgroundTasks
 import logging
 
 logger = logging.getLogger(__name__)
