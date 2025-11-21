@@ -32,7 +32,7 @@ payload = {
 
 print('🔍 Testing Cross-Country Shipping (CA to NY)...')
 response = requests.post(
-    'https://tg-bot-repair.preview.emergentagent.com/api/calculate-shipping',
+    'https://tgbot-rescue.preview.emergentagent.com/api/calculate-shipping',
     json=payload,
     timeout=30
 )

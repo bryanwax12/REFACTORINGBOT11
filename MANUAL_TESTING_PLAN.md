@@ -176,7 +176,7 @@
 
 ## 🖥️ ЧАСТЬ 2: АДМИН-ПАНЕЛЬ
 
-### URL админки: https://tg-bot-repair.preview.emergentagent.com
+### URL админки: https://tgbot-rescue.preview.emergentagent.com
 
 ---
 
