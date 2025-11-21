@@ -76,7 +76,9 @@ class BotPerformanceConfig:
             'write_timeout': cls.TELEGRAM_TIMEOUTS['write_timeout'],
             'connect_timeout': cls.TELEGRAM_TIMEOUTS['connect_timeout'],
             'pool_timeout': cls.TELEGRAM_TIMEOUTS['pool_timeout'],
-            'concurrent_updates': 100,      # Handle many updates concurrently
+            'concurrent_updates': True,      # CHANGED: Use True (default: 1 update per user at a time)
+                                             # This prevents race conditions when user types fast!
+                                             # Multiple users can still be handled concurrently
         }
     
     @classmethod
