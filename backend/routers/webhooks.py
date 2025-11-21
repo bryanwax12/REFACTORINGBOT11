@@ -88,14 +88,16 @@ async def telegram_webhook(request: Request):
             update_type = "MESSAGE" if update.message else "CALLBACK" if update.callback_query else "OTHER"
             message_text = update.message.text if update.message else update.callback_query.data if update.callback_query else "N/A"
             
-            logger.info(f"✅ Update created: user={user_id}, type={update_type}, text='{message_text[:50]}'")
+            logger.error(f"✅ Update: user={user_id}, type={update_type}, text='{message_text[:50]}'")
+            logger.error(f"   update.message: {update.message is not None}")
+            if update.message:
+                logger.error(f"   message.text: '{update.message.text}'")
+                logger.error(f"   message has text: {hasattr(update.message, 'text') and update.message.text is not None}")
             
             # Process update SYNCHRONOUSLY
-            # CRITICAL: We must wait for Persistence to save conversation state
-            # before responding to Telegram, otherwise fast messages lose state
             await srv.application.process_update(update)
             
-            logger.info(f"✅ Update processed for user {user_id}")
+            logger.error(f"✅ Update processed for user {user_id}")
             return {"ok": True}
         else:
             logger.error("⚠️ Update is None")
