@@ -8585,5 +8585,31 @@ def run_comprehensive_telegram_bot_tests():
     return results
 
 if __name__ == "__main__":
-    # Run comprehensive Telegram bot testing as requested in review
+    print("🚀 Starting Backend Test Suite...")
+    print(f"Backend URL: {BACKEND_URL}")
+    print(f"API Base: {API_BASE}")
+    
+    # CRITICAL: Run the fast input test first (from review request)
+    print("\n" + "="*80)
+    print("🚨 КРИТИЧЕСКОЕ ТЕСТИРОВАНИЕ ИЗ REVIEW REQUEST")
+    print("="*80)
+    fast_input_result = test_telegram_fast_input_issue()
+    
+    # Run comprehensive testing
     run_comprehensive_telegram_bot_tests()
+    
+    # Final assessment for review request
+    print("\n" + "="*80)
+    print("🎯 ФИНАЛЬНАЯ ОЦЕНКА REVIEW REQUEST")
+    print("="*80)
+    
+    if fast_input_result:
+        print("✅ REVIEW REQUEST: Fast input issue at PARCEL_WEIGHT step RESOLVED")
+    else:
+        print("❌ REVIEW REQUEST: Fast input issue at PARCEL_WEIGHT step NOT RESOLVED")
+        print("🚨 URGENT ACTION REQUIRED:")
+        print("   1. Check webhook processing in /api/telegram/webhook")
+        print("   2. Verify PicklePersistence configuration")
+        print("   3. Ensure ConversationHandler has persistent=True")
+        print("   4. Add logging to order_parcel_weight handler")
+        print("   5. Check if srv.application.process_update() is called synchronously")
