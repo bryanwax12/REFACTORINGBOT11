@@ -985,6 +985,282 @@ def test_error_handling_and_retry():
         print(f"❌ Error handling test error: {e}")
         return False
 
+def test_telegram_fast_input_issue():
+    """Test Telegram bot fast input issue at PARCEL_WEIGHT step - CRITICAL REVIEW REQUEST"""
+    print("\n🔍 КРИТИЧЕСКОЕ ТЕСТИРОВАНИЕ: Проблема быстрого ввода на шаге PARCEL_WEIGHT")
+    print("🎯 КОНТЕКСТ: Бот перестает отвечать на быстрые сообщения на шаге 15/18 (ввод веса посылки)")
+    print("🎯 ПРОБЛЕМА: Пользователь отправил '3' ПЯТЬ РАЗ подряд - бот НЕ ОТВЕТИЛ ни на одно сообщение")
+    
+    try:
+        # Test configuration
+        test_user_id = 999999999  # Test user ID
+        webhook_url = f"{BACKEND_URL}/api/telegram/webhook"
+        
+        print(f"\n📋 Конфигурация теста:")
+        print(f"   Webhook URL: {webhook_url}")
+        print(f"   Test User ID: {test_user_id}")
+        print(f"   Тестируемый шаг: PARCEL_WEIGHT (15/18)")
+        
+        # Step 1: Simulate full flow up to PARCEL_WEIGHT step
+        print(f"\n🔄 ШАГ 1: Симуляция полного флоу до шага PARCEL_WEIGHT")
+        
+        # 1.1: /start command
+        start_update = {
+            "update_id": int(time.time() * 1000),
+            "message": {
+                "message_id": 1,
+                "from": {
+                    "id": test_user_id,
+                    "is_bot": False,
+                    "first_name": "TestUser",
+                    "username": "testuser",
+                    "language_code": "ru"
+                },
+                "chat": {
+                    "id": test_user_id,
+                    "first_name": "TestUser",
+                    "username": "testuser",
+                    "type": "private"
+                },
+                "date": int(time.time()),
+                "text": "/start"
+            }
+        }
+        
+        response = requests.post(webhook_url, json=start_update, timeout=10)
+        print(f"   /start command: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        
+        # 1.2: "Новый заказ" button
+        time.sleep(0.5)  # Small delay between steps
+        new_order_update = {
+            "update_id": int(time.time() * 1000) + 1,
+            "callback_query": {
+                "id": f"callback_{int(time.time())}",
+                "from": {
+                    "id": test_user_id,
+                    "is_bot": False,
+                    "first_name": "TestUser",
+                    "username": "testuser"
+                },
+                "message": {
+                    "message_id": 2,
+                    "from": {"id": 123456789, "is_bot": True, "first_name": "Bot"},
+                    "chat": {"id": test_user_id, "type": "private"},
+                    "date": int(time.time()),
+                    "text": "Main menu"
+                },
+                "data": "new_order"
+            }
+        }
+        
+        response = requests.post(webhook_url, json=new_order_update, timeout=10)
+        print(f"   'Новый заказ' button: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        
+        # 1.3: Simulate all steps up to PARCEL_WEIGHT (steps 1-14)
+        order_steps = [
+            ("FROM_NAME", "Иван Иванов"),
+            ("FROM_ADDRESS", "ул. Ленина 1"),
+            ("FROM_CITY", "Москва"),
+            ("FROM_STATE", "Moscow"),
+            ("FROM_ZIP", "101000"),
+            ("FROM_PHONE", "+79991234567"),
+            ("TO_NAME", "Петр Петров"),
+            ("TO_ADDRESS", "ул. Пушкина 2"),
+            ("TO_CITY", "Санкт-Петербург"),
+            ("TO_STATE", "Saint Petersburg"),
+            ("TO_ZIP", "190000"),
+            ("TO_PHONE", "+79997654321")
+        ]
+        
+        print(f"   Симуляция шагов 1-12 (адресные данные):")
+        for i, (step_name, step_value) in enumerate(order_steps, 3):
+            time.sleep(0.3)  # Delay between steps
+            step_update = {
+                "update_id": int(time.time() * 1000) + i,
+                "message": {
+                    "message_id": i,
+                    "from": {
+                        "id": test_user_id,
+                        "is_bot": False,
+                        "first_name": "TestUser",
+                        "username": "testuser"
+                    },
+                    "chat": {
+                        "id": test_user_id,
+                        "type": "private"
+                    },
+                    "date": int(time.time()),
+                    "text": step_value
+                }
+            }
+            
+            response = requests.post(webhook_url, json=step_update, timeout=10)
+            status = "✅" if response.status_code == 200 else "❌"
+            print(f"      {step_name}: {step_value} -> {response.status_code} {status}")
+        
+        print(f"   ✅ Все шаги 1-12 завершены, переходим к тестированию PARCEL_WEIGHT")
+        
+        # Step 2: CRITICAL TEST - Send 5 rapid messages with weight "3"
+        print(f"\n🚨 ШАГ 2: КРИТИЧЕСКИЙ ТЕСТ - Отправка 5 сообщений подряд с весом '3'")
+        print(f"   Это воспроизводит проблему из review request")
+        
+        # Clear any previous logs
+        os.system("echo '' > /tmp/webhook_test_log.txt")
+        
+        rapid_messages = []
+        responses = []
+        start_time = time.time()
+        
+        # Send 5 messages as fast as possible (like user did)
+        for i in range(5):
+            weight_update = {
+                "update_id": int(time.time() * 1000000) + i,  # Unique update IDs
+                "message": {
+                    "message_id": 100 + i,
+                    "from": {
+                        "id": test_user_id,
+                        "is_bot": False,
+                        "first_name": "TestUser",
+                        "username": "testuser"
+                    },
+                    "chat": {
+                        "id": test_user_id,
+                        "type": "private"
+                    },
+                    "date": int(time.time()) + i,
+                    "text": "3"  # Weight value
+                }
+            }
+            
+            rapid_messages.append(weight_update)
+            
+            # Send immediately without delay (reproducing user behavior)
+            try:
+                response = requests.post(webhook_url, json=weight_update, timeout=5)
+                responses.append((i+1, response.status_code, response.text[:100]))
+                print(f"   Сообщение {i+1}/5: '3' -> {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+            except Exception as e:
+                responses.append((i+1, "ERROR", str(e)[:100]))
+                print(f"   Сообщение {i+1}/5: '3' -> ERROR: {e}")
+        
+        total_time = time.time() - start_time
+        print(f"   Общее время отправки 5 сообщений: {total_time:.3f}s")
+        
+        # Step 3: Analyze results
+        print(f"\n📊 ШАГ 3: АНАЛИЗ РЕЗУЛЬТАТОВ")
+        
+        successful_responses = [r for r in responses if r[1] == 200]
+        failed_responses = [r for r in responses if r[1] != 200]
+        
+        print(f"   Успешные ответы: {len(successful_responses)}/5")
+        print(f"   Неудачные ответы: {len(failed_responses)}/5")
+        
+        if len(successful_responses) == 0:
+            print(f"   ❌ КРИТИЧЕСКАЯ ПРОБЛЕМА: НИ ОДНО сообщение не обработано!")
+            print(f"   🚨 Это точно воспроизводит проблему из review request")
+        elif len(successful_responses) < 5:
+            print(f"   ⚠️ ЧАСТИЧНАЯ ПРОБЛЕМА: Только {len(successful_responses)} из 5 сообщений обработано")
+        else:
+            print(f"   ✅ Все сообщения обработаны успешно")
+        
+        # Step 4: Check backend logs for webhook processing
+        print(f"\n🔍 ШАГ 4: АНАЛИЗ ЛОГОВ BACKEND")
+        
+        # Check for webhook received logs
+        webhook_logs = os.popen("tail -n 100 /var/log/supervisor/backend.err.log | grep -i 'WEBHOOK RECEIVED'").read()
+        webhook_count = len([line for line in webhook_logs.split('\n') if 'WEBHOOK RECEIVED' in line])
+        print(f"   'WEBHOOK RECEIVED' логи: {webhook_count} {'✅' if webhook_count >= 5 else '❌'}")
+        
+        # Check for parcel weight handler logs
+        parcel_logs = os.popen("tail -n 100 /var/log/supervisor/backend.err.log | grep -i 'order_parcel_weight'").read()
+        parcel_count = len([line for line in parcel_logs.split('\n') if 'order_parcel_weight' in line])
+        print(f"   'order_parcel_weight' handler логи: {parcel_count} {'✅' if parcel_count >= 1 else '❌'}")
+        
+        # Check for persistence/session logs
+        persistence_logs = os.popen("tail -n 100 /var/log/supervisor/backend.err.log | grep -i 'persistence\\|session'").read()
+        persistence_count = len([line for line in persistence_logs.split('\n') if line.strip()])
+        print(f"   Persistence/Session логи: {persistence_count} {'ℹ️' if persistence_count > 0 else '⚠️'}")
+        
+        # Check for any errors
+        error_logs = os.popen("tail -n 50 /var/log/supervisor/backend.err.log | grep -i 'error\\|exception\\|failed'").read()
+        if error_logs.strip():
+            print(f"   ❌ Обнаружены ошибки в логах:")
+            for line in error_logs.split('\n')[-5:]:  # Last 5 error lines
+                if line.strip():
+                    print(f"      {line.strip()}")
+        else:
+            print(f"   ✅ Критических ошибок в логах не найдено")
+        
+        # Step 5: Check Persistence Configuration
+        print(f"\n🔍 ШАГ 5: ПРОВЕРКА КОНФИГУРАЦИИ PERSISTENCE")
+        
+        # Check if PicklePersistence is configured correctly
+        try:
+            with open('/app/backend/server.py', 'r') as f:
+                server_code = f.read()
+            
+            # Check for PicklePersistence configuration
+            pickle_persistence = 'PicklePersistence' in server_code
+            update_interval = 'update_interval=0.0' in server_code
+            single_file = 'single_file=False' in server_code
+            
+            print(f"   PicklePersistence настроен: {'✅' if pickle_persistence else '❌'}")
+            print(f"   update_interval=0.0: {'✅' if update_interval else '❌'}")
+            print(f"   single_file=False: {'✅' if single_file else '❌'}")
+            
+            # Check ConversationHandler block setting
+            conv_handler_block = 'block=False' in server_code
+            print(f"   ConversationHandler block=False: {'✅' if conv_handler_block else '❌'}")
+            
+        except Exception as e:
+            print(f"   ❌ Ошибка проверки конфигурации: {e}")
+        
+        # Step 6: Recommendations
+        print(f"\n💡 ШАГ 6: РЕКОМЕНДАЦИИ")
+        
+        if len(successful_responses) == 0:
+            print(f"   🚨 КРИТИЧЕСКАЯ ПРОБЛЕМА ПОДТВЕРЖДЕНА:")
+            print(f"   1. Webhook endpoint принимает запросы (200 OK)")
+            print(f"   2. НО обработка сообщений НЕ РАБОТАЕТ")
+            print(f"   3. Возможные причины:")
+            print(f"      - Persistence не сохраняет состояние между запросами")
+            print(f"      - ConversationHandler теряет контекст при быстрых сообщениях")
+            print(f"      - Webhook обработка не передает Update в Application")
+            print(f"      - Проблемы с async/await в webhook handler")
+            print(f"   4. РЕКОМЕНДУЕМЫЕ ИСПРАВЛЕНИЯ:")
+            print(f"      - Проверить что srv.application.process_update() вызывается")
+            print(f"      - Убедиться что Persistence сохраняет состояние ПЕРЕД ответом")
+            print(f"      - Добавить логирование в order_parcel_weight handler")
+            print(f"      - Проверить ConversationHandler persistent=True")
+        elif len(successful_responses) < 5:
+            print(f"   ⚠️ ЧАСТИЧНАЯ ПРОБЛЕМА:")
+            print(f"   - {len(successful_responses)} из 5 сообщений обработано")
+            print(f"   - Возможно проблема с debounce или rate limiting")
+            print(f"   - Рекомендуется проверить @debounce_input декоратор")
+        else:
+            print(f"   ✅ Проблема НЕ ВОСПРОИЗВЕДЕНА в тестовой среде")
+            print(f"   - Возможно проблема специфична для production окружения")
+            print(f"   - Или проблема была исправлена")
+        
+        # Final assessment
+        print(f"\n🎯 ИТОГОВАЯ ОЦЕНКА:")
+        
+        if len(successful_responses) == 0:
+            print(f"   ❌ ТЕСТ НЕ ПРОЙДЕН: Критическая проблема с быстрым вводом ПОДТВЕРЖДЕНА")
+            return False
+        elif len(successful_responses) < 3:
+            print(f"   ⚠️ ТЕСТ ЧАСТИЧНО ПРОЙДЕН: Проблема частично воспроизведена")
+            return False
+        else:
+            print(f"   ✅ ТЕСТ ПРОЙДЕН: Быстрый ввод обрабатывается корректно")
+            return True
+        
+    except Exception as e:
+        print(f"❌ Ошибка тестирования быстрого ввода: {e}")
+        import traceback
+        print(f"   Traceback: {traceback.format_exc()}")
+        return False
+
 def check_backend_logs():
     """Check backend logs for any errors"""
     print("\n🔍 Checking Backend Logs...")
