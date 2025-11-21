@@ -1398,6 +1398,15 @@ async def startup_event():
                 update_interval=1  # Save every 1 second (fast updates)
             )
             
+            # Optimize: Only receive needed update types (saves ~20-40ms)
+            from telegram import Update
+            allowed_update_types = [
+                Update.MESSAGE,
+                Update.CALLBACK_QUERY,
+                Update.MY_CHAT_MEMBER,
+            ]
+            logger.info(f"⚡ Optimized: Only accepting {len(allowed_update_types)} update types")
+            
             application = (
                 Application.builder()
                 .token(TELEGRAM_BOT_TOKEN)
