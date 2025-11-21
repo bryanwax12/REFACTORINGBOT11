@@ -348,6 +348,32 @@ generate_thank_you_message = util_generate_thank_you_message
 
 app = FastAPI(title="Telegram Shipping Bot")
 
+# ==================== STARTUP EVENT ====================
+@app.on_event("startup")
+async def startup_event():
+    """
+    Автоматическая очистка старых сессий при запуске (включая deploy)
+    """
+    import asyncio
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    # Подождем 5 секунд, чтобы БД точно подключилась
+    await asyncio.sleep(5)
+    
+    try:
+        logger.warning("🧹 STARTUP: Автоматическая очистка старых сессий...")
+        
+        # Очистка через MongoDB
+        result = await db.user_sessions.delete_many({})
+        
+        logger.warning(f"✅ STARTUP: Очищено {result.deleted_count} старых сессий")
+        logger.warning("🎉 STARTUP: Все пользователи начнут с чистого листа!")
+        
+    except Exception as e:
+        logger.error(f"⚠️ STARTUP: Не удалось очистить сессии: {e}")
+        logger.error("⚠️ STARTUP: Это не критично, продолжаем работу")
+
 # ==================== MIDDLEWARE ====================
 from fastapi.middleware.cors import CORSMiddleware
 from middleware.logging import RequestLoggingMiddleware
