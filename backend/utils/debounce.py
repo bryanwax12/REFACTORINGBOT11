@@ -31,6 +31,7 @@ def debounce_input(min_interval: float = 0.3, show_reminder: bool = True):
         @wraps(func)
         async def wrapper(update, context, *args, **kwargs):
             if not update.effective_user:
+                logger.debug(f"🔍 Debounce [{func.__name__}]: No effective_user, proceeding without debounce")
                 return await func(update, context, *args, **kwargs)
             
             user_id = update.effective_user.id
@@ -41,15 +42,22 @@ def debounce_input(min_interval: float = 0.3, show_reminder: bool = True):
             last_time = _last_processed.get(key, 0)
             time_since_last = current_time - last_time
             
+            logger.info(
+                f"🔍 DEBOUNCE CHECK [{handler_name}] user={user_id}: "
+                f"time_since_last={time_since_last:.3f}s, min_interval={min_interval}s, "
+                f"last_processed_time={last_time}, current_time={current_time}"
+            )
+            
             # Track fast input count
             fast_input_key = f"{key}_fast_count"
             if time_since_last < min_interval:
                 fast_count = context.user_data.get(fast_input_key, 0) + 1
                 context.user_data[fast_input_key] = fast_count
                 
-                logger.info(
-                    f"🚫 Debounce: Ignoring fast input from user {user_id} "
-                    f"in {handler_name} (interval: {time_since_last:.3f}s < {min_interval}s, count: {fast_count})"
+                logger.warning(
+                    f"🚫 DEBOUNCE BLOCKED [{handler_name}] user={user_id}: "
+                    f"Ignoring fast input (interval: {time_since_last:.3f}s < {min_interval}s, "
+                    f"fast_count: {fast_count}, message_text: '{update.message.text[:50] if update.message else 'N/A'}')"
                 )
                 
                 # Show friendly reminder after 2 fast inputs  
