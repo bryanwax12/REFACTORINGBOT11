@@ -643,6 +643,12 @@ def with_user_session(create_user=True, require_session=False):
             user_id = update.effective_user.id
             username = update.effective_user.username
             first_name = update.effective_user.first_name
+            handler_name = func.__name__
+            
+            logger.info(
+                f"🔍 SESSION CHECK [{handler_name}] user={user_id}: "
+                f"Starting with_user_session decorator (create_user={create_user}, require_session={require_session})"
+            )
             
             user_repo = get_user_repo()
             session_repo = SessionRepository(db)
@@ -654,16 +660,20 @@ def with_user_session(create_user=True, require_session=False):
                     username=username,
                     first_name=first_name
                 )
+                logger.info(f"✅ SESSION CHECK [{handler_name}] user={user_id}: User retrieved/created")
             else:
                 user = await user_repo.find_by_telegram_id(user_id)
                 
                 if not user:
+                    logger.warning(f"❌ SESSION CHECK [{handler_name}] user={user_id}: User not found")
                     if update.message:
                         await update.message.reply_text("❌ Пользователь не найден. Используйте /start")
                     return ConversationHandler.END
+                logger.info(f"✅ SESSION CHECK [{handler_name}] user={user_id}: User found")
             
             # Check if blocked
             if user.get('blocked', False):
+                logger.warning(f"❌ SESSION CHECK [{handler_name}] user={user_id}: User is blocked")
                 if update.message:
                     await update.message.reply_text("❌ Вы заблокированы")
                 return ConversationHandler.END
