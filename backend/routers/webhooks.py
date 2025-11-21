@@ -89,15 +89,12 @@ async def telegram_webhook(request: Request, background_tasks: BackgroundTasks):
             message_text = update.message.text if update.message else update.callback_query.data if update.callback_query else "N/A"
             
             logger.info(f"✅ Update created: user={user_id}, type={update_type}, text='{message_text[:50]}'")
-            logger.info(f"   Processing through application with {len(srv.application.handlers)} handler groups...")
             
-            # Process the update ASYNCHRONOUSLY in background
-            # This prevents Telegram from throttling webhooks due to slow processing
-            import asyncio
-            asyncio.create_task(srv.application.process_update(update))
+            # Process update in background using FastAPI BackgroundTasks
+            # This ensures immediate response to Telegram (prevents throttling)
+            background_tasks.add_task(srv.application.process_update, update)
             
-            # Return immediately to Telegram (fast response prevents throttling)
-            logger.info(f"✅ Update queued for processing for user {user_id}")
+            # Return immediately to Telegram (< 50ms response time)
             return {"ok": True}
         else:
             logger.error("⚠️ Update is None")
