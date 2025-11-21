@@ -17,11 +17,27 @@ async def debug_unhandled_message(update: Update, context: ContextTypes.DEFAULT_
     
     logger.error(f"🚨 UNHANDLED MESSAGE from user {user_id}: '{message_text}'")
     logger.error(f"   User data keys: {list(context.user_data.keys())}")
+    logger.error(f"   User data content: {context.user_data}")
     logger.error(f"   Chat data keys: {list(context.chat_data.keys())}")
     
-    # Send helpful message to user
-    if update.message:
-        await update.message.reply_text(
-            "⚠️ Сообщение не обработано.\n\n"
-            "Пожалуйста, используйте /start для начала работы с ботом."
-        )
+    # Check if user is in middle of conversation
+    has_order_data = any(key.startswith('from_') or key.startswith('to_') or key.startswith('parcel_') 
+                         for key in context.user_data.keys())
+    
+    if has_order_data:
+        logger.error(f"   ⚠️ USER HAS ORDER DATA but ConversationHandler didn't match!")
+        logger.error(f"   This means conversation state is lost or incorrect!")
+        
+        # Send specific message
+        if update.message:
+            await update.message.reply_text(
+                "⚠️ Извините, состояние диалога потеряно.\n\n"
+                "Пожалуйста, используйте /start чтобы начать заново."
+            )
+    else:
+        # Send helpful message to user
+        if update.message:
+            await update.message.reply_text(
+                "⚠️ Сообщение не обработано.\n\n"
+                "Пожалуйста, используйте /start для начала работы с ботом."
+            )
