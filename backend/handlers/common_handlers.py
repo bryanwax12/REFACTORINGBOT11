@@ -139,20 +139,28 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     - Error handling
     - Typing indicator
     """
+    # Get user from context FIRST (injected by decorator)
+    user = context.user_data.get('db_user')
+    if not user:
+        logger.error("db_user not found in context!")
+        return ConversationHandler.END
+    
     # CRITICAL: Clear any active conversation state to prevent dialog conflicts
     # This ensures /start always brings user to main menu, not mid-conversation
     try:
         logger.info(f"🧹 Clearing conversation state for user {update.effective_user.id}")
+        # Save db_user before clearing
+        saved_user = user
         # Clear ALL conversation data for this user
         context.user_data.clear()
+        # Restore db_user for this handler to use
+        context.user_data['db_user'] = saved_user
+        user = saved_user
         
         # Additionally, signal to ConversationHandler that we want to end any active conversation
         # This happens via the return value ConversationHandler.END at the end of this function
     except Exception as e:
         logger.error(f"Error clearing conversation state: {e}")
-    
-    # Get user from context (injected by decorator)
-    user = context.user_data['db_user']
     user_balance = user.get('balance', 0.0)
     first_name = user.get('first_name', 'Пользователь')
     
