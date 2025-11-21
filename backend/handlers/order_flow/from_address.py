@@ -133,12 +133,13 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     # Run session update and logging in parallel (non-blocking background tasks)
     if not context.user_data.get('editing_template_from'):
         logger.info("📝 Updating session for FROM_NAME (normal flow)")
+        # REMOVED: ConversationHandler manages state via Persistence
         # Run session update in background (don't wait)
-        asyncio.create_task(session_service.update_session_step(
-            user_id,
-            step="FROM_ADDRESS",
-            data={'from_name': name}
-        ))
+        # asyncio.create_task(session_service.update_session_step(
+        #     user_id,
+        #     step="FROM_ADDRESS",
+        #     data={'from_name': name}
+        # ))
     else:
         logger.info("⏭️ SKIPPING session update - editing template FROM address")
     
