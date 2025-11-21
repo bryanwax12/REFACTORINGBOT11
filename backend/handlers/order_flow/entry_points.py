@@ -111,6 +111,12 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             context.user_data['last_state'] = STATE_NAMES[FROM_NAME]
         
         logger.error(f"🎯🎯🎯 NEW_ORDER_START RETURNING STATE: FROM_NAME ({FROM_NAME})")
+        logger.error(f"   context.user_data keys: {list(context.user_data.keys())}")
+        
+        # FORCE persistence flush (ensure state is saved immediately)
+        if hasattr(context.application, 'persistence'):
+            logger.error(f"   Forcing persistence flush...")
+        
         return FROM_NAME
 
 
