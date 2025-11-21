@@ -190,14 +190,18 @@ class SessionRepository(BaseRepository):
         Returns:
             True если обновлено
         """
-        return await self.update_one(
-            {
-                "user_id": user_id,
-                "session_type": session_type,
-                "is_active": True
-            },
-            {"$set": {"current_step": new_step}}
-        )
+        # CRITICAL: Lock to prevent race conditions
+        lock = self.user_locks.setdefault(user_id, Lock())
+        
+        async with lock:
+            return await self.update_one(
+                {
+                    "user_id": user_id,
+                    "session_type": session_type,
+                    "is_active": True
+                },
+                {"$set": {"current_step": new_step}}
+            )
     
     async def clear_session(
         self,
