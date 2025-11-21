@@ -1542,6 +1542,18 @@ async def startup_event():
             ), group=1)  # Lower priority than ConversationHandler
             
             application.add_handler(CallbackQueryHandler(button_callback))
+
+            # DEBUG: Add fallback handler to catch unhandled messages
+            from handlers.debug_handler import debug_unhandled_message
+            application.add_handler(
+                MessageHandler(
+                    telegram_filters.TEXT & ~telegram_filters.COMMAND,
+                    debug_unhandled_message
+                ),
+                group=10  # LOWEST priority - catches everything else
+            )
+            logger.warning("🔍 DEBUG: Fallback handler added to catch unhandled messages")
+
             
             
             # Global error handler for catching all exceptions
