@@ -11,17 +11,18 @@ logger = logging.getLogger(__name__)
 # Store last processed message time per user+handler
 _last_processed = {}
 
-def debounce_input(min_interval: float = 0.3):
+def debounce_input(min_interval: float = 0.3, show_reminder: bool = True):
     """
     Decorator to prevent processing duplicate inputs when user types very fast
     
     Args:
         min_interval: Minimum time (seconds) between processing messages from same user
                      Default: 0.3 seconds (300ms)
+        show_reminder: Show friendly reminder to user if they type too fast
     
     How it works:
     - First message: Processes immediately
-    - Subsequent messages within min_interval: Silently ignored
+    - Subsequent messages within min_interval: Ignored with optional reminder
     - After min_interval: Processes normally
     
     This prevents race conditions when user sends multiple messages in <300ms
@@ -40,14 +41,34 @@ def debounce_input(min_interval: float = 0.3):
             last_time = _last_processed.get(key, 0)
             time_since_last = current_time - last_time
             
-            # If user sent message too quickly after previous one
+            # Track fast input count
+            fast_input_key = f"{key}_fast_count"
             if time_since_last < min_interval:
+                fast_count = context.user_data.get(fast_input_key, 0) + 1
+                context.user_data[fast_input_key] = fast_count
+                
                 logger.info(
                     f"🚫 Debounce: Ignoring fast input from user {user_id} "
-                    f"in {handler_name} (interval: {time_since_last:.3f}s < {min_interval}s)"
+                    f"in {handler_name} (interval: {time_since_last:.3f}s < {min_interval}s, count: {fast_count})"
                 )
+                
+                # Show friendly reminder after 3 fast inputs
+                if show_reminder and fast_count >= 3:
+                    try:
+                        await update.message.reply_text(
+                            "⏱ Пожалуйста, вводите данные медленнее.\n"
+                            "Ваше предыдущее сообщение ещё обрабатывается...",
+                            quote=False
+                        )
+                        context.user_data[fast_input_key] = 0  # Reset after showing reminder
+                    except Exception as e:
+                        logger.warning(f"Failed to send fast input reminder: {e}")
+                
                 # Return current state without processing
                 return context.user_data.get('last_conversation_state')
+            else:
+                # Reset fast input counter if user slowed down
+                context.user_data[fast_input_key] = 0
             
             # Update last processed time
             _last_processed[key] = current_time
