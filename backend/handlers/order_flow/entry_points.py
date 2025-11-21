@@ -112,10 +112,8 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         logger.error(f"🎯🎯🎯 NEW_ORDER_START RETURNING STATE: FROM_NAME ({FROM_NAME})")
         logger.error(f"   context.user_data keys: {list(context.user_data.keys())}")
-        
-        # FORCE persistence flush (ensure state is saved immediately)
-        if hasattr(context.application, 'persistence'):
-            logger.error(f"   Forcing persistence flush...")
+        logger.error(f"   chat_id: {update.effective_chat.id if update.effective_chat else 'None'}")
+        logger.error(f"   user_id: {telegram_id}")
         
         return FROM_NAME
 
