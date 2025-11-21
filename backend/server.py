@@ -1414,7 +1414,7 @@ async def startup_event():
                 Application.builder()
                 .token(TELEGRAM_BOT_TOKEN)
                 .persistence(persistence)  # Persistence enabled
-                .concurrent_updates(True)  # REVERTED: False made it worse, back to True
+                .concurrent_updates(False)  # CRITICAL: Sequential processing prevents race conditions in Persistence!
                 .connect_timeout(app_settings['connect_timeout'])  # Fast connection
                 .read_timeout(app_settings['read_timeout'])   # Optimized read timeout
                 .write_timeout(app_settings['write_timeout'])  # Reliable message delivery
