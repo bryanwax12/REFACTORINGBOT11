@@ -139,22 +139,15 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     - Error handling
     - Typing indicator
     """
-    # CRITICAL: Clear old conversation state for this user to prevent stuck dialogs
+    # CRITICAL: Clear any active conversation state to prevent dialog conflicts
+    # This ensures /start always brings user to main menu, not mid-conversation
     try:
-        from server import db
-        user_id = update.effective_user.id
-        chat_id = update.effective_chat.id
-        conv_key = str((chat_id, user_id))
+        logger.info(f"🧹 Clearing conversation state for user {update.effective_user.id}")
+        # Clear ALL conversation data for this user
+        context.user_data.clear()
         
-        # Clear from MongoDB
-        doc = await db.bot_persistence.find_one({"_id": "conversation_order_conv_handler"})
-        if doc and 'data' in doc and conv_key in doc['data']:
-            del doc['data'][conv_key]
-            await db.bot_persistence.update_one(
-                {"_id": "conversation_order_conv_handler"},
-                {"$set": {"data": doc['data'], "updated_at": datetime.now(timezone.utc)}}
-            )
-            logger.info(f"🧹 Cleared old conversation state for user {user_id}")
+        # Additionally, signal to ConversationHandler that we want to end any active conversation
+        # This happens via the return value ConversationHandler.END at the end of this function
     except Exception as e:
         logger.error(f"Error clearing conversation state: {e}")
     
