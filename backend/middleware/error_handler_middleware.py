@@ -61,6 +61,10 @@ async def error_handler_middleware(request: Request, call_next):
     Перехватывает все необработанные исключения и возвращает
     структурированный JSON ответ
     """
+    # CRITICAL: Skip error handling for Telegram webhook - it breaks response chain!
+    if request.url.path == "/api/telegram/webhook":
+        return await call_next(request)
+    
     request_id = str(time.time())  # Простой request ID
     request.state.request_id = request_id
     
