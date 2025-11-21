@@ -109,6 +109,8 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             context.user_data['last_bot_message_id'] = bot_msg.message_id
             context.user_data['last_bot_message_text'] = message_text
             context.user_data['last_state'] = STATE_NAMES[FROM_NAME]
+        
+        logger.error(f"🎯🎯🎯 NEW_ORDER_START RETURNING STATE: FROM_NAME ({FROM_NAME})")
         return FROM_NAME
 
 
