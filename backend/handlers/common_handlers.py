@@ -187,6 +187,9 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Save last bot message context for button protection
     context.user_data['last_bot_message_id'] = bot_msg.message_id
     context.user_data['last_bot_message_text'] = welcome_message
+    
+    # CRITICAL: Return END to exit any active conversation
+    return ConversationHandler.END
 
 
 @safe_handler(fallback_state=ConversationHandler.END)
