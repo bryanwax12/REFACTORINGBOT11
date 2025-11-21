@@ -1383,6 +1383,7 @@ async def startup_event():
             persistence_file = persistence_dir / 'conversation_state.pkl'
             
             logger.info(f"💾 Setting up persistence: {persistence_file}")
+            logger.warning("⚠️ Persistence DISABLED temporarily - debugging 5-second delay issue")
             
             # Initialize persistence
             from telegram.ext import PersistenceInput
