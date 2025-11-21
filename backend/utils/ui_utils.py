@@ -143,9 +143,8 @@ def get_main_menu_keyboard(user_balance: float = 0.0) -> InlineKeyboardMarkup:
 
 
 def get_cancel_keyboard() -> InlineKeyboardMarkup:
-    """Simple cancel button keyboard (used in order flow)"""
-    keyboard = [[InlineKeyboardButton(ButtonTexts.CANCEL, callback_data=CallbackData.CANCEL_ORDER)]]
-    return InlineKeyboardMarkup(keyboard)
+    """Simple cancel button keyboard (used in order flow) - OPTIMIZED: uses pre-loaded keyboard"""
+    return get_preloaded_cancel_keyboard()
 
 
 def get_skip_and_cancel_keyboard(skip_callback: str) -> InlineKeyboardMarkup:
