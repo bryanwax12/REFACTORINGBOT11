@@ -121,25 +121,27 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
         logger.info("🔄 RESTORED editing_template_from flag in order_from_name")
     
     # Update session via service (skip if editing template)
+    # Run session update and logging in parallel (non-blocking background tasks)
     if not context.user_data.get('editing_template_from'):
         logger.info("📝 Updating session for FROM_NAME (normal flow)")
-        await session_service.update_session_step(
+        # Run session update in background (don't wait)
+        asyncio.create_task(session_service.update_session_step(
             user_id,
             step="FROM_ADDRESS",
             data={'from_name': name}
-        )
+        ))
     else:
         logger.info("⏭️ SKIPPING session update - editing template FROM address")
     
-    # Log action
-    await SecurityLogger.log_action(
+    # Log action in background (don't wait)
+    asyncio.create_task(SecurityLogger.log_action(
         "order_input",
         user_id,
         {"field": "from_name", "length": len(name)},
         "success"
-    )
+    ))
     
-    # Mark previous message as selected
+    # Mark previous message as selected (already async)
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
     asyncio.create_task(mark_message_as_selected(update, context))
     
