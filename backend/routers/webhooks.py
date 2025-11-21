@@ -90,11 +90,12 @@ async def telegram_webhook(request: Request, background_tasks: BackgroundTasks):
             
             logger.info(f"✅ Update created: user={user_id}, type={update_type}, text='{message_text[:50]}'")
             
-            # Process update in background using FastAPI BackgroundTasks
-            # This ensures immediate response to Telegram (prevents throttling)
-            background_tasks.add_task(srv.application.process_update, update)
+            # Process update SYNCHRONOUSLY
+            # CRITICAL: We must wait for Persistence to save conversation state
+            # before responding to Telegram, otherwise fast messages lose state
+            await srv.application.process_update(update)
             
-            # Return immediately to Telegram (< 50ms response time)
+            logger.info(f"✅ Update processed for user {user_id}")
             return {"ok": True}
         else:
             logger.error("⚠️ Update is None")
