@@ -14,6 +14,9 @@ class TemplateRepository(BaseRepository):
     
     def __init__(self, db):
         super().__init__(db.templates, "templates")
+        # Import cache (lazy import to avoid circular dependencies)
+        from services.template_cache import template_cache
+        self.cache = template_cache
     
     async def create_template(
         self,
