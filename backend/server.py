@@ -1619,7 +1619,7 @@ async def startup_event():
                 # Установить новый webhook
                 await application.bot.set_webhook(
                     url=webhook_url,
-                    allowed_updates=["message", "callback_query"],
+                    allowed_updates=["message", "callback_query", "my_chat_member"],
                     drop_pending_updates=False
                 )
                 
