@@ -6,6 +6,7 @@ from typing import Dict, List, Optional
 from repositories.base_repository import BaseRepository
 from datetime import datetime, timezone, timedelta
 import logging
+from asyncio import Lock
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,8 @@ class SessionRepository(BaseRepository):
     
     def __init__(self, db):
         super().__init__(db.user_sessions, "user_sessions")
+        # CRITICAL: Per-user locks to prevent race conditions during fast input
+        self.user_locks: Dict[int, Lock] = {}
     
     async def get_or_create_session(
         self,
