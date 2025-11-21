@@ -301,7 +301,6 @@ async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE
     return FROM_CITY
 
 
-@debounce_input(min_interval=0.3)
 @safe_handler(fallback_state=ConversationHandler.END)
 @with_typing_action()
 @with_user_session(create_user=False, require_session=True)
