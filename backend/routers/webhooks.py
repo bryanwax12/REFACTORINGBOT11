@@ -80,13 +80,15 @@ async def telegram_webhook(request: Request):
                 update_data['callback_query']['from']['is_bot'] = False
         
         # Create a Telegram Update object using application's bot
+        logger.info(f"📝 Creating Update object from data...")
         update = Update.de_json(update_data, srv.application.bot)
         
         if update:
-            logger.error(f"✅ Update created, processing...")
+            user_id = update.effective_user.id if update.effective_user else "Unknown"
+            logger.info(f"✅ Update created for user {user_id}, processing...")
             # Process the update through the application
             await srv.application.process_update(update)
-            logger.error(f"✅ Update processed successfully")
+            logger.info(f"✅ Update processed successfully for user {user_id}")
             return {"ok": True}
         else:
             logger.error("⚠️ Update is None")
