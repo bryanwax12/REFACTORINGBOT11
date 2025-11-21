@@ -85,9 +85,15 @@ async def telegram_webhook(request: Request):
         
         if update:
             user_id = update.effective_user.id if update.effective_user else "Unknown"
-            logger.info(f"✅ Update created for user {user_id}, processing...")
+            update_type = "MESSAGE" if update.message else "CALLBACK" if update.callback_query else "OTHER"
+            message_text = update.message.text if update.message else update.callback_query.data if update.callback_query else "N/A"
+            
+            logger.info(f"✅ Update created: user={user_id}, type={update_type}, text='{message_text[:50]}'")
+            logger.info(f"   Processing through application with {len(srv.application.handlers)} handler groups...")
+            
             # Process the update through the application
             await srv.application.process_update(update)
+            
             logger.info(f"✅ Update processed successfully for user {user_id}")
             return {"ok": True}
         else:
