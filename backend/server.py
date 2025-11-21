@@ -1613,17 +1613,6 @@ async def startup_event():
                 # Webhook mode
                 logger.info(f"🌐 WEBHOOK MODE: {webhook_url}")
                 
-                # CRITICAL: Start updater in webhook mode for proper update processing
-                # This is required even though we manually call process_update()
-                # The updater needs to be in "running" state for handlers to work
-                logger.info("🔄 Starting updater for webhook mode...")
-                await application.updater.start_webhook(
-                    listen="0.0.0.0",  # Not actually used, we handle webhooks via FastAPI
-                    port=0,  # Port 0 = don't actually listen (we use FastAPI endpoint)
-                    url_path=""  # Empty path = updater won't create HTTP server
-                )
-                logger.info("✅ Updater started in webhook mode")
-                
                 # Удалить старый webhook перед установкой нового
                 await application.bot.delete_webhook(drop_pending_updates=True)
                 
