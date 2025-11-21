@@ -89,7 +89,8 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     # Session service injected via decorator
     if not context.user_data.get('editing_template_to'):
         await session_service.save_order_field(user_id, 'to_name', name)
-        await session_service.update_session_step(user_id, step="TO_ADDRESS")
+        # REMOVED: ConversationHandler manages state via Persistence
+        # await session_service.update_session_step(user_id, step="TO_ADDRESS")
     
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages, TemplateEditMessages
     asyncio.create_task(mark_message_as_selected(update, context))
@@ -142,7 +143,8 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     # Session service injected via decorator
     if not context.user_data.get('editing_template_to'):
         await session_service.save_order_field(user_id, 'to_address', address)
-        await session_service.update_session_step(user_id, step="TO_ADDRESS2")
+        # REMOVED: ConversationHandler manages state via Persistence
+        # await session_service.update_session_step(user_id, step="TO_ADDRESS2")
     
     asyncio.create_task(mark_message_as_selected(update, context))
     from utils.ui_utils import get_skip_and_cancel_keyboard, OrderStepMessages, CallbackData, TemplateEditMessages
@@ -193,7 +195,8 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE, 
     # Session service injected via decorator
     if not context.user_data.get('editing_template_to'):
         await session_service.save_order_field(user_id, 'to_address2', address2)
-        await session_service.update_session_step(user_id, step="TO_CITY")
+        # REMOVED: ConversationHandler manages state via Persistence
+        # await session_service.update_session_step(user_id, step="TO_CITY")
     
     asyncio.create_task(mark_message_as_selected(update, context))
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages, TemplateEditMessages
@@ -246,7 +249,8 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     # Session service injected via decorator
     if not context.user_data.get('editing_template_to'):
         await session_service.save_order_field(user_id, 'to_city', city)
-        await session_service.update_session_step(user_id, step="TO_STATE")
+        # REMOVED: ConversationHandler manages state via Persistence
+        # await session_service.update_session_step(user_id, step="TO_STATE")
     
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages, TemplateEditMessages
     asyncio.create_task(mark_message_as_selected(update, context))
@@ -298,7 +302,8 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     # Session service injected via decorator
     if not context.user_data.get('editing_template_to'):
         await session_service.save_order_field(user_id, 'to_state', state)
-        await session_service.update_session_step(user_id, step="TO_ZIP")
+        # REMOVED: ConversationHandler manages state via Persistence
+        # await session_service.update_session_step(user_id, step="TO_ZIP")
     
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages, TemplateEditMessages
     asyncio.create_task(mark_message_as_selected(update, context))
@@ -350,7 +355,8 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, sessi
     # Session service injected via decorator
     if not context.user_data.get('editing_template_to'):
         await session_service.save_order_field(user_id, 'to_zip', zip_code)
-        await session_service.update_session_step(user_id, step="TO_PHONE")
+        # REMOVED: ConversationHandler manages state via Persistence
+        # await session_service.update_session_step(user_id, step="TO_PHONE")
     
     asyncio.create_task(mark_message_as_selected(update, context))
     
@@ -478,7 +484,8 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     # Update session via repository (for normal order flow)
     # Session service injected via decorator
     await session_service.save_order_field(user_id, 'to_phone', formatted_phone)
-    await session_service.update_session_step(user_id, step="PARCEL_WEIGHT")
+    # REMOVED: ConversationHandler manages state via Persistence
+        # await session_service.update_session_step(user_id, step="PARCEL_WEIGHT")
     
     reply_markup = get_cancel_keyboard()
     message_text = OrderStepMessages.PARCEL_WEIGHT

@@ -49,7 +49,8 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
     # Update session via repository
     # Session service injected via decorator
     await session_service.save_order_field(user_id, 'parcel_weight', weight)
-    await session_service.update_session_step(user_id, step="PARCEL_LENGTH")
+    # REMOVED: ConversationHandler manages state via Persistence
+        # await session_service.update_session_step(user_id, step="PARCEL_LENGTH")
     
     from utils.ui_utils import get_standard_size_and_cancel_keyboard, get_cancel_keyboard, OrderStepMessages, CallbackData
     asyncio.create_task(mark_message_as_selected(update, context))
@@ -102,7 +103,8 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
     # Update session via repository
     # Session service injected via decorator
     await session_service.save_order_field(user_id, 'parcel_length', length)
-    await session_service.update_session_step(user_id, step="PARCEL_WIDTH")
+    # REMOVED: ConversationHandler manages state via Persistence
+        # await session_service.update_session_step(user_id, step="PARCEL_WIDTH")
     
     asyncio.create_task(mark_message_as_selected(update, context))
     from utils.ui_utils import get_standard_size_and_cancel_keyboard, get_cancel_keyboard, OrderStepMessages, CallbackData
@@ -155,7 +157,8 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE,
     # Update session via repository
     # Session service injected via decorator
     await session_service.save_order_field(user_id, 'parcel_width', width)
-    await session_service.update_session_step(user_id, step="PARCEL_HEIGHT")
+    # REMOVED: ConversationHandler manages state via Persistence
+        # await session_service.update_session_step(user_id, step="PARCEL_HEIGHT")
     
     from utils.ui_utils import get_standard_size_and_cancel_keyboard, get_cancel_keyboard, OrderStepMessages, CallbackData
     asyncio.create_task(mark_message_as_selected(update, context))
@@ -208,7 +211,8 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
     # Update session via repository
     # Session service injected via decorator
     await session_service.save_order_field(user_id, 'parcel_height', height)
-    await session_service.update_session_step(user_id, step="CALCULATING_RATES")
+    # REMOVED: ConversationHandler manages state via Persistence
+        # await session_service.update_session_step(user_id, step="CALCULATING_RATES")
     
     asyncio.create_task(mark_message_as_selected(update, context))
     
