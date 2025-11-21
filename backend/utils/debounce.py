@@ -56,8 +56,10 @@ def debounce_input(min_interval: float = 0.5, show_reminder: bool = True):
                 if show_reminder and fast_count >= 2:
                     try:
                         await update.message.reply_text(
-                            "⏱ Пожалуйста, вводите данные медленнее.\n"
-                            "Ваше предыдущее сообщение ещё обрабатывается...",
+                            "⏱ *Слишком быстро!*\n\n"
+                            "Подождите 1-2 секунды между сообщениями.\n"
+                            "Ваш ввод обрабатывается...",
+                            parse_mode="Markdown",
                             quote=False
                         )
                         context.user_data[fast_input_key] = 0  # Reset after showing reminder
