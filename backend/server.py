@@ -37,6 +37,16 @@ from config_production import PRODUCTION_CONFIG
 # Check critical env variables and use config file if corrupted
 for key in ['ADMIN_API_KEY', 'MONGO_URL', 'TELEGRAM_BOT_TOKEN', 'WEBHOOK_BASE_URL', 'SHIPSTATION_API_KEY']:
     current_value = os.environ.get(key)
+    
+    # Special handling for WEBHOOK_BASE_URL - always use production config on production
+    if key == 'WEBHOOK_BASE_URL':
+        # If env var contains preview URL, use production config instead
+        if current_value and 'preview.emergentagent.com' in current_value:
+            if key in PRODUCTION_CONFIG:
+                os.environ[key] = PRODUCTION_CONFIG[key]
+                print(f"⚠️ Using production config for {key} (preview URL detected)")
+                continue
+    
     if not current_value or is_env_corrupted(current_value):
         if key in PRODUCTION_CONFIG:
             os.environ[key] = PRODUCTION_CONFIG[key]
