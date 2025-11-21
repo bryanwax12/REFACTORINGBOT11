@@ -94,6 +94,21 @@ async def telegram_webhook(request: Request):
                 logger.error(f"   message.text: '{update.message.text}'")
                 logger.error(f"   message has text: {hasattr(update.message, 'text') and update.message.text is not None}")
             
+            # CRITICAL DEBUG: Check ConversationHandler state BEFORE processing
+            if srv.application.persistence:
+                try:
+                    all_conversations = await srv.application.persistence.get_conversations('order_conversation')
+                    logger.error(f"🔍 PERSISTENCE CHECK:")
+                    logger.error(f"   All conversations: {all_conversations}")
+                    if update.effective_chat:
+                        chat_id = update.effective_chat.id
+                        user_key = (chat_id, user_id)
+                        current_state = all_conversations.get(user_key, None)
+                        logger.error(f"   User key: {user_key}")
+                        logger.error(f"   Current state for this user: {current_state}")
+                except Exception as persist_err:
+                    logger.error(f"   ❌ Error checking persistence: {persist_err}")
+            
             # Process update SYNCHRONOUSLY
             await srv.application.process_update(update)
             
