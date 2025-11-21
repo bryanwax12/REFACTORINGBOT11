@@ -1410,7 +1410,7 @@ async def startup_event():
             application = (
                 Application.builder()
                 .token(TELEGRAM_BOT_TOKEN)
-                .persistence(persistence)  # ADD PERSISTENCE!
+                # .persistence(persistence)  # TEMPORARILY DISABLED for debugging
                 .concurrent_updates(app_settings['concurrent_updates'])  # Handle many updates concurrently
                 .connect_timeout(app_settings['connect_timeout'])  # Fast connection
                 .read_timeout(app_settings['read_timeout'])   # Optimized read timeout
