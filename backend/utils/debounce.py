@@ -52,8 +52,8 @@ def debounce_input(min_interval: float = 0.5, show_reminder: bool = True):
                     f"in {handler_name} (interval: {time_since_last:.3f}s < {min_interval}s, count: {fast_count})"
                 )
                 
-                # Show friendly reminder after 3 fast inputs
-                if show_reminder and fast_count >= 3:
+                # Show friendly reminder after 2 fast inputs  
+                if show_reminder and fast_count >= 2:
                     try:
                         await update.message.reply_text(
                             "⏱ Пожалуйста, вводите данные медленнее.\n"
