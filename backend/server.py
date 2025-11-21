@@ -1397,7 +1397,8 @@ async def startup_event():
                     callback_data=False      # DON'T save callback data (prevents duplicate buttons!)
                     # Conversation states are saved automatically with user_data + chat_data
                 ),
-                update_interval=0.1  # Save every 100ms for fast message handling
+                update_interval=0.0,  # INSTANT save after every change (perfect for fast input!)
+                single_file=False     # Better performance with concurrent writes
             )
             
             # Optimize: Only receive needed update types (saves ~20-40ms)
