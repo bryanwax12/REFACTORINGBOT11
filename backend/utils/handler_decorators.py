@@ -690,16 +690,19 @@ def with_user_session(create_user=True, require_session=False):
             session = await session_repo.get_session(user_id)
             
             if require_session and not session:
-                logger.warning(f"⚠️ Session required but missing for user {user_id}")
+                logger.warning(f"❌ SESSION CHECK [{handler_name}] user={user_id}: Session required but missing")
                 if update.message:
                     await update.message.reply_text("⚠️ Сессия истекла. Используйте /start")
                 return ConversationHandler.END
             
             if not session:
+                logger.info(f"🔄 SESSION CHECK [{handler_name}] user={user_id}: Creating new session")
                 session = await session_repo.get_or_create_session(
                     user_id,
                     session_type="conversation"
                 )
+            else:
+                logger.info(f"✅ SESSION CHECK [{handler_name}] user={user_id}: Session found")
             
             # Update last_updated to keep session alive (for TTL)
             from datetime import datetime, timezone
@@ -710,7 +713,11 @@ def with_user_session(create_user=True, require_session=False):
             
             context.user_data['session'] = session
             
-            return await func(update, context, *args, **kwargs)
+            logger.info(f"▶️ SESSION CHECK [{handler_name}] user={user_id}: All checks passed, calling handler")
+            result = await func(update, context, *args, **kwargs)
+            logger.info(f"✅ SESSION CHECK [{handler_name}] user={user_id}: Handler completed, returning state={result}")
+            
+            return result
         
         return wrapper
     return decorator
