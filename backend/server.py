@@ -1421,8 +1421,8 @@ async def startup_event():
                 .build()
             )
             
-            # logger.info("✅ Persistence enabled - conversation state will be saved!")
-            logger.warning("⚠️ Persistence DISABLED - testing without state persistence")
+            logger.info("✅ Persistence RE-ENABLED with concurrent_updates=False fix")
+            logger.info("🔧 CRITICAL FIX: concurrent_updates=False prevents 5-second delay")
             
             # CRITICAL: Update global bot_instance with the application's bot for notifications
             # Without this, notifications will NOT work!
