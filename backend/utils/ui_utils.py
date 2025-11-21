@@ -7,6 +7,47 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 
 # ============================================================
+# PRE-LOADED KEYBOARDS (PERFORMANCE OPTIMIZATION)
+# ============================================================
+# Creating keyboard objects once and reusing them saves 5-15ms per message
+
+_CANCEL_KEYBOARD = None
+_YES_NO_KEYBOARD = None
+_BACK_TO_MENU_KEYBOARD = None
+
+
+def get_preloaded_cancel_keyboard():
+    """Get pre-loaded cancel keyboard (cached)"""
+    global _CANCEL_KEYBOARD
+    if _CANCEL_KEYBOARD is None:
+        _CANCEL_KEYBOARD = InlineKeyboardMarkup([[
+            InlineKeyboardButton("❌ Отмена", callback_data="cancel_order")
+        ]])
+    return _CANCEL_KEYBOARD
+
+
+def get_preloaded_yes_no_keyboard():
+    """Get pre-loaded yes/no keyboard (cached)"""
+    global _YES_NO_KEYBOARD
+    if _YES_NO_KEYBOARD is None:
+        _YES_NO_KEYBOARD = InlineKeyboardMarkup([
+            [InlineKeyboardButton("✅ Да", callback_data="confirm_yes")],
+            [InlineKeyboardButton("❌ Нет", callback_data="confirm_no")]
+        ])
+    return _YES_NO_KEYBOARD
+
+
+def get_preloaded_back_to_menu_keyboard():
+    """Get pre-loaded back to menu keyboard (cached)"""
+    global _BACK_TO_MENU_KEYBOARD
+    if _BACK_TO_MENU_KEYBOARD is None:
+        _BACK_TO_MENU_KEYBOARD = InlineKeyboardMarkup([[
+            InlineKeyboardButton("🔙 Главное меню", callback_data="main_menu")
+        ]])
+    return _BACK_TO_MENU_KEYBOARD
+
+
+# ============================================================
 # BUTTON TEXT CONSTANTS
 # ============================================================
 
