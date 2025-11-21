@@ -103,6 +103,13 @@ class TemplateRepository(BaseRepository):
         Returns:
             Список шаблонов
         """
+        # Check cache first (only if no type filter - we cache all user templates)
+        if not template_type:
+            cached_templates = self.cache.get_user_templates(user_id)
+            if cached_templates is not None:
+                logger.debug(f"✅ Using cached templates for user {user_id}")
+                return cached_templates
+        
         filter_query = {
             "user_id": user_id,
             "is_active": True
@@ -111,10 +118,16 @@ class TemplateRepository(BaseRepository):
         if template_type:
             filter_query["type"] = template_type
         
-        return await self.find_many(
+        templates = await self.find_many(
             filter_query,
             sort=[("created_at", -1)]
         )
+        
+        # Cache result (only if no filter)
+        if not template_type and templates:
+            self.cache.set_user_templates(user_id, templates)
+        
+        return templates
     
     async def get_public_templates(
         self,
