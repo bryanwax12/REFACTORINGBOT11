@@ -75,16 +75,27 @@ def debounce_input(min_interval: float = 0.3, show_reminder: bool = True):
                         logger.warning(f"Failed to send fast input reminder: {e}")
                 
                 # Return current state without processing
-                return context.user_data.get('last_conversation_state')
+                last_state = context.user_data.get('last_conversation_state')
+                logger.warning(
+                    f"🚫 DEBOUNCE RETURNING [{handler_name}] user={user_id}: "
+                    f"Returning last_state={last_state} without processing"
+                )
+                return last_state
             else:
                 # Reset fast input counter if user slowed down
                 context.user_data[fast_input_key] = 0
+                logger.info(
+                    f"✅ DEBOUNCE PASSED [{handler_name}] user={user_id}: "
+                    f"Processing message (interval OK: {time_since_last:.3f}s >= {min_interval}s)"
+                )
             
             # Update last processed time
             _last_processed[key] = current_time
             
             # Process the message
+            logger.info(f"▶️ DEBOUNCE CALLING [{handler_name}] user={user_id}: Starting handler execution")
             result = await func(update, context, *args, **kwargs)
+            logger.info(f"✅ DEBOUNCE COMPLETED [{handler_name}] user={user_id}: Handler returned state={result}")
             
             # Store the returned state for potential duplicate messages
             if result is not None:
