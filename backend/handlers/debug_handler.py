@@ -17,8 +17,17 @@ async def debug_unhandled_message(update: Update, context: ContextTypes.DEFAULT_
     
     logger.error(f"🚨 UNHANDLED MESSAGE from user {user_id}: '{message_text}'")
     logger.error(f"   User data keys: {list(context.user_data.keys())}")
-    logger.error(f"   User data content: {context.user_data}")
+    logger.error(f"   User data (filtered): {[k for k in context.user_data.keys() if not k.startswith('_')]}")
     logger.error(f"   Chat data keys: {list(context.chat_data.keys())}")
+    
+    # Check conversation state
+    try:
+        # Try to get conversation state from PTB internal storage
+        if hasattr(update, 'effective_chat') and update.effective_chat:
+            logger.error(f"   Chat ID: {update.effective_chat.id}")
+            logger.error(f"   User ID: {user_id}")
+    except Exception as e:
+        logger.error(f"   Error checking conversation state: {e}")
     
     # Check if user is in middle of conversation
     has_order_data = any(key.startswith('from_') or key.startswith('to_') or key.startswith('parcel_') 
