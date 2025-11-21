@@ -111,26 +111,30 @@ class SessionRepository(BaseRepository):
         Returns:
             True если обновлено
         """
-        if merge:
-            # Объединить с существующими данными
-            update_query = {
-                "$set": {
-                    f"session_data.{key}": value
-                    for key, value in data.items()
-                }
-            }
-        else:
-            # Заменить полностью
-            update_query = {"$set": {"session_data": data}}
+        # CRITICAL: Get or create lock for this user to prevent race conditions
+        lock = self.user_locks.setdefault(user_id, Lock())
         
-        return await self.update_one(
-            {
-                "user_id": user_id,
-                "session_type": session_type,
-                "is_active": True
-            },
-            update_query
-        )
+        async with lock:  # One user = one write at a time
+            if merge:
+                # Объединить с существующими данными
+                update_query = {
+                    "$set": {
+                        f"session_data.{key}": value
+                        for key, value in data.items()
+                    }
+                }
+            else:
+                # Заменить полностью
+                update_query = {"$set": {"session_data": data}}
+            
+            return await self.update_one(
+                {
+                    "user_id": user_id,
+                    "session_type": session_type,
+                    "is_active": True
+                },
+                update_query
+            )
     
     async def update_temp_data(
         self,
