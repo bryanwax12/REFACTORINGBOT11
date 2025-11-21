@@ -153,21 +153,25 @@ class SessionRepository(BaseRepository):
         Returns:
             True если обновлено
         """
-        update_query = {
-            "$set": {
-                f"temp_data.{key}": value
-                for key, value in data.items()
-            }
-        }
+        # CRITICAL: Lock to prevent race conditions
+        lock = self.user_locks.setdefault(user_id, Lock())
         
-        return await self.update_one(
-            {
-                "user_id": user_id,
-                "session_type": session_type,
-                "is_active": True
-            },
-            update_query
-        )
+        async with lock:
+            update_query = {
+                "$set": {
+                    f"temp_data.{key}": value
+                    for key, value in data.items()
+                }
+            }
+            
+            return await self.update_one(
+                {
+                    "user_id": user_id,
+                    "session_type": session_type,
+                    "is_active": True
+                },
+                update_query
+            )
     
     async def update_step(
         self,
