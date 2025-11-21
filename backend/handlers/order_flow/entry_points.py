@@ -49,6 +49,8 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         asyncio.create_task(mark_message_as_selected(update, context))
         send_method = update.message.reply_text
     
+    logger.error(f"🎯🎯🎯 NEW_ORDER_START CALLED for user {telegram_id}")
+    logger.error(f"   Callback data: {update.callback_query.data if update.callback_query else 'None'}")
     logger.info(f"📝 User {telegram_id} starting new order flow")
     
     # CRITICAL: Clear any leftover editing flags from previous operations
