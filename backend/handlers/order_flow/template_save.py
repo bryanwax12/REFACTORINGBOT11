@@ -214,17 +214,18 @@ async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_T
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
-        message_text = f"""✅ *Шаблон обновлён!*
-━━━━━━━━━━━━━━━━━━━━
-
-📁 *Название:* {template_name}
-🔄 *Статус:* Адреса обновлены
-
-💡 Шаблон теперь содержит актуальные адреса из текущего заказа.
-
-━━━━━━━━━━━━━━━━━━━━
-# 🚀 PERFORMANCE: Send message in background
-async def send_message():
+        message_text = (
+            f"✅ *Шаблон обновлён!*\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"📁 *Название:* {template_name}\n"
+            f"🔄 *Статус:* Адреса обновлены\n\n"
+            f"💡 Шаблон теперь содержит актуальные адреса из текущего заказа.\n\n"
+            f"━━━━━━━━━━━━━━━━━━━━\n"
+            f"*Что дальше?*"
+        )
+        
+        # 🚀 PERFORMANCE: Send message in background
+        async def send_message():
             bot_msg = await safe_telegram_call(query.message.reply_text(
                 message_text,
                 reply_markup=reply_markup,
