@@ -233,14 +233,16 @@ async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_T
             ))
             
             # Save last bot message context for button protection
-            context.user_data['last_bot_message_id'] = bot_msg.message_id
-            context.user_data['last_bot_message_text'] = message_text
-            context.user_data['saved_template_name'] = template_name
-        else:
-            await safe_telegram_call(query.message.reply_text("❌ Не удалось обновить шаблон"))
-
-asyncio.create_task(send_message())
-
+            if bot_msg:
+                context.user_data['last_bot_message_id'] = bot_msg.message_id
+                context.user_data['last_bot_message_text'] = message_text
+                context.user_data['saved_template_name'] = template_name
+        
+        asyncio.create_task(send_message())
+        
+        return ConversationHandler.END
+    else:
+        await safe_telegram_call(query.message.reply_text("❌ Не удалось обновить шаблон"))
         return ConversationHandler.END
 
 
