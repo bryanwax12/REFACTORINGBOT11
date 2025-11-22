@@ -1474,6 +1474,7 @@ async def startup_event():
                 per_user=True,
                 per_message=False,  # False is correct: we use MessageHandler (not only CallbackQueryHandler)
                 allow_reentry=True,
+                name='template_rename_conversation',  # CRITICAL: Name required for persistence
                 persistent=True  # Enable persistence
             )
             
