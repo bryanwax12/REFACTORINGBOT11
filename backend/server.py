@@ -1414,18 +1414,13 @@ async def startup_event():
             # Initialize persistence
             from telegram.ext import PersistenceInput
             
+            # CRITICAL FIX: Use simplest possible persistence configuration
+            # single_file=True ensures conversations are properly saved
             persistence = PicklePersistence(
                 filepath=str(persistence_file),
-                store_data=PersistenceInput(
-                    user_data=True,          # Save user data (important!)
-                    chat_data=True,          # Save chat data (important!)
-                    bot_data=True,           # Save bot data
-                    callback_data=False      # DON'T save callback data (prevents duplicate buttons!)
-                    # NOTE: Conversations are saved automatically when user_data=True and chat_data=True
-                ),
-                update_interval=0.0,  # INSTANT save after every change
-                single_file=False,    # Better performance with concurrent writes
-                on_flush=True         # CRITICAL: Synchronous write! Prevents state loss on fast input!
+                single_file=True,     # CRITICAL: Must be True for conversations to be saved properly
+                on_flush=True,        # Synchronous write prevents state loss
+                update_interval=0.0   # Immediate writes
             )
             
             # Optimize: Only receive needed update types (saves ~20-40ms)
