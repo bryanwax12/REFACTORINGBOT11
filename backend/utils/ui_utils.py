@@ -952,7 +952,9 @@ class ShippingRatesUI:
     @staticmethod
     def progress_message(seconds: int = 0) -> str:
         """Progress message while fetching rates"""
-        return f"⏳ Получаю доступные курьерские службы и тарифы... ({seconds} сек)"
+        # Add animated dots to avoid "Message not modified" errors
+        dots = "." * (seconds % 3 + 1)
+        return f"⏳ Получаю доступные курьерские службы и тарифы{dots} ({seconds} сек)"
     
     @staticmethod
     def cache_hit_message() -> str:
