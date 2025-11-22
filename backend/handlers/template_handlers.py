@@ -689,20 +689,25 @@ async def edit_template_to_address(update: Update, context: ContextTypes.DEFAULT
         
         # Start TO address input
         reply_markup = get_cancel_keyboard()
-        bot_msg = await query.message.reply_text(
-            "📥 Редактирование адреса получателя\n\nШаг 1/7: Имя получателя\nНапример: Jane Doe",
-            reply_markup=reply_markup
-        )
         
-        # Save message ID to remove button later (both in context and DB)
-        if bot_msg:
-            context.user_data['last_prompt_message_id'] = bot_msg.message_id
-            # Also save to DB session so it persists
-            await db.user_sessions.update_one(
-                {"user_id": user_id, "is_active": True},
-                {"$set": {"last_prompt_message_id": bot_msg.message_id}}
+        # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
+        async def send_edit_prompt():
+            bot_msg = await query.message.reply_text(
+                "📥 Редактирование адреса получателя\n\nШаг 1/7: Имя получателя\nНапример: Jane Doe",
+                reply_markup=reply_markup
             )
-            logger.info(f"💾 Saved last_prompt_message_id={bot_msg.message_id} to both context and DB")
+            
+            # Save message ID to remove button later (both in context and DB)
+            if bot_msg:
+                context.user_data['last_prompt_message_id'] = bot_msg.message_id
+                # Also save to DB session so it persists
+                await db.user_sessions.update_one(
+                    {"user_id": user_id, "is_active": True},
+                    {"$set": {"last_prompt_message_id": bot_msg.message_id}}
+                )
+                logger.info(f"💾 Saved last_prompt_message_id={bot_msg.message_id} to both context and DB")
+        
+        asyncio.create_task(send_edit_prompt())
         
         logger.info("✅ edit_template_to_address COMPLETED - returning TO_NAME state")
         return TO_NAME
