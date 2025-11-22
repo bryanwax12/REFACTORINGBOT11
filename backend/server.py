@@ -1572,20 +1572,7 @@ async def startup_event():
             
             application.add_handler(CallbackQueryHandler(button_callback))
 
-            # DEBUG: Fallback handler REMOVED - it was conflicting with ConversationHandler
-            # ConversationHandler processes messages correctly, debug handler was causing false alarms
-            logger.info("✅ ConversationHandler is the only handler for order flow")
-            
-            # TEMPORARY DEBUG: Test if messages reach handlers at all
-            async def debug_test_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-                logger.error(f"🚨 DEBUG TEST HANDLER CALLED! user={update.effective_user.id}, text='{update.message.text}'")
-                # Don't send reply to avoid confusion
-            
-            application.add_handler(
-                MessageHandler(telegram_filters.TEXT & ~telegram_filters.COMMAND, debug_test_handler),
-                group=99  # LOWEST priority - only if no other handler matches
-            )
-            logger.warning("🔍 DEBUG: Test handler added (group=99) to catch unhandled messages")
+            logger.info("✅ ConversationHandler is the only handler for order flow - all debug handlers removed")
 
             
             
