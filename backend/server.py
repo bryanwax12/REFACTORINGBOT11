@@ -1474,7 +1474,8 @@ async def startup_event():
                 per_chat=True,
                 per_user=True,
                 per_message=False,  # False is correct: we use MessageHandler (not only CallbackQueryHandler)
-                allow_reentry=True
+                allow_reentry=True,
+                persistent=True  # Enable persistence
             )
             
             # Import order conversation handler from modular setup
