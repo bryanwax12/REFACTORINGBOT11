@@ -100,20 +100,24 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup = get_cancel_keyboard()
         
         message_text = OrderFlowMessages.new_order_start()
-        bot_msg = await safe_telegram_call(send_method(
-            message_text,
-            reply_markup=reply_markup
-        ))
         
-        if bot_msg:
-            context.user_data['last_bot_message_id'] = bot_msg.message_id
-            context.user_data['last_bot_message_text'] = message_text
-            context.user_data['last_state'] = STATE_NAMES[FROM_NAME]
+        # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
+        async def send_next_step():
+            bot_msg = await safe_telegram_call(send_method(
+                message_text,
+                reply_markup=reply_markup
+            ))
+            if bot_msg:
+                context.user_data['last_bot_message_id'] = bot_msg.message_id
+                context.user_data['last_bot_message_text'] = message_text
+                context.user_data['last_state'] = STATE_NAMES[FROM_NAME]
         
-        logger.error(f"🎯🎯🎯 NEW_ORDER_START RETURNING STATE: FROM_NAME ({FROM_NAME})")
-        logger.error(f"   context.user_data keys: {list(context.user_data.keys())}")
-        logger.error(f"   chat_id: {update.effective_chat.id if update.effective_chat else 'None'}")
-        logger.error(f"   user_id: {telegram_id}")
+        asyncio.create_task(send_next_step())
+        
+        logger.info(f"✅ NEW_ORDER_START RETURNING STATE: FROM_NAME ({FROM_NAME})")
+        logger.info(f"   context.user_data keys: {list(context.user_data.keys())}")
+        logger.info(f"   chat_id: {update.effective_chat.id if update.effective_chat else 'None'}")
+        logger.info(f"   user_id: {telegram_id}")
         
         return FROM_NAME
 
