@@ -62,14 +62,11 @@ async def telegram_webhook(request: Request):
         
         # Get the update data from the request
         update_data = await request.json()
-        logger.error(f"📩 WEBHOOK RECEIVED: {update_data.get('message', {}).get('text', 'no message')}")
         
         # Check if application is initialized
         if not srv.application:
             logger.error("❌ Application not initialized")
             return {"ok": False, "error": "Application not ready"}
-        
-        logger.error(f"✅ Application is initialized")
         
         # Fix missing 'is_bot' field in user data (Telegram API compatibility)
         if 'message' in update_data and 'from' in update_data['message']:
@@ -80,14 +77,9 @@ async def telegram_webhook(request: Request):
                 update_data['callback_query']['from']['is_bot'] = False
         
         # Create a Telegram Update object using application's bot
-        logger.info(f"📝 Creating Update object from data...")
         update = Update.de_json(update_data, srv.application.bot)
         
         if update:
-            user_id = update.effective_user.id if update.effective_user else "Unknown"
-            update_type = "MESSAGE" if update.message else "CALLBACK" if update.callback_query else "OTHER"
-            message_text = update.message.text if update.message else update.callback_query.data if update.callback_query else "N/A"
-            
             # Process update SYNCHRONOUSLY
             await srv.application.process_update(update)
             return {"ok": True}
