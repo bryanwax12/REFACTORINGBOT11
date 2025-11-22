@@ -568,14 +568,18 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Минимальная сумма: $10
 Максимальная сумма: $1000"""
             
-            bot_msg = await safe_telegram_call(query.message.reply_text(
-                message_text,
-                reply_markup=reply_markup
-            ))
+            # 🚀 PERFORMANCE: Send message in background
+            async def send_topup_prompt():
+                bot_msg = await safe_telegram_call(query.message.reply_text(
+                    message_text,
+                    reply_markup=reply_markup
+                ))
+                # Save message context for button protection
+                if bot_msg:
+                    context.user_data['last_bot_message_id'] = bot_msg.message_id
+                    context.user_data['last_bot_message_text'] = message_text
             
-            # Save message context for button protection
-            context.user_data['last_bot_message_id'] = bot_msg.message_id
-            context.user_data['last_bot_message_text'] = message_text
+            asyncio.create_task(send_topup_prompt())
             
             from server import TOPUP_AMOUNT
             return TOPUP_AMOUNT
