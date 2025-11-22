@@ -286,11 +286,14 @@ async def rename_template_start(update: Update, context: ContextTypes.DEFAULT_TY
     message = TemplateMessages.rename_prompt()
     reply_markup = get_template_rename_keyboard(template_id)
     
-    # Send prompt and save message ID to remove buttons later
-    bot_msg = await query.message.reply_text(message, reply_markup=reply_markup)
-    if bot_msg:
-        context.user_data['rename_prompt_message_id'] = bot_msg.message_id
-        context.user_data['rename_prompt_chat_id'] = bot_msg.chat_id
+    # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
+    async def send_rename_prompt():
+        bot_msg = await query.message.reply_text(message, reply_markup=reply_markup)
+        if bot_msg:
+            context.user_data['rename_prompt_message_id'] = bot_msg.message_id
+            context.user_data['rename_prompt_chat_id'] = bot_msg.chat_id
+    
+    asyncio.create_task(send_rename_prompt())
     
     # Transition to TEMPLATE_RENAME state
     logger.info(f"✅ Returning TEMPLATE_RENAME state (value: {TEMPLATE_RENAME})")
