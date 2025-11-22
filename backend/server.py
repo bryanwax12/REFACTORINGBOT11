@@ -1412,10 +1412,8 @@ async def startup_event():
             logger.warning("⚠️ Persistence DISABLED temporarily - debugging 5-second delay issue")
             
             # Initialize persistence
-            from telegram.ext import PersistenceInput
-            
-            # CRITICAL FIX: Use simplest possible persistence configuration
-            # single_file=True ensures conversations are properly saved
+            # CRITICAL FIX: Use simplest possible persistence configuration for PTB 22.5
+            # Conversations are saved automatically when persistence is enabled
             persistence = PicklePersistence(
                 filepath=str(persistence_file),
                 single_file=True,     # CRITICAL: Must be True for conversations to be saved properly
