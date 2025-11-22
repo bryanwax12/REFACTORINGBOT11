@@ -260,8 +260,7 @@ async def handle_template_new_name(update: Update, context: ContextTypes.DEFAULT
     from utils.ui_utils import get_cancel_keyboard
     reply_markup = get_cancel_keyboard()
     
-    await safe_telegram_call(query.message.reply_text(
-        """📝 *Новое название шаблона*
+    message_text = """📝 *Новое название шаблона*
 ━━━━━━━━━━━━━━━━━━━━
 
 Введите уникальное название для шаблона.
@@ -271,7 +270,10 @@ async def handle_template_new_name(update: Update, context: ContextTypes.DEFAULT
 • _"Склад NY"_
 • _"Родителям (зима)"_
 
-💬 *Введите название:*""",
+💬 *Введите название:*"""
+    
+    await safe_telegram_call(query.message.reply_text(
+        message_text,
         reply_markup=reply_markup,
         parse_mode='Markdown'
     ))
