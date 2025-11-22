@@ -470,7 +470,10 @@ async def fetch_rates_from_shipstation(
         (success, rates_list, error_message)
     """
     try:
-        async with httpx.AsyncClient(timeout=timeout) as client:
+        # Create timeout config (connect, read, write, pool)
+        timeout_config = httpx.Timeout(timeout, connect=10.0)
+        
+        async with httpx.AsyncClient(timeout=timeout_config) as client:
             response = await client.post(
                 api_url,
                 json=rate_request,
