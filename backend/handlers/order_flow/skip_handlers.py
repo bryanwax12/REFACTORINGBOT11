@@ -68,6 +68,7 @@ async def handle_skip_field(
     reply_markup = get_cancel_keyboard()
     
     # Save state IMMEDIATELY (before background task)
+    from server import STATE_NAMES
     context.user_data['last_bot_message_text'] = next_message
     context.user_data['last_state'] = STATE_NAMES[next_step_const]
     
