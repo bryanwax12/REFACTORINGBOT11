@@ -97,7 +97,8 @@ async def view_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = TemplateMessages.template_details(template)
     reply_markup = get_template_view_keyboard(template_id)
     
-    await query.message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown')
+    # 🚀 PERFORMANCE: Send message in background
+    asyncio.create_task(query.message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown'))
 
 
 async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
