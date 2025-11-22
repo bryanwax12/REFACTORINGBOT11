@@ -190,10 +190,13 @@ async def skip_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         query = update.callback_query
         await query.answer()
-        await query.message.reply_text(
+        
+        # 🚀 PERFORMANCE: Send message in background
+        asyncio.create_task(query.message.reply_text(
             "✅ Адрес отправителя в шаблоне обновлён!",
             reply_markup=reply_markup
-        )
+        ))
+        
         return ConversationHandler.END
     
     # Check if we're editing FROM address in order creation flow
