@@ -68,6 +68,11 @@ async def telegram_webhook(request: Request):
             logger.error("❌ Application not initialized")
             return {"ok": False, "error": "Application not ready"}
         
+        # Check if application was initialized properly (PTB requirement)
+        if not srv.application.running:
+            logger.error("❌ Application not running - initialize() was not called")
+            return {"ok": False, "error": "Application not initialized"}
+        
         # Fix missing 'is_bot' field in user data (Telegram API compatibility)
         if 'message' in update_data and 'from' in update_data['message']:
             if 'is_bot' not in update_data['message']['from']:
