@@ -88,7 +88,7 @@ async def view_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     if not template:
         logger.error(f"❌ Template {template_id} not found")
-        await query.message.reply_text(TemplateMessages.template_not_found())
+        asyncio.create_task(query.message.reply_text(TemplateMessages.template_not_found()))
         return
     
     logger.info(f"✅ Template found: {template.get('name')}")
@@ -123,7 +123,7 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     if not template:
         logger.error(f"❌ Template {template_id} not found")
-        await query.message.reply_text(TemplateMessages.template_not_found())
+        asyncio.create_task(query.message.reply_text(TemplateMessages.template_not_found()))
         return
     
     # Load template data into context
@@ -205,7 +205,7 @@ async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     if not template:
         logger.error(f"❌ Template {template_id} not found")
-        await query.message.reply_text(TemplateMessages.template_not_found())
+        asyncio.create_task(query.message.reply_text(TemplateMessages.template_not_found()))
         return
     
     logger.info(f"✅ Template found: {template.get('name')}")
