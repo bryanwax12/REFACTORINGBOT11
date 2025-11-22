@@ -484,14 +484,18 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         # Show next step
         reply_markup = get_cancel_keyboard()
-        bot_msg = await safe_telegram_call(query.message.reply_text(
-            message_text if message_text else "Продолжаем оформление заказа...",
-            reply_markup=reply_markup
-        ))
         
-        if bot_msg:
-            context.user_data['last_bot_message_id'] = bot_msg.message_id
-            context.user_data['last_bot_message_text'] = message_text if message_text else "Продолжаем..."
+        # 🚀 PERFORMANCE: Send message in background
+        async def send_continue():
+            bot_msg = await safe_telegram_call(query.message.reply_text(
+                message_text if message_text else "Продолжаем оформление заказа...",
+                reply_markup=reply_markup
+            ))
+            if bot_msg:
+                context.user_data['last_bot_message_id'] = bot_msg.message_id
+                context.user_data['last_bot_message_text'] = message_text if message_text else "Продолжаем..."
+        
+        asyncio.create_task(send_continue())
         
         return last_state
     
