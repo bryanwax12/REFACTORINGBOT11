@@ -1524,7 +1524,7 @@ async def startup_event():
                     CommandHandler('start', start_command)
                 ],
                 name='refund_conversation',
-                persistent=False,
+                persistent=True,  # Enable persistence
                 per_chat=True,
                 per_user=True,
                 allow_reentry=True
