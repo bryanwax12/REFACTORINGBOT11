@@ -344,6 +344,10 @@ async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = get_cancel_keyboard()
     message_text = OrderFlowMessages.new_order_start()
     
+    # Save state IMMEDIATELY (before background task)
+    context.user_data['last_bot_message_text'] = message_text
+    context.user_data['last_state'] = STATE_NAMES[FROM_NAME]
+    
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
         bot_msg = await safe_telegram_call(query.message.reply_text(
@@ -352,8 +356,6 @@ async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ))
         if bot_msg:
             context.user_data['last_bot_message_id'] = bot_msg.message_id
-            context.user_data['last_bot_message_text'] = message_text
-            context.user_data['last_state'] = STATE_NAMES[FROM_NAME]
     
     asyncio.create_task(send_next_step())
     
