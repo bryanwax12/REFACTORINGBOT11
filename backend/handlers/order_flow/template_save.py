@@ -398,27 +398,27 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
             # 🚀 PERFORMANCE: Send message in background
             async def send_message():
                 bot_msg = await safe_telegram_call(update.message.reply_text(
-                message_text,
-                reply_markup=reply_markup,
-                parse_mode='Markdown'
-            ))
+                    message_text,
+                    reply_markup=reply_markup,
+                    parse_mode='Markdown'
+                ))
                 
-                # Save message_id in payment for later removal of button
-                await db.payments.update_one(
-                    {"invoice_id": track_id},
-                    {"$set": {
-                        "payment_message_id": bot_msg.message_id,
-                        "payment_message_text": message_text
-                    }}
-                )
-                
-                # Also save in context for immediate use
-                context.user_data['last_bot_message_id'] = bot_msg.message_id
-                context.user_data['last_bot_message_text'] = message_text
-                
-
-asyncio.create_task(send_message())
-
+                if bot_msg:
+                    # Save message_id in payment for later removal of button
+                    await db.payments.update_one(
+                        {"invoice_id": track_id},
+                        {"$set": {
+                            "payment_message_id": bot_msg.message_id,
+                            "payment_message_text": message_text
+                        }}
+                    )
+                    
+                    # Also save in context for immediate use
+                    context.user_data['last_bot_message_id'] = bot_msg.message_id
+                    context.user_data['last_bot_message_text'] = message_text
+            
+            asyncio.create_task(send_message())
+            
             return ConversationHandler.END
         else:
             error_msg = invoice_result.get('error', 'Unknown error')
