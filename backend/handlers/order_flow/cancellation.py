@@ -57,15 +57,18 @@ async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     message_text = "⚠️ Вы уверены, что хотите отменить создание заказа?\n\nВсе введённые данные будут потеряны."
     
-    bot_msg = await safe_telegram_call(query.message.reply_text(
-            message_text,
-            reply_markup=reply_markup
-        ))
+    # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
+    async def send_cancel_prompt():
+        bot_msg = await safe_telegram_call(query.message.reply_text(
+                message_text,
+                reply_markup=reply_markup
+            ))
+        # Save last bot message context for button protection
+        if bot_msg:
+            context.user_data['last_bot_message_id'] = bot_msg.message_id
+            context.user_data['last_bot_message_text'] = message_text
     
-    # Save last bot message context for button protection
-    if bot_msg:
-        context.user_data['last_bot_message_id'] = bot_msg.message_id
-        context.user_data['last_bot_message_text'] = message_text
+    asyncio.create_task(send_cancel_prompt())
     
     # Return the state we were in before cancel
     last_state = context.user_data.get('last_state')
