@@ -502,17 +502,20 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # last_state is a string (state name like "FROM_CITY")
     keyboard, message_text = OrderStepMessages.get_step_keyboard_and_message(last_state)
     
-    # Send message with or without keyboard
-    if keyboard:
-        bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=keyboard))
-    else:
-        reply_markup = get_cancel_keyboard()
-        bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=reply_markup))
+    # 🚀 PERFORMANCE: Send message in background
+    async def send_return():
+        if keyboard:
+            bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=keyboard))
+        else:
+            reply_markup = get_cancel_keyboard()
+            bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=reply_markup))
+        
+        # Save context
+        if bot_msg:
+            context.user_data['last_bot_message_id'] = bot_msg.message_id
+            context.user_data['last_bot_message_text'] = message_text
     
-    # Save context
-    if bot_msg:
-        context.user_data['last_bot_message_id'] = bot_msg.message_id
-        context.user_data['last_bot_message_text'] = message_text
+    asyncio.create_task(send_return())
     
     # Get state constant from state name
     state_constant = STATE_NAMES.get(last_state, FROM_NAME)
