@@ -365,25 +365,30 @@ _Если вы оплатите другую сумму, деньги НЕ по�
 
 *После успешной оплаты баланс будет автоматически пополнен.*"""
             
-            bot_msg = await safe_telegram_call(update.message.reply_text(
-                message_text,
-                reply_markup=reply_markup,
-                parse_mode='Markdown'
-            ))
+            # 🚀 PERFORMANCE: Send message and save to DB in background
+            async def send_payment_message():
+                bot_msg = await safe_telegram_call(update.message.reply_text(
+                    message_text,
+                    reply_markup=reply_markup,
+                    parse_mode='Markdown'
+                ))
+                
+                if bot_msg:
+                    # Save message_id in payment for later removal of button
+                    from repositories import get_repositories
+                    repos = get_repositories()
+                    await repos.payments.update_payment(
+                        {"invoice_id": track_id},
+                        {
+                            "payment_message_id": bot_msg.message_id,
+                            "payment_message_text": message_text
+                        }
+                    )
+                    
+                    context.user_data['last_bot_message_id'] = bot_msg.message_id
+                    context.user_data['last_bot_message_text'] = message_text
             
-            # Save message_id in payment for later removal of button
-            from repositories import get_repositories
-            repos = get_repositories()
-            await repos.payments.update_payment(
-                {"invoice_id": track_id},
-                {
-                    "payment_message_id": bot_msg.message_id,
-                    "payment_message_text": message_text
-                }
-            )
-            
-            context.user_data['last_bot_message_id'] = bot_msg.message_id
-            context.user_data['last_bot_message_text'] = message_text
+            asyncio.create_task(send_payment_message())
             
             return ConversationHandler.END
         else:
