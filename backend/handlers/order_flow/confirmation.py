@@ -228,12 +228,17 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         context.user_data['editing_from_address'] = True
         from utils.ui_utils import get_cancel_keyboard
         reply_markup = get_cancel_keyboard()
-        bot_msg = await safe_telegram_call(query.message.reply_text(
-            "📤 Редактирование адреса отправителя\n\nШаг 1/7: Имя отправителя\nНапример: John Smith",
-            reply_markup=reply_markup,
-        ))
-        if bot_msg:
-            context.user_data['last_bot_message_id'] = bot_msg.message_id
+        
+        # 🚀 PERFORMANCE: Send message in background
+        async def send_edit_prompt():
+            bot_msg = await safe_telegram_call(query.message.reply_text(
+                "📤 Редактирование адреса отправителя\n\nШаг 1/7: Имя отправителя\nНапример: John Smith",
+                reply_markup=reply_markup,
+            ))
+            if bot_msg:
+                context.user_data['last_bot_message_id'] = bot_msg.message_id
+        
+        asyncio.create_task(send_edit_prompt())
         context.user_data['last_state'] = STATE_NAMES[FROM_NAME]
         logger.info("✅ Returning FROM_NAME state for editing")
         return FROM_NAME
