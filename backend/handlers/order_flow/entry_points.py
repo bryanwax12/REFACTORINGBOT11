@@ -149,20 +149,22 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
     # Mark previous message as selected (blocking)
     asyncio.create_task(mark_message_as_selected(update, context))
     
-    # Save last_state BEFORE sending (so it's saved even if send fails)
+    # Save last_state and message text
     context.user_data['last_state'] = STATE_NAMES[PARCEL_WEIGHT]
     context.user_data['last_bot_message_text'] = message_text
-    logger.error(f"🔍 start_order_with_template: SET last_state to {STATE_NAMES[PARCEL_WEIGHT]}")
+    logger.info(f"✅ start_order_with_template: transitioning to {STATE_NAMES[PARCEL_WEIGHT]}")
     
-    # Send new message immediately without waiting for mark_message_as_selected
-    bot_msg = await safe_telegram_call(query.message.reply_text(
-            message_text,
-            reply_markup=reply_markup,
-            parse_mode='Markdown'
-        ))
+    # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
+    async def send_next_step():
+        bot_msg = await safe_telegram_call(query.message.reply_text(
+                message_text,
+                reply_markup=reply_markup,
+                parse_mode='Markdown'
+            ))
+        if bot_msg:
+            context.user_data['last_bot_message_id'] = bot_msg.message_id
     
-    if bot_msg:
-        context.user_data['last_bot_message_id'] = bot_msg.message_id
+    asyncio.create_task(send_next_step())
     
     return PARCEL_WEIGHT
 
