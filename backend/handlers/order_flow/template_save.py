@@ -68,7 +68,7 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
         # 🚀 PERFORMANCE: Send message in background
         async def send_message():
             bot_msg = await safe_telegram_call(update.message.reply_text(
-                f"""⚠️ *Шаблон уже существует*
+                f"⚠️ *Шаблон уже существует*
     ━━━━━━━━━━━━━━━━━━━━
     
     📁 *Название:* {template_name}
@@ -77,7 +77,7 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
     
     *Выберите действие:*
     • Обновить — заменить адреса в существующем шаблоне
-    • Ввести другое название — сохранить как новый шаблон""",
+    • Ввести другое название — сохранить как новый шаблон",
                 reply_markup=reply_markup,
                 parse_mode='Markdown'
             ))
@@ -107,9 +107,9 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
         reply_markup = InlineKeyboardMarkup(keyboard)
         
         await safe_telegram_call(update.message.reply_text(
-            f"""❌ *Ошибка сохранения шаблона*
+            f"❌ *Ошибка сохранения шаблона*
 
-{error}""",
+{error}",
             parse_mode='Markdown',
             reply_markup=reply_markup
         ))
@@ -124,7 +124,7 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    message_text = f"""✅ *Шаблон сохранён!*
+    message_text = f"✅ *Шаблон сохранён!*
 ━━━━━━━━━━━━━━━━━━━━
 
 📁 *Название:* {template_name}
@@ -132,7 +132,7 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
 💡 Теперь вы можете использовать этот шаблон для быстрого создания заказов с готовыми адресами.
 
 ━━━━━━━━━━━━━━━━━━━━
-*Что дальше?*"""
+*Что дальше?*"
     
     # 🚀 PERFORMANCE: Send message in background
     async def send_success():
