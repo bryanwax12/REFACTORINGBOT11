@@ -88,31 +88,8 @@ async def telegram_webhook(request: Request):
             update_type = "MESSAGE" if update.message else "CALLBACK" if update.callback_query else "OTHER"
             message_text = update.message.text if update.message else update.callback_query.data if update.callback_query else "N/A"
             
-            logger.error(f"✅ Update: user={user_id}, type={update_type}, text='{message_text[:50]}'")
-            logger.error(f"   update.message: {update.message is not None}")
-            if update.message:
-                logger.error(f"   message.text: '{update.message.text}'")
-                logger.error(f"   message has text: {hasattr(update.message, 'text') and update.message.text is not None}")
-            
-            # CRITICAL DEBUG: Check ConversationHandler state BEFORE processing
-            if srv.application.persistence:
-                try:
-                    all_conversations = await srv.application.persistence.get_conversations('order_conversation')
-                    logger.error(f"🔍 PERSISTENCE CHECK:")
-                    logger.error(f"   All conversations: {all_conversations}")
-                    if update.effective_chat:
-                        chat_id = update.effective_chat.id
-                        user_key = (chat_id, user_id)
-                        current_state = all_conversations.get(user_key, None)
-                        logger.error(f"   User key: {user_key}")
-                        logger.error(f"   Current state for this user: {current_state}")
-                except Exception as persist_err:
-                    logger.error(f"   ❌ Error checking persistence: {persist_err}")
-            
             # Process update SYNCHRONOUSLY
             await srv.application.process_update(update)
-            
-            logger.error(f"✅ Update processed for user {user_id}")
             return {"ok": True}
         else:
             logger.error("⚠️ Update is None")
