@@ -176,7 +176,7 @@
 
 ## 🖥️ ЧАСТЬ 2: АДМИН-ПАНЕЛЬ
 
-### URL админки: https://bugfix-telegram.preview.emergentagent.com
+### URL админки: https://bot-recovery-3.preview.emergentagent.com
 
 ---
 

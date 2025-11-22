@@ -164,7 +164,7 @@ else:
 
 ### Preview окружение (текущее)
 ```
-WEBHOOK_BASE_URL = "https://bugfix-telegram.preview.emergentagent.com"
+WEBHOOK_BASE_URL = "https://bot-recovery-3.preview.emergentagent.com"
                                      ↓
               Содержит "preview" → НЕ production
                                      ↓
