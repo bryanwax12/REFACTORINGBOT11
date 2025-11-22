@@ -340,7 +340,7 @@ async def rename_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
     
     if len(new_name) > 50:
         logger.warning(f"❌ Template name too long: {len(new_name)} chars")
-        await update.message.reply_text(TemplateMessages.name_too_long())
+        asyncio.create_task(update.message.reply_text(TemplateMessages.name_too_long()))
         return
     
     template_id = context.user_data.get('renaming_template_id')
