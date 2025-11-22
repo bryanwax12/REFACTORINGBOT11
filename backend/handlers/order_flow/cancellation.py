@@ -274,17 +274,20 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.info(f"⚠️ Weight {weight} lbs > 10, hiding standard size button in return_to_order")
         keyboard = get_cancel_keyboard()
     
-    # Send message with or without keyboard
-    if keyboard:
-        bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=keyboard))
-    else:
-        reply_markup = get_cancel_keyboard()
-        bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=reply_markup))
+    # 🚀 PERFORMANCE: Send message in background
+    async def send_return_message():
+        if keyboard:
+            bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=keyboard))
+        else:
+            reply_markup = get_cancel_keyboard()
+            bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=reply_markup))
+        
+        # Save context
+        if bot_msg:
+            context.user_data['last_bot_message_id'] = bot_msg.message_id
+            context.user_data['last_bot_message_text'] = message_text
     
-    # Save context
-    if bot_msg:
-        context.user_data['last_bot_message_id'] = bot_msg.message_id
-        context.user_data['last_bot_message_text'] = message_text
+    asyncio.create_task(send_return_message())
     
     # Return the state constant - import from server
     from server import STATE_CONSTANTS
