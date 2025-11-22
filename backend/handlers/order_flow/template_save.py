@@ -106,10 +106,9 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         
+        message_text = f"❌ *Ошибка сохранения шаблона*\n\n{error}"
         await safe_telegram_call(update.message.reply_text(
-            f"❌ *Ошибка сохранения шаблона*
-
-{error}",
+            message_text,
             parse_mode='Markdown',
             reply_markup=reply_markup
         ))
