@@ -65,24 +65,27 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
             [InlineKeyboardButton("📝 Ввести другое название", callback_data='template_new_name')],
             [InlineKeyboardButton("❌ Отмена", callback_data='start')]
         ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        
-        bot_msg = await safe_telegram_call(update.message.reply_text(
-            f"""⚠️ *Шаблон уже существует*
-━━━━━━━━━━━━━━━━━━━━
+        # 🚀 PERFORMANCE: Send message in background
+        async def send_message():
+            bot_msg = await safe_telegram_call(update.message.reply_text(
+                f"""⚠️ *Шаблон уже существует*
+    ━━━━━━━━━━━━━━━━━━━━
+    
+    📁 *Название:* {template_name}
+    
+    Шаблон с таким названием уже сохранён.
+    
+    *Выберите действие:*
+    • Обновить — заменить адреса в существующем шаблоне
+    • Ввести другое название — сохранить как новый шаблон""",
+                reply_markup=reply_markup,
+                parse_mode='Markdown'
+            ))
+            # Don't clear last_bot_message here - we need it for mark_message_as_selected
+            context.user_data['pending_template_name'] = template_name
 
-📁 *Название:* {template_name}
+        asyncio.create_task(send_message())
 
-Шаблон с таким названием уже сохранён.
-
-*Выберите действие:*
-• Обновить — заменить адреса в существующем шаблоне
-• Ввести другое название — сохранить как новый шаблон""",
-            reply_markup=reply_markup,
-            parse_mode='Markdown'
-        ))
-        # Don't clear last_bot_message here - we need it for mark_message_as_selected
-        context.user_data['pending_template_name'] = template_name
         return TEMPLATE_NAME
     
     # Create template using template service
@@ -219,20 +222,23 @@ async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_T
 💡 Шаблон теперь содержит актуальные адреса из текущего заказа.
 
 ━━━━━━━━━━━━━━━━━━━━
-*Что дальше?*"""
-        
-        bot_msg = await safe_telegram_call(query.message.reply_text(
-            message_text,
-            reply_markup=reply_markup,
-            parse_mode='Markdown'
-        ))
-        
-        # Save last bot message context for button protection
-        context.user_data['last_bot_message_id'] = bot_msg.message_id
-        context.user_data['last_bot_message_text'] = message_text
-        context.user_data['saved_template_name'] = template_name
-    else:
-        await safe_telegram_call(query.message.reply_text("❌ Не удалось обновить шаблон"))
+# 🚀 PERFORMANCE: Send message in background
+async def send_message():
+            bot_msg = await safe_telegram_call(query.message.reply_text(
+                message_text,
+                reply_markup=reply_markup,
+                parse_mode='Markdown'
+            ))
+            
+            # Save last bot message context for button protection
+            context.user_data['last_bot_message_id'] = bot_msg.message_id
+            context.user_data['last_bot_message_text'] = message_text
+            context.user_data['saved_template_name'] = template_name
+        else:
+            await safe_telegram_call(query.message.reply_text("❌ Не удалось обновить шаблон"))
+
+asyncio.create_task(send_message())
+
         return ConversationHandler.END
 
 
@@ -384,27 +390,30 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
 ⚠️❗️❗️ *ВАЖНО: Оплатите точно ${topup_amount}!* ❗️❗️⚠️
 _Если вы оплатите другую сумму, деньги НЕ поступят на баланс!_
 
-*После успешной оплаты баланс будет автоматически пополнен.*"""
-            
-            bot_msg = await safe_telegram_call(update.message.reply_text(
-            message_text,
-            reply_markup=reply_markup,
-            parse_mode='Markdown'
-        ))
-            
-            # Save message_id in payment for later removal of button
-            await db.payments.update_one(
-                {"invoice_id": track_id},
-                {"$set": {
-                    "payment_message_id": bot_msg.message_id,
-                    "payment_message_text": message_text
-                }}
-            )
-            
-            # Also save in context for immediate use
-            context.user_data['last_bot_message_id'] = bot_msg.message_id
-            context.user_data['last_bot_message_text'] = message_text
-            
+# 🚀 PERFORMANCE: Send message in background
+async def send_message():
+                bot_msg = await safe_telegram_call(update.message.reply_text(
+                message_text,
+                reply_markup=reply_markup,
+                parse_mode='Markdown'
+            ))
+                
+                # Save message_id in payment for later removal of button
+                await db.payments.update_one(
+                    {"invoice_id": track_id},
+                    {"$set": {
+                        "payment_message_id": bot_msg.message_id,
+                        "payment_message_text": message_text
+                    }}
+                )
+                
+                # Also save in context for immediate use
+                context.user_data['last_bot_message_id'] = bot_msg.message_id
+                context.user_data['last_bot_message_text'] = message_text
+                
+
+asyncio.create_task(send_message())
+
             return ConversationHandler.END
         else:
             error_msg = invoice_result.get('error', 'Unknown error')
