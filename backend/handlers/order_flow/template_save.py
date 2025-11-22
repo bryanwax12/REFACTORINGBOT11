@@ -67,17 +67,17 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
         ]
         # 🚀 PERFORMANCE: Send message in background
         async def send_message():
+            message_text = (
+                f"⚠️ *Шаблон уже существует*\n"
+                f"━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"📁 *Название:* {template_name}\n\n"
+                f"Шаблон с таким названием уже сохранён.\n\n"
+                f"*Выберите действие:*\n"
+                f"• Обновить — заменить адреса в существующем шаблоне\n"
+                f"• Ввести другое название — сохранить как новый шаблон"
+            )
             bot_msg = await safe_telegram_call(update.message.reply_text(
-                f"⚠️ *Шаблон уже существует*
-    ━━━━━━━━━━━━━━━━━━━━
-    
-    📁 *Название:* {template_name}
-    
-    Шаблон с таким названием уже сохранён.
-    
-    *Выберите действие:*
-    • Обновить — заменить адреса в существующем шаблоне
-    • Ввести другое название — сохранить как новый шаблон",
+                message_text,
                 reply_markup=reply_markup,
                 parse_mode='Markdown'
             ))
