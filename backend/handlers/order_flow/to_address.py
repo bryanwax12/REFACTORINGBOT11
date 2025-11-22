@@ -103,15 +103,18 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     
     reply_markup = get_cancel_keyboard()
     
-    bot_msg = await safe_telegram_call(update.message.reply_text(
+    # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
+    async def send_next_step():
+        bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
         reply_markup=reply_markup
     ))
-    
-    if bot_msg:
+        if bot_msg:
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         context.user_data['last_state'] = STATE_NAMES[TO_ADDRESS]
+    
+    asyncio.create_task(send_next_step())
     
     return TO_ADDRESS
 
@@ -157,15 +160,18 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     
     reply_markup = get_skip_and_cancel_keyboard(CallbackData.SKIP_TO_ADDRESS2)
     
-    bot_msg = await safe_telegram_call(update.message.reply_text(
+    # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
+    async def send_next_step():
+        bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
         reply_markup=reply_markup
     ))
-    
-    if bot_msg:
+        if bot_msg:
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         context.user_data['last_state'] = STATE_NAMES[TO_ADDRESS2]
+    
+    asyncio.create_task(send_next_step())
     
     return TO_ADDRESS2
 
@@ -209,15 +215,18 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE, 
     
     reply_markup = get_cancel_keyboard()
     
-    bot_msg = await safe_telegram_call(update.message.reply_text(
+    # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
+    async def send_next_step():
+        bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
         reply_markup=reply_markup
     ))
-    
-    if bot_msg:
+        if bot_msg:
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         context.user_data['last_state'] = STATE_NAMES[TO_CITY]
+    
+    asyncio.create_task(send_next_step())
     
     return TO_CITY
 
@@ -263,15 +272,18 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     
     reply_markup = get_cancel_keyboard()
     
-    bot_msg = await safe_telegram_call(update.message.reply_text(
+    # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
+    async def send_next_step():
+        bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
         reply_markup=reply_markup
     ))
-    
-    if bot_msg:
+        if bot_msg:
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         context.user_data['last_state'] = STATE_NAMES[TO_STATE]
+    
+    asyncio.create_task(send_next_step())
     
     return TO_STATE
 
@@ -316,15 +328,18 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     
     reply_markup = get_cancel_keyboard()
     
-    bot_msg = await safe_telegram_call(update.message.reply_text(
+    # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
+    async def send_next_step():
+        bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
         reply_markup=reply_markup
     ))
-    
-    if bot_msg:
+        if bot_msg:
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         context.user_data['last_state'] = STATE_NAMES[TO_ZIP]
+    
+    asyncio.create_task(send_next_step())
     
     return TO_ZIP
 
@@ -370,15 +385,18 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, sessi
     
     reply_markup = get_skip_and_cancel_keyboard(CallbackData.SKIP_TO_PHONE)
     
-    bot_msg = await safe_telegram_call(update.message.reply_text(
+    # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
+    async def send_next_step():
+        bot_msg = await safe_telegram_call(update.message.reply_text(
         message_text,
         reply_markup=reply_markup
     ))
-    
-    if bot_msg:
+        if bot_msg:
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message_text
         context.user_data['last_state'] = STATE_NAMES[TO_PHONE]
+    
+    asyncio.create_task(send_next_step())
     
     return TO_PHONE
 
