@@ -593,10 +593,12 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, s
             ]
             reply_markup = InlineKeyboardMarkup(keyboard)
             
-            await update.message.reply_text(
+            # 🚀 PERFORMANCE: Send message in background
+            asyncio.create_task(update.message.reply_text(
                 "✅ Адрес отправителя в шаблоне обновлён!",
                 reply_markup=reply_markup
-            )
+            ))
+            
             return ConversationHandler.END
         
         return ConversationHandler.END
