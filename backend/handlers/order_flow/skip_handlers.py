@@ -78,6 +78,7 @@ async def handle_skip_field(
             reply_markup=reply_markup
         ))
         if bot_msg:
+            context.user_data['last_bot_message_id'] = bot_msg.message_id
     
     asyncio.create_task(send_next_step())
     
