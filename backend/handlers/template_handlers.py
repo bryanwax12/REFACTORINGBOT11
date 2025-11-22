@@ -161,12 +161,15 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     from server import PARCEL_WEIGHT, STATE_NAMES
     context.user_data['last_state'] = STATE_NAMES[PARCEL_WEIGHT]
     context.user_data['last_bot_message_text'] = weight_prompt
-    logger.error(f"🔍 use_template: SET last_state to {STATE_NAMES[PARCEL_WEIGHT]}")
+    logger.info(f"✅ use_template: transitioning to {STATE_NAMES[PARCEL_WEIGHT]}")
     
-    bot_msg = await query.message.reply_text(weight_prompt, reply_markup=reply_markup)
+    # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
+    async def send_weight_prompt():
+        bot_msg = await query.message.reply_text(weight_prompt, reply_markup=reply_markup)
+        if bot_msg:
+            context.user_data['last_bot_message_id'] = bot_msg.message_id
     
-    if bot_msg:
-        context.user_data['last_bot_message_id'] = bot_msg.message_id
+    asyncio.create_task(send_weight_prompt())
     
     # Transition to parcel weight step
     logger.info(f"🔵 use_template returning PARCEL_WEIGHT state (value: {PARCEL_WEIGHT})")
