@@ -1409,7 +1409,6 @@ async def startup_event():
             persistence_file = persistence_dir / 'conversation_state.pkl'
             
             logger.info(f"💾 Setting up persistence: {persistence_file}")
-            logger.warning("⚠️ Persistence DISABLED temporarily - debugging 5-second delay issue")
             
             # Initialize persistence
             # CRITICAL FIX: Use simplest possible persistence configuration for PTB 22.5
