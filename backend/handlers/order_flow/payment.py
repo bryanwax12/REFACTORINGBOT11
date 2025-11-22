@@ -72,16 +72,19 @@ async def show_payment_methods(update: Update, context: ContextTypes.DEFAULT_TYP
     
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    bot_msg = await safe_telegram_call(query.message.reply_text(
+    # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
+    async def send_message():
+        bot_msg = await safe_telegram_call(query.message.reply_text(
         message,
         reply_markup=reply_markup
     ))
-    
-    if bot_msg:
+        if bot_msg:
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = message
     
-    return PAYMENT_METHOD
+    asyncio.create_task(send_message())
+    
+        return PAYMENT_METHOD
 
 
 @safe_handler(fallback_state=ConversationHandler.END)
