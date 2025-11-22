@@ -1420,8 +1420,8 @@ async def startup_event():
                     user_data=True,          # Save user data (important!)
                     chat_data=True,          # Save chat data (important!)
                     bot_data=True,           # Save bot data
-                    callback_data=False,     # DON'T save callback data (prevents duplicate buttons!)
-                    conversations=True       # CRITICAL: Must explicitly enable conversation persistence in PTB v20+
+                    callback_data=False      # DON'T save callback data (prevents duplicate buttons!)
+                    # NOTE: Conversations are saved automatically when user_data=True and chat_data=True
                 ),
                 update_interval=0.0,  # INSTANT save after every change
                 single_file=False,    # Better performance with concurrent writes
