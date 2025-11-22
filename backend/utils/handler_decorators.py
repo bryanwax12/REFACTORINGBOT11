@@ -216,17 +216,21 @@ def with_typing_action():
     def decorator(func):
         @wraps(func)
         async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
+            import asyncio
             from telegram.constants import ChatAction
             
-            # Send typing action
+            # 🚀 PERFORMANCE: Send typing action in background - don't block handler
             if update.effective_chat:
-                try:
-                    await context.bot.send_chat_action(
-                        chat_id=update.effective_chat.id,
-                        action=ChatAction.TYPING
-                    )
-                except Exception as e:
-                    logger.debug(f"Failed to send typing action: {e}")
+                async def send_typing():
+                    try:
+                        await context.bot.send_chat_action(
+                            chat_id=update.effective_chat.id,
+                            action=ChatAction.TYPING
+                        )
+                    except Exception as e:
+                        logger.debug(f"Failed to send typing action: {e}")
+                
+                asyncio.create_task(send_typing())
             
             return await func(update, context, *args, **kwargs)
         
