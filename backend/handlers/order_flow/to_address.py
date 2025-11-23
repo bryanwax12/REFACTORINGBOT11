@@ -102,7 +102,7 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     async def send_next_step():
         bot_msg = await safe_telegram_call(update.effective_message.reply_text(
             message_text,
-            reply_markup=ForceReply()))
+            reply_markup=ForceReply(input_field_placeholder=" ", selective=True)))
         if bot_msg:
             context.user_data['last_bot_message_id'] = bot_msg.message_id
     
@@ -219,7 +219,7 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE, 
     async def send_next_step():
         bot_msg = await safe_telegram_call(update.effective_message.reply_text(
             message_text,
-            reply_markup=ForceReply()))
+            reply_markup=ForceReply(input_field_placeholder=" ", selective=True)))
 
     asyncio.create_task(send_next_step())
 
@@ -270,7 +270,7 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     async def send_next_step():
         bot_msg = await safe_telegram_call(update.effective_message.reply_text(
             message_text,
-            reply_markup=ForceReply()))
+            reply_markup=ForceReply(input_field_placeholder=" ", selective=True)))
         if bot_msg:
             context.user_data['last_bot_message_id'] = bot_msg.message_id
     
@@ -322,7 +322,7 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     async def send_next_step():
         bot_msg = await safe_telegram_call(update.effective_message.reply_text(
             message_text,
-            reply_markup=ForceReply()))
+            reply_markup=ForceReply(input_field_placeholder=" ", selective=True)))
 
     asyncio.create_task(send_next_step())
 
@@ -509,7 +509,7 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     async def send_next_step():
         bot_msg = await safe_telegram_call(update.effective_message.reply_text(
             message_text,
-            reply_markup=ForceReply()))
+            reply_markup=ForceReply(input_field_placeholder=" ", selective=True)))
     
         if bot_msg:
             context.user_data['last_bot_message_id'] = bot_msg.message_id
