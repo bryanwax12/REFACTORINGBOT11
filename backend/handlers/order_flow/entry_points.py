@@ -66,17 +66,8 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     logger.info("✅ Cleared ALL user data for fresh order start")
     
-    # Session is already handled by @with_user_session decorator
-    # Available in context.user_data['session']
-    session = context.user_data.get('session', {})
-    current_step = session.get('current_step', 'START')
-    temp_data = session.get('temp_data', {})
-    
-    if current_step != 'START' and temp_data:
-        logger.info(f"🔄 Resuming session for user {telegram_id} from step {current_step}")
-        context.user_data.update(temp_data)
-    else:
-        logger.info(f"🆕 New session for user {telegram_id}")
+    # Fresh new order - no resume
+    logger.info(f"🆕 Fresh new order for user {telegram_id}")
     
     # Check if bot is in maintenance mode
     if await check_maintenance_mode(update):
