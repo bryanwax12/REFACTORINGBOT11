@@ -355,7 +355,7 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, sessi
     
     
     
-    zip_code = update.message.text.strip()
+    zip_code = update.effective_message.text.strip()
     
     # Store
     user_id = update.effective_user.id
