@@ -212,11 +212,11 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
     
     height_str = update.message.text.strip()
     
-    # Validate
-    is_valid, error_msg, height = validate_dimension(height_str, "Высота")
-    if not is_valid:
-        await safe_telegram_call(update.message.reply_text(error_msg))
-        return PARCEL_HEIGHT
+    # Convert to float (no validation)
+    try:
+        height = float(height_str)
+    except:
+        height = 10.0  # Default value
     
     # Store
     user_id = update.effective_user.id
