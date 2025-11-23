@@ -156,8 +156,8 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
         bot_msg = await safe_telegram_call(update.effective_message.reply_text(
-            message_text
-        , reply_markup=ForceReply()))
+            message_text,
+            reply_markup=ForceReply()))
         if bot_msg:
             context.user_data['last_bot_message_id'] = bot_msg.message_id
     
@@ -287,8 +287,8 @@ async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
         bot_msg = await safe_telegram_call(update.effective_message.reply_text(
-            message_text
-        , reply_markup=ForceReply()))
+            message_text,
+            reply_markup=ForceReply()))
         if bot_msg:
             context.user_data['last_bot_message_id'] = bot_msg.message_id
     
@@ -343,8 +343,8 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
         bot_msg = await safe_telegram_call(update.effective_message.reply_text(
-            message_text
-        , reply_markup=ForceReply()))
+            message_text,
+            reply_markup=ForceReply()))
         if bot_msg:
             context.user_data['last_bot_message_id'] = bot_msg.message_id
     
@@ -396,8 +396,8 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
         bot_msg = await safe_telegram_call(update.effective_message.reply_text(
-            message_text
-        , reply_markup=ForceReply()))
+            message_text,
+            reply_markup=ForceReply()))
         if bot_msg:
             context.user_data['last_bot_message_id'] = bot_msg.message_id
     
@@ -585,8 +585,8 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
         bot_msg = await safe_telegram_call(update.effective_message.reply_text(
-            message_text
-        , reply_markup=ForceReply()))
+            message_text,
+            reply_markup=ForceReply()))
         if bot_msg:
             context.user_data['last_bot_message_id'] = bot_msg.message_id
     
