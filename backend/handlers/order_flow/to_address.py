@@ -258,7 +258,12 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     # Validate
     is_valid, error_msg = validate_city(city)
     if not is_valid:
-        await safe_telegram_call(update.message.reply_text(error_msg))
+        logger.warning(f"❌ VALIDATION ERROR [TO_CITY]: User {update.effective_user.id} entered '{city}' - sending error: {error_msg}")
+        error_sent = await safe_telegram_call(update.message.reply_text(error_msg))
+        if error_sent:
+            logger.info(f"✅ ERROR MESSAGE SENT successfully for TO_CITY validation")
+        else:
+            logger.error(f"❌ FAILED to send error message for TO_CITY validation")
         return TO_CITY
     
     # Store
