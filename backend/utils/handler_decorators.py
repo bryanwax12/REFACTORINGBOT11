@@ -621,108 +621,50 @@ def with_services(
 
 def with_user_session(create_user=True, require_session=False):
     """
-    Combined decorator for user + session management
+    Minimal decorator for user blocking check ONLY
     
-    Provides both user and session in one decorator
-    Replaces common pattern of checking user + session
+    ⚠️ IMPORTANT: MongoDBPersistence handles ALL state management automatically!
+    This decorator MUST NOT touch context.user_data or session data.
+    It only checks if user is blocked in database.
     
     Usage:
-        @with_user_session(create_user=True, require_session=True)
+        @with_user_session()
         async def order_handler(update, context):
-            user = context.user_data['db_user']
-            session = context.user_data['session']
-            # Both guaranteed to exist
+            # MongoDBPersistence automatically manages context.user_data
+            # Handler just works with state as normal
     
     Args:
-        create_user: Create user if missing
-        require_session: Require session to exist
+        create_user: Ignored (kept for backward compatibility)
+        require_session: Ignored (kept for backward compatibility)
     """
     def decorator(func):
         @wraps(func)
         async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
             from repositories import get_user_repo
-            from repositories.session_repository import SessionRepository
-            from server import db
             
             user_id = update.effective_user.id
-            username = update.effective_user.username
-            first_name = update.effective_user.first_name
             handler_name = func.__name__
             
-            logger.info(
-                f"🔍 SESSION CHECK [{handler_name}] user={user_id}: "
-                f"Starting with_user_session decorator (create_user={create_user}, require_session={require_session})"
-            )
+            logger.debug(f"🔍 [{handler_name}] user={user_id}: Checking user block status")
             
             user_repo = get_user_repo()
-            session_repo = SessionRepository(db)
             
-            # Handle user
-            if create_user:
-                user = await user_repo.get_or_create_user(
-                    telegram_id=user_id,
-                    username=username,
-                    first_name=first_name
-                )
-                logger.info(f"✅ SESSION CHECK [{handler_name}] user={user_id}: User retrieved/created")
-            else:
-                user = await user_repo.find_by_telegram_id(user_id)
-                
-                if not user:
-                    logger.warning(f"❌ SESSION CHECK [{handler_name}] user={user_id}: User not found")
-                    if update.message:
-                        await update.message.reply_text("❌ Пользователь не найден. Используйте /start")
-                    return ConversationHandler.END
-                logger.info(f"✅ SESSION CHECK [{handler_name}] user={user_id}: User found")
+            # ONLY check if user is blocked - nothing else
+            user = await user_repo.find_by_telegram_id(user_id)
             
-            # Check if blocked
-            if user.get('blocked', False):
-                logger.warning(f"❌ SESSION CHECK [{handler_name}] user={user_id}: User is blocked")
+            if user and user.get('blocked', False):
+                logger.warning(f"❌ [{handler_name}] user={user_id}: User is blocked")
                 if update.message:
                     await update.message.reply_text("❌ Вы заблокированы")
                 return ConversationHandler.END
             
-            context.user_data['db_user'] = user
+            # ✅ CRITICAL: DO NOT touch context.user_data here!
+            # ✅ CRITICAL: DO NOT read/write session data!
+            # ✅ MongoDBPersistence is the ONLY source of truth for state
             
-            # Store user discount for order flow
-            user_discount = user.get('discount', 0)
-            if user_discount > 0:
-                context.user_data['user_discount'] = user_discount
-                logger.info(f"User {user_id} has discount: {user_discount}%")
-            
-            # Handle session
-            session = await session_repo.get_session(user_id)
-            
-            if require_session and not session:
-                logger.warning(f"❌ SESSION CHECK [{handler_name}] user={user_id}: Session required but missing")
-                if update.message:
-                    await update.message.reply_text("⚠️ Сессия истекла. Используйте /start")
-                return ConversationHandler.END
-            
-            if not session:
-                logger.info(f"🔄 SESSION CHECK [{handler_name}] user={user_id}: Creating new session")
-                session = await session_repo.get_or_create_session(
-                    user_id,
-                    session_type="conversation"
-                )
-            else:
-                logger.info(f"✅ SESSION CHECK [{handler_name}] user={user_id}: Session found")
-            
-            # Update last_updated to keep session alive (for TTL)
-            from datetime import datetime, timezone
-            await session_repo.update_one(
-                {"user_id": user_id, "is_active": True},
-                {"$set": {"last_updated": datetime.now(timezone.utc)}}
-            )
-            
-            context.user_data['session'] = session
-            
-            # MongoDBPersistence handles ALL state management automatically
-            # We don't restore or save anything here - just pass control to handler
-            
-            logger.info(f"▶️ SESSION CHECK [{handler_name}] user={user_id}: All checks passed, calling handler")
+            logger.debug(f"▶️ [{handler_name}] user={user_id}: User not blocked, calling handler")
             result = await func(update, context, *args, **kwargs)
-            logger.info(f"✅ SESSION CHECK [{handler_name}] user={user_id}: Handler completed, returning state={result}")
+            logger.debug(f"✅ [{handler_name}] user={user_id}: Handler completed, state={result}")
             
             return result
         
