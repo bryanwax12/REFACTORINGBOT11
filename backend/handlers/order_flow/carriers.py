@@ -4,7 +4,7 @@ Handles carrier selection and rate refresh
 """
 import asyncio
 import logging
-from telegram import Update
+from telegram import Update, ForceReply
 from telegram.ext import ContextTypes
 from handlers.common_handlers import safe_telegram_call
 from utils.handler_decorators import with_user_session

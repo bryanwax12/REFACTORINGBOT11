@@ -4,7 +4,7 @@ Handles skip actions for optional fields with proper UI and state management
 """
 import asyncio
 import logging
-from telegram import Update
+from telegram import Update, ForceReply
 from telegram.ext import ContextTypes
 
 logger = logging.getLogger(__name__)
