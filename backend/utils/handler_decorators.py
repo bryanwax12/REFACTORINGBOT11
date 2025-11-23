@@ -625,6 +625,9 @@ def with_user_session(create_user=True, require_session=False):
     
     ⚠️ GOLDEN STANDARD 2025: MongoDBPersistence + Lazy Loading
     
+    2025 CRITICAL FIX: Use update.effective_message instead of update.message
+    to handle both 'message' and 'edited_message' updates properly!
+    
     Architecture:
     1. MongoDBPersistence is the ONLY owner of:
        - ConversationHandler state
@@ -635,11 +638,6 @@ def with_user_session(create_user=True, require_session=False):
        - If YES → reuse it (no DB query!)
        - If NO → load from DB and inject into context
        - MongoDBPersistence will automatically persist it for next handler
-    
-    3. This does NOT conflict because:
-       - We don't overwrite already restored data
-       - We don't touch ConversationHandler routing keys
-       - We don't await during ConversationHandler state decision
     
     Usage:
         @with_user_session()
@@ -655,6 +653,14 @@ def with_user_session(create_user=True, require_session=False):
         @wraps(func)
         async def wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, *args, **kwargs):
             from repositories import get_user_repo
+            
+            # ✅ 2025 FIX: Use effective_message (works for message AND edited_message)
+            message = update.effective_message
+            
+            # Safety check: ignore if no message and no callback_query
+            if not message and not update.callback_query:
+                logger.debug(f"⏭️ Ignoring update without message or callback_query")
+                return  # Don't block, just skip
             
             user_id = update.effective_user.id
             username = update.effective_user.username
@@ -681,8 +687,9 @@ def with_user_session(create_user=True, require_session=False):
                     user = await user_repo.find_by_telegram_id(user_id)
                     if not user:
                         logger.warning(f"❌ [{handler_name}] user={user_id}: User not found")
-                        if update.message:
-                            await update.message.reply_text("❌ Пользователь не найден. Используйте /start")
+                        # Use effective_message for reply
+                        if message:
+                            await message.reply_text("❌ Пользователь не найден. Используйте /start")
                         return ConversationHandler.END
                 
                 # Inject into context - MongoDBPersistence will persist it automatically
@@ -692,8 +699,9 @@ def with_user_session(create_user=True, require_session=False):
             # Check if blocked (always check, security-critical)
             if user.get('blocked', False):
                 logger.warning(f"❌ [{handler_name}] user={user_id}: User is blocked")
-                if update.message:
-                    await update.message.reply_text("❌ Вы заблокированы")
+                # Use effective_message for reply
+                if message:
+                    await message.reply_text("❌ Вы заблокированы")
                 return ConversationHandler.END
             
             # ✅ CRITICAL: DO NOT touch session or conversation state!
