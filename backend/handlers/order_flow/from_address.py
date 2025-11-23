@@ -355,7 +355,8 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE, se
             reply_markup=ForceReply(
                 input_field_placeholder=" ",
                 selective=True
-            ))
+            )
+        ))
         if bot_msg:
             context.user_data['last_bot_message_id'] = bot_msg.message_id
     
