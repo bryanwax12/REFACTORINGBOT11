@@ -430,30 +430,22 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     # Show with SKIP option
     from utils.ui_utils import get_skip_and_cancel_keyboard, OrderStepMessages, CallbackData, TemplateEditMessages
     
-    # Use different messages for template editing vs order creation  
+    # ✅ МАГИЧЕСКИЙ ГИБРИД 2025 (опциональное поле)
+    from utils.ui_utils import ask_with_skip_cancel_and_focus
+    
     if context.user_data.get('editing_template_from') or context.user_data.get('editing_from_address'):
         message_text = TemplateEditMessages.FROM_PHONE
     else:
         message_text = OrderStepMessages.FROM_PHONE
     
-    reply_markup = get_skip_and_cancel_keyboard(CallbackData.SKIP_FROM_PHONE)
-    
-    # Save state IMMEDIATELY (before background task)
-    context.user_data['last_bot_message_text'] = message_text
-    
-    # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
-    async def send_next_step():
-        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
-            message_text,
-            reply_markup=reply_markup
-        ))
-        if bot_msg:
-            context.user_data['last_bot_message_id'] = bot_msg.message_id
-    
-    asyncio.create_task(send_next_step())
-    
-    # Save current state for cancel button (UI-only, does NOT interfere with ConversationHandler)
-    from server import STATE_NAMES
+    await ask_with_skip_cancel_and_focus(
+        update,
+        context,
+        message_text,
+        placeholder="Например: +1234567890",
+        skip_callback=CallbackData.SKIP_FROM_PHONE,
+        safe_telegram_call_func=safe_telegram_call
+    )
     
     return FROM_PHONE
 
