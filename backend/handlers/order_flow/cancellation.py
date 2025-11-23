@@ -152,7 +152,7 @@ async def confirm_cancel_order(update: Update, context: ContextTypes.DEFAULT_TYP
 @safe_handler(fallback_state=ConversationHandler.END)
 async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Return to order after cancel button - restore exact screen"""
-    from server import FROM_NAME, safe_telegram_call, mark_message_as_selected
+    from server import FROM_NAME, safe_telegram_call, mark_message_as_selected, db
     from utils.ui_utils import OrderStepMessages, get_cancel_keyboard
     
     logger.info(f"return_to_order called - user_id: {update.effective_user.id}")
@@ -160,57 +160,56 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await safe_telegram_call(query.answer())
     
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
-
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
-
     asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
-    # Get the state we were in when cancel was pressed
-    last_state = context.user_data.get('last_state')
-    logger.error(f'🔍 DEBUG return_to_order: last_state={last_state}, user_data keys={list(context.user_data.keys())}')
+    # ✅ 2025 ПРАВИЛЬНЫЙ СПОСОБ: Получить состояние из сессии (которое было сохранено при отмене)
+    user_id = update.effective_user.id
+    session = await db.user_sessions.find_one(
+        {"user_id": user_id, "is_active": True},
+        {"session_data.state_before_cancel": 1}
+    )
     
-    logger.info(f"return_to_order: last_state = {last_state}, type = {type(last_state)}")
-    logger.info(f"return_to_order: user_data keys = {list(context.user_data.keys())}")
+    saved_state = None
+    if session:
+        saved_state = session.get("session_data", {}).get("state_before_cancel")
+        logger.info(f"✅ Restored state from session: {saved_state}")
+        
+        # Очистить сохраненное состояние
+        await db.user_sessions.update_one(
+            {"user_id": user_id, "is_active": True},
+            {"$unset": {"session_data.state_before_cancel": ""}}
+        )
     
-    # If no last_state - try to restore saved state before cancel
-    if last_state is None:
-        # Try to restore state that was saved before cancel
-        saved_state = context.user_data.get('saved_state_before_cancel')
-        if saved_state:
-            logger.info(f"Restoring saved state: {saved_state}")
-            last_state = saved_state
-            # Clear saved state
-            context.user_data.pop('saved_state_before_cancel', None)
-            # Continue to use this state below - don't return here!
-        else:
-            logger.warning("return_to_order: No last_state or saved_state found!")
+    if not saved_state:
+        logger.warning("⚠️ No saved state found - checking for template editing")
+        
+        # Check if editing template - return to first step of editing
+        if context.user_data.get('editing_template_from'):
+            logger.info("Returning to first step of FROM address editing")
+            from server import FROM_NAME
+            from utils.ui_utils import TemplateEditMessages
             
-            # Check if editing template - return to first step of editing
-            if context.user_data.get('editing_template_from'):
-                logger.info("Returning to first step of FROM address editing")
-                from server import FROM_NAME
-                from utils.ui_utils import TemplateEditMessages, get_cancel_keyboard
-                
-                await safe_telegram_call(update.effective_message.reply_text(
-                    TemplateEditMessages.FROM_NAME,
-                    reply_markup=get_cancel_keyboard()
-                ))
-                return FROM_NAME
-                
-            elif context.user_data.get('editing_template_to'):
-                logger.info("Returning to first step of TO address editing")
-                from server import TO_NAME
-                from utils.ui_utils import TemplateEditMessages, get_cancel_keyboard
-                
-                await safe_telegram_call(update.effective_message.reply_text(
-                    TemplateEditMessages.TO_NAME,
-                    reply_markup=get_cancel_keyboard()
-                ))
-                return TO_NAME
-            
-            await safe_telegram_call(update.effective_message.reply_text("Продолжаем оформление заказа..."))
+            await safe_telegram_call(update.effective_message.reply_text(
+                TemplateEditMessages.FROM_NAME,
+                reply_markup=get_cancel_keyboard()
+            ))
             return FROM_NAME
+            
+        elif context.user_data.get('editing_template_to'):
+            logger.info("Returning to first step of TO address editing")
+            from server import TO_NAME
+            from utils.ui_utils import TemplateEditMessages
+            
+            await safe_telegram_call(update.effective_message.reply_text(
+                TemplateEditMessages.TO_NAME,
+                reply_markup=get_cancel_keyboard()
+            ))
+            return TO_NAME
+        
+        logger.error("❌ No state found - returning to FROM_NAME")
+        await safe_telegram_call(update.effective_message.reply_text("Продолжаем оформление заказа..."))
+        return FROM_NAME
     
     # If last_state is a number (state constant), we need the string name
     # Check if it's a string (state name) or int (state constant)
