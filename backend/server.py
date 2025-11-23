@@ -1399,26 +1399,8 @@ async def startup_event():
             # Get optimized settings from performance config
             app_settings = BotPerformanceConfig.get_optimized_application_settings()
             
-            # CRITICAL: Add persistence to save conversation state
-            from telegram.ext import PicklePersistence
-            import os
-            
-            # Create persistence directory if not exists
-            persistence_dir = Path(__file__).parent / 'data'
-            persistence_dir.mkdir(exist_ok=True)
-            persistence_file = persistence_dir / 'conversation_state.pkl'
-            
-            logger.info(f"💾 Setting up persistence: {persistence_file}")
-            
-            # Initialize persistence
-            # CRITICAL FIX: Use simplest possible persistence configuration for PTB 22.5
-            # Conversations are saved automatically when persistence is enabled
-            persistence = PicklePersistence(
-                filepath=str(persistence_file),
-                single_file=True,     # CRITICAL: Must be True for conversations to be saved properly
-                on_flush=True,        # Synchronous write prevents state loss
-                update_interval=0.0   # Immediate writes
-            )
+            # PicklePersistence DISABLED - Using MongoDB as single source of truth
+            # This eliminates duplicate steps and state conflicts
             
             # Optimize: Only receive needed update types (saves ~20-40ms)
             from telegram import Update
