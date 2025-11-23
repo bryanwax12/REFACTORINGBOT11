@@ -34,6 +34,8 @@ class MongoDBPersistence(BasePersistence):
     async def get_conversations(self, name: str) -> ConversationDict:
         """Restore conversation states from MongoDB"""
         try:
+            logger.info(f"🔍 get_conversations called for handler: {name}")
+            
             # Load all active conversations for this handler
             sessions = await self.db.user_sessions.find(
                 {"is_active": True},
@@ -49,8 +51,9 @@ class MongoDBPersistence(BasePersistence):
                     # ConversationHandler uses (chat_id, user_id) as key
                     key = (user_id, user_id)  # For private chats, chat_id == user_id
                     conversations[key] = state
+                    logger.info(f"   📥 User {user_id}: state={state}")
             
-            logger.info(f"📥 Loaded {len(conversations)} conversations from MongoDB")
+            logger.info(f"✅ Loaded {len(conversations)} conversations from MongoDB for '{name}'")
             return conversations
             
         except Exception as e:
