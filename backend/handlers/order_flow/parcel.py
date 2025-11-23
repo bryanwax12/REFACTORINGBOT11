@@ -39,7 +39,7 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
     # Validate
     is_valid, error_msg, weight = validate_weight(weight_str)
     if not is_valid:
-        await safe_telegram_call(update.message.reply_text(error_msg))
+        await safe_telegram_call(update.effective_message.reply_text(error_msg))
         return PARCEL_WEIGHT
     
     # Store
@@ -74,7 +74,7 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
-        bot_msg = await safe_telegram_call(update.message.reply_text(
+        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
             message_text,
             reply_markup=reply_markup
         ))
@@ -139,7 +139,7 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
-        bot_msg = await safe_telegram_call(update.message.reply_text(
+        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
             message_text,
             reply_markup=reply_markup
         ))
@@ -202,7 +202,7 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE,
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
-        bot_msg = await safe_telegram_call(update.message.reply_text(
+        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
             message_text,
             reply_markup=reply_markup
         ))

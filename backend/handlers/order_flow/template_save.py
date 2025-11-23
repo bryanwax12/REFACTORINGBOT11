@@ -47,7 +47,7 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
     template_name = update.message.text.strip()[:30]  # Limit to 30 chars
     
     if not template_name:
-        await safe_telegram_call(update.message.reply_text("❌ Название не может быть пустым. Попробуйте еще раз:"))
+        await safe_telegram_call(update.effective_message.reply_text("❌ Название не может быть пустым. Попробуйте еще раз:"))
         return TEMPLATE_NAME
     
     telegram_id = update.effective_user.id
@@ -76,7 +76,7 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
                 f"• Обновить — заменить адреса в существующем шаблоне\n"
                 f"• Ввести другое название — сохранить как новый шаблон"
             )
-            bot_msg = await safe_telegram_call(update.message.reply_text(
+            bot_msg = await safe_telegram_call(update.effective_message.reply_text(
                 message_text,
                 reply_markup=reply_markup,
                 parse_mode='Markdown'
@@ -107,7 +107,7 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
         reply_markup = InlineKeyboardMarkup(keyboard)
         
         message_text = f"❌ *Ошибка сохранения шаблона*\n\n{error}"
-        await safe_telegram_call(update.message.reply_text(
+        await safe_telegram_call(update.effective_message.reply_text(
             message_text,
             parse_mode='Markdown',
             reply_markup=reply_markup
@@ -134,7 +134,7 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
     
     # 🚀 PERFORMANCE: Send message in background
     async def send_success():
-        bot_msg = await safe_telegram_call(update.message.reply_text(
+        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
             message_text,
             reply_markup=reply_markup,
             parse_mode='Markdown'
@@ -339,20 +339,20 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
         try:
             topup_amount = float(amount_text)
         except ValueError:
-            await safe_telegram_call(update.message.reply_text(
+            await safe_telegram_call(update.effective_message.reply_text(
                 "❌ Неверный формат суммы. Введите число, например: 50"
             ))
             return TOPUP_AMOUNT
         
         # Check limits
         if topup_amount < 10:
-            await safe_telegram_call(update.message.reply_text(
+            await safe_telegram_call(update.effective_message.reply_text(
                 "❌ Минимальная сумма пополнения: $10"
             ))
             return TOPUP_AMOUNT
         
         if topup_amount > 10000:
-            await safe_telegram_call(update.message.reply_text(
+            await safe_telegram_call(update.effective_message.reply_text(
                 "❌ Максимальная сумма пополнения: $10,000"
             ))
             return TOPUP_AMOUNT
@@ -364,7 +364,7 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
         user = await user_repo.find_by_telegram_id(telegram_id)
         
         if not user:
-            await safe_telegram_call(update.message.reply_text("❌ Пользователь не найден"))
+            await safe_telegram_call(update.effective_message.reply_text("❌ Пользователь не найден"))
             return ConversationHandler.END
         
         # Create Oxapay invoice directly (order_id must be <= 50 chars)
@@ -413,7 +413,7 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
             
             # 🚀 PERFORMANCE: Send message in background
             async def send_message():
-                bot_msg = await safe_telegram_call(update.message.reply_text(
+                bot_msg = await safe_telegram_call(update.effective_message.reply_text(
                     message_text,
                     reply_markup=reply_markup,
                     parse_mode='Markdown'
@@ -438,12 +438,12 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
             return ConversationHandler.END
         else:
             error_msg = invoice_result.get('error', 'Unknown error')
-            await safe_telegram_call(update.message.reply_text(f"❌ *Ошибка создания инвойса:* {error_msg}", parse_mode='Markdown'))
+            await safe_telegram_call(update.effective_message.reply_text(f"❌ *Ошибка создания инвойса:* {error_msg}", parse_mode='Markdown'))
             return ConversationHandler.END
         
     except Exception as e:
         logger.error(f"Top-up amount handling error: {e}")
-        await safe_telegram_call(update.message.reply_text(
+        await safe_telegram_call(update.effective_message.reply_text(
             "❌ Произошла ошибка. Попробуйте снова позже."
         ))
         return ConversationHandler.END

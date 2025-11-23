@@ -55,7 +55,7 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
         asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
-        send_method = update.message.reply_text
+        send_method = update.effective_message.reply_text
     
     logger.info(f"📝 User {telegram_id} starting new order flow (callback: {update.callback_query.data if update.callback_query else 'command'})")
     

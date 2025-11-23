@@ -101,7 +101,7 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
-        bot_msg = await safe_telegram_call(update.message.reply_text(
+        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
             message_text,
             reply_markup=ForceReply(
                 input_field_placeholder="123 Main St.",
@@ -163,7 +163,7 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
-        bot_msg = await safe_telegram_call(update.message.reply_text(
+        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
             message_text,
             reply_markup=reply_markup
         ))
@@ -189,7 +189,7 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE, 
     address2 = sanitize_string(address2, max_length=100)
     
     if len(address2) > 100:
-        await safe_telegram_call(update.message.reply_text("❌ Адрес 2 слишком длинный (максимум 100 символов)"))
+        await safe_telegram_call(update.effective_message.reply_text("❌ Адрес 2 слишком длинный (максимум 100 символов)"))
         return TO_ADDRESS2
     
     # Store
@@ -224,7 +224,7 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE, 
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
-        bot_msg = await safe_telegram_call(update.message.reply_text(
+        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
             message_text,
             reply_markup=ForceReply(
                 input_field_placeholder="New York",
@@ -280,7 +280,7 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
-        bot_msg = await safe_telegram_call(update.message.reply_text(
+        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
             message_text,
             reply_markup=ForceReply(
                 input_field_placeholder="NY",
@@ -337,7 +337,7 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
-        bot_msg = await safe_telegram_call(update.message.reply_text(
+        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
             message_text,
             reply_markup=ForceReply(
                 input_field_placeholder="10001",
@@ -397,7 +397,7 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, sessi
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
-        bot_msg = await safe_telegram_call(update.message.reply_text(
+        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
             message_text,
             reply_markup=reply_markup
         ))
@@ -507,7 +507,7 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
             reply_markup = InlineKeyboardMarkup(keyboard)
             
             # 🚀 PERFORMANCE: Send message in background
-            asyncio.create_task(update.message.reply_text(
+            asyncio.create_task(update.effective_message.reply_text(
                 "✅ Адрес получателя в шаблоне обновлён!",
                 reply_markup=reply_markup
             ))
@@ -531,7 +531,7 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
-        bot_msg = await safe_telegram_call(update.message.reply_text(
+        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
             message_text,
             reply_markup=ForceReply(
                 input_field_placeholder="10.5",
