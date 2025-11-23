@@ -347,21 +347,7 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     is_valid, error_msg = validate_state(state)
     if not is_valid:
         logger.warning(f"❌ VALIDATION ERROR [TO_STATE]: User {update.effective_user.id} entered '{state}' - Error: {error_msg}")
-        
-        # Try to send error message (with extended logging)
-        try:
-            error_sent = await safe_telegram_call(update.message.reply_text(error_msg), timeout=5)
-            if error_sent:
-                logger.info(f"✅ ERROR MESSAGE SENT successfully to user {update.effective_user.id}")
-            else:
-                logger.error(f"❌ ERROR MESSAGE FAILED (returned None) for user {update.effective_user.id}")
-                # Retry once more
-                logger.info(f"🔄 Retrying error message send...")
-                error_sent = await update.message.reply_text(error_msg)
-                logger.info(f"✅ ERROR MESSAGE SENT on retry")
-        except Exception as e:
-            logger.error(f"❌ EXCEPTION while sending error message: {type(e).__name__}: {e}", exc_info=True)
-        
+        await safe_telegram_call(update.message.reply_text(error_msg))
         return TO_STATE
     
     # Store
