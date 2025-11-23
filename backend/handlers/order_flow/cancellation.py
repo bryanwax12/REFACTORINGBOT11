@@ -60,7 +60,7 @@ async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE, sessi
         logger.warning(f"⚠️ No active session found for user {user_id}")
     
     # Add "Check Data" button only if on shipping rates selection screen
-    if last_state == STATE_NAMES[SELECT_CARRIER]:
+    if current_state == SELECT_CARRIER:
         keyboard = [
             [InlineKeyboardButton("📋 Проверить данные", callback_data='check_data')],
             [InlineKeyboardButton("↩️ Вернуться к заказу", callback_data='return_to_order')],
