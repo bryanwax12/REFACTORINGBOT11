@@ -33,14 +33,11 @@ def get_preloaded_cancel_keyboard():
 
 
 def get_preloaded_yes_no_keyboard():
-    """Get pre-loaded yes/no keyboard (cached)"""
-    global _YES_NO_KEYBOARD
-    if _YES_NO_KEYBOARD is None:
-        _YES_NO_KEYBOARD = InlineKeyboardMarkup([
-            [InlineKeyboardButton("✅ Да", callback_data="confirm_yes")],
-            [InlineKeyboardButton("❌ Нет", callback_data="confirm_no")]
-        ])
-    return _YES_NO_KEYBOARD
+    """Generate fresh yes/no keyboard (no cache)"""
+    return InlineKeyboardMarkup([[
+        InlineKeyboardButton(_make_unique_text("✅ Да"), callback_data="confirm_yes"),
+        InlineKeyboardButton(_make_unique_text("❌ Нет"), callback_data="confirm_no")
+    ]])
 
 
 def get_preloaded_back_to_menu_keyboard():
