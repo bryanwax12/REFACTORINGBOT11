@@ -342,13 +342,6 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, sessi
     
     zip_code = update.message.text.strip()
     
-    # Validate
-    is_valid, error_msg = validate_zip(zip_code)
-    if not is_valid:
-        logger.warning(f"❌ VALIDATION ERROR [TO_ZIP]: User {update.effective_user.id} - Error: {error_msg}")
-        await safe_telegram_call(update.message.reply_text(error_msg))
-        return TO_ZIP
-    
     # Store
     user_id = update.effective_user.id
     context.user_data['to_zip'] = zip_code
