@@ -103,17 +103,6 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     name = update.message.text.strip()
     name = sanitize_string(name, max_length=50)
     
-    logger.info(f"📝 Validating name: '{name}' (length: {len(name)})")
-    
-    # Validate using centralized validator
-    is_valid, error_msg = validate_name(name)
-    logger.info(f"✅ Validation result: is_valid={is_valid}, error_msg='{error_msg}'")
-    
-    if not is_valid:
-        logger.warning(f"❌ VALIDATION ERROR [FROM_NAME]: User {update.effective_user.id} - Error: {error_msg}")
-        await safe_telegram_call(update.message.reply_text(error_msg))
-        return FROM_NAME
-    
     # Store in session AND context using service
     user_id = update.effective_user.id
     context.user_data['from_name'] = name
