@@ -1259,7 +1259,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # If no last_state - just continue
     if last_state is None:
         logger.warning("return_to_order: No last_state found!")
-        await safe_telegram_call(query.message.reply_text("Продолжаем оформление заказа..."))
+        await safe_telegram_call(update.effective_message.reply_text("Продолжаем оформление заказа..."))
         return FROM_NAME
     
     # If last_state is a number (state constant), we need the string name
