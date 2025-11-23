@@ -717,31 +717,12 @@ def with_user_session(create_user=True, require_session=False):
             
             context.user_data['session'] = session
             
-            # Restore user data from MongoDB (NOT conversation_state - MongoDBPersistence handles that)
-            session_data = session.get('session_data', {})
-            if session_data:
-                # Restore only user data (from_name, from_address, etc.) - NOT conversation_state
-                for key, value in session_data.items():
-                    if key != 'conversation_state':  # Skip - MongoDBPersistence manages this
-                        context.user_data[key] = value
-                
-                logger.info(f"✅ Restored {len([k for k in session_data.keys() if k != 'conversation_state'])} user data items from MongoDB")
+            # MongoDBPersistence handles ALL state management automatically
+            # We don't restore or save anything here - just pass control to handler
             
             logger.info(f"▶️ SESSION CHECK [{handler_name}] user={user_id}: All checks passed, calling handler")
             result = await func(update, context, *args, **kwargs)
             logger.info(f"✅ SESSION CHECK [{handler_name}] user={user_id}: Handler completed, returning state={result}")
-            
-            # MongoDBPersistence handles conversation state automatically
-            # We only save user_data (not conversation_state - that's handled by persistence)
-            if result is not None and result != ConversationHandler.END:
-                session_data_to_save = {k: v for k, v in context.user_data.items() 
-                                       if k not in ['db_user', 'session', 'conversation_state'] and not k.startswith('_')}
-                
-                await session_repo.update_one(
-                    {"user_id": user_id, "is_active": True},
-                    {"$set": {"session_data": session_data_to_save}}
-                )
-                logger.info(f"✅ Saved user_data to MongoDB (state managed by Persistence)")
             
             return result
         
