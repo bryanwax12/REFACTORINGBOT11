@@ -81,20 +81,22 @@ async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT
                 # Add checkmark to last bot message
                 if not last_text.startswith("✅"):
                     new_text = f"✅ {last_text}"
-                    await safe_telegram_call(context.bot.edit_message_text(
+                    await context.bot.edit_message_text(
                         chat_id=update.effective_chat.id,
                         message_id=last_msg_id,
                         text=new_text,
                         reply_markup=None
-                    ))
+                    )
                 else:
                     # Just remove buttons if checkmark already exists
-                    await safe_telegram_call(context.bot.edit_message_reply_markup(
+                    await context.bot.edit_message_reply_markup(
                         chat_id=update.effective_chat.id,
                         message_id=last_msg_id,
                         reply_markup=None
-                    ))
-            except Exception:
+                    )
+            except Exception as e:
+                # Silently ignore "Message can't be edited" and similar errors
+                # These are normal when message is too old or already edited
                 pass
         
     except Exception:
