@@ -24,31 +24,17 @@ async def safe_telegram_call(coro, timeout=10, error_message="❌ Превыше
         await safe_telegram_call(update.message.reply_text("Hello"), chat_id=update.effective_chat.id)
     """
     try:
-        result = await asyncio.wait_for(coro, timeout=timeout)
-        logger.debug(f"✅ Telegram API call successful: {type(result).__name__}")
-        return result
+        return await asyncio.wait_for(coro, timeout=timeout)
     except asyncio.TimeoutError:
-        logger.error(f"❌ Telegram API timeout after {timeout}s")
+        logger.error(f"Telegram API timeout after {timeout}s")
         return None
     except telegram.error.RetryAfter as e:
         # Telegram rate limit hit - wait and retry
-        logger.warning(f"⏳ Telegram rate limit: waiting {e.retry_after}s")
+        logger.warning(f"Telegram rate limit: waiting {e.retry_after}s")
         await asyncio.sleep(e.retry_after)
-        try:
-            result = await asyncio.wait_for(coro, timeout=timeout)
-            logger.info(f"✅ Telegram API call successful after retry")
-            return result
-        except Exception as retry_error:
-            logger.error(f"❌ Telegram API error after retry: {retry_error}")
-            return None
-    except telegram.error.BadRequest as e:
-        logger.error(f"❌ Telegram BadRequest error: {e}")
-        return None
-    except telegram.error.NetworkError as e:
-        logger.error(f"❌ Telegram Network error: {e}")
-        return None
+        return await asyncio.wait_for(coro, timeout=timeout)
     except Exception as e:
-        logger.error(f"❌ Telegram API error ({type(e).__name__}): {e}", exc_info=True)
+        logger.error(f"Telegram API error: {e}")
         return None
 
 
