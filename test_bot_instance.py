@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 load_dotenv('/app/frontend/.env')
 
 # Get backend URL from environment
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://bot-recovery-3.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://bot-bugbuster.preview.emergentagent.com')
 
 def test_bot_instance_availability():
     """Test if bot_instance is available via a debug endpoint"""
