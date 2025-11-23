@@ -68,7 +68,7 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
         except Exception as e:
             logger.warning(f"⚠️ Could not remove cancel button: {e}")
     
-    name = update.message.text.strip()
+    name = update.effective_message.text.strip()
     name = sanitize_string(name, max_length=50)
     
     # Store
@@ -125,7 +125,7 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     
     
     
-    address = update.message.text.strip()
+    address = update.effective_message.text.strip()
     address = sanitize_string(address, max_length=100)
     
     # Store
@@ -186,7 +186,7 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE, 
     
     
     
-    address2 = update.message.text.strip()
+    address2 = update.effective_message.text.strip()
     address2 = sanitize_string(address2, max_length=100)
     
     if len(address2) > 100:
@@ -247,7 +247,7 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     
     
     
-    city = update.message.text.strip()
+    city = update.effective_message.text.strip()
     city = sanitize_string(city, max_length=50)
     
     # Store
@@ -304,7 +304,7 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     
     
     
-    state = update.message.text.strip().upper()
+    state = update.effective_message.text.strip().upper()
     
     # Store
     user_id = update.effective_user.id
@@ -419,7 +419,7 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     
     
     
-    phone = update.message.text.strip()
+    phone = update.effective_message.text.strip()
     
     # Format phone (basic formatting without validation)
     digits_only = ''.join(filter(str.isdigit, phone))
