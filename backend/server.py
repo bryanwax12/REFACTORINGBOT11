@@ -1271,7 +1271,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         # Show next step
         reply_markup = get_cancel_keyboard()
-        bot_msg = await safe_telegram_call(query.message.reply_text(
+        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
             message_text if message_text else "Продолжаем оформление заказа...",
             reply_markup=reply_markup
         ))
