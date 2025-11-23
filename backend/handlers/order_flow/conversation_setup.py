@@ -275,7 +275,7 @@ def setup_order_conversation_handler():
         allow_reentry=True,
         block=False,  # CRITICAL: Process messages from same user sequentially to prevent race conditions
         name="order_conversation",  # Name for logging/debugging
-        persistent=True  # CRITICAL: Enable persistence for this conversation handler
+        persistent=False  # DISABLED: We use MongoDB for state management, PicklePersistence causes issues with state restoration
     )
     
     logger.info("✅ Order conversation handler configured successfully")
