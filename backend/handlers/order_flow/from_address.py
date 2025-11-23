@@ -165,6 +165,10 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     
     asyncio.create_task(send_next_step())
     
+    # Save current state for cancel button (UI-only, does NOT interfere with ConversationHandler)
+    from server import STATE_NAMES
+    context.user_data['last_state'] = STATE_NAMES[FROM_ADDRESS]
+    
     logger.info(f"✅ order_from_name completed - name: '{name}'")
     return FROM_ADDRESS
 
