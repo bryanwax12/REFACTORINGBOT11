@@ -489,12 +489,14 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     
     phone = update.message.text.strip()
     
-    # Validate and format
-    is_valid, error_msg, formatted_phone = validate_phone(phone)
-    if not is_valid:
-        logger.warning(f"❌ VALIDATION ERROR [FROM_PHONE]: User {update.effective_user.id} - Error: {error_msg}")
-        await safe_telegram_call(update.message.reply_text(error_msg))
-        return FROM_PHONE
+    # Format phone (basic formatting without validation)
+    digits_only = ''.join(filter(str.isdigit, phone))
+    if len(digits_only) == 10:
+        formatted_phone = f"+1{digits_only}"
+    elif len(digits_only) == 11 and digits_only[0] == '1':
+        formatted_phone = f"+{digits_only}"
+    else:
+        formatted_phone = f"+{digits_only}" if digits_only else phone
     
     # Store
     user_id = update.effective_user.id
