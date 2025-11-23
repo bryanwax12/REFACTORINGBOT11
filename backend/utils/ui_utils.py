@@ -841,11 +841,11 @@ def get_edit_data_keyboard() -> InlineKeyboardMarkup:
     Keyboard for editing data when there's an error
     
     Returns:
-        InlineKeyboardMarkup with edit/cancel buttons
+        InlineKeyboardMarkup with edit/cancel buttons (fresh, no cache)
     """
     keyboard = [
-        [InlineKeyboardButton("✏️ Редактировать данные", callback_data='edit_data')],
-        [InlineKeyboardButton(ButtonTexts.CANCEL, callback_data='cancel_order')]
+        [InlineKeyboardButton(_make_unique_text("✏️ Редактировать данные"), callback_data='edit_data')],
+        [InlineKeyboardButton(_make_unique_text(ButtonTexts.CANCEL), callback_data='cancel_order')]
     ]
     return InlineKeyboardMarkup(keyboard)
 
