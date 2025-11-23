@@ -256,58 +256,8 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
             from handlers.order_flow.rates import fetch_shipping_rates
             return await fetch_shipping_rates(update, context)
     
-    # Check if editing template - use TemplateEditMessages
-    editing_template = context.user_data.get('editing_template_from') or context.user_data.get('editing_template_to')
-    if editing_template:
-        from utils.ui_utils import TemplateEditMessages
-        # Map state name to TemplateEditMessages method
-        state_to_message = {
-            'FROM_NAME': TemplateEditMessages.FROM_NAME,
-            'FROM_ADDRESS': TemplateEditMessages.FROM_ADDRESS,
-            'FROM_ADDRESS2': TemplateEditMessages.FROM_ADDRESS2,
-            'FROM_CITY': TemplateEditMessages.FROM_CITY,
-            'FROM_STATE': TemplateEditMessages.FROM_STATE,
-            'FROM_ZIP': TemplateEditMessages.FROM_ZIP,
-            'FROM_PHONE': TemplateEditMessages.FROM_PHONE,
-            'TO_NAME': TemplateEditMessages.TO_NAME,
-            'TO_ADDRESS': TemplateEditMessages.TO_ADDRESS,
-            'TO_ADDRESS2': TemplateEditMessages.TO_ADDRESS2,
-            'TO_CITY': TemplateEditMessages.TO_CITY,
-            'TO_STATE': TemplateEditMessages.TO_STATE,
-            'TO_ZIP': TemplateEditMessages.TO_ZIP,
-            'TO_PHONE': TemplateEditMessages.TO_PHONE,
-        }
-        message_text = state_to_message.get(last_state, "Продолжаем редактирование...")
-        keyboard = None  # Will use cancel keyboard
-    else:
-        keyboard, message_text = OrderStepMessages.get_step_keyboard_and_message(last_state)
-    
-    # Special handling for parcel dimension states: check weight to decide keyboard
-    weight = context.user_data.get('parcel_weight', 0)
-    
-    if last_state in ['PARCEL_LENGTH', 'PARCEL_WIDTH', 'PARCEL_HEIGHT'] and weight > 10:
-        # Weight > 10 lbs, don't show "Use standard sizes" button
-        logger.info(f"⚠️ Weight {weight} lbs > 10, hiding standard size button in return_to_order")
-        keyboard = get_cancel_keyboard()
-    
-    # 🚀 PERFORMANCE: Send message in background
-    async def send_return_message():
-        if keyboard:
-            bot_msg = await safe_telegram_call(update.effective_message.reply_text(message_text, reply_markup=keyboard))
-        else:
-            reply_markup = get_cancel_keyboard()
-            bot_msg = await safe_telegram_call(update.effective_message.reply_text(message_text, reply_markup=reply_markup))
-        
-        # Save context
-        if bot_msg:
-            context.user_data['last_bot_message_id'] = bot_msg.message_id
-            context.user_data['last_bot_message_text'] = message_text
-    
-    asyncio.create_task(send_return_message())
-    
-    # Return the state constant - import from server
-    from server import STATE_CONSTANTS
-    return STATE_CONSTANTS.get(last_state, FROM_NAME)
+    # Return saved state (MongoDBPersistence will restore the conversation)
+    return saved_state
 
 
 # ============================================================
