@@ -4,6 +4,7 @@ Centralized UI components: keyboards, buttons, message templates
 """
 from typing import Optional, List
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+import time
 
 
 # ============================================================
