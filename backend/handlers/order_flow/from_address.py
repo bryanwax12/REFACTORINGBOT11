@@ -142,31 +142,22 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     # ✅ CRITICAL: Mark previous message with EXPLICIT old text (avoids race condition)
     asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
-    # Use different messages for template editing (7 steps) vs order creation (18 steps)
-    from utils.ui_utils import get_cancel_keyboard, OrderStepMessages, TemplateEditMessages
+    # ✅ МАГИЧЕСКИЙ ГИБРИД 2025: Кнопка "Отмена" + автофокус + клавиатура
+    from utils.ui_utils import ask_with_cancel_and_focus, OrderStepMessages, TemplateEditMessages
+    
     if context.user_data.get('editing_template_from') or context.user_data.get('editing_from_address'):
         message_text = TemplateEditMessages.FROM_ADDRESS
     else:
         message_text = OrderStepMessages.FROM_ADDRESS
     
-    reply_markup = get_cancel_keyboard()
-    
-    # Save state IMMEDIATELY (can safely update now since mark_message has explicit text)
-    context.user_data['last_bot_message_text'] = message_text
-    
-    # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
-    async def send_next_step():
-        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
-            message_text,
-            reply_markup=reply_markup
-        ))
-        if bot_msg:
-            context.user_data['last_bot_message_id'] = bot_msg.message_id
-    
-    asyncio.create_task(send_next_step())
-    
-    # Save current state for cancel button (UI-only, does NOT interfere with ConversationHandler)
-    from server import STATE_NAMES
+    # Отправить 2 сообщения: кнопка "Отмена" + ForceReply
+    await ask_with_cancel_and_focus(
+        update,
+        context,
+        message_text,
+        placeholder="Например: 123 Main St.",
+        safe_telegram_call_func=safe_telegram_call
+    )
     
     logger.info(f"✅ order_from_name completed - name: '{name}'")
     return FROM_ADDRESS
