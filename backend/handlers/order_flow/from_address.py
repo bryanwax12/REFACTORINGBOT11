@@ -150,7 +150,7 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
         message_text = OrderStepMessages.FROM_ADDRESS
     
     # Show next step with ForceReply for instant response
-    from telegram import ForceReply
+    # ForceReply removed - user request
     
     # Save state IMMEDIATELY (can safely update now since mark_message has explicit text)
     context.user_data['last_bot_message_text'] = message_text
