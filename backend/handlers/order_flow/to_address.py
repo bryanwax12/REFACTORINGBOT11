@@ -163,10 +163,7 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     async def send_next_step():
         bot_msg = await safe_telegram_call(update.effective_message.reply_text(
             message_text,
-            reply_markup=ForceReply(
-                input_field_placeholder=" ",
-                selective=True
-            )
+            reply_markup=reply_markup
         ))
     
     
