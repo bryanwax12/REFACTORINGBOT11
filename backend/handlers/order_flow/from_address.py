@@ -167,7 +167,6 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     
     # Save current state for cancel button (UI-only, does NOT interfere with ConversationHandler)
     from server import STATE_NAMES
-    context.user_data['last_state'] = STATE_NAMES[FROM_ADDRESS]
     
     logger.info(f"✅ order_from_name completed - name: '{name}'")
     return FROM_ADDRESS
@@ -242,7 +241,6 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE,
     
     # Save current state for cancel button (UI-only, does NOT interfere with ConversationHandler)
     from server import STATE_NAMES
-    context.user_data['last_state'] = STATE_NAMES[FROM_ADDRESS2]
     
     return FROM_ADDRESS2
 
@@ -310,7 +308,6 @@ async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE
     
     # Save current state for cancel button (UI-only, does NOT interfere with ConversationHandler)
     from server import STATE_NAMES
-    context.user_data['last_state'] = STATE_NAMES[FROM_CITY]
     
     return FROM_CITY
 
@@ -374,7 +371,6 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     
     # Save current state for cancel button (UI-only, does NOT interfere with ConversationHandler)
     from server import STATE_NAMES
-    context.user_data[\'last_state\'] = STATE_NAMES[FROM_STATE]
     
     return FROM_STATE
 
@@ -434,7 +430,6 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     
     # Save current state for cancel button (UI-only, does NOT interfere with ConversationHandler)
     from server import STATE_NAMES
-    context.user_data[\'last_state\'] = STATE_NAMES[FROM_ZIP]
     
     return FROM_ZIP
 
@@ -496,7 +491,6 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     
     # Save current state for cancel button (UI-only, does NOT interfere with ConversationHandler)
     from server import STATE_NAMES
-    context.user_data[\'last_state\'] = STATE_NAMES[FROM_PHONE]
     
     return FROM_PHONE
 
@@ -634,6 +628,5 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     logger.info("🔵 order_from_phone returning TO_NAME")
     # Save current state for cancel button (UI-only, does NOT interfere with ConversationHandler)
     from server import STATE_NAMES
-    context.user_data[\'last_state\'] = STATE_NAMES[TO_NAME]
     
     return TO_NAME
