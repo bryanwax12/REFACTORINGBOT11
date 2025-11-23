@@ -308,6 +308,10 @@ async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE
     
     asyncio.create_task(send_next_step())
     
+    # Save current state for cancel button (UI-only, does NOT interfere with ConversationHandler)
+    from server import STATE_NAMES
+    context.user_data['last_state'] = STATE_NAMES[FROM_CITY]
+    
     return FROM_CITY
 
 
