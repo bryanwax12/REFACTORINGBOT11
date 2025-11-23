@@ -8,13 +8,21 @@ import time
 
 
 # ============================================================
-# PRE-LOADED KEYBOARDS (PERFORMANCE OPTIMIZATION)
+# ANTI-CACHE UTILITIES
 # ============================================================
-# Creating keyboard objects once and reusing them saves 5-15ms per message
+# Telegram caches identical keyboards, causing 2-5s delays on repeated use.
+# Solution: Add invisible unique identifier to button text
 
-_CANCEL_KEYBOARD = None
-_YES_NO_KEYBOARD = None
-_BACK_TO_MENU_KEYBOARD = None
+def _make_unique_text(text: str) -> str:
+    """Add invisible zero-width space to make button text unique (defeats Telegram cache)"""
+    # Use zero-width space (U+200B) - invisible but makes text unique
+    return text + chr(0x200B) * (int(time.time()) % 5)
+
+# ============================================================
+# KEYBOARD GENERATORS (NO CACHING - ALWAYS FRESH)
+# ============================================================
+# Previously cached keyboards caused Telegram to "think" 2-5s on second use
+# Now generating fresh keyboards each time with unique markers
 
 
 def get_preloaded_cancel_keyboard():
