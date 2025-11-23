@@ -300,30 +300,22 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
     asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
-    from utils.ui_utils import get_cancel_keyboard
     
-    # Use different messages for template editing vs order creation
+    # ✅ МАГИЧЕСКИЙ ГИБРИД 2025
+    from utils.ui_utils import ask_with_cancel_and_focus
+    
     if context.user_data.get('editing_template_to') or context.user_data.get('editing_to_address'):
         message_text = TemplateEditMessages.TO_ZIP
     else:
         message_text = OrderStepMessages.TO_ZIP
     
-    reply_markup = get_cancel_keyboard()
-    
-    # Save state IMMEDIATELY (before background task)
-    context.user_data['last_bot_message_text'] = message_text
-    
-    # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
-    async def send_next_step():
-        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
-            message_text,
-            reply_markup=reply_markup
-        ))
-
-    asyncio.create_task(send_next_step())
-
-    # Save current state for cancel button (UI-only, does NOT interfere with ConversationHandler)
-    from server import STATE_NAMES
+    await ask_with_cancel_and_focus(
+        update,
+        context,
+        message_text,
+        placeholder="Например: 10001",
+        safe_telegram_call_func=safe_telegram_call
+    )
     
     return TO_ZIP
 
