@@ -66,6 +66,17 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     logger.info("✅ Cleared ALL user data for fresh order start")
     
+    # Also clear MongoDB session data for fresh start
+    from server import db
+    await db.user_sessions.update_one(
+        {"user_id": telegram_id, "is_active": True},
+        {"$set": {
+            "session_data": {},
+            "current_step": "START"
+        }}
+    )
+    logger.info("✅ Cleared MongoDB session data")
+    
     # Fresh new order - no resume
     logger.info(f"🆕 Fresh new order for user {telegram_id}")
     
