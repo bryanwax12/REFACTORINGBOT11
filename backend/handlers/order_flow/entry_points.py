@@ -182,7 +182,10 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
     async def send_next_step():
         bot_msg = await safe_telegram_call(query.message.reply_text(
                 message_text,
-                reply_markup=reply_markup,
+                reply_markup=ForceReply(
+                    input_field_placeholder=" ",
+                    selective=True
+                ),
                 parse_mode='Markdown'
             ))
         if bot_msg:
