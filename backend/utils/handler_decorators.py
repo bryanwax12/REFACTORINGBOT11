@@ -719,11 +719,16 @@ def with_user_session(create_user=True, require_session=False):
             
             # CRITICAL: Restore ConversationHandler state from MongoDB (replaces PicklePersistence)
             session_data = session.get('session_data', {})
-            if 'conversation_state' in session_data:
+            if session_data:
                 # Restore all conversation data from MongoDB
                 for key, value in session_data.items():
-                    if key != 'conversation_state':  # Don't overwrite state, ConversationHandler manages it
-                        context.user_data[key] = value
+                    context.user_data[key] = value  # ← Include conversation_state!
+                
+                # CRITICAL: ConversationHandler looks for this specific key
+                if 'conversation_state' in session_data:
+                    context.user_data['__conversation_state'] = session_data['conversation_state']
+                    logger.info(f"✅ Restored conversation_state={session_data['conversation_state']} from MongoDB")
+                
                 logger.info(f"✅ Restored {len(session_data)} items from MongoDB session")
             
             logger.info(f"▶️ SESSION CHECK [{handler_name}] user={user_id}: All checks passed, calling handler")
