@@ -111,7 +111,11 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     
     if not is_valid:
         logger.warning(f"❌ Name validation FAILED for '{name}': {error_msg}")
-        await safe_telegram_call(update.message.reply_text(error_msg))
+        error_sent = await safe_telegram_call(update.message.reply_text(error_msg))
+        if error_sent:
+            logger.info(f"✅ ERROR MESSAGE SENT successfully for FROM_NAME validation")
+        else:
+            logger.error(f"❌ FAILED to send error message for FROM_NAME validation")
         return FROM_NAME
     
     # Store in session AND context using service
