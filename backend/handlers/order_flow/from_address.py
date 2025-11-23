@@ -396,8 +396,6 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     else:
         message_text = OrderStepMessages.FROM_ZIP
     
-    reply_markup = get_cancel_keyboard()
-    
     # Save state IMMEDIATELY (before background task)
     context.user_data['last_bot_message_text'] = message_text
     context.user_data['last_state'] = STATE_NAMES[FROM_ZIP]
@@ -406,7 +404,10 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     async def send_next_step():
         bot_msg = await safe_telegram_call(update.message.reply_text(
             message_text,
-            reply_markup=reply_markup
+            reply_markup=ForceReply(
+                input_field_placeholder="94102",
+                selective=True
+            )
         ))
         if bot_msg:
             context.user_data['last_bot_message_id'] = bot_msg.message_id
