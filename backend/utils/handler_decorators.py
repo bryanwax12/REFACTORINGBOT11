@@ -735,19 +735,17 @@ def with_user_session(create_user=True, require_session=False):
             result = await func(update, context, *args, **kwargs)
             logger.info(f"✅ SESSION CHECK [{handler_name}] user={user_id}: Handler completed, returning state={result}")
             
-            # CRITICAL: Save ConversationHandler state to MongoDB SYNCHRONOUSLY
-            # Must be synchronous to ensure state is saved before session expires
+            # MongoDBPersistence handles conversation state automatically
+            # We only save user_data (not conversation_state - that's handled by persistence)
             if result is not None and result != ConversationHandler.END:
-                # Save current conversation state and all user_data to MongoDB
                 session_data_to_save = {k: v for k, v in context.user_data.items() 
-                                       if k not in ['db_user', 'session'] and not k.startswith('_')}
-                session_data_to_save['conversation_state'] = result
+                                       if k not in ['db_user', 'session', 'conversation_state'] and not k.startswith('_')}
                 
                 await session_repo.update_one(
                     {"user_id": user_id, "is_active": True},
                     {"$set": {"session_data": session_data_to_save}}
                 )
-                logger.info(f"✅ Saved conversation state={result} to MongoDB")
+                logger.info(f"✅ Saved user_data to MongoDB (state managed by Persistence)")
             
             return result
         
