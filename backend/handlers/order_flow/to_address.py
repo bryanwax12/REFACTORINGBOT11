@@ -128,13 +128,6 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     address = update.message.text.strip()
     address = sanitize_string(address, max_length=100)
     
-    # Validate
-    is_valid, error_msg = validate_address(address, "Адрес")
-    if not is_valid:
-        logger.warning(f"❌ VALIDATION ERROR [TO_ADDRESS]: User {update.effective_user.id} - Error: {error_msg}")
-        await safe_telegram_call(update.message.reply_text(error_msg))
-        return TO_ADDRESS
-    
     # Store
     user_id = update.effective_user.id
     context.user_data['to_address'] = address
