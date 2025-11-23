@@ -135,7 +135,7 @@ def get_main_menu_keyboard(user_balance: float = 0.0) -> InlineKeyboardMarkup:
         [InlineKeyboardButton(ButtonTexts.CREATE_ORDER, callback_data=CallbackData.NEW_ORDER)],
         [InlineKeyboardButton(ButtonTexts.my_balance(user_balance), callback_data=CallbackData.MY_BALANCE)],
         [InlineKeyboardButton(ButtonTexts.MY_TEMPLATES, callback_data=CallbackData.MY_TEMPLATES)],
-        [InlineKeyboardButton("💰 Refund Label", callback_data="refund_menu")],
+        [InlineKeyboardButton(_make_unique_text("💰 Refund Label"), callback_data="refund_menu")],
         [InlineKeyboardButton(ButtonTexts.HELP, callback_data=CallbackData.HELP)],
         [InlineKeyboardButton(ButtonTexts.FAQ, callback_data=CallbackData.FAQ)]
     ]
@@ -175,7 +175,7 @@ def get_standard_size_and_cancel_keyboard(standard_size_callback: str) -> Inline
         InlineKeyboardMarkup with standard size and cancel buttons
     """
     keyboard = [
-        [InlineKeyboardButton("⏭️ Использовать стандартные размеры", callback_data=standard_size_callback)],
+        [InlineKeyboardButton(_make_unique_text("⏭️ Использовать стандартные размеры"), callback_data=standard_size_callback)],
         [InlineKeyboardButton(ButtonTexts.CANCEL, callback_data=CallbackData.CANCEL_ORDER)]
     ]
     return InlineKeyboardMarkup(keyboard)
@@ -729,11 +729,11 @@ def get_template_view_keyboard(template_id: str) -> InlineKeyboardMarkup:
         InlineKeyboardMarkup with use/edit/delete buttons
     """
     keyboard = [
-        [InlineKeyboardButton("✅ Использовать шаблон", callback_data=f'template_use_{template_id}')],
-        [InlineKeyboardButton("📝 Редактировать адреса", callback_data=f'template_edit_{template_id}')],
-        [InlineKeyboardButton("✏️ Переименовать", callback_data=f'template_rename_{template_id}')],
-        [InlineKeyboardButton("🗑 Удалить", callback_data=f'template_delete_{template_id}')],
-        [InlineKeyboardButton("🔙 К списку шаблонов", callback_data=CallbackData.MY_TEMPLATES)]
+        [InlineKeyboardButton(_make_unique_text("✅ Использовать шаблон"), callback_data=f'template_use_{template_id}')],
+        [InlineKeyboardButton(_make_unique_text("📝 Редактировать адреса"), callback_data=f'template_edit_{template_id}')],
+        [InlineKeyboardButton(_make_unique_text("✏️ Переименовать"), callback_data=f'template_rename_{template_id}')],
+        [InlineKeyboardButton(_make_unique_text("🗑 Удалить"), callback_data=f'template_delete_{template_id}')],
+        [InlineKeyboardButton(_make_unique_text("🔙 К списку шаблонов"), callback_data=CallbackData.MY_TEMPLATES)]
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -749,8 +749,8 @@ def get_template_delete_confirmation_keyboard(template_id: str) -> InlineKeyboar
         InlineKeyboardMarkup with confirm/cancel buttons
     """
     keyboard = [
-        [InlineKeyboardButton("✅ Да, удалить", callback_data=f'template_confirm_delete_{template_id}')],
-        [InlineKeyboardButton("❌ Отмена", callback_data=f'template_view_{template_id}')]
+        [InlineKeyboardButton(_make_unique_text("✅ Да, удалить"), callback_data=f'template_confirm_delete_{template_id}')],
+        [InlineKeyboardButton(_make_unique_text("❌ Отмена"), callback_data=f'template_view_{template_id}')]
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -765,7 +765,7 @@ def get_template_rename_keyboard(template_id: str) -> InlineKeyboardMarkup:
     Returns:
         InlineKeyboardMarkup with cancel button
     """
-    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data=f'template_view_{template_id}')]]
+    keyboard = [[InlineKeyboardButton(_make_unique_text("❌ Отмена"), callback_data=f'template_view_{template_id}')]]
     return InlineKeyboardMarkup(keyboard)
 
 
@@ -806,8 +806,8 @@ def get_new_order_choice_keyboard() -> InlineKeyboardMarkup:
         InlineKeyboardMarkup with new/template/cancel buttons
     """
     keyboard = [
-        [InlineKeyboardButton("📝 Новый заказ", callback_data='order_new')],
-        [InlineKeyboardButton("📋 Из шаблона", callback_data='order_from_template')],
+        [InlineKeyboardButton(_make_unique_text("📝 Новый заказ"), callback_data='order_new')],
+        [InlineKeyboardButton(_make_unique_text("📋 Из шаблона"), callback_data='order_from_template')],
         [InlineKeyboardButton(ButtonTexts.CANCEL, callback_data=CallbackData.START)]
     ]
     return InlineKeyboardMarkup(keyboard)
@@ -858,7 +858,7 @@ def get_edit_addresses_keyboard() -> InlineKeyboardMarkup:
         InlineKeyboardMarkup with edit addresses/cancel buttons
     """
     keyboard = [
-        [InlineKeyboardButton("✏️ Редактировать адреса", callback_data='edit_addresses_error')],
+        [InlineKeyboardButton(_make_unique_text("✏️ Редактировать адреса"), callback_data='edit_addresses_error')],
         [InlineKeyboardButton(ButtonTexts.CANCEL, callback_data='cancel_order')]
     ]
     return InlineKeyboardMarkup(keyboard)
@@ -872,8 +872,8 @@ def get_retry_edit_cancel_keyboard() -> InlineKeyboardMarkup:
         InlineKeyboardMarkup with retry/edit/cancel buttons
     """
     keyboard = [
-        [InlineKeyboardButton("🔄 Попробовать снова", callback_data='continue_order')],
-        [InlineKeyboardButton("✏️ Редактировать адреса", callback_data='edit_addresses_error')],
+        [InlineKeyboardButton(_make_unique_text("🔄 Попробовать снова"), callback_data='continue_order')],
+        [InlineKeyboardButton(_make_unique_text("✏️ Редактировать адреса"), callback_data='edit_addresses_error')],
         [InlineKeyboardButton(ButtonTexts.CANCEL, callback_data='cancel_order')]
     ]
     return InlineKeyboardMarkup(keyboard)
@@ -888,7 +888,7 @@ def get_back_to_rates_keyboard() -> InlineKeyboardMarkup:
     """
     keyboard = [
         [
-            InlineKeyboardButton("◀️ Назад к тарифам", callback_data='back_to_rates'),
+            InlineKeyboardButton(_make_unique_text("◀️ Назад к тарифам"), callback_data='back_to_rates'),
             InlineKeyboardButton(ButtonTexts.CANCEL, callback_data='cancel_order')
         ]
     ]
@@ -922,7 +922,7 @@ def get_payment_keyboard(balance: float, amount: float) -> InlineKeyboardMarkup:
         )])
     
     keyboard.append([
-        InlineKeyboardButton("◀️ Назад к тарифам", callback_data='back_to_rates'),
+        InlineKeyboardButton(_make_unique_text("◀️ Назад к тарифам"), callback_data='back_to_rates'),
         InlineKeyboardButton(ButtonTexts.CANCEL, callback_data='cancel_order')
     ])
     
@@ -1243,7 +1243,7 @@ ShipStation не смог проверить один или оба адреса
             )])
         
         # Add refresh and cancel buttons
-        keyboard.append([InlineKeyboardButton("🔄 Обновить тарифы", callback_data='refresh_rates')])
+        keyboard.append([InlineKeyboardButton(_make_unique_text("🔄 Обновить тарифы"), callback_data='refresh_rates')])
         keyboard.append([InlineKeyboardButton(ButtonTexts.CANCEL, callback_data=CallbackData.CANCEL_ORDER)])
         
         return InlineKeyboardMarkup(keyboard)
@@ -1387,9 +1387,9 @@ class DataConfirmationUI:
     def build_confirmation_keyboard() -> InlineKeyboardMarkup:
         """Build keyboard for data confirmation screen"""
         keyboard = [
-            [InlineKeyboardButton("✅ Всё верно, показать тарифы", callback_data='confirm_data')],
-            [InlineKeyboardButton("✏️ Редактировать данные", callback_data='edit_data')],
-            [InlineKeyboardButton("💾 Сохранить как шаблон", callback_data='save_template')],
+            [InlineKeyboardButton(_make_unique_text("✅ Всё верно, показать тарифы"), callback_data='confirm_data')],
+            [InlineKeyboardButton(_make_unique_text("✏️ Редактировать данные"), callback_data='edit_data')],
+            [InlineKeyboardButton(_make_unique_text("💾 Сохранить как шаблон"), callback_data='save_template')],
             [InlineKeyboardButton(ButtonTexts.CANCEL, callback_data=CallbackData.CANCEL_ORDER)]
         ]
         return InlineKeyboardMarkup(keyboard)
@@ -1398,10 +1398,10 @@ class DataConfirmationUI:
     def build_edit_menu_keyboard() -> InlineKeyboardMarkup:
         """Build keyboard for edit menu"""
         keyboard = [
-            [InlineKeyboardButton("📤 Адрес отправителя", callback_data='edit_from_address')],
-            [InlineKeyboardButton("📥 Адрес получателя", callback_data='edit_to_address')],
-            [InlineKeyboardButton("📦 Посылка", callback_data='edit_parcel')],
-            [InlineKeyboardButton("◀️ Назад", callback_data='back_to_confirmation')]
+            [InlineKeyboardButton(_make_unique_text("📤 Адрес отправителя"), callback_data='edit_from_address')],
+            [InlineKeyboardButton(_make_unique_text("📥 Адрес получателя"), callback_data='edit_to_address')],
+            [InlineKeyboardButton(_make_unique_text("📦 Посылка"), callback_data='edit_parcel')],
+            [InlineKeyboardButton(_make_unique_text("◀️ Назад"), callback_data='back_to_confirmation')]
         ]
         return InlineKeyboardMarkup(keyboard)
 
@@ -1497,8 +1497,8 @@ class PaymentFlowUI:
     def build_balance_keyboard() -> InlineKeyboardMarkup:
         """Keyboard for balance screen"""
         keyboard = [
-            [InlineKeyboardButton("❌ Отмена", callback_data='start')],
-            [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]
+            [InlineKeyboardButton(_make_unique_text("❌ Отмена"), callback_data='start')],
+            [InlineKeyboardButton(_make_unique_text("🔙 Главное меню"), callback_data='start')]
         ]
         return InlineKeyboardMarkup(keyboard)
     
@@ -1506,11 +1506,11 @@ class PaymentFlowUI:
     def build_crypto_selection_keyboard() -> InlineKeyboardMarkup:
         """Keyboard for cryptocurrency selection"""
         keyboard = [
-            [InlineKeyboardButton("₿ Bitcoin (BTC)", callback_data='crypto_btc')],
-            [InlineKeyboardButton("Ξ Ethereum (ETH)", callback_data='crypto_eth')],
-            [InlineKeyboardButton("₮ Tether (USDT)", callback_data='crypto_usdt')],
-            [InlineKeyboardButton("Ł Litecoin (LTC)", callback_data='crypto_ltc')],
-            [InlineKeyboardButton("❌ Отмена", callback_data='start')]
+            [InlineKeyboardButton(_make_unique_text("₿ Bitcoin (BTC)"), callback_data='crypto_btc')],
+            [InlineKeyboardButton(_make_unique_text("Ξ Ethereum (ETH)"), callback_data='crypto_eth')],
+            [InlineKeyboardButton(_make_unique_text("₮ Tether (USDT)"), callback_data='crypto_usdt')],
+            [InlineKeyboardButton(_make_unique_text("Ł Litecoin (LTC)"), callback_data='crypto_ltc')],
+            [InlineKeyboardButton(_make_unique_text("❌ Отмена"), callback_data='start')]
         ]
         return InlineKeyboardMarkup(keyboard)
 
@@ -1618,8 +1618,8 @@ class TemplateManagementUI:
     def build_no_templates_keyboard() -> InlineKeyboardMarkup:
         """Keyboard when no templates exist"""
         keyboard = [
-            [InlineKeyboardButton("📦 Создать заказ", callback_data='new_order')],
-            [InlineKeyboardButton("🔙 Главное меню", callback_data='start')]
+            [InlineKeyboardButton(_make_unique_text("📦 Создать заказ"), callback_data='new_order')],
+            [InlineKeyboardButton(_make_unique_text("🔙 Главное меню"), callback_data='start')]
         ]
         return InlineKeyboardMarkup(keyboard)
     
@@ -1627,10 +1627,10 @@ class TemplateManagementUI:
     def build_template_view_keyboard(template_id: str) -> InlineKeyboardMarkup:
         """Keyboard for viewing a single template"""
         keyboard = [
-            [InlineKeyboardButton("📦 Использовать шаблон", callback_data=f'use_template_{template_id}')],
-            [InlineKeyboardButton("✏️ Переименовать", callback_data=f'rename_template_{template_id}')],
-            [InlineKeyboardButton("🗑 Удалить", callback_data=f'delete_template_{template_id}')],
-            [InlineKeyboardButton("◀️ Назад к списку", callback_data='my_templates')]
+            [InlineKeyboardButton(_make_unique_text("📦 Использовать шаблон"), callback_data=f'use_template_{template_id}')],
+            [InlineKeyboardButton(_make_unique_text("✏️ Переименовать"), callback_data=f'rename_template_{template_id}')],
+            [InlineKeyboardButton(_make_unique_text("🗑 Удалить"), callback_data=f'delete_template_{template_id}')],
+            [InlineKeyboardButton(_make_unique_text("◀️ Назад к списку"), callback_data='my_templates')]
         ]
         return InlineKeyboardMarkup(keyboard)
     
@@ -1638,8 +1638,8 @@ class TemplateManagementUI:
     def build_confirm_delete_keyboard(template_id: str) -> InlineKeyboardMarkup:
         """Keyboard for confirming template deletion"""
         keyboard = [
-            [InlineKeyboardButton("✅ Да, удалить", callback_data=f'confirm_delete_{template_id}')],
-            [InlineKeyboardButton("❌ Отмена", callback_data=f'template_view_{template_id}')]
+            [InlineKeyboardButton(_make_unique_text("✅ Да, удалить"), callback_data=f'confirm_delete_{template_id}')],
+            [InlineKeyboardButton(_make_unique_text("❌ Отмена"), callback_data=f'template_view_{template_id}')]
         ]
         return InlineKeyboardMarkup(keyboard)
 
