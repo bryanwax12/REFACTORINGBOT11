@@ -139,10 +139,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     - Error handling
     - Typing indicator
     """
-    logger.error(f"🎯🎯🎯 START_COMMAND CALLED! user={update.effective_user.id if update.effective_user else 'None'}")
-    logger.error(f"   Update type: {type(update)}")
-    logger.error(f"   Message: {update.message.text if update.message else 'None'}")
-    logger.error(f"   Callback: {update.callback_query.data if update.callback_query else 'None'}")
+    logger.info(f"📍 START command from user {update.effective_user.id if update.effective_user else 'None'}")
     
     # Get user from context FIRST (injected by decorator)
     user = context.user_data.get('db_user')
