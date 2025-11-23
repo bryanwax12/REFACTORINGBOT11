@@ -717,19 +717,15 @@ def with_user_session(create_user=True, require_session=False):
             
             context.user_data['session'] = session
             
-            # CRITICAL: Restore ConversationHandler state from MongoDB (replaces PicklePersistence)
+            # Restore user data from MongoDB (NOT conversation_state - MongoDBPersistence handles that)
             session_data = session.get('session_data', {})
             if session_data:
-                # Restore all conversation data from MongoDB
+                # Restore only user data (from_name, from_address, etc.) - NOT conversation_state
                 for key, value in session_data.items():
-                    context.user_data[key] = value  # ← Include conversation_state!
+                    if key != 'conversation_state':  # Skip - MongoDBPersistence manages this
+                        context.user_data[key] = value
                 
-                # CRITICAL: ConversationHandler looks for this specific key
-                if 'conversation_state' in session_data:
-                    context.user_data['__conversation_state'] = session_data['conversation_state']
-                    logger.info(f"✅ Restored conversation_state={session_data['conversation_state']} from MongoDB")
-                
-                logger.info(f"✅ Restored {len(session_data)} items from MongoDB session")
+                logger.info(f"✅ Restored {len([k for k in session_data.keys() if k != 'conversation_state'])} user data items from MongoDB")
             
             logger.info(f"▶️ SESSION CHECK [{handler_name}] user={user_id}: All checks passed, calling handler")
             result = await func(update, context, *args, **kwargs)
