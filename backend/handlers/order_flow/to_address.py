@@ -202,8 +202,6 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE, 
     else:
         message_text = OrderStepMessages.TO_CITY
     
-    reply_markup = get_cancel_keyboard()
-    
     # Save state IMMEDIATELY (before background task)
     context.user_data['last_bot_message_text'] = message_text
     context.user_data['last_state'] = STATE_NAMES[TO_CITY]
@@ -212,10 +210,11 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE, 
     async def send_next_step():
         bot_msg = await safe_telegram_call(update.message.reply_text(
             message_text,
-            reply_markup=reply_markup
+            reply_markup=ForceReply(
+                input_field_placeholder="New York",
+                selective=True
+            )
         ))
-    
-    
 
     asyncio.create_task(send_next_step())
 
