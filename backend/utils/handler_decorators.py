@@ -621,20 +621,23 @@ def with_services(
 
 def with_user_session(create_user=True, require_session=False):
     """
-    Minimal decorator for user blocking check ONLY
+    Minimal decorator for user check and context preparation
     
-    ⚠️ IMPORTANT: MongoDBPersistence handles ALL state management automatically!
-    This decorator MUST NOT touch context.user_data or session data.
-    It only checks if user is blocked in database.
+    ⚠️ IMPORTANT: MongoDBPersistence handles CONVERSATION STATE automatically!
+    This decorator only:
+    1. Gets user from DB (or creates if needed)
+    2. Checks if user is blocked
+    3. Injects db_user into context for handlers to use
+    4. DOES NOT touch session or conversation state
     
     Usage:
         @with_user_session()
         async def order_handler(update, context):
-            # MongoDBPersistence automatically manages context.user_data
-            # Handler just works with state as normal
+            user = context.user_data['db_user']  # Available for handlers
+            # MongoDBPersistence manages conversation state
     
     Args:
-        create_user: Ignored (kept for backward compatibility)
+        create_user: Create user if missing (default: True)
         require_session: Ignored (kept for backward compatibility)
     """
     def decorator(func):
@@ -643,26 +646,44 @@ def with_user_session(create_user=True, require_session=False):
             from repositories import get_user_repo
             
             user_id = update.effective_user.id
+            username = update.effective_user.username
+            first_name = update.effective_user.first_name
             handler_name = func.__name__
             
-            logger.debug(f"🔍 [{handler_name}] user={user_id}: Checking user block status")
+            logger.debug(f"🔍 [{handler_name}] user={user_id}: Checking user")
             
             user_repo = get_user_repo()
             
-            # ONLY check if user is blocked - nothing else
-            user = await user_repo.find_by_telegram_id(user_id)
+            # Get or create user
+            if create_user:
+                user = await user_repo.get_or_create_user(
+                    telegram_id=user_id,
+                    username=username,
+                    first_name=first_name
+                )
+            else:
+                user = await user_repo.find_by_telegram_id(user_id)
+                if not user:
+                    logger.warning(f"❌ [{handler_name}] user={user_id}: User not found")
+                    if update.message:
+                        await update.message.reply_text("❌ Пользователь не найден. Используйте /start")
+                    return ConversationHandler.END
             
-            if user and user.get('blocked', False):
+            # Check if blocked
+            if user.get('blocked', False):
                 logger.warning(f"❌ [{handler_name}] user={user_id}: User is blocked")
                 if update.message:
                     await update.message.reply_text("❌ Вы заблокированы")
                 return ConversationHandler.END
             
-            # ✅ CRITICAL: DO NOT touch context.user_data here!
-            # ✅ CRITICAL: DO NOT read/write session data!
-            # ✅ MongoDBPersistence is the ONLY source of truth for state
+            # Inject db_user into context (NOT conversation state!)
+            # This is just a reference to user document, handlers need this
+            context.user_data['db_user'] = user
             
-            logger.debug(f"▶️ [{handler_name}] user={user_id}: User not blocked, calling handler")
+            # ✅ CRITICAL: DO NOT touch session or conversation state!
+            # ✅ MongoDBPersistence is the ONLY manager of conversation state
+            
+            logger.debug(f"▶️ [{handler_name}] user={user_id}: Calling handler")
             result = await func(update, context, *args, **kwargs)
             logger.debug(f"✅ [{handler_name}] user={user_id}: Handler completed, state={result}")
             
