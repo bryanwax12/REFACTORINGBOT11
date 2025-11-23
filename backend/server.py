@@ -1399,8 +1399,10 @@ async def startup_event():
             # Get optimized settings from performance config
             app_settings = BotPerformanceConfig.get_optimized_application_settings()
             
-            # PicklePersistence DISABLED - Using MongoDB as single source of truth
-            # This eliminates duplicate steps and state conflicts
+            # MongoDB Persistence - lightweight replacement for PicklePersistence
+            from utils.mongodb_persistence import MongoDBPersistence
+            mongodb_persistence = MongoDBPersistence(db)
+            logger.info("✅ MongoDBPersistence initialized")
             
             # Optimize: Only receive needed update types (saves ~20-40ms)
             from telegram import Update
@@ -1414,7 +1416,7 @@ async def startup_event():
             application = (
                 Application.builder()
                 .token(TELEGRAM_BOT_TOKEN)
-                # .persistence(persistence)  # DISABLED: Causes duplicate steps, using MongoDB only
+                .persistence(mongodb_persistence)  # MongoDB-based persistence for ConversationHandler
                 .concurrent_updates(False)  # CRITICAL: Sequential processing prevents race conditions
                 .connect_timeout(app_settings['connect_timeout'])  # Fast connection
                 .read_timeout(app_settings['read_timeout'])   # Optimized read timeout
