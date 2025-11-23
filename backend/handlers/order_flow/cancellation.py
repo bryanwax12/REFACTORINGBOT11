@@ -14,11 +14,12 @@ from utils.handler_decorators import with_user_session, safe_handler, with_servi
 
 @safe_handler(fallback_state=ConversationHandler.END)
 @with_user_session(create_user=False, require_session=True)
-async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
+@with_services(session_service=True)
+async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE, session_service):
     """Show cancellation confirmation"""
     from server import (
         SELECT_CARRIER, PAYMENT_METHOD, STATE_NAMES,
-        safe_telegram_call, mark_message_as_selected
+        safe_telegram_call, mark_message_as_selected, db
     )
     
     if update.callback_query:
@@ -38,11 +39,25 @@ async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
-    # Check if we're on shipping rates screen
-    last_state = context.user_data.get('last_state')
+    # ✅ 2025 ПРАВИЛЬНЫЙ СПОСОБ: Получить текущее состояние из MongoDBPersistence
+    user_id = update.effective_user.id
+    session = await db.user_sessions.find_one(
+        {"user_id": user_id, "is_active": True},
+        {"session_data.conversation_state": 1}
+    )
     
-    # SAVE last_state for return_to_order to restore
-    context.user_data['saved_state_before_cancel'] = last_state
+    current_state = None
+    if session:
+        current_state = session.get("session_data", {}).get("conversation_state")
+        logger.info(f"✅ Got current state from MongoDBPersistence: {current_state}")
+        
+        # Сохранить состояние В СЕССИИ для восстановления после отмены
+        await db.user_sessions.update_one(
+            {"user_id": user_id, "is_active": True},
+            {"$set": {"session_data.state_before_cancel": current_state}}
+        )
+    else:
+        logger.warning(f"⚠️ No active session found for user {user_id}")
     
     # Add "Check Data" button only if on shipping rates selection screen
     if last_state == STATE_NAMES[SELECT_CARRIER]:
