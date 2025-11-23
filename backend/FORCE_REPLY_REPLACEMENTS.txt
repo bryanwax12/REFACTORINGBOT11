@@ -1,0 +1,6 @@
+TO_ADDRESS placeholder: 123 Main St.
+TO_CITY placeholder: New York
+TO_STATE placeholder: NY
+TO_ZIP placeholder: 10001
+TO_PHONE placeholder: +1 (212) 555-0123
+PARCEL_WEIGHT placeholder: 10.5
