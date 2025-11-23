@@ -1432,8 +1432,8 @@ async def startup_event():
             application = (
                 Application.builder()
                 .token(TELEGRAM_BOT_TOKEN)
-                .persistence(persistence)  # Persistence enabled
-                .concurrent_updates(False)  # CRITICAL: Sequential processing prevents race conditions in Persistence!
+                # .persistence(persistence)  # DISABLED: Causes duplicate steps, using MongoDB only
+                .concurrent_updates(False)  # CRITICAL: Sequential processing prevents race conditions
                 .connect_timeout(app_settings['connect_timeout'])  # Fast connection
                 .read_timeout(app_settings['read_timeout'])   # Optimized read timeout
                 .write_timeout(app_settings['write_timeout'])  # Reliable message delivery
@@ -1442,7 +1442,7 @@ async def startup_event():
                 .build()
             )
             
-            logger.info("✅ Persistence RE-ENABLED with concurrent_updates=False fix")
+            logger.info("✅ Application built WITHOUT PicklePersistence (using MongoDB only)")
             logger.info("🔧 CRITICAL FIX: concurrent_updates=False prevents 5-second delay")
             
             # CRITICAL: Update global bot_instance with the application's bot for notifications
