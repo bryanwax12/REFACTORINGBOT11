@@ -587,8 +587,7 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     
     logger.info("⚠️ NORMAL FLOW: Proceeding to TO_NAME (no editing flags detected)")
     
-    from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
-    reply_markup = get_cancel_keyboard()
+    from utils.ui_utils import OrderStepMessages
     message_text = OrderStepMessages.TO_NAME
     
     # Save state IMMEDIATELY (before background task)
@@ -599,7 +598,10 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     async def send_next_step():
         bot_msg = await safe_telegram_call(update.message.reply_text(
             message_text,
-            reply_markup=reply_markup
+            reply_markup=ForceReply(
+                input_field_placeholder="+1 (415) 555-1234",
+                selective=True
+            )
         ))
         if bot_msg:
             context.user_data['last_bot_message_id'] = bot_msg.message_id
