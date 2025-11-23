@@ -513,12 +513,13 @@ async def skip_address_validation(update: Update, context: ContextTypes.DEFAULT_
     from server import fetch_shipping_rates
     
     query = update.callback_query
-    await safe_telegram_call(query.answer())
+    asyncio.create_task(safe_telegram_call(query.answer()))
     
     # Set flag to skip validation
     context.user_data['skip_address_validation'] = True
     
-    await safe_telegram_call(query.message.reply_text("⚠️ Пропускаю валидацию адреса...\n⏳ Получаю доступные курьерские службы и тарифы..."))
+    # 🚀 PERFORMANCE: Show message in background - don't block state return
+    asyncio.create_task(safe_telegram_call(query.message.reply_text("⚠️ Пропускаю валидацию адреса...\n⏳ Получаю доступные курьерские службы и тарифы...")))
     
     # Call fetch_shipping_rates which will now skip validation
     return await fetch_shipping_rates(update, context)
