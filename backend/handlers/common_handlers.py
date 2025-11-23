@@ -38,10 +38,16 @@ async def safe_telegram_call(coro, timeout=10, error_message="❌ Превыше
         return None
 
 
-async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT_TYPE, prompt_text: str = None):
     """
     Add checkmark ✅ to selected message and remove buttons
     Runs async - doesn't block bot response
+    
+    Args:
+        update: Telegram update
+        context: Bot context
+        prompt_text: EXPLICIT prompt text to mark (avoids race condition with context updates)
+                     If None, falls back to context.user_data['last_bot_message_text']
     """
     try:
         # Handle callback query (button press)
@@ -62,11 +68,13 @@ async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT
             return
         
         # Handle text input messages
-        if update.message and 'last_bot_message_id' in context.user_data:
+        if update.effective_message and 'last_bot_message_id' in context.user_data:
             last_msg_id = context.user_data.get('last_bot_message_id')
-            last_text = context.user_data.get('last_bot_message_text', '')
             
-            if not last_msg_id:
+            # ✅ 2025 FIX: Use explicit prompt_text to avoid race condition
+            last_text = prompt_text if prompt_text is not None else context.user_data.get('last_bot_message_text', '')
+            
+            if not last_msg_id or not last_text:
                 return
             
             try:
