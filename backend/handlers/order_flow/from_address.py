@@ -375,13 +375,6 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     
     state = update.message.text.strip().upper()
     
-    # Validate
-    is_valid, error_msg = validate_state(state)
-    if not is_valid:
-        logger.warning(f"❌ VALIDATION ERROR [FROM_STATE]: User {update.effective_user.id} - Error: {error_msg}")
-        await safe_telegram_call(update.message.reply_text(error_msg))
-        return FROM_STATE
-    
     # Store
     user_id = update.effective_user.id
     context.user_data['from_state'] = state
