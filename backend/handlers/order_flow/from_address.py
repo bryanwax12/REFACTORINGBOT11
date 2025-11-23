@@ -319,13 +319,6 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     city = update.message.text.strip()
     city = sanitize_string(city, max_length=50)
     
-    # Validate
-    is_valid, error_msg = validate_city(city)
-    if not is_valid:
-        logger.warning(f"❌ VALIDATION ERROR [FROM_CITY]: User {update.effective_user.id} - Error: {error_msg}")
-        await safe_telegram_call(update.message.reply_text(error_msg))
-        return FROM_CITY
-    
     # Store
     user_id = update.effective_user.id
     context.user_data['from_city'] = city
