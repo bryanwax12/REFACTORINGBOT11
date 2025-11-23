@@ -43,8 +43,8 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     user_id = update.effective_user.id
     message_text = update.message.text if update.message else "N/A"
     
-    logger.info(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-    logger.info(f"🔵 ORDER_FROM_NAME STARTED")
+    logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    logger.info("🔵 ORDER_FROM_NAME STARTED")
     logger.info(f"   User: {user_id}")
     logger.info(f"   Message: '{message_text[:100]}'")
     logger.info(f"   Update ID: {update.update_id}")
@@ -52,7 +52,7 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     logger.info(f"   editing_template_from: {context.user_data.get('editing_template_from')}")
     logger.info(f"   editing_template_id: {context.user_data.get('editing_template_id')}")
     logger.info(f"   awaiting_topup_amount: {context.user_data.get('awaiting_topup_amount')}")
-    logger.info(f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+    logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     
     # Remove cancel button from prompt if exists
     # Try to get message_id from context first, then from DB
