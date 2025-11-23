@@ -338,8 +338,11 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE, se
         # REMOVED: ConversationHandler manages state via Persistence
         # await session_service.update_session_step(user_id, step="FROM_STATE")
     
+    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+    
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages, TemplateEditMessages
-    asyncio.create_task(mark_message_as_selected(update, context))
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     # Use different messages for template editing vs order creation
     if context.user_data.get('editing_template_from') or context.user_data.get('editing_from_address'):
