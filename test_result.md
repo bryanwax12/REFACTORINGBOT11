@@ -29,12 +29,23 @@ context.user_data['last_bot_message_text'] = new_message_text
 
 ## ФАЙЛЫ
 - `/app/backend/handlers/common_handlers.py:41-95` - добавлен параметр `prompt_text`
-- `/app/backend/handlers/order_flow/from_address.py:131-154` - явная передача старого текста
+- **ВСЕ 13 файлов в `/app/backend/handlers/order_flow/`** - массово исправлены все вызовы:
+  - from_address.py (6 вызовов)
+  - to_address.py (7 вызовов)
+  - parcel.py (4 вызова)
+  - cancellation.py (3 вызова)
+  - confirmation.py (6 вызовов)
+  - entry_points.py (7 вызовов)
+  - payment.py (4 вызова)
+  - skip_handlers.py (1 вызов)
+  - template_save.py (6 вызовов)
+  - И другие...
 
 ## СТАТУС
-✅ Исправление внедрено
-✅ Backend перезапущен (11:35 UTC)
+✅ Исправление внедрено ВЕЗДЕ (45+ вызовов!)
+✅ Backend перезапущен (11:37 UTC)
 ✅ Race condition устранена на уровне сигнатуры функции
+✅ Автоматическая массовая замена успешно выполнена
 ⏳ ТРЕБУЕТСЯ: Финальное тестирование пользователем
 
 ================================================================================
