@@ -717,9 +717,31 @@ def with_user_session(create_user=True, require_session=False):
             
             context.user_data['session'] = session
             
+            # CRITICAL: Restore ConversationHandler state from MongoDB (replaces PicklePersistence)
+            session_data = session.get('session_data', {})
+            if 'conversation_state' in session_data:
+                # Restore all conversation data from MongoDB
+                for key, value in session_data.items():
+                    if key != 'conversation_state':  # Don't overwrite state, ConversationHandler manages it
+                        context.user_data[key] = value
+                logger.info(f"✅ Restored {len(session_data)} items from MongoDB session")
+            
             logger.info(f"▶️ SESSION CHECK [{handler_name}] user={user_id}: All checks passed, calling handler")
             result = await func(update, context, *args, **kwargs)
             logger.info(f"✅ SESSION CHECK [{handler_name}] user={user_id}: Handler completed, returning state={result}")
+            
+            # CRITICAL: Save ConversationHandler state to MongoDB after handler execution
+            if result is not None and result != ConversationHandler.END:
+                # Save current conversation state and all user_data to MongoDB
+                session_data_to_save = {k: v for k, v in context.user_data.items() 
+                                       if k not in ['db_user', 'session'] and not k.startswith('_')}
+                session_data_to_save['conversation_state'] = result
+                
+                await session_repo.update_one(
+                    {"user_id": user_id, "is_active": True},
+                    {"$set": {"session_data": session_data_to_save}}
+                )
+                logger.info(f"✅ Saved conversation state={result} to MongoDB")
             
             return result
         
