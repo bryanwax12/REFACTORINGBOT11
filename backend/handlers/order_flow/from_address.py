@@ -158,7 +158,7 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
-        bot_msg = await safe_telegram_call(update.message.reply_text(
+        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
             message_text,
             reply_markup=ForceReply(
                 input_field_placeholder="Например: 215 Clayton St.",
