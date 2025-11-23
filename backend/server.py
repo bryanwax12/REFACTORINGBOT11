@@ -1524,7 +1524,7 @@ async def startup_event():
                     CommandHandler('start', start_command)
                 ],
                 name='refund_conversation',
-                persistent=True,  # Enable persistence
+                persistent=False,  # DISABLED: Using MongoDB only
                 per_chat=True,
                 per_user=True,
                 allow_reentry=True
