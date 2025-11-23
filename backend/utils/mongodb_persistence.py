@@ -60,9 +60,13 @@ class MongoDBPersistence(BasePersistence):
     async def update_conversation(
         self, name: str, key: tuple, new_state: Optional[object]
     ) -> None:
-        """Save conversation state to MongoDB"""
+        """Save conversation state to MongoDB (with deduplication)"""
         try:
             chat_id, user_id = key
+            
+            # Deduplication: Skip if state hasn't changed
+            if key in self._last_saved and self._last_saved[key] == new_state:
+                return  # No need to save - state unchanged
             
             if new_state is None:
                 # Conversation ended - clear state
@@ -70,6 +74,7 @@ class MongoDBPersistence(BasePersistence):
                     {"user_id": user_id, "is_active": True},
                     {"$unset": {"session_data.conversation_state": ""}}
                 )
+                self._last_saved.pop(key, None)  # Clear cached state
                 logger.info(f"🗑️ Cleared conversation for user {user_id}")
             else:
                 # Save new state
@@ -77,6 +82,7 @@ class MongoDBPersistence(BasePersistence):
                     {"user_id": user_id, "is_active": True},
                     {"$set": {"session_data.conversation_state": new_state}}
                 )
+                self._last_saved[key] = new_state  # Cache current state
                 logger.info(f"💾 Saved conversation state={new_state} for user {user_id}")
                 
         except Exception as e:
