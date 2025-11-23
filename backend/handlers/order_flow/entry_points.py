@@ -40,7 +40,7 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.callback_query:
         query = update.callback_query
         try:
-            await query.answer()
+            asyncio.create_task(query.answer())  # 🚀 Non-blocking
         except Exception:
             pass
         asyncio.create_task(mark_message_as_selected(update, context))

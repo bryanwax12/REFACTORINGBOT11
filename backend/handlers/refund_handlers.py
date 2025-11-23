@@ -2,6 +2,7 @@
 Refund Request Handlers for Telegram Bot
 Handles user refund requests for labels
 """
+import asyncio
 import logging
 import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -23,7 +24,7 @@ async def refund_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     Show refund menu with information about manual processing
     """
     query = update.callback_query
-    await query.answer()
+    asyncio.create_task(query.answer())  # 🚀 Non-blocking
     
     message = (
         "💰 *Возврат средств за лейблы*\n"
@@ -172,7 +173,7 @@ async def my_refunds(update: Update, context: ContextTypes.DEFAULT_TYPE):
     Show user's refund requests
     """
     query = update.callback_query
-    await query.answer()
+    asyncio.create_task(query.answer())  # 🚀 Non-blocking
     
     user_id = update.effective_user.id
     
@@ -288,7 +289,7 @@ async def cancel_refund(update: Update, context: ContextTypes.DEFAULT_TYPE):
     from telegram import InlineKeyboardButton, InlineKeyboardMarkup
     
     query = update.callback_query
-    await query.answer()
+    asyncio.create_task(query.answer())  # 🚀 Non-blocking
     
     # Add button to return to main menu
     keyboard = [[InlineKeyboardButton("🏠 Главное меню", callback_data="start")]]

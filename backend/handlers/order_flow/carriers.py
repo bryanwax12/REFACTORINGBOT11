@@ -2,6 +2,7 @@
 Order Flow: Carrier Selection Handlers
 Handles carrier selection and rate refresh
 """
+import asyncio
 import logging
 from telegram import Update
 from telegram.ext import ContextTypes
@@ -25,7 +26,7 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
     - check_data: Go back to data confirmation
     """
     query = update.callback_query
-    await query.answer()
+    asyncio.create_task(query.answer())  # 🚀 Non-blocking
     
     data = query.data
     logger.info(f"🚚 Carrier action: {data}")
@@ -67,7 +68,7 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
             logger.warning(f"Could not delete old message: {e}")
         
         # Answer the callback query
-        await query.answer()
+        asyncio.create_task(query.answer())  # 🚀 Non-blocking
         
         return await fetch_shipping_rates(update, context)
     

@@ -191,7 +191,7 @@ async def skip_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup = InlineKeyboardMarkup(keyboard)
         
         query = update.callback_query
-        await query.answer()
+        asyncio.create_task(query.answer())  # 🚀 Non-blocking
         
         # 🚀 PERFORMANCE: Send message in background
         asyncio.create_task(query.message.reply_text(
@@ -211,7 +211,7 @@ async def skip_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Return to confirmation screen
         from handlers.order_flow.confirmation import show_data_confirmation
         query = update.callback_query
-        await query.answer()
+        asyncio.create_task(query.answer())  # 🚀 Non-blocking
         return await show_data_confirmation(update, context)
     
     # Normal flow
@@ -287,7 +287,7 @@ async def skip_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup = InlineKeyboardMarkup(keyboard)
         
         query = update.callback_query
-        await query.answer()
+        asyncio.create_task(query.answer())  # 🚀 Non-blocking
         
         # 🚀 PERFORMANCE: Send message in background
         asyncio.create_task(query.message.reply_text(
@@ -307,7 +307,7 @@ async def skip_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Return to confirmation screen
         from handlers.order_flow.confirmation import show_data_confirmation
         query = update.callback_query
-        await query.answer()
+        asyncio.create_task(query.answer())  # 🚀 Non-blocking
         return await show_data_confirmation(update, context)
     
     # Normal flow
