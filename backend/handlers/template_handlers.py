@@ -158,11 +158,10 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     weight_prompt = f"{message}\n\n{OrderStepMessages.PARCEL_WEIGHT}"
     reply_markup = get_cancel_keyboard()
     
-    # Save last_state BEFORE sending (so cancel can return here)
-    from server import PARCEL_WEIGHT, STATE_NAMES
-    context.user_data['last_state'] = STATE_NAMES[PARCEL_WEIGHT]
+    # Save UI state ONLY (NOT conversation state - ConversationHandler manages that)
+    from server import PARCEL_WEIGHT
     context.user_data['last_bot_message_text'] = weight_prompt
-    logger.info(f"✅ use_template: transitioning to {STATE_NAMES[PARCEL_WEIGHT]}")
+    logger.info(f"✅ use_template: transitioning to PARCEL_WEIGHT")
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_weight_prompt():
