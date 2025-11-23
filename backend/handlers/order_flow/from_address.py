@@ -136,9 +136,11 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
         "success"
     ))
     
-    # ✅ CRITICAL FIX: Mark previous message FIRST, before updating state
-    # Save old values that mark_message_as_selected needs
-    asyncio.create_task(mark_message_as_selected(update, context))
+    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+    
+    # ✅ CRITICAL: Mark previous message with EXPLICIT old text (avoids race condition)
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     # Use different messages for template editing (7 steps) vs order creation (18 steps)
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages, TemplateEditMessages
@@ -150,7 +152,7 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     # Show next step with ForceReply for instant response
     from telegram import ForceReply
     
-    # Save state IMMEDIATELY (before background task)
+    # Save state IMMEDIATELY (can safely update now since mark_message has explicit text)
     context.user_data['last_bot_message_text'] = message_text
     context.user_data['last_state'] = STATE_NAMES[FROM_ADDRESS]
     
