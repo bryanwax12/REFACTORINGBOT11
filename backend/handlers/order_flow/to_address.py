@@ -91,8 +91,6 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     else:
         message_text = OrderStepMessages.TO_ADDRESS
     
-    reply_markup = get_cancel_keyboard()
-    
     # Save state IMMEDIATELY (before background task)
     context.user_data['last_bot_message_text'] = message_text
     context.user_data['last_state'] = STATE_NAMES[TO_ADDRESS]
@@ -101,7 +99,10 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     async def send_next_step():
         bot_msg = await safe_telegram_call(update.message.reply_text(
             message_text,
-            reply_markup=reply_markup
+            reply_markup=ForceReply(
+                input_field_placeholder="123 Main St.",
+                selective=True
+            )
         ))
         if bot_msg:
             context.user_data['last_bot_message_id'] = bot_msg.message_id
