@@ -89,12 +89,8 @@ async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE, sessi
     
     asyncio.create_task(send_cancel_prompt())
     
-    # Return the state we were in before cancel
-    last_state = context.user_data.get('last_state')
-    if isinstance(last_state, str):
-        from server import STATE_CONSTANTS, FROM_NAME
-        return STATE_CONSTANTS.get(last_state, FROM_NAME)
-    return last_state if last_state else PAYMENT_METHOD
+    # Return current state (MongoDBPersistence will handle it)
+    return current_state if current_state else PAYMENT_METHOD
 
 
 @safe_handler(fallback_state=ConversationHandler.END)
