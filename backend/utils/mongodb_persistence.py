@@ -28,6 +28,7 @@ class MongoDBPersistence(BasePersistence):
         )
         self.db = db
         self._conversations: Dict[str, Dict[tuple, object]] = {}
+        self._last_saved: Dict[tuple, object] = {}  # Track last saved state for deduplication
         logger.info("✅ MongoDBPersistence initialized (conversations only)")
     
     async def get_conversations(self, name: str) -> ConversationDict:
