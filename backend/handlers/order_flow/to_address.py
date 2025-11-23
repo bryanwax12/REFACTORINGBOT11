@@ -83,7 +83,11 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
         # await session_service.update_session_step(user_id, step="TO_ADDRESS")
     
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages, TemplateEditMessages
-    asyncio.create_task(mark_message_as_selected(update, context))
+    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     # Use different messages for template editing vs order creation
     if context.user_data.get('editing_template_to') or context.user_data.get('editing_to_address'):
@@ -136,7 +140,13 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE, s
         # REMOVED: ConversationHandler manages state via Persistence
         # await session_service.update_session_step(user_id, step="TO_ADDRESS2")
     
-    asyncio.create_task(mark_message_as_selected(update, context))
+    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+    
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+    
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     from utils.ui_utils import get_skip_and_cancel_keyboard, OrderStepMessages, CallbackData, TemplateEditMessages
     
     # Use different messages for template editing vs order creation
@@ -193,7 +203,13 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE, 
         # REMOVED: ConversationHandler manages state via Persistence
         # await session_service.update_session_step(user_id, step="TO_CITY")
     
-    asyncio.create_task(mark_message_as_selected(update, context))
+    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+    
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+    
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages, TemplateEditMessages
     
     # Use different messages for template editing vs order creation
@@ -246,7 +262,11 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
         # await session_service.update_session_step(user_id, step="TO_STATE")
     
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages, TemplateEditMessages
-    asyncio.create_task(mark_message_as_selected(update, context))
+    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     # Use different messages for template editing vs order creation
     if context.user_data.get('editing_template_to') or context.user_data.get('editing_to_address'):
@@ -299,7 +319,11 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
         # await session_service.update_session_step(user_id, step="TO_ZIP")
     
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages, TemplateEditMessages
-    asyncio.create_task(mark_message_as_selected(update, context))
+    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     # Use different messages for template editing vs order creation
     if context.user_data.get('editing_template_to') or context.user_data.get('editing_to_address'):
@@ -349,7 +373,13 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, sessi
         # REMOVED: ConversationHandler manages state via Persistence
         # await session_service.update_session_step(user_id, step="TO_PHONE")
     
-    asyncio.create_task(mark_message_as_selected(update, context))
+    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+    
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+    
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     from utils.ui_utils import get_skip_and_cancel_keyboard, OrderStepMessages, CallbackData, TemplateEditMessages
     
@@ -419,7 +449,11 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
             logger.info(f"🔄 RESTORED FLAGS from DB: editing_template_to={editing_template_to}, editing_template_id={editing_template_id}")
     
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages
-    asyncio.create_task(mark_message_as_selected(update, context))
+    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     # Check if we're editing only TO address in order
     if context.user_data.get('editing_to_address'):
