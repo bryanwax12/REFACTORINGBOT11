@@ -41,13 +41,10 @@ def get_preloaded_yes_no_keyboard():
 
 
 def get_preloaded_back_to_menu_keyboard():
-    """Get pre-loaded back to menu keyboard (cached)"""
-    global _BACK_TO_MENU_KEYBOARD
-    if _BACK_TO_MENU_KEYBOARD is None:
-        _BACK_TO_MENU_KEYBOARD = InlineKeyboardMarkup([[
-            InlineKeyboardButton("🔙 Главное меню", callback_data="main_menu")
-        ]])
-    return _BACK_TO_MENU_KEYBOARD
+    """Generate fresh back-to-menu keyboard (no cache)"""
+    return InlineKeyboardMarkup([[
+        InlineKeyboardButton(_make_unique_text("🔙 Главное меню"), callback_data="main_menu")
+    ]])
 
 
 # ============================================================
