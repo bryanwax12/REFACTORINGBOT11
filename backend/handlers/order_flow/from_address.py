@@ -213,25 +213,17 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE,
     else:
         message_text = OrderStepMessages.FROM_ADDRESS2
     
-    # Show next step with SKIP option
-    reply_markup = get_skip_and_cancel_keyboard(CallbackData.SKIP_FROM_ADDRESS2)
+    # ✅ МАГИЧЕСКИЙ ГИБРИД 2025 (опциональное поле)
+    from utils.ui_utils import ask_with_skip_cancel_and_focus
     
-    # Save state IMMEDIATELY (before background task)
-    context.user_data['last_bot_message_text'] = message_text
-    
-    # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
-    async def send_next_step():
-        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
-            message_text,
-            reply_markup=reply_markup
-        ))
-        if bot_msg:
-            context.user_data['last_bot_message_id'] = bot_msg.message_id
-    
-    asyncio.create_task(send_next_step())
-    
-    # Save current state for cancel button (UI-only, does NOT interfere with ConversationHandler)
-    from server import STATE_NAMES
+    await ask_with_skip_cancel_and_focus(
+        update,
+        context,
+        message_text,
+        placeholder="Например: Apt 4B",
+        skip_callback=CallbackData.SKIP_FROM_ADDRESS2,
+        safe_telegram_call_func=safe_telegram_call
+    )
     
     return FROM_ADDRESS2
 
