@@ -67,8 +67,11 @@ class MongoDBPersistence(BasePersistence):
         try:
             chat_id, user_id = key
             
+            logger.info(f"🔍 update_conversation called: handler={name}, user={user_id}, new_state={new_state}")
+            
             # Deduplication: Skip if state hasn't changed
             if key in self._last_saved and self._last_saved[key] == new_state:
+                logger.info(f"⏭️ SKIP: State unchanged for user {user_id} (state={new_state})")
                 return  # No need to save - state unchanged
             
             if new_state is None:
@@ -78,18 +81,23 @@ class MongoDBPersistence(BasePersistence):
                     {"$unset": {"session_data.conversation_state": ""}}
                 )
                 self._last_saved.pop(key, None)  # Clear cached state
-                logger.info(f"🗑️ Cleared conversation for user {user_id}")
+                logger.info(f"🗑️ CLEARED conversation for user {user_id} (handler={name})")
             else:
                 # Save new state
-                await self.db.user_sessions.update_one(
+                result = await self.db.user_sessions.update_one(
                     {"user_id": user_id, "is_active": True},
-                    {"$set": {"session_data.conversation_state": new_state}}
+                    {"$set": {"session_data.conversation_state": new_state}},
+                    upsert=False
                 )
-                self._last_saved[key] = new_state  # Cache current state
-                logger.info(f"💾 Saved conversation state={new_state} for user {user_id}")
+                
+                if result.matched_count == 0:
+                    logger.warning(f"⚠️ No active session found for user {user_id} - state NOT saved!")
+                else:
+                    self._last_saved[key] = new_state  # Cache current state
+                    logger.info(f"✅ SAVED conversation: handler={name}, user={user_id}, state={new_state}")
                 
         except Exception as e:
-            logger.error(f"❌ Failed to save conversation: {e}")
+            logger.error(f"❌ Failed to save conversation: {e}", exc_info=True)
     
     # Required abstract methods (we don't use these):
     async def get_user_data(self) -> Dict: return {}
