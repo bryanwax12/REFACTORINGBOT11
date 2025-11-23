@@ -154,7 +154,6 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     
     # Save state IMMEDIATELY (can safely update now since mark_message has explicit text)
     context.user_data['last_bot_message_text'] = message_text
-    context.user_data['last_state'] = STATE_NAMES[FROM_ADDRESS]
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
@@ -229,7 +228,6 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE,
     
     # Save state IMMEDIATELY (before background task)
     context.user_data['last_bot_message_text'] = message_text
-    context.user_data['last_state'] = STATE_NAMES[FROM_ADDRESS2]
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
@@ -291,7 +289,6 @@ async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE
     
     # Save state IMMEDIATELY (before background task)
     context.user_data['last_bot_message_text'] = message_text
-    context.user_data['last_state'] = STATE_NAMES[FROM_CITY]
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
@@ -352,7 +349,6 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     
     # Save state IMMEDIATELY (before background task)
     context.user_data['last_bot_message_text'] = message_text
-    context.user_data['last_state'] = STATE_NAMES[FROM_STATE]
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
@@ -410,7 +406,6 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     
     # Save state IMMEDIATELY (before background task)
     context.user_data['last_bot_message_text'] = message_text
-    context.user_data['last_state'] = STATE_NAMES[FROM_ZIP]
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
@@ -472,7 +467,6 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     
     # Save state IMMEDIATELY (before background task)
     context.user_data['last_bot_message_text'] = message_text
-    context.user_data['last_state'] = STATE_NAMES[FROM_PHONE]
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
@@ -605,7 +599,6 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     
     # Save state IMMEDIATELY (before background task)
     context.user_data['last_bot_message_text'] = message_text
-    context.user_data['last_state'] = STATE_NAMES[TO_NAME]
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():

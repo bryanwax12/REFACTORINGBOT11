@@ -118,7 +118,6 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
     # Save state IMMEDIATELY (before background task)
     context.user_data['last_bot_message_text'] = message_text
-    context.user_data['last_state'] = STATE_NAMES[FROM_NAME]
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
@@ -173,7 +172,6 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
     asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     # Save last_state and message text
-    context.user_data['last_state'] = STATE_NAMES[PARCEL_WEIGHT]
     context.user_data['last_bot_message_text'] = message_text
     logger.info(f"✅ start_order_with_template: transitioning to {STATE_NAMES[PARCEL_WEIGHT]}")
     
@@ -377,7 +375,6 @@ async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Save state IMMEDIATELY (before background task)
     context.user_data['last_bot_message_text'] = message_text
-    context.user_data['last_state'] = STATE_NAMES[FROM_NAME]
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():

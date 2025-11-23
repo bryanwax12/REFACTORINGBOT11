@@ -169,7 +169,6 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if saved_state:
             logger.info(f"Restoring saved state: {saved_state}")
             last_state = saved_state
-            context.user_data['last_state'] = saved_state
             # Clear saved state
             context.user_data.pop('saved_state_before_cancel', None)
             # Continue to use this state below - don't return here!

@@ -262,7 +262,6 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
                 context.user_data['last_bot_message_id'] = bot_msg.message_id
         
         asyncio.create_task(send_edit_prompt())
-        context.user_data['last_state'] = STATE_NAMES[FROM_NAME]
         logger.info("✅ Returning FROM_NAME state for editing")
         return FROM_NAME
     
@@ -291,7 +290,6 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
                 context.user_data['last_bot_message_id'] = bot_msg.message_id
         
         asyncio.create_task(send_edit_prompt())
-        context.user_data['last_state'] = STATE_NAMES[TO_NAME]
         logger.info("✅ Returning TO_NAME state for editing")
         return TO_NAME
     
@@ -320,7 +318,6 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
                 context.user_data['last_bot_message_id'] = bot_msg.message_id
         
         asyncio.create_task(send_edit_prompt())
-        context.user_data['last_state'] = STATE_NAMES[PARCEL_WEIGHT]
         logger.info("✅ Returning PARCEL_WEIGHT state for editing")
         return PARCEL_WEIGHT
     

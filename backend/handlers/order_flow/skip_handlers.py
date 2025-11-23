@@ -74,7 +74,6 @@ async def handle_skip_field(
     # Save state IMMEDIATELY (before background task)
     from server import STATE_NAMES
     context.user_data['last_bot_message_text'] = next_message
-    context.user_data['last_state'] = STATE_NAMES[next_step_const]
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():

@@ -97,7 +97,6 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     
     # Save state IMMEDIATELY (before background task)
     context.user_data['last_bot_message_text'] = message_text
-    context.user_data['last_state'] = STATE_NAMES[TO_ADDRESS]
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
@@ -159,7 +158,6 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     
     # Save state IMMEDIATELY (before background task)
     context.user_data['last_bot_message_text'] = message_text
-    context.user_data['last_state'] = STATE_NAMES[TO_ADDRESS2]
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
@@ -220,7 +218,6 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE, 
     
     # Save state IMMEDIATELY (before background task)
     context.user_data['last_bot_message_text'] = message_text
-    context.user_data['last_state'] = STATE_NAMES[TO_CITY]
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
@@ -276,7 +273,6 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     
     # Save state IMMEDIATELY (before background task)
     context.user_data['last_bot_message_text'] = message_text
-    context.user_data['last_state'] = STATE_NAMES[TO_STATE]
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
@@ -333,7 +329,6 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     
     # Save state IMMEDIATELY (before background task)
     context.user_data['last_bot_message_text'] = message_text
-    context.user_data['last_state'] = STATE_NAMES[TO_ZIP]
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
@@ -393,7 +388,6 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, sessi
     
     # Save state IMMEDIATELY (before background task)
     context.user_data['last_bot_message_text'] = message_text
-    context.user_data['last_state'] = STATE_NAMES[TO_PHONE]
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
@@ -525,7 +519,6 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     message_text = OrderStepMessages.PARCEL_WEIGHT
     
     # Save last_state BEFORE sending (so it's saved even if send fails)
-    context.user_data['last_state'] = STATE_NAMES[PARCEL_WEIGHT]
     context.user_data['last_bot_message_text'] = message_text
     logger.error(f"🔍 order_to_phone: SET last_state to {STATE_NAMES[PARCEL_WEIGHT]}")
     

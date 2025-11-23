@@ -570,7 +570,6 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
             logger.info("✅ Pending order saved!")
             
             from server import TOPUP_AMOUNT, STATE_NAMES
-            context.user_data['last_state'] = STATE_NAMES[TOPUP_AMOUNT]  # Save state for cancel return
             
             from utils.ui_utils import get_cancel_keyboard
             reply_markup = get_cancel_keyboard()

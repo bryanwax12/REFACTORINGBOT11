@@ -70,7 +70,6 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
     
     # Save state IMMEDIATELY (before background task)
     context.user_data['last_bot_message_text'] = message_text
-    context.user_data['last_state'] = STATE_NAMES[PARCEL_LENGTH]
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
@@ -135,7 +134,6 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
     
     # Save state IMMEDIATELY (before background task)
     context.user_data['last_bot_message_text'] = message_text
-    context.user_data['last_state'] = STATE_NAMES[PARCEL_WIDTH]
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
@@ -198,7 +196,6 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE,
     
     # Save state IMMEDIATELY (before background task)
     context.user_data['last_bot_message_text'] = message_text
-    context.user_data['last_state'] = STATE_NAMES[PARCEL_HEIGHT]
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
