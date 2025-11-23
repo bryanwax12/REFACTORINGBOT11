@@ -26,13 +26,10 @@ def _make_unique_text(text: str) -> str:
 
 
 def get_preloaded_cancel_keyboard():
-    """Get pre-loaded cancel keyboard (cached)"""
-    global _CANCEL_KEYBOARD
-    if _CANCEL_KEYBOARD is None:
-        _CANCEL_KEYBOARD = InlineKeyboardMarkup([[
-            InlineKeyboardButton("❌ Отмена", callback_data="cancel_order")
-        ]])
-    return _CANCEL_KEYBOARD
+    """Generate fresh cancel keyboard (no cache)"""
+    return InlineKeyboardMarkup([[
+        InlineKeyboardButton(_make_unique_text("❌ Отмена"), callback_data="cancel_order")
+    ]])
 
 
 def get_preloaded_yes_no_keyboard():
