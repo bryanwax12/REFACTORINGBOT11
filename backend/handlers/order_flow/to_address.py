@@ -78,12 +78,21 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     # Validate
     is_valid, error_msg = validate_name(name)
     if not is_valid:
-        logger.warning(f"❌ VALIDATION ERROR [TO_NAME]: User {update.effective_user.id} entered '{name}' - sending error: {error_msg}")
-        error_sent = await safe_telegram_call(update.message.reply_text(error_msg))
-        if error_sent:
-            logger.info(f"✅ ERROR MESSAGE SENT successfully for TO_NAME validation")
-        else:
-            logger.error(f"❌ FAILED to send error message for TO_NAME validation")
+        logger.warning(f"❌ VALIDATION ERROR [TO_NAME]: User {update.effective_user.id} entered '{name}' - Error: {error_msg}")
+        
+        # Try to send error message
+        try:
+            error_sent = await safe_telegram_call(update.message.reply_text(error_msg), timeout=5)
+            if error_sent:
+                logger.info(f"✅ ERROR MESSAGE SENT successfully to user {update.effective_user.id}")
+            else:
+                logger.error(f"❌ ERROR MESSAGE FAILED (returned None)")
+                # Retry once more
+                error_sent = await update.message.reply_text(error_msg)
+                logger.info(f"✅ ERROR MESSAGE SENT on retry")
+        except Exception as e:
+            logger.error(f"❌ EXCEPTION while sending error message: {e}", exc_info=True)
+        
         return TO_NAME
     
     # Store
