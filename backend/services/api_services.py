@@ -39,7 +39,7 @@ async def create_oxapay_invoice(amount: float, order_id: str, description: str =
         }
         
         # Prepare payload according to official documentation (using camelCase for Oxapay)
-        webhook_url = f"{os.environ.get('WEBHOOK_BASE_URL', 'https://botrescue.preview.emergentagent.com')}/api/oxapay/webhook"
+        webhook_url = f"{os.environ.get('WEBHOOK_BASE_URL', 'https://tgbot-debugger.preview.emergentagent.com')}/api/oxapay/webhook"
         payload = {
             "amount": amount,
             "currency": "USD",

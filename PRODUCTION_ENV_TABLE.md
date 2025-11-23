@@ -52,7 +52,7 @@ openssl rand -hex 32
 
 | Параметр | Текущее (Test) | Production | Описание | Действие |
 |----------|----------------|------------|----------|----------|
-| `WEBHOOK_BASE_URL` | `https://botrescue.preview.emergentagent.com` | `https://ваш-домен.com` | Базовый URL для webhook | 🔴 **ОБЯЗАТЕЛЬНО заменить на ваш домен!** |
+| `WEBHOOK_BASE_URL` | `https://tgbot-debugger.preview.emergentagent.com` | `https://ваш-домен.com` | Базовый URL для webhook | 🔴 **ОБЯЗАТЕЛЬНО заменить на ваш домен!** |
 | `WEBHOOK_PATH` | `/api/telegram/webhook` | `/api/telegram/webhook` | Путь для webhook | ✅ Оставить как есть |
 
 **Важно:** 
