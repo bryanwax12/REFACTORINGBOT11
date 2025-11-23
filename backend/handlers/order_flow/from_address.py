@@ -359,7 +359,14 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     # Validate
     is_valid, error_msg = validate_city(city)
     if not is_valid:
-        await safe_telegram_call(update.message.reply_text(error_msg))
+        logger.warning(f"❌ VALIDATION ERROR [FROM_CITY]: User {update.effective_user.id} - Error: {error_msg}")
+        try:
+            error_sent = await safe_telegram_call(update.message.reply_text(error_msg), timeout=5)
+            if not error_sent:
+                error_sent = await update.message.reply_text(error_msg)
+                logger.info(f"✅ ERROR MESSAGE SENT on retry")
+        except Exception as e:
+            logger.error(f"❌ EXCEPTION sending error: {e}", exc_info=True)
         return FROM_CITY
     
     # Store
