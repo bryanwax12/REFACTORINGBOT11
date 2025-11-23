@@ -494,27 +494,15 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     # REMOVED: ConversationHandler manages state via Persistence
         # await session_service.update_session_step(user_id, step="PARCEL_WEIGHT")
     
-    from utils.ui_utils import get_cancel_keyboard
-    message_text = OrderStepMessages.PARCEL_WEIGHT
-    reply_markup = get_cancel_keyboard()
+    # ✅ МАГИЧЕСКИЙ ГИБРИД 2025
+    from utils.ui_utils import ask_with_cancel_and_focus, OrderStepMessages
     
-    # Save last_state BEFORE sending (so it's saved even if send fails)
-    context.user_data['last_bot_message_text'] = message_text
-    
-    # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
-    async def send_next_step():
-        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
-            message_text,
-            reply_markup=reply_markup
-        ))
-    
-        if bot_msg:
-            context.user_data['last_bot_message_id'] = bot_msg.message_id
-    
-
-    asyncio.create_task(send_next_step())
-
-    # Save current state for cancel button (UI-only, does NOT interfere with ConversationHandler)
-    from server import STATE_NAMES
+    await ask_with_cancel_and_focus(
+        update,
+        context,
+        OrderStepMessages.PARCEL_WEIGHT,
+        placeholder="Например: 2.5",
+        safe_telegram_call_func=safe_telegram_call
+    )
     
     return PARCEL_WEIGHT
