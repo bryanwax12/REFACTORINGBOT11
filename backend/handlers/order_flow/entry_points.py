@@ -386,7 +386,10 @@ async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     async def send_next_step():
         bot_msg = await safe_telegram_call(query.message.reply_text(
             message_text,
-            reply_markup=reply_markup
+            reply_markup=ForceReply(
+                input_field_placeholder=" ",
+                selective=True
+            )
         ))
         if bot_msg:
             context.user_data['last_bot_message_id'] = bot_msg.message_id
