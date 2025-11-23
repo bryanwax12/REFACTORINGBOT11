@@ -155,11 +155,11 @@ def get_skip_and_cancel_keyboard(skip_callback: str) -> InlineKeyboardMarkup:
         skip_callback: Callback data for skip button
     
     Returns:
-        InlineKeyboardMarkup with skip and cancel
+        InlineKeyboardMarkup with skip and cancel (fresh, no cache)
     """
     keyboard = [
-        [InlineKeyboardButton(ButtonTexts.SKIP, callback_data=skip_callback)],
-        [InlineKeyboardButton(ButtonTexts.CANCEL, callback_data=CallbackData.CANCEL_ORDER)]
+        [InlineKeyboardButton(_make_unique_text(ButtonTexts.SKIP), callback_data=skip_callback)],
+        [InlineKeyboardButton(_make_unique_text(ButtonTexts.CANCEL), callback_data=CallbackData.CANCEL_ORDER)]
     ]
     return InlineKeyboardMarkup(keyboard)
 
