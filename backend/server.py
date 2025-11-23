@@ -1287,10 +1287,10 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Send message with or without keyboard
     if keyboard:
-        bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=keyboard))
+        bot_msg = await safe_telegram_call(update.effective_message.reply_text(message_text, reply_markup=keyboard))
     else:
         reply_markup = get_cancel_keyboard()
-        bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=reply_markup))
+        bot_msg = await safe_telegram_call(update.effective_message.reply_text(message_text, reply_markup=reply_markup))
     
     # Save context
     if bot_msg:
