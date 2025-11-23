@@ -54,7 +54,6 @@ async def display_shipping_rates(
     reply_markup = ShippingRatesUI.build_rates_keyboard(rates)
     
     # Save state
-    context.user_data['last_state'] = STATE_NAMES[SELECT_CARRIER]
     
     # Send message (use effective_message to support both callbacks and regular messages)
     message_obj = update.effective_message
