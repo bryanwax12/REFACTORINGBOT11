@@ -290,13 +290,6 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     
     state = update.message.text.strip().upper()
     
-    # Validate
-    is_valid, error_msg = validate_state(state)
-    if not is_valid:
-        logger.warning(f"❌ VALIDATION ERROR [TO_STATE]: User {update.effective_user.id} entered '{state}' - Error: {error_msg}")
-        await safe_telegram_call(update.message.reply_text(error_msg))
-        return TO_STATE
-    
     # Store
     user_id = update.effective_user.id
     context.user_data['to_state'] = state
