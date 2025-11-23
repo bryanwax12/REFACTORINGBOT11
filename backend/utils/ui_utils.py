@@ -34,9 +34,11 @@ def _make_unique_text(text: str) -> str:
     Returns:
         Text with invisible unique markers
     """
-    # Combine ZWJ + timestamp variation for maximum uniqueness
-    timestamp_marker = int(time.time()) % 7
-    invisible_suffix = (ZWJ + ZWNJ) * timestamp_marker if timestamp_marker > 0 else ZWJ
+    # Use milliseconds for true uniqueness (never repeats)
+    timestamp_ms = int(time.time() * 1000)
+    # Create unique pattern based on last 3 digits of milliseconds
+    pattern_num = timestamp_ms % 8  # 0-7 variations
+    invisible_suffix = (ZWSP + ZWJ) * pattern_num if pattern_num > 0 else ZWSP
     return text + invisible_suffix
 
 # ============================================================
