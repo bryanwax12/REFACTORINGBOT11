@@ -37,25 +37,22 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     telegram_id = user['telegram_id']
     
     # Handle both command and callback
+    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context (ОДИН РАЗ!)
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+    
+    # ✅ Mark previous message as selected (ОДИН РАЗ!)
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    
+    # ✅ Always use update.effective_message (ОДИН РАЗ!)
+    send_method = update.effective_message.reply_text
+    
+    # Handle callback query answer
     if update.callback_query:
         query = update.callback_query
         try:
             asyncio.create_task(query.answer())  # 🚀 Non-blocking
         except Exception:
             pass
-        # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
-
-        old_prompt_text = context.user_data.get('last_bot_message_text', '')
-
-        asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
-        send_method = update.effective_message.reply_text
-    else:
-        # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
-
-        old_prompt_text = context.user_data.get('last_bot_message_text', '')
-
-        asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
-        send_method = update.effective_message.reply_text
     
     logger.info(f"📝 User {telegram_id} starting new order flow (callback: {update.callback_query.data if update.callback_query else 'command'})")
     
