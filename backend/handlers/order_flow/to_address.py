@@ -488,7 +488,6 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     # REMOVED: ConversationHandler manages state via Persistence
         # await session_service.update_session_step(user_id, step="PARCEL_WEIGHT")
     
-    reply_markup = get_cancel_keyboard()
     message_text = OrderStepMessages.PARCEL_WEIGHT
     
     # Save last_state BEFORE sending (so it's saved even if send fails)
@@ -500,7 +499,10 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     async def send_next_step():
         bot_msg = await safe_telegram_call(update.message.reply_text(
             message_text,
-            reply_markup=reply_markup
+            reply_markup=ForceReply(
+                input_field_placeholder="10.5",
+                selective=True
+            )
         ))
     
         if bot_msg:
