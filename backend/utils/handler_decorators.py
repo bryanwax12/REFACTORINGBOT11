@@ -621,19 +621,30 @@ def with_services(
 
 def with_user_session(create_user=True, require_session=False):
     """
-    Minimal decorator for user check and context preparation
+    Lazy-loading decorator for user check and context preparation
     
-    ⚠️ IMPORTANT: MongoDBPersistence handles CONVERSATION STATE automatically!
-    This decorator only:
-    1. Gets user from DB (or creates if needed)
-    2. Checks if user is blocked
-    3. Injects db_user into context for handlers to use
-    4. DOES NOT touch session or conversation state
+    ⚠️ GOLDEN STANDARD 2025: MongoDBPersistence + Lazy Loading
+    
+    Architecture:
+    1. MongoDBPersistence is the ONLY owner of:
+       - ConversationHandler state
+       - ALL context.user_data (saves/restores it completely)
+    
+    2. This decorator does LAZY loading:
+       - Checks if db_user already exists in context.user_data (restored by MongoDBPersistence)
+       - If YES → reuse it (no DB query!)
+       - If NO → load from DB and inject into context
+       - MongoDBPersistence will automatically persist it for next handler
+    
+    3. This does NOT conflict because:
+       - We don't overwrite already restored data
+       - We don't touch ConversationHandler routing keys
+       - We don't await during ConversationHandler state decision
     
     Usage:
         @with_user_session()
         async def order_handler(update, context):
-            user = context.user_data['db_user']  # Available for handlers
+            user = context.user_data['db_user']  # Available (lazy-loaded or restored)
             # MongoDBPersistence manages conversation state
     
     Args:
@@ -650,35 +661,40 @@ def with_user_session(create_user=True, require_session=False):
             first_name = update.effective_user.first_name
             handler_name = func.__name__
             
-            logger.debug(f"🔍 [{handler_name}] user={user_id}: Checking user")
-            
-            user_repo = get_user_repo()
-            
-            # Get or create user
-            if create_user:
-                user = await user_repo.get_or_create_user(
-                    telegram_id=user_id,
-                    username=username,
-                    first_name=first_name
-                )
+            # ✅ LAZY LOADING: Check if db_user already exists (restored by MongoDBPersistence)
+            if 'db_user' in context.user_data:
+                user = context.user_data['db_user']
+                logger.debug(f"♻️ [{handler_name}] user={user_id}: Reusing cached db_user (no DB query)")
             else:
-                user = await user_repo.find_by_telegram_id(user_id)
-                if not user:
-                    logger.warning(f"❌ [{handler_name}] user={user_id}: User not found")
-                    if update.message:
-                        await update.message.reply_text("❌ Пользователь не найден. Используйте /start")
-                    return ConversationHandler.END
+                # First time or after context clear - load from DB
+                logger.debug(f"🔍 [{handler_name}] user={user_id}: Loading db_user from DB")
+                
+                user_repo = get_user_repo()
+                
+                if create_user:
+                    user = await user_repo.get_or_create_user(
+                        telegram_id=user_id,
+                        username=username,
+                        first_name=first_name
+                    )
+                else:
+                    user = await user_repo.find_by_telegram_id(user_id)
+                    if not user:
+                        logger.warning(f"❌ [{handler_name}] user={user_id}: User not found")
+                        if update.message:
+                            await update.message.reply_text("❌ Пользователь не найден. Используйте /start")
+                        return ConversationHandler.END
+                
+                # Inject into context - MongoDBPersistence will persist it automatically
+                context.user_data['db_user'] = user
+                logger.debug(f"✅ [{handler_name}] user={user_id}: db_user cached for future handlers")
             
-            # Check if blocked
+            # Check if blocked (always check, security-critical)
             if user.get('blocked', False):
                 logger.warning(f"❌ [{handler_name}] user={user_id}: User is blocked")
                 if update.message:
                     await update.message.reply_text("❌ Вы заблокированы")
                 return ConversationHandler.END
-            
-            # Inject db_user into context (NOT conversation state!)
-            # This is just a reference to user document, handlers need this
-            context.user_data['db_user'] = user
             
             # ✅ CRITICAL: DO NOT touch session or conversation state!
             # ✅ MongoDBPersistence is the ONLY manager of conversation state
