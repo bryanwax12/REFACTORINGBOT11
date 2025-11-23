@@ -504,7 +504,6 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     
     # Save last_state BEFORE sending (so it's saved even if send fails)
     context.user_data['last_bot_message_text'] = message_text
-    logger.error(f"🔍 order_to_phone: SET last_state to {STATE_NAMES[PARCEL_WEIGHT]}")
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
