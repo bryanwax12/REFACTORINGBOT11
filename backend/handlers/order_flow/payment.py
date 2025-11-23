@@ -78,7 +78,7 @@ async def show_payment_methods(update: Update, context: ContextTypes.DEFAULT_TYP
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_message():
-        bot_msg = await safe_telegram_call(query.message.reply_text(
+        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
             message,
             reply_markup=reply_markup
         ))
@@ -217,7 +217,7 @@ async def show_order_summary(update: Update, context: ContextTypes.DEFAULT_TYPE)
     
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await safe_telegram_call(query.message.reply_text(
+    await safe_telegram_call(update.effective_message.reply_text(
         summary,
         reply_markup=reply_markup,
         parse_mode='HTML'
@@ -322,7 +322,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
             payment_service = service_factory.get_payment_service()
             
             if user.get('balance', 0) < amount:
-                await safe_telegram_call(query.message.reply_text(PaymentFlowUI.insufficient_balance_error()))
+                await safe_telegram_call(update.effective_message.reply_text(PaymentFlowUI.insufficient_balance_error()))
                 return ConversationHandler.END
             
             # NEW LOGIC: Get order_id from context (created when rate was selected)
@@ -342,7 +342,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     logger.info(f"✅ Restored order_id from DB: {order_id}")
                 else:
                     logger.error("❌ No pending orders found in database!")
-                    await safe_telegram_call(query.message.reply_text(
+                    await safe_telegram_call(update.effective_message.reply_text(
                         "❌ Ошибка: заказ не найден. Пожалуйста, начните заново."
                     ))
                     return ConversationHandler.END
@@ -352,7 +352,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 
                 if not order:
                     logger.error(f"❌ Order {order_id} not found in database!")
-                    await safe_telegram_call(query.message.reply_text(
+                    await safe_telegram_call(update.effective_message.reply_text(
                         "❌ Ошибка: заказ не найден в базе данных."
                     ))
                     return ConversationHandler.END
@@ -361,7 +361,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
             order_status = order.get('payment_status', 'pending')
             if order_status == 'paid':
                 logger.warning(f"⚠️ Order {order_id} already paid!")
-                await safe_telegram_call(query.message.reply_text(
+                await safe_telegram_call(update.effective_message.reply_text(
                     "✅ Этот заказ уже оплачен!"
                 ))
                 return ConversationHandler.END
@@ -369,7 +369,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
             logger.info(f"✅ Found pending order {order_id}, proceeding with payment")
             
             # Show progress indicator while creating label
-            progress_msg = await safe_telegram_call(query.message.reply_text(
+            progress_msg = await safe_telegram_call(update.effective_message.reply_text(
                 "⏳ Создаем shipping label... 0 сек",
                 parse_mode='Markdown'
             ))
@@ -422,7 +422,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 if not success:
                     logger.error(f"Failed to process payment: {error}")
                     # This shouldn't happen as we checked balance earlier
-                    await safe_telegram_call(query.message.reply_text(f"❌ Ошибка обработки платежа: {error}"))
+                    await safe_telegram_call(update.effective_message.reply_text(f"❌ Ошибка обработки платежа: {error}"))
                     return ConversationHandler.END
                 
                 # Update order status to "paid" (NEW LOGIC)
@@ -441,7 +441,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 
-                await safe_telegram_call(query.message.reply_text(
+                await safe_telegram_call(update.effective_message.reply_text(
                     PaymentFlowUI.payment_success_balance(amount, new_balance, order.get('order_id')),
                     reply_markup=reply_markup
                 ))
@@ -461,7 +461,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 
-                await safe_telegram_call(query.message.reply_text(
+                await safe_telegram_call(update.effective_message.reply_text(
             """❌ Не удалось создать shipping label.
             Оплата не списана. Ваш баланс не изменился.
             Пожалуйста, свяжитесь с администратором.""",
@@ -515,7 +515,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     display_id = format_order_id_for_display(session['order_id'])
                     order_id_display = f"\n📦 Номер заказа: #{display_id}\n"
                 
-                await safe_telegram_call(query.message.reply_text(
+                await safe_telegram_call(update.effective_message.reply_text(
                     f"""✅ Заказ создан!{order_id_display}
 
 💰 Сумма к оплате: ${amount}
@@ -528,7 +528,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 ))
             else:
                 error_msg = invoice_result.get('error', 'Unknown error')
-                await safe_telegram_call(query.message.reply_text(f"❌ Ошибка создания инвойса: {error_msg}"))
+                await safe_telegram_call(update.effective_message.reply_text(f"❌ Ошибка создания инвойса: {error_msg}"))
         elif query.data == 'topup_for_order':
             # Import db and insert function
             from server import db
@@ -585,7 +585,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
             # 🚀 PERFORMANCE: Send message in background
             async def send_topup_prompt():
-                bot_msg = await safe_telegram_call(query.message.reply_text(
+                bot_msg = await safe_telegram_call(update.effective_message.reply_text(
                     message_text,
                     reply_markup=reply_markup
                 ))
@@ -601,6 +601,6 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     except Exception as e:
         logger.error(f"Payment error: {e}")
-        await safe_telegram_call(query.message.reply_text(f"❌ Ошибка при оплате: {str(e)}"))
+        await safe_telegram_call(update.effective_message.reply_text(f"❌ Ошибка при оплате: {str(e)}"))
         return ConversationHandler.END
 

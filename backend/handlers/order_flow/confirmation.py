@@ -80,7 +80,7 @@ async def handle_save_as_template(update: Update, context: ContextTypes.DEFAULT_
     
     # 🚀 PERFORMANCE: Send message in background
     async def send_template_prompt():
-        bot_msg = await safe_telegram_call(query.message.reply_text(
+        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
             TemplateManagementUI.template_name_prompt(),
             reply_markup=reply_markup,
             parse_mode='Markdown'
@@ -153,7 +153,7 @@ async def show_edit_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Build keyboard using UI utils
     reply_markup = DataConfirmationUI.build_edit_menu_keyboard()
     
-    await safe_telegram_call(query.message.reply_text(message, reply_markup=reply_markup))
+    await safe_telegram_call(update.effective_message.reply_text(message, reply_markup=reply_markup))
     return EDIT_MENU
 
 
@@ -216,7 +216,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         
         # 🚀 PERFORMANCE: Send message in background
         async def send_template_prompt():
-            bot_msg = await safe_telegram_call(query.message.reply_text(
+            bot_msg = await safe_telegram_call(update.effective_message.reply_text(
                 TemplateManagementUI.template_name_prompt(),
                 reply_markup=reply_markup,
                 parse_mode='Markdown',
@@ -254,7 +254,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         
         # 🚀 PERFORMANCE: Send message in background
         async def send_edit_prompt():
-            bot_msg = await safe_telegram_call(query.message.reply_text(
+            bot_msg = await safe_telegram_call(update.effective_message.reply_text(
                 "📤 Редактирование адреса отправителя\n\nШаг 1/7: Имя отправителя\nНапример: John Smith",
                 reply_markup=reply_markup,
             ))
@@ -282,7 +282,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         
         # 🚀 PERFORMANCE: Send message in background
         async def send_edit_prompt():
-            bot_msg = await safe_telegram_call(query.message.reply_text(
+            bot_msg = await safe_telegram_call(update.effective_message.reply_text(
                 "📥 Редактирование адреса получателя\n\nШаг 1/7: Имя получателя\nНапример: Jane Doe",
                 reply_markup=reply_markup,
             ))
@@ -310,7 +310,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         
         # 🚀 PERFORMANCE: Send message in background
         async def send_edit_prompt():
-            bot_msg = await safe_telegram_call(query.message.reply_text(
+            bot_msg = await safe_telegram_call(update.effective_message.reply_text(
                 "📦 Редактирование посылки\n\nВведите вес посылки в фунтах:\nНапример: 5 или 2.5",
                 reply_markup=reply_markup,
             ))

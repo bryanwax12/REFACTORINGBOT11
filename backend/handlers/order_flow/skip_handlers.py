@@ -77,7 +77,7 @@ async def handle_skip_field(
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
-        bot_msg = await safe_telegram_call(query.message.reply_text(
+        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
             next_message,
             reply_markup=reply_markup
         ))
@@ -197,7 +197,7 @@ async def skip_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         asyncio.create_task(query.answer())  # 🚀 Non-blocking
         
         # 🚀 PERFORMANCE: Send message in background
-        asyncio.create_task(query.message.reply_text(
+        asyncio.create_task(update.effective_message.reply_text(
             "✅ Адрес отправителя в шаблоне обновлён!",
             reply_markup=reply_markup
         ))
@@ -293,7 +293,7 @@ async def skip_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         asyncio.create_task(query.answer())  # 🚀 Non-blocking
         
         # 🚀 PERFORMANCE: Send message in background
-        asyncio.create_task(query.message.reply_text(
+        asyncio.create_task(update.effective_message.reply_text(
             "✅ Адрес получателя в шаблоне обновлён!",
             reply_markup=reply_markup
         ))
@@ -522,7 +522,7 @@ async def skip_address_validation(update: Update, context: ContextTypes.DEFAULT_
     context.user_data['skip_address_validation'] = True
     
     # 🚀 PERFORMANCE: Show message in background - don't block state return
-    asyncio.create_task(safe_telegram_call(query.message.reply_text("⚠️ Пропускаю валидацию адреса...\n⏳ Получаю доступные курьерские службы и тарифы...")))
+    asyncio.create_task(safe_telegram_call(update.effective_message.reply_text("⚠️ Пропускаю валидацию адреса...\n⏳ Получаю доступные курьерские службы и тарифы...")))
     
     # Call fetch_shipping_rates which will now skip validation
     return await fetch_shipping_rates(update, context)

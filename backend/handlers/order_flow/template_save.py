@@ -181,7 +181,7 @@ async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_T
     user_repo = get_user_repo()
     user = await user_repo.find_by_telegram_id(telegram_id)
     if not user:
-        await safe_telegram_call(query.message.reply_text("❌ Ошибка: пользователь не найден"))
+        await safe_telegram_call(update.effective_message.reply_text("❌ Ошибка: пользователь не найден"))
         return ConversationHandler.END
     
     # Update template
@@ -230,7 +230,7 @@ async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_T
         
         # 🚀 PERFORMANCE: Send message in background
         async def send_message():
-            bot_msg = await safe_telegram_call(query.message.reply_text(
+            bot_msg = await safe_telegram_call(update.effective_message.reply_text(
                 message_text,
                 reply_markup=reply_markup,
                 parse_mode='Markdown'
@@ -246,7 +246,7 @@ async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_T
         
         return ConversationHandler.END
     else:
-        await safe_telegram_call(query.message.reply_text("❌ Не удалось обновить шаблон"))
+        await safe_telegram_call(update.effective_message.reply_text("❌ Не удалось обновить шаблон"))
         return ConversationHandler.END
 
 
@@ -280,7 +280,7 @@ async def handle_template_new_name(update: Update, context: ContextTypes.DEFAULT
         "💬 *Введите название:*"
     )
     
-    await safe_telegram_call(query.message.reply_text(
+    await safe_telegram_call(update.effective_message.reply_text(
         message_text,
         reply_markup=reply_markup,
         parse_mode='Markdown'

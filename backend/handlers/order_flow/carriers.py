@@ -107,7 +107,7 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 break
         
         if not selected_rate:
-            await safe_telegram_call(query.message.reply_text(
+            await safe_telegram_call(update.effective_message.reply_text(
                 "❌ Выбранный тариф не найден. Попробуйте обновить список тарифов.",
             ))
             from server import SELECT_CARRIER
@@ -168,7 +168,7 @@ async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user = await user_repo.find_by_telegram_id(query.from_user.id)
         
         if not user:
-            await safe_telegram_call(query.message.reply_text("❌ Ошибка: пользователь не найден"))
+            await safe_telegram_call(update.effective_message.reply_text("❌ Ошибка: пользователь не найден"))
             from server import SELECT_CARRIER
             return SELECT_CARRIER
         

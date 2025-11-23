@@ -48,7 +48,7 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
         asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
-        send_method = query.message.reply_text
+        send_method = update.effective_message.reply_text
     else:
         # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
 
@@ -180,7 +180,7 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
-        bot_msg = await safe_telegram_call(query.message.reply_text(
+        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
                 message_text,
                 reply_markup=ForceReply(
                     input_field_placeholder=" ",
@@ -235,7 +235,7 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     
     if not pending_order or not pending_order.get('selected_rate'):
         logger.error("🔴 ERROR: No pending order or no selected_rate")
-        await safe_telegram_call(query.message.reply_text(
+        await safe_telegram_call(update.effective_message.reply_text(
             "❌ Не найдены данные незавершенного заказа.\n\nПожалуйста, создайте новый заказ."
         ))
         return ConversationHandler.END
@@ -331,7 +331,7 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
     
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await safe_telegram_call(query.message.reply_text(
+    await safe_telegram_call(update.effective_message.reply_text(
             message_text,
             reply_markup=reply_markup,
             parse_mode='Markdown'
@@ -384,7 +384,7 @@ async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
-        bot_msg = await safe_telegram_call(query.message.reply_text(
+        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
             message_text,
             reply_markup=ForceReply(
                 input_field_placeholder=" ",
@@ -425,7 +425,7 @@ async def order_from_template_list(update: Update, context: ContextTypes.DEFAULT
     templates = await db.templates.find({"telegram_id": telegram_id}, {"_id": 0}).to_list(10)
     
     if not templates:
-        await safe_telegram_call(query.message.reply_text(OrderFlowMessages.no_templates_error()))
+        await safe_telegram_call(update.effective_message.reply_text(OrderFlowMessages.no_templates_error()))
         return ConversationHandler.END
     
     message = OrderFlowMessages.select_template()
@@ -437,7 +437,7 @@ async def order_from_template_list(update: Update, context: ContextTypes.DEFAULT
     
     # 🚀 PERFORMANCE: Send message in background
     async def send_template_list():
-        bot_msg = await safe_telegram_call(query.message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown'))
+        bot_msg = await safe_telegram_call(update.effective_message.reply_text(message, reply_markup=reply_markup, parse_mode='Markdown'))
         if bot_msg:
             context.user_data['last_bot_message_id'] = bot_msg.message_id
             context.user_data['last_bot_message_text'] = message

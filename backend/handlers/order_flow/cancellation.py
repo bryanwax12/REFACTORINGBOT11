@@ -63,7 +63,7 @@ async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_cancel_prompt():
-        bot_msg = await safe_telegram_call(query.message.reply_text(
+        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
                 message_text,
                 reply_markup=reply_markup
             ))
@@ -132,7 +132,7 @@ async def confirm_cancel_order(update: Update, context: ContextTypes.DEFAULT_TYP
     keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
-    await safe_telegram_call(query.message.reply_text("❌ Создание заказа отменено.", reply_markup=reply_markup))
+    await safe_telegram_call(update.effective_message.reply_text("❌ Создание заказа отменено.", reply_markup=reply_markup))
     return ConversationHandler.END
 
 
@@ -181,7 +181,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 from server import FROM_NAME
                 from utils.ui_utils import TemplateEditMessages, get_cancel_keyboard
                 
-                await safe_telegram_call(query.message.reply_text(
+                await safe_telegram_call(update.effective_message.reply_text(
                     TemplateEditMessages.FROM_NAME,
                     reply_markup=get_cancel_keyboard()
                 ))
@@ -192,13 +192,13 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 from server import TO_NAME
                 from utils.ui_utils import TemplateEditMessages, get_cancel_keyboard
                 
-                await safe_telegram_call(query.message.reply_text(
+                await safe_telegram_call(update.effective_message.reply_text(
                     TemplateEditMessages.TO_NAME,
                     reply_markup=get_cancel_keyboard()
                 ))
                 return TO_NAME
             
-            await safe_telegram_call(query.message.reply_text("Продолжаем оформление заказа..."))
+            await safe_telegram_call(update.effective_message.reply_text("Продолжаем оформление заказа..."))
             return FROM_NAME
     
     # If last_state is a number (state constant), we need the string name
@@ -213,7 +213,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         # 🚀 PERFORMANCE: Send message in background
         async def send_continue():
-            bot_msg = await safe_telegram_call(query.message.reply_text(
+            bot_msg = await safe_telegram_call(update.effective_message.reply_text(
                 message_text if message_text else "Продолжаем оформление заказа...",
                 reply_markup=reply_markup
             ))
@@ -288,10 +288,10 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # 🚀 PERFORMANCE: Send message in background
     async def send_return_message():
         if keyboard:
-            bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=keyboard))
+            bot_msg = await safe_telegram_call(update.effective_message.reply_text(message_text, reply_markup=keyboard))
         else:
             reply_markup = get_cancel_keyboard()
-            bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=reply_markup))
+            bot_msg = await safe_telegram_call(update.effective_message.reply_text(message_text, reply_markup=reply_markup))
         
         # Save context
         if bot_msg:
