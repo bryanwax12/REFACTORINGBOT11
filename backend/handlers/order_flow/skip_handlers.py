@@ -46,7 +46,11 @@ async def handle_skip_field(
     await safe_telegram_call(query.answer())
     
     # Mark previous message as selected
-    asyncio.create_task(mark_message_as_selected(update, context))
+    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     # Save field value
     user_id = update.effective_user.id

@@ -168,7 +168,11 @@ async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_T
     await safe_telegram_call(query.answer())
     
     # Mark previous message as selected (non-blocking)
-    asyncio.create_task(mark_message_as_selected(update, context))
+    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     template_id = query.data.replace('template_update_', '')
     telegram_id = query.from_user.id
@@ -256,7 +260,11 @@ async def handle_template_new_name(update: Update, context: ContextTypes.DEFAULT
     await safe_telegram_call(query.answer())
     
     # Mark previous message as selected (non-blocking)
-    asyncio.create_task(mark_message_as_selected(update, context))
+    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     from utils.ui_utils import get_cancel_keyboard
     reply_markup = get_cancel_keyboard()
@@ -292,7 +300,11 @@ async def continue_order_after_template(update: Update, context: ContextTypes.DE
     import asyncio
     
     # Mark previous message as selected (remove buttons)
-    asyncio.create_task(mark_message_as_selected(update, context))
+    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     return await fetch_shipping_rates(update, context)
 
@@ -314,7 +326,11 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
     import asyncio
     
     # Mark previous message as selected (remove "Отмена" button)
-    asyncio.create_task(mark_message_as_selected(update, context))
+    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     try:
         amount_text = update.message.text.strip()

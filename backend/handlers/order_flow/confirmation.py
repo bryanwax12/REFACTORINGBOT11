@@ -68,7 +68,11 @@ async def handle_save_as_template(update: Update, context: ContextTypes.DEFAULT_
     await safe_telegram_call(query.answer())
     
     # Mark previous message as selected (non-blocking)
-    asyncio.create_task(mark_message_as_selected(update, context))
+    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     # Prompt for template name with cancel button
     from utils.ui_utils import get_cancel_keyboard
@@ -138,7 +142,11 @@ async def show_edit_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     
     # Mark previous message as selected (non-blocking)
-    asyncio.create_task(mark_message_as_selected(update, context))
+    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     message = "✏️ Что вы хотите изменить?"
     
@@ -182,7 +190,11 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         return await cancel_order(update, context)
     
     # Mark previous message as selected (remove buttons)
-    asyncio.create_task(mark_message_as_selected(update, context))
+    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     if query.data == 'confirm_cancel':
         return await confirm_cancel_order(update, context)
@@ -227,7 +239,11 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
     
     if query.data == 'edit_from_address':
         # Mark previous message as selected (non-blocking)
-        asyncio.create_task(mark_message_as_selected(update, context))
+        # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+        old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+        asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
         
         logger.info(f"🔧 Starting FROM address edit - user_data keys: {list(context.user_data.keys())}")
         
@@ -252,7 +268,11 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
     
     if query.data == 'edit_to_address':
         # Mark previous message as selected (non-blocking)
-        asyncio.create_task(mark_message_as_selected(update, context))
+        # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+        old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+        asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
         
         logger.info(f"🔧 Starting TO address edit - user_data keys: {list(context.user_data.keys())}")
         
@@ -277,7 +297,11 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
     
     if query.data == 'edit_parcel':
         # Mark previous message as selected (non-blocking)
-        asyncio.create_task(mark_message_as_selected(update, context))
+        # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+        old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+        asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
         
         logger.info(f"🔧 Starting PARCEL edit - user_data keys: {list(context.user_data.keys())}")
         

@@ -32,7 +32,11 @@ async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
             logger.warning(f"Could not remove buttons from previous message: {e}")
     
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-    asyncio.create_task(mark_message_as_selected(update, context))
+    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     # Check if we're on shipping rates screen
     last_state = context.user_data.get('last_state')
@@ -91,7 +95,11 @@ async def confirm_cancel_order(update: Update, context: ContextTypes.DEFAULT_TYP
     await safe_telegram_call(query.answer())
     
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-    asyncio.create_task(mark_message_as_selected(update, context))
+    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     # Cancel pending order if exists (NEW LOGIC)
     order_id = context.user_data.get('order_id')
@@ -141,7 +149,11 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await safe_telegram_call(query.answer())
     
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-    asyncio.create_task(mark_message_as_selected(update, context))
+    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     # Get the state we were in when cancel was pressed
     last_state = context.user_data.get('last_state')

@@ -43,10 +43,18 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             asyncio.create_task(query.answer())  # 🚀 Non-blocking
         except Exception:
             pass
-        asyncio.create_task(mark_message_as_selected(update, context))
+        # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+        old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+        asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
         send_method = query.message.reply_text
     else:
-        asyncio.create_task(mark_message_as_selected(update, context))
+        # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+        old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+        asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
         send_method = update.message.reply_text
     
     logger.info(f"📝 User {telegram_id} starting new order flow (callback: {update.callback_query.data if update.callback_query else 'command'})")
@@ -158,7 +166,11 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
     await safe_telegram_call(query.answer())
     
     # Mark previous message as selected (blocking)
-    asyncio.create_task(mark_message_as_selected(update, context))
+    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     # Save last_state and message text
     context.user_data['last_state'] = STATE_NAMES[PARCEL_WEIGHT]
@@ -210,7 +222,11 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
         context.user_data['last_bot_message_text'] = pending_order.get('topup_success_message_text')
     
     # Mark previous message as selected (non-blocking)
-    asyncio.create_task(mark_message_as_selected(update, context))
+    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     logger.debug("🔵 Message marked as selected")
     
     if not pending_order or not pending_order.get('selected_rate'):
@@ -350,7 +366,11 @@ async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['awaiting_topup_amount'] = False
     
     # Mark previous message as selected (remove buttons from choice screen)
-    asyncio.create_task(mark_message_as_selected(update, context))
+    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     reply_markup = get_cancel_keyboard()
     message_text = OrderFlowMessages.new_order_start()
@@ -386,7 +406,11 @@ async def order_from_template_list(update: Update, context: ContextTypes.DEFAULT
     await safe_telegram_call(query.answer())
     
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-    asyncio.create_task(mark_message_as_selected(update, context))
+    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     telegram_id = query.from_user.id
     
@@ -427,7 +451,11 @@ async def continue_order_after_template(update: Update, context: ContextTypes.DE
     await safe_telegram_call(query.answer())
     
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-    asyncio.create_task(mark_message_as_selected(update, context))
+    # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
+
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     # Since template was saved from CONFIRM_DATA screen, we have all data including weight/dimensions
     # Return to data confirmation screen
