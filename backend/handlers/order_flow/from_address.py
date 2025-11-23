@@ -398,7 +398,8 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE, s
         # REMOVED: ConversationHandler manages state via Persistence
         # await session_service.update_session_step(user_id, step="FROM_ZIP")
     
-    asyncio.create_task(mark_message_as_selected(update, context))
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     from utils.ui_utils import get_cancel_keyboard, OrderStepMessages, TemplateEditMessages
     
     # Use different messages for template editing vs order creation
@@ -455,7 +456,8 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
         # REMOVED: ConversationHandler manages state via Persistence
         # await session_service.update_session_step(user_id, step="FROM_PHONE")
     
-    asyncio.create_task(mark_message_as_selected(update, context))
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     # Show with SKIP option
     from utils.ui_utils import get_skip_and_cancel_keyboard, OrderStepMessages, CallbackData, TemplateEditMessages
