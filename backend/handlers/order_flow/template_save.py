@@ -44,7 +44,7 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
         except Exception as e:
             logger.warning(f"Could not remove cancel button: {e}")
     
-    template_name = update.message.text.strip()[:30]  # Limit to 30 chars
+    template_name = update.effective_message.text.strip()[:30]  # Limit to 30 chars
     
     if not template_name:
         await safe_telegram_call(update.effective_message.reply_text("❌ Название не может быть пустым. Попробуйте еще раз:"))
@@ -333,7 +333,7 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
     asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     try:
-        amount_text = update.message.text.strip()
+        amount_text = update.effective_message.text.strip()
         
         # Validate amount
         try:

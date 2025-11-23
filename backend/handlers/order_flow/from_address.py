@@ -41,7 +41,7 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     from server import SecurityLogger, sanitize_string, FROM_NAME, FROM_ADDRESS, STATE_NAMES
     
     user_id = update.effective_user.id
-    message_text = update.message.text if update.message else "N/A"
+    message_text = update.effective_message.text if update.message else "N/A"
     
     logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     logger.info("🔵 ORDER_FROM_NAME STARTED")
@@ -96,7 +96,7 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
         logger.info("⏭️ Skipping - user in topup flow")
         return ConversationHandler.END
     
-    name = update.message.text.strip()
+    name = update.effective_message.text.strip()
     name = sanitize_string(name, max_length=50)
     
     # Store in session AND context using service
@@ -185,7 +185,7 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE,
     
     logger.info(f"🔵 order_from_address - User: {update.effective_user.id}")
     
-    address = update.message.text.strip()
+    address = update.effective_message.text.strip()
     address = sanitize_string(address, max_length=100)
     
     # Store
@@ -255,7 +255,7 @@ async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE
     
     
     
-    address2 = update.message.text.strip()
+    address2 = update.effective_message.text.strip()
     address2 = sanitize_string(address2, max_length=100)
     
     if len(address2) > 100:
@@ -319,7 +319,7 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     
     
     
-    city = update.message.text.strip()
+    city = update.effective_message.text.strip()
     city = sanitize_string(city, max_length=50)
     
     # Store
@@ -379,7 +379,7 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     
     
     
-    state = update.message.text.strip().upper()
+    state = update.effective_message.text.strip().upper()
     
     # Store
     user_id = update.effective_user.id
@@ -436,7 +436,7 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     
     
     
-    zip_code = update.message.text.strip()
+    zip_code = update.effective_message.text.strip()
     
     # Store
     user_id = update.effective_user.id
@@ -494,7 +494,7 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     
     
     
-    phone = update.message.text.strip()
+    phone = update.effective_message.text.strip()
     
     # Format phone (basic formatting without validation)
     digits_only = ''.join(filter(str.isdigit, phone))
