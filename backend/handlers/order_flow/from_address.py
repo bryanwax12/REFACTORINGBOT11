@@ -110,21 +110,8 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     logger.info(f"✅ Validation result: is_valid={is_valid}, error_msg='{error_msg}'")
     
     if not is_valid:
-        logger.warning(f"❌ VALIDATION ERROR [FROM_NAME]: User {update.effective_user.id} entered '{name}' - Error: {error_msg}")
-        
-        # Try to send error message
-        try:
-            error_sent = await safe_telegram_call(update.message.reply_text(error_msg), timeout=5)
-            if error_sent:
-                logger.info(f"✅ ERROR MESSAGE SENT successfully to user {update.effective_user.id}")
-            else:
-                logger.error(f"❌ ERROR MESSAGE FAILED (returned None)")
-                # Retry once more
-                error_sent = await update.message.reply_text(error_msg)
-                logger.info(f"✅ ERROR MESSAGE SENT on retry")
-        except Exception as e:
-            logger.error(f"❌ EXCEPTION while sending error message: {e}", exc_info=True)
-        
+        logger.warning(f"❌ VALIDATION ERROR [FROM_NAME]: User {update.effective_user.id} - Error: {error_msg}")
+        await safe_telegram_call(update.message.reply_text(error_msg))
         return FROM_NAME
     
     # Store in session AND context using service
