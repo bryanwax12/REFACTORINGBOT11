@@ -1678,20 +1678,25 @@ async def ask_with_cancel_and_focus(
     context,
     text: str,
     placeholder: str = "",
+    next_state=None,
     safe_telegram_call_func=None
 ):
     """
-    Простое решение: ТОЛЬКО ForceReply для автофокуса
+    Простое решение: ТОЛЬКО ForceReply для автофокуса + возврат следующего состояния
     
     Отправляет ОДНО сообщение с текстом вопроса и ForceReply.
-    Без кнопок "Отмена" - пользователь может использовать команду /cancel.
+    ВАЖНО: Возвращает next_state для ConversationHandler!
     
     Args:
         update: Telegram Update
         context: Telegram Context
         text: Текст вопроса (например: "Имя отправителя:")
         placeholder: Плейсхолдер для поля ввода
+        next_state: Следующее состояние для ConversationHandler (ОБЯЗАТЕЛЬНО!)
         safe_telegram_call_func: Функция для безопасной отправки (опционально)
+    
+    Returns:
+        next_state - состояние для ConversationHandler
     """
     from telegram import ForceReply
     
@@ -1705,7 +1710,7 @@ async def ask_with_cancel_and_focus(
         update.effective_message.reply_text(
             text,
             reply_markup=ForceReply(
-                input_field_placeholder=placeholder or " ",
+                input_field_placeholder=" ",
                 selective=True
             )
         )
@@ -1716,7 +1721,8 @@ async def ask_with_cancel_and_focus(
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = text
     
-    return bot_msg
+    # КРИТИЧНО: Вернуть следующее состояние для ConversationHandler
+    return next_state
 
 
 async def ask_with_skip_cancel_and_focus(
