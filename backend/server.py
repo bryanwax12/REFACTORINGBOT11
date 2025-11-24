@@ -1398,7 +1398,7 @@ async def startup_event():
             application = (
                 Application.builder()
                 .token(TELEGRAM_BOT_TOKEN)
-                .persistence(persistence)  # DictPersistence for webhook mode - preserves conversation state
+                .persistence(persistence)  # PicklePersistence for webhook mode - preserves conversation state on disk
                 .concurrent_updates(True)  # Allow concurrent updates for better performance in webhook mode
                 .connect_timeout(app_settings['connect_timeout'])  # Fast connection
                 .read_timeout(app_settings['read_timeout'])   # Optimized read timeout
