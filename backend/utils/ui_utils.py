@@ -1743,43 +1743,54 @@ async def ask_with_skip_cancel_and_focus(
     safe_telegram_call_func=None
 ):
     """
-    Простое решение для опциональных полей: кнопки "Пропустить" + "Отмена" (без ForceReply)
+    ✅ ПРАВИЛЬНОЕ РЕШЕНИЕ 2025 для опциональных полей: Два сообщения
     
-    ForceReply не работает в отдельном сообщении.
-    Вместо этого просто показываем кнопки, и пользователь пишет ответ в чат.
+    1. Сообщение с кнопками "Пропустить" + "Отмена" (InlineKeyboardMarkup)
+    2. Сразу за ним - ForceReply (автофокус + клавиатура)
     
     Args:
         update: Telegram Update
         context: Telegram Context
         text: Текст вопроса
-        placeholder: Плейсхолдер (не используется, оставлен для совместимости)
+        placeholder: Плейсхолдер для поля ввода
         skip_callback: Callback data для кнопки "Пропустить"
         safe_telegram_call_func: Функция для безопасной отправки
     """
-    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ForceReply
     
     # Функция для безопасной отправки
     if safe_telegram_call_func is None:
         from handlers.common_handlers import safe_telegram_call
         safe_telegram_call_func = safe_telegram_call
     
-    # Сообщение с кнопками "Пропустить" и "Отмена"
+    # 1. Сообщение с кнопками "Пропустить" и "Отмена"
     skip_cancel_keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("⏭️ Пропустить", callback_data=skip_callback)],
         [InlineKeyboardButton("❌ Отмена", callback_data="cancel_order")]
     ])
     
-    bot_msg = await safe_telegram_call_func(
+    await safe_telegram_call_func(
         update.effective_message.reply_text(
             text,
             reply_markup=skip_cancel_keyboard
         )
     )
     
+    # 2. ForceReply - мгновенный ввод
+    bot_msg = await safe_telegram_call_func(
+        update.effective_message.reply_text(
+            "⌨️ Или введите данные:",
+            reply_markup=ForceReply(
+                input_field_placeholder=placeholder or "Введите или пропустите",
+                selective=True
+            )
+        )
+    )
+    
     # Сохранить ID последнего сообщения
     if bot_msg:
         context.user_data['last_bot_message_id'] = bot_msg.message_id
-        context.user_data['last_bot_message_text'] = text
+        context.user_data['last_bot_message_text'] = "⌨️ Или введите данные:"
     
     return bot_msg
 
