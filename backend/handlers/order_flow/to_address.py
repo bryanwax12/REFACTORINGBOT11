@@ -457,6 +457,7 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
         update,
         context,
         OrderStepMessages.PARCEL_WEIGHT,
+        placeholder="Например: 90001",
         next_state=PARCEL_WEIGHT,
         safe_telegram_call_func=safe_telegram_call
     )
