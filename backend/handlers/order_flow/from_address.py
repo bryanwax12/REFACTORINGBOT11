@@ -272,15 +272,13 @@ async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE
     else:
         message_text = OrderStepMessages.FROM_CITY
     
-    await ask_with_cancel_and_focus(
+    return await ask_with_cancel_and_focus(
         update,
         context,
         message_text,
-        placeholder="Например: San Francisco",
+        next_state=FROM_CITY,
         safe_telegram_call_func=safe_telegram_call
     )
-    
-    return FROM_CITY
 
 
 @safe_handler(fallback_state=ConversationHandler.END)
@@ -383,15 +381,13 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     else:
         message_text = OrderStepMessages.FROM_ZIP
     
-    await ask_with_cancel_and_focus(
+    return await ask_with_cancel_and_focus(
         update,
         context,
         message_text,
-        placeholder="Например: 94102",
+        next_state=FROM_ZIP,
         safe_telegram_call_func=safe_telegram_call
     )
-    
-    return FROM_ZIP
 
 
 @safe_handler(fallback_state=ConversationHandler.END)
