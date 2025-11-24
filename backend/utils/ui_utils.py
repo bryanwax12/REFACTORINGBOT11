@@ -1731,13 +1731,15 @@ async def ask_with_skip_cancel_and_focus(
     text: str,
     placeholder: str = "",
     skip_callback: str = "",
+    next_state=None,
     safe_telegram_call_func=None
 ):
     """
-    Для опциональных полей: кнопка "Пропустить" БЕЗ ForceReply
+    Для опциональных полей: кнопка "Пропустить" БЕЗ ForceReply + возврат состояния
     
-    НЕ ИСПОЛЬЗУЕМ ForceReply для опциональных полей - это вызывает двойной ввод.
+    НЕ ИСПОЛЬЗУЕМ ForceReply для опциональных полей.
     Просто показываем кнопку "Пропустить", пользователь вводит текст обычным способом.
+    ВАЖНО: Возвращает next_state для ConversationHandler!
     
     Args:
         update: Telegram Update
@@ -1745,7 +1747,11 @@ async def ask_with_skip_cancel_and_focus(
         text: Текст вопроса
         placeholder: Плейсхолдер (не используется)
         skip_callback: Callback data для кнопки "Пропустить"
+        next_state: Следующее состояние для ConversationHandler (ОБЯЗАТЕЛЬНО!)
         safe_telegram_call_func: Функция для безопасной отправки
+    
+    Returns:
+        next_state - состояние для ConversationHandler
     """
     from telegram import InlineKeyboardButton, InlineKeyboardMarkup
     
@@ -1771,5 +1777,6 @@ async def ask_with_skip_cancel_and_focus(
         context.user_data['last_bot_message_id'] = bot_msg.message_id
         context.user_data['last_bot_message_text'] = text
     
-    return bot_msg
+    # КРИТИЧНО: Вернуть следующее состояние для ConversationHandler
+    return next_state
 
