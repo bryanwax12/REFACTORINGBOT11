@@ -164,7 +164,7 @@ else:
 
 ### Preview окружение (текущее)
 ```
-WEBHOOK_BASE_URL = "https://tgbot-revival.preview.emergentagent.com"
+WEBHOOK_BASE_URL = "https://shiptrack-bot.preview.emergentagent.com"
                                      ↓
               Содержит "preview" → НЕ production
                                      ↓

@@ -176,7 +176,7 @@
 
 ## 🖥️ ЧАСТЬ 2: АДМИН-ПАНЕЛЬ
 
-### URL админки: https://tgbot-revival.preview.emergentagent.com
+### URL админки: https://shiptrack-bot.preview.emergentagent.com
 
 ---
 
