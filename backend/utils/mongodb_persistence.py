@@ -69,11 +69,6 @@ class MongoDBPersistence(BasePersistence):
             
             logger.info(f"🔍 update_conversation called: handler={name}, user={user_id}, new_state={new_state}")
             
-            # Deduplication: Skip if state hasn't changed
-            if key in self._last_saved and self._last_saved[key] == new_state:
-                logger.info(f"⏭️ SKIP: State unchanged for user {user_id} (state={new_state})")
-                return  # No need to save - state unchanged
-            
             if new_state is None:
                 # Conversation ended - clear state
                 await self.db.user_sessions.update_one(
