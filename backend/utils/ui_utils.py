@@ -187,9 +187,26 @@ def get_skip_and_cancel_keyboard(skip_callback: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(keyboard)
 
 
+def get_standard_size_keyboard(standard_size_callback: str) -> InlineKeyboardMarkup:
+    """
+    Keyboard with 'Use Standard Size' button only (no cancel)
+    
+    Args:
+        standard_size_callback: Callback data for standard size button
+    
+    Returns:
+        InlineKeyboardMarkup with standard size button
+    """
+    keyboard = [
+        [InlineKeyboardButton(_make_unique_text("⏭️ Использовать стандартные размеры"), callback_data=standard_size_callback)]
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
 def get_standard_size_and_cancel_keyboard(standard_size_callback: str) -> InlineKeyboardMarkup:
     """
     Keyboard with 'Use Standard Size' and Cancel buttons (for parcel dimensions)
+    DEPRECATED - use get_standard_size_keyboard instead
     
     Args:
         standard_size_callback: Callback data for standard size button
