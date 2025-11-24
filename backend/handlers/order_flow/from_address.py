@@ -215,16 +215,14 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE,
     # ✅ МАГИЧЕСКИЙ ГИБРИД 2025 (опциональное поле)
     from utils.ui_utils import ask_with_skip_cancel_and_focus
     
-    await ask_with_skip_cancel_and_focus(
+    return await ask_with_skip_cancel_and_focus(
         update,
         context,
         message_text,
-        placeholder="Например: Apt 4B",
         skip_callback=CallbackData.SKIP_FROM_ADDRESS2,
+        next_state=FROM_ADDRESS2,
         safe_telegram_call_func=safe_telegram_call
     )
-    
-    return FROM_ADDRESS2
 
 
 @safe_handler(fallback_state=ConversationHandler.END)
