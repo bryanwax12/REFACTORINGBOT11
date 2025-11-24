@@ -488,19 +488,15 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     
     logger.info("⚠️ NORMAL FLOW: Proceeding to TO_NAME (no editing flags detected)")
     
-    from utils.ui_utils import OrderStepMessages, get_cancel_keyboard
+    from utils.ui_utils import OrderStepMessages
     message_text = OrderStepMessages.TO_NAME
-    reply_markup = get_cancel_keyboard()
     
     # Save state IMMEDIATELY (before background task)
     context.user_data['last_bot_message_text'] = message_text
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_next_step():
-        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
-            message_text,
-            reply_markup=reply_markup
-        ))
+        bot_msg = await safe_telegram_call(update.effective_message.reply_text(message_text))
         if bot_msg:
             context.user_data['last_bot_message_id'] = bot_msg.message_id
     
