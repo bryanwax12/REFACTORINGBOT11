@@ -24,23 +24,20 @@ const isEnvCorrupted = (val) => {
   return val && (val.includes('REACT_APP_') || val.includes('MONGO_URL') || val.includes('WEBHOOK_'));
 };
 
+// Always use environment variables - fail if they're missing or corrupted
 if (isEnvCorrupted(process.env.REACT_APP_BACKEND_URL) || 
     isEnvCorrupted(process.env.REACT_APP_ADMIN_API_KEY) ||
     !process.env.REACT_APP_BACKEND_URL ||
     !process.env.REACT_APP_ADMIN_API_KEY) {
-  // Use production config file
-  console.log('⚠️ Environment variables corrupted or missing, using production config file');
-  const productionConfig = {
-    BACKEND_URL: 'https://telegram-admin-fix-2.emergent.host',
-    ADMIN_API_KEY: 'sk_admin_e19063c3f82f447ba4ccf49cd97dd9fd_2024',
-  };
-  BACKEND_URL = productionConfig.BACKEND_URL;
-  ADMIN_API_KEY = productionConfig.ADMIN_API_KEY;
-} else {
-  // Use environment variables (preview/local)
-  BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-  ADMIN_API_KEY = process.env.REACT_APP_ADMIN_API_KEY;
+  console.error('❌ CRITICAL: Environment variables are corrupted or missing!');
+  console.error('REACT_APP_BACKEND_URL:', process.env.REACT_APP_BACKEND_URL);
+  console.error('REACT_APP_ADMIN_API_KEY:', process.env.REACT_APP_ADMIN_API_KEY ? '[SET]' : '[MISSING]');
+  throw new Error('Missing or corrupted environment variables. Please check deployment configuration.');
 }
+
+// Use environment variables exclusively
+BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+ADMIN_API_KEY = process.env.REACT_APP_ADMIN_API_KEY;
 
 const API = `${BACKEND_URL}/api`;
 
