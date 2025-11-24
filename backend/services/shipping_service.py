@@ -481,9 +481,21 @@ async def fetch_rates_from_shipstation(
         
         if response.status_code == 200:
             data = response.json()
+            
+            # Log full response for debugging
+            logger.info(f"📦 ShipStation rates response: {data}")
+            
             rates = data.get('rate_response', {}).get('rates', [])
             
             if not rates:
+                # Check if there are any errors in the response
+                errors = data.get('rate_response', {}).get('errors', [])
+                if errors:
+                    error_details = "; ".join([f"{e.get('message', 'Unknown error')}" for e in errors])
+                    logger.error(f"ShipStation returned errors: {error_details}")
+                    return False, None, f"ShipStation errors: {error_details}"
+                
+                logger.warning(f"No rates in response. Full response: {data}")
                 return False, None, "No rates returned from ShipStation"
             
             return True, rates, None
