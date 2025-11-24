@@ -128,7 +128,7 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         bot_msg = await safe_telegram_call(send_method(
             message_text,
             reply_markup=ForceReply(
-                input_field_placeholder=" ",
+                input_field_placeholder="⌨️ Жду ваш ответ...",
                 selective=True
             )
         ))
