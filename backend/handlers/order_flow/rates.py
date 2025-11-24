@@ -232,8 +232,21 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             from utils.ui_utils import get_edit_addresses_keyboard, ShippingRatesUI
             reply_markup = get_edit_addresses_keyboard()
             
+            # Parse error message for user-friendly display
+            user_message = "❌ Не удалось получить тарифы доставки.\n\n"
+            
+            # Check for common validation errors
+            if "state_province" in error_msg.lower():
+                user_message += "⚠️ Штат должен быть указан 2-буквенным кодом (например: CA, NY, TX)\n\n"
+            if "postal_code" in error_msg.lower():
+                user_message += "⚠️ Почтовый индекс должен быть в правильном формате (например: 90001)\n\n"
+            if "address" in error_msg.lower() and "invalid" in error_msg.lower():
+                user_message += "⚠️ Проверьте правильность адреса\n\n"
+            
+            user_message += "Пожалуйста, проверьте корректность всех данных и попробуйте снова."
+            
             await safe_telegram_call(message.reply_text(
-                "❌ Не удалось получить тарифы доставки.\n\nПожалуйста, проверьте корректность адресов и попробуйте снова.",
+                user_message,
                 reply_markup=reply_markup,
             ))
             
