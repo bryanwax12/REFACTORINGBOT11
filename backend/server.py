@@ -1408,8 +1408,8 @@ async def startup_event():
                 .build()
             )
             
-            logger.info("✅ Application built with DictPersistence for webhook mode")
-            logger.info("🔧 CRITICAL FIX: DictPersistence preserves conversation state between HTTP requests")
+            logger.info("✅ Application built with PicklePersistence for webhook mode")
+            logger.info("🔧 CRITICAL FIX: PicklePersistence saves conversation state to disk between HTTP requests")
             
             # CRITICAL: Update global bot_instance with the application's bot for notifications
             # Without this, notifications will NOT work!
