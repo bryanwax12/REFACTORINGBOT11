@@ -1380,11 +1380,11 @@ async def startup_event():
             # Get optimized settings from performance config
             app_settings = BotPerformanceConfig.get_optimized_application_settings()
             
-            # DictPersistence for webhook mode - stores conversation state between HTTP requests
+            # PicklePersistence for webhook mode - saves conversation state to disk between HTTP requests
             # This is CRITICAL for webhook mode to work correctly!
-            from telegram.ext import DictPersistence
-            persistence = DictPersistence()
-            logger.info("✅ DictPersistence initialized for webhook mode")
+            from telegram.ext import PicklePersistence
+            persistence = PicklePersistence(filepath='/tmp/telegram_bot_persistence.pickle')
+            logger.info("✅ PicklePersistence initialized for webhook mode (file: /tmp/telegram_bot_persistence.pickle)")
             
             # Optimize: Only receive needed update types (saves ~20-40ms)
             from telegram import Update
