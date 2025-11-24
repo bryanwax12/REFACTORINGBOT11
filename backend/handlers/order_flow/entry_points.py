@@ -71,16 +71,26 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     logger.info("✅ Cleared ALL user data for fresh order start")
     
-    # Also clear MongoDB session data for fresh start
+    # Create or update MongoDB session for ConversationHandler persistence
     from server import db
+    from datetime import datetime, timezone
+    
+    # CRITICAL: Use upsert=True to create session if it doesn't exist
     await db.user_sessions.update_one(
         {"user_id": telegram_id, "is_active": True},
         {"$set": {
             "session_data": {},
-            "current_step": "START"
-        }}
+            "current_step": "START",
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        },
+         "$setOnInsert": {
+            "user_id": telegram_id,
+            "is_active": True,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        }},
+        upsert=True  # CREATE session if doesn't exist
     )
-    logger.info("✅ Cleared MongoDB session data")
+    logger.info("✅ Created/cleared MongoDB session data for ConversationHandler")
     
     # Fresh new order - no resume
     logger.info(f"🆕 Fresh new order for user {telegram_id}")
