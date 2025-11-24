@@ -215,12 +215,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return FROM_NAME
     
     # saved_state is an integer (state constant from ConversationHandler)
-    # Show data confirmation screen (where user clicked "Cancel")
-    from handlers.order_flow.confirmation import show_data_confirmation
-    logger.info(f"✅ Returning to data confirmation screen")
-    
-    # Show confirmation screen
-    return await show_data_confirmation(update, context)
+    logger.info(f"✅ Returning to saved state: {saved_state}")
     
     # Special handling for SELECT_CARRIER (shipping rates screen)
     from server import SELECT_CARRIER
