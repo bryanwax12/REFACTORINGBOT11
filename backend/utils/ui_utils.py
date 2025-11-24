@@ -1728,26 +1728,27 @@ async def ask_with_skip_cancel_and_focus(
     safe_telegram_call_func=None
 ):
     """
-    Для опциональных полей: кнопка "Пропустить" + ForceReply
+    Для опциональных полей: кнопка "Пропустить" БЕЗ ForceReply
     
-    Отправляет ОДНО сообщение с кнопкой "Пропустить" и ForceReply.
+    НЕ ИСПОЛЬЗУЕМ ForceReply для опциональных полей - это вызывает двойной ввод.
+    Просто показываем кнопку "Пропустить", пользователь вводит текст обычным способом.
     
     Args:
         update: Telegram Update
         context: Telegram Context
         text: Текст вопроса
-        placeholder: Плейсхолдер для поля ввода
+        placeholder: Плейсхолдер (не используется)
         skip_callback: Callback data для кнопки "Пропустить"
         safe_telegram_call_func: Функция для безопасной отправки
     """
-    from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ForceReply
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
     
     # Функция для безопасной отправки
     if safe_telegram_call_func is None:
         from handlers.common_handlers import safe_telegram_call
         safe_telegram_call_func = safe_telegram_call
     
-    # Сообщение с кнопкой "Пропустить" + ForceReply
+    # ОДНО сообщение с кнопкой "Пропустить" (БЕЗ ForceReply)
     skip_keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("⏭️ Пропустить", callback_data=skip_callback)]
     ])
@@ -1759,21 +1760,10 @@ async def ask_with_skip_cancel_and_focus(
         )
     )
     
-    # Второе сообщение с ForceReply
-    bot_msg2 = await safe_telegram_call_func(
-        update.effective_message.reply_text(
-            "⌨️ Или введите данные:",
-            reply_markup=ForceReply(
-                input_field_placeholder=placeholder or " ",
-                selective=True
-            )
-        )
-    )
-    
     # Сохранить ID последнего сообщения
-    if bot_msg2:
-        context.user_data['last_bot_message_id'] = bot_msg2.message_id
-        context.user_data['last_bot_message_text'] = "⌨️ Или введите данные:"
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = text
     
-    return bot_msg2
+    return bot_msg
 
