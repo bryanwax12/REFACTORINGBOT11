@@ -13,14 +13,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 async def clear_debounce_data():
     """Clear all debounce-related data from user_sessions"""
     
-    # Load MongoDB URL
-    try:
-        from config_production import PRODUCTION_CONFIG
-        mongo_url = PRODUCTION_CONFIG['MONGO_URL']
-        print(f"✅ Using production MongoDB")
-    except:
-        mongo_url = os.environ.get('MONGO_URL')
-        print(f"✅ Using environment MongoDB")
+    # Load MongoDB URL from environment only
+    mongo_url = os.environ.get('MONGO_URL')
+    print(f"✅ Using MongoDB URL from environment")
     
     if not mongo_url:
         print("❌ No MongoDB URL found!")
