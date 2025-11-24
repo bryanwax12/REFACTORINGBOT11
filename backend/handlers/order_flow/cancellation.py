@@ -257,12 +257,13 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.info(f"✅ Returning to saved state: {saved_state}")
     
     # Special handling for SELECT_CARRIER (shipping rates screen)
-    from server import SELECT_CARRIER
+    from server import SELECT_CARRIER, PAYMENT_METHOD
+    
     if saved_state == SELECT_CARRIER:
         logger.info("🔄 Returning to shipping rates screen")
         from services.shipping_service import display_shipping_rates
         from repositories import get_user_repo
-        from server import STATE_NAMES, SELECT_CARRIER
+        from server import STATE_NAMES
         
         # Check if we have cached rates
         if 'rates' in context.user_data:
@@ -281,7 +282,18 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
             from handlers.order_flow.rates import fetch_shipping_rates
             return await fetch_shipping_rates(update, context)
     
-    # Return saved state (MongoDBPersistence will restore the conversation)
+    elif saved_state == PAYMENT_METHOD:
+        logger.info("🔄 Returning to payment method screen")
+        from handlers.order_flow.payment import ask_payment_method
+        return await ask_payment_method(update, context)
+    
+    # For other states, just show continuation message and return the state
+    # MongoDBPersistence will restore the proper handler
+    await safe_telegram_call(update.effective_message.reply_text(
+        "Продолжаем оформление заказа...",
+        reply_markup=get_cancel_keyboard()
+    ))
+    
     return saved_state
 
 
