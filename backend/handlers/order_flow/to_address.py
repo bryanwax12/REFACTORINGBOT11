@@ -358,7 +358,7 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, sessi
     # ✅ МАГИЧЕСКИЙ ГИБРИД 2025 (опциональное поле)
     from utils.ui_utils import ask_with_skip_cancel_and_focus
     
-    return await ask_with_skip_cancel_and_focus(
+    await ask_with_skip_cancel_and_focus(
         update,
         context,
         message_text,
@@ -366,6 +366,8 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, sessi
         next_state=TO_PHONE,
         safe_telegram_call_func=safe_telegram_call
     )
+    
+    return TO_PHONE
 
 
 @safe_handler(fallback_state=ConversationHandler.END)
