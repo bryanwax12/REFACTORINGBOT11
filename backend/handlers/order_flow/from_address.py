@@ -43,53 +43,7 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     user_id = update.effective_user.id
     message_text = update.effective_message.text if update.message else "N/A"
     
-    logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-    logger.info("🔵 ORDER_FROM_NAME STARTED")
-    logger.info(f"   User: {user_id}")
-    logger.info(f"   Message: '{message_text[:100]}'")
-    logger.info(f"   Update ID: {update.update_id}")
-    logger.info(f"   Context user_data keys: {list(context.user_data.keys())}")
-    logger.info(f"   editing_template_from: {context.user_data.get('editing_template_from')}")
-    logger.info(f"   editing_template_id: {context.user_data.get('editing_template_id')}")
-    logger.info(f"   awaiting_topup_amount: {context.user_data.get('awaiting_topup_amount')}")
-    logger.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-    
-    # Remove cancel button from prompt if exists
-    # Try to get message_id from context first, then from DB
-    message_id_to_remove = context.user_data.get('last_prompt_message_id')
-    
-    if not message_id_to_remove:
-        # Load from DB if not in context
-        from server import db
-        session = await db.user_sessions.find_one(
-            {"user_id": update.effective_user.id, "is_active": True},
-            {"_id": 0, "last_prompt_message_id": 1}
-        )
-        if session:
-            message_id_to_remove = session.get('last_prompt_message_id')
-            logger.info(f"🔄 Loaded last_prompt_message_id from DB: {message_id_to_remove}")
-    
-    if message_id_to_remove:
-        try:
-            logger.info(f"🗑️ Attempting to remove cancel button from message_id={message_id_to_remove}")
-            await context.bot.edit_message_reply_markup(
-                chat_id=update.effective_chat.id,
-                message_id=message_id_to_remove,
-                reply_markup=None
-            )
-            context.user_data.pop('last_prompt_message_id', None)
-            
-            # Remove from DB too
-            from server import db
-            await db.user_sessions.update_one(
-                {"user_id": update.effective_user.id, "is_active": True},
-                {"$unset": {"last_prompt_message_id": ""}}
-            )
-            logger.info(f"✅ Cancel button removed successfully from message {message_id_to_remove}")
-        except Exception as e:
-            logger.warning(f"⚠️ Could not remove cancel button: {e}")
-    else:
-        logger.info("ℹ️ No last_prompt_message_id found")
+    logger.info(f"🔵 ORDER_FROM_NAME - User: {user_id}, Message: '{message_text[:50]}'")
     
     # Skip if user is in topup flow
     if context.user_data.get('awaiting_topup_amount'):
