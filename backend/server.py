@@ -1441,7 +1441,7 @@ async def startup_event():
                 per_message=False,  # False is correct: we use MessageHandler (not only CallbackQueryHandler)
                 allow_reentry=True,
                 name='template_rename_conversation',
-                persistent=True  # Enabled: Using DictPersistence
+                persistent=True  # Enabled: Using PicklePersistence
             )
             
             # Import order conversation handler from modular setup
