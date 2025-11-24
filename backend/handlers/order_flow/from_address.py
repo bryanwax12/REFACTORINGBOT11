@@ -290,6 +290,13 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     
     state = update.effective_message.text.strip().upper()
     
+    # Validate state code (must be 2 letters for US)
+    if len(state) != 2 or not state.isalpha():
+        await safe_telegram_call(update.effective_message.reply_text(
+            "⚠️ Штат должен быть указан 2-буквенным кодом.\n\nНапример: CA, NY, TX, FL\n\nПожалуйста, введите код штата:"
+        ))
+        return FROM_STATE
+    
     # Store
     user_id = update.effective_user.id
     context.user_data['from_state'] = state
