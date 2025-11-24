@@ -86,6 +86,7 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
         update,
         context,
         message_text,
+        placeholder="Например: 215 Clayton St.",
         next_state=FROM_ADDRESS,
         safe_telegram_call_func=safe_telegram_call
     )
