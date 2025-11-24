@@ -263,12 +263,10 @@ async def order_from_address2(update: Update, context: ContextTypes.DEFAULT_TYPE
     # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
     
-    from utils.ui_utils import get_cancel_keyboard, OrderStepMessages, TemplateEditMessages
     asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
-    # Use different messages for template editing vs order creation
     # ✅ МАГИЧЕСКИЙ ГИБРИД 2025
-    from utils.ui_utils import ask_with_cancel_and_focus
+    from utils.ui_utils import ask_with_cancel_and_focus, OrderStepMessages, TemplateEditMessages
     
     if context.user_data.get('editing_template_from') or context.user_data.get('editing_from_address'):
         message_text = TemplateEditMessages.FROM_CITY
