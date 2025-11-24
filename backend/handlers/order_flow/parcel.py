@@ -37,7 +37,7 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
     weight_str = update.effective_message.text.strip()
     
     # Validate
-    is_valid, error_msg, weight = validate_weight(weight_str)
+    is_valid, weight, error_msg = validate_weight(weight_str)
     if not is_valid:
         await safe_telegram_call(update.effective_message.reply_text(error_msg))
         return PARCEL_WEIGHT
