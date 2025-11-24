@@ -156,7 +156,6 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Send prompt for weight input
     weight_prompt = f"{message}\n\n{OrderStepMessages.PARCEL_WEIGHT}"
-    reply_markup = get_cancel_keyboard()
     
     # Save UI state ONLY (NOT conversation state - ConversationHandler manages that)
     from server import PARCEL_WEIGHT
@@ -165,7 +164,7 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_weight_prompt():
-        bot_msg = await query.message.reply_text(weight_prompt, reply_markup=reply_markup)
+        bot_msg = await query.message.reply_text(weight_prompt)
         if bot_msg:
             context.user_data['last_bot_message_id'] = bot_msg.message_id
     
