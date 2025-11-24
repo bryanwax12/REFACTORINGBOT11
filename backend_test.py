@@ -8251,7 +8251,10 @@ def main():
     
     # Run tests as specified in review request
     tests = [
-        # 1. PRIORITY: Telegram Bot Basic Flow (Review Request)
+        # 1. PRIORITY: Telegram Bot Double Input Issue (CRITICAL REVIEW REQUEST)
+        ("🚨 Telegram Double Input Issue", test_telegram_double_input_issue),
+        
+        # 2. PRIORITY: Telegram Bot Basic Flow (Review Request)
         ("🎯 Telegram Bot Basic Flow", test_telegram_bot_basic_flow),
         ("🤖 Telegram Bot Infrastructure", test_telegram_bot_infrastructure),
         ("🔑 Telegram Bot Token Validation", test_telegram_bot_token),
