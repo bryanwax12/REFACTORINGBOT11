@@ -1633,7 +1633,7 @@ async def startup_event():
                 # Запустить polling
                 await application.updater.start_polling(
                     allowed_updates=["message", "callback_query"],
-                    drop_pending_updates=False
+                    drop_pending_updates=True  # Drop pending updates to avoid processing old messages
                 )
                 
                 logger.info("✅ Polling started successfully")
