@@ -302,6 +302,13 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, sessi
     
     zip_code = update.effective_message.text.strip()
     
+    # Validate ZIP code (5 digits for US)
+    if not zip_code.isdigit() or len(zip_code) != 5:
+        await safe_telegram_call(update.effective_message.reply_text(
+            "⚠️ Почтовый индекс должен содержать 5 цифр.\n\nНапример: 94102, 10001, 90210\n\nПожалуйста, введите почтовый индекс:"
+        ))
+        return TO_ZIP
+    
     # Store
     user_id = update.effective_user.id
     context.user_data['to_zip'] = zip_code
