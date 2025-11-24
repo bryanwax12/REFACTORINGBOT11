@@ -7836,6 +7836,7 @@ def test_telegram_bot_production_flow():
                     "date": int(time.time()),
                     "text": "Шаг 3/18: Адрес 2 отправителя"
                 },
+                "chat_instance": "test_chat_instance_456",
                 "data": "skip_from_address2"
             }
         }
