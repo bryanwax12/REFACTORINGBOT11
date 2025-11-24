@@ -32,6 +32,16 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     logger.info(f"🔵 order_to_name - User: {update.effective_user.id}")
     
     name = update.effective_message.text.strip()
+    
+    # Validate name
+    from utils.validation import validate_name
+    is_valid, error_msg = validate_name(name)
+    if not is_valid:
+        await safe_telegram_call(update.effective_message.reply_text(
+            error_msg + "\n\nПожалуйста, введите имя получателя:"
+        ))
+        return TO_NAME
+    
     name = sanitize_string(name, max_length=50)
     
     # Store
