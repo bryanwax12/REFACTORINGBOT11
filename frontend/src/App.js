@@ -15,32 +15,21 @@ import { Package, DollarSign, Users, TrendingUp, Send, MapPin, Box, Search, Down
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-// WORKAROUND: Use config file instead of env variables for production
-// Emergent platform concatenates environment variables
-let BACKEND_URL, ADMIN_API_KEY;
-
-// Check if running in production and env vars are corrupted
-const isEnvCorrupted = (val) => {
-  return val && (val.includes('REACT_APP_') || val.includes('MONGO_URL') || val.includes('WEBHOOK_'));
+// WORKAROUND: Emergent platform concatenates environment variables
+// This function automatically cleans concatenated values
+const cleanEnvValue = (value) => {
+  if (!value) return value;
+  // Split by common concatenation patterns and take the first part
+  const cleaned = value.split('REACT_APP_')[0].split('MONGO_URL')[0].split('WEBHOOK_')[0].split('BOT_TOKEN')[0].trim();
+  return cleaned;
 };
 
-if (isEnvCorrupted(process.env.REACT_APP_BACKEND_URL) || 
-    isEnvCorrupted(process.env.REACT_APP_ADMIN_API_KEY) ||
-    !process.env.REACT_APP_BACKEND_URL ||
-    !process.env.REACT_APP_ADMIN_API_KEY) {
-  // Use production config file
-  console.log('⚠️ Environment variables corrupted or missing, using production config file');
-  const productionConfig = {
-    BACKEND_URL: 'https://telegram-admin-fix-2.emergent.host',
-    ADMIN_API_KEY: 'sk_admin_e19063c3f82f447ba4ccf49cd97dd9fd_2024',
-  };
-  BACKEND_URL = productionConfig.BACKEND_URL;
-  ADMIN_API_KEY = productionConfig.ADMIN_API_KEY;
-} else {
-  // Use environment variables (preview/local)
-  BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-  ADMIN_API_KEY = process.env.REACT_APP_ADMIN_API_KEY;
-}
+// Get and clean environment variables
+let BACKEND_URL = cleanEnvValue(process.env.REACT_APP_BACKEND_URL) || 'https://telegram-admin-fix-2.emergent.host';
+let ADMIN_API_KEY = cleanEnvValue(process.env.REACT_APP_ADMIN_API_KEY) || 'sk_admin_e19063c3f82f447ba4ccf49cd97dd9fd_2024';
+
+// Log config source for debugging
+console.log('📡 Config source:', process.env.REACT_APP_BACKEND_URL ? 'Environment Variables (cleaned)' : 'Fallback values');
 
 const API = `${BACKEND_URL}/api`;
 

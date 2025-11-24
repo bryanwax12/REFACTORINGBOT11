@@ -3,8 +3,15 @@ import axios from "axios";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 
-const API = process.env.REACT_APP_BACKEND_URL || "";
-const ADMIN_API_KEY = process.env.REACT_APP_ADMIN_API_KEY;
+// Clean environment variables (Emergent platform concatenates them)
+const cleanEnvValue = (value) => {
+  if (!value) return value;
+  return value.split('REACT_APP_')[0].split('MONGO_URL')[0].split('WEBHOOK_')[0].split('BOT_TOKEN')[0].trim();
+};
+
+const BACKEND_URL = cleanEnvValue(process.env.REACT_APP_BACKEND_URL) || "";
+const ADMIN_API_KEY = cleanEnvValue(process.env.REACT_APP_ADMIN_API_KEY) || "";
+const API = `${BACKEND_URL}/api`;
 
 export default function MonitoringTab() {
   const [healthData, setHealthData] = useState(null);
