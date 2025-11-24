@@ -275,6 +275,7 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
         update,
         context,
         message_text,
+        placeholder="Например: CA",
         next_state=TO_ZIP,
         safe_telegram_call_func=safe_telegram_call
     )
