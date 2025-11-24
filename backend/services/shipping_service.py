@@ -501,9 +501,33 @@ async def fetch_rates_from_shipstation(
             return True, rates, None
             
         else:
-            error_msg = f"ShipStation API error: {response.status_code} - {response.text}"
-            logger.error(error_msg)
-            return False, None, error_msg
+            # Parse error response
+            try:
+                error_data = response.json()
+                errors = error_data.get('errors', [])
+                
+                if errors:
+                    # Extract user-friendly error messages
+                    error_messages = []
+                    for error in errors:
+                        msg = error.get('message', 'Unknown error')
+                        field = error.get('field_name', '')
+                        if field:
+                            error_messages.append(f"{field}: {msg}")
+                        else:
+                            error_messages.append(msg)
+                    
+                    error_msg = "; ".join(error_messages)
+                    logger.error(f"ShipStation API validation errors: {error_msg}")
+                    return False, None, error_msg
+                else:
+                    error_msg = f"ShipStation API error: {response.status_code} - {response.text}"
+                    logger.error(error_msg)
+                    return False, None, error_msg
+            except:
+                error_msg = f"ShipStation API error: {response.status_code} - {response.text}"
+                logger.error(error_msg)
+                return False, None, error_msg
             
     except httpx.TimeoutException:
         return False, None, "Request timeout - ShipStation API took too long to respond"
