@@ -320,11 +320,11 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     
     state = update.effective_message.text.strip().upper()
     
-    # Validate state code (must be 2 letters for US)
-    if len(state) != 2 or not state.isalpha():
-        await safe_telegram_call(update.effective_message.reply_text(
-            "⚠️ Штат должен быть указан 2-буквенным кодом.\n\nНапример: CA, NY, TX, FL\n\nПожалуйста, введите код штата:"
-        ))
+    # Validate state code
+    from utils.validation import validate_state
+    is_valid, error_msg = validate_state(state)
+    if not is_valid:
+        await safe_telegram_call(update.effective_message.reply_text(error_msg))
         return FROM_STATE
     
     # Store
