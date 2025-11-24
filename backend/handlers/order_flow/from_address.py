@@ -152,14 +152,17 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     
     logger.info(f"✅ order_from_name completed - name: '{name}'")
     
-    # Функция сама вернет FROM_ADDRESS для ConversationHandler
-    return await ask_with_cancel_and_focus(
+    # Отправляем запрос пользователю (НЕ возвращаем состояние из функции)
+    await ask_with_cancel_and_focus(
         update,
         context,
         message_text,
         next_state=FROM_ADDRESS,
         safe_telegram_call_func=safe_telegram_call
     )
+    
+    # ConversationHandler сам дождется ответа пользователя
+    return FROM_ADDRESS
 
 
 @safe_handler(fallback_state=ConversationHandler.END)
