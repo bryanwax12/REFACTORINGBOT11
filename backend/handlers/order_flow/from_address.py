@@ -53,34 +53,9 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     name = update.effective_message.text.strip()
     name = sanitize_string(name, max_length=50)
     
-    # Store in session AND context using service
+    # Store in context
     user_id = update.effective_user.id
     context.user_data['from_name'] = name
-    
-    # CRITICAL: Check and restore flags from DB session if missing
-    from server import db
-    session = await db.user_sessions.find_one(
-        {"user_id": user_id, "is_active": True},
-        {"_id": 0, "editing_template_from": 1, "editing_template_id": 1}
-    )
-    if session and session.get('editing_template_from'):
-        context.user_data['editing_template_from'] = True
-        context.user_data['editing_template_id'] = session.get('editing_template_id')
-        logger.info("🔄 RESTORED editing_template_from flag in order_from_name")
-    
-    # Update session via service (skip if editing template)
-    # Run session update and logging in parallel (non-blocking background tasks)
-    if not context.user_data.get('editing_template_from'):
-        logger.info("📝 Updating session for FROM_NAME (normal flow)")
-        # REMOVED: ConversationHandler manages state via Persistence
-        # Run session update in background (don't wait)
-        # asyncio.create_task(session_service.update_session_step(
-        #     user_id,
-        #     step="FROM_ADDRESS",
-        #     data={'from_name': name}
-        # ))
-    else:
-        logger.info("⏭️ SKIPPING session update - editing template FROM address")
     
     # Log action in background (don't wait)
     asyncio.create_task(SecurityLogger.log_action(
