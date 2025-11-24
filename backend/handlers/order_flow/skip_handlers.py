@@ -74,16 +74,16 @@ async def handle_skip_field(
     # Save state IMMEDIATELY (before background task)
     context.user_data['last_bot_message_text'] = next_message
     
-    # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
-    async def send_next_step():
-        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
-            next_message,
-            reply_markup=reply_markup
-        ))
-        if bot_msg:
-            context.user_data['last_bot_message_id'] = bot_msg.message_id
-    
-    asyncio.create_task(send_next_step())
+    # Send message with ForceReply
+    bot_msg = await safe_telegram_call(update.effective_message.reply_text(
+        next_message,
+        reply_markup=ForceReply(
+            input_field_placeholder=" ",
+            selective=True
+        )
+    ))
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
     
     # Return next state constant
     return next_step_const
