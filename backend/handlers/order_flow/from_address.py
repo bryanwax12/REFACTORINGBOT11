@@ -334,7 +334,7 @@ async def order_from_city(update: Update, context: ContextTypes.DEFAULT_TYPE, se
         bot_msg = await safe_telegram_call(update.effective_message.reply_text(
             message_text,
             reply_markup=ForceReply(
-                input_field_placeholder=" ",
+                input_field_placeholder="⌨️ Жду ваш ответ...",
                 selective=True
             )
         ))

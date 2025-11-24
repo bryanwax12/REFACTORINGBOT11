@@ -187,7 +187,7 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
         bot_msg = await safe_telegram_call(update.effective_message.reply_text(
                 message_text,
                 reply_markup=ForceReply(
-                    input_field_placeholder=" ",
+                    input_field_placeholder="⌨️ Жду ваш ответ...",
                     selective=True
                 ),
                 parse_mode='Markdown'
@@ -391,7 +391,7 @@ async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
         bot_msg = await safe_telegram_call(update.effective_message.reply_text(
             message_text,
             reply_markup=ForceReply(
-                input_field_placeholder=" ",
+                input_field_placeholder="⌨️ Жду ваш ответ...",
                 selective=True
             )
         ))

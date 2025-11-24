@@ -78,7 +78,7 @@ async def handle_skip_field(
     bot_msg = await safe_telegram_call(update.effective_message.reply_text(
         next_message,
         reply_markup=ForceReply(
-            input_field_placeholder=" ",
+            input_field_placeholder="⌨️ Жду ваш ответ...",
             selective=True
         )
     ))
