@@ -120,6 +120,16 @@ async def order_from_address(update: Update, context: ContextTypes.DEFAULT_TYPE,
     logger.info(f"🔵 order_from_address - User: {update.effective_user.id}")
     
     address = update.effective_message.text.strip()
+    
+    # Validate address
+    from utils.validation import validate_address
+    is_valid, error_msg = validate_address(address)
+    if not is_valid:
+        await safe_telegram_call(update.effective_message.reply_text(
+            error_msg + "\n\nПожалуйста, введите адрес отправителя:"
+        ))
+        return FROM_ADDRESS
+    
     address = sanitize_string(address, max_length=100)
     
     # Store
