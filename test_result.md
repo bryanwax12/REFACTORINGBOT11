@@ -393,7 +393,7 @@ python3 /app/test_bot_flow.py
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "КОМПЛЕКСНОЕ ТЕСТИРОВАНИЕ ГЛОБАЛЬНОГО РЕФАКТОРИНГА системы управления состоянием last_state. Проблема: context.user_data['last_state'] сохранялся как целочисленная константа (FROM_NAME = 0), а при чтении ожидалась строка ('FROM_NAME'). Это вызывало KeyError при нажатии кнопок 'Отмена' → 'Вернуться к заказу'. Исправлено: создан словарь STATE_NAMES для маппинга INT → STRING, обновлено 32 места присваивания last_state."
+user_problem_statement: "ТЕСТИРОВАНИЕ TELEGRAM БОТА @whitelabel_shipping_bot: Протестировать основной флоу бота - команда /start, нажатие 'Новый заказ', прохождение первых 3 шагов создания заказа (имя отправителя 'Test Name', адрес отправителя '123 Test St', пропуск Address 2). Проверить что бот отвечает на команды, переходы между шагами работают, ForceReply открывает клавиатуру, кнопка 'Пропустить' работает. Production bot: @whitelabel_shipping_bot, Backend: https://telegram-admin-fix-2.emergent.host, Test user ID: 7066790254."
 
 backend:
   - task: "Balance Notification System - Admin Panel Balance Changes"
