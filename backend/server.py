@@ -1380,10 +1380,11 @@ async def startup_event():
             # Get optimized settings from performance config
             app_settings = BotPerformanceConfig.get_optimized_application_settings()
             
-            # MongoDB Persistence - lightweight replacement for PicklePersistence
-            from utils.mongodb_persistence import MongoDBPersistence
-            mongodb_persistence = MongoDBPersistence(db)
-            logger.info("✅ MongoDBPersistence initialized")
+            # DictPersistence for webhook mode - stores conversation state between HTTP requests
+            # This is CRITICAL for webhook mode to work correctly!
+            from telegram.ext import DictPersistence
+            persistence = DictPersistence()
+            logger.info("✅ DictPersistence initialized for webhook mode")
             
             # Optimize: Only receive needed update types (saves ~20-40ms)
             from telegram import Update
@@ -1397,8 +1398,8 @@ async def startup_event():
             application = (
                 Application.builder()
                 .token(TELEGRAM_BOT_TOKEN)
-                .persistence(mongodb_persistence)  # MongoDB-based persistence for ConversationHandler
-                .concurrent_updates(False)  # CRITICAL: Sequential processing prevents race conditions
+                .persistence(persistence)  # DictPersistence for webhook mode - preserves conversation state
+                .concurrent_updates(True)  # Allow concurrent updates for better performance in webhook mode
                 .connect_timeout(app_settings['connect_timeout'])  # Fast connection
                 .read_timeout(app_settings['read_timeout'])   # Optimized read timeout
                 .write_timeout(app_settings['write_timeout'])  # Reliable message delivery
