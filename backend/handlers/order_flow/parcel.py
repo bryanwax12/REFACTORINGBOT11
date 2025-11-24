@@ -97,11 +97,12 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
     
     length_str = update.effective_message.text.strip()
     
-    # Convert to float (no validation)
-    try:
-        length = float(length_str)
-    except:
-        length = 10.0  # Default value
+    # Validate dimension
+    from utils.validation import validate_dimension
+    is_valid, length, error_msg = validate_dimension(length_str, "Длина")
+    if not is_valid:
+        await safe_telegram_call(update.effective_message.reply_text(error_msg))
+        return PARCEL_LENGTH
     
     # Store
     user_id = update.effective_user.id
