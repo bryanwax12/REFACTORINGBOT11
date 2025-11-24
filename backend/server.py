@@ -31,34 +31,15 @@ def is_env_corrupted(value):
         return True
     return False
 
-# Load production config if needed
-from config_production import PRODUCTION_CONFIG
-
-# Check critical env variables and use config file if corrupted
-for key in ['ADMIN_API_KEY', 'MONGO_URL', 'TELEGRAM_BOT_TOKEN', 'WEBHOOK_BASE_URL', 'SHIPSTATION_API_KEY']:
+# Validate critical environment variables
+REQUIRED_ENV_VARS = ['ADMIN_API_KEY', 'MONGO_URL', 'TELEGRAM_BOT_TOKEN', 'WEBHOOK_BASE_URL']
+for key in REQUIRED_ENV_VARS:
     current_value = os.environ.get(key)
-    
-    # Special handling for WEBHOOK_BASE_URL - always use production config on production
-    if key == 'WEBHOOK_BASE_URL':
-        # If env var contains preview URL, use production config instead
-        if current_value and 'preview.emergentagent.com' in current_value:
-            if key in PRODUCTION_CONFIG:
-                os.environ[key] = PRODUCTION_CONFIG[key]
-                print(f"⚠️ Using production config for {key} (preview URL detected)")
-                continue
-    
     if not current_value or is_env_corrupted(current_value):
-        if key in PRODUCTION_CONFIG:
-            os.environ[key] = PRODUCTION_CONFIG[key]
-            print(f"⚠️ Using production config for {key} (env var corrupted or missing)")
+        print(f"❌ CRITICAL: Missing or corrupted environment variable: {key}")
+        # Don't raise error immediately - let the application start and log the issue
     else:
-        print(f"✅ Using env variable for {key}: {current_value[:20]}...")
-
-# Also set related keys if not present
-if not os.environ.get('SHIPSTATION_API_KEY_TEST'):
-    os.environ['SHIPSTATION_API_KEY_TEST'] = PRODUCTION_CONFIG.get('SHIPSTATION_API_KEY_TEST', '')
-if not os.environ.get('SHIPSTATION_API_KEY_PROD'):
-    os.environ['SHIPSTATION_API_KEY_PROD'] = PRODUCTION_CONFIG.get('SHIPSTATION_API_KEY_PROD', '')
+        print(f"✅ Environment variable validated: {key}: {current_value[:20]}...")
 
 from bot_protection import BotProtection
 from telegram_safety import TelegramSafetySystem, TelegramBestPractices
