@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 from utils.handler_decorators import with_user_session, safe_handler
 
 @safe_handler(fallback_state=ConversationHandler.END)
-@with_user_session(create_user=True, require_session=True)
+@with_user_session(create_user=True, require_session=False)
 async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Start new order flow
