@@ -75,22 +75,19 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     from server import db
     from datetime import datetime, timezone
     
-    # CRITICAL: Use upsert=True to create session if it doesn't exist
-    await db.user_sessions.update_one(
-        {"user_id": telegram_id, "is_active": True},
-        {"$set": {
-            "session_data": {},
-            "current_step": "START",
-            "updated_at": datetime.now(timezone.utc).isoformat()
-        },
-         "$setOnInsert": {
-            "user_id": telegram_id,
-            "is_active": True,
-            "created_at": datetime.now(timezone.utc).isoformat()
-        }},
-        upsert=True  # CREATE session if doesn't exist
-    )
-    logger.info("✅ Created/cleared MongoDB session data for ConversationHandler")
+    # CRITICAL FIX: First delete any existing session to avoid duplicate key error
+    await db.user_sessions.delete_many({"user_id": telegram_id})
+    
+    # Now create fresh session
+    await db.user_sessions.insert_one({
+        "user_id": telegram_id,
+        "is_active": True,
+        "session_data": {},
+        "current_step": "START",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    })
+    logger.info("✅ Created fresh MongoDB session data for ConversationHandler")
     
     # Fresh new order - no resume
     logger.info(f"🆕 Fresh new order for user {telegram_id}")
