@@ -68,20 +68,12 @@ async def handle_skip_field(
     else:
         logger.info(f"User {user_id}: Skipped {field_name}")
     
-    # Show next step with ForceReply (no cancel button)
-    from telegram import ForceReply
-    
+    # Show next step (no cancel button)
     # Save state IMMEDIATELY (before background task)
     context.user_data['last_bot_message_text'] = next_message
     
-    # Send message with ForceReply
-    bot_msg = await safe_telegram_call(update.effective_message.reply_text(
-        next_message,
-        reply_markup=ForceReply(
-            input_field_placeholder="⌨️ Жду ваш ответ...",
-            selective=True
-        )
-    ))
+    # Send message without ForceReply
+    bot_msg = await safe_telegram_call(update.effective_message.reply_text(next_message))
     if bot_msg:
         context.user_data['last_bot_message_id'] = bot_msg.message_id
     
