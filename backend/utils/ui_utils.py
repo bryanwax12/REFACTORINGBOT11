@@ -1681,13 +1681,10 @@ async def ask_with_cancel_and_focus(
     safe_telegram_call_func=None
 ):
     """
-    ✅ ПРАВИЛЬНОЕ РЕШЕНИЕ 2025: Два сообщения
+    Простое решение: ТОЛЬКО ForceReply для автофокуса
     
-    1. Сообщение с кнопкой "Отмена" (InlineKeyboardMarkup)
-    2. Сразу за ним - ForceReply (автофокус + клавиатура)
-    
-    Это работает идеально и используется в топовых ботах:
-    @CryptoBot, @durgerkingbot, @PizzaBot
+    Отправляет ОДНО сообщение с текстом вопроса и ForceReply.
+    Без кнопок "Отмена" - пользователь может использовать команду /cancel.
     
     Args:
         update: Telegram Update
@@ -1696,31 +1693,19 @@ async def ask_with_cancel_and_focus(
         placeholder: Плейсхолдер для поля ввода
         safe_telegram_call_func: Функция для безопасной отправки (опционально)
     """
-    from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ForceReply
+    from telegram import ForceReply
     
     # Функция для безопасной отправки
     if safe_telegram_call_func is None:
         from handlers.common_handlers import safe_telegram_call
         safe_telegram_call_func = safe_telegram_call
     
-    # 1. Сообщение с кнопкой "Отмена"
-    cancel_keyboard = InlineKeyboardMarkup([[
-        InlineKeyboardButton("❌ Отмена", callback_data="cancel_order")
-    ]])
-    
-    await safe_telegram_call_func(
-        update.effective_message.reply_text(
-            text,
-            reply_markup=cancel_keyboard
-        )
-    )
-    
-    # 2. ForceReply - мгновенный ввод
+    # Одно сообщение с ForceReply
     bot_msg = await safe_telegram_call_func(
         update.effective_message.reply_text(
-            "⌨️ Жду ваш ответ...",
+            text,
             reply_markup=ForceReply(
-                input_field_placeholder=placeholder or "Введите данные...",
+                input_field_placeholder=placeholder or " ",
                 selective=True
             )
         )
@@ -1729,7 +1714,7 @@ async def ask_with_cancel_and_focus(
     # Сохранить ID последнего сообщения для UI-логики
     if bot_msg:
         context.user_data['last_bot_message_id'] = bot_msg.message_id
-        context.user_data['last_bot_message_text'] = "⌨️ Жду ваш ответ..."
+        context.user_data['last_bot_message_text'] = text
     
     return bot_msg
 
