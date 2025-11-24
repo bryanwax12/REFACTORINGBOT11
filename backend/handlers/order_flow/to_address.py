@@ -256,13 +256,15 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     else:
         message_text = OrderStepMessages.TO_STATE
     
-    return await ask_with_cancel_and_focus(
+    await ask_with_cancel_and_focus(
         update,
         context,
         message_text,
         next_state=TO_STATE,
         safe_telegram_call_func=safe_telegram_call
     )
+    
+    return TO_STATE
 
 
 @safe_handler(fallback_state=ConversationHandler.END)
