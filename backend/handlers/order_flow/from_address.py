@@ -438,7 +438,7 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     else:
         message_text = OrderStepMessages.FROM_PHONE
     
-    return await ask_with_skip_cancel_and_focus(
+    await ask_with_skip_cancel_and_focus(
         update,
         context,
         message_text,
@@ -446,6 +446,8 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
         next_state=FROM_PHONE,
         safe_telegram_call_func=safe_telegram_call
     )
+    
+    return FROM_PHONE
 
 
 @safe_handler(fallback_state=ConversationHandler.END)
