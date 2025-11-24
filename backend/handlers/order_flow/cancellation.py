@@ -11,6 +11,9 @@ logger = logging.getLogger(__name__)
 
 from utils.handler_decorators import with_user_session, safe_handler, with_services
 
+# Export public functions
+__all__ = ['cancel_order', 'confirm_cancel_order', 'return_to_order', 'check_order_data']
+
 
 @safe_handler(fallback_state=ConversationHandler.END)
 @with_user_session(create_user=False, require_session=True)
