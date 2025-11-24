@@ -352,6 +352,8 @@ __all__ = [
 
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=True, require_session=True)
 async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Start new order (without template)"""
     from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
