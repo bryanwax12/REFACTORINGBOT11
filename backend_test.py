@@ -7697,6 +7697,7 @@ def test_telegram_bot_production_flow():
                     "date": int(time.time()),
                     "text": "Главное меню"
                 },
+                "chat_instance": "test_chat_instance_123",
                 "data": "new_order"
             }
         }
