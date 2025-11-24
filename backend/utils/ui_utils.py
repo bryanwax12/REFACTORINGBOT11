@@ -1681,57 +1681,44 @@ async def ask_with_cancel_and_focus(
     safe_telegram_call_func=None
 ):
     """
-    Магический гибрид: кнопка "Отмена" + автофокус + открытая клавиатура
+    Простое решение: только кнопка "Отмена" (без ForceReply)
     
-    Отправляет 2 сообщения за 0.3 сек:
-    1. Сообщение с кнопкой "Отмена" (InlineKeyboard)
-    2. Сообщение с ForceReply (автофокус + клавиатура)
-    
-    Используется в топовых ботах: @durgerkingbot, @CryptoBot, @PizzaBot
+    ForceReply не работает в отдельном сообщении - Telegram не связывает ответ пользователя с ним.
+    Вместо этого просто показываем кнопку "Отмена", и пользователь пишет ответ в чат.
+    MessageHandler ловит текстовый ответ.
     
     Args:
         update: Telegram Update
         context: Telegram Context
         text: Текст вопроса (например: "Имя отправителя:")
-        placeholder: Плейсхолдер для поля ввода
+        placeholder: Плейсхолдер (не используется, оставлен для совместимости)
         safe_telegram_call_func: Функция для безопасной отправки (опционально)
     """
-    from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ForceReply
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
     
     # Функция для безопасной отправки
     if safe_telegram_call_func is None:
         from handlers.common_handlers import safe_telegram_call
         safe_telegram_call_func = safe_telegram_call
     
-    # 1. Сообщение с кнопкой "Отмена"
+    # Сообщение с кнопкой "Отмена"
     cancel_keyboard = InlineKeyboardMarkup([[
         InlineKeyboardButton("❌ Отмена", callback_data="cancel_order")
     ]])
     
-    bot_msg_1 = await safe_telegram_call_func(
+    bot_msg = await safe_telegram_call_func(
         update.effective_message.reply_text(
             text,
             reply_markup=cancel_keyboard
         )
     )
     
-    # 2. Сразу за ним - ForceReply (автофокус)
-    bot_msg_2 = await safe_telegram_call_func(
-        update.effective_message.reply_text(
-            "⌨️ Жду ваш ответ...",
-            reply_markup=ForceReply(
-                input_field_placeholder=placeholder or " ",
-                selective=True
-            )
-        )
-    )
-    
     # Сохранить ID последнего сообщения для UI-логики
-    if bot_msg_2:
-        context.user_data['last_bot_message_id'] = bot_msg_2.message_id
-        context.user_data['last_bot_message_text'] = "⌨️ Жду ваш ответ..."
+    if bot_msg:
+        context.user_data['last_bot_message_id'] = bot_msg.message_id
+        context.user_data['last_bot_message_text'] = text
     
-    return bot_msg_1, bot_msg_2
+    return bot_msg
 
 
 async def ask_with_skip_cancel_and_focus(
