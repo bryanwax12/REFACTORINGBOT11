@@ -215,24 +215,12 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return FROM_NAME
     
     # saved_state is an integer (state constant from ConversationHandler)
-    # Get the message text for this state
-    keyboard, message_text = OrderStepMessages.get_step_keyboard_and_message(str(saved_state))
-    logger.info(f"✅ Returning to state {saved_state}")
+    # Show data confirmation screen (where user clicked "Cancel")
+    from handlers.order_flow.confirmation import show_data_confirmation
+    logger.info(f"✅ Returning to data confirmation screen")
     
-    # Show the step
-    reply_markup = get_cancel_keyboard()
-    
-    # 🚀 PERFORMANCE: Send message in background
-    async def send_continue():
-        bot_msg = await safe_telegram_call(update.effective_message.reply_text(
-            message_text if message_text else "Продолжаем оформление заказа...",
-            reply_markup=reply_markup
-        ))
-        if bot_msg:
-            context.user_data['last_bot_message_id'] = bot_msg.message_id
-            context.user_data['last_bot_message_text'] = message_text if message_text else "Продолжаем..."
-    
-    asyncio.create_task(send_continue())
+    # Show confirmation screen
+    return await show_data_confirmation(update, context)
     
     # Special handling for SELECT_CARRIER (shipping rates screen)
     from server import SELECT_CARRIER
