@@ -350,8 +350,8 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data.clear()
         await new_order_start(update, context)
     elif query.data == 'cancel_order':
-        # Import from order_handlers module
-        from handlers.order_handlers import cancel_order
+        # Import from order_flow.cancellation module
+        from handlers.order_flow.cancellation import cancel_order
         # Check if this is an orphaned cancel button (order already completed)
         if context.user_data.get('order_completed'):
             logger.info(f"Orphaned cancel button detected from user {update.effective_user.id}")
