@@ -386,13 +386,15 @@ async def order_from_state(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     else:
         message_text = OrderStepMessages.FROM_ZIP
     
-    return await ask_with_cancel_and_focus(
+    await ask_with_cancel_and_focus(
         update,
         context,
         message_text,
         next_state=FROM_ZIP,
         safe_telegram_call_func=safe_telegram_call
     )
+    
+    return FROM_ZIP
 
 
 @safe_handler(fallback_state=ConversationHandler.END)
