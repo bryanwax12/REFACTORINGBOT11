@@ -376,11 +376,11 @@ async def order_from_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     
     zip_code = update.effective_message.text.strip()
     
-    # Validate ZIP code (5 digits for US)
-    if not zip_code.isdigit() or len(zip_code) != 5:
-        await safe_telegram_call(update.effective_message.reply_text(
-            "⚠️ Почтовый индекс должен содержать 5 цифр.\n\nНапример: 94102, 10001, 90210\n\nПожалуйста, введите почтовый индекс:"
-        ))
+    # Validate ZIP code
+    from utils.validation import validate_zip
+    is_valid, error_msg = validate_zip(zip_code)
+    if not is_valid:
+        await safe_telegram_call(update.effective_message.reply_text(error_msg + "\n\nПожалуйста, введите почтовый индекс:"))
         return FROM_ZIP
     
     # Store
