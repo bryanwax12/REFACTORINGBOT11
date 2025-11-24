@@ -1710,7 +1710,7 @@ async def ask_with_cancel_and_focus(
         update.effective_message.reply_text(
             text,
             reply_markup=ForceReply(
-                input_field_placeholder=" ",
+                input_field_placeholder="⌨️ Жду ваш ответ...",
                 selective=True
             )
         )
