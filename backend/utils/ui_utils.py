@@ -1707,7 +1707,7 @@ async def ask_with_cancel_and_focus(
     
     # Одно сообщение с ForceReply
     # Используем переданный placeholder или дефолтный
-    if not placeholder:
+    if not placeholder or placeholder.strip() == "":
         placeholder = "Введите текст..."
     
     bot_msg = await safe_telegram_call_func(
