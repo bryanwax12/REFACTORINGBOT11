@@ -8909,14 +8909,252 @@ def run_comprehensive_telegram_bot_tests():
     
     return results
 
+def test_telegram_skip_button_cancel_issue():
+    """Test specific issue: Cancel button should NOT appear after skipping optional field"""
+    print("\n🔍 КРИТИЧЕСКОЕ ТЕСТИРОВАНИЕ: Кнопка 'Отмена' после пропуска опционального поля")
+    print("🎯 ТЕСТ: После нажатия 'Пропустить' на FROM_PHONE, следующий шаг (TO_NAME) НЕ должен показывать кнопку 'Отмена'")
+    print("🎯 Production bot: @whitelabel_shipping_bot")
+    print("🎯 User ID: 7066790254")
+    print("🎯 Backend: https://telegram-admin-fix-2.emergent.host")
+    
+    try:
+        # Test configuration
+        test_user_id = 7066790254  # Actual user ID from review request
+        webhook_url = f"{BACKEND_URL}/api/telegram/webhook"
+        
+        print(f"\n📋 Конфигурация теста:")
+        print(f"   Webhook URL: {webhook_url}")
+        print(f"   Test User ID: {test_user_id}")
+        print(f"   Тестируемый сценарий: FROM_PHONE (пропустить) → TO_NAME (проверка кнопок)")
+        
+        # Step 1: /start command
+        print(f"\n🔄 ШАГ 1: Отправка команды /start")
+        start_update = {
+            "update_id": int(time.time() * 1000),
+            "message": {
+                "message_id": 1,
+                "from": {
+                    "id": test_user_id,
+                    "is_bot": False,
+                    "first_name": "Test",
+                    "username": "testuser",
+                    "language_code": "ru"
+                },
+                "chat": {
+                    "id": test_user_id,
+                    "first_name": "Test",
+                    "username": "testuser",
+                    "type": "private"
+                },
+                "date": int(time.time()),
+                "text": "/start"
+            }
+        }
+        
+        response = requests.post(webhook_url, json=start_update, timeout=10)
+        print(f"   /start command: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                print(f"   Response: {result}")
+            except:
+                print(f"   Response: {response.text[:200]}")
+        
+        # Step 2: Click "Новый заказ" button
+        print(f"\n🔄 ШАГ 2: Нажатие кнопки 'Новый заказ'")
+        time.sleep(0.5)
+        new_order_update = {
+            "update_id": int(time.time() * 1000) + 1,
+            "callback_query": {
+                "id": f"callback_{int(time.time())}",
+                "from": {
+                    "id": test_user_id,
+                    "is_bot": False,
+                    "first_name": "Test",
+                    "username": "testuser"
+                },
+                "message": {
+                    "message_id": 2,
+                    "from": {"id": 123456789, "is_bot": True, "first_name": "Bot"},
+                    "chat": {"id": test_user_id, "type": "private"},
+                    "date": int(time.time()),
+                    "text": "Main menu"
+                },
+                "chat_instance": "test_chat_instance",
+                "data": "new_order"
+            }
+        }
+        
+        response = requests.post(webhook_url, json=new_order_update, timeout=10)
+        print(f"   'Новый заказ' button: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        
+        # Step 3: Go through steps to FROM_PHONE (step 7)
+        print(f"\n🔄 ШАГ 3: Прохождение шагов до FROM_PHONE (шаг 7)")
+        order_steps = [
+            ("FROM_NAME", "Test"),
+            ("FROM_ADDRESS", "Test St"),
+            ("FROM_CITY", "Test City"),
+            ("FROM_STATE", "CA"),
+            ("FROM_ZIP", "12345")
+        ]
+        
+        for i, (step_name, step_value) in enumerate(order_steps, 3):
+            time.sleep(0.5)
+            step_update = {
+                "update_id": int(time.time() * 1000) + i,
+                "message": {
+                    "message_id": i,
+                    "from": {
+                        "id": test_user_id,
+                        "is_bot": False,
+                        "first_name": "Test",
+                        "username": "testuser"
+                    },
+                    "chat": {
+                        "id": test_user_id,
+                        "type": "private"
+                    },
+                    "date": int(time.time()),
+                    "text": step_value
+                }
+            }
+            
+            response = requests.post(webhook_url, json=step_update, timeout=10)
+            status = "✅" if response.status_code == 200 else "❌"
+            print(f"   {step_name}: '{step_value}' -> {response.status_code} {status}")
+        
+        # Step 4: Skip Address 2 (FROM_ADDRESS2)
+        print(f"\n🔄 ШАГ 4: Пропуск Address 2 (FROM_ADDRESS2)")
+        time.sleep(0.5)
+        skip_address2_update = {
+            "update_id": int(time.time() * 1000) + 10,
+            "callback_query": {
+                "id": f"skip_callback_{int(time.time())}",
+                "from": {
+                    "id": test_user_id,
+                    "is_bot": False,
+                    "first_name": "Test",
+                    "username": "testuser"
+                },
+                "message": {
+                    "message_id": 10,
+                    "from": {"id": 123456789, "is_bot": True, "first_name": "Bot"},
+                    "chat": {"id": test_user_id, "type": "private"},
+                    "date": int(time.time()),
+                    "text": "Address 2 prompt"
+                },
+                "chat_instance": "test_chat_instance",
+                "data": "skip_from_address2"
+            }
+        }
+        
+        response = requests.post(webhook_url, json=skip_address2_update, timeout=10)
+        print(f"   Skip Address 2: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        
+        # Step 5: CRITICAL TEST - Skip FROM_PHONE
+        print(f"\n🔄 ШАГ 5: КРИТИЧЕСКИЙ ТЕСТ - Пропуск FROM_PHONE")
+        time.sleep(0.5)
+        skip_phone_update = {
+            "update_id": int(time.time() * 1000) + 11,
+            "callback_query": {
+                "id": f"skip_phone_callback_{int(time.time())}",
+                "from": {
+                    "id": test_user_id,
+                    "is_bot": False,
+                    "first_name": "Test",
+                    "username": "testuser"
+                },
+                "message": {
+                    "message_id": 11,
+                    "from": {"id": 123456789, "is_bot": True, "first_name": "Bot"},
+                    "chat": {"id": test_user_id, "type": "private"},
+                    "date": int(time.time()),
+                    "text": "Phone prompt"
+                },
+                "chat_instance": "test_chat_instance",
+                "data": "skip_from_phone"
+            }
+        }
+        
+        response = requests.post(webhook_url, json=skip_phone_update, timeout=10)
+        print(f"   Skip FROM_PHONE: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        
+        # Step 6: VERIFICATION - Check TO_NAME step response
+        print(f"\n🔍 ШАГ 6: ПРОВЕРКА - Анализ следующего шага (TO_NAME)")
+        
+        # The response from skip_phone should contain the TO_NAME step
+        # We need to check if it contains "Отмена" button or only ForceReply
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                response_text = json.dumps(result, ensure_ascii=False).lower()
+                
+                # Check for cancel button indicators
+                cancel_indicators = [
+                    'отмена',
+                    'cancel',
+                    'cancel_order',
+                    'отменить'
+                ]
+                
+                has_cancel_button = any(indicator in response_text for indicator in cancel_indicators)
+                
+                # Check for ForceReply indicators
+                force_reply_indicators = [
+                    'force_reply',
+                    'forcereply',
+                    'selective'
+                ]
+                
+                has_force_reply = any(indicator in response_text for indicator in force_reply_indicators)
+                
+                print(f"   Анализ ответа TO_NAME:")
+                print(f"   Содержит кнопку 'Отмена': {'❌ ДА (ПЛОХО)' if has_cancel_button else '✅ НЕТ (ХОРОШО)'}")
+                print(f"   Содержит ForceReply: {'✅ ДА (ХОРОШО)' if has_force_reply else '❌ НЕТ (ПЛОХО)'}")
+                
+                # Show response for manual verification
+                print(f"   Полный ответ (первые 500 символов):")
+                print(f"   {json.dumps(result, ensure_ascii=False, indent=2)[:500]}...")
+                
+                # Test result
+                test_passed = not has_cancel_button and has_force_reply
+                
+                if test_passed:
+                    print(f"   ✅ ТЕСТ ПРОЙДЕН: Кнопка 'Отмена' НЕ показывается после пропуска FROM_PHONE")
+                else:
+                    print(f"   ❌ ТЕСТ НЕ ПРОЙДЕН: Проблема с кнопками после пропуска FROM_PHONE")
+                
+                return test_passed
+                
+            except Exception as e:
+                print(f"   ❌ Ошибка анализа ответа: {e}")
+                print(f"   Raw response: {response.text[:500]}")
+                return False
+        else:
+            print(f"   ❌ Не удалось получить ответ TO_NAME step")
+            return False
+        
+    except Exception as e:
+        print(f"❌ Ошибка тестирования skip button cancel issue: {e}")
+        import traceback
+        print(f"   Traceback: {traceback.format_exc()}")
+        return False
+
 if __name__ == "__main__":
     print("🚀 Starting Backend Test Suite...")
     print(f"Backend URL: {BACKEND_URL}")
     print(f"API Base: {API_BASE}")
     
-    # CRITICAL: Run the fast input test first (from review request)
+    # CRITICAL: Run the specific test from review request first
     print("\n" + "="*80)
     print("🚨 КРИТИЧЕСКОЕ ТЕСТИРОВАНИЕ ИЗ REVIEW REQUEST")
+    print("="*80)
+    skip_button_result = test_telegram_skip_button_cancel_issue()
+    
+    # CRITICAL: Run the fast input test (from previous review request)
+    print("\n" + "="*80)
+    print("🚨 ДОПОЛНИТЕЛЬНОЕ ТЕСТИРОВАНИЕ - БЫСТРЫЙ ВВОД")
     print("="*80)
     fast_input_result = test_telegram_fast_input_issue()
     
@@ -8928,13 +9166,18 @@ if __name__ == "__main__":
     print("🎯 ФИНАЛЬНАЯ ОЦЕНКА REVIEW REQUEST")
     print("="*80)
     
-    if fast_input_result:
-        print("✅ REVIEW REQUEST: Fast input issue at PARCEL_WEIGHT step RESOLVED")
+    if skip_button_result:
+        print("✅ REVIEW REQUEST: Skip button cancel issue RESOLVED")
+        print("   После пропуска FROM_PHONE кнопка 'Отмена' НЕ показывается на TO_NAME")
     else:
-        print("❌ REVIEW REQUEST: Fast input issue at PARCEL_WEIGHT step NOT RESOLVED")
+        print("❌ REVIEW REQUEST: Skip button cancel issue NOT RESOLVED")
         print("🚨 URGENT ACTION REQUIRED:")
-        print("   1. Check webhook processing in /api/telegram/webhook")
-        print("   2. Verify PicklePersistence configuration")
-        print("   3. Ensure ConversationHandler has persistent=True")
-        print("   4. Add logging to order_parcel_weight handler")
-        print("   5. Check if srv.application.process_update() is called synchronously")
+        print("   1. Check skip handlers in /app/backend/handlers/order_flow/skip_handlers.py")
+        print("   2. Verify TO_NAME step does not include cancel button after skip")
+        print("   3. Ensure ForceReply is used instead of InlineKeyboard for TO_NAME")
+        print("   4. Check conversation flow after skip operations")
+    
+    if fast_input_result:
+        print("✅ ADDITIONAL: Fast input issue at PARCEL_WEIGHT step RESOLVED")
+    else:
+        print("❌ ADDITIONAL: Fast input issue at PARCEL_WEIGHT step NOT RESOLVED")
