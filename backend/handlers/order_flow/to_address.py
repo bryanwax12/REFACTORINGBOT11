@@ -174,6 +174,7 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE, 
         update,
         context,
         message_text,
+        placeholder="Например: 123 Main St.",
         next_state=TO_CITY,
         safe_telegram_call_func=safe_telegram_call
     )
