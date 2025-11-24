@@ -187,10 +187,10 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE,
     # Check weight to decide if we show "Use standard sizes" button
     weight = context.user_data.get('parcel_weight', 0)
     if weight > 10:
-        reply_markup = get_cancel_keyboard()
+        reply_markup = None  # No buttons for heavy packages
         logger.info(f"⚠️ Weight {weight} lbs > 10, hiding standard size button")
     else:
-        reply_markup = get_standard_size_and_cancel_keyboard(CallbackData.SKIP_PARCEL_HEIGHT)
+        reply_markup = get_standard_size_keyboard(CallbackData.SKIP_PARCEL_HEIGHT)
     
     message_text = OrderStepMessages.PARCEL_HEIGHT
     
