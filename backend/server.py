@@ -1614,7 +1614,7 @@ async def startup_event():
                 await application.bot.set_webhook(
                     url=webhook_url,
                     allowed_updates=["message", "callback_query", "my_chat_member"],
-                    drop_pending_updates=False
+                    drop_pending_updates=True  # Drop pending updates to avoid processing old messages
                 )
                 
                 logger.info(f"✅ Webhook set successfully: {webhook_url}")
