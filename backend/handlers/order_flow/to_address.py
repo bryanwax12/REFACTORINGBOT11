@@ -249,7 +249,7 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     # ✅ МАГИЧЕСКИЙ ГИБРИД 2025
-    from utils.ui_utils import ask_with_cancel_and_focus
+    from utils.ui_utils import ask_with_cancel_and_focus, OrderStepMessages, TemplateEditMessages
     
     if context.user_data.get('editing_template_to') or context.user_data.get('editing_to_address'):
         message_text = TemplateEditMessages.TO_STATE
