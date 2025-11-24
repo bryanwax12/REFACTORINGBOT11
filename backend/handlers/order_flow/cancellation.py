@@ -210,8 +210,47 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ))
             return TO_NAME
         
+        # Try to detect state from context.user_data
+        logger.warning("⚠️ Trying to detect state from context.user_data")
+        
+        # Check what data we have to determine the state
+        if context.user_data.get('selected_carrier_id'):
+            # User was at payment method selection
+            logger.info("🔄 Detected PAYMENT_METHOD state from context")
+            from server import PAYMENT_METHOD
+            from handlers.order_flow.payment import ask_payment_method
+            return await ask_payment_method(update, context)
+        
+        elif context.user_data.get('rates'):
+            # User was at carrier selection
+            logger.info("🔄 Detected SELECT_CARRIER state from context")
+            from server import SELECT_CARRIER
+            from services.shipping_service import display_shipping_rates
+            from repositories import get_user_repo
+            from server import STATE_NAMES
+            
+            user_repo = get_user_repo()
+            return await display_shipping_rates(
+                update, 
+                context, 
+                context.user_data['rates'],
+                find_user_by_telegram_id_func=user_repo.find_by_telegram_id,
+                safe_telegram_call_func=safe_telegram_call,
+                STATE_NAMES=STATE_NAMES,
+                SELECT_CARRIER=SELECT_CARRIER
+            )
+        
+        elif context.user_data.get('parcel_dimensions'):
+            # User was at parcel step or later, refetch rates
+            logger.info("🔄 Refetching shipping rates")
+            from handlers.order_flow.rates import fetch_shipping_rates
+            return await fetch_shipping_rates(update, context)
+        
         logger.error("❌ No state found - returning to FROM_NAME")
-        await safe_telegram_call(update.effective_message.reply_text("Продолжаем оформление заказа..."))
+        await safe_telegram_call(update.effective_message.reply_text(
+            "Продолжаем оформление заказа...",
+            reply_markup=get_cancel_keyboard()
+        ))
         return FROM_NAME
     
     # saved_state is an integer (state constant from ConversationHandler)
