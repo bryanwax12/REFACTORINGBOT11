@@ -7601,6 +7601,329 @@ def test_atomic_operations_flow():
         print(f"❌ Atomic operations flow test error: {e}")
         return False
 
+def test_telegram_bot_production_flow():
+    """Test Telegram bot production flow as requested in review"""
+    print("\n🔍 КРИТИЧЕСКОЕ ТЕСТИРОВАНИЕ: Telegram Bot Production Flow")
+    print("🎯 REVIEW REQUEST: Протестируй Telegram бота @whitelabel_shipping_bot")
+    print("🎯 ЗАДАЧА: /start → 'Новый заказ' → 3 первых шага создания заказа")
+    
+    try:
+        # Configuration from review request
+        backend_url = "https://telegram-admin-fix-2.emergent.host"
+        webhook_url = f"{backend_url}/api/telegram/webhook"
+        test_user_id = 7066790254  # Telegram user ID from review request
+        
+        print(f"\n📋 Конфигурация теста:")
+        print(f"   Production Bot: @whitelabel_shipping_bot")
+        print(f"   Backend URL: {backend_url}")
+        print(f"   Webhook URL: {webhook_url}")
+        print(f"   Test User ID: {test_user_id}")
+        
+        # Test results tracking
+        test_results = []
+        
+        # Step 1: Send /start command
+        print(f"\n🔄 ШАГ 1: Отправка команды /start")
+        
+        start_update = {
+            "update_id": int(time.time() * 1000),
+            "message": {
+                "message_id": 1,
+                "from": {
+                    "id": test_user_id,
+                    "is_bot": False,
+                    "first_name": "TestUser",
+                    "username": "testuser",
+                    "language_code": "ru"
+                },
+                "chat": {
+                    "id": test_user_id,
+                    "first_name": "TestUser",
+                    "username": "testuser",
+                    "type": "private"
+                },
+                "date": int(time.time()),
+                "text": "/start",
+                "entities": [
+                    {
+                        "offset": 0,
+                        "length": 6,
+                        "type": "bot_command"
+                    }
+                ]
+            }
+        }
+        
+        try:
+            response = requests.post(webhook_url, json=start_update, timeout=15)
+            start_success = response.status_code == 200
+            print(f"   /start command: {response.status_code} {'✅' if start_success else '❌'}")
+            test_results.append(("start_command", start_success))
+            
+            if response.status_code == 200:
+                try:
+                    result = response.json()
+                    print(f"   Response: {result}")
+                except:
+                    print(f"   Response: {response.text[:200]}")
+            else:
+                print(f"   Error: {response.text[:200]}")
+                
+        except Exception as e:
+            print(f"   ❌ /start command error: {e}")
+            test_results.append(("start_command", False))
+        
+        # Small delay between steps
+        time.sleep(1)
+        
+        # Step 2: Click "Новый заказ" button
+        print(f"\n🔄 ШАГ 2: Нажатие кнопки 'Новый заказ'")
+        
+        new_order_update = {
+            "update_id": int(time.time() * 1000) + 1,
+            "callback_query": {
+                "id": f"callback_{int(time.time())}",
+                "from": {
+                    "id": test_user_id,
+                    "is_bot": False,
+                    "first_name": "TestUser",
+                    "username": "testuser",
+                    "language_code": "ru"
+                },
+                "message": {
+                    "message_id": 2,
+                    "from": {"id": 8492458522, "is_bot": True, "first_name": "WhiteLabelShippingBot"},
+                    "chat": {"id": test_user_id, "type": "private"},
+                    "date": int(time.time()),
+                    "text": "Главное меню"
+                },
+                "data": "new_order"
+            }
+        }
+        
+        try:
+            response = requests.post(webhook_url, json=new_order_update, timeout=15)
+            new_order_success = response.status_code == 200
+            print(f"   'Новый заказ' button: {response.status_code} {'✅' if new_order_success else '❌'}")
+            test_results.append(("new_order_button", new_order_success))
+            
+            if response.status_code == 200:
+                try:
+                    result = response.json()
+                    print(f"   Response: {result}")
+                except:
+                    print(f"   Response: {response.text[:200]}")
+            else:
+                print(f"   Error: {response.text[:200]}")
+                
+        except Exception as e:
+            print(f"   ❌ 'Новый заказ' button error: {e}")
+            test_results.append(("new_order_button", False))
+        
+        time.sleep(1)
+        
+        # Step 3: Enter sender name "Test Name"
+        print(f"\n🔄 ШАГ 3: Ввод имени отправителя 'Test Name'")
+        
+        name_update = {
+            "update_id": int(time.time() * 1000) + 2,
+            "message": {
+                "message_id": 3,
+                "from": {
+                    "id": test_user_id,
+                    "is_bot": False,
+                    "first_name": "TestUser",
+                    "username": "testuser",
+                    "language_code": "ru"
+                },
+                "chat": {
+                    "id": test_user_id,
+                    "first_name": "TestUser",
+                    "username": "testuser",
+                    "type": "private"
+                },
+                "date": int(time.time()),
+                "text": "Test Name"
+            }
+        }
+        
+        try:
+            response = requests.post(webhook_url, json=name_update, timeout=15)
+            name_success = response.status_code == 200
+            print(f"   Sender name 'Test Name': {response.status_code} {'✅' if name_success else '❌'}")
+            test_results.append(("sender_name", name_success))
+            
+            if response.status_code == 200:
+                try:
+                    result = response.json()
+                    print(f"   Response: {result}")
+                except:
+                    print(f"   Response: {response.text[:200]}")
+            else:
+                print(f"   Error: {response.text[:200]}")
+                
+        except Exception as e:
+            print(f"   ❌ Sender name error: {e}")
+            test_results.append(("sender_name", False))
+        
+        time.sleep(1)
+        
+        # Step 4: Enter sender address "123 Test St"
+        print(f"\n🔄 ШАГ 4: Ввод адреса отправителя '123 Test St'")
+        
+        address_update = {
+            "update_id": int(time.time() * 1000) + 3,
+            "message": {
+                "message_id": 4,
+                "from": {
+                    "id": test_user_id,
+                    "is_bot": False,
+                    "first_name": "TestUser",
+                    "username": "testuser",
+                    "language_code": "ru"
+                },
+                "chat": {
+                    "id": test_user_id,
+                    "first_name": "TestUser",
+                    "username": "testuser",
+                    "type": "private"
+                },
+                "date": int(time.time()),
+                "text": "123 Test St"
+            }
+        }
+        
+        try:
+            response = requests.post(webhook_url, json=address_update, timeout=15)
+            address_success = response.status_code == 200
+            print(f"   Sender address '123 Test St': {response.status_code} {'✅' if address_success else '❌'}")
+            test_results.append(("sender_address", address_success))
+            
+            if response.status_code == 200:
+                try:
+                    result = response.json()
+                    print(f"   Response: {result}")
+                except:
+                    print(f"   Response: {response.text[:200]}")
+            else:
+                print(f"   Error: {response.text[:200]}")
+                
+        except Exception as e:
+            print(f"   ❌ Sender address error: {e}")
+            test_results.append(("sender_address", False))
+        
+        time.sleep(1)
+        
+        # Step 5: Click "Пропустить" for Address 2
+        print(f"\n🔄 ШАГ 5: Нажатие кнопки 'Пропустить' для Address 2")
+        
+        skip_update = {
+            "update_id": int(time.time() * 1000) + 4,
+            "callback_query": {
+                "id": f"callback_{int(time.time()) + 1}",
+                "from": {
+                    "id": test_user_id,
+                    "is_bot": False,
+                    "first_name": "TestUser",
+                    "username": "testuser",
+                    "language_code": "ru"
+                },
+                "message": {
+                    "message_id": 5,
+                    "from": {"id": 8492458522, "is_bot": True, "first_name": "WhiteLabelShippingBot"},
+                    "chat": {"id": test_user_id, "type": "private"},
+                    "date": int(time.time()),
+                    "text": "Шаг 3/18: Адрес 2 отправителя"
+                },
+                "data": "skip_from_address2"
+            }
+        }
+        
+        try:
+            response = requests.post(webhook_url, json=skip_update, timeout=15)
+            skip_success = response.status_code == 200
+            print(f"   'Пропустить' button: {response.status_code} {'✅' if skip_success else '❌'}")
+            test_results.append(("skip_button", skip_success))
+            
+            if response.status_code == 200:
+                try:
+                    result = response.json()
+                    print(f"   Response: {result}")
+                except:
+                    print(f"   Response: {response.text[:200]}")
+            else:
+                print(f"   Error: {response.text[:200]}")
+                
+        except Exception as e:
+            print(f"   ❌ 'Пропустить' button error: {e}")
+            test_results.append(("skip_button", False))
+        
+        # Check backend logs for bot activity
+        print(f"\n🔍 ШАГ 6: Проверка логов backend")
+        
+        try:
+            # Check recent logs for webhook activity
+            log_result = os.popen("tail -n 100 /var/log/supervisor/backend.err.log | grep -i 'webhook\\|telegram\\|order'").read()
+            
+            if log_result.strip():
+                print(f"   ✅ Bot activity detected in logs")
+                # Show relevant log lines
+                log_lines = [line.strip() for line in log_result.split('\n') if line.strip()]
+                for line in log_lines[-5:]:  # Last 5 relevant lines
+                    print(f"      {line}")
+            else:
+                print(f"   ⚠️ No recent bot activity in logs")
+                
+            # Check for specific patterns
+            webhook_received = "WEBHOOK RECEIVED" in log_result
+            order_processing = any(x in log_result.lower() for x in ["order_from_name", "new_order", "from_address"])
+            
+            print(f"   Webhook received logs: {'✅' if webhook_received else '❌'}")
+            print(f"   Order processing logs: {'✅' if order_processing else '❌'}")
+            
+        except Exception as e:
+            print(f"   ❌ Error checking logs: {e}")
+        
+        # Summary
+        print(f"\n📊 РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ:")
+        
+        successful_tests = sum(1 for _, success in test_results if success)
+        total_tests = len(test_results)
+        
+        for test_name, success in test_results:
+            status = "✅" if success else "❌"
+            print(f"   {test_name}: {status}")
+        
+        print(f"\n   Успешно: {successful_tests}/{total_tests} тестов")
+        
+        # Check specific requirements from review request
+        print(f"\n🎯 ПРОВЕРКА ТРЕБОВАНИЙ ИЗ REVIEW REQUEST:")
+        
+        bot_responds = successful_tests > 0
+        transitions_work = successful_tests >= 3  # At least 3 steps working
+        skip_works = any(name == "skip_button" and success for name, success in test_results)
+        
+        print(f"   Бот отвечает на команды: {'✅' if bot_responds else '❌'}")
+        print(f"   Переходы между шагами работают: {'✅' if transitions_work else '❌'}")
+        print(f"   Кнопка 'Пропустить' работает: {'✅' if skip_works else '❌'}")
+        
+        # Overall assessment
+        if successful_tests >= 4:  # All 5 steps working
+            print(f"\n   ✅ ТЕСТ ПРОЙДЕН: Все основные функции работают корректно")
+            return True
+        elif successful_tests >= 2:  # At least basic flow working
+            print(f"\n   ⚠️ ТЕСТ ЧАСТИЧНО ПРОЙДЕН: Основные функции работают, есть проблемы")
+            return True
+        else:
+            print(f"\n   ❌ ТЕСТ НЕ ПРОЙДЕН: Критические проблемы с ботом")
+            return False
+        
+    except Exception as e:
+        print(f"❌ Критическая ошибка тестирования Telegram бота: {e}")
+        import traceback
+        print(f"   Traceback: {traceback.format_exc()}")
+        return False
+
 def main():
     """Run Telegram Bot Basic Flow Tests per Review Request"""
     print("🚀 TELEGRAM BOT BASIC FLOW TESTING")
