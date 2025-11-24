@@ -1706,11 +1706,15 @@ async def ask_with_cancel_and_focus(
         safe_telegram_call_func = safe_telegram_call
     
     # Одно сообщение с ForceReply
+    # Добавляем подсказку прямо в текст, так как input_field_placeholder не работает на всех клиентах
+    message_text = f"{text}\n\n⌨️ _Жду ваш ответ..._"
+    
     bot_msg = await safe_telegram_call_func(
         update.effective_message.reply_text(
-            text,
+            message_text,
+            parse_mode='Markdown',
             reply_markup=ForceReply(
-                input_field_placeholder="⌨️ Жду ваш ответ...",
+                input_field_placeholder="Введите...",
                 selective=True
             )
         )
