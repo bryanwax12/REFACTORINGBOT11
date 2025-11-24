@@ -225,6 +225,7 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
         update,
         context,
         message_text,
+        placeholder="Например: Los Angeles",
         next_state=TO_STATE,
         safe_telegram_call_func=safe_telegram_call
     )
