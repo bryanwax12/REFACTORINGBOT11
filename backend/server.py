@@ -7,7 +7,7 @@ import os
 
 # CRITICAL: Load .env BEFORE any other imports that use environment variables
 ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
+load_dotenv(ROOT_DIR / '.env', override=False)
 
 # WORKAROUND: Emergent platform concatenates environment variables
 # Use production config file if env vars are corrupted
