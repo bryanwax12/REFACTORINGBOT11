@@ -134,6 +134,12 @@ async def show_order_summary(update: Update, context: ContextTypes.DEFAULT_TYPE)
     query = update.callback_query
     await safe_telegram_call(query.answer())
     
+    # Remove buttons from the previous message
+    try:
+        await safe_telegram_call(query.message.edit_reply_markup(reply_markup=None))
+    except Exception as e:
+        logger.warning(f"Could not remove buttons from previous message: {e}")
+    
     # Get order data
     data = context.user_data
     selected_carrier = data.get('selected_carrier', 'Unknown')
