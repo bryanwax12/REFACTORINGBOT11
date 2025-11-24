@@ -213,6 +213,16 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     
     
     city = update.effective_message.text.strip()
+    
+    # Validate city
+    from utils.validation import validate_city
+    is_valid, error_msg = validate_city(city)
+    if not is_valid:
+        await safe_telegram_call(update.effective_message.reply_text(
+            error_msg + "\n\nПожалуйста, введите город получателя:"
+        ))
+        return TO_CITY
+    
     city = sanitize_string(city, max_length=50)
     
     # Store
