@@ -142,7 +142,7 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     # ✅ CRITICAL: Mark previous message with EXPLICIT old text (avoids race condition)
     asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
-    # ✅ МАГИЧЕСКИЙ ГИБРИД 2025: Кнопка "Отмена" + автофокус + клавиатура
+    # ✅ 2025: ForceReply + return состояния
     from utils.ui_utils import ask_with_cancel_and_focus, OrderStepMessages, TemplateEditMessages
     
     if context.user_data.get('editing_template_from') or context.user_data.get('editing_from_address'):
@@ -150,17 +150,16 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     else:
         message_text = OrderStepMessages.FROM_ADDRESS
     
-    # Отправить 2 сообщения: кнопка "Отмена" + ForceReply
-    await ask_with_cancel_and_focus(
+    logger.info(f"✅ order_from_name completed - name: '{name}'")
+    
+    # Функция сама вернет FROM_ADDRESS для ConversationHandler
+    return await ask_with_cancel_and_focus(
         update,
         context,
         message_text,
-        placeholder="Например: 123 Main St.",
+        next_state=FROM_ADDRESS,
         safe_telegram_call_func=safe_telegram_call
     )
-    
-    logger.info(f"✅ order_from_name completed - name: '{name}'")
-    return FROM_ADDRESS
 
 
 @safe_handler(fallback_state=ConversationHandler.END)
