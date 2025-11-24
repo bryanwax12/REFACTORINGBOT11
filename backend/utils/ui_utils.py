@@ -1728,10 +1728,9 @@ async def ask_with_skip_cancel_and_focus(
     safe_telegram_call_func=None
 ):
     """
-    ✅ ПРАВИЛЬНОЕ РЕШЕНИЕ 2025 для опциональных полей: Два сообщения
+    Для опциональных полей: кнопка "Пропустить" + ForceReply
     
-    1. Сообщение с кнопками "Пропустить" + "Отмена" (InlineKeyboardMarkup)
-    2. Сразу за ним - ForceReply (автофокус + клавиатура)
+    Отправляет ОДНО сообщение с кнопкой "Пропустить" и ForceReply.
     
     Args:
         update: Telegram Update
@@ -1748,34 +1747,33 @@ async def ask_with_skip_cancel_and_focus(
         from handlers.common_handlers import safe_telegram_call
         safe_telegram_call_func = safe_telegram_call
     
-    # 1. Сообщение с кнопками "Пропустить" и "Отмена"
-    skip_cancel_keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("⏭️ Пропустить", callback_data=skip_callback)],
-        [InlineKeyboardButton("❌ Отмена", callback_data="cancel_order")]
+    # Сообщение с кнопкой "Пропустить" + ForceReply
+    skip_keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton("⏭️ Пропустить", callback_data=skip_callback)]
     ])
     
-    await safe_telegram_call_func(
+    bot_msg = await safe_telegram_call_func(
         update.effective_message.reply_text(
             text,
-            reply_markup=skip_cancel_keyboard
+            reply_markup=skip_keyboard
         )
     )
     
-    # 2. ForceReply - мгновенный ввод
-    bot_msg = await safe_telegram_call_func(
+    # Второе сообщение с ForceReply
+    bot_msg2 = await safe_telegram_call_func(
         update.effective_message.reply_text(
             "⌨️ Или введите данные:",
             reply_markup=ForceReply(
-                input_field_placeholder=placeholder or "Введите или пропустите",
+                input_field_placeholder=placeholder or " ",
                 selective=True
             )
         )
     )
     
     # Сохранить ID последнего сообщения
-    if bot_msg:
-        context.user_data['last_bot_message_id'] = bot_msg.message_id
+    if bot_msg2:
+        context.user_data['last_bot_message_id'] = bot_msg2.message_id
         context.user_data['last_bot_message_text'] = "⌨️ Или введите данные:"
     
-    return bot_msg
+    return bot_msg2
 
