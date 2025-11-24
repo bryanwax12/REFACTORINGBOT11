@@ -162,11 +162,12 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE,
     
     width_str = update.effective_message.text.strip()
     
-    # Convert to float (no validation)
-    try:
-        width = float(width_str)
-    except:
-        width = 10.0  # Default value
+    # Validate dimension
+    from utils.validation import validate_dimension
+    is_valid, width, error_msg = validate_dimension(width_str, "Ширина")
+    if not is_valid:
+        await safe_telegram_call(update.effective_message.reply_text(error_msg))
+        return PARCEL_WIDTH
     
     # Store
     user_id = update.effective_user.id
