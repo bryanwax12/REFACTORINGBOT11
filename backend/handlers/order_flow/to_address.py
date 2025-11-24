@@ -64,6 +64,7 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
         update,
         context,
         message_text,
+        placeholder="Например: Jane Doe",
         next_state=TO_ADDRESS,
         safe_telegram_call_func=safe_telegram_call
     )
