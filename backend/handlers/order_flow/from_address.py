@@ -436,6 +436,13 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     
     phone = update.effective_message.text.strip()
     
+    # Validate phone (optional field)
+    from utils.validation import validate_phone
+    is_valid, error_msg = validate_phone(phone, required=False)
+    if not is_valid:
+        await safe_telegram_call(update.effective_message.reply_text(error_msg + "\n\nПожалуйста, введите номер телефона:"))
+        return FROM_PHONE
+    
     # Format phone (basic formatting without validation)
     digits_only = ''.join(filter(str.isdigit, phone))
     if len(digits_only) == 10:
