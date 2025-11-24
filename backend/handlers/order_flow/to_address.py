@@ -202,15 +202,13 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE, 
     else:
         message_text = OrderStepMessages.TO_CITY
     
-    await ask_with_cancel_and_focus(
+    return await ask_with_cancel_and_focus(
         update,
         context,
         message_text,
-        placeholder="Например: New York",
+        next_state=TO_CITY,
         safe_telegram_call_func=safe_telegram_call
     )
-    
-    return TO_CITY
 
 
 @safe_handler(fallback_state=ConversationHandler.END)
@@ -252,15 +250,13 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
     else:
         message_text = OrderStepMessages.TO_STATE
     
-    await ask_with_cancel_and_focus(
+    return await ask_with_cancel_and_focus(
         update,
         context,
         message_text,
-        placeholder="Например: NY",
+        next_state=TO_STATE,
         safe_telegram_call_func=safe_telegram_call
     )
-    
-    return TO_STATE
 
 
 @safe_handler(fallback_state=ConversationHandler.END)
@@ -301,15 +297,13 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     else:
         message_text = OrderStepMessages.TO_ZIP
     
-    await ask_with_cancel_and_focus(
+    return await ask_with_cancel_and_focus(
         update,
         context,
         message_text,
-        placeholder="Например: 10001",
+        next_state=TO_ZIP,
         safe_telegram_call_func=safe_telegram_call
     )
-    
-    return TO_ZIP
 
 
 @safe_handler(fallback_state=ConversationHandler.END)
@@ -354,16 +348,14 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, sessi
     # ✅ МАГИЧЕСКИЙ ГИБРИД 2025 (опциональное поле)
     from utils.ui_utils import ask_with_skip_cancel_and_focus
     
-    await ask_with_skip_cancel_and_focus(
+    return await ask_with_skip_cancel_and_focus(
         update,
         context,
         message_text,
-        placeholder="Например: +1234567890",
         skip_callback=CallbackData.SKIP_TO_PHONE,
+        next_state=TO_PHONE,
         safe_telegram_call_func=safe_telegram_call
     )
-    
-    return TO_PHONE
 
 
 @safe_handler(fallback_state=ConversationHandler.END)
@@ -482,12 +474,10 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     # ✅ МАГИЧЕСКИЙ ГИБРИД 2025
     from utils.ui_utils import ask_with_cancel_and_focus, OrderStepMessages
     
-    await ask_with_cancel_and_focus(
+    return await ask_with_cancel_and_focus(
         update,
         context,
         OrderStepMessages.PARCEL_WEIGHT,
-        placeholder="Например: 2.5",
+        next_state=PARCEL_WEIGHT,
         safe_telegram_call_func=safe_telegram_call
     )
-    
-    return PARCEL_WEIGHT
