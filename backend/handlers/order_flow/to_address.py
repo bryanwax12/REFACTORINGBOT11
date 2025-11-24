@@ -486,10 +486,12 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
     # ✅ МАГИЧЕСКИЙ ГИБРИД 2025
     from utils.ui_utils import ask_with_cancel_and_focus, OrderStepMessages
     
-    return await ask_with_cancel_and_focus(
+    await ask_with_cancel_and_focus(
         update,
         context,
         OrderStepMessages.PARCEL_WEIGHT,
         next_state=PARCEL_WEIGHT,
         safe_telegram_call_func=safe_telegram_call
     )
+    
+    return PARCEL_WEIGHT
