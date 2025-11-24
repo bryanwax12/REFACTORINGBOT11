@@ -52,7 +52,7 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
     # REMOVED: ConversationHandler manages state via Persistence
         # await session_service.update_session_step(user_id, step="PARCEL_LENGTH")
     
-    from utils.ui_utils import get_standard_size_and_cancel_keyboard, get_cancel_keyboard, OrderStepMessages, CallbackData
+    from utils.ui_utils import get_standard_size_keyboard, get_standard_size_and_cancel_keyboard, get_cancel_keyboard, OrderStepMessages, CallbackData
     # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
@@ -120,7 +120,7 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     
     asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
-    from utils.ui_utils import get_standard_size_and_cancel_keyboard, get_cancel_keyboard, OrderStepMessages, CallbackData
+    from utils.ui_utils import get_standard_size_keyboard, get_standard_size_and_cancel_keyboard, get_cancel_keyboard, OrderStepMessages, CallbackData
     
     # Check weight to decide if we show "Use standard sizes" button
     weight = context.user_data.get('parcel_weight', 0)
@@ -177,7 +177,7 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE,
     # REMOVED: ConversationHandler manages state via Persistence
         # await session_service.update_session_step(user_id, step="PARCEL_HEIGHT")
     
-    from utils.ui_utils import get_standard_size_and_cancel_keyboard, get_cancel_keyboard, OrderStepMessages, CallbackData
+    from utils.ui_utils import get_standard_size_keyboard, get_standard_size_and_cancel_keyboard, get_cancel_keyboard, OrderStepMessages, CallbackData
     # ✅ 2025 FIX: Get OLD prompt text BEFORE updating context
 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
