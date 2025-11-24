@@ -1399,10 +1399,11 @@ async def startup_event():
             # Get optimized settings from performance config
             app_settings = BotPerformanceConfig.get_optimized_application_settings()
             
-            # MongoDB Persistence - lightweight replacement for PicklePersistence
-            from utils.mongodb_persistence import MongoDBPersistence
-            mongodb_persistence = MongoDBPersistence(db)
-            logger.info("✅ MongoDBPersistence initialized")
+            # DictPersistence for webhook mode - stores conversation state between HTTP requests
+            # This is CRITICAL for webhook mode to work correctly!
+            from telegram.ext import DictPersistence
+            persistence = DictPersistence()
+            logger.info("✅ DictPersistence initialized for webhook mode")
             
             # Optimize: Only receive needed update types (saves ~20-40ms)
             from telegram import Update
@@ -1416,8 +1417,8 @@ async def startup_event():
             application = (
                 Application.builder()
                 .token(TELEGRAM_BOT_TOKEN)
-                .persistence(mongodb_persistence)  # MongoDB-based persistence for ConversationHandler
-                .concurrent_updates(False)  # CRITICAL: Sequential processing prevents race conditions
+                .persistence(persistence)  # DictPersistence for webhook mode - preserves conversation state
+                .concurrent_updates(True)  # Allow concurrent updates for better performance in webhook mode
                 .connect_timeout(app_settings['connect_timeout'])  # Fast connection
                 .read_timeout(app_settings['read_timeout'])   # Optimized read timeout
                 .write_timeout(app_settings['write_timeout'])  # Reliable message delivery
@@ -1426,8 +1427,8 @@ async def startup_event():
                 .build()
             )
             
-            logger.info("✅ Application built WITHOUT PicklePersistence (using MongoDB only)")
-            logger.info("🔧 CRITICAL FIX: concurrent_updates=False prevents 5-second delay")
+            logger.info("✅ Application built with DictPersistence for webhook mode")
+            logger.info("🔧 CRITICAL FIX: DictPersistence preserves conversation state between HTTP requests")
             
             # CRITICAL: Update global bot_instance with the application's bot for notifications
             # Without this, notifications will NOT work!
@@ -1459,7 +1460,7 @@ async def startup_event():
                 per_message=False,  # False is correct: we use MessageHandler (not only CallbackQueryHandler)
                 allow_reentry=True,
                 name='template_rename_conversation',
-                persistent=False  # DISABLED: Using MongoDB only
+                persistent=True  # Enabled: Using DictPersistence
             )
             
             # Import order conversation handler from modular setup
@@ -1508,7 +1509,7 @@ async def startup_event():
                     CommandHandler('start', start_command)
                 ],
                 name='refund_conversation',
-                persistent=False,  # DISABLED: Using MongoDB only
+                persistent=True,  # Enabled: Using DictPersistence
                 per_chat=True,
                 per_user=True,
                 allow_reentry=True
@@ -1627,13 +1628,15 @@ async def startup_event():
                 
                 # Удалить старый webhook перед установкой нового
                 await application.bot.delete_webhook(drop_pending_updates=True)
+                logger.info("   Old webhook deleted")
                 
                 # Установить новый webhook
                 await application.bot.set_webhook(
                     url=webhook_url,
                     allowed_updates=["message", "callback_query", "my_chat_member"],
-                    drop_pending_updates=False
+                    drop_pending_updates=True  # Drop pending updates to avoid processing old messages
                 )
+                logger.info(f"   Webhook URL configured: {webhook_url}")
                 
                 logger.info(f"✅ Webhook set successfully: {webhook_url}")
                 
