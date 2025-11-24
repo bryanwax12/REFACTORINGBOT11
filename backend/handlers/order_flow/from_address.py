@@ -407,6 +407,10 @@ async def order_from_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     
     logger.info(f"📞 FROM phone saved: {formatted_phone}")
     
+    # ✅ CRITICAL: Mark previous message with checkmark (add emoji)
+    old_prompt_text = context.user_data.get('last_bot_message_text', '')
+    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    
     # CRITICAL: Check DB session DIRECTLY for editing flags (don't rely on context.user_data)
     from server import db
     session = await db.user_sessions.find_one(
