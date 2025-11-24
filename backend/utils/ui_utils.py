@@ -1705,19 +1705,9 @@ async def ask_with_cancel_and_focus(
         from handlers.common_handlers import safe_telegram_call
         safe_telegram_call_func = safe_telegram_call
     
-    # Одно сообщение с ForceReply
-    # Используем переданный placeholder или дефолтный
-    if not placeholder or placeholder.strip() == "":
-        placeholder = "Введите текст..."
-    
+    # Одно сообщение без ForceReply
     bot_msg = await safe_telegram_call_func(
-        update.effective_message.reply_text(
-            text,
-            reply_markup=ForceReply(
-                input_field_placeholder=placeholder,
-                selective=True
-            )
-        )
+        update.effective_message.reply_text(text)
     )
     
     # Сохранить ID последнего сообщения для UI-логики
