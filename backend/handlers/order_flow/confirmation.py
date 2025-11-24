@@ -299,14 +299,11 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         
         # Edit parcel dimensions
         context.user_data['editing_parcel'] = True
-        from utils.ui_utils import get_cancel_keyboard
-        reply_markup = get_cancel_keyboard()
         
         # 🚀 PERFORMANCE: Send message in background
         async def send_edit_prompt():
             bot_msg = await safe_telegram_call(update.effective_message.reply_text(
-                "📦 Редактирование посылки\n\nВведите вес посылки в фунтах:\nНапример: 5 или 2.5",
-                reply_markup=reply_markup,
+                "📦 Редактирование посылки\n\nВведите вес посылки в фунтах:\nНапример: 5 или 2.5"
             ))
             if bot_msg:
                 context.user_data['last_bot_message_id'] = bot_msg.message_id
