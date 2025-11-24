@@ -1408,8 +1408,8 @@ async def startup_event():
                 .build()
             )
             
-            logger.info("✅ Application built WITHOUT PicklePersistence (using MongoDB only)")
-            logger.info("🔧 CRITICAL FIX: concurrent_updates=False prevents 5-second delay")
+            logger.info("✅ Application built with DictPersistence for webhook mode")
+            logger.info("🔧 CRITICAL FIX: DictPersistence preserves conversation state between HTTP requests")
             
             # CRITICAL: Update global bot_instance with the application's bot for notifications
             # Without this, notifications will NOT work!
