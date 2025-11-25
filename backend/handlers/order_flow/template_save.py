@@ -118,7 +118,6 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
     
     keyboard = [
         [InlineKeyboardButton("↩️ Вернуться к заказу", callback_data='continue_order')],
-        [InlineKeyboardButton("📋 Мои шаблоны", callback_data='my_templates')],
         [InlineKeyboardButton("🏠 Главное меню", callback_data='start')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
