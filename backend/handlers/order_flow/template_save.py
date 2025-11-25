@@ -449,6 +449,28 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
         return ConversationHandler.END
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=False, require_session=True)
+async def cancel_template_save(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Cancel template saving and return to order confirmation"""
+    from server import safe_telegram_call
+    from handlers.order_flow.confirmation import show_data_confirmation
+    
+    logger.info("❌ Canceling template save, returning to order confirmation")
+    
+    query = update.callback_query
+    await safe_telegram_call(query.answer())
+    
+    # Remove buttons from cancel confirmation message
+    try:
+        await safe_telegram_call(query.message.edit_reply_markup(reply_markup=None))
+    except Exception as e:
+        logger.warning(f"Could not remove buttons: {e}")
+    
+    # Return to order confirmation screen
+    return await show_data_confirmation(update, context)
+
+
 # ============================================================
 # MODULE EXPORTS
 # ============================================================
@@ -458,5 +480,6 @@ __all__ = [
     'handle_template_update',
     'handle_template_new_name',
     'continue_order_after_template',
+    'cancel_template_save',
     'handle_topup_amount'
 ]
