@@ -868,7 +868,7 @@ def get_template_selection_keyboard(templates: List[dict]) -> InlineKeyboardMark
     for i, template in enumerate(templates, 1):
         keyboard.append([InlineKeyboardButton(
             f"{i}. {template['name']}", 
-            callback_data=f"template_use_{template['id']}"
+            callback_data=f"template_view_{template['id']}"
         )])
     
     keyboard.append([InlineKeyboardButton(ButtonTexts.CANCEL, callback_data=CallbackData.START)])
