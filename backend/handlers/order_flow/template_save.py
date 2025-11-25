@@ -212,7 +212,6 @@ async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_T
         template_name = context.user_data.get('pending_template_name', 'шаблон')
         keyboard = [
             [InlineKeyboardButton("↩️ Вернуться к заказу", callback_data='continue_order')],
-            [InlineKeyboardButton("📋 Мои шаблоны", callback_data='my_templates')],
             [InlineKeyboardButton("🏠 Главное меню", callback_data='start')]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
