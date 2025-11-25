@@ -387,6 +387,35 @@ app.add_middleware(RateLimitMiddleware, requests_per_minute=60, requests_per_hou
 
 api_router = APIRouter(prefix="/api")
 
+# ==================== HEALTH CHECK ENDPOINT ====================
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for deployment platform"""
+    try:
+        # Check if MongoDB is accessible
+        if db is not None:
+            await db.command('ping')
+            db_status = "connected"
+        else:
+            db_status = "not_configured"
+        
+        return {
+            "status": "healthy",
+            "database": db_status,
+            "bot_configured": bool(TELEGRAM_BOT_TOKEN)
+        }
+    except Exception as e:
+        logger.error(f"Health check failed: {e}")
+        return {
+            "status": "unhealthy",
+            "error": str(e)
+        }
+
+@app.get("/api/health")
+async def api_health_check():
+    """Health check endpoint with /api prefix"""
+    return await health_check()
+
 # ==================== DEBUG ENDPOINT (NO AUTH) ====================
 @app.get("/api/debug/config")
 async def debug_config_no_auth():
