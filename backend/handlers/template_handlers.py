@@ -223,8 +223,14 @@ async def delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = TemplateMessages.confirm_delete(template.get('name'))
     reply_markup = get_template_delete_confirmation_keyboard(template_id)
     
-    # 🚀 PERFORMANCE: Send message in background
-    asyncio.create_task(query.message.reply_text(message, reply_markup=reply_markup))
+    # Send confirmation message
+    async def send_confirmation():
+        bot_msg = await query.message.reply_text(message, reply_markup=reply_markup)
+        if bot_msg:
+            context.user_data['last_bot_message_id'] = bot_msg.message_id
+            context.user_data['last_bot_message_text'] = message
+    
+    asyncio.create_task(send_confirmation())
 
 
 async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
