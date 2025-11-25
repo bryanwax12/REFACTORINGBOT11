@@ -4,7 +4,15 @@ Test AI thank you message generation
 """
 import asyncio
 import sys
+import os
 sys.path.insert(0, '/app/backend')
+
+# Load environment variables
+from dotenv import load_dotenv
+load_dotenv()
+
+print(f"🔑 EMERGENT_LLM_KEY в окружении: {bool(os.getenv('EMERGENT_LLM_KEY'))}")
+print()
 
 from utils.telegram_utils import generate_thank_you_message
 
