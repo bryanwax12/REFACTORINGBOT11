@@ -78,6 +78,10 @@ def validate_state(state: str) -> Tuple[bool, str]:
     if not state.isalpha():
         return False, "⚠️ Код штата должен содержать только буквы.\n\nНапример: CA, NY, TX, FL"
     
+    # Check if state code contains only ASCII letters (reject Cyrillic)
+    if not state.isascii():
+        return False, "⚠️ Код штата должен быть указан латинскими буквами.\n\nНапример: CA (не СА), NY, TX, FL\n\nПожалуйста, введите код штата латиницей:"
+    
     return True, ""
 
 
