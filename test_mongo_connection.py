@@ -5,8 +5,8 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 async def test_connection():
     # Test credentials
-    username = "bbeardy3_db_user"
-    password = "vSGSbgmaKDhC3ZIz"
+    username = "telegrambot_user"
+    password = "lfaFaksqp6A0ETAw"
     cluster = "cluster1.lfw3fr.mongodb.net"
     database = "telegram_shipping_bot"
     
