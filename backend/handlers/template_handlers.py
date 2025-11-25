@@ -251,6 +251,12 @@ async def confirm_delete_template(update: Update, context: ContextTypes.DEFAULT_
     if result.deleted_count > 0:
         logger.info(f"✅ Template {template_id} deleted successfully")
         
+        # Remove buttons from confirmation message
+        try:
+            await safe_telegram_call(query.message.edit_reply_markup(reply_markup=None))
+        except Exception as e:
+            logger.debug(f"Could not remove confirmation buttons: {e}")
+        
         # Show success message with navigation buttons
         keyboard = [
             [InlineKeyboardButton("📋 Мои шаблоны", callback_data='my_templates')],
