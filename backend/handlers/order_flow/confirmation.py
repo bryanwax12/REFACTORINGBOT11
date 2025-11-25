@@ -74,12 +74,12 @@ async def handle_save_as_template(update: Update, context: ContextTypes.DEFAULT_
 
     asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
-    # Prompt for template name with custom cancel button
+    # Prompt for template name with custom back button
     from telegram import InlineKeyboardButton, InlineKeyboardMarkup
     import logging
     logger = logging.getLogger(__name__)
     
-    keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_template_save')]]
+    keyboard = [[InlineKeyboardButton("↩️ Вернуться к заказу", callback_data='cancel_template_save')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     logger.info("📝 Creating template save prompt with callback_data='cancel_template_save'")
