@@ -83,8 +83,12 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE,
     # Set state to wait for amount input
     context.user_data['awaiting_topup_amount'] = True
     
+    logger.info(f"📤 Sending balance message to user {telegram_id}")
+    
     # Send message and save context
     bot_message = await send_method(message, reply_markup=reply_markup, parse_mode='Markdown')
+    
+    logger.info(f"✅ Balance message sent successfully, message_id={bot_message.message_id}")
     
     context.user_data['last_bot_message_id'] = bot_message.message_id
     context.user_data['last_bot_message_text'] = message
