@@ -296,6 +296,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     from server import db
     
     query = update.callback_query
+    logger.info(f"🔵 button_callback called with data: {query.data}")
     await safe_telegram_call(query.answer())
     
     if query.data == 'start' or query.data == 'main_menu':
