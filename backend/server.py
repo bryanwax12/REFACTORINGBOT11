@@ -391,6 +391,9 @@ api_router = APIRouter(prefix="/api")
 @app.get("/health")
 async def health_check():
     """Health check endpoint for deployment platform"""
+    db_status = "not_configured"
+    db_error = None
+    
     try:
         # Check if MongoDB is accessible
         if db is not None:
@@ -398,18 +401,19 @@ async def health_check():
             db_status = "connected"
         else:
             db_status = "not_configured"
-        
-        return {
-            "status": "healthy",
-            "database": db_status,
-            "bot_configured": bool(TELEGRAM_BOT_TOKEN)
-        }
     except Exception as e:
-        logger.error(f"Health check failed: {e}")
-        return {
-            "status": "unhealthy",
-            "error": str(e)
-        }
+        logger.warning(f"MongoDB not accessible in health check: {e}")
+        db_status = "unavailable"
+        db_error = str(e)
+    
+    # Return healthy status if app is running, even if DB is temporarily unavailable
+    return {
+        "status": "healthy",
+        "app": "running",
+        "database": db_status,
+        "bot_configured": bool(TELEGRAM_BOT_TOKEN),
+        "db_error": db_error if db_error else None
+    }
 
 @app.get("/api/health")
 async def api_health_check():
