@@ -673,32 +673,24 @@ async def edit_template_to_address(update: Update, context: ContextTypes.DEFAULT
         context.user_data['editing_template_to'] = True
         
         # CRITICAL: Save flags to DB session so they persist across handler calls
-        from server import session_manager
         user_id = update.effective_user.id
-        
-        # IMPORTANT: Ensure session exists before setting flags
-        existing_session = await db.user_sessions.find_one(
-            {"user_id": user_id, "is_active": True}
-        )
-        
-        if not existing_session:
-            # Create new session if doesn't exist
-            logger.info(f"📝 Creating new session for template editing")
-            await session_manager.get_or_create_session(user_id)
+        from datetime import datetime, timezone
         
         result = await db.user_sessions.update_one(
-            {"user_id": user_id, "is_active": True},
+            {"user_id": user_id},
             {"$set": {
                 "editing_template_id": template_id,
                 "editing_template_to": True,
                 "editing_template_from": False,
-                "current_step": "TO_NAME"
+                "current_step": "TO_NAME",
+                "is_active": True,
+                "timestamp": datetime.now(timezone.utc)
             }},
             upsert=True  # Create if doesn't exist
         )
         
         logger.info(f"✅ FLAGS SET: editing_template_to=True, editing_template_id={template_id}")
-        logger.info(f"📝 Session update result: matched={result.matched_count}, modified={result.modified_count}, upserted={result.upserted_id}")
+        logger.info(f"📝 Session flags set: matched={result.matched_count}, modified={result.modified_count}, upserted={result.upserted_id}")
         
         # Load current TO data
         context.user_data['to_name'] = template.get('to_name', '')
