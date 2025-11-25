@@ -1081,13 +1081,6 @@ async def create_and_send_label(order_id, telegram_id, message):
                                 text=f"🔗 Трекинг номер:\n\n`{tracking_number}`",
                                 parse_mode='Markdown'
                             ))
-                            
-                            # Send thank you message
-                            logger.info(f"Sending thank you message to user {telegram_id}")
-                            await safe_telegram_call(bot_instance.send_message(
-                                chat_id=telegram_id,
-                                text=thank_you_msg
-                            ))
                             logger.info(f"Label sent successfully to user {telegram_id}")
                         else:
                             logger.error(f"Failed to send label: {error}")
