@@ -1065,11 +1065,11 @@ async def create_and_send_label(order_id, telegram_id, message):
                         # Generate AI thank you message
                         try:
                             thank_you_msg = await generate_thank_you_message()
-                    except Exception as e:
-                        logger.error(f"Error generating thank you message: {e}")
-                        thank_you_msg = "Спасибо за использование нашего сервиса!"
-                    
-                    # Send label using service
+                        except Exception as e:
+                            logger.error(f"Error generating thank you message: {e}")
+                            thank_you_msg = "Спасибо за использование нашего сервиса!"
+                        
+                        # Send label using service
                     from services.shipping_service import send_label_to_user
                     success, error = await send_label_to_user(
                         bot_instance=bot_instance,
