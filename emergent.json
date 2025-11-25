@@ -1,0 +1,49 @@
+{
+  "version": "1.0",
+  "name": "telegram-shipping-bot",
+  "description": "WhiteLabel Telegram Shipping Bot with ShipStation Integration",
+  "runtime": {
+    "backend": {
+      "type": "python",
+      "version": "3.11",
+      "entry": "backend/start.sh",
+      "port": 8001
+    },
+    "frontend": {
+      "type": "node",
+      "version": "18",
+      "port": 3000
+    }
+  },
+  "database": {
+    "type": "external",
+    "provider": "mongodb-atlas",
+    "skip_migration": true,
+    "connection_env": "MONGO_URL"
+  },
+  "environment": {
+    "required": [
+      "MONGO_URL",
+      "DB_NAME",
+      "TELEGRAM_BOT_TOKEN",
+      "ADMIN_TELEGRAM_ID",
+      "ADMIN_API_KEY"
+    ],
+    "optional": [
+      "BOT_MODE",
+      "BOT_ENVIRONMENT",
+      "SHIPSTATION_API_KEY",
+      "OXAPAY_API_KEY",
+      "EMERGENT_LLM_KEY"
+    ]
+  },
+  "deployment": {
+    "skip_mongodb_migration": true,
+    "use_external_database": true,
+    "health_check": {
+      "path": "/api/debug/config",
+      "port": 8001,
+      "interval": 30
+    }
+  }
+}
