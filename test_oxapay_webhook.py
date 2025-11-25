@@ -27,7 +27,7 @@ load_dotenv('/app/backend/.env')
 load_dotenv('/app/frontend/.env')
 
 MONGO_URL = os.getenv('MONGO_URL', 'mongodb://localhost:27017')
-BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://shiptrack-bot.preview.emergentagent.com')
+BACKEND_URL = os.getenv('REACT_APP_BACKEND_URL', 'https://telemshipper.preview.emergentagent.com')
 
 # Test user from review request
 TEST_USER_ID = 5594152712

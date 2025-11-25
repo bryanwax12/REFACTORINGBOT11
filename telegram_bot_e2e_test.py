@@ -16,7 +16,7 @@ load_dotenv('/app/frontend/.env')
 load_dotenv('/app/backend/.env')
 
 # Get backend URL from environment
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://shiptrack-bot.preview.emergentagent.com')
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://telemshipper.preview.emergentagent.com')
 WEBHOOK_URL = f"{BACKEND_URL}/api/telegram/webhook"
 
 class TelegramBotTester:
