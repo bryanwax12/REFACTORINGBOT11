@@ -1,0 +1,13 @@
+{
+  "mongodb": {
+    "managed": false,
+    "skip_migration": true,
+    "use_existing_connection": true,
+    "connection_string_env": "MONGO_URL",
+    "database_name_env": "DB_NAME"
+  },
+  "skip_steps": [
+    "mongodb_migration",
+    "db_migration"
+  ]
+}
