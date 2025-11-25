@@ -24,12 +24,19 @@ const cleanEnvValue = (value) => {
   return cleaned;
 };
 
-// Get and clean environment variables
-let BACKEND_URL = cleanEnvValue(process.env.REACT_APP_BACKEND_URL) || 'https://telegram-admin-fix-2.emergent.host';
-let ADMIN_API_KEY = cleanEnvValue(process.env.REACT_APP_ADMIN_API_KEY) || 'sk_admin_e19063c3f82f447ba4ccf49cd97dd9fd_2024';
+// Get environment variables (required for deployment)
+const BACKEND_URL = cleanEnvValue(process.env.REACT_APP_BACKEND_URL);
+const ADMIN_API_KEY = cleanEnvValue(process.env.REACT_APP_ADMIN_API_KEY);
 
-// Log config source for debugging
-console.log('📡 Config source:', process.env.REACT_APP_BACKEND_URL ? 'Environment Variables (cleaned)' : 'Fallback values');
+// Validate required environment variables
+if (!BACKEND_URL) {
+  console.error('❌ REACT_APP_BACKEND_URL is not set');
+}
+if (!ADMIN_API_KEY) {
+  console.error('❌ REACT_APP_ADMIN_API_KEY is not set');
+}
+
+console.log('📡 Backend URL:', BACKEND_URL);
 
 const API = `${BACKEND_URL}/api`;
 
