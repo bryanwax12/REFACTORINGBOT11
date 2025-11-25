@@ -452,20 +452,23 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
 @safe_handler(fallback_state=ConversationHandler.END)
 @with_user_session(create_user=False, require_session=True)
 async def cancel_template_save(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Cancel template saving and return to order confirmation"""
+    """Cancel template saving and return to order confirmation (no dialog)"""
     from server import safe_telegram_call
     from handlers.order_flow.confirmation import show_data_confirmation
     
     logger.info("❌ Canceling template save, returning to order confirmation")
     
     query = update.callback_query
-    await safe_telegram_call(query.answer())
+    await safe_telegram_call(query.answer("Отменено"))
     
-    # Remove buttons from cancel confirmation message
+    # Remove buttons from the message
     try:
         await safe_telegram_call(query.message.edit_reply_markup(reply_markup=None))
     except Exception as e:
         logger.warning(f"Could not remove buttons: {e}")
+    
+    # Send info message
+    await safe_telegram_call(query.message.reply_text("↩️ Возвращаемся к проверке данных заказа..."))
     
     # Return to order confirmation screen
     return await show_data_confirmation(update, context)
