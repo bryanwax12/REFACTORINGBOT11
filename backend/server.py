@@ -193,16 +193,9 @@ client = AsyncIOMotorClient(
     socketTimeoutMS=mongodb_config['socketTimeoutMS']
 )
 
-# Auto-select database name based on environment
-webhook_base_url_for_db = os.environ.get('WEBHOOK_BASE_URL', '')
-if 'crypto-shipping.emergent.host' in webhook_base_url_for_db:
-    # Production environment
-    db_name = os.environ.get('DB_NAME_PRODUCTION', 'async-tg-bot-telegram_shipping_bot')
-    print(f"🟢 PRODUCTION DATABASE: {db_name}")
-else:
-    # Preview environment
-    db_name = os.environ.get('DB_NAME_PREVIEW', os.environ.get('DB_NAME', 'telegram_shipping_bot'))
-    print(f"🔵 PREVIEW DATABASE: {db_name}")
+# Get database name from environment
+db_name = os.environ.get('DB_NAME', 'telegram_shipping_bot')
+print(f"📊 Using database: {db_name}")
 
 db = client[db_name]
 
