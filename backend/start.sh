@@ -5,20 +5,20 @@ echo "==================================="
 echo "Starting Telegram Shipping Bot"
 echo "==================================="
 
-# Ensure critical environment variables are set
-if [ -z "$MONGO_URL" ]; then
-    echo "❌ ERROR: MONGO_URL environment variable is not set"
-    exit 1
+# WORKAROUND: Allow both EXTERNAL_MONGO_URL and MONGO_URL
+if [ -n "$EXTERNAL_MONGO_URL" ]; then
+    echo "✅ Using EXTERNAL_MONGO_URL (MongoDB Atlas)"
+elif [ -n "$MONGO_URL" ]; then
+    echo "✅ Using MONGO_URL (Fallback or Emergent managed)"
+else
+    echo "⚠️ WARNING: No MongoDB URL configured"
+    echo "   Application will start but database features will be disabled"
 fi
 
-if [ -z "$DB_NAME" ]; then
-    echo "❌ ERROR: DB_NAME environment variable is not set"
-    exit 1
+if [ -n "$DB_NAME" ]; then
+    echo "   Database: $DB_NAME"
 fi
 
-echo "✅ Environment validated"
-echo "   MongoDB: External (MongoDB Atlas)"
-echo "   Database: $DB_NAME"
 echo ""
 
 # Start the application
