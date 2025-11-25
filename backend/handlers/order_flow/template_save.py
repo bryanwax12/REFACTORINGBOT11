@@ -502,5 +502,6 @@ __all__ = [
     'handle_template_new_name',
     'continue_order_after_template',
     'cancel_template_save',
+    'return_to_confirm_from_error',
     'handle_topup_amount'
 ]
