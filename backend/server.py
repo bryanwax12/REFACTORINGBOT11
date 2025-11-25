@@ -182,16 +182,9 @@ from utils.settings_cache import (
 from config.performance_config import BotPerformanceConfig
 
 try:
-    # WORKAROUND: Use EXTERNAL_MONGO_URL for our Atlas DB, MONGO_URL for Emergent managed
-    mongo_url = os.environ.get('EXTERNAL_MONGO_URL') or os.environ.get('MONGO_URL', '')
-    
-    if mongo_url and os.environ.get('EXTERNAL_MONGO_URL'):
-        print("🌍 Using EXTERNAL MongoDB Atlas (production database)")
-    elif mongo_url:
-        print("📦 Using MONGO_URL (Emergent managed or fallback)")
-    
+    mongo_url = os.environ.get('MONGO_URL', '')
     if not mongo_url:
-        print("⚠️ No MongoDB URL configured - MongoDB will be initialized later")
+        print("⚠️ MONGO_URL not set - MongoDB will be initialized later")
         client = None
         db = None
         session_manager = None
@@ -209,7 +202,7 @@ try:
         )
 
         # Get database name from environment
-        db_name = os.environ.get('EXTERNAL_DB_NAME') or os.environ.get('DB_NAME', 'telegram_shipping_bot')
+        db_name = os.environ.get('DB_NAME', 'telegram_shipping_bot')
         print(f"📊 Using database: {db_name}")
 
         db = client[db_name]
@@ -224,7 +217,7 @@ try:
         print("📦 Repository Manager initialized successfully")
 except Exception as e:
     print(f"⚠️ MongoDB initialization failed: {e}")
-    print("⚠️ Application will start without database - configure MONGO_URL or EXTERNAL_MONGO_URL")
+    print("⚠️ Application will start without database - configure MONGO_URL to enable")
     client = None
     db = None
     session_manager = None
