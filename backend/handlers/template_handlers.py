@@ -569,32 +569,26 @@ async def edit_template_from_address(update: Update, context: ContextTypes.DEFAU
         context.user_data['editing_template_from'] = True
         
         # CRITICAL: Save flags to DB session so they persist across handler calls
-        from server import db, session_manager
+        from server import db
         user_id = update.effective_user.id
-        
-        # IMPORTANT: Ensure session exists before setting flags
-        existing_session = await db.user_sessions.find_one(
-            {"user_id": user_id, "is_active": True}
-        )
-        
-        if not existing_session:
-            # Create new session if doesn't exist
-            logger.info(f"📝 Creating new session for template editing")
-            await session_manager.get_or_create_session(user_id)
+        from datetime import datetime, timezone
         
         # Save editing flags as TOP-LEVEL session fields (not in temp_data)
+        # Use upsert to create session if it doesn't exist
         result = await db.user_sessions.update_one(
-            {"user_id": user_id, "is_active": True},
+            {"user_id": user_id},
             {"$set": {
                 "editing_template_id": template_id,
                 "editing_template_from": True,
                 "editing_template_to": False,
-                "current_step": "FROM_NAME"
+                "current_step": "FROM_NAME",
+                "is_active": True,
+                "timestamp": datetime.now(timezone.utc)
             }},
             upsert=True  # Create if doesn't exist
         )
         
-        logger.info(f"📝 Session update result: matched={result.matched_count}, modified={result.modified_count}, upserted={result.upserted_id}")
+        logger.info(f"📝 Session flags set: matched={result.matched_count}, modified={result.modified_count}, upserted={result.upserted_id}")
         
         logger.info(f"✅ FLAGS SET: editing_template_from=True, editing_template_id={template_id}")
         logger.info("📝 Flags saved to BOTH context.user_data AND DB session")
