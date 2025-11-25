@@ -580,7 +580,7 @@ async def edit_template_from_address(update: Update, context: ContextTypes.DEFAU
         if not existing_session:
             # Create new session if doesn't exist
             logger.info(f"📝 Creating new session for template editing")
-            await session_manager.create_user_session(user_id)
+            await session_manager.get_or_create_session(user_id)
         
         # Save editing flags as TOP-LEVEL session fields (not in temp_data)
         result = await db.user_sessions.update_one(
@@ -690,7 +690,7 @@ async def edit_template_to_address(update: Update, context: ContextTypes.DEFAULT
         if not existing_session:
             # Create new session if doesn't exist
             logger.info(f"📝 Creating new session for template editing")
-            await session_manager.create_user_session(user_id)
+            await session_manager.get_or_create_session(user_id)
         
         result = await db.user_sessions.update_one(
             {"user_id": user_id, "is_active": True},
