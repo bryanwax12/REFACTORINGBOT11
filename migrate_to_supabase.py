@@ -177,7 +177,8 @@ async def main():
     # Connect to MongoDB
     logger.info("Connecting to MongoDB Atlas...")
     mongo_client = AsyncIOMotorClient(MONGO_URL)
-    mongo_db = mongo_client.telegram_shipping_bot
+    db_name = os.getenv('DB_NAME', 'telegram_shipping_bot')
+    mongo_db = mongo_client[db_name]
     
     # Connect to Supabase PostgreSQL
     logger.info("Connecting to Supabase PostgreSQL...")
