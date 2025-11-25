@@ -93,6 +93,7 @@ def setup_order_conversation_handler():
         save_template_name,
         handle_template_update,
         handle_template_new_name,
+        cancel_template_save,
         continue_order_after_template,
         handle_topup_amount
     )
