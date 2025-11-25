@@ -117,7 +117,7 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return CONFIRM_DATA
     
     keyboard = [
-        [InlineKeyboardButton("📦 Продолжить создание заказа", callback_data='continue_order')],
+        [InlineKeyboardButton("↩️ Вернуться к заказу", callback_data='continue_order')],
         [InlineKeyboardButton("📋 Мои шаблоны", callback_data='my_templates')],
         [InlineKeyboardButton("🏠 Главное меню", callback_data='start')]
     ]
