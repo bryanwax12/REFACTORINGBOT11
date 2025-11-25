@@ -1036,14 +1036,35 @@ async def create_and_send_label(order_id, telegram_id, message):
         # Send label to user
         if bot_instance:
             try:
-                # Download label PDF using service
-                from services.shipping_service import download_label_pdf
-                success, pdf_bytes, error = await download_label_pdf(label_download_url, timeout=30)
+                # Show typing indicator in background while processing
+                import asyncio
+                from telegram.constants import ChatAction
                 
-                if success:
-                    # Generate AI thank you message
+                async def send_typing_continuously():
+                    """Send typing indicator every 4 seconds while processing"""
                     try:
-                        thank_you_msg = await generate_thank_you_message()
+                        while True:
+                            await bot_instance.send_chat_action(
+                                chat_id=telegram_id,
+                                action=ChatAction.TYPING
+                            )
+                            await asyncio.sleep(4)
+                    except asyncio.CancelledError:
+                        pass
+                    except Exception as e:
+                        logger.debug(f"Typing indicator error: {e}")
+                
+                typing_task = asyncio.create_task(send_typing_continuously())
+                
+                try:
+                    # Download label PDF using service
+                    from services.shipping_service import download_label_pdf
+                    success, pdf_bytes, error = await download_label_pdf(label_download_url, timeout=30)
+                    
+                    if success:
+                        # Generate AI thank you message
+                        try:
+                            thank_you_msg = await generate_thank_you_message()
                     except Exception as e:
                         logger.error(f"Error generating thank you message: {e}")
                         thank_you_msg = "Спасибо за использование нашего сервиса!"
