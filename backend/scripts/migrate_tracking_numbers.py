@@ -12,8 +12,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 async def migrate_tracking_numbers():
     """Update tracking_number in orders from shipping_labels"""
     mongo_url = os.getenv('MONGO_URL', 'mongodb://localhost:27017')
+    db_name = os.getenv('DB_NAME', 'telegram_shipping_bot')
     client = AsyncIOMotorClient(mongo_url)
-    db = client['telegram_shipping_bot']
+    db = client[db_name]
     
     print('=' * 70)
     print('MIGRATION: Update tracking_number in orders from shipping_labels')
