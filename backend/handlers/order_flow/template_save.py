@@ -459,7 +459,7 @@ async def cancel_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
     logger.info("❌ Canceling template save, returning to order confirmation")
     
     query = update.callback_query
-    await safe_telegram_call(query.answer("Отменено"))
+    await safe_telegram_call(query.answer())
     
     # Remove buttons from the message
     try:
@@ -467,10 +467,7 @@ async def cancel_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
     except Exception as e:
         logger.warning(f"Could not remove buttons: {e}")
     
-    # Send info message
-    await safe_telegram_call(query.message.reply_text("↩️ Возвращаемся к проверке данных заказа..."))
-    
-    # Return to order confirmation screen
+    # Return to order confirmation screen directly
     return await show_data_confirmation(update, context)
 
 
