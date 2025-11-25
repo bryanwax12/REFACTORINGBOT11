@@ -182,9 +182,16 @@ from utils.settings_cache import (
 from config.performance_config import BotPerformanceConfig
 
 try:
-    mongo_url = os.environ.get('MONGO_URL', '')
+    # Support both MONGO_URL (local) and MONGODB_URI (deployment platform)
+    # Priority: MONGODB_URI > MONGO_URL (for deployment compatibility)
+    mongo_url = os.environ.get('MONGODB_URI') or os.environ.get('MONGO_URL', '')
+    
+    if mongo_url:
+        print(f"📊 MongoDB URL source: {'MONGODB_URI' if os.environ.get('MONGODB_URI') else 'MONGO_URL'}")
+        print(f"📊 MongoDB URL: {mongo_url[:30]}...")
+    
     if not mongo_url:
-        print("⚠️ MONGO_URL not set - MongoDB will be initialized later")
+        print("⚠️ MONGO_URL/MONGODB_URI not set - MongoDB will be initialized later")
         client = None
         db = None
         session_manager = None
