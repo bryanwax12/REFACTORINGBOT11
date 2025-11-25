@@ -327,8 +327,10 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await start_command(update, context)
     elif query.data == 'my_balance':
         # Import from payment_handlers module
+        logger.info("🔵 Calling my_balance_command from button_callback")
         from handlers.payment_handlers import my_balance_command
         await my_balance_command(update, context)
+        logger.info("✅ my_balance_command finished")
     elif query.data == 'my_templates':
         # Import from template_handlers module
         from handlers.template_handlers import my_templates_menu
