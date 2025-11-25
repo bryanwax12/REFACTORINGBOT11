@@ -181,32 +181,47 @@ from utils.settings_cache import (
 # Import performance config for optimized settings
 from config.performance_config import BotPerformanceConfig
 
-mongo_url = os.environ['MONGO_URL']
-mongodb_config = BotPerformanceConfig.get_mongodb_config()
-client = AsyncIOMotorClient(
-    mongo_url,
-    maxPoolSize=mongodb_config['maxPoolSize'],
-    minPoolSize=mongodb_config['minPoolSize'],
-    maxIdleTimeMS=mongodb_config['maxIdleTimeMS'],
-    serverSelectionTimeoutMS=mongodb_config['serverSelectionTimeoutMS'],
-    connectTimeoutMS=mongodb_config['connectTimeoutMS'],
-    socketTimeoutMS=mongodb_config['socketTimeoutMS']
-)
+try:
+    mongo_url = os.environ.get('MONGO_URL', '')
+    if not mongo_url:
+        print("⚠️ MONGO_URL not set - MongoDB will be initialized later")
+        client = None
+        db = None
+        session_manager = None
+        repository_manager = None
+    else:
+        mongodb_config = BotPerformanceConfig.get_mongodb_config()
+        client = AsyncIOMotorClient(
+            mongo_url,
+            maxPoolSize=mongodb_config['maxPoolSize'],
+            minPoolSize=mongodb_config['minPoolSize'],
+            maxIdleTimeMS=mongodb_config['maxIdleTimeMS'],
+            serverSelectionTimeoutMS=mongodb_config['serverSelectionTimeoutMS'],
+            connectTimeoutMS=mongodb_config['connectTimeoutMS'],
+            socketTimeoutMS=mongodb_config['socketTimeoutMS']
+        )
 
-# Get database name from environment
-db_name = os.environ.get('DB_NAME', 'telegram_shipping_bot')
-print(f"📊 Using database: {db_name}")
+        # Get database name from environment
+        db_name = os.environ.get('DB_NAME', 'telegram_shipping_bot')
+        print(f"📊 Using database: {db_name}")
 
-db = client[db_name]
+        db = client[db_name]
 
-# Initialize Session Manager for state management
-from session_manager import SessionManager
-session_manager = SessionManager(db)
+        # Initialize Session Manager for state management
+        from session_manager import SessionManager
+        session_manager = SessionManager(db)
 
-# Initialize Repository Manager for data access layer
-from repositories import init_repositories, get_repositories
-repository_manager = init_repositories(db)
-print("📦 Repository Manager initialized successfully")
+        # Initialize Repository Manager for data access layer
+        from repositories import init_repositories, get_repositories
+        repository_manager = init_repositories(db)
+        print("📦 Repository Manager initialized successfully")
+except Exception as e:
+    print(f"⚠️ MongoDB initialization failed: {e}")
+    print("⚠️ Application will start without database - configure MONGO_URL to enable")
+    client = None
+    db = None
+    session_manager = None
+    repository_manager = None
 
 # In-memory cache for frequently accessed data
 
