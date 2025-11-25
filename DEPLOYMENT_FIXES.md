@@ -37,13 +37,19 @@ exec uvicorn server:app --host 0.0.0.0 --port $PORT --workers 1
 
 ---
 
-### 3. ✅ MongoDB конфигурация
-**Статус:** Уже исправлено в предыдущей сессии.
+### 3. ✅ MongoDB конфигурация (ОБНОВЛЕНО)
+**Проблема:** Платформа Emergent ищет переменную `MONGODB_URI`, но код использовал `MONGO_URL`.
 
-**Текущая конфигурация:**
-- `MONGO_URL=mongodb://mongo:27017/telegram_shipping_bot`
+**Исправление:**
+- Добавлена поддержка обеих переменных: `MONGODB_URI` (приоритет) и `MONGO_URL` (fallback)
+- `MONGODB_URI=mongodb://mongo:27017/telegram_shipping_bot` добавлен в `.env`
 - Использует управляемую БД платформы Emergent (НЕ внешний Atlas)
 - Все хардкоды имени БД удалены из скриптов
+
+**Важно:** 
+- ❌ НЕ использовать внешний MongoDB Atlas для deployment
+- ✅ Использовать только управляемую БД платформы: `mongodb://mongo:27017/...`
+- ✅ Платформа теперь находит `MONGODB_URI` и подключается к встроенной БД
 
 ---
 
