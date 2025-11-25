@@ -259,9 +259,9 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Special handling for SELECT_CARRIER (shipping rates screen)
     from server import SELECT_CARRIER, PAYMENT_METHOD, TEMPLATE_NAME, CONFIRM_DATA
     
-    # If user was saving template, return to confirmation screen
-    if saved_state == TEMPLATE_NAME:
-        logger.info("🔄 Returning from template save to confirmation screen")
+    # If user was saving template or at confirmation screen, return to confirmation
+    if saved_state == TEMPLATE_NAME or saved_state == CONFIRM_DATA:
+        logger.info("🔄 Returning to order confirmation screen")
         from handlers.order_flow.confirmation import show_data_confirmation
         return await show_data_confirmation(update, context)
     
