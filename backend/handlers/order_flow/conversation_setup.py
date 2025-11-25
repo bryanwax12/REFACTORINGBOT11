@@ -224,6 +224,7 @@ def setup_order_conversation_handler():
             ],
             CONFIRM_DATA: [
                 CallbackQueryHandler(handle_save_as_template, pattern='^save_template$'),
+                CallbackQueryHandler(return_to_confirm_from_error, pattern='^return_to_confirm_from_error$'),
                 CallbackQueryHandler(handle_data_confirmation, pattern='^(confirm_data|edit_data|edit_addresses_error|edit_from_address|edit_to_address|return_to_order|confirm_cancel|cancel_order)$')
             ],
             EDIT_MENU: [
