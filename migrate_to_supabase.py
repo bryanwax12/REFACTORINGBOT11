@@ -10,8 +10,8 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# MongoDB connection (source)
-MONGO_URL = "mongodb+srv://bbeardy3_db_user:ccW9UMMYvz1sSpuJ@cluster0.zmmat7g.mongodb.net/telegram_shipping_bot?retryWrites=true&w=majority"
+# MongoDB connection (source) - load from environment
+MONGO_URL = os.environ.get('MONGO_URL', '')
 
 # Supabase connection (destination) - will be provided by user
 SUPABASE_URL = os.environ.get('SUPABASE_URL', '')
