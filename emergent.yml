@@ -1,4 +1,0 @@
-database:
-  type: mongodb
-  managed: false
-  skip_migration: true
