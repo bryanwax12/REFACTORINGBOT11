@@ -252,7 +252,38 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
                     try:
                         order = await db.orders.find_one({"id": payment['order_id']}, {"_id": 0})
                         if order:
-                            await create_and_send_label(payment['order_id'], order['telegram_id'], None)
+                            label_created = await create_and_send_label(payment['order_id'], order['telegram_id'], None)
+                            
+                            if label_created:
+                                # Get user balance after payment
+                                from repositories import get_user_repo
+                                user_repo = get_user_repo()
+                                new_balance = await user_repo.get_balance(order['telegram_id'])
+                                
+                                # Send balance info to user
+                                from utils.ui_utils import PaymentFlowUI
+                                from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+                                
+                                keyboard = [[InlineKeyboardButton("🔙 Главное меню", callback_data='start')]]
+                                reply_markup = InlineKeyboardMarkup(keyboard)
+                                
+                                await safe_telegram_call(bot_instance.send_message(
+                                    chat_id=order['telegram_id'],
+                                    text=PaymentFlowUI.payment_success_crypto(order['amount'], new_balance, payment['order_id']),
+                                    reply_markup=reply_markup
+                                ))
+                                
+                                # Send AI-generated thank you message
+                                try:
+                                    from utils.telegram_utils import generate_thank_you_message
+                                    thank_you_msg = await generate_thank_you_message()
+                                    await safe_telegram_call(bot_instance.send_message(
+                                        chat_id=order['telegram_id'],
+                                        text=thank_you_msg
+                                    ))
+                                    logger.info(f"AI thank you message sent to user {order['telegram_id']}")
+                                except Exception as e:
+                                    logger.error(f"Error generating/sending thank you message: {e}")
                     except Exception as e:
                         logger.error(f"Failed to create label: {e}")
         
