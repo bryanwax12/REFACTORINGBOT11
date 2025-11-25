@@ -269,7 +269,7 @@ async def handle_oxapay_webhook(request: Request, db, bot_instance, safe_telegra
                                 
                                 await safe_telegram_call(bot_instance.send_message(
                                     chat_id=order['telegram_id'],
-                                    text=PaymentFlowUI.payment_success_crypto(order['amount'], new_balance, payment['order_id']),
+                                    text=PaymentFlowUI.payment_success_balance(order['amount'], new_balance, payment['order_id']),
                                     reply_markup=reply_markup
                                 ))
                                 
