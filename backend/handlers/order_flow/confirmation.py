@@ -214,26 +214,8 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
         from handlers.order_flow.rates import fetch_shipping_rates
         return await fetch_shipping_rates(update, context)
     
-    if query.data == 'save_template':
-        # Save current order data as template
-        from utils.ui_utils import TemplateManagementUI, get_cancel_keyboard
-        
-        reply_markup = get_cancel_keyboard()
-        
-        # 🚀 PERFORMANCE: Send message in background
-        async def send_template_prompt():
-            bot_msg = await safe_telegram_call(update.effective_message.reply_text(
-                TemplateManagementUI.template_name_prompt(),
-                reply_markup=reply_markup,
-                parse_mode='Markdown',
-            ))
-            # Save prompt message ID to remove button later
-            if bot_msg:
-                context.user_data['last_prompt_message_id'] = bot_msg.message_id
-        
-        asyncio.create_task(send_template_prompt())
-        
-        return TEMPLATE_NAME
+    # Note: 'save_template' is now handled by handle_save_as_template function
+    # This case should not be reached anymore
     
     if query.data == 'edit_data':
         # Show edit menu
