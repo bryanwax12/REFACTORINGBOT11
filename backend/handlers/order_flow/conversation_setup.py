@@ -246,7 +246,7 @@ def setup_order_conversation_handler():
                 CallbackQueryHandler(handle_template_update, pattern='^template_update_'),
                 CallbackQueryHandler(handle_template_new_name, pattern='^template_new_name$'),
                 CallbackQueryHandler(continue_order_after_template, pattern='^continue_order$'),
-                CallbackQueryHandler(cancel_template_save, pattern='^(confirm_cancel|return_to_order)$'),
+                CallbackQueryHandler(cancel_template_save, pattern='^cancel_template_save$'),
                 CallbackQueryHandler(start_command, pattern='^start$')
             ],
             TEMPLATE_LIST: [
