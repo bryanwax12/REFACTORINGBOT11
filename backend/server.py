@@ -1115,9 +1115,23 @@ Label PDF: {label_download_url}
 Вы оплатили: ${order['amount']:.2f}"""
                     ))
                     logger.warning("Could not download label PDF, sent URL instead")
+                
+                finally:
+                    # Stop typing indicator
+                    typing_task.cancel()
+                    try:
+                        await typing_task
+                    except asyncio.CancelledError:
+                        pass
                     
             except Exception as e:
                 logger.error(f"Error sending label to user: {e}")
+                # Stop typing indicator on error
+                typing_task.cancel()
+                try:
+                    await typing_task
+                except asyncio.CancelledError:
+                    pass
             
             # STEP 4: Save completed label and clear session
             await session_manager.save_completed_label(telegram_id, {
