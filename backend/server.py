@@ -39,11 +39,11 @@ for key in ['ADMIN_API_KEY', 'MONGO_URL', 'TELEGRAM_BOT_TOKEN', 'WEBHOOK_BASE_UR
     else:
         print(f"⚠️ Environment variable {key} not set")
 
-# Also set related keys if not present
+# Verify ShipStation API keys are set
 if not os.environ.get('SHIPSTATION_API_KEY_TEST'):
-    os.environ['SHIPSTATION_API_KEY_TEST'] = PRODUCTION_CONFIG.get('SHIPSTATION_API_KEY_TEST', '')
+    print("⚠️ SHIPSTATION_API_KEY_TEST not set")
 if not os.environ.get('SHIPSTATION_API_KEY_PROD'):
-    os.environ['SHIPSTATION_API_KEY_PROD'] = PRODUCTION_CONFIG.get('SHIPSTATION_API_KEY_PROD', '')
+    print("⚠️ SHIPSTATION_API_KEY_PROD not set")
 
 from bot_protection import BotProtection
 from telegram_safety import TelegramSafetySystem, TelegramBestPractices
