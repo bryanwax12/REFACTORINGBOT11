@@ -33,7 +33,7 @@ def setup_order_conversation_handler():
     )
     # Import handlers from their actual locations
     from handlers.order_flow.payment import process_payment
-    from handlers.order_flow.confirmation import handle_data_confirmation
+    from handlers.order_flow.confirmation import handle_data_confirmation, handle_save_as_template
     from handlers.order_flow.entry_points import order_new, order_from_template_list
     from handlers.template_handlers import (
         use_template,
