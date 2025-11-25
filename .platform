@@ -1,0 +1,10 @@
+mongodb:
+  managed: false
+  skip_migration: true
+  migration_command: "./migrate.py"
+
+deployment:
+  skip_steps:
+    - mongodb_create_user
+    - mongodb_migrate
+    - db_migrate
