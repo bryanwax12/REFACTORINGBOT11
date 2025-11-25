@@ -67,6 +67,7 @@ async def view_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger = logging.getLogger(__name__)
     
     query = update.callback_query
+    logger.info(f"🔵 view_template CALLED with callback_data: {query.data}")
     await safe_telegram_call(query.answer())
     
     # Remove buttons from template list message
