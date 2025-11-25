@@ -470,6 +470,28 @@ async def cancel_template_save(update: Update, context: ContextTypes.DEFAULT_TYP
     return await show_data_confirmation(update, context)
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
+@with_user_session(create_user=False, require_session=True)
+async def return_to_confirm_from_error(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Return to order confirmation after template save error"""
+    from server import safe_telegram_call
+    from handlers.order_flow.confirmation import show_data_confirmation
+    
+    logger.info("↩️ Returning to order confirmation from template error")
+    
+    query = update.callback_query
+    await safe_telegram_call(query.answer())
+    
+    # Remove buttons from the error message
+    try:
+        await safe_telegram_call(query.message.edit_reply_markup(reply_markup=None))
+    except Exception as e:
+        logger.warning(f"Could not remove buttons: {e}")
+    
+    # Return to order confirmation screen
+    return await show_data_confirmation(update, context)
+
+
 # ============================================================
 # MODULE EXPORTS
 # ============================================================
