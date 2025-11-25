@@ -6,12 +6,10 @@
   "env": {
     "MONGO_URL": {
       "description": "MongoDB Atlas connection string",
-      "value": "mongodb+srv://bbeardy3_db_user:ccW9UMMYvz1sSpuJ@cluster0.zmmat7g.mongodb.net/telegram_shipping_bot?retryWrites=true&w=majority&appName=Cluster0",
       "required": true
     },
     "DB_NAME": {
       "description": "MongoDB database name",
-      "value": "telegram_shipping_bot",
       "required": true
     },
     "TELEGRAM_BOT_TOKEN": {
