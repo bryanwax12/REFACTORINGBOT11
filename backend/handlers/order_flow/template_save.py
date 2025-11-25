@@ -212,7 +212,7 @@ async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_T
     if result.modified_count > 0:
         template_name = context.user_data.get('pending_template_name', 'шаблон')
         keyboard = [
-            [InlineKeyboardButton("📦 Продолжить создание заказа", callback_data='continue_order')],
+            [InlineKeyboardButton("↩️ Вернуться к заказу", callback_data='continue_order')],
             [InlineKeyboardButton("📋 Мои шаблоны", callback_data='my_templates')],
             [InlineKeyboardButton("🏠 Главное меню", callback_data='start')]
         ]
