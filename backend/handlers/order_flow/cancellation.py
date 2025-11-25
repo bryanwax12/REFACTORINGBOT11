@@ -42,26 +42,29 @@ async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE, sessi
 
     asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
-    # ✅ 2025 ПРАВИЛЬНЫЙ СПОСОБ: Получить текущее состояние из MongoDBPersistence
+    # Get current state from context.user_data (more reliable than DB lookup)
     user_id = update.effective_user.id
-    session = await db.user_sessions.find_one(
-        {"user_id": user_id, "is_active": True},
-        {"session_data.conversation_state": 1}
-    )
+    current_state = context.user_data.get('current_conversation_state')
     
-    current_state = None
-    if session:
-        current_state = session.get("session_data", {}).get("conversation_state")
-        logger.info(f"✅ Got current state from MongoDBPersistence: {current_state}")
-        
-        # Сохранить состояние В СЕССИИ для восстановления после отмены
-        result = await db.user_sessions.update_one(
-            {"user_id": user_id, "is_active": True},
-            {"$set": {"session_data.state_before_cancel": current_state}}
-        )
-        logger.info(f"📝 Saved state_before_cancel={current_state}, matched={result.matched_count}, modified={result.modified_count}")
-    else:
-        logger.warning(f"⚠️ No active session found for user {user_id}")
+    # If not in context, assume we're at CONFIRM_DATA based on where cancel_order is called from
+    if not current_state:
+        from server import CONFIRM_DATA
+        current_state = CONFIRM_DATA
+        logger.info(f"⚠️ State not in context, assuming CONFIRM_DATA")
+    
+    logger.info(f"✅ Current state: {current_state}")
+    
+    # Save state to DB for return_to_order to retrieve
+    result = await db.user_sessions.update_one(
+        {"user_id": user_id},
+        {"$set": {
+            "session_data.state_before_cancel": current_state,
+            "is_active": True,
+            "timestamp": datetime.now(timezone.utc)
+        }},
+        upsert=True
+    )
+    logger.info(f"📝 Saved state_before_cancel={current_state}, matched={result.matched_count}, modified={result.modified_count}")
     
     # Add "Check Data" button only if on shipping rates selection screen
     if current_state == SELECT_CARRIER:
