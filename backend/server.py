@@ -1100,11 +1100,11 @@ async def create_and_send_label(order_id, telegram_id, message):
                             logger.error(f"Failed to send label: {error}")
                             raise Exception(error)
                     else:
-                    # Fallback if PDF download fails
-                    logger.error(f"Failed to download PDF: {error}")
-                    await safe_telegram_call(bot_instance.send_message(
-                        chat_id=telegram_id,
-                        text=f"""📦 Shipping label создан!
+                        # Fallback if PDF download fails
+                        logger.error(f"Failed to download PDF: {error}")
+                        await safe_telegram_call(bot_instance.send_message(
+                            chat_id=telegram_id,
+                            text=f"""📦 Shipping label создан!
 
 Tracking: {tracking_number}
 Carrier: {order['selected_carrier']}
@@ -1113,8 +1113,8 @@ Service: {order['selected_service']}
 Label PDF: {label_download_url}
 
 Вы оплатили: ${order['amount']:.2f}"""
-                    ))
-                    logger.warning("Could not download label PDF, sent URL instead")
+                        ))
+                        logger.warning("Could not download label PDF, sent URL instead")
                 
                 finally:
                     # Stop typing indicator
