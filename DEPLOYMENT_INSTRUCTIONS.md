@@ -23,8 +23,9 @@ mongodb+srv://<username>:<password>@cluster0.zmmat7g.mongodb.net/telegram_shippi
 When you deploy on Emergent platform, you need to set these environment variables:
 
 ```bash
-MONGO_URL=mongodb+srv://bbeardy3_db_user:ccW9UMMYvz1sSpuJ@cluster0.zmmat7g.mongodb.net/telegram_shipping_bot?retryWrites=true&w=majority
+MONGO_URL=<your_mongodb_atlas_connection_string>
 ```
+*(Configure this in your deployment environment variables)*
 
 **How to set in Emergent:**
 1. Go to your deployment settings
