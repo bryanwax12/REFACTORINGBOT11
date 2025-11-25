@@ -1070,36 +1070,36 @@ async def create_and_send_label(order_id, telegram_id, message):
                             thank_you_msg = "Спасибо за использование нашего сервиса!"
                         
                         # Send label using service
-                    from services.shipping_service import send_label_to_user
-                    success, error = await send_label_to_user(
-                        bot_instance=bot_instance,
-                        telegram_id=telegram_id,
-                        pdf_bytes=pdf_bytes,
-                        order_id=order_id,
-                        tracking_number=tracking_number,
-                        carrier=order['selected_carrier'].upper(),
-                        safe_telegram_call_func=safe_telegram_call
-                    )
-                    
-                    if success:
-                        # Send tracking info
-                        await safe_telegram_call(bot_instance.send_message(
-                            chat_id=telegram_id,
-                            text=f"🔗 Трекинг номер:\n\n`{tracking_number}`",
-                            parse_mode='Markdown'
-                        ))
+                        from services.shipping_service import send_label_to_user
+                        success, error = await send_label_to_user(
+                            bot_instance=bot_instance,
+                            telegram_id=telegram_id,
+                            pdf_bytes=pdf_bytes,
+                            order_id=order_id,
+                            tracking_number=tracking_number,
+                            carrier=order['selected_carrier'].upper(),
+                            safe_telegram_call_func=safe_telegram_call
+                        )
                         
-                        # Send thank you message
-                        logger.info(f"Sending thank you message to user {telegram_id}")
-                        await safe_telegram_call(bot_instance.send_message(
-                            chat_id=telegram_id,
-                            text=thank_you_msg
-                        ))
-                        logger.info(f"Label sent successfully to user {telegram_id}")
+                        if success:
+                            # Send tracking info
+                            await safe_telegram_call(bot_instance.send_message(
+                                chat_id=telegram_id,
+                                text=f"🔗 Трекинг номер:\n\n`{tracking_number}`",
+                                parse_mode='Markdown'
+                            ))
+                            
+                            # Send thank you message
+                            logger.info(f"Sending thank you message to user {telegram_id}")
+                            await safe_telegram_call(bot_instance.send_message(
+                                chat_id=telegram_id,
+                                text=thank_you_msg
+                            ))
+                            logger.info(f"Label sent successfully to user {telegram_id}")
+                        else:
+                            logger.error(f"Failed to send label: {error}")
+                            raise Exception(error)
                     else:
-                        logger.error(f"Failed to send label: {error}")
-                        raise Exception(error)
-                else:
                     # Fallback if PDF download fails
                     logger.error(f"Failed to download PDF: {error}")
                     await safe_telegram_call(bot_instance.send_message(
