@@ -15,14 +15,16 @@ This application uses **external MongoDB Atlas cluster** and does not require lo
 The following environment variables are required for deployment:
 
 ```
-MONGO_URL=mongodb+srv://bbeardy3_db_user:ccW9UMMYvz1sSpuJ@cluster0.zmmat7g.mongodb.net/telegram_shipping_bot?retryWrites=true&w=majority&appName=Cluster0
+MONGO_URL=<your_mongodb_atlas_connection_string>
 DB_NAME=telegram_shipping_bot
-TELEGRAM_BOT_TOKEN=8492458522:AAE3dLsl2blomb5WxP7w4S0bqvrs1M4WSsM
-ADMIN_TELEGRAM_ID=7066790254
-ADMIN_API_KEY=sk_admin_e19063c3f82f447ba4ccf49cd97dd9fd_2024
+TELEGRAM_BOT_TOKEN=<your_telegram_bot_token>
+ADMIN_TELEGRAM_ID=<your_admin_telegram_id>
+ADMIN_API_KEY=<your_admin_api_key>
 BOT_MODE=polling
 BOT_ENVIRONMENT=production
 ```
+
+**Note:** All credentials should be configured via your deployment platform's environment variables, NOT hardcoded in files.
 
 ### Deployment Files Created
 
