@@ -1,8 +1,15 @@
 #!/bin/bash
-# This script skips MongoDB migration and validates existing connection
+set -e
 
-echo "Skipping MongoDB migration - using existing MongoDB Atlas cluster"
-echo "MONGO_URL is set: ${MONGO_URL:0:30}..."
-echo "DB_NAME is set: $DB_NAME"
-echo "Migration skip: SUCCESS"
+echo "================================================"
+echo "MongoDB Migration Skipper"
+echo "================================================"
+echo ""
+echo "Using external MongoDB Atlas cluster"
+echo "Database: $DB_NAME"
+echo "Connection: External (MongoDB Atlas)"
+echo ""
+echo "✅ Migration skipped successfully"
+echo "✅ Application will connect to existing database"
+echo ""
 exit 0
