@@ -452,6 +452,16 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     reply_markup=reply_markup
                 ))
                 
+                # Send AI-generated thank you message
+                try:
+                    from utils.telegram_utils import generate_thank_you_message
+                    thank_you_msg = await generate_thank_you_message()
+                    await safe_telegram_call(update.effective_message.reply_text(thank_you_msg))
+                    logger.info(f"AI thank you message sent to user {telegram_id}")
+                except Exception as e:
+                    logger.error(f"Error generating/sending thank you message: {e}")
+                    # Don't fail the whole flow if AI message fails
+                
                 # Mark order as completed to prevent stale button interactions
                 context.user_data.clear()
                 context.user_data['order_completed'] = True
