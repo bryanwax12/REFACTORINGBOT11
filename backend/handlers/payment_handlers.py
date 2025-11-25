@@ -32,10 +32,14 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE,
     """
     from server import safe_telegram_call, mark_message_as_selected
     
+    logger.info("🔍 my_balance_command CALLED")
+    
     # Get user and balance from injected services
     user = context.user_data['db_user']
     telegram_id = user['telegram_id']
     balance = await user_service.get_balance(telegram_id)
+    
+    logger.info(f"💰 Balance for user {telegram_id}: ${balance:.2f}")
     
     # Handle both command and callback
     if update.callback_query:
