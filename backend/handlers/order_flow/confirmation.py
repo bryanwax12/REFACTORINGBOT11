@@ -76,8 +76,13 @@ async def handle_save_as_template(update: Update, context: ContextTypes.DEFAULT_
     
     # Prompt for template name with custom cancel button
     from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+    import logging
+    logger = logging.getLogger(__name__)
+    
     keyboard = [[InlineKeyboardButton("❌ Отмена", callback_data='cancel_template_save')]]
     reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    logger.info("📝 Creating template save prompt with callback_data='cancel_template_save'")
     
     # 🚀 PERFORMANCE: Send message in background
     async def send_template_prompt():
