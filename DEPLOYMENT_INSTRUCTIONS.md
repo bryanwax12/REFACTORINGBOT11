@@ -4,8 +4,9 @@
 
 **Connection String:**
 ```
-mongodb+srv://bbeardy3_db_user:ccW9UMMYvz1sSpuJ@cluster0.zmmat7g.mongodb.net/telegram_shipping_bot?retryWrites=true&w=majority
+mongodb+srv://<username>:<password>@cluster0.zmmat7g.mongodb.net/telegram_shipping_bot?retryWrites=true&w=majority
 ```
+*(Actual credentials configured via environment variables)*
 
 **Data Imported:**
 - ✅ 5 users
