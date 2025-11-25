@@ -10,7 +10,8 @@ load_dotenv()
 
 async def create_indexes():
     client = AsyncIOMotorClient(os.getenv('MONGO_URL'))
-    db = client['telegram_shipping_bot']
+    db_name = os.getenv('DB_NAME', 'telegram_shipping_bot')
+    db = client[db_name]
     coll = db.refund_requests
     
     print("Creating indexes for refund_requests...")
