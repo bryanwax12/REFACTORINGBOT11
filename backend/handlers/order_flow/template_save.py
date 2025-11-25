@@ -294,8 +294,8 @@ async def handle_template_new_name(update: Update, context: ContextTypes.DEFAULT
 @safe_handler(fallback_state=ConversationHandler.END)
 @with_user_session(create_user=False, require_session=True)
 async def continue_order_after_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Continue order creation after saving template"""
-    from handlers.order_flow.rates import fetch_shipping_rates
+    """Return to order confirmation after saving template"""
+    from handlers.order_flow.confirmation import show_data_confirmation
     from server import mark_message_as_selected
     import asyncio
     
@@ -306,7 +306,8 @@ async def continue_order_after_template(update: Update, context: ContextTypes.DE
 
     asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
-    return await fetch_shipping_rates(update, context)
+    # Return to order confirmation screen
+    return await show_data_confirmation(update, context)
 
 
 @safe_handler(fallback_state=ConversationHandler.END)
