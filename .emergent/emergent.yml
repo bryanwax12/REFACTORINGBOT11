@@ -4,6 +4,11 @@
   "created_at": "2025-11-24T06:28:27.958543+00:00Z",
   "database": {
     "type": "mongodb",
-    "managed": false
+    "managed": false,
+    "skip_migration": true,
+    "use_external": true
+  },
+  "mongodb": {
+    "skip_migration": true
   }
 }
