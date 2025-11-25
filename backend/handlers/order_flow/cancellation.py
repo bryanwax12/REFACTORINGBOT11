@@ -55,10 +55,11 @@ async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE, sessi
         logger.info(f"✅ Got current state from MongoDBPersistence: {current_state}")
         
         # Сохранить состояние В СЕССИИ для восстановления после отмены
-        await db.user_sessions.update_one(
+        result = await db.user_sessions.update_one(
             {"user_id": user_id, "is_active": True},
             {"$set": {"session_data.state_before_cancel": current_state}}
         )
+        logger.info(f"📝 Saved state_before_cancel={current_state}, matched={result.matched_count}, modified={result.modified_count}")
     else:
         logger.warning(f"⚠️ No active session found for user {user_id}")
     
