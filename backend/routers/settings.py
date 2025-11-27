@@ -20,6 +20,7 @@ async def get_api_mode():
         current_mode = api_config_manager.get_current_mode()
         
         return {
+            "mode": current_mode,  # Frontend expects "mode" field
             "current_mode": current_mode,
             "available_modes": ["production", "test"]
         }
