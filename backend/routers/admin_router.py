@@ -698,6 +698,8 @@ async def add_user_balance_legacy(
             # Send beautiful notification to user
             if bot_instance:
                 try:
+                    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+                    
                     message = (
                         "💰 *БАЛАНС ПОПОЛНЕН*\n\n"
                         f"✨ Администратор добавил:\n"
@@ -705,10 +707,17 @@ async def add_user_balance_legacy(
                         f"💳 Текущий баланс: *${new_balance:.2f}*\n\n"
                         f"🎉 Спасибо!"
                     )
+                    
+                    # Add "Continue Order" button
+                    keyboard = InlineKeyboardMarkup([
+                        [InlineKeyboardButton("📦 Продолжить заказ", callback_data="continue_order")]
+                    ])
+                    
                     await safe_telegram_call(bot_instance.send_message(
                         chat_id=telegram_id,
                         text=message,
-                        parse_mode='Markdown'
+                        parse_mode='Markdown',
+                        reply_markup=keyboard
                     ))
                     logger.info(f"Balance notification sent to user {telegram_id}")
                 except Exception as e:
