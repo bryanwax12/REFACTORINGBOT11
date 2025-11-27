@@ -1059,12 +1059,13 @@ async def create_and_send_label(order_id, telegram_id, message):
         # Update order using Repository Pattern
         from repositories import get_repositories
         repos = get_repositories()
-        await repos.orders.update_by_id(order_id, {
+        update_result = await repos.orders.update_by_order_id(order_id, {
             "shipping_status": "label_created",
             "tracking_number": tracking_number,
             "label_id": label_id,
             "shipment_id": shipment_id
         })
+        logger.info(f"📝 Order updated with tracking info: {update_result}")
         
         # Send label to user
         logger.info(f"📨 Preparing to send label to user {telegram_id}")
