@@ -1067,7 +1067,9 @@ async def create_and_send_label(order_id, telegram_id, message):
         })
         
         # Send label to user
+        logger.info(f"📨 Preparing to send label to user {telegram_id}")
         if bot_instance:
+            logger.info(f"✅ bot_instance available, proceeding with label delivery")
             try:
                 # Show typing indicator in background while processing
                 import asyncio
