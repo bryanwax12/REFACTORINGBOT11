@@ -118,6 +118,27 @@ class OrderRepository(BaseRepository):
         )
         return result
     
+    async def update_by_order_id(
+        self,
+        order_id: str,
+        update_data: Dict
+    ) -> bool:
+        """
+        Обновить заказ по order_id (ORD-...)
+        
+        Args:
+            order_id: Order ID заказа (поле 'order_id')
+            update_data: Данные для обновления
+            
+        Returns:
+            True если обновлено
+        """
+        result = await self.update_one(
+            {"order_id": order_id},
+            {"$set": update_data}
+        )
+        return result
+    
     async def update_status(
         self,
         order_id: str,
