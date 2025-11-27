@@ -6,6 +6,9 @@ import os
 from datetime import datetime, timezone, timedelta
 
 async def check_labels():
+    # Load from backend/.env
+    from dotenv import load_dotenv
+    load_dotenv('/app/backend/.env')
     mongo_url = os.environ.get('MONGODB_URI') or os.environ.get('MONGO_URL', '')
     db_name = os.environ.get('DB_NAME', 'telegram_shipping_bot')
     
