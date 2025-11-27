@@ -89,7 +89,9 @@ async def enable_maintenance(message: Optional[str] = None):
                 
                 logger.info(f"✅ Maintenance notification sent: {success_count} success, {failed_count} failed")
             except Exception as broadcast_error:
-                logger.error(f"Error broadcasting maintenance notification: {broadcast_error}")
+                logger.error(f"❌ Error broadcasting maintenance notification: {broadcast_error}", exc_info=True)
+        else:
+            logger.warning("⚠️ bot_instance is None, cannot send notifications!")
         
         return {
             "status": "enabled",
