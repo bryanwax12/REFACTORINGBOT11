@@ -46,13 +46,22 @@ async def notify_admin_error(user_info: dict, error_type: str, error_details: st
     from server import ADMIN_TELEGRAM_ID, bot_instance
     from handlers.common_handlers import safe_telegram_call
     
-    if not ADMIN_TELEGRAM_ID or not bot_instance:
+    logger.info(f"🔔 notify_admin_error called: error_type={error_type}, order_id={order_id}")
+    
+    if not ADMIN_TELEGRAM_ID:
+        logger.warning("⚠️ ADMIN_TELEGRAM_ID not set, skipping error notification")
+        return
+    
+    if not bot_instance:
+        logger.warning("⚠️ bot_instance not available, skipping error notification")
         return
     
     try:
         username = user_info.get('username', 'N/A')
         telegram_id = user_info.get('telegram_id', 'N/A')
         first_name = user_info.get('first_name', 'N/A')
+        
+        logger.info(f"📤 Sending error notification to admin {ADMIN_TELEGRAM_ID} for user {telegram_id}")
         
         message = f"""🚨 <b>ОШИБКА В БОТЕ</b> 🚨
 
@@ -75,8 +84,9 @@ async def notify_admin_error(user_info: dict, error_type: str, error_details: st
             text=message,
             parse_mode='HTML'
         ))
+        logger.info(f"✅ Error notification sent to admin successfully")
     except Exception as e:
-        logger.error(f"Failed to send admin notification: {e}")
+        logger.error(f"❌ Failed to send admin error notification: {e}", exc_info=True)
 
 
 # ==================== ADMIN STATISTICS ====================
