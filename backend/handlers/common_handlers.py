@@ -346,6 +346,25 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await db.pending_orders.delete_one({"telegram_id": telegram_id})
         context.user_data.clear()
         await start_command(update, context)
+    elif query.data == 'continue_order':
+        # Return to order confirmation after balance top-up
+        asyncio.create_task(mark_message_as_selected(update, context))
+        telegram_id = query.from_user.id
+        
+        # Check if user has pending order
+        pending_order = await db.pending_orders.find_one({"telegram_id": telegram_id}, {"_id": 0})
+        
+        if pending_order and pending_order.get('selected_rate'):
+            # Show order confirmation with rates
+            from handlers.order_flow.confirmation import show_data_confirmation
+            await show_data_confirmation(update, context)
+        else:
+            # No pending order, start new one
+            await safe_telegram_call(query.message.reply_text(
+                "У вас нет активного заказа. Начните новый заказ из главного меню!",
+                parse_mode='Markdown'
+            ))
+            await start_command(update, context)
     elif query.data == 'new_order':
         # Import from server (will be moved to order_handlers later)
         from server import new_order_start
