@@ -51,7 +51,7 @@ async def enable_maintenance(request: dict = None):
         
         logger.info(f"🔧 Enabling maintenance mode with message: {maintenance_message[:50]}...")
         
-        await db.bot_settings.update_one(
+        result = await db.bot_settings.update_one(
             {"key": "maintenance_mode"},
             {
                 "$set": {
@@ -62,7 +62,11 @@ async def enable_maintenance(request: dict = None):
             upsert=True
         )
         
-        logger.info("🔧 Maintenance mode ENABLED")
+        logger.info(f"🔧 Maintenance mode ENABLED (matched: {result.matched_count}, modified: {result.modified_count}, upserted: {result.upserted_id})")
+        
+        # Verify it was saved
+        verify = await db.bot_settings.find_one({"key": "maintenance_mode"}, {"_id": 0})
+        logger.info(f"✅ Verified maintenance settings: {verify}")
         
         # Broadcast notification to all users
         logger.info(f"📋 bot_instance available: {bot_instance is not None}")
