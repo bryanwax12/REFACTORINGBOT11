@@ -174,8 +174,14 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # This happens via the return value ConversationHandler.END at the end of this function
     except Exception as e:
         logger.error(f"Error clearing conversation state: {e}")
-    user_balance = user.get('balance', 0.0)
+    # ALWAYS get fresh balance from DB (not from cached user)
+    from server import db
+    telegram_id = user.get('telegram_id')
+    fresh_user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0, "balance": 1, "first_name": 1})
+    user_balance = fresh_user.get('balance', 0.0) if fresh_user else 0.0
     first_name = user.get('first_name', 'Пользователь')
+    
+    logger.info(f"💰 Fresh balance from DB: ${user_balance:.2f}")
     
     # Handle both command and callback
     if update.callback_query:
