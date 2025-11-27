@@ -1227,9 +1227,10 @@ Label PDF: {label_download_url}
                 logger.error(f"❌ Failed to send label notification to admin: {e}", exc_info=True)
         
         # Check ShipStation balance after label creation
+        logger.info(f"🔍 Checking ShipStation balance...")
         asyncio.create_task(check_shipstation_balance())
         
-        logger.info(f"Label created successfully for order {order_id}")
+        logger.info(f"✅ Label created successfully for order {order_id}")
         return True  # Success
         
     except Exception as e:
