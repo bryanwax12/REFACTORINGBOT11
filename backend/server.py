@@ -1161,10 +1161,12 @@ Label PDF: {label_download_url}
                 'amount': order['amount']
             })
             logger.info(f"✅ Label saved and session cleared for user {telegram_id}")
-                
-        # Send notification to admin about new label
+        
+        # Send notification to admin about new label (MOVED OUTSIDE bot_instance check)
+        logger.info(f"🔔 Attempting to send admin notification. ADMIN_TELEGRAM_ID={ADMIN_TELEGRAM_ID}")
         if ADMIN_TELEGRAM_ID:
             try:
+                logger.info(f"📤 Preparing admin notification for order {order_id}")
                 # Get user info using Repository Pattern
                 from repositories import get_user_repo
                 user_repo = get_user_repo()
