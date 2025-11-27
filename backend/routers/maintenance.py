@@ -133,7 +133,9 @@ async def disable_maintenance():
                     {"_id": 0, "telegram_id": 1}
                 ).to_list(10000)
                 
+                logger.info(f"👥 Found {len(users)} users to notify")
                 notification_text = "✅ *Бот снова работает!*\n\nТехническое обслуживание завершено. Вы можете продолжить пользоваться ботом."
+                logger.info(f"📝 Notification text: {notification_text[:100]}...")
                 
                 success_count = 0
                 failed_count = 0
