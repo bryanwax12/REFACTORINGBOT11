@@ -34,20 +34,20 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE,
     
     logger.info("🔍 my_balance_command CALLED")
     
-    # Get user from context but ALWAYS fetch fresh balance from DB
-    user = context.user_data.get('db_user')
+    # Get telegram_id
+    telegram_id = update.effective_user.id
+    
+    # ALWAYS get fresh user data from DB (don't trust context cache)
+    from server import db
+    user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    
     if not user:
-        # Fallback to getting user from update
-        telegram_id = update.effective_user.id
-        from server import db
-        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
-    else:
-        telegram_id = user['telegram_id']
+        logger.error(f"❌ User {telegram_id} not found in database!")
+        return
     
-    # ALWAYS get fresh balance from DB (bypass cache)
-    balance = await user_service.get_balance(telegram_id, bypass_cache=True)
+    balance = user.get('balance', 0)
     
-    logger.info(f"💰 Balance for user {telegram_id}: ${balance:.2f}")
+    logger.info(f"💰 Fresh balance from DB for user {telegram_id}: ${balance:.2f}")
     
     # Handle both command and callback
     if update.callback_query:
