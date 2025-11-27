@@ -30,17 +30,25 @@ async def get_api_mode():
 
 
 @router.post("/api-mode", dependencies=[Depends(verify_admin_key)])
-async def set_api_mode(mode: str):
+async def set_api_mode(request: dict):
     """Set API mode (production/test) - ADMIN ONLY"""
     from server import api_config_manager
     
     try:
+        mode = request.get("mode")
+        if not mode:
+            raise HTTPException(
+                status_code=400,
+                detail="Mode is required"
+            )
+        
         if mode not in ["production", "test"]:
             raise HTTPException(
                 status_code=400,
                 detail="Invalid mode. Use 'production' or 'test'"
             )
         
+        logger.info(f"Switching API mode to: {mode}")
         success = api_config_manager.switch_mode(mode)
         
         if not success:
@@ -49,8 +57,11 @@ async def set_api_mode(mode: str):
                 detail="Failed to switch API mode"
             )
         
+        logger.info(f"API mode successfully switched to: {mode}")
+        
         return {
             "status": "success",
+            "mode": mode,
             "new_mode": mode,
             "message": f"Switched to {mode} mode"
         }
