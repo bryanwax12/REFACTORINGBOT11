@@ -1100,6 +1100,7 @@ async def create_and_send_label(order_id, telegram_id, message):
                     
                     if success:
                         # Send label using service
+                        logger.info(f"📤 Sending label PDF to user {telegram_id}...")
                         from services.shipping_service import send_label_to_user
                         success, error = await send_label_to_user(
                             bot_instance=bot_instance,
