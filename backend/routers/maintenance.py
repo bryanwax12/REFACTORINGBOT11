@@ -123,9 +123,11 @@ async def disable_maintenance():
         logger.info("✅ Maintenance mode DISABLED")
         
         # Broadcast notification to all users
+        logger.info(f"📋 bot_instance available: {bot_instance is not None}")
         if bot_instance:
             try:
                 logger.info("📢 Broadcasting maintenance disabled notification to all users...")
+                logger.info("📊 Fetching users from database...")
                 users = await db.users.find(
                     {"bot_blocked_by_user": {"$ne": True}},
                     {"_id": 0, "telegram_id": 1}
