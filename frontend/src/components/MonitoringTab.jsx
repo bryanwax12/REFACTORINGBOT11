@@ -24,15 +24,20 @@ export default function MonitoringTab() {
 
   const loadData = async () => {
     try {
-      const [healthRes, logsRes, metricsRes] = await Promise.all([
-        axios.get(`${API}/api/bot/health`),
-        axios.get(`${API}/api/bot/logs?limit=50`),
-        axios.get(`${API}/api/bot/metrics`)
-      ]);
+      // Use correct monitoring endpoint
+      const response = await axios.get(`${API}/monitoring/combined`, {
+        headers: {
+          'X-API-Key': ADMIN_API_KEY
+        }
+      });
 
-      setHealthData(healthRes.data);
-      setLogs(logsRes.data.logs);
-      setMetrics(metricsRes.data);
+      if (response.data.success) {
+        setHealthData(response.data.health);
+        setMetrics(response.data.application);
+        
+        // Logs are not available in this endpoint, keep them empty for now
+        setLogs([]);
+      }
     } catch (error) {
       console.error("Failed to load monitoring data", error);
     } finally {
