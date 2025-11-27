@@ -34,10 +34,18 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE,
     
     logger.info("🔍 my_balance_command CALLED")
     
-    # Get user and balance from injected services
-    user = context.user_data['db_user']
-    telegram_id = user['telegram_id']
-    balance = await user_service.get_balance(telegram_id)
+    # Get user from context but ALWAYS fetch fresh balance from DB
+    user = context.user_data.get('db_user')
+    if not user:
+        # Fallback to getting user from update
+        telegram_id = update.effective_user.id
+        from server import db
+        user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
+    else:
+        telegram_id = user['telegram_id']
+    
+    # ALWAYS get fresh balance from DB (bypass cache)
+    balance = await user_service.get_balance(telegram_id, bypass_cache=True)
     
     logger.info(f"💰 Balance for user {telegram_id}: ${balance:.2f}")
     
