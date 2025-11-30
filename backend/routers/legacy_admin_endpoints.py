@@ -368,13 +368,13 @@ async def invite_all_to_channel_legacy(
     Send channel invite to all users (legacy endpoint for frontend)
     Frontend calls: /api/users/invite-all-channel
     """
-    from server import db
+    from server import db, bot_instance
     from handlers.common_handlers import safe_telegram_call
     from datetime import datetime, timezone
     import os
     
-    # Get bot_instance from app.state
-    bot_instance = getattr(request.app.state, 'bot_instance', None)
+    logger.info(f"📢 [INVITE_ALL_CHANNEL] Endpoint called")
+    logger.info(f"📋 [INVITE_ALL_CHANNEL] bot_instance available: {bot_instance is not None}")
     
     try:
         if not bot_instance:
