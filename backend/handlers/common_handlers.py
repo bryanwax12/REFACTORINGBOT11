@@ -152,11 +152,18 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     - Error handling
     - Typing indicator
     """
-    logger.info(f"📍 START command from user {update.effective_user.id if update.effective_user else 'None'}")
+    telegram_id = update.effective_user.id if update.effective_user else None
+    logger.info(f"📍 START command from user {telegram_id}")
     
-    # Check if bot is in maintenance mode FIRST (before anything else)
+    # CRITICAL: Check if user is blocked FIRST (before maintenance check)
+    if telegram_id and await check_user_blocked(telegram_id):
+        logger.info(f"🚫 Blocked user {telegram_id} attempted to use /start")
+        await send_blocked_message(update)
+        return ConversationHandler.END
+    
+    # Check if bot is in maintenance mode SECOND
     if await check_maintenance_mode(update):
-        logger.info(f"🔧 User {update.effective_user.id} blocked by maintenance mode")
+        logger.info(f"🔧 User {telegram_id} blocked by maintenance mode")
         from utils.ui_utils import MessageTemplates
         if update.callback_query:
             await safe_telegram_call(update.callback_query.answer())
@@ -175,13 +182,6 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = context.user_data.get('db_user')
     if not user:
         logger.error("db_user not found in context!")
-        return ConversationHandler.END
-    
-    # Check if user is blocked
-    telegram_id = user.get('telegram_id')
-    if await check_user_blocked(telegram_id):
-        logger.info(f"🚫 Blocked user {telegram_id} attempted to use /start")
-        await send_blocked_message(update)
         return ConversationHandler.END
     
     # CRITICAL: Clear any active conversation state to prevent dialog conflicts
