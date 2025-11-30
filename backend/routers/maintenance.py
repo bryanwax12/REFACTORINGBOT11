@@ -35,8 +35,6 @@ async def get_maintenance_status():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-from fastapi import Body
-
 @router.post("/enable", dependencies=[Depends(verify_admin_key)])
 async def enable_maintenance(message: str = Body(None, embed=True)):
     """Enable maintenance mode - ADMIN ONLY"""
