@@ -86,11 +86,11 @@ async def block_user(request: Request, telegram_id: int, authenticated: bool = D
 @admin_router.post("/users/{telegram_id}/unblock")
 async def unblock_user(request: Request, telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
     """Unblock a user to allow bot usage"""
-    from server import db
+    from server import db, bot_instance
     from handlers.common_handlers import safe_telegram_call
     
-    # Get bot_instance from app.state
-    bot_instance = getattr(request.app.state, 'bot_instance', None)
+    logger.info(f"✅ Unblocking user {telegram_id}...")
+    logger.info(f"📋 bot_instance available: {bot_instance is not None}")
     
     try:
         # Check if user exists
@@ -103,6 +103,8 @@ async def unblock_user(request: Request, telegram_id: int, authenticated: bool =
             {"$set": {"blocked": False}}
         )
         
+        logger.info(f"✅ User unblocked in DB (matched: {result.matched_count}, modified: {result.modified_count})")
+        
         if result.modified_count > 0:
             if bot_instance:
                 try:
@@ -112,13 +114,17 @@ async def unblock_user(request: Request, telegram_id: int, authenticated: bool =
                         "✨ Теперь вы можете пользоваться всеми функциями.\n\n"
                         "💫 Добро пожаловать обратно!"
                     )
+                    logger.info(f"📤 Sending unblock notification to user {telegram_id}...")
                     await safe_telegram_call(bot_instance.send_message(
                         chat_id=telegram_id,
                         text=message,
                         parse_mode='Markdown'
                     ))
+                    logger.info(f"✅ Unblock notification sent to user {telegram_id}")
                 except Exception as e:
-                    logger.error(f"Failed to send unblock notification: {e}")
+                    logger.error(f"❌ Failed to send unblock notification: {e}", exc_info=True)
+            else:
+                logger.warning("⚠️ bot_instance is None, cannot send notification!")
             
             return {"success": True, "message": "User unblocked successfully"}
         else:
