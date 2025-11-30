@@ -143,11 +143,10 @@ async def unblock_user(
     Query Parameters:
     - send_notification: Whether to notify user via Telegram
     """
-    from server import db
+    from server import db, bot_instance
     from services.admin.user_admin_service import user_admin_service
     
-    # Get bot_instance from app.state
-    bot_instance = getattr(request.app.state, 'bot_instance', None)
+    logger.info(f"✅ [ADMIN_USERS UNBLOCK] telegram_id={telegram_id}, bot_instance={bot_instance is not None}")
     
     try:
         # Check if user exists
