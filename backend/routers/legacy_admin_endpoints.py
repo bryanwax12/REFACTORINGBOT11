@@ -186,11 +186,11 @@ async def block_user_legacy(
     Block user (legacy endpoint for frontend)
     Frontend calls: /api/users/{telegram_id}/block
     """
-    from server import db
+    from server import db, bot_instance
     from handlers.common_handlers import safe_telegram_call
     
-    # Get bot_instance from app.state
-    bot_instance = getattr(request.app.state, 'bot_instance', None)
+    logger.info(f"🚫 [BLOCK_USER] Endpoint called for telegram_id={telegram_id}")
+    logger.info(f"📋 [BLOCK_USER] bot_instance available: {bot_instance is not None}")
     
     try:
         user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
