@@ -311,11 +311,14 @@ async def legacy_enable_maintenance(request: Request, api_key: str = Depends(ver
     # Get bot_instance from app.state
     bot_instance = getattr(request.app.state, 'bot_instance', None)
     
-    await db.settings.update_one(
+    # CRITICAL: Use bot_settings collection (same as maintenance check)
+    logger.info("🔧 legacy_enable_maintenance called")
+    result = await db.bot_settings.update_one(
         {"key": "maintenance_mode"},
-        {"$set": {"value": True}},
+        {"$set": {"enabled": True, "message": "Бот временно на техническом обслуживании. Попробуйте позже."}},
         upsert=True
     )
+    logger.info(f"✅ Maintenance enabled in bot_settings (matched: {result.matched_count}, modified: {result.modified_count})")
     clear_settings_cache()
     
     # Notify all users
