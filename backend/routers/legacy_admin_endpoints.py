@@ -54,14 +54,12 @@ async def add_balance_legacy(
     Add balance to user (legacy endpoint for frontend)
     Frontend calls: /api/users/{telegram_id}/balance/add
     """
-    from server import db
+    from server import db, bot_instance
     from services.admin.user_admin_service import user_admin_service
     from handlers.common_handlers import safe_telegram_call
     
-    # Get bot_instance from app.state
-    bot_instance = getattr(request.app.state, 'bot_instance', None)
-    logger.info(f"[ADD_BALANCE] Endpoint called for telegram_id={telegram_id}, amount={amount}")
-    logger.info(f"[ADD_BALANCE] bot_instance from app.state: {'AVAILABLE' if bot_instance else 'NONE'}")
+    logger.info(f"💰 [ADD_BALANCE] Endpoint called for telegram_id={telegram_id}, amount={amount}")
+    logger.info(f"📋 [ADD_BALANCE] bot_instance available: {bot_instance is not None}")
     
     try:
         success, new_balance, error = await user_admin_service.update_user_balance(
