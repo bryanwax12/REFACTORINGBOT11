@@ -34,11 +34,11 @@ async def get_users(authenticated: bool = Depends(verify_admin_key)):
 @admin_router.post("/users/{telegram_id}/block")
 async def block_user(request: Request, telegram_id: int, authenticated: bool = Depends(verify_admin_key)):
     """Block a user from using the bot"""
-    from server import db
+    from server import db, bot_instance
     from handlers.common_handlers import safe_telegram_call
     
-    # Get bot_instance from app.state
-    bot_instance = getattr(request.app.state, 'bot_instance', None)
+    logger.info(f"🚫 Blocking user {telegram_id}...")
+    logger.info(f"📋 bot_instance available: {bot_instance is not None}")
     
     try:
         # Check if user exists
@@ -51,6 +51,8 @@ async def block_user(request: Request, telegram_id: int, authenticated: bool = D
             {"$set": {"blocked": True}}
         )
         
+        logger.info(f"✅ User blocked in DB (matched: {result.matched_count}, modified: {result.modified_count})")
+        
         if result.modified_count > 0:
             if bot_instance:
                 try:
@@ -59,13 +61,17 @@ async def block_user(request: Request, telegram_id: int, authenticated: bool = D
                         "🚫 Ваш доступ к боту ограничен администратором.\n\n"
                         "📞 Для разблокировки обратитесь в поддержку."
                     )
+                    logger.info(f"📤 Sending block notification to user {telegram_id}...")
                     await safe_telegram_call(bot_instance.send_message(
                         chat_id=telegram_id,
                         text=message,
                         parse_mode='Markdown'
                     ))
+                    logger.info(f"✅ Block notification sent to user {telegram_id}")
                 except Exception as e:
-                    logger.error(f"Failed to send block notification: {e}")
+                    logger.error(f"❌ Failed to send block notification: {e}", exc_info=True)
+            else:
+                logger.warning("⚠️ bot_instance is None, cannot send notification!")
             
             return {"success": True, "message": "User blocked successfully"}
         else:
