@@ -152,7 +152,24 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     logger.info(f"📍 START command from user {update.effective_user.id if update.effective_user else 'None'}")
     
-    # Get user from context FIRST (injected by decorator)
+    # Check if bot is in maintenance mode FIRST (before anything else)
+    if await check_maintenance_mode(update):
+        logger.info(f"🔧 User {update.effective_user.id} blocked by maintenance mode")
+        from utils.ui_utils import MessageTemplates
+        if update.callback_query:
+            await safe_telegram_call(update.callback_query.answer())
+            await update.callback_query.message.reply_text(
+                MessageTemplates.maintenance_mode(),
+                parse_mode='Markdown'
+            )
+        else:
+            await update.message.reply_text(
+                MessageTemplates.maintenance_mode(),
+                parse_mode='Markdown'
+            )
+        return ConversationHandler.END
+    
+    # Get user from context (injected by decorator)
     user = context.user_data.get('db_user')
     if not user:
         logger.error("db_user not found in context!")
