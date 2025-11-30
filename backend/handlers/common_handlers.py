@@ -158,6 +158,13 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.error("db_user not found in context!")
         return ConversationHandler.END
     
+    # Check if user is blocked
+    telegram_id = user.get('telegram_id')
+    if await check_user_blocked(telegram_id):
+        logger.info(f"🚫 Blocked user {telegram_id} attempted to use /start")
+        await send_blocked_message(update)
+        return ConversationHandler.END
+    
     # CRITICAL: Clear any active conversation state to prevent dialog conflicts
     # This ensures /start always brings user to main menu, not mid-conversation
     try:
