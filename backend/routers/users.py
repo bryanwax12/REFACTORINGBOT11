@@ -163,6 +163,9 @@ async def unblock_user(telegram_id: int):
 async def add_user_balance(telegram_id: int, amount: float, description: str = "Manual add"):
     """Add balance to user account"""
     from repositories import get_user_repo
+    from server import bot_instance
+    from handlers.common_handlers import safe_telegram_call
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
     
     try:
         if amount <= 0:
@@ -181,7 +184,36 @@ async def add_user_balance(telegram_id: int, amount: float, description: str = "
         
         new_balance = user.get('balance', 0) + amount
         
-        logger.info(f"💰 Added ${amount} to user {telegram_id}. New balance: ${new_balance}")
+        logger.info(f"💰 [USERS_ROUTER] Added ${amount} to user {telegram_id}. New balance: ${new_balance}")
+        logger.info(f"📋 [USERS_ROUTER] bot_instance available: {bot_instance is not None}")
+        
+        # Send notification to user
+        if bot_instance:
+            try:
+                message = (
+                    "💰 *БАЛАНС ПОПОЛНЕН*\n\n"
+                    f"✨ Администратор добавил:\n"
+                    f"💵 *+${amount:.2f}*\n\n"
+                    f"💳 Текущий баланс: *${new_balance:.2f}*\n\n"
+                    f"🎉 Спасибо!"
+                )
+                
+                # Add "Continue Order" button
+                keyboard = InlineKeyboardMarkup([
+                    [InlineKeyboardButton("📦 Продолжить заказ", callback_data="continue_order")]
+                ])
+                
+                await safe_telegram_call(bot_instance.send_message(
+                    chat_id=telegram_id,
+                    text=message,
+                    parse_mode='Markdown',
+                    reply_markup=keyboard
+                ))
+                logger.info(f"✅ [USERS_ROUTER] Balance notification sent to user {telegram_id}")
+            except Exception as e:
+                logger.error(f"❌ [USERS_ROUTER] Failed to send balance notification: {e}", exc_info=True)
+        else:
+            logger.warning(f"⚠️ [USERS_ROUTER] bot_instance is None, cannot send notification")
         
         return {
             "status": "success",
