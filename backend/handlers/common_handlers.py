@@ -319,24 +319,24 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     from server import db
     
     query = update.callback_query
-    logger.info(f"🔵 button_callback called with data: {query.data}")
+    telegram_id = query.from_user.id
+    logger.info(f"🔵 button_callback called with data: {query.data} from user {telegram_id}")
     await safe_telegram_call(query.answer())
     
-    # Check if bot is in maintenance mode FIRST
+    # CRITICAL: Check if user is blocked FIRST (before maintenance check)
+    if await check_user_blocked(telegram_id):
+        logger.info(f"🚫 Blocked user {telegram_id} attempted to use button: {query.data}")
+        await send_blocked_message(update)
+        return ConversationHandler.END
+    
+    # Check if bot is in maintenance mode SECOND
     if await check_maintenance_mode(update):
-        logger.info(f"🔧 User {query.from_user.id} blocked by maintenance mode (button: {query.data})")
+        logger.info(f"🔧 User {telegram_id} blocked by maintenance mode (button: {query.data})")
         from utils.ui_utils import MessageTemplates
         await query.message.reply_text(
             MessageTemplates.maintenance_mode(),
             parse_mode='Markdown'
         )
-        return ConversationHandler.END
-    
-    # Check if user is blocked
-    telegram_id = query.from_user.id
-    if await check_user_blocked(telegram_id):
-        logger.info(f"🚫 Blocked user {telegram_id} attempted to use button: {query.data}")
-        await send_blocked_message(update)
         return ConversationHandler.END
     
     if query.data == 'start' or query.data == 'main_menu':
