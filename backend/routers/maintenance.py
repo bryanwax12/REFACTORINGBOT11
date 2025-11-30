@@ -35,18 +35,15 @@ async def get_maintenance_status():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+from fastapi import Body
+
 @router.post("/enable", dependencies=[Depends(verify_admin_key)])
-async def enable_maintenance(request: dict = None):
+async def enable_maintenance(message: str = Body(None, embed=True)):
     """Enable maintenance mode - ADMIN ONLY"""
     from server import db, bot_instance
     from utils.telegram_utils import safe_telegram_call
     
     try:
-        # Extract message from request body if provided
-        message = None
-        if request and isinstance(request, dict):
-            message = request.get('message')
-        
         maintenance_message = message or "Бот временно на техническом обслуживании. Попробуйте позже."
         
         logger.info(f"🔧 Enabling maintenance mode with message: {maintenance_message[:50]}...")
