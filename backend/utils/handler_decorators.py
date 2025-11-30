@@ -696,12 +696,17 @@ def with_user_session(create_user=True, require_session=False):
                 context.user_data['db_user'] = user
                 logger.debug(f"✅ [{handler_name}] user={user_id}: db_user cached for future handlers")
             
-            # Check if blocked (always check, security-critical)
-            if user.get('blocked', False):
-                logger.warning(f"❌ [{handler_name}] user={user_id}: User is blocked")
+            # CRITICAL: Check if blocked (ALWAYS from DB, never from cache!)
+            # Re-fetch user from DB to get latest blocked status
+            user_repo = get_user_repo()
+            fresh_user = await user_repo.find_by_telegram_id(user_id)
+            if fresh_user and fresh_user.get('blocked', False):
+                logger.warning(f"🚫 [{handler_name}] user={user_id}: User is BLOCKED (checked from DB)")
                 # Use effective_message for reply
                 if message:
-                    await message.reply_text("❌ Вы заблокированы")
+                    await message.reply_text("⛔️ *АККАУНТ ЗАБЛОКИРОВАН*\n\n🚫 Ваш доступ к боту ограничен администратором.\n\n📞 Для разблокировки обратитесь в поддержку.", parse_mode='Markdown')
+                elif update.callback_query:
+                    await update.callback_query.message.reply_text("⛔️ *АККАУНТ ЗАБЛОКИРОВАН*\n\n🚫 Ваш доступ к боту ограничен администратором.\n\n📞 Для разблокировки обратитесь в поддержку.", parse_mode='Markdown')
                 return ConversationHandler.END
             
             # ✅ CRITICAL: DO NOT touch session or conversation state!
