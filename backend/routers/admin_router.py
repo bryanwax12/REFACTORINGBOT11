@@ -216,12 +216,22 @@ async def disable_maintenance_mode(authenticated: bool = Depends(verify_admin_ke
     from server import db, clear_settings_cache, bot_instance
     from utils.telegram_utils import safe_telegram_call
     
+    logger.info("✅ disable_maintenance_mode endpoint called (admin_router)")
+    
     try:
-        await db.settings.update_one(
+        # Update bot_settings (used by middleware check)
+        result = await db.bot_settings.update_one(
             {"key": "maintenance_mode"},
-            {"$set": {"value": False}},
+            {"$set": {"enabled": False}},
             upsert=True
         )
+        
+        logger.info(f"✅ Maintenance disabled in DB (matched: {result.matched_count}, modified: {result.modified_count})")
+        
+        # Verify
+        verify = await db.bot_settings.find_one({"key": "maintenance_mode"}, {"_id": 0})
+        logger.info(f"✅ Verified settings: {verify}")
+        
         clear_settings_cache()
         
         # Broadcast notification to all users
