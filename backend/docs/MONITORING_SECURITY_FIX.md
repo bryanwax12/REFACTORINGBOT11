@@ -131,7 +131,7 @@ async def get_metrics(authenticated: bool = Depends(verify_admin_key)) -> Dict:
 
 ### Test 1: Health Check (публичный)
 ```bash
-curl https://logisticsbot-ai.preview.emergentagent.com/api/monitoring/health
+curl https://easyshipbot.preview.emergentagent.com/api/monitoring/health
 ```
 
 **Результат**:
@@ -153,7 +153,7 @@ curl https://logisticsbot-ai.preview.emergentagent.com/api/monitoring/health
 
 ### Test 2: Metrics БЕЗ аутентификации
 ```bash
-curl https://logisticsbot-ai.preview.emergentagent.com/api/monitoring/metrics
+curl https://easyshipbot.preview.emergentagent.com/api/monitoring/metrics
 ```
 
 **Результат**:
@@ -168,7 +168,7 @@ curl https://logisticsbot-ai.preview.emergentagent.com/api/monitoring/metrics
 
 ### Test 3: Metrics С аутентификацией
 ```bash
-curl https://logisticsbot-ai.preview.emergentagent.com/api/monitoring/metrics \
+curl https://easyshipbot.preview.emergentagent.com/api/monitoring/metrics \
   -H "X-API-Key: YOUR_ADMIN_KEY"
 ```
 
@@ -213,11 +213,11 @@ Success rate: 100.0%
 ### Test 5: Stats Endpoints
 ```bash
 # Без ключа
-curl https://logisticsbot-ai.preview.emergentagent.com/api/monitoring/stats/users
+curl https://easyshipbot.preview.emergentagent.com/api/monitoring/stats/users
 # HTTP 401: {"detail":"API key required"}
 
 # С ключом
-curl https://logisticsbot-ai.preview.emergentagent.com/api/monitoring/stats/users \
+curl https://easyshipbot.preview.emergentagent.com/api/monitoring/stats/users \
   -H "X-API-Key: YOUR_ADMIN_KEY"
 # HTTP 200: {"total_users": 7, ...}
 ```

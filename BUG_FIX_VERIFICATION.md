@@ -22,7 +22,7 @@ Conflict: terminated by other getUpdates request
 
 ### Внесенные изменения
 1. **Файл**: `/app/backend/.env`
-   - Добавлена переменная: `WEBHOOK_URL="https://logisticsbot-ai.preview.emergentagent.com"`
+   - Добавлена переменная: `WEBHOOK_URL="https://easyshipbot.preview.emergentagent.com"`
    - Это заставляет бота работать в webhook режиме
 
 2. **Файл**: `/app/backend/server.py`
@@ -127,8 +127,8 @@ tail -100 /var/log/supervisor/backend.err.log | grep "Conflict"
    ```
    Должно быть:
    ```
-   WEBHOOK_URL="https://logisticsbot-ai.preview.emergentagent.com"
-   WEBHOOK_BASE_URL="https://logisticsbot-ai.preview.emergentagent.com"
+   WEBHOOK_URL="https://easyshipbot.preview.emergentagent.com"
+   WEBHOOK_BASE_URL="https://easyshipbot.preview.emergentagent.com"
    ```
 
 2. **Перезапустите бэкенд:**

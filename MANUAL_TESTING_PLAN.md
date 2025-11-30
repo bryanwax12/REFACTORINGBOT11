@@ -176,7 +176,7 @@
 
 ## 🖥️ ЧАСТЬ 2: АДМИН-ПАНЕЛЬ
 
-### URL админки: https://logisticsbot-ai.preview.emergentagent.com
+### URL админки: https://easyshipbot.preview.emergentagent.com
 
 ---
 

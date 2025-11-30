@@ -16,7 +16,7 @@ load_dotenv('/app/frontend/.env')
 load_dotenv('/app/backend/.env')
 
 # Configuration from review request
-BACKEND_URL = "https://logisticsbot-ai.preview.emergentagent.com"
+BACKEND_URL = "https://easyshipbot.preview.emergentagent.com"
 API_KEY = "sk_admin_e19063c3f82f447ba4ccf49cd97dd9fd_2024"
 TEST_USER_ID = 5594152712
 

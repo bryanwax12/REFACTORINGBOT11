@@ -73,7 +73,7 @@
 **Что нужно сделать:**
 1. Зайти в Oxapay dashboard
 2. Найти раздел "Merchant Settings" или "API Settings"
-3. Проверить/установить Callback URL: `https://logisticsbot-ai.preview.emergentagent.com/api/oxapay/webhook`
+3. Проверить/установить Callback URL: `https://easyshipbot.preview.emergentagent.com/api/oxapay/webhook`
 4. Проверить логи webhook delivery в Oxapay (если есть)
 5. Провести тестовый платеж
 
