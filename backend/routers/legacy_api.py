@@ -293,8 +293,9 @@ async def legacy_set_api_mode(req: Request, request: dict, api_key: str = Depend
 async def legacy_get_maintenance_status(api_key: str = Depends(verify_api_key)):
     """Legacy maintenance status endpoint"""
     from server import db
-    setting = await db.settings.find_one({"key": "maintenance_mode"}, {"_id": 0})
-    is_enabled = setting.get("value", False) if setting else False
+    # CRITICAL: Use bot_settings collection (same as maintenance check)
+    setting = await db.bot_settings.find_one({"key": "maintenance_mode"}, {"_id": 0})
+    is_enabled = setting.get("enabled", False) if setting else False
     return {
         "maintenance_mode": is_enabled,
         "message": "Maintenance mode is enabled" if is_enabled else ""
