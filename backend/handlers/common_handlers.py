@@ -109,7 +109,9 @@ async def check_user_blocked(telegram_id: int) -> bool:
     from repositories import get_user_repo
     user_repo = get_user_repo()
     user = await user_repo.find_by_telegram_id(telegram_id)
-    return user.get('blocked', False) if user else False
+    is_blocked = user.get('blocked', False) if user else False
+    logger.info(f"🔍 Block check for user {telegram_id}: blocked={is_blocked}")
+    return is_blocked
 
 
 async def send_blocked_message(update: Update):
