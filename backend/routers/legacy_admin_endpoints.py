@@ -301,12 +301,12 @@ async def invite_to_channel_legacy(
     Send channel invite to user (legacy endpoint for frontend)
     Frontend calls: /api/users/{telegram_id}/invite-channel
     """
-    from server import db
+    from server import db, bot_instance
     from handlers.common_handlers import safe_telegram_call
     from datetime import datetime, timezone
     
-    # Get bot_instance from app.state
-    bot_instance = getattr(request.app.state, 'bot_instance', None)
+    logger.info(f"📢 [INVITE_CHANNEL] Endpoint called for telegram_id={telegram_id}")
+    logger.info(f"📋 [INVITE_CHANNEL] bot_instance available: {bot_instance is not None}")
     
     try:
         user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0})
