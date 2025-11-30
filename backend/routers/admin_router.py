@@ -781,11 +781,11 @@ async def deduct_user_balance_legacy(
     Legacy endpoint to deduct balance from user
     Used by frontend - subtracts specified amount from user balance
     """
-    from server import db
+    from server import db, bot_instance
     from handlers.common_handlers import safe_telegram_call
     
-    # Get bot_instance from app.state
-    bot_instance = getattr(request.app.state, 'bot_instance', None)
+    logger.info(f"💸 [DEDUCT_BALANCE_ADMIN] Endpoint called for telegram_id={telegram_id}, amount={amount}")
+    logger.info(f"📋 [DEDUCT_BALANCE_ADMIN] bot_instance available: {bot_instance is not None}")
     
     try:
         # Get current balance first
