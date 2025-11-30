@@ -36,7 +36,7 @@ async def get_maintenance_status():
 
 
 @router.post("/enable", dependencies=[Depends(verify_admin_key)])
-async def enable_maintenance(message: str = Body(None, embed=True)):
+async def enable_maintenance(message: Optional[str] = Body(default=None)):
     """Enable maintenance mode - ADMIN ONLY"""
     from server import db, bot_instance
     from utils.telegram_utils import safe_telegram_call
