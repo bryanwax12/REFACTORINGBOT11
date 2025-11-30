@@ -2,7 +2,7 @@
 Maintenance Router
 Эндпоинты для управления режимом обслуживания
 """
-from fastapi import APIRouter, HTTPException, Depends, Body
+from fastapi import APIRouter, HTTPException, Depends, Body, Request
 from handlers.admin_handlers import verify_admin_key
 from typing import Optional
 import logging
