@@ -26,13 +26,17 @@ async def check_maintenance_mode(update: Update) -> bool:
         user_id = str(update.effective_user.id) if update.effective_user else None
         admin_id = str(ADMIN_TELEGRAM_ID) if ADMIN_TELEGRAM_ID else None
         
-        logger.debug(f"🔍 Maintenance check: enabled={is_maintenance}, user={user_id}, admin={admin_id}")
+        logger.info(f"🔍 Maintenance check: enabled={is_maintenance}, user={user_id}, admin={admin_id}")
         
         # Allow admin to use bot even in maintenance mode
         if is_maintenance and user_id != admin_id:
             logger.info(f"🚫 User {user_id} blocked by maintenance mode")
             return True
         
+        if is_maintenance and user_id == admin_id:
+            logger.info(f"✅ Admin {user_id} allowed during maintenance")
+        
+        logger.info(f"✅ User {user_id} allowed (maintenance={is_maintenance})")
         return False
     except Exception as e:
         logger.error(f"❌ Error checking maintenance mode: {e}", exc_info=True)
