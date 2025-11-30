@@ -217,15 +217,6 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         asyncio.create_task(mark_message_as_selected(update, context))
         send_method = update.message.reply_text
     
-    # Check if bot is in maintenance mode
-    if await check_maintenance_mode(update):
-        from utils.ui_utils import MessageTemplates
-        await send_method(
-            MessageTemplates.maintenance_mode(),
-            parse_mode='Markdown'
-        )
-        return ConversationHandler.END
-        
     # Import UI utilities
     from utils.ui_utils import MessageTemplates, get_main_menu_keyboard
     
