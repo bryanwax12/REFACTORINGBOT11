@@ -97,6 +97,34 @@ class OrderRepository(BaseRepository):
             limit=limit
         )
     
+    async def find_by_telegram_id(
+        self,
+        telegram_id: int,
+        limit: int = 100,
+        status: Optional[str] = None
+    ) -> List[Dict]:
+        """
+        Найти заказы пользователя по telegram_id
+        
+        Args:
+            telegram_id: Telegram ID пользователя
+            limit: Максимальное количество
+            status: Фильтр по статусу
+            
+        Returns:
+            Список заказов
+        """
+        filter_query = {"telegram_id": telegram_id}
+        
+        if status:
+            filter_query['status'] = status
+        
+        return await self.find_many(
+            filter_query,
+            sort=[("created_at", -1)],
+            limit=limit
+        )
+    
     async def update_by_id(
         self,
         order_id: str,
