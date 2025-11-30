@@ -7361,3 +7361,40 @@ from server import bot_instance
 - Кнопка "Details" выдает ошибку: `'OrderRepository' object has no attribute 'count_by_telegram_id'`
 - Это ошибка в коде репозитория, НЕ связана с bot_instance
 
+
+
+---
+## ✅ КНОПКА "DETAILS" ИСПРАВЛЕНА (30.11.2025 12:08)
+
+### 🔍 Найденная проблема:
+В `OrderRepository` отсутствовали два метода:
+1. `count_by_telegram_id()` - для подсчета заказов пользователя
+2. `find_by_telegram_id()` - для получения заказов пользователя
+
+### ✅ Решение:
+Добавлены оба метода в `/app/backend/repositories/order_repository.py`:
+
+```python
+async def count_by_telegram_id(self, telegram_id: int) -> int:
+    """Подсчет количества заказов пользователя"""
+    return await self.collection.count_documents({"telegram_id": telegram_id})
+
+async def find_by_telegram_id(self, telegram_id: int, limit: int = 100, status: Optional[str] = None) -> List[Dict]:
+    """Найти заказы пользователя по telegram_id"""
+    filter_query = {"telegram_id": telegram_id}
+    if status:
+        filter_query['status'] = status
+    return await self.find_many(filter_query, sort=[("created_at", -1)], limit=limit)
+```
+
+### 🧪 Финальное тестирование всех функций:
+- ✅ **Details**: User: A | Balance: 36.5 | Orders: 0
+- ✅ **Add Balance**: Status: success | New Balance: 37.5 + уведомление отправлено
+- ✅ **Block User**: Success: True + уведомление отправлено
+- ✅ **Unblock User**: Success: True + уведомление отправлено
+- ✅ **Maintenance Enable**: Success: True | Users notified: 6
+- ✅ **Maintenance Disable**: Success: True | Users notified: 6
+
+### Результат:
+🎉 **ВСЕ 6 ФУНКЦИЙ АДМИН-ПАНЕЛИ РАБОТАЮТ ИДЕАЛЬНО!**
+
