@@ -46,61 +46,10 @@ async def get_maintenance_status(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/maintenance/enable")
-async def enable_maintenance(
-    payload: MaintenanceMessage,
-    authenticated: bool = Depends(verify_admin_key)
-):
-    """
-    Enable maintenance mode
-    
-    Request Body:
-    - message: Message to show users during maintenance
-    """
-    from server import db
-    from services.admin.system_admin_service import system_admin_service
-    
-    try:
-        success, message = await system_admin_service.enable_maintenance(
-            db,
-            payload.message
-        )
-        
-        if success:
-            return {"success": True, "message": message}
-        else:
-            raise HTTPException(status_code=500, detail=message)
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error enabling maintenance: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/maintenance/disable")
-async def disable_maintenance(
-    authenticated: bool = Depends(verify_admin_key)
-):
-    """
-    Disable maintenance mode
-    """
-    from server import db
-    from services.admin.system_admin_service import system_admin_service
-    
-    try:
-        success, message = await system_admin_service.disable_maintenance(db)
-        
-        if success:
-            return {"success": True, "message": message}
-        else:
-            raise HTTPException(status_code=500, detail=message)
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error disabling maintenance: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+# REMOVED: Duplicate enable/disable maintenance endpoints
+# All maintenance operations should use:
+# - /api/maintenance/enable (legacy_api.py) - used by frontend
+# - /api/admin/maintenance/enable (admin_router.py) - new standard API
 
 
 @router.post("/sessions/clear")
