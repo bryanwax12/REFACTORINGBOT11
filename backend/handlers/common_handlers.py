@@ -312,6 +312,13 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.info(f"🔵 button_callback called with data: {query.data}")
     await safe_telegram_call(query.answer())
     
+    # Check if user is blocked
+    telegram_id = query.from_user.id
+    if await check_user_blocked(telegram_id):
+        logger.info(f"🚫 Blocked user {telegram_id} attempted to use button: {query.data}")
+        await send_blocked_message(update)
+        return ConversationHandler.END
+    
     if query.data == 'start' or query.data == 'main_menu':
         # Check if user has pending order
         telegram_id = query.from_user.id
