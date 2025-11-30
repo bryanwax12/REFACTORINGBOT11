@@ -272,6 +272,18 @@ class OrderRepository(BaseRepository):
         filter_dict = filter_dict or {}
         return await self.collection.count_documents(filter_dict)
     
+    async def count_by_telegram_id(self, telegram_id: int) -> int:
+        """
+        Подсчет количества заказов пользователя
+        
+        Args:
+            telegram_id: Telegram ID пользователя
+            
+        Returns:
+            Количество заказов пользователя
+        """
+        return await self.collection.count_documents({"telegram_id": telegram_id})
+    
     async def aggregate_orders(self, pipeline: List[Dict]) -> List[Dict]:
         """
         Агрегация заказов
