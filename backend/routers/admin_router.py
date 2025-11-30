@@ -150,7 +150,7 @@ async def get_maintenance_status(authenticated: bool = Depends(verify_admin_key)
 async def enable_maintenance_mode(authenticated: bool = Depends(verify_admin_key)):
     """Enable maintenance mode"""
     from server import db, clear_settings_cache, bot_instance
-    from utils.telegram_utils import safe_telegram_call
+    from handlers.common_handlers import safe_telegram_call
     
     logger.info("🔧 enable_maintenance_mode endpoint called (admin_router)")
     
