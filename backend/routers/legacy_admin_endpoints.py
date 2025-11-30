@@ -120,11 +120,11 @@ async def deduct_balance_legacy(
     Deduct balance from user (legacy endpoint for frontend)
     Frontend calls: /api/users/{telegram_id}/balance/deduct
     """
-    from server import db
+    from server import db, bot_instance
     from handlers.common_handlers import safe_telegram_call
     
-    # Get bot_instance from app.state
-    bot_instance = getattr(request.app.state, 'bot_instance', None)
+    logger.info(f"💸 [DEDUCT_BALANCE] Endpoint called for telegram_id={telegram_id}, amount={amount}")
+    logger.info(f"📋 [DEDUCT_BALANCE] bot_instance available: {bot_instance is not None}")
     
     try:
         user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0, "balance": 1})
