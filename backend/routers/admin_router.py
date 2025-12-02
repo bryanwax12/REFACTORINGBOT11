@@ -100,7 +100,7 @@ async def unblock_user(request: Request, telegram_id: int, authenticated: bool =
         
         result = await db.users.update_one(
             {"telegram_id": telegram_id},
-            {"$set": {"blocked": False}}
+            {"$set": {"blocked": False, "is_blocked": False}}  # Set both for compatibility
         )
         
         logger.info(f"✅ User unblocked in DB (matched: {result.matched_count}, modified: {result.modified_count})")
