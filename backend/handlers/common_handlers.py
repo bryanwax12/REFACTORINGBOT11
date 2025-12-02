@@ -106,16 +106,11 @@ async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT
 
 async def check_user_blocked(telegram_id: int) -> bool:
     """Check if user is blocked from using the bot (ALWAYS fetch fresh from DB!)"""
-    from server import db
     from repositories import get_user_repo
-    logger.info(f"🔍 check_user_blocked called for user {telegram_id}")
     user_repo = get_user_repo()
     is_blocked_result = await user_repo.is_blocked(telegram_id)
-    logger.info(f"   DB result: is_blocked = {is_blocked_result}")
     if is_blocked_result:
-        logger.error(f"🚫🚫🚫 User {telegram_id} is BLOCKED - should be denied!")
-    else:
-        logger.info(f"✅ User {telegram_id} is NOT blocked")
+        logger.warning(f"🚫 User {telegram_id} is blocked")
     return is_blocked_result
 
 
