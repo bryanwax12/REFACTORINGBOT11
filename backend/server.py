@@ -1717,9 +1717,10 @@ async def startup_event():
                     logger.debug(f"   Webhook delete skipped: {e}")
                 
                 # Запустить polling
+                logger.info("   Starting polling with dropped pending updates...")
                 await application.updater.start_polling(
                     allowed_updates=["message", "callback_query"],
-                    drop_pending_updates=False
+                    drop_pending_updates=True  # Drop old updates to avoid conflicts
                 )
                 
                 logger.info("✅ Polling started successfully")
