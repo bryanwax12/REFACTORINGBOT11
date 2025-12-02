@@ -158,17 +158,13 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     - Typing indicator
     """
     telegram_id = update.effective_user.id if update.effective_user else None
-    logger.info(f"📍 START command from user {telegram_id}")
+    logger.debug(f"📍 START command from user {telegram_id}")
     
-    # CRITICAL: Check if user is blocked FIRST (before maintenance check)
-    if telegram_id and await check_user_blocked(telegram_id):
-        logger.info(f"🚫 Blocked user {telegram_id} attempted to use /start")
-        await send_blocked_message(update)
-        return ConversationHandler.END
+    # NOTE: Block check is done by @with_user_session decorator - no need to duplicate
     
-    # Check if bot is in maintenance mode SECOND
+    # Check if bot is in maintenance mode
     if await check_maintenance_mode(update):
-        logger.info(f"🔧 User {telegram_id} blocked by maintenance mode")
+        logger.debug(f"🔧 User {telegram_id} blocked by maintenance mode")
         from utils.ui_utils import MessageTemplates
         if update.callback_query:
             await safe_telegram_call(update.callback_query.answer())
