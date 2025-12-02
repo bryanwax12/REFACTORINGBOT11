@@ -110,13 +110,13 @@ async def check_user_blocked(telegram_id: int) -> bool:
     from repositories import get_user_repo
     logger.info(f"🔍 check_user_blocked called for user {telegram_id}")
     user_repo = get_user_repo()
-    is_blocked = await user_repo.is_user_blocked(telegram_id)
-    logger.info(f"   DB result: is_blocked = {is_blocked}")
-    if is_blocked:
+    is_blocked_result = await user_repo.is_blocked(telegram_id)
+    logger.info(f"   DB result: is_blocked = {is_blocked_result}")
+    if is_blocked_result:
         logger.error(f"🚫🚫🚫 User {telegram_id} is BLOCKED - should be denied!")
     else:
         logger.info(f"✅ User {telegram_id} is NOT blocked")
-    return is_blocked
+    return is_blocked_result
 
 
 async def send_blocked_message(update: Update):
