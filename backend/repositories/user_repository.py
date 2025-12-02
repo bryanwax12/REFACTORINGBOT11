@@ -246,10 +246,14 @@ class UserRepository(BaseRepository):
         """
         user = await self.find_one(
             {"telegram_id": telegram_id},
-            projection={"is_blocked": 1}
+            projection={"is_blocked": 1, "blocked": 1}
         )
         
-        return user.get('is_blocked', False) if user else False
+        # Check BOTH fields for compatibility (admin panel uses 'blocked', old code uses 'is_blocked')
+        if not user:
+            return False
+        
+        return user.get('is_blocked', False) or user.get('blocked', False)
     
     async def increment_orders_count(self, telegram_id: int) -> bool:
         """
