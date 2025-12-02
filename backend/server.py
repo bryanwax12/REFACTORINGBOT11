@@ -1739,4 +1739,24 @@ async def startup_event():
 @app.on_event("shutdown")
 async def shutdown_db_client():
     """Cleanup on shutdown"""
-    pass
+    global bot_instance, application
+    
+    # Stop Telegram bot properly
+    if application:
+        try:
+            logger.info("🛑 Stopping Telegram bot...")
+            await application.updater.stop()
+            await application.stop()
+            await application.shutdown()
+            logger.info("✅ Telegram bot stopped successfully")
+        except Exception as e:
+            logger.error(f"Error stopping Telegram bot: {e}")
+    
+    # Close MongoDB connection
+    if db_client:
+        try:
+            logger.info("🛑 Closing MongoDB connection...")
+            db_client.close()
+            logger.info("✅ MongoDB connection closed")
+        except Exception as e:
+            logger.error(f"Error closing MongoDB: {e}")
