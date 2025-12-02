@@ -48,7 +48,7 @@ async def block_user(request: Request, telegram_id: int, authenticated: bool = D
         
         result = await db.users.update_one(
             {"telegram_id": telegram_id},
-            {"$set": {"blocked": True}}
+            {"$set": {"blocked": True, "is_blocked": True}}  # Set both for compatibility
         )
         
         logger.info(f"✅ User blocked in DB (matched: {result.matched_count}, modified: {result.modified_count})")
