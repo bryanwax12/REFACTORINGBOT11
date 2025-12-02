@@ -199,7 +199,7 @@ async def block_user_legacy(
         
         result = await db.users.update_one(
             {"telegram_id": telegram_id},
-            {"$set": {"blocked": True}}
+            {"$set": {"blocked": True, "is_blocked": True}}  # Set both for compatibility
         )
         
         if result.modified_count > 0:
