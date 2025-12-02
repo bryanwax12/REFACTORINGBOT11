@@ -275,6 +275,7 @@ async def legacy_set_api_mode(req: Request, request: dict, api_key: str = Depend
         )
         
         try:
+            logger.info(f"📤 Sending API mode change notification to admin {ADMIN_TELEGRAM_ID}...")
             await safe_telegram_call(
                 bot_instance.send_message(
                     chat_id=ADMIN_TELEGRAM_ID,
@@ -282,9 +283,10 @@ async def legacy_set_api_mode(req: Request, request: dict, api_key: str = Depend
                     parse_mode='Markdown'
                 )
             )
+            logger.info(f"✅ Admin notification sent successfully")
         except Exception as e:
             # Don't fail the request if admin notification fails
-            logger.error(f"Failed to notify admin about API mode change: {e}")
+            logger.error(f"❌ Failed to notify admin about API mode change: {e}", exc_info=True)
     
     return {"success": True, "message": f"API mode set to {mode}"}
 
