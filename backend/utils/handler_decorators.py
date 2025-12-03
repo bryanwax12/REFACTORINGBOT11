@@ -701,14 +701,24 @@ def with_user_session(create_user=True, require_session=False):
             user_repo = get_user_repo()
             fresh_user = await user_repo.find_by_telegram_id(user_id)
             
-            if fresh_user and fresh_user.get('blocked', False):
-                logger.warning(f"🚫 [{handler_name}] user={user_id}: BLOCKED - denying access")
+            # Check BOTH fields for compatibility
+            is_blocked = False
+            if fresh_user:
+                is_blocked = fresh_user.get('blocked', False) or fresh_user.get('is_blocked', False)
+            
+            if is_blocked:
+                logger.warning(f"🚫 [{handler_name}] user={user_id}: BLOCKED (blocked={fresh_user.get('blocked')}, is_blocked={fresh_user.get('is_blocked')}) - denying access")
                 # Use effective_message for reply
                 if message:
                     await message.reply_text("⛔️ *АККАУНТ ЗАБЛОКИРОВАН*\n\n🚫 Ваш доступ к боту ограничен администратором.\n\n📞 Для разблокировки обратитесь в поддержку.", parse_mode='Markdown')
                 elif update.callback_query:
                     await update.callback_query.message.reply_text("⛔️ *АККАУНТ ЗАБЛОКИРОВАН*\n\n🚫 Ваш доступ к боту ограничен администратором.\n\n📞 Для разблокировки обратитесь в поддержку.", parse_mode='Markdown')
                 return ConversationHandler.END
+            
+            # IMPORTANT: Update cached user with fresh data to avoid stale cache
+            if fresh_user:
+                context.user_data['db_user'] = fresh_user
+                logger.debug(f"🔄 [{handler_name}] user={user_id}: Cache updated with fresh data")
             
             # ✅ CRITICAL: DO NOT touch session or conversation state!
             # ✅ MongoDBPersistence is the ONLY manager of conversation state
