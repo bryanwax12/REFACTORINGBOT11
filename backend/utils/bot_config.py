@@ -100,10 +100,24 @@ class BotConfig:
         """
         Определить нужно ли использовать webhook
         
+        CRITICAL: In Kubernetes/production with multiple replicas, 
+        MUST use webhook to avoid Telegram Conflict errors!
+        
         Returns:
             True если нужен webhook, False для polling
         """
-        return self.mode == 'webhook'
+        # If explicitly set to webhook mode
+        if self.mode == 'webhook':
+            return True
+        
+        # KUBERNETES FIX: If webhook URL is configured, prefer webhook over polling
+        # This prevents Conflict errors when multiple pods run simultaneously
+        if self.webhook_base_url and self.webhook_path:
+            logger.info("🔧 Webhook URL configured - using webhook mode to avoid Kubernetes conflicts")
+            return True
+        
+        # Default to polling for local development
+        return False
     
     def get_webhook_url(self) -> str:
         """
