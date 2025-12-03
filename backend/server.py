@@ -1725,12 +1725,29 @@ async def startup_event():
                 
                 # Запустить polling
                 logger.info("   Starting polling with dropped pending updates...")
-                await application.updater.start_polling(
-                    allowed_updates=["message", "callback_query"],
-                    drop_pending_updates=True  # Drop old updates to avoid conflicts
-                )
                 
-                logger.info("✅ Polling started successfully")
+                # KUBERNETES FIX: Add retry logic for Conflict errors
+                # In Kubernetes, old pods may not have terminated yet
+                max_retries = 3
+                for attempt in range(max_retries):
+                    try:
+                        await application.updater.start_polling(
+                            allowed_updates=["message", "callback_query"],
+                            drop_pending_updates=True,  # Drop old updates to avoid conflicts
+                            timeout=30,  # Increase timeout for Kubernetes
+                            read_timeout=20,
+                            write_timeout=20
+                        )
+                        logger.info("✅ Polling started successfully")
+                        break
+                    except telegram.error.Conflict as e:
+                        if attempt < max_retries - 1:
+                            wait_time = (attempt + 1) * 10  # 10, 20, 30 seconds
+                            logger.warning(f"⚠️ Conflict detected (attempt {attempt + 1}/{max_retries}). Waiting {wait_time}s for old instance to terminate...")
+                            await asyncio.sleep(wait_time)
+                        else:
+                            logger.error("❌ Failed to start polling after retries. Another instance is still running!")
+                            raise
         except Exception as e:
             logger.error(f"Failed to start Telegram Bot: {e}", exc_info=True)
             logger.warning("Application will continue without Telegram Bot")
