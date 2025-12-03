@@ -7871,3 +7871,110 @@ Bot receiving messages ✅
 
 ### 🚀 БОТ ПОЛНОСТЬЮ ФУНКЦИОНАЛЕН И ГОТОВ К PRODUCTION!
 
+
+
+---
+## 🚀 DEPLOYMENT FIX: АВТОМАТИЧЕСКОЕ ПЕРЕКЛЮЧЕНИЕ НА WEBHOOK (03.12.2025 12:14)
+
+### ⚠️ Проблема при deployment:
+```
+telegram.error.Conflict: terminated by other getUpdates request
+```
+
+**Root Cause для Kubernetes:**
+- В Kubernetes запускается несколько pod'ов (replicas)
+- Каждый pod пытается запустить polling
+- Telegram API блокирует множественный polling
+- **Результат**: Deployment fails с Conflict ошибками
+
+---
+
+### ✅ Решение (автоматическое определение режима):
+
+**Изменения в `/app/backend/utils/bot_config.py`:**
+
+```python
+def should_use_webhook(self) -> bool:
+    # If explicitly set to webhook mode
+    if self.mode == 'webhook':
+        return True
+    
+    # KUBERNETES FIX: If webhook URL is configured, prefer webhook
+    # This prevents Conflict errors when multiple pods run simultaneously
+    if self.webhook_base_url and self.webhook_path:
+        logger.info("🔧 Webhook URL configured - using webhook mode")
+        return True
+    
+    # Default to polling for local development
+    return False
+```
+
+**Изменения в `/app/backend/server.py`:**
+
+1. **Добавлено расширенное логирование**:
+   - Показывает BOT_MODE из env
+   - Показывает наличие Webhook URL
+   - Показывает выбранный режим
+
+2. **Добавлен retry logic для polling** (если используется):
+   - 3 попытки с экспоненциальным backoff (10, 20, 30 сек)
+   - Graceful handling Conflict ошибок
+
+3. **Предупреждение для production**:
+   - Если polling используется в production, выводится warning
+
+---
+
+### 📊 Результат:
+
+**До исправления:**
+```
+BOT_MODE=polling
+Multiple pods → Multiple polling → Conflict ❌
+```
+
+**После исправления:**
+```
+WEBHOOK_BASE_URL configured → Auto-detect webhook mode ✅
+Multiple pods → Multiple webhook handlers → No conflicts ✅
+```
+
+**Текущий статус:**
+```
+Environment: PRODUCTION
+BOT_MODE env: POLLING
+Webhook URL configured: True
+Selected mode: 🌐 WEBHOOK ✅
+Webhook set successfully ✅
+```
+
+---
+
+### 🎯 Преимущества для Kubernetes:
+
+| Характеристика | Polling | Webhook (новое) |
+|---------------|---------|-----------------|
+| Multiple pods | ❌ Conflict | ✅ Работает |
+| Scalability | ❌ Только 1 pod | ✅ Любое кол-во |
+| Deployment | ❌ Fails | ✅ Success |
+| Load balancing | ❌ Нет | ✅ Kubernetes LB |
+
+---
+
+### 📁 Измененные файлы:
+1. `/app/backend/utils/bot_config.py` - автоопределение webhook mode
+2. `/app/backend/server.py` - логирование + retry logic
+
+---
+
+### 🎉 ИТОГ:
+
+**Deployment в Kubernetes теперь работает:**
+- ✅ Автоматическое переключение на webhook при наличии WEBHOOK_BASE_URL
+- ✅ Нет Conflict ошибок
+- ✅ Поддержка множественных replicas
+- ✅ Graceful retry для polling mode (если используется)
+- ✅ Production-ready configuration
+
+**Приложение готово к deployment в Kubernetes!** 🚀
+
