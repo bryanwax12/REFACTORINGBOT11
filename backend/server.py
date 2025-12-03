@@ -1684,8 +1684,15 @@ async def startup_event():
             
             logger.info(f"{env_icon} Starting Telegram Bot:")
             logger.info(f"   Environment: {bot_config.environment.upper()}")
-            logger.info(f"   Mode: {mode_icon} {bot_config.mode.upper()}")
+            logger.info(f"   BOT_MODE env: {bot_config.mode.upper()}")
+            logger.info(f"   Webhook URL configured: {bool(webhook_url)}")
+            logger.info(f"   Selected mode: {mode_icon} {'WEBHOOK' if use_webhook else 'POLLING'}")
             logger.info(f"   Bot: @{get_bot_username()}")
+            
+            # KUBERNETES DEPLOYMENT: Warn if polling in production
+            if not use_webhook and is_production_environment():
+                logger.warning("⚠️ POLLING MODE in production! This may cause conflicts with multiple replicas.")
+                logger.warning("⚠️ Consider setting WEBHOOK_BASE_URL and WEBHOOK_PATH for production deployment.")
             
             if use_webhook and webhook_url:
                 # Webhook mode
