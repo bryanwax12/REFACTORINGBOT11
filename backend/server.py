@@ -398,8 +398,10 @@ api_router = APIRouter(prefix="/api")
 # ==================== ROOT ENDPOINT ====================
 @app.get("/")
 @app.head("/")
-async def root():
+async def root(request: Request):
     """Root endpoint - returns API status"""
+    if request.method == "HEAD":
+        return Response(status_code=200, headers={"Content-Type": "application/json"})
     return {
         "status": "ok",
         "message": "Telegram Shipping Bot API",
@@ -407,6 +409,7 @@ async def root():
         "health_check": "/health",
         "api_docs": "/docs"
     }
+
 
 @app.get("/health")
 @app.head("/health")
