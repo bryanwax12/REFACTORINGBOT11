@@ -397,6 +397,7 @@ api_router = APIRouter(prefix="/api")
 # ==================== HEALTH CHECK ENDPOINT ====================
 # ==================== ROOT ENDPOINT ====================
 @app.get("/")
+@app.head("/")
 async def root():
     """Root endpoint - returns API status"""
     return {
@@ -408,6 +409,7 @@ async def root():
     }
 
 @app.get("/health")
+@app.head("/health")
 async def health_check():
     """Health check endpoint for deployment platform"""
     db_status = "not_configured"
@@ -435,6 +437,7 @@ async def health_check():
     }
 
 @app.get("/api/health")
+@app.head("/api/health")
 async def api_health_check():
     """Health check endpoint with /api prefix"""
     return await health_check()
