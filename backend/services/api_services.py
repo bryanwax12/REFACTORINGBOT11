@@ -239,6 +239,13 @@ async def get_shipstation_carrier_ids():
                             logger.info(f"   Carrier {idx+1}: {carrier_name} → {carrier_id}")
                 
                 logger.info(f"✅ Successfully loaded {len(carriers)} ShipStation carriers")
+                
+                # ✅ Cache the result
+                global _carrier_ids_cache, _carrier_ids_cache_time
+                _carrier_ids_cache = carriers
+                _carrier_ids_cache_time = datetime.now(timezone.utc)
+                logger.debug(f"✅ Cached carrier_ids for {_CARRIER_CACHE_TTL}s")
+                
                 return carriers
             except Exception as parse_error:
                 logger.error(f"❌ Error parsing carriers response: {parse_error}", exc_info=True)
