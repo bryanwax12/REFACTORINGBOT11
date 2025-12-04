@@ -239,7 +239,9 @@ def test_full_user_flow():
         print(f"❌ Full user flow test error: {e}")
         return False
 
-def test_user_blocking():
+# ==================== БЛОК 2: ADMIN PANEL FUNCTIONS (Priority: HIGH) ====================
+
+def test_maintenance_mode():
     """Test user blocking/unblocking functionality - CRITICAL REVIEW REQUEST"""
     print("\n🔍 БЛОК 1.2: Тестирование блокировки пользователя")
     print("🎯 КРИТИЧЕСКИЙ ТЕСТ: Блокировка/разблокировка пользователя и проверка статуса")
