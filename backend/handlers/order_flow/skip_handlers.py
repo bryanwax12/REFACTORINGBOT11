@@ -501,6 +501,7 @@ async def skip_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE)
     return await show_data_confirmation(update, context)
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
 async def skip_address_validation(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Skip address validation and continue with rate fetching"""
     from handlers.common_handlers import safe_telegram_call

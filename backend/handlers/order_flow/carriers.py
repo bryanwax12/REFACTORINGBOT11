@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 @with_user_session(create_user=False, require_session=True)
+@safe_handler(fallback_state=ConversationHandler.END)
 async def select_carrier(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     Handle carrier selection, refresh rates, and cancel actions
