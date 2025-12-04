@@ -66,8 +66,11 @@ async def get_expense_stats(
     
     except HTTPException:
         raise
+    except pymongo.errors.PyMongoError as e:
+        logger.error(f"Database error getting expense stats: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Database error")
     except Exception as e:
-        logger.error(f"Error getting expense stats: {e}")
+        logger.error(f"Unexpected error getting expense stats: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
