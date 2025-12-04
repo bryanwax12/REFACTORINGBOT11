@@ -395,6 +395,18 @@ app.add_middleware(RateLimitMiddleware, requests_per_minute=60, requests_per_hou
 api_router = APIRouter(prefix="/api")
 
 # ==================== HEALTH CHECK ENDPOINT ====================
+# ==================== ROOT ENDPOINT ====================
+@app.get("/")
+async def root():
+    """Root endpoint - returns API status"""
+    return {
+        "status": "ok",
+        "message": "Telegram Shipping Bot API",
+        "version": "1.0.0",
+        "health_check": "/health",
+        "api_docs": "/docs"
+    }
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint for deployment platform"""
