@@ -10,6 +10,35 @@ from telegram.ext import ContextTypes, ConversationHandler
 
 logger = logging.getLogger(__name__)
 
+# ✅ Cache for user block status (TTL: 5 minutes)
+_user_blocked_cache = {}
+_USER_BLOCKED_TTL = 300  # 5 minutes in seconds
+
+def is_user_blocked_cached(user_id: int, user_data: dict) -> bool:
+    """Check if user is blocked with 5-minute cache"""
+    global _user_blocked_cache
+    
+    # Check cache
+    if user_id in _user_blocked_cache:
+        cached_blocked, cache_time = _user_blocked_cache[user_id]
+        age = (datetime.now(timezone.utc) - cache_time).total_seconds()
+        if age < _USER_BLOCKED_TTL:
+            return cached_blocked
+    
+    # Get from user_data
+    is_blocked = user_data.get('is_blocked', False) or user_data.get('blocked', False)
+    
+    # Cache the result
+    _user_blocked_cache[user_id] = (is_blocked, datetime.now(timezone.utc))
+    
+    return is_blocked
+
+def clear_user_blocked_cache(user_id: int):
+    """Clear cache when user is blocked/unblocked"""
+    global _user_blocked_cache
+    if user_id in _user_blocked_cache:
+        del _user_blocked_cache[user_id]
+
 
 def safe_handler(fallback_state=ConversationHandler.END, error_message="❌ Произошла ошибка. Попробуйте позже.", skip_maintenance_check=False):
     """
