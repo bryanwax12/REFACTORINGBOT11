@@ -376,9 +376,39 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             STATE_NAMES=STATE_NAMES,
             SELECT_CARRIER=SELECT_CARRIER
         )
-        
+    
+    except httpx.TimeoutException as e:
+        logger.error(f"ShipStation API timeout: {e}", exc_info=True)
+        keyboard = [
+            [InlineKeyboardButton("🔄 Повторить", callback_data='retry_rates')],
+            [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await safe_telegram_call(message.reply_text(
+            "❌ Превышено время ожидания ответа от сервиса доставки.\n\nПопробуйте еще раз или обратитесь в поддержку.",
+            reply_markup=reply_markup
+        ))
+        return CONFIRM_DATA
+    
+    except httpx.HTTPStatusError as e:
+        logger.error(f"ShipStation API HTTP error {e.response.status_code}: {e}", exc_info=True)
+        keyboard = [
+            [InlineKeyboardButton("✏️ Редактировать адреса", callback_data='edit_addresses_error')],
+            [InlineKeyboardButton("❌ Отмена", callback_data='cancel_order')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await safe_telegram_call(message.reply_text(
+            "❌ Ошибка сервиса доставки.\n\nПроверьте корректность адресов и попробуйте снова.",
+            reply_markup=reply_markup
+        ))
+        return CONFIRM_DATA
+    
+    except telegram.error.TelegramError as e:
+        logger.error(f"Telegram error in rates: {e}", exc_info=True)
+        return CONFIRM_DATA
+    
     except Exception as e:
-        logger.error(f"Error getting rates: {e}", exc_info=True)
+        logger.error(f"Unexpected error getting rates: {e}", exc_info=True)
         
         keyboard = [
             [InlineKeyboardButton("✏️ Редактировать адреса", callback_data='edit_addresses_error')],
