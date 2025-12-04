@@ -53,6 +53,12 @@ async def oxapay_webhook(request: Request):
         return {"status": "error", "message": str(e)}
 
 
+@router.head("/telegram/webhook")
+async def telegram_webhook_head():
+    """Health check for webhook endpoint"""
+    from fastapi.responses import Response
+    return Response(status_code=200)
+
 @router.post("/telegram/webhook")
 async def telegram_webhook(request: Request):
     """Handle Telegram webhook updates"""
