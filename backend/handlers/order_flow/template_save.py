@@ -8,6 +8,9 @@ import time
 import uuid
 from datetime import datetime, timezone
 from telegram import Update, ForceReply, InlineKeyboardButton, InlineKeyboardMarkup
+
+# ⚡ Performance: Import preloaded keyboards
+from utils.ui_utils import PRELOADED_CANCEL_KEYBOARD
 from telegram.ext import ContextTypes, ConversationHandler
 
 logger = logging.getLogger(__name__)
@@ -265,7 +268,7 @@ async def handle_template_new_name(update: Update, context: ContextTypes.DEFAULT
     asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text)))
     
     from utils.ui_utils import get_cancel_keyboard
-    reply_markup = get_cancel_keyboard()
+    reply_markup = PRELOADED_CANCEL_KEYBOARD  # ⚡ Performance
     
     message_text = (
         "📝 *Новое название шаблона*\n"

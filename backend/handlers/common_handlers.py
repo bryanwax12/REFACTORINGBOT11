@@ -6,6 +6,9 @@ import asyncio
 import logging
 from datetime import datetime, timezone
 from telegram import Update
+
+# ⚡ Performance: Import preloaded keyboards
+from utils.ui_utils import PRELOADED_CANCEL_KEYBOARD, PRELOADED_BACK_TO_MENU_KEYBOARD, PRELOADED_EXIT_CONFIRMATION_KEYBOARD
 from telegram.ext import ContextTypes, ConversationHandler
 import telegram.error
 import pymongo.errors
@@ -329,7 +332,7 @@ async def faq_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         send_method = update.message.reply_text
     
     faq_text = MessageTemplates.faq_text()
-    reply_markup = get_back_to_menu_keyboard()
+    reply_markup = PRELOADED_BACK_TO_MENU_KEYBOARD  # ⚡ Performance
     bot_msg = await send_method(faq_text, reply_markup=reply_markup, parse_mode='Markdown')
     
     # Save message ID and text for button protection
@@ -380,7 +383,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
             order_amount = pending_order.get('selected_rate', {}).get('shipmentCost', 0.0)
             warning_text = MessageTemplates.exit_warning(order_amount)
-            reply_markup = get_exit_confirmation_keyboard()
+            reply_markup = PRELOADED_EXIT_CONFIRMATION_KEYBOARD  # ⚡ Performance
             
             bot_msg = await safe_telegram_call(query.message.reply_text(
                 warning_text,
@@ -580,7 +583,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.warning(f"return_to_order: last_state is int ({last_state}), should be string!")
         
         # Show next step
-        reply_markup = get_cancel_keyboard()
+        reply_markup = PRELOADED_CANCEL_KEYBOARD  # ⚡ Performance
         
         # 🚀 PERFORMANCE: Send message in background
         async def send_continue():
@@ -604,7 +607,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if keyboard:
             bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=keyboard))
         else:
-            reply_markup = get_cancel_keyboard()
+            reply_markup = PRELOADED_CANCEL_KEYBOARD  # ⚡ Performance
             bot_msg = await safe_telegram_call(query.message.reply_text(message_text, reply_markup=reply_markup))
         
         # Save context

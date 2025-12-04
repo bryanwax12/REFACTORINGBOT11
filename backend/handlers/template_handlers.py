@@ -5,6 +5,9 @@ Manages address templates for quick order creation
 import asyncio
 import logging
 from telegram import Update
+
+# ⚡ Performance: Import preloaded keyboards
+from utils.ui_utils import PRELOADED_BACK_TO_MENU_KEYBOARD
 from telegram.ext import ContextTypes
 from datetime import datetime, timezone
 
@@ -43,7 +46,7 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     if not templates:
         message = TemplateMessages.no_templates()
-        reply_markup = get_back_to_menu_keyboard()
+        reply_markup = PRELOADED_BACK_TO_MENU_KEYBOARD  # ⚡ Performance
         bot_message = await send_method(message, reply_markup=reply_markup, parse_mode='Markdown')
     else:
         message = TemplateMessages.templates_list(len(templates), max_templates=10)

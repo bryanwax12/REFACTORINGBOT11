@@ -5,6 +5,9 @@ Handles balance, topup, and payment flow for Telegram bot
 import asyncio
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+
+# ⚡ Performance: Import preloaded keyboards
+from utils.ui_utils import PRELOADED_BACK_TO_MENU_KEYBOARD
 from telegram.ext import ContextTypes
 import telegram.error
 import pymongo.errors
@@ -88,7 +91,7 @@ async def my_balance_command(update: Update, context: ContextTypes.DEFAULT_TYPE,
 💵 *Введите сумму для пополнения*
 (минимум $10):"""
     
-    reply_markup = get_back_to_menu_keyboard()
+    reply_markup = PRELOADED_BACK_TO_MENU_KEYBOARD  # ⚡ Performance
     
     # Set state to wait for amount input
     context.user_data['awaiting_topup_amount'] = True

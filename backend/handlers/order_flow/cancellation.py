@@ -5,6 +5,9 @@ Handles order cancellation and returning to order
 import logging
 import asyncio
 from telegram import Update, ForceReply, InlineKeyboardButton, InlineKeyboardMarkup
+
+# ⚡ Performance: Import preloaded keyboards
+from utils.ui_utils import PRELOADED_CANCEL_KEYBOARD
 from telegram.ext import ContextTypes, ConversationHandler
 
 logger = logging.getLogger(__name__)
@@ -200,7 +203,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
             await safe_telegram_call(update.effective_message.reply_text(
                 TemplateEditMessages.FROM_NAME,
-                reply_markup=get_cancel_keyboard()
+                reply_markup=PRELOADED_CANCEL_KEYBOARD  # ⚡ Performance
             ))
             return FROM_NAME
             
@@ -211,7 +214,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
             await safe_telegram_call(update.effective_message.reply_text(
                 TemplateEditMessages.TO_NAME,
-                reply_markup=get_cancel_keyboard()
+                reply_markup=PRELOADED_CANCEL_KEYBOARD  # ⚡ Performance
             ))
             return TO_NAME
         
@@ -254,7 +257,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.error("❌ No state found - returning to FROM_NAME")
         await safe_telegram_call(update.effective_message.reply_text(
             "Продолжаем оформление заказа...",
-            reply_markup=get_cancel_keyboard()
+            reply_markup=PRELOADED_CANCEL_KEYBOARD  # ⚡ Performance
         ))
         return FROM_NAME
     
@@ -302,7 +305,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # MongoDBPersistence will restore the proper handler
     await safe_telegram_call(update.effective_message.reply_text(
         "Продолжаем оформление заказа...",
-        reply_markup=get_cancel_keyboard()
+        reply_markup=PRELOADED_CANCEL_KEYBOARD  # ⚡ Performance
     ))
     
     return saved_state

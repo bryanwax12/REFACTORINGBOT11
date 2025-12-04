@@ -6,6 +6,9 @@ import asyncio
 import logging
 from datetime import datetime, timezone
 from telegram import Update, ForceReply, InlineKeyboardButton, InlineKeyboardMarkup
+
+# ⚡ Performance: Import preloaded keyboards
+from utils.ui_utils import PRELOADED_CANCEL_KEYBOARD
 from telegram.ext import ContextTypes, ConversationHandler
 import telegram.error
 import pymongo.errors
@@ -604,7 +607,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
             from server import TOPUP_AMOUNT, STATE_NAMES
             
             from utils.ui_utils import get_cancel_keyboard
-            reply_markup = get_cancel_keyboard()
+            reply_markup = PRELOADED_CANCEL_KEYBOARD  # ⚡ Performance
             
             message_text = """💵 Пополнение баланса
 
