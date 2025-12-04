@@ -140,8 +140,8 @@ async def check_maintenance_mode(update: Update) -> bool:
 from utils.handler_decorators import with_user_session, safe_handler, with_typing_action
 
 @safe_handler(fallback_state=ConversationHandler.END)
-@with_typing_action()
-@with_user_session(create_user=True, require_session=False)
+@with_user_session(create_user=True, require_session=False)  # Check blocking FIRST
+@with_typing_action()  # Then send typing action if not blocked
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     /start command handler - Main menu
