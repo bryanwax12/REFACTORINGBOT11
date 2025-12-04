@@ -537,9 +537,20 @@ _Если вы оплатите другую сумму, деньги НЕ по�
         
         context.user_data.clear()
         return ConversationHandler.END
-        
+    
+    except ValueError as e:
+        logger.warning(f"Invalid crypto selection: {e}")
+        await safe_telegram_call(query.message.reply_text(f"❌ Неверный выбор криптовалюты"))
+        return ConversationHandler.END
+    except pymongo.errors.PyMongoError as e:
+        logger.error(f"Database error in crypto selection: {e}", exc_info=True)
+        await safe_telegram_call(query.message.reply_text(f"❌ Ошибка базы данных. Попробуйте позже."))
+        return ConversationHandler.END
+    except telegram.error.TelegramError as e:
+        logger.error(f"Telegram error in crypto selection: {e}", exc_info=True)
+        return ConversationHandler.END
     except Exception as e:
-        logger.error(f"Crypto selection handling error: {e}")
+        logger.error(f"Unexpected error in crypto selection: {e}", exc_info=True)
         await safe_telegram_call(query.message.reply_text(f"❌ Ошибка: {str(e)}"))
         return ConversationHandler.END
 
