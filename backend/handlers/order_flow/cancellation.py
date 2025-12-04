@@ -41,7 +41,7 @@ async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE, sessi
 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     # Get current state from context.user_data (more reliable than DB lookup)
     user_id = update.effective_user.id
@@ -118,7 +118,7 @@ async def confirm_cancel_order(update: Update, context: ContextTypes.DEFAULT_TYP
 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     # Cancel pending order if exists (NEW LOGIC)
     order_id = context.user_data.get('order_id')
@@ -169,7 +169,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
-    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     # ✅ 2025 ПРАВИЛЬНЫЙ СПОСОБ: Получить состояние из сессии (которое было сохранено при отмене)
     user_id = update.effective_user.id

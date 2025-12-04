@@ -50,7 +50,7 @@ async def handle_skip_field(
 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     # Save field value
     user_id = update.effective_user.id

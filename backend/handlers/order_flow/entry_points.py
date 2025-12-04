@@ -41,7 +41,7 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
     
     # ✅ Mark previous message as selected (ОДИН РАЗ!)
-    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     # ✅ Always use update.effective_message (ОДИН РАЗ!)
     send_method = update.effective_message.reply_text
@@ -129,7 +129,7 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if bot_msg:
             context.user_data['last_bot_message_id'] = bot_msg.message_id
     
-    asyncio.create_task(send_next_step())
+    asyncio.create_task(safe_background_task(send_next_step()))
     
     logger.info(f"✅ NEW_ORDER_START RETURNING STATE: FROM_NAME ({FROM_NAME})")
     logger.info(f"   context.user_data keys: {list(context.user_data.keys())}")
@@ -170,7 +170,7 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     # Save last_state and message text
     context.user_data['last_bot_message_text'] = message_text
@@ -185,7 +185,7 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
         if bot_msg:
             context.user_data['last_bot_message_id'] = bot_msg.message_id
     
-    asyncio.create_task(send_next_step())
+    asyncio.create_task(safe_background_task(send_next_step()))
     
     return PARCEL_WEIGHT
 
@@ -224,7 +224,7 @@ async def return_to_payment_after_topup(update: Update, context: ContextTypes.DE
 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     logger.debug("🔵 Message marked as selected")
     
     if not pending_order or not pending_order.get('selected_rate'):
@@ -368,7 +368,7 @@ async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     reply_markup = get_cancel_keyboard()
     message_text = OrderFlowMessages.new_order_start()
@@ -382,7 +382,7 @@ async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if bot_msg:
             context.user_data['last_bot_message_id'] = bot_msg.message_id
     
-    asyncio.create_task(send_next_step())
+    asyncio.create_task(safe_background_task(send_next_step()))
     
     logger.info("order_new returning FROM_NAME state")
     return FROM_NAME
@@ -404,7 +404,7 @@ async def order_from_template_list(update: Update, context: ContextTypes.DEFAULT
 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     telegram_id = query.from_user.id
     
@@ -449,7 +449,7 @@ async def continue_order_after_template(update: Update, context: ContextTypes.DE
 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     # Since template was saved from CONFIRM_DATA screen, we have all data including weight/dimensions
     # Return to data confirmation screen

@@ -41,7 +41,7 @@ async def show_payment_methods(update: Update, context: ContextTypes.DEFAULT_TYP
 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     telegram_id = query.from_user.id
     
@@ -244,7 +244,7 @@ async def handle_back_to_rates(update: Update, context: ContextTypes.DEFAULT_TYP
 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     # Return to rate selection
     return await fetch_shipping_rates(update, context)
@@ -292,7 +292,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-        asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+        asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
         # Return to rate selection - call fetch_shipping_rates again
         from handlers.order_flow.rates import fetch_shipping_rates
         return await fetch_shipping_rates(update, context)
@@ -302,7 +302,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-    asyncio.create_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
     
     telegram_id = query.from_user.id
     from repositories import get_user_repo
