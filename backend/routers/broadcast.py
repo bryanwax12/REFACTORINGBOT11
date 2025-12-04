@@ -91,95 +91,97 @@ async def broadcast_message(
         if not users:
             raise HTTPException(status_code=404, detail="No users found for target audience")
         
-        # Start broadcasting
-        logger.info(f"📢 Starting broadcast to {len(users)} users. Target: {target}")
+        # Start broadcasting - OPTIMIZED: Parallel sending with batching
+        logger.info(f"📢 Starting parallel broadcast to {len(users)} users. Target: {target}")
         
-        success_count = 0
-        fail_count = 0
+        # ⚡ Performance: Send in parallel batches to avoid rate limits
+        BATCH_SIZE = 20  # Send 20 messages at once
         
-        for user in users:
+        async def send_to_user(user):
+            """Send message to a single user"""
             try:
                 telegram_id = user['telegram_id']
                 username = user.get('username', 'unknown')
                 
                 # Check if user blocked the bot
                 if user.get('bot_blocked_by_user', False):
-                    logger.warning(f"❌ Пропуск пользователя {username} ({telegram_id}): заблокировал бота")
-                    fail_count += 1
-                    continue
+                    logger.debug(f"Skipping blocked user {username} ({telegram_id})")
+                    return False, "blocked"
                 
                 # Send with image (file_id or URL)
                 try:
                     result = None
-                    send_error = None
                     
                     if file_id:
-                        # Use file_id (faster, no need to re-download)
-                        logger.info(f"📤 Отправка с file_id пользователю {username} ({telegram_id})")
-                        try:
-                            result = await bot_instance.send_photo(
-                                chat_id=telegram_id,
-                                photo=file_id,
-                                caption=message
-                            )
-                        except Exception as e:
-                            send_error = str(e)
-                            result = None
+                        result = await bot_instance.send_photo(
+                            chat_id=telegram_id,
+                            photo=file_id,
+                            caption=message
+                        )
                     elif image_url:
-                        # Use URL (will download image)
-                        logger.info(f"📤 Отправка с URL пользователю {username} ({telegram_id})")
-                        try:
-                            result = await bot_instance.send_photo(
-                                chat_id=telegram_id,
-                                photo=image_url,
-                                caption=message
-                            )
-                        except Exception as e:
-                            send_error = str(e)
-                            result = None
+                        result = await bot_instance.send_photo(
+                            chat_id=telegram_id,
+                            photo=image_url,
+                            caption=message
+                        )
                     else:
-                        # Text only message
-                        logger.info(f"📤 Отправка текста пользователю {username} ({telegram_id})")
-                        try:
-                            result = await bot_instance.send_message(
-                                chat_id=telegram_id,
-                                text=message
-                            )
-                        except Exception as e:
-                            send_error = str(e)
-                            result = None
+                        result = await bot_instance.send_message(
+                            chat_id=telegram_id,
+                            text=message
+                        )
                     
-                    # Check if send was successful
-                    if result is not None:
-                        logger.info(f"✅ Успешно отправлено {username} ({telegram_id})")
+                    if result:
+                        logger.info(f"✅ Sent to {username} ({telegram_id})")
+                        return True, None
+                    else:
+                        return False, "no_result"
+                        
+                except Exception as e:
+                    send_error = str(e)
+                    logger.error(f"❌ Error sending to {username} ({telegram_id}): {send_error}")
+                    
+                    # If chat not found or user blocked - mark in DB
+                    if "chat not found" in send_error.lower() or "bot was blocked" in send_error.lower() or "user is deactivated" in send_error.lower():
+                        try:
+                            await user_repo.update_one(
+                                {"telegram_id": telegram_id},
+                                {"$set": {"bot_blocked_by_user": True}}
+                            )
+                        except:
+                            pass
+                    
+                    return False, send_error
+                    
+            except Exception as e:
+                logger.error(f"❌ General error for user {user.get('telegram_id')}: {e}")
+                return False, str(e)
+        
+        # Process in batches
+        success_count = 0
+        fail_count = 0
+        
+        for i in range(0, len(users), BATCH_SIZE):
+            batch = users[i:i + BATCH_SIZE]
+            logger.info(f"📤 Processing batch {i//BATCH_SIZE + 1}/{(len(users)-1)//BATCH_SIZE + 1} ({len(batch)} users)")
+            
+            # ⚡ Send all messages in batch PARALLELLY
+            results = await asyncio.gather(*[send_to_user(user) for user in batch], return_exceptions=True)
+            
+            # Count results
+            for result in results:
+                if isinstance(result, tuple):
+                    success, error = result
+                    if success:
                         success_count += 1
                     else:
-                        # Log specific error
-                        if send_error:
-                            logger.error(f"❌ Ошибка отправки {username} ({telegram_id}): {send_error}")
-                            
-                            # If chat not found or user blocked - mark in DB
-                            if "chat not found" in send_error.lower() or "bot was blocked" in send_error.lower() or "user is deactivated" in send_error.lower():
-                                logger.warning(f"⚠️ Пометка пользователя {username} ({telegram_id}) как заблокировавшего бота")
-                                await user_repo.update_one(
-                                    {"telegram_id": telegram_id},
-                                    {"$set": {"bot_blocked_by_user": True}}
-                                )
-                        else:
-                            logger.error(f"❌ Ошибка отправки {username} ({telegram_id}): unknown error")
                         fail_count += 1
-                        
-                except Exception as telegram_err:
-                    logger.error(f"❌ Telegram API error для {username} ({telegram_id}): {telegram_err}")
+                else:
+                    # Exception occurred
                     fail_count += 1
-                    continue
-                
-                # Rate limiting
-                await asyncio.sleep(0.05)  # 50ms delay between messages
-                
-            except Exception as e:
-                logger.error(f"❌ Общая ошибка для пользователя {telegram_id}: {e}")
-                fail_count += 1
+            
+            # Small delay between batches to avoid Telegram rate limits
+            if i + BATCH_SIZE < len(users):
+                await asyncio.sleep(1)  # 1 second between batches
         
         logger.info(f"✅ Broadcast complete. Success: {success_count}, Failed: {fail_count}")
         
