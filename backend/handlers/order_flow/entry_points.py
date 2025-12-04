@@ -416,9 +416,16 @@ async def order_from_template_list(update: Update, context: ContextTypes.DEFAULT
     
     telegram_id = query.from_user.id
     
-    # Get templates directly from DB (same as my_templates_menu)
-    from server import db
-    templates = await db.templates.find({"telegram_id": telegram_id}, {"_id": 0}).to_list(10)
+    # ⚡ Performance: Use cached templates if available
+    cached_templates = context.user_data.get('cached_templates')
+    if cached_templates:
+        templates = cached_templates[:10]  # Limit to 10
+        logger.info(f"⚡ Using cached templates: {len(templates)}")
+    else:
+        # Fallback: Get templates from DB
+        from server import db
+        templates = await db.templates.find({"telegram_id": telegram_id}, {"_id": 0}).to_list(10)
+        logger.info(f"📊 Fetched templates from DB: {len(templates)}")
     
     if not templates:
         await safe_telegram_call(update.effective_message.reply_text(OrderFlowMessages.no_templates_error()))
