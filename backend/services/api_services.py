@@ -270,8 +270,8 @@ async def get_shipstation_carrier_ids():
                 logger.debug(f"✅ Cached carrier_ids for {_CARRIER_CACHE_TTL}s")
                 
                 return carriers
-            except Exception as parse_error:
-                logger.error(f"❌ Error parsing carriers response: {parse_error}", exc_info=True)
+            except (ValueError, KeyError) as parse_error:
+                logger.error(f"❌ Error parsing carriers JSON: {parse_error}", exc_info=True)
                 logger.error(f"   Response text: {response.text[:500]}")
                 return {}
         else:
