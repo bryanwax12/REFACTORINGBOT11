@@ -160,11 +160,11 @@ async def confirm_cancel_order(update: Update, context: ContextTypes.DEFAULT_TYP
 
 @safe_handler(fallback_state=ConversationHandler.END)
 @with_user_session(create_user=False, require_session=True)
-@safe_handler(fallback_state=ConversationHandler.END)
 async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Return to order after cancel button - restore exact screen"""
-    from server import FROM_NAME, safe_telegram_call, mark_message_as_selected, db
+    from server import FROM_NAME, ORDER_FLOW_STATES, safe_telegram_call, mark_message_as_selected, db
     from utils.ui_utils import OrderStepMessages, get_cancel_keyboard
+    from utils.state_validation import validate_and_log_transition
     
     logger.info(f"return_to_order called - user_id: {update.effective_user.id}")
     query = update.callback_query
@@ -184,7 +184,16 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     saved_state = None
     if session:
         saved_state = session.get("session_data", {}).get("state_before_cancel")
-        logger.info(f"✅ Restored state from session: {saved_state}")
+        logger.info(f"📍 Retrieved state from session: {saved_state}")
+        
+        # ✅ VALIDATE STATE before returning - prevents confusion!
+        saved_state = validate_and_log_transition(
+            user_id=user_id,
+            saved_state=saved_state,
+            valid_states=ORDER_FLOW_STATES,
+            handler_name="return_to_order",
+            fallback_state=FROM_NAME
+        )
         
         # Очистить сохраненное состояние
         await db.user_sessions.update_one(
