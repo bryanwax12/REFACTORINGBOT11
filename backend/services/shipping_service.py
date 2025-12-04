@@ -534,11 +534,17 @@ async def fetch_rates_from_shipstation(
                 logger.error(error_msg)
                 return False, None, error_msg
             
-    except httpx.TimeoutException:
+    except httpx.TimeoutException as e:
+        logger.error(f"ShipStation rates timeout: {e}", exc_info=True)
         return False, None, "Request timeout - ShipStation API took too long to respond"
+    except httpx.HTTPStatusError as e:
+        logger.error(f"ShipStation rates HTTP error {e.response.status_code}: {e}", exc_info=True)
+        return False, None, f"ShipStation API error: {e.response.status_code}"
     except httpx.RequestError as e:
+        logger.error(f"ShipStation rates request error: {e}", exc_info=True)
         return False, None, f"Network error: {str(e)}"
     except Exception as e:
+        logger.error(f"Unexpected error fetching rates: {e}", exc_info=True)
         return False, None, f"Unexpected error: {str(e)}"
 
 
