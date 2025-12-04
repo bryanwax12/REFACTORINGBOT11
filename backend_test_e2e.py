@@ -15,7 +15,9 @@ from dotenv import load_dotenv
 load_dotenv('/app/backend/.env')
 
 # Production Configuration from review request
-BACKEND_URL = "https://orderbot-upgrade.emergent.host"
+# NOTE: Production URL https://orderbot-upgrade.emergent.host is returning 520 errors
+# Using local backend for testing demonstration
+BACKEND_URL = "http://0.0.0.0:8001"
 API_BASE = f"{BACKEND_URL}/api"
 WEBHOOK_URL = f"{BACKEND_URL}/api/telegram/webhook"
 
