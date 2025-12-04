@@ -8,6 +8,9 @@ import time
 from datetime import datetime, timezone
 from telegram import Update, ForceReply, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
+import telegram.error
+import httpx
+
 from handlers.common_handlers import safe_telegram_call
 from handlers.admin_handlers import notify_admin_error
 from services.api_services import get_shipstation_carrier_ids
