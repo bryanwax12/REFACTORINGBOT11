@@ -152,8 +152,7 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
     
     # Template data already loaded in context.user_data
     # Ask for parcel weight (first thing not in template)
-    from utils.ui_utils import get_cancel_keyboard
-    reply_markup = get_cancel_keyboard()
+    reply_markup = PRELOADED_CANCEL_KEYBOARD  # ⚡ Performance: Use preloaded constant
     
     template_name = context.user_data.get('template_name', 'шаблон')
     
@@ -372,7 +371,7 @@ async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text)))
     
-    reply_markup = get_cancel_keyboard()
+    reply_markup = PRELOADED_CANCEL_KEYBOARD  # ⚡ Performance: Use preloaded constant
     message_text = OrderFlowMessages.new_order_start()
     
     # Save state IMMEDIATELY (before background task)
