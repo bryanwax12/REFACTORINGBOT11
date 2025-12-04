@@ -56,12 +56,14 @@ async def oxapay_webhook(request: Request):
 @router.post("/telegram/webhook")
 async def telegram_webhook(request: Request):
     """Handle Telegram webhook updates"""
+    logger.info("📨 Telegram webhook called")
     try:
         import server as srv
         from telegram import Update
         
         # Get the update data from the request
         update_data = await request.json()
+        logger.debug(f"📦 Update data received: update_id={update_data.get('update_id')}")
         
         # Check if application is initialized
         if not srv.application:
