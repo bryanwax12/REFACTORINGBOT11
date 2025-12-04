@@ -9705,6 +9705,17 @@ if __name__ == "__main__":
     print("🎯 ФИНАЛЬНАЯ ОЦЕНКА REVIEW REQUEST")
     print("="*80)
     
+    if balance_duplication_result:
+        print("✅ REVIEW REQUEST: Balance command duplication issue RESOLVED")
+        print("   Функция 'Мой баланс' работает без дублирования сообщений")
+    else:
+        print("❌ REVIEW REQUEST: Balance command duplication issue NOT RESOLVED")
+        print("🚨 URGENT ACTION REQUIRED:")
+        print("   1. Check my_balance_command in /app/backend/handlers/payment_handlers.py")
+        print("   2. Verify send_method() is called only once")
+        print("   3. Check for race conditions with mark_message_as_selected")
+        print("   4. Ensure button_callback doesn't call my_balance_command twice")
+    
     if skip_button_result:
         print("✅ REVIEW REQUEST: Skip button cancel issue RESOLVED")
         print("   После пропуска FROM_PHONE кнопка 'Отмена' НЕ показывается на TO_NAME")
