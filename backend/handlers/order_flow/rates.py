@@ -148,10 +148,12 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         
         # Get rates from ShipStation with progress updates
         async def update_progress():
-            """Update progress message every 0.3 seconds"""
+            """Update progress with increasing intervals to reduce API calls"""
             start_time = datetime.now(timezone.utc)
-            while True:
-                await asyncio.sleep(0.3)
+            # Progressive intervals: 1, 2, 3, 5, 10 seconds
+            intervals = [1, 2, 3, 5, 10, 15, 20, 30]
+            for interval in intervals:
+                await asyncio.sleep(interval)
                 elapsed = int((datetime.now(timezone.utc) - start_time).total_seconds())
                 try:
                     await safe_telegram_call(progress_msg.edit_text(
