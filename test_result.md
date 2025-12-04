@@ -8208,21 +8208,16 @@ tail -n 500 backend.log | grep -i "conflict" | wc -l
 Агент: E1 Fork Agent (Main)
 ================================================================================
 
-## Цель
-Провести полное end-to-end тестирование всех критических функций приложения
-перед финальным подтверждением готовности к production.
+test_plan:
+  current_focus:
+    - "ФИНАЛЬНОЕ E2E ТЕСТИРОВАНИЕ - PRODUCTION READINESS CHECK"
+    - "Production Deployment Infrastructure Fix"
+  stuck_tasks:
+    - "Production URL https://orderbot-upgrade.emergent.host returning 520 errors"
+  test_all: true
+  test_priority: "critical_first"
 
-## Scope тестирования
-1. **User Flow**: Полный цикл создания заказа (10+ шагов)
-2. **Admin Panel**: Все функции управления
-3. **Integrations**: ShipStation API, Payment webhooks
-4. **Edge Cases**: Блокировка, тех. режим, ошибки валидации
-5. **Performance**: Response times, webhook processing
-
-## Testing Method
-- Backend testing agent для API endpoints
-- Webhook simulation для Telegram bot interaction
-- Database verification для data integrity
-
-Запуск тестирования...
+agent_communication:
+    - agent: "testing"
+      message: "🚨 КРИТИЧЕСКАЯ ПРОБЛЕМА ОБНАРУЖЕНА: Production deployment https://orderbot-upgrade.emergent.host полностью недоступен (HTTP 520 errors). Все backend функции работают корректно локально (5/6 тестов пройдены), но production URL возвращает 'Service temporarily unavailable'. Требуется немедленное исправление инфраструктуры deployment перед production readiness. Локальное тестирование показало: ✅ Admin panel functions работают, ✅ Webhook configuration корректна, ✅ Performance соответствует требованиям, ✅ Логи чистые (no Conflict errors), ❌ Production deployment down. РЕКОМЕНДАЦИЯ: Исправить production deployment infrastructure, затем повторить E2E тестирование на production URL."
 
