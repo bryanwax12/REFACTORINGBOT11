@@ -730,10 +730,10 @@ def with_user_session(create_user=True, require_session=False):
             user_repo = get_user_repo()
             fresh_user = await user_repo.find_by_telegram_id(user_id)
             
-            # Check BOTH fields for compatibility
+            # ✅ Check BOTH fields with cache (5-minute TTL)
             is_blocked = False
             if fresh_user:
-                is_blocked = fresh_user.get('blocked', False) or fresh_user.get('is_blocked', False)
+                is_blocked = is_user_blocked_cached(user_id, fresh_user)
             
             if is_blocked:
                 logger.warning(f"🚫 [{handler_name}] user={user_id}: BLOCKED (blocked={fresh_user.get('blocked')}, is_blocked={fresh_user.get('is_blocked')}) - denying access")
