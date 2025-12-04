@@ -6,6 +6,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel
 from handlers.admin_handlers import verify_admin_key
 import logging
+import pymongo.errors
+import telegram.error
 
 logger = logging.getLogger(__name__)
 
@@ -55,8 +57,11 @@ async def get_users(
             "skip": skip
         }
     
+    except pymongo.errors.PyMongoError as e:
+        logger.error(f"Database error getting users: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Database error")
     except Exception as e:
-        logger.error(f"Error getting users: {e}")
+        logger.error(f"Unexpected error getting users: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -81,8 +86,14 @@ async def get_user(
     
     except HTTPException:
         raise
+    except pymongo.errors.PyMongoError as e:
+        logger.error(f"Database error getting user: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Database error")
+    except telegram.error.TelegramError as e:
+        logger.error(f"Telegram error getting user: {e}", exc_info=True)
+        raise HTTPException(status_code=503, detail="Notification service error")
     except Exception as e:
-        logger.error(f"Error getting user: {e}")
+        logger.error(f"Unexpected error getting user: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -125,8 +136,14 @@ async def block_user(
     
     except HTTPException:
         raise
+    except pymongo.errors.PyMongoError as e:
+        logger.error(f"Database error blocking user: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Database error")
+    except telegram.error.TelegramError as e:
+        logger.error(f"Telegram error blocking user: {e}", exc_info=True)
+        raise HTTPException(status_code=503, detail="Notification service error")
     except Exception as e:
-        logger.error(f"Error blocking user: {e}")
+        logger.error(f"Unexpected error blocking user: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -169,8 +186,14 @@ async def unblock_user(
     
     except HTTPException:
         raise
+    except pymongo.errors.PyMongoError as e:
+        logger.error(f"Database error unblocking user: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Database error")
+    except telegram.error.TelegramError as e:
+        logger.error(f"Telegram error unblocking user: {e}", exc_info=True)
+        raise HTTPException(status_code=503, detail="Notification service error")
     except Exception as e:
-        logger.error(f"Error unblocking user: {e}")
+        logger.error(f"Unexpected error unblocking user: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -210,8 +233,14 @@ async def update_balance(
     
     except HTTPException:
         raise
+    except pymongo.errors.PyMongoError as e:
+        logger.error(f"Database error updating balance: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Database error")
+    except telegram.error.TelegramError as e:
+        logger.error(f"Telegram error updating balance: {e}", exc_info=True)
+        raise HTTPException(status_code=503, detail="Notification service error")
     except Exception as e:
-        logger.error(f"Error updating balance: {e}")
+        logger.error(f"Unexpected error updating balance: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -244,6 +273,12 @@ async def update_discount(
     
     except HTTPException:
         raise
+    except pymongo.errors.PyMongoError as e:
+        logger.error(f"Database error updating discount: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Database error")
+    except telegram.error.TelegramError as e:
+        logger.error(f"Telegram error updating discount: {e}", exc_info=True)
+        raise HTTPException(status_code=503, detail="Notification service error")
     except Exception as e:
-        logger.error(f"Error updating discount: {e}")
+        logger.error(f"Unexpected error updating discount: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
