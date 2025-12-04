@@ -139,6 +139,11 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
         f"*Что дальше?*"
     )
     
+    # ⚡ Performance: Invalidate template cache
+    if 'cached_templates' in context.user_data:
+        del context.user_data['cached_templates']
+        logger.info("⚡ Template cache invalidated after save")
+    
     # 🚀 PERFORMANCE: Send message in background
     async def send_success():
         bot_msg = await safe_telegram_call(update.effective_message.reply_text(
