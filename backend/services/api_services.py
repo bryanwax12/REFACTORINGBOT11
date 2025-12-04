@@ -180,8 +180,8 @@ async def get_shipstation_carrier_ids():
     Get carrier IDs from ShipStation (with 1-hour cache)
     Returns dict mapping carrier names to IDs
     """
-    global _carrier_ids_cache, _carrier_ids_cache_time
     from datetime import datetime, timezone
+    global _carrier_ids_cache, _carrier_ids_cache_time
     
     # Check cache
     if _carrier_ids_cache and _carrier_ids_cache_time:
