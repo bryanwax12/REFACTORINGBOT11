@@ -139,8 +139,11 @@ async def show_order_summary(update: Update, context: ContextTypes.DEFAULT_TYPE)
     # Remove buttons from the previous message
     try:
         await safe_telegram_call(query.message.edit_reply_markup(reply_markup=None))
-    except Exception as e:
-        logger.warning(f"Could not remove buttons from previous message: {e}")
+    except telegram.error.BadRequest:
+        # Expected: message too old to edit
+        pass
+    except telegram.error.TelegramError as e:
+        logger.debug(f"Could not remove buttons from previous message: {e}")
     
     # Get order data
     data = context.user_data
