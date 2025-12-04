@@ -1284,6 +1284,222 @@ def check_backend_logs():
     except Exception as e:
         print(f"❌ Error checking logs: {e}")
 
+def test_balance_command_duplication():
+    """Test balance command for message duplication - CRITICAL REVIEW REQUEST"""
+    print("\n🔍 КРИТИЧЕСКОЕ ТЕСТИРОВАНИЕ: Дублирование сообщений при нажатии 'Мой баланс'")
+    print("🎯 ПРОБЛЕМА: Пользователь сообщил о дублировании сообщения при нажатии кнопки 'Мой баланс'")
+    print("🎯 КОНТЕКСТ: Проверить функцию my_balance_command на дублирование вызовов send_method()")
+    
+    try:
+        # Test configuration
+        test_user_id = 5594152712  # Real user ID from review request
+        webhook_url = f"{BACKEND_URL}/api/telegram/webhook"
+        
+        print(f"\n📋 Конфигурация теста:")
+        print(f"   Webhook URL: {webhook_url}")
+        print(f"   Test User ID: {test_user_id}")
+        print(f"   Тестируемая функция: my_balance_command")
+        
+        # Step 1: Test /start command first to establish session
+        print(f"\n🔄 ШАГ 1: Установка сессии пользователя через /start")
+        
+        start_update = {
+            "update_id": int(time.time() * 1000),
+            "message": {
+                "message_id": 1,
+                "from": {
+                    "id": test_user_id,
+                    "is_bot": False,
+                    "first_name": "TestUser",
+                    "username": "testuser",
+                    "language_code": "ru"
+                },
+                "chat": {
+                    "id": test_user_id,
+                    "first_name": "TestUser",
+                    "username": "testuser",
+                    "type": "private"
+                },
+                "date": int(time.time()),
+                "text": "/start"
+            }
+        }
+        
+        response = requests.post(webhook_url, json=start_update, timeout=10)
+        print(f"   /start command: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                print(f"   Response: {result}")
+            except:
+                print(f"   Response: {response.text[:100]}")
+        
+        # Step 2: Test 'Мой баланс' button click
+        print(f"\n🚨 ШАГ 2: КРИТИЧЕСКИЙ ТЕСТ - Нажатие кнопки 'Мой баланс'")
+        print(f"   Проверяем на дублирование сообщений")
+        
+        # Clear any previous logs for clean analysis
+        os.system("echo '' > /tmp/balance_test_log.txt")
+        
+        balance_update = {
+            "update_id": int(time.time() * 1000) + 1,
+            "callback_query": {
+                "id": f"balance_test_{int(time.time())}",
+                "from": {
+                    "id": test_user_id,
+                    "is_bot": False,
+                    "first_name": "TestUser",
+                    "username": "testuser"
+                },
+                "message": {
+                    "message_id": 2,
+                    "from": {"id": 123456789, "is_bot": True, "first_name": "Bot"},
+                    "chat": {"id": test_user_id, "type": "private"},
+                    "date": int(time.time()),
+                    "text": "Main menu"
+                },
+                "chat_instance": "test_chat_instance",
+                "data": "my_balance"
+            }
+        }
+        
+        # Record start time for log analysis
+        test_start_time = time.time()
+        
+        response = requests.post(webhook_url, json=balance_update, timeout=15)
+        print(f"   'Мой баланс' button: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        
+        if response.status_code == 200:
+            try:
+                result = response.json()
+                print(f"   Response: {result}")
+            except:
+                print(f"   Response: {response.text[:100]}")
+        
+        # Step 3: Analyze backend logs for duplication
+        print(f"\n📊 ШАГ 3: АНАЛИЗ ЛОГОВ НА ДУБЛИРОВАНИЕ")
+        
+        # Wait a moment for logs to be written
+        time.sleep(2)
+        
+        # Check for my_balance_command calls
+        balance_logs = os.popen("tail -n 100 /var/log/supervisor/backend.err.log | grep -i 'my_balance_command'").read()
+        balance_call_count = len([line for line in balance_logs.split('\n') if 'my_balance_command CALLED' in line])
+        print(f"   'my_balance_command CALLED' логи: {balance_call_count} {'✅' if balance_call_count == 1 else '❌ ДУБЛИРОВАНИЕ!' if balance_call_count > 1 else '⚠️'}")
+        
+        # Check for button_callback logs
+        button_logs = os.popen("tail -n 100 /var/log/supervisor/backend.err.log | grep -i 'Button.*my_balance'").read()
+        button_call_count = len([line for line in button_logs.split('\n') if 'Button: my_balance' in line])
+        print(f"   'Button: my_balance' логи: {button_call_count} {'✅' if button_call_count == 1 else '❌ ДУБЛИРОВАНИЕ!' if button_call_count > 1 else '⚠️'}")
+        
+        # Check for mark_message_as_selected calls
+        mark_logs = os.popen("tail -n 100 /var/log/supervisor/backend.err.log | grep -i 'mark_message_as_selected'").read()
+        mark_call_count = len([line for line in mark_logs.split('\n') if 'mark_message_as_selected' in line and line.strip()])
+        print(f"   'mark_message_as_selected' логи: {mark_call_count} {'✅' if mark_call_count <= 2 else '❌ ИЗБЫТОЧНЫЕ ВЫЗОВЫ!' if mark_call_count > 2 else '⚠️'}")
+        
+        # Check for send message logs
+        send_logs = os.popen("tail -n 100 /var/log/supervisor/backend.err.log | grep -i 'sending balance message\\|balance message sent'").read()
+        send_call_count = len([line for line in send_logs.split('\n') if ('Sending balance message' in line or 'Balance message sent' in line) and line.strip()])
+        print(f"   'Sending/sent balance message' логи: {send_call_count} {'✅' if send_call_count <= 2 else '❌ ДУБЛИРОВАНИЕ ОТПРАВКИ!' if send_call_count > 2 else '⚠️'}")
+        
+        # Step 4: Code analysis for potential duplication causes
+        print(f"\n🔍 ШАГ 4: АНАЛИЗ КОДА НА ПОТЕНЦИАЛЬНЫЕ ПРИЧИНЫ ДУБЛИРОВАНИЯ")
+        
+        try:
+            # Check payment_handlers.py for duplication issues
+            with open('/app/backend/handlers/payment_handlers.py', 'r') as f:
+                payment_code = f.read()
+            
+            # Check for multiple send_method calls in my_balance_command
+            import re
+            send_method_calls = len(re.findall(r'send_method\s*\(', payment_code))
+            print(f"   send_method() вызовов в payment_handlers.py: {send_method_calls} {'✅' if send_method_calls == 1 else '❌ МНОЖЕСТВЕННЫЕ ВЫЗОВЫ!'}")
+            
+            # Check for multiple mark_message_as_selected calls
+            mark_calls = len(re.findall(r'mark_message_as_selected\s*\(', payment_code))
+            print(f"   mark_message_as_selected() вызовов в my_balance_command: {mark_calls} {'✅' if mark_calls <= 2 else '❌ ИЗБЫТОЧНЫЕ ВЫЗОВЫ!'}")
+            
+            # Check if there are duplicate code paths
+            if_callback_query = 'if update.callback_query:' in payment_code
+            else_clause = 'else:' in payment_code and 'send_method = update.message.reply_text' in payment_code
+            print(f"   Проверка if/else структуры: {'✅' if if_callback_query and else_clause else '❌ ПРОБЛЕМА СО СТРУКТУРОЙ!'}")
+            
+            # Check common_handlers.py for button_callback duplication
+            with open('/app/backend/handlers/common_handlers.py', 'r') as f:
+                common_code = f.read()
+            
+            # Check button_callback function for my_balance handling
+            my_balance_handlers = len(re.findall(r"query\.data\s*==\s*['\"]my_balance['\"]", common_code))
+            print(f"   'my_balance' обработчиков в button_callback: {my_balance_handlers} {'✅' if my_balance_handlers == 1 else '❌ МНОЖЕСТВЕННЫЕ ОБРАБОТЧИКИ!'}")
+            
+        except Exception as e:
+            print(f"   ❌ Ошибка анализа кода: {e}")
+        
+        # Step 5: Race condition analysis
+        print(f"\n🔍 ШАГ 5: АНАЛИЗ RACE CONDITIONS")
+        
+        try:
+            # Check for asyncio.create_task usage in my_balance_command
+            with open('/app/backend/handlers/payment_handlers.py', 'r') as f:
+                payment_code = f.read()
+            
+            # Look for race condition patterns
+            asyncio_tasks = len(re.findall(r'asyncio\.create_task\s*\(', payment_code))
+            print(f"   asyncio.create_task вызовов: {asyncio_tasks} {'✅' if asyncio_tasks <= 2 else '⚠️ ВОЗМОЖНЫЕ RACE CONDITIONS'}")
+            
+            # Check for context updates before mark_message_as_selected
+            context_updates_before_mark = 'context.user_data[' in payment_code and 'mark_message_as_selected' in payment_code
+            print(f"   Обновления context перед mark_message_as_selected: {'⚠️ ВОЗМОЖНАЯ RACE CONDITION' if context_updates_before_mark else '✅'}")
+            
+        except Exception as e:
+            print(f"   ❌ Ошибка анализа race conditions: {e}")
+        
+        # Step 6: Final assessment
+        print(f"\n🎯 ШАГ 6: ИТОГОВАЯ ОЦЕНКА ДУБЛИРОВАНИЯ")
+        
+        # Determine if duplication occurred
+        duplication_detected = (
+            balance_call_count > 1 or 
+            button_call_count > 1 or 
+            send_call_count > 2 or
+            mark_call_count > 3
+        )
+        
+        if duplication_detected:
+            print(f"   ❌ ДУБЛИРОВАНИЕ ОБНАРУЖЕНО:")
+            if balance_call_count > 1:
+                print(f"      - my_balance_command вызывался {balance_call_count} раз (ожидался 1)")
+            if button_call_count > 1:
+                print(f"      - button_callback обработал my_balance {button_call_count} раз (ожидался 1)")
+            if send_call_count > 2:
+                print(f"      - Отправка сообщения произошла {send_call_count} раз (ожидалось 1-2)")
+            if mark_call_count > 3:
+                print(f"      - mark_message_as_selected вызывался {mark_call_count} раз (ожидалось 1-2)")
+            
+            print(f"\n   🔧 РЕКОМЕНДУЕМЫЕ ИСПРАВЛЕНИЯ:")
+            print(f"      1. Проверить что my_balance_command вызывается только один раз")
+            print(f"      2. Убедиться что send_method() вызывается только один раз")
+            print(f"      3. Проверить race condition между mark_message_as_selected и context updates")
+            print(f"      4. Убедиться что button_callback не вызывает my_balance_command дважды")
+            
+            return False
+        else:
+            print(f"   ✅ ДУБЛИРОВАНИЕ НЕ ОБНАРУЖЕНО:")
+            print(f"      - my_balance_command: {balance_call_count} вызов")
+            print(f"      - button_callback: {button_call_count} обработка")
+            print(f"      - Отправка сообщения: {send_call_count} раз")
+            print(f"      - mark_message_as_selected: {mark_call_count} вызовов")
+            
+            print(f"\n   ✅ Функция 'Мой баланс' работает корректно без дублирования")
+            return True
+        
+    except Exception as e:
+        print(f"❌ Ошибка тестирования дублирования баланса: {e}")
+        import traceback
+        print(f"   Traceback: {traceback.format_exc()}")
+        return False
+
 def test_telegram_bot_basic_flow():
     """Test Telegram bot basic flow as requested in review"""
     print("\n🔍 Testing Telegram Bot Basic Flow...")
