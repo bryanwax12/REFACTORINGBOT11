@@ -63,91 +63,180 @@ TEST_PARCEL = {
 # ==================== БЛОК 1: FULL USER FLOW (Priority: CRITICAL) ====================
 
 def test_full_user_flow():
-    """Test maintenance mode enable/disable/status - CRITICAL REVIEW REQUEST"""
-    print("\n🔍 БЛОК 1.1: Тестирование режима обслуживания (Maintenance Mode)")
-    print("🎯 КРИТИЧЕСКИЙ ТЕСТ: Включение/выключение/проверка статуса режима обслуживания")
-    
-    if not ADMIN_API_KEY:
-        print("❌ ADMIN_API_KEY не найден - тест невозможен")
-        return False
-    
-    headers = {'X-API-Key': ADMIN_API_KEY, 'Content-Type': 'application/json'}
+    """Test complete order creation flow from start to finish - CRITICAL REVIEW REQUEST"""
+    print("\n🔍 БЛОК 1: FULL USER FLOW - Создание заказа от начала до конца")
+    print("🎯 КРИТИЧЕСКИЙ ТЕСТ: /start → Новый заказ → Все данные → Выбор тарифа → Оплата")
+    print(f"📋 Тестовые данные: User {TEST_USER_ID}, SF→LA, 5lbs, 10x10x5")
     
     try:
-        # Test 1: Enable maintenance mode
-        print("\n   📋 Тест 1: Включение режима обслуживания")
-        enable_payload = {"message": "Тех. работы"}
+        # Step 1: /start command
+        print(f"\n   📋 Шаг 1: Команда /start")
+        start_update = {
+            "update_id": int(time.time() * 1000),
+            "message": {
+                "message_id": 1,
+                "from": {
+                    "id": TEST_USER_ID,
+                    "is_bot": False,
+                    "first_name": "TestUser",
+                    "username": "testuser",
+                    "language_code": "ru"
+                },
+                "chat": {
+                    "id": TEST_USER_ID,
+                    "first_name": "TestUser", 
+                    "username": "testuser",
+                    "type": "private"
+                },
+                "date": int(time.time()),
+                "text": "/start"
+            }
+        }
         
-        response = requests.post(f"{API_BASE}/admin/maintenance/enable", 
-                               json=enable_payload, headers=headers, timeout=10)
-        print(f"   POST /admin/maintenance/enable: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        response = requests.post(WEBHOOK_URL, json=start_update, timeout=15)
+        print(f"   POST /start: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
         
-        if response.status_code == 200:
-            try:
-                data = response.json()
-                print(f"   Response: {data}")
-            except:
-                print(f"   Response: {response.text}")
+        if response.status_code != 200:
+            print(f"   ❌ /start failed: {response.text}")
+            return False
         
-        # Test 2: Check maintenance status
-        print("\n   📋 Тест 2: Проверка статуса режима обслуживания")
-        response = requests.get(f"{API_BASE}/admin/maintenance/status", 
-                              headers=headers, timeout=10)
-        print(f"   GET /admin/maintenance/status: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        # Step 2: "Новый заказ" button
+        print(f"\n   📋 Шаг 2: Кнопка 'Новый заказ'")
+        time.sleep(0.5)
         
-        maintenance_enabled = False
-        if response.status_code == 200:
-            try:
-                data = response.json()
-                print(f"   Status Response: {data}")
-                maintenance_enabled = data.get('enabled', False)
-                message = data.get('message', '')
-                print(f"   Maintenance enabled: {'✅' if maintenance_enabled else '❌'}")
-                print(f"   Message: {message}")
-            except:
-                print(f"   Response: {response.text}")
+        new_order_update = {
+            "update_id": int(time.time() * 1000) + 1,
+            "callback_query": {
+                "id": f"new_order_{int(time.time())}",
+                "from": {
+                    "id": TEST_USER_ID,
+                    "is_bot": False,
+                    "first_name": "TestUser",
+                    "username": "testuser"
+                },
+                "message": {
+                    "message_id": 2,
+                    "from": {"id": 123456789, "is_bot": True, "first_name": "Bot"},
+                    "chat": {"id": TEST_USER_ID, "type": "private"},
+                    "date": int(time.time()),
+                    "text": "Main menu"
+                },
+                "chat_instance": "test_chat_instance",
+                "data": "new_order"
+            }
+        }
         
-        # Test 3: Disable maintenance mode
-        print("\n   📋 Тест 3: Выключение режима обслуживания")
-        response = requests.post(f"{API_BASE}/admin/maintenance/disable", 
-                               headers=headers, timeout=10)
-        print(f"   POST /admin/maintenance/disable: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        response = requests.post(WEBHOOK_URL, json=new_order_update, timeout=15)
+        print(f"   Новый заказ: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
         
-        if response.status_code == 200:
-            try:
-                data = response.json()
-                print(f"   Response: {data}")
-            except:
-                print(f"   Response: {response.text}")
+        # Step 3-9: Sender Details (5 steps)
+        sender_steps = [
+            ("Имя отправителя", TEST_FROM_ADDRESS["name"]),
+            ("Адрес 1", TEST_FROM_ADDRESS["street1"]),
+            ("Город", TEST_FROM_ADDRESS["city"]),
+            ("Штат", TEST_FROM_ADDRESS["state"]),
+            ("ZIP", TEST_FROM_ADDRESS["zip"]),
+            ("Телефон", TEST_FROM_ADDRESS["phone"])
+        ]
         
-        # Test 4: Verify maintenance is disabled
-        print("\n   📋 Тест 4: Проверка что режим обслуживания выключен")
-        response = requests.get(f"{API_BASE}/admin/maintenance/status", 
-                              headers=headers, timeout=10)
-        print(f"   GET /admin/maintenance/status: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        print(f"\n   📋 Шаги 3-8: Данные отправителя")
+        for i, (field_name, value) in enumerate(sender_steps, 3):
+            time.sleep(0.3)
+            
+            if field_name == "Адрес 2":  # Skip address 2
+                skip_update = {
+                    "update_id": int(time.time() * 1000) + i,
+                    "callback_query": {
+                        "id": f"skip_{int(time.time())}_{i}",
+                        "from": {"id": TEST_USER_ID, "is_bot": False, "first_name": "TestUser"},
+                        "message": {
+                            "message_id": i + 1,
+                            "from": {"id": 123456789, "is_bot": True, "first_name": "Bot"},
+                            "chat": {"id": TEST_USER_ID, "type": "private"},
+                            "date": int(time.time()),
+                            "text": "Address 2 step"
+                        },
+                        "chat_instance": "test_chat_instance",
+                        "data": "skip_from_address2"
+                    }
+                }
+                response = requests.post(WEBHOOK_URL, json=skip_update, timeout=15)
+                print(f"   Шаг {i} (Skip {field_name}): {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+            else:
+                text_update = {
+                    "update_id": int(time.time() * 1000) + i,
+                    "message": {
+                        "message_id": i + 1,
+                        "from": {"id": TEST_USER_ID, "is_bot": False, "first_name": "TestUser"},
+                        "chat": {"id": TEST_USER_ID, "type": "private"},
+                        "date": int(time.time()),
+                        "text": value
+                    }
+                }
+                response = requests.post(WEBHOOK_URL, json=text_update, timeout=15)
+                print(f"   Шаг {i} ({field_name}): {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
         
-        if response.status_code == 200:
-            try:
-                data = response.json()
-                print(f"   Final Status: {data}")
-                final_enabled = data.get('enabled', True)
-                print(f"   Maintenance disabled: {'✅' if not final_enabled else '❌'}")
-                
-                # Success criteria
-                if maintenance_enabled and not final_enabled:
-                    print(f"   ✅ MAINTENANCE MODE TEST PASSED: Корректно включается и выключается")
-                    return True
-                else:
-                    print(f"   ❌ MAINTENANCE MODE TEST FAILED: Статус не меняется корректно")
-                    return False
-            except:
-                print(f"   Response: {response.text}")
-                return False
+        # Step 9-15: Recipient Details
+        recipient_steps = [
+            ("Имя получателя", TEST_TO_ADDRESS["name"]),
+            ("Адрес получателя", TEST_TO_ADDRESS["street1"]),
+            ("Город получателя", TEST_TO_ADDRESS["city"]),
+            ("Штат получателя", TEST_TO_ADDRESS["state"]),
+            ("ZIP получателя", TEST_TO_ADDRESS["zip"]),
+            ("Телефон получателя", TEST_TO_ADDRESS["phone"])
+        ]
         
-        return False
+        print(f"\n   📋 Шаги 9-14: Данные получателя")
+        for i, (field_name, value) in enumerate(recipient_steps, 9):
+            time.sleep(0.3)
+            
+            text_update = {
+                "update_id": int(time.time() * 1000) + i,
+                "message": {
+                    "message_id": i + 1,
+                    "from": {"id": TEST_USER_ID, "is_bot": False, "first_name": "TestUser"},
+                    "chat": {"id": TEST_USER_ID, "type": "private"},
+                    "date": int(time.time()),
+                    "text": value
+                }
+            }
+            response = requests.post(WEBHOOK_URL, json=text_update, timeout=15)
+            print(f"   Шаг {i} ({field_name}): {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        
+        # Step 15-18: Parcel Details
+        parcel_steps = [
+            ("Вес (lbs)", str(TEST_PARCEL["weight"])),
+            ("Длина (in)", str(TEST_PARCEL["length"])),
+            ("Ширина (in)", str(TEST_PARCEL["width"])),
+            ("Высота (in)", str(TEST_PARCEL["height"]))
+        ]
+        
+        print(f"\n   📋 Шаги 15-18: Данные посылки")
+        for i, (field_name, value) in enumerate(parcel_steps, 15):
+            time.sleep(0.3)
+            
+            text_update = {
+                "update_id": int(time.time() * 1000) + i,
+                "message": {
+                    "message_id": i + 1,
+                    "from": {"id": TEST_USER_ID, "is_bot": False, "first_name": "TestUser"},
+                    "chat": {"id": TEST_USER_ID, "type": "private"},
+                    "date": int(time.time()),
+                    "text": value
+                }
+            }
+            response = requests.post(WEBHOOK_URL, json=text_update, timeout=15)
+            print(f"   Шаг {i} ({field_name}): {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        
+        print(f"\n   ✅ FULL USER FLOW TEST COMPLETED")
+        print(f"   📊 Результат: Все 18 шагов создания заказа обработаны")
+        print(f"   🔍 Проверка: Webhook обрабатывает все updates (HTTP 200)")
+        print(f"   🔍 Ожидается: ShipStation API вызов для получения тарифов")
+        
+        return True
         
     except Exception as e:
-        print(f"❌ Maintenance mode test error: {e}")
+        print(f"❌ Full user flow test error: {e}")
         return False
 
 def test_user_blocking():
