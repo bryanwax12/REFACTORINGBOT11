@@ -171,7 +171,7 @@ async def handle_template_update(update: Update, context: ContextTypes.DEFAULT_T
 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text)))
     
     template_id = query.data.replace('template_update_', '')
     telegram_id = query.from_user.id
@@ -262,7 +262,7 @@ async def handle_template_new_name(update: Update, context: ContextTypes.DEFAULT
 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text)))
     
     from utils.ui_utils import get_cancel_keyboard
     reply_markup = get_cancel_keyboard()
@@ -302,7 +302,7 @@ async def continue_order_after_template(update: Update, context: ContextTypes.DE
 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text)))
     
     # Return to order confirmation screen
     return await show_data_confirmation(update, context)
@@ -329,7 +329,7 @@ async def handle_topup_amount(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text)))
     
     try:
         amount_text = update.effective_message.text.strip()

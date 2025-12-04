@@ -72,7 +72,7 @@ async def handle_save_as_template(update: Update, context: ContextTypes.DEFAULT_
 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text)))
     
     # Prompt for template name with custom back button
     from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -152,7 +152,7 @@ async def show_edit_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text)))
     
     message = "✏️ Что вы хотите изменить?"
     
@@ -200,7 +200,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text)))
     
     if query.data == 'confirm_cancel':
         return await confirm_cancel_order(update, context)
@@ -231,7 +231,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
 
         old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-        asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+        asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text)))
         
         logger.info(f"🔧 Starting FROM address edit - user_data keys: {list(context.user_data.keys())}")
         
@@ -256,7 +256,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
 
         old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-        asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+        asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text)))
         
         logger.info(f"🔧 Starting TO address edit - user_data keys: {list(context.user_data.keys())}")
         
@@ -281,7 +281,7 @@ async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT
 
         old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-        asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+        asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text)))
         
         logger.info(f"🔧 Starting PARCEL edit - user_data keys: {list(context.user_data.keys())}")
         

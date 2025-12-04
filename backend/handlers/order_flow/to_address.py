@@ -60,7 +60,7 @@ async def order_to_name(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text)))
     
     # ✅ МАГИЧЕСКИЙ ГИБРИД 2025
     from utils.ui_utils import ask_with_cancel_and_focus, OrderStepMessages, TemplateEditMessages
@@ -122,7 +122,7 @@ async def order_to_address(update: Update, context: ContextTypes.DEFAULT_TYPE, s
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
     
-    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text)))
     from utils.ui_utils import get_skip_and_cancel_keyboard, OrderStepMessages, CallbackData, TemplateEditMessages
     
     # Use different messages for template editing vs order creation
@@ -180,7 +180,7 @@ async def order_to_address2(update: Update, context: ContextTypes.DEFAULT_TYPE, 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
     
-    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text)))
     
     # ✅ МАГИЧЕСКИЙ ГИБРИД 2025
     from utils.ui_utils import ask_with_cancel_and_focus, OrderStepMessages, TemplateEditMessages
@@ -241,7 +241,7 @@ async def order_to_city(update: Update, context: ContextTypes.DEFAULT_TYPE, sess
 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text)))
     
     # ✅ МАГИЧЕСКИЙ ГИБРИД 2025
     from utils.ui_utils import ask_with_cancel_and_focus, OrderStepMessages, TemplateEditMessages
@@ -298,7 +298,7 @@ async def order_to_state(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text)))
     
     # ✅ МАГИЧЕСКИЙ ГИБРИД 2025
     from utils.ui_utils import ask_with_cancel_and_focus, OrderStepMessages, TemplateEditMessages
@@ -356,7 +356,7 @@ async def order_to_zip(update: Update, context: ContextTypes.DEFAULT_TYPE, sessi
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
     
-    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text)))
     
     from utils.ui_utils import get_skip_and_cancel_keyboard, OrderStepMessages, CallbackData, TemplateEditMessages
     
@@ -432,7 +432,7 @@ async def order_to_phone(update: Update, context: ContextTypes.DEFAULT_TYPE, ses
 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text)))
     
     # Check if we're editing only TO address in order
     if context.user_data.get('editing_to_address'):

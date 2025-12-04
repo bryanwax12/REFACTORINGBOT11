@@ -57,7 +57,7 @@ async def order_parcel_weight(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text)))
     
     # If weight > 10 lbs, don't show "Use standard sizes" button (package is too heavy for 10x10x10)
     if weight > 10:
@@ -120,7 +120,7 @@ async def order_parcel_length(update: Update, context: ContextTypes.DEFAULT_TYPE
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
     
-    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text)))
     from utils.ui_utils import get_standard_size_keyboard, get_standard_size_and_cancel_keyboard, get_cancel_keyboard, OrderStepMessages, CallbackData
     
     # Check weight to decide if we show "Use standard sizes" button
@@ -184,7 +184,7 @@ async def order_parcel_width(update: Update, context: ContextTypes.DEFAULT_TYPE,
 
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
-    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text)))
     
     # Check weight to decide if we show "Use standard sizes" button
     weight = context.user_data.get('parcel_weight', 0)
@@ -248,7 +248,7 @@ async def order_parcel_height(update: Update, context: ContextTypes.DEFAULT_TYPE
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
 
     
-    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text)))
     
     from handlers.order_flow.confirmation import show_data_confirmation
     
