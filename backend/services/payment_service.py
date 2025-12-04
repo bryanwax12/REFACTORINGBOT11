@@ -416,9 +416,15 @@ async def create_payment_invoice(
             'pay_link': pay_link,
             'amount': amount
         }, None
-        
+    
+    except pymongo.errors.PyMongoError as e:
+        logger.error(f"❌ Database error creating invoice: {e}", exc_info=True)
+        return False, None, "Database error"
+    except ValueError as e:
+        logger.error(f"❌ Validation error creating invoice: {e}")
+        return False, None, str(e)
     except Exception as e:
-        logger.error(f"❌ Error creating invoice: {e}")
+        logger.error(f"❌ Unexpected error creating invoice: {e}", exc_info=True)
         return False, None, str(e)
 
 
