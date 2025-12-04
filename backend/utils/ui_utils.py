@@ -299,7 +299,6 @@ def get_payment_success_keyboard(has_pending_order: bool = False, order_amount: 
 def get_cancel_and_menu_keyboard() -> InlineKeyboardMarkup:
     """Keyboard with Cancel and Back to Menu - OPTIMIZED: uses pre-loaded keyboard"""
     return PRELOADED_CANCEL_AND_MENU_KEYBOARD
-    return InlineKeyboardMarkup(keyboard)
 
 
 # ============================================================
