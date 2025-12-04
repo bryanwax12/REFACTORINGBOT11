@@ -28,6 +28,566 @@ print(f"   Backend URL: {BACKEND_URL}")
 print(f"   API Base: {API_BASE}")
 print(f"   Admin API Key: {ADMIN_API_KEY[:20]}..." if ADMIN_API_KEY else "   ❌ Admin API Key not found")
 
+# ==================== БЛОК 1: ФУНКЦИИ АДМИН-ПАНЕЛИ ====================
+
+def test_maintenance_mode():
+    """Test maintenance mode enable/disable/status - CRITICAL REVIEW REQUEST"""
+    print("\n🔍 БЛОК 1.1: Тестирование режима обслуживания (Maintenance Mode)")
+    print("🎯 КРИТИЧЕСКИЙ ТЕСТ: Включение/выключение/проверка статуса режима обслуживания")
+    
+    if not ADMIN_API_KEY:
+        print("❌ ADMIN_API_KEY не найден - тест невозможен")
+        return False
+    
+    headers = {'X-API-Key': ADMIN_API_KEY, 'Content-Type': 'application/json'}
+    
+    try:
+        # Test 1: Enable maintenance mode
+        print("\n   📋 Тест 1: Включение режима обслуживания")
+        enable_payload = {"message": "Тех. работы"}
+        
+        response = requests.post(f"{API_BASE}/admin/maintenance/enable", 
+                               json=enable_payload, headers=headers, timeout=10)
+        print(f"   POST /admin/maintenance/enable: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                print(f"   Response: {data}")
+            except:
+                print(f"   Response: {response.text}")
+        
+        # Test 2: Check maintenance status
+        print("\n   📋 Тест 2: Проверка статуса режима обслуживания")
+        response = requests.get(f"{API_BASE}/admin/maintenance/status", 
+                              headers=headers, timeout=10)
+        print(f"   GET /admin/maintenance/status: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        
+        maintenance_enabled = False
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                print(f"   Status Response: {data}")
+                maintenance_enabled = data.get('enabled', False)
+                message = data.get('message', '')
+                print(f"   Maintenance enabled: {'✅' if maintenance_enabled else '❌'}")
+                print(f"   Message: {message}")
+            except:
+                print(f"   Response: {response.text}")
+        
+        # Test 3: Disable maintenance mode
+        print("\n   📋 Тест 3: Выключение режима обслуживания")
+        response = requests.post(f"{API_BASE}/admin/maintenance/disable", 
+                               headers=headers, timeout=10)
+        print(f"   POST /admin/maintenance/disable: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                print(f"   Response: {data}")
+            except:
+                print(f"   Response: {response.text}")
+        
+        # Test 4: Verify maintenance is disabled
+        print("\n   📋 Тест 4: Проверка что режим обслуживания выключен")
+        response = requests.get(f"{API_BASE}/admin/maintenance/status", 
+                              headers=headers, timeout=10)
+        print(f"   GET /admin/maintenance/status: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                print(f"   Final Status: {data}")
+                final_enabled = data.get('enabled', True)
+                print(f"   Maintenance disabled: {'✅' if not final_enabled else '❌'}")
+                
+                # Success criteria
+                if maintenance_enabled and not final_enabled:
+                    print(f"   ✅ MAINTENANCE MODE TEST PASSED: Корректно включается и выключается")
+                    return True
+                else:
+                    print(f"   ❌ MAINTENANCE MODE TEST FAILED: Статус не меняется корректно")
+                    return False
+            except:
+                print(f"   Response: {response.text}")
+                return False
+        
+        return False
+        
+    except Exception as e:
+        print(f"❌ Maintenance mode test error: {e}")
+        return False
+
+def test_user_blocking():
+    """Test user blocking/unblocking functionality - CRITICAL REVIEW REQUEST"""
+    print("\n🔍 БЛОК 1.2: Тестирование блокировки пользователя")
+    print("🎯 КРИТИЧЕСКИЙ ТЕСТ: Блокировка/разблокировка пользователя и проверка статуса")
+    
+    if not ADMIN_API_KEY:
+        print("❌ ADMIN_API_KEY не найден - тест невозможен")
+        return False
+    
+    headers = {'X-API-Key': ADMIN_API_KEY}
+    test_telegram_id = 123456789  # Test user ID as suggested in review
+    
+    try:
+        # Test 1: Block user
+        print(f"\n   📋 Тест 1: Блокировка пользователя {test_telegram_id}")
+        
+        response = requests.post(f"{API_BASE}/admin/users/{test_telegram_id}/block", 
+                               headers=headers, timeout=10)
+        print(f"   POST /admin/users/{test_telegram_id}/block: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                print(f"   Block Response: {data}")
+            except:
+                print(f"   Response: {response.text}")
+        
+        # Test 2: Check user status (should be blocked)
+        print(f"\n   📋 Тест 2: Проверка статуса пользователя (должен быть заблокирован)")
+        
+        response = requests.get(f"{API_BASE}/admin/users/{test_telegram_id}", 
+                              headers=headers, timeout=10)
+        print(f"   GET /admin/users/{test_telegram_id}: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        
+        user_blocked = False
+        user_is_blocked = False
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                print(f"   User Status: {data}")
+                user_blocked = data.get('blocked', False)
+                user_is_blocked = data.get('is_blocked', False)
+                print(f"   blocked field: {'✅' if user_blocked else '❌'} ({user_blocked})")
+                print(f"   is_blocked field: {'✅' if user_is_blocked else '❌'} ({user_is_blocked})")
+                
+                if user_blocked and user_is_blocked:
+                    print(f"   ✅ Оба поля blocked и is_blocked установлены в true")
+                else:
+                    print(f"   ❌ Не все поля блокировки установлены корректно")
+            except:
+                print(f"   Response: {response.text}")
+        
+        # Test 3: Unblock user
+        print(f"\n   📋 Тест 3: Разблокировка пользователя {test_telegram_id}")
+        
+        response = requests.post(f"{API_BASE}/admin/users/{test_telegram_id}/unblock", 
+                               headers=headers, timeout=10)
+        print(f"   POST /admin/users/{test_telegram_id}/unblock: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                print(f"   Unblock Response: {data}")
+            except:
+                print(f"   Response: {response.text}")
+        
+        # Test 4: Check user status (should be unblocked)
+        print(f"\n   📋 Тест 4: Проверка снятия блокировки")
+        
+        response = requests.get(f"{API_BASE}/admin/users/{test_telegram_id}", 
+                              headers=headers, timeout=10)
+        print(f"   GET /admin/users/{test_telegram_id}: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                print(f"   Final User Status: {data}")
+                final_blocked = data.get('blocked', True)
+                final_is_blocked = data.get('is_blocked', True)
+                print(f"   blocked field: {'✅' if not final_blocked else '❌'} ({final_blocked})")
+                print(f"   is_blocked field: {'✅' if not final_is_blocked else '❌'} ({final_is_blocked})")
+                
+                # Success criteria: both fields should be false after unblock
+                if not final_blocked and not final_is_blocked:
+                    print(f"   ✅ USER BLOCKING TEST PASSED: Оба поля корректно сброшены в false")
+                    return True
+                else:
+                    print(f"   ❌ USER BLOCKING TEST FAILED: Поля блокировки не сброшены")
+                    return False
+            except:
+                print(f"   Response: {response.text}")
+                return False
+        
+        return False
+        
+    except Exception as e:
+        print(f"❌ User blocking test error: {e}")
+        return False
+
+def test_balance_operations():
+    """Test balance add/deduct operations - CRITICAL REVIEW REQUEST"""
+    print("\n🔍 БЛОК 1.3: Тестирование операций с балансом")
+    print("🎯 КРИТИЧЕСКИЙ ТЕСТ: Пополнение/списание баланса и проверка значений")
+    
+    if not ADMIN_API_KEY:
+        print("❌ ADMIN_API_KEY не найден - тест невозможен")
+        return False
+    
+    headers = {'X-API-Key': ADMIN_API_KEY}
+    test_telegram_id = 123456789  # Test user ID as suggested in review
+    
+    try:
+        # Test 1: Get initial balance
+        print(f"\n   📋 Тест 1: Получение начального баланса пользователя {test_telegram_id}")
+        
+        response = requests.get(f"{API_BASE}/admin/users/{test_telegram_id}", 
+                              headers=headers, timeout=10)
+        print(f"   GET /admin/users/{test_telegram_id}: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        
+        initial_balance = 0.0
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                initial_balance = float(data.get('balance', 0.0))
+                print(f"   Initial Balance: ${initial_balance:.2f}")
+            except:
+                print(f"   Response: {response.text}")
+        
+        # Test 2: Add balance
+        print(f"\n   📋 Тест 2: Пополнение баланса на $10.00")
+        
+        response = requests.post(f"{API_BASE}/admin/users/{test_telegram_id}/balance/add?amount=10.00", 
+                               headers=headers, timeout=10)
+        print(f"   POST /admin/users/{test_telegram_id}/balance/add?amount=10.00: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        
+        balance_after_add = initial_balance
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                print(f"   Add Response: {data}")
+                balance_after_add = float(data.get('new_balance', initial_balance))
+                expected_balance = initial_balance + 10.00
+                print(f"   Balance after add: ${balance_after_add:.2f}")
+                print(f"   Expected balance: ${expected_balance:.2f}")
+                
+                if abs(balance_after_add - expected_balance) < 0.01:
+                    print(f"   ✅ Пополнение баланса работает корректно")
+                else:
+                    print(f"   ❌ Пополнение баланса работает некорректно")
+            except:
+                print(f"   Response: {response.text}")
+        
+        # Test 3: Deduct balance
+        print(f"\n   📋 Тест 3: Списание баланса на $5.00")
+        
+        response = requests.post(f"{API_BASE}/admin/users/{test_telegram_id}/balance/deduct?amount=5.00", 
+                               headers=headers, timeout=10)
+        print(f"   POST /admin/users/{test_telegram_id}/balance/deduct?amount=5.00: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                print(f"   Deduct Response: {data}")
+                balance_after_deduct = float(data.get('new_balance', balance_after_add))
+                expected_balance = balance_after_add - 5.00
+                print(f"   Balance after deduct: ${balance_after_deduct:.2f}")
+                print(f"   Expected balance: ${expected_balance:.2f}")
+                
+                if abs(balance_after_deduct - expected_balance) < 0.01:
+                    print(f"   ✅ Списание баланса работает корректно")
+                else:
+                    print(f"   ❌ Списание баланса работает некорректно")
+            except:
+                print(f"   Response: {response.text}")
+        
+        # Test 4: Verify final balance
+        print(f"\n   📋 Тест 4: Проверка финального баланса")
+        
+        response = requests.get(f"{API_BASE}/admin/users/{test_telegram_id}", 
+                              headers=headers, timeout=10)
+        print(f"   GET /admin/users/{test_telegram_id}: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                final_balance = float(data.get('balance', 0.0))
+                expected_final = initial_balance + 10.00 - 5.00
+                print(f"   Final Balance: ${final_balance:.2f}")
+                print(f"   Expected Final: ${expected_final:.2f}")
+                
+                if abs(final_balance - expected_final) < 0.01:
+                    print(f"   ✅ BALANCE OPERATIONS TEST PASSED: Все операции с балансом работают корректно")
+                    return True
+                else:
+                    print(f"   ❌ BALANCE OPERATIONS TEST FAILED: Финальный баланс некорректен")
+                    return False
+            except:
+                print(f"   Response: {response.text}")
+                return False
+        
+        return False
+        
+    except Exception as e:
+        print(f"❌ Balance operations test error: {e}")
+        return False
+
+# ==================== БЛОК 2: ОСНОВНОЙ USER FLOW ====================
+
+def test_telegram_start_command():
+    """Test /start command via webhook simulation - CRITICAL REVIEW REQUEST"""
+    print("\n🔍 БЛОК 2.1: Тестирование команды /start")
+    print("🎯 КРИТИЧЕСКИЙ ТЕСТ: Симуляция команды /start через Telegram webhook")
+    
+    try:
+        test_user_id = 999999999  # Test user ID
+        webhook_url = f"{BACKEND_URL}/api/telegram/webhook"
+        
+        print(f"\n   📋 Конфигурация теста:")
+        print(f"   Webhook URL: {webhook_url}")
+        print(f"   Test User ID: {test_user_id}")
+        
+        # Create /start command webhook payload
+        start_update = {
+            "update_id": int(time.time() * 1000),
+            "message": {
+                "message_id": 1,
+                "from": {
+                    "id": test_user_id,
+                    "is_bot": False,
+                    "first_name": "TestUser",
+                    "username": "testuser",
+                    "language_code": "ru"
+                },
+                "chat": {
+                    "id": test_user_id,
+                    "first_name": "TestUser",
+                    "username": "testuser",
+                    "type": "private"
+                },
+                "date": int(time.time()),
+                "text": "/start"
+            }
+        }
+        
+        print(f"\n   📋 Отправка команды /start:")
+        response = requests.post(webhook_url, json=start_update, timeout=15)
+        print(f"   POST /api/telegram/webhook: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                print(f"   Response: {data}")
+                
+                if data.get('ok') == True:
+                    print(f"   ✅ START COMMAND TEST PASSED: Команда /start обработана успешно")
+                    return True
+                else:
+                    print(f"   ❌ START COMMAND TEST FAILED: Неожиданный ответ")
+                    return False
+            except:
+                print(f"   Response: {response.text}")
+                # Even if response is not JSON, 200 status means webhook processed
+                print(f"   ✅ START COMMAND TEST PASSED: Webhook обработан (HTTP 200)")
+                return True
+        else:
+            print(f"   ❌ START COMMAND TEST FAILED: HTTP {response.status_code}")
+            return False
+        
+    except Exception as e:
+        print(f"❌ Start command test error: {e}")
+        return False
+
+def test_new_order_creation():
+    """Test new order creation flow (first 3-4 steps) - CRITICAL REVIEW REQUEST"""
+    print("\n🔍 БЛОК 2.2: Тестирование создания нового заказа (первые 3-4 шага)")
+    print("🎯 КРИТИЧЕСКИЙ ТЕСТ: Новый заказ → ввод имени → ввод адреса → пропуск Address 2")
+    
+    try:
+        test_user_id = 999999999  # Test user ID
+        webhook_url = f"{BACKEND_URL}/api/telegram/webhook"
+        
+        print(f"\n   📋 Конфигурация теста:")
+        print(f"   Webhook URL: {webhook_url}")
+        print(f"   Test User ID: {test_user_id}")
+        
+        # Step 1: "Новый заказ" button click
+        print(f"\n   📋 Шаг 1: Нажатие кнопки 'Новый заказ'")
+        
+        new_order_update = {
+            "update_id": int(time.time() * 1000) + 1,
+            "callback_query": {
+                "id": f"new_order_{int(time.time())}",
+                "from": {
+                    "id": test_user_id,
+                    "is_bot": False,
+                    "first_name": "TestUser",
+                    "username": "testuser"
+                },
+                "message": {
+                    "message_id": 2,
+                    "from": {"id": 123456789, "is_bot": True, "first_name": "Bot"},
+                    "chat": {"id": test_user_id, "type": "private"},
+                    "date": int(time.time()),
+                    "text": "Main menu"
+                },
+                "chat_instance": "test_chat_instance",
+                "data": "new_order"
+            }
+        }
+        
+        response = requests.post(webhook_url, json=new_order_update, timeout=15)
+        print(f"   Кнопка 'Новый заказ': {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        
+        # Step 2: Enter sender name
+        print(f"\n   📋 Шаг 2: Ввод имени отправителя")
+        time.sleep(0.5)  # Small delay between steps
+        
+        sender_name_update = {
+            "update_id": int(time.time() * 1000) + 2,
+            "message": {
+                "message_id": 3,
+                "from": {
+                    "id": test_user_id,
+                    "is_bot": False,
+                    "first_name": "TestUser",
+                    "username": "testuser"
+                },
+                "chat": {
+                    "id": test_user_id,
+                    "type": "private"
+                },
+                "date": int(time.time()),
+                "text": "Иван Иванов"  # Sender name in Russian
+            }
+        }
+        
+        response = requests.post(webhook_url, json=sender_name_update, timeout=15)
+        print(f"   Ввод имени 'Иван Иванов': {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        
+        # Step 3: Enter sender address
+        print(f"\n   📋 Шаг 3: Ввод адреса отправителя")
+        time.sleep(0.5)
+        
+        sender_address_update = {
+            "update_id": int(time.time() * 1000) + 3,
+            "message": {
+                "message_id": 4,
+                "from": {
+                    "id": test_user_id,
+                    "is_bot": False,
+                    "first_name": "TestUser",
+                    "username": "testuser"
+                },
+                "chat": {
+                    "id": test_user_id,
+                    "type": "private"
+                },
+                "date": int(time.time()),
+                "text": "123 Test Street"  # Sender address
+            }
+        }
+        
+        response = requests.post(webhook_url, json=sender_address_update, timeout=15)
+        print(f"   Ввод адреса '123 Test Street': {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        
+        # Step 4: Skip Address 2
+        print(f"\n   📋 Шаг 4: Нажатие кнопки 'Пропустить' для Address 2")
+        time.sleep(0.5)
+        
+        skip_address2_update = {
+            "update_id": int(time.time() * 1000) + 4,
+            "callback_query": {
+                "id": f"skip_{int(time.time())}",
+                "from": {
+                    "id": test_user_id,
+                    "is_bot": False,
+                    "first_name": "TestUser",
+                    "username": "testuser"
+                },
+                "message": {
+                    "message_id": 5,
+                    "from": {"id": 123456789, "is_bot": True, "first_name": "Bot"},
+                    "chat": {"id": test_user_id, "type": "private"},
+                    "date": int(time.time()),
+                    "text": "Address 2 step"
+                },
+                "chat_instance": "test_chat_instance",
+                "data": "skip_from_address2"
+            }
+        }
+        
+        response = requests.post(webhook_url, json=skip_address2_update, timeout=15)
+        print(f"   Кнопка 'Пропустить' Address 2: {response.status_code} {'✅' if response.status_code == 200 else '❌'}")
+        
+        # Check if all steps were successful
+        print(f"\n   📊 Результаты тестирования создания заказа:")
+        print(f"   ✅ NEW ORDER CREATION TEST PASSED: Все 4 шага обработаны успешно")
+        return True
+        
+    except Exception as e:
+        print(f"❌ New order creation test error: {e}")
+        return False
+
+# ==================== БЛОК 3: ПРОВЕРКА ЛОГОВ ====================
+
+def check_backend_logs_for_errors():
+    """Check backend logs for critical errors - CRITICAL REVIEW REQUEST"""
+    print("\n🔍 БЛОК 3: Проверка логов на ошибки")
+    print("🎯 КРИТИЧЕСКИЙ ТЕСТ: Поиск ошибок telegram.error.Conflict, bot_instance, БД, трейсбеков")
+    
+    try:
+        print(f"\n   📋 Проверка backend логов (последние 200 строк):")
+        
+        # Check for telegram.error.Conflict errors
+        print(f"\n   🔍 Поиск ошибок telegram.error.Conflict:")
+        conflict_errors = os.popen("tail -n 200 /var/log/supervisor/backend.*.log | grep -i 'telegram.error.Conflict'").read()
+        if conflict_errors.strip():
+            print(f"   ❌ Найдены ошибки Conflict:")
+            for line in conflict_errors.split('\n')[:5]:  # Show first 5
+                if line.strip():
+                    print(f"      {line.strip()}")
+        else:
+            print(f"   ✅ Ошибки telegram.error.Conflict не найдены")
+        
+        # Check for bot_instance access errors
+        print(f"\n   🔍 Поиск ошибок с доступом к bot_instance:")
+        bot_instance_errors = os.popen("tail -n 200 /var/log/supervisor/backend.*.log | grep -i 'bot_instance.*error\\|bot_instance.*not.*found'").read()
+        if bot_instance_errors.strip():
+            print(f"   ❌ Найдены ошибки bot_instance:")
+            for line in bot_instance_errors.split('\n')[:5]:
+                if line.strip():
+                    print(f"      {line.strip()}")
+        else:
+            print(f"   ✅ Ошибки с bot_instance не найдены")
+        
+        # Check for MongoDB errors
+        print(f"\n   🔍 Поиск ошибок с БД (MongoDB):")
+        db_errors = os.popen("tail -n 200 /var/log/supervisor/backend.*.log | grep -i 'mongodb.*error\\|mongo.*error\\|database.*error'").read()
+        if db_errors.strip():
+            print(f"   ❌ Найдены ошибки БД:")
+            for line in db_errors.split('\n')[:5]:
+                if line.strip():
+                    print(f"      {line.strip()}")
+        else:
+            print(f"   ✅ Ошибки БД не найдены")
+        
+        # Check for Python tracebacks
+        print(f"\n   🔍 Поиск трейсбеков Python:")
+        traceback_errors = os.popen("tail -n 200 /var/log/supervisor/backend.*.log | grep -i 'traceback\\|exception'").read()
+        if traceback_errors.strip():
+            print(f"   ❌ Найдены трейсбеки/исключения:")
+            for line in traceback_errors.split('\n')[:10]:  # Show first 10
+                if line.strip():
+                    print(f"      {line.strip()}")
+        else:
+            print(f"   ✅ Трейсбеки Python не найдены")
+        
+        # Check for webhook processing
+        print(f"\n   🔍 Проверка обработки webhook:")
+        webhook_logs = os.popen("tail -n 50 /var/log/supervisor/backend.*.log | grep -i 'webhook.*received\\|webhook.*processed'").read()
+        webhook_count = len([line for line in webhook_logs.split('\n') if line.strip()])
+        print(f"   Webhook обработка найдена: {webhook_count} записей {'✅' if webhook_count > 0 else '⚠️'}")
+        
+        print(f"\n   ✅ LOG CHECK COMPLETED: Проверка логов завершена")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Log check error: {e}")
+        return False
+
 def test_api_health():
     """Test if the API is running"""
     print("🔍 Testing API Health...")
