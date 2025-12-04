@@ -49,9 +49,13 @@ async def display_shipping_rates(
     user = await find_user_by_telegram_id_func(telegram_id)
     user_balance = user.get('balance', 0.0) if user else 0.0
     
-    # Format message and keyboard using UI utils
-    message = ShippingRatesUI.format_rates_message(rates, user_balance)
-    reply_markup = ShippingRatesUI.build_rates_keyboard(rates)
+    # Format message and keyboard using UI utils (CPU-intensive operations)
+    # ✅ Run in thread to avoid blocking event loop
+    import asyncio
+    message, reply_markup = await asyncio.gather(
+        asyncio.to_thread(ShippingRatesUI.format_rates_message, rates, user_balance),
+        asyncio.to_thread(ShippingRatesUI.build_rates_keyboard, rates)
+    )
     
     # Save state
     
