@@ -86,7 +86,7 @@ async def notify_admin_error(user_info: dict, error_type: str, error_details: st
             text=message,
             parse_mode='HTML'
         ))
-        logger.info(f"✅ Error notification sent to admin successfully")
+        logger.info("✅ Error notification sent to admin successfully")
     except telegram.error.BadRequest as e:
         logger.error(f"❌ Telegram bad request sending admin notification: {e}")
     except telegram.error.TelegramError as e:
