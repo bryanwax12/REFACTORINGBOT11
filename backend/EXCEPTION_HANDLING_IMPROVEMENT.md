@@ -152,7 +152,34 @@ async def shutdown():
 
 ## Прогресс
 
-- [ ] P0 файлы (5 файлов)
-- [ ] P1 файлы (4 группы файлов)
-- [ ] P2 файлы (остальное)
+### P0 - Критичные файлы (✅ ЗАВЕРШЕНО)
+- [x] `handlers/payment_handlers.py` - 4 места улучшено
+  - Добавлены специфичные исключения: `pymongo.errors`, `telegram.error`, `ValueError`
+  - Улучшено логирование с `exc_info=True`
+- [x] `handlers/order_flow/payment.py` - 5 мест улучшено
+  - Разделены `BadRequest` (ожидаемые) и другие `TelegramError`
+  - Добавлены `pymongo.errors` для операций с БД
+- [x] `handlers/order_flow/rates.py` - 6 мест улучшено  
+  - Добавлены `httpx.TimeoutException` и `httpx.HTTPStatusError`
+  - Улучшены сообщения пользователю в зависимости от типа ошибки
+- [x] `handlers/common_handlers.py` - 5 мест улучшено
+  - Разделены `BadRequest` (ожидаемые, лог debug) и `TelegramError` (неожиданные, лог error)
+  - Улучшена обработка в `safe_telegram_call` и `safe_background_task`
+
+### P1 - Важные файлы
+- [ ] `services/api_services.py`
+- [ ] `services/shipping_service.py`
+- [ ] `services/payment_service.py`
+- [ ] `routers/admin/` (все файлы)
+- [ ] `handlers/admin_handlers.py`
+
+### P2 - Низкий приоритет
+- [ ] `api/monitoring.py` (8 мест)
+- [ ] `api/alerting.py` (3 места)
+- [ ] Остальные routers
+
+## Статистика
+- **Всего найдено:** ~269 мест с `except Exception`
+- **Исправлено:** 20 мест в P0 файлах
+- **Осталось:** ~249 мест
 
