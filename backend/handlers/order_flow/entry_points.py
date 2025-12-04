@@ -148,6 +148,7 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return FROM_NAME
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
 async def start_order_with_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Start order creation with pre-loaded template data"""
     from server import PARCEL_WEIGHT, STATE_NAMES, safe_telegram_call, mark_message_as_selected
@@ -198,6 +199,7 @@ async def start_order_with_template(update: Update, context: ContextTypes.DEFAUL
     return PARCEL_WEIGHT
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
 async def return_to_payment_after_topup(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Return user to payment screen after topping up balance"""
     logger.debug("🔵 return_to_payment_after_topup: START")
@@ -356,7 +358,7 @@ __all__ = [
 ]
 
 
-
+@safe_handler(fallback_state=ConversationHandler.END)
 async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Start new order (without template)"""
     from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
@@ -396,6 +398,7 @@ async def order_new(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return FROM_NAME
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
 async def order_from_template_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Show template list for order creation"""
     from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
@@ -450,6 +453,7 @@ async def order_from_template_list(update: Update, context: ContextTypes.DEFAULT
     return TEMPLATE_LIST
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
 async def continue_order_after_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Continue order creation after saving template - return to data confirmation"""
     from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
