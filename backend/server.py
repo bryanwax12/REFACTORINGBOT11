@@ -1755,10 +1755,7 @@ async def startup_event():
                     try:
                         await application.updater.start_polling(
                             allowed_updates=["message", "callback_query"],
-                            drop_pending_updates=True,  # Drop old updates to avoid conflicts
-                            timeout=30,  # Increase timeout for Kubernetes
-                            read_timeout=20,
-                            write_timeout=20
+                            drop_pending_updates=True  # Drop old updates to avoid conflicts
                         )
                         logger.info("✅ Polling started successfully")
                         break
