@@ -6,6 +6,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from handlers.admin_handlers import verify_admin_key
 import logging
+import pymongo.errors
+import httpx
 
 logger = logging.getLogger(__name__)
 
