@@ -242,8 +242,8 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 @safe_handler(fallback_state=ConversationHandler.END)
-@with_typing_action()
-@with_user_session(create_user=False, require_session=False)
+@with_user_session(create_user=False, require_session=False)  # Check blocking FIRST
+@with_typing_action()  # Then send typing action if not blocked
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
     /help command handler
