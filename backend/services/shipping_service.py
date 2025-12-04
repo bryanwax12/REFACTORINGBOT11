@@ -718,11 +718,14 @@ async def download_label_pdf(label_url: str, timeout: int = 30) -> Tuple[bool, O
         else:
             return False, None, f"Failed to download label: HTTP {response.status_code}"
             
-    except httpx.TimeoutException:
+    except httpx.TimeoutException as e:
+        logger.error(f"Label download timeout: {e}", exc_info=True)
         return False, None, "Timeout downloading label"
     except httpx.RequestError as e:
+        logger.error(f"Label download request error: {e}", exc_info=True)
         return False, None, f"Network error: {str(e)}"
     except Exception as e:
+        logger.error(f"Unexpected error downloading label: {e}", exc_info=True)
         return False, None, f"Error downloading label: {str(e)}"
 
 
