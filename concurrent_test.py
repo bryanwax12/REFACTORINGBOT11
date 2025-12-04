@@ -11,7 +11,7 @@ import json
 from typing import List, Dict, Any
 
 # Backend URL from environment
-BACKEND_URL = "https://telebot-fixer-1.preview.emergentagent.com"
+BACKEND_URL = "https://telegram-shipbot.preview.emergentagent.com"
 ADMIN_API_KEY = "sk_admin_e19063c3f82f447ba4ccf49cd97dd9fd_2024"
 
 async def make_request(session: aiohttp.ClientSession, endpoint: str, method: str = "GET", 

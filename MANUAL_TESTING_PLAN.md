@@ -176,7 +176,7 @@
 
 ## 🖥️ ЧАСТЬ 2: АДМИН-ПАНЕЛЬ
 
-### URL админки: https://telebot-fixer-1.preview.emergentagent.com
+### URL админки: https://telegram-shipbot.preview.emergentagent.com
 
 ---
 

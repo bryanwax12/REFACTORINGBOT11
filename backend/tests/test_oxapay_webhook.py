@@ -18,7 +18,7 @@ load_dotenv(ROOT_DIR / '.env')
 MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
 DB_NAME = os.environ.get('DB_NAME', 'telegram_shipping_bot')
 
-WEBHOOK_URL = "https://telebot-fixer-1.preview.emergentagent.com/api/oxapay/webhook"
+WEBHOOK_URL = "https://telegram-shipbot.preview.emergentagent.com/api/oxapay/webhook"
 TEST_USER_ID = 5594152712
 
 
