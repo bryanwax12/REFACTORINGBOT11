@@ -1636,7 +1636,8 @@ async def startup_event():
                 wrapped_topup_handler
             ), group=1)  # Lower priority than ConversationHandler
             
-            application.add_handler(CallbackQueryHandler(button_callback))
+            # Add button_callback with lower priority (group=2) to not interfere with ConversationHandler
+            application.add_handler(CallbackQueryHandler(button_callback), group=2)
 
             logger.info("✅ ConversationHandler is the only handler for order flow - all debug handlers removed")
 
