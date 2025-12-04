@@ -203,8 +203,8 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             # Delete progress message
             try:
                 await safe_telegram_call(progress_msg.delete())
-            except Exception:
-                pass
+            except telegram.error.BadRequest:
+                pass  # Already deleted
             
             from utils.ui_utils import get_retry_edit_cancel_keyboard
             reply_markup = get_retry_edit_cancel_keyboard()
@@ -231,8 +231,8 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             # Delete progress message
             try:
                 await safe_telegram_call(progress_msg.delete())
-            except Exception:
-                pass
+            except telegram.error.BadRequest:
+                pass  # Already deleted
             
             from utils.ui_utils import get_edit_addresses_keyboard, ShippingRatesUI
             reply_markup = get_edit_addresses_keyboard()
@@ -296,8 +296,8 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
             # Delete progress message
             try:
                 await safe_telegram_call(progress_msg.delete())
-            except Exception:
-                pass
+            except telegram.error.BadRequest:
+                pass  # Already deleted
             
             from utils.ui_utils import get_edit_addresses_keyboard, ShippingRatesUI
             reply_markup = get_edit_addresses_keyboard()
