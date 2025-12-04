@@ -325,13 +325,16 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     query = update.callback_query
     telegram_id = query.from_user.id
-    logger.debug(f"🔵 Button: {query.data} from user {telegram_id}")
+    logger.info(f"🔵 Button: {query.data} from user {telegram_id}")
     await safe_telegram_call(query.answer())
     
     # CRITICAL: Check if user is blocked FIRST (before maintenance check)
+    logger.info(f"🔍 Checking block status for user {telegram_id} in button_callback")
     if await check_user_blocked(telegram_id):
+        logger.error(f"🚫🚫🚫 User {telegram_id} is BLOCKED - denying button access")
         await send_blocked_message(update)
         return ConversationHandler.END
+    logger.info(f"✅ User {telegram_id} not blocked, proceeding with button")
     
     # Check if bot is in maintenance mode SECOND
     if await check_maintenance_mode(update):
