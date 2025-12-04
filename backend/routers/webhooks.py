@@ -87,13 +87,20 @@ async def telegram_webhook(request: Request):
         update = Update.de_json(update_data, srv.application.bot)
         
         if update:
+            logger.info(f"✅ Processing update {update.update_id}")
             # Process update SYNCHRONOUSLY
             await srv.application.process_update(update)
-            return {"ok": True}
+            logger.info(f"✅ Update {update.update_id} processed successfully")
+            # Return 200 OK with empty body (Telegram recommendation)
+            from fastapi.responses import Response
+            return Response(status_code=200)
         else:
             logger.error("⚠️ Update is None")
-            return {"ok": False, "error": "Invalid update"}
+            from fastapi.responses import Response
+            return Response(status_code=200)  # Still return 200 to avoid retries
             
     except Exception as e:
         logger.error(f"❌ Error processing Telegram webhook: {e}", exc_info=True)
-        return {"ok": False, "error": str(e)}
+        # Return 200 even on error to prevent Telegram from retrying
+        from fastapi.responses import Response
+        return Response(status_code=200)
