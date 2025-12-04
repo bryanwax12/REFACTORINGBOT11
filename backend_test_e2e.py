@@ -26,12 +26,13 @@ PROD_BOT_TOKEN = "8492458522:AAE3dLsl2blomb5WxP7w4S0bqvrs1M4WSsM"
 ADMIN_API_KEY = "sk_admin_e19063c3f82f447ba4ccf49cd97dd9fd_2024"
 TEST_USER_ID = 7066790254  # Test user with balance from review request
 
-print(f"🚀 PRODUCTION E2E TEST CONFIGURATION:")
-print(f"   Backend URL: {BACKEND_URL}")
+print(f"🚀 E2E TEST CONFIGURATION:")
+print(f"   Backend URL: {BACKEND_URL} (Local - Production URL has 520 errors)")
 print(f"   Webhook URL: {WEBHOOK_URL}")
 print(f"   Production Bot: @whitelabel_shipping_bot")
 print(f"   Test User ID: {TEST_USER_ID}")
 print(f"   Admin API Key: {ADMIN_API_KEY[:20]}...")
+print(f"   ⚠️  NOTE: Production https://orderbot-upgrade.emergent.host is down (520 errors)")
 
 # Test data from review request
 TEST_FROM_ADDRESS = {
