@@ -102,8 +102,15 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ))
         return ConversationHandler.END
     
-    # Check if user has templates
-    templates_count = await count_user_templates(telegram_id)
+    # ⚡ Performance: Use cached templates if available
+    cached_templates = context.user_data.get('cached_templates')
+    if cached_templates is not None:
+        templates_count = len(cached_templates)
+        logger.info(f"⚡ Using cached templates count: {templates_count}")
+    else:
+        # Fallback: fetch from DB if not cached
+        templates_count = await count_user_templates(telegram_id)
+        logger.info(f"📊 Fetched templates count from DB: {templates_count}")
     
     from utils.ui_utils import get_new_order_choice_keyboard, get_cancel_keyboard, OrderFlowMessages
     
