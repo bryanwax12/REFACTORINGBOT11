@@ -6,6 +6,8 @@ import asyncio
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
+import telegram.error
+import pymongo.errors
 
 logger = logging.getLogger(__name__)
 
