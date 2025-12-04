@@ -18,8 +18,12 @@ async def safe_background_task(coro):
     async with _background_task_semaphore:
         try:
             await coro
+        except telegram.error.TelegramError as e:
+            logger.warning(f"Telegram error in background task: {e}")
+        except pymongo.errors.PyMongoError as e:
+            logger.error(f"MongoDB error in background task: {e}", exc_info=True)
         except Exception as e:
-            logger.error(f"Background task error: {e}", exc_info=True)
+            logger.error(f"Unexpected error in background task: {e}", exc_info=True)
 
 # Logger
 logger = logging.getLogger(__name__)
