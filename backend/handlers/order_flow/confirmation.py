@@ -138,6 +138,7 @@ __all__ = [
 
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
 async def show_edit_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Show menu to select what to edit"""
     from handlers.common_handlers import safe_telegram_call, mark_message_as_selected
@@ -165,6 +166,7 @@ async def show_edit_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
 async def handle_data_confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle user's choice on data confirmation"""
     import logging
