@@ -100,7 +100,7 @@ def _get_state_name(state) -> str:
     try:
         from server import STATE_NAMES
         return STATE_NAMES.get(state, f"UNKNOWN({state})")
-    except:
+    except Exception:
         return f"STATE({state})"
 
 

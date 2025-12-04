@@ -54,7 +54,7 @@ async def cancel_order(update: Update, context: ContextTypes.DEFAULT_TYPE, sessi
     if not current_state:
         from server import CONFIRM_DATA
         current_state = CONFIRM_DATA
-        logger.info(f"⚠️ State not in context, assuming CONFIRM_DATA")
+        logger.info("⚠️ State not in context, assuming CONFIRM_DATA")
     
     logger.info(f"✅ Current state: {current_state}")
     
