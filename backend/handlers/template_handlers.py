@@ -42,7 +42,17 @@ async def my_templates_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Get user's templates
     from utils.ui_utils import TemplateMessages, get_back_to_menu_keyboard, get_templates_list_keyboard
     
-    templates = await db.templates.find({"telegram_id": telegram_id}).to_list(100)
+    # ⚡ Performance: Use cached templates if available
+    cached_templates = context.user_data.get('cached_templates')
+    if cached_templates:
+        templates = cached_templates
+        logger.info(f"⚡ Using cached templates: {len(templates)}")
+    else:
+        # Fallback: Get templates from DB
+        templates = await db.templates.find({"telegram_id": telegram_id}).to_list(100)
+        logger.info(f"📊 Fetched templates from DB: {len(templates)}")
+        # Update cache
+        context.user_data['cached_templates'] = templates
     
     if not templates:
         message = TemplateMessages.no_templates()
