@@ -129,12 +129,15 @@ async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT
                         message_id=last_msg_id,
                         reply_markup=None
                     )
-            except Exception as e:
-                # Silently ignore "Message can't be edited" and similar errors
-                # These are normal when message is too old or already edited
+            except telegram.error.BadRequest:
+                # Expected: "Message can't be edited" (too old or already deleted)
+                pass
+            except telegram.error.TelegramError:
+                # Other Telegram errors (network issues, etc)
                 pass
         
     except Exception:
+        # Catch-all for unexpected errors in this non-critical function
         pass
 
 
