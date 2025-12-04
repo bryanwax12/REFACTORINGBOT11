@@ -166,12 +166,23 @@ async def shutdown():
   - Разделены `BadRequest` (ожидаемые, лог debug) и `TelegramError` (неожиданные, лог error)
   - Улучшена обработка в `safe_telegram_call` и `safe_background_task`
 
-### P1 - Важные файлы
-- [ ] `services/api_services.py`
-- [ ] `services/shipping_service.py`
-- [ ] `services/payment_service.py`
-- [ ] `routers/admin/` (все файлы)
-- [ ] `handlers/admin_handlers.py`
+### P1 - Важные файлы (✅ ЗАВЕРШЕНО)
+- [x] `services/api_services.py` - 6 мест улучшено
+  - Добавлены: `httpx.TimeoutException`, `httpx.HTTPStatusError`, `httpx.RequestError`
+  - Улучшена обработка JSON parsing ошибок (`ValueError`, `KeyError`)
+- [x] `services/shipping_service.py` - 3 места улучшено
+  - Добавлены специфичные HTTP исключения и `telegram.error`
+  - Исправлен bare `except` на конкретные типы
+- [x] `services/payment_service.py` - 4 места улучшено
+  - Добавлены `pymongo.errors` для всех операций с БД
+  - Разделены validation и database errors
+- [x] `handlers/admin_handlers.py` - 2 места улучшено
+  - Разделены `telegram.error.BadRequest` и другие Telegram ошибки
+  - Добавлена обработка `pymongo.errors`
+- [x] `routers/admin/stats.py` - 4 места улучшено
+- [x] `routers/admin/system.py` - 6 мест улучшено
+- [x] `routers/admin/users.py` - 6 мест улучшено
+  - Все admin роутеры: добавлены `pymongo.errors`, `httpx.RequestError`, `telegram.error`
 
 ### P2 - Низкий приоритет
 - [ ] `api/monitoring.py` (8 мест)
