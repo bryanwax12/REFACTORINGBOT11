@@ -128,9 +128,15 @@ async def add_balance(telegram_id: int, amount: float, db):
         else:
             logger.warning(f"⚠️ User {telegram_id} not found for balance add")
             return False
-            
+    
+    except pymongo.errors.ConnectionFailure as e:
+        logger.error(f"MongoDB connection failed while adding balance: {e}", exc_info=True)
+        return False
+    except pymongo.errors.PyMongoError as e:
+        logger.error(f"MongoDB error while adding balance: {e}", exc_info=True)
+        return False
     except Exception as e:
-        logger.error(f"Error adding balance: {e}")
+        logger.error(f"Unexpected error adding balance: {e}", exc_info=True)
         return False
 
 
