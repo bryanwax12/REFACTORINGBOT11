@@ -5,6 +5,7 @@ Handles statistics and analytics endpoints
 from fastapi import APIRouter, Depends, HTTPException, Query
 from handlers.admin_handlers import verify_admin_key
 import logging
+import pymongo.errors
 
 logger = logging.getLogger(__name__)
 
