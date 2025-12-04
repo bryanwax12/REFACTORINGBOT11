@@ -201,6 +201,9 @@ async def get_expense_stats_data(db, date_from: Optional[str] = None, date_to: O
             "date_from": date_from,
             "date_to": date_to
         }
+    except pymongo.errors.PyMongoError as e:
+        logger.error(f"Database error getting expense stats: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Database error")
     except Exception as e:
-        logger.error(f"Error getting expense stats: {e}")
+        logger.error(f"Unexpected error getting expense stats: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
