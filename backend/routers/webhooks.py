@@ -62,16 +62,14 @@ async def telegram_webhook_head():
 @router.post("/telegram/webhook")
 async def telegram_webhook(request: Request):
     """Handle Telegram webhook updates"""
-    logger.error("📨 TELEGRAM WEBHOOK CALLED - THIS SHOULD ALWAYS APPEAR")
-    print("📨 TELEGRAM WEBHOOK CALLED - PRINT VERSION")
+    logger.info("📨 TELEGRAM WEBHOOK CALLED")
     try:
         import server as srv
         from telegram import Update
         
         # Get the update data from the request
         update_data = await request.json()
-        print(f"📦 UPDATE DATA: {update_data.get('update_id')}")
-        logger.error(f"📦 Update data received: update_id={update_data.get('update_id')}")
+        logger.info(f"📦 Update data received: update_id={update_data.get('update_id')}")
         
         # Check if application is initialized
         if not srv.application:
