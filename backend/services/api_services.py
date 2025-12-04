@@ -127,9 +127,15 @@ async def check_oxapay_payment(track_id: str):
             return data
         
         return None
-        
+    
+    except httpx.TimeoutException as e:
+        logger.error(f"Oxapay payment check timeout: {e}", exc_info=True)
+        return None
+    except httpx.RequestError as e:
+        logger.error(f"Oxapay payment check request error: {e}", exc_info=True)
+        return None
     except Exception as e:
-        logger.error(f"Oxapay inquiry error: {e}")
+        logger.error(f"Unexpected error checking Oxapay payment: {e}", exc_info=True)
         return None
 
 
