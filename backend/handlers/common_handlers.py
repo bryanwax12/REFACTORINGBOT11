@@ -153,9 +153,18 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     - Typing indicator
     """
     telegram_id = update.effective_user.id if update.effective_user else None
-    logger.debug(f"📍 START command from user {telegram_id}")
+    logger.info(f"📍 START command from user {telegram_id}")
     
-    # NOTE: Block check is done by @with_user_session decorator - no need to duplicate
+    # CRITICAL: Double-check blocked status (in case decorator didn't run in webhook mode)
+    from repositories import get_user_repo
+    user_repo = get_user_repo()
+    is_blocked = await user_repo.is_blocked(telegram_id)
+    logger.info(f"🔍 Block check for user {telegram_id}: is_blocked={is_blocked}")
+    
+    if is_blocked:
+        logger.error(f"🚫🚫🚫 User {telegram_id} is BLOCKED - denying access in start_command")
+        await send_blocked_message(update)
+        return ConversationHandler.END
     
     # Check if bot is in maintenance mode
     if await check_maintenance_mode(update):
