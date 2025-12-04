@@ -92,7 +92,14 @@ async def telegram_webhook(request: Request):
         
         # Get the update data from the request
         update_data = await request.json()
-        logger.info(f"📦 Update data received: update_id={update_data.get('update_id')}")
+        update_id = update_data.get('update_id')
+        logger.info(f"📦 Update data received: update_id={update_id}")
+        
+        # ✅ DUPLICATE PROTECTION: Check if this update was already processed
+        if update_id and is_duplicate_update(update_id):
+            logger.warning(f"⚠️ Duplicate update_id={update_id} detected, skipping processing")
+            from fastapi.responses import Response
+            return Response(status_code=200)
         
         # Check if application is initialized
         if not srv.application:
