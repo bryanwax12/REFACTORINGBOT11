@@ -162,8 +162,8 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
                     await safe_telegram_call(progress_msg.edit_text(
                         ShippingRatesUI.progress_message(elapsed)
                     ))
-                except Exception:
-                    break  # Stop if message was deleted or can't be edited
+                except telegram.error.BadRequest:
+                    break  # Message was deleted or can't be edited
         
         # Start progress update task
         progress_task = asyncio.create_task(update_progress())
