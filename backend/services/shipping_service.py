@@ -777,6 +777,13 @@ Tracking: {tracking_number}"""
         )
         
         return True, None
-        
+    
+    except telegram.error.BadRequest as e:
+        logger.error(f"Telegram bad request sending label: {e}", exc_info=True)
+        return False, f"Cannot send label: {str(e)}"
+    except telegram.error.TelegramError as e:
+        logger.error(f"Telegram error sending label: {e}", exc_info=True)
+        return False, f"Telegram error: {str(e)}"
     except Exception as e:
+        logger.error(f"Unexpected error sending label: {e}", exc_info=True)
         return False, f"Error sending label: {str(e)}"
