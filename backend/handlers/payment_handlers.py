@@ -425,9 +425,20 @@ _Если вы оплатите другую сумму, деньги НЕ по�
             error_msg = invoice_result.get('error', 'Unknown error')
             await safe_telegram_call(update.message.reply_text(f"❌ *Ошибка создания инвойса:* {error_msg}", parse_mode='Markdown'))
             return ConversationHandler.END
-        
+    
+    except ValueError as e:
+        logger.warning(f"Invalid topup amount: {e}")
+        await safe_telegram_call(update.message.reply_text(f"❌ Неверная сумма пополнения"))
+        return ConversationHandler.END
+    except pymongo.errors.PyMongoError as e:
+        logger.error(f"Database error in topup: {e}", exc_info=True)
+        await safe_telegram_call(update.message.reply_text(f"❌ Ошибка базы данных. Попробуйте позже."))
+        return ConversationHandler.END
+    except telegram.error.TelegramError as e:
+        logger.error(f"Telegram error in topup: {e}", exc_info=True)
+        return ConversationHandler.END
     except Exception as e:
-        logger.error(f"Top-up amount handling error: {e}")
+        logger.error(f"Unexpected error in topup handler: {e}", exc_info=True)
         await safe_telegram_call(update.message.reply_text(f"❌ Ошибка: {str(e)}"))
         return ConversationHandler.END
 
