@@ -628,12 +628,11 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
             asyncio.create_task(send_topup_prompt())
             
-            from server import TOPUP_AMOUNT
             return TOPUP_AMOUNT
     
     except pymongo.errors.PyMongoError as e:
         logger.error(f"Database error in payment: {e}", exc_info=True)
-        await safe_telegram_call(update.effective_message.reply_text(f"❌ Ошибка базы данных. Попробуйте позже."))
+        await safe_telegram_call(update.effective_message.reply_text("❌ Ошибка базы данных. Попробуйте позже."))
         return ConversationHandler.END
     except telegram.error.TelegramError as e:
         logger.error(f"Telegram error in payment: {e}", exc_info=True)

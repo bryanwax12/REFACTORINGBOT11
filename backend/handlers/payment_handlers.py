@@ -428,11 +428,11 @@ _Если вы оплатите другую сумму, деньги НЕ по�
     
     except ValueError as e:
         logger.warning(f"Invalid topup amount: {e}")
-        await safe_telegram_call(update.message.reply_text(f"❌ Неверная сумма пополнения"))
+        await safe_telegram_call(update.message.reply_text("❌ Неверная сумма пополнения"))
         return ConversationHandler.END
     except pymongo.errors.PyMongoError as e:
         logger.error(f"Database error in topup: {e}", exc_info=True)
-        await safe_telegram_call(update.message.reply_text(f"❌ Ошибка базы данных. Попробуйте позже."))
+        await safe_telegram_call(update.message.reply_text("❌ Ошибка базы данных. Попробуйте позже."))
         return ConversationHandler.END
     except telegram.error.TelegramError as e:
         logger.error(f"Telegram error in topup: {e}", exc_info=True)
@@ -540,11 +540,11 @@ _Если вы оплатите другую сумму, деньги НЕ по�
     
     except ValueError as e:
         logger.warning(f"Invalid crypto selection: {e}")
-        await safe_telegram_call(query.message.reply_text(f"❌ Неверный выбор криптовалюты"))
+        await safe_telegram_call(query.message.reply_text("❌ Неверный выбор криптовалюты"))
         return ConversationHandler.END
     except pymongo.errors.PyMongoError as e:
         logger.error(f"Database error in crypto selection: {e}", exc_info=True)
-        await safe_telegram_call(query.message.reply_text(f"❌ Ошибка базы данных. Попробуйте позже."))
+        await safe_telegram_call(query.message.reply_text("❌ Ошибка базы данных. Попробуйте позже."))
         return ConversationHandler.END
     except telegram.error.TelegramError as e:
         logger.error(f"Telegram error in crypto selection: {e}", exc_info=True)
