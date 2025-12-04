@@ -215,10 +215,10 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.callback_query:
         query = update.callback_query
         await safe_telegram_call(query.answer())
-        asyncio.create_task(mark_message_as_selected(update, context))
+        asyncio.create_task(safe_background_task(mark_message_as_selected(update, context)))
         send_method = query.message.reply_text
     else:
-        asyncio.create_task(mark_message_as_selected(update, context))
+        asyncio.create_task(safe_background_task(mark_message_as_selected(update, context)))
         send_method = update.message.reply_text
     
     # Import UI utilities
@@ -259,11 +259,11 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         query = update.callback_query
         await safe_telegram_call(query.answer())
         # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-        asyncio.create_task(mark_message_as_selected(update, context))
+        asyncio.create_task(safe_background_task(mark_message_as_selected(update, context)))
         send_method = query.message.reply_text
     else:
         # Mark previous message as selected (non-blocking)
-        asyncio.create_task(mark_message_as_selected(update, context))
+        asyncio.create_task(safe_background_task(mark_message_as_selected(update, context)))
         send_method = update.message.reply_text
     
     help_text = MessageTemplates.help_text()
@@ -295,11 +295,11 @@ async def faq_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         query = update.callback_query
         await safe_telegram_call(query.answer())
         # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-        asyncio.create_task(mark_message_as_selected(update, context))
+        asyncio.create_task(safe_background_task(mark_message_as_selected(update, context)))
         send_method = query.message.reply_text
     else:
         # Mark previous message as selected (non-blocking)
-        asyncio.create_task(mark_message_as_selected(update, context))
+        asyncio.create_task(safe_background_task(mark_message_as_selected(update, context)))
         send_method = update.message.reply_text
     
     faq_text = MessageTemplates.faq_text()
@@ -350,7 +350,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if pending_order and pending_order.get('selected_rate'):
             # Show warning about losing order data
             from utils.ui_utils import MessageTemplates, get_exit_confirmation_keyboard
-            asyncio.create_task(mark_message_as_selected(update, context))
+            asyncio.create_task(safe_background_task(mark_message_as_selected(update, context)))
             
             order_amount = pending_order.get('selected_rate', {}).get('shipmentCost', 0.0)
             warning_text = MessageTemplates.exit_warning(order_amount)
@@ -384,14 +384,14 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await faq_command(update, context)
     elif query.data == 'confirm_exit_to_menu':
         # User confirmed exit to main menu - clear pending order
-        asyncio.create_task(mark_message_as_selected(update, context))
+        asyncio.create_task(safe_background_task(mark_message_as_selected(update, context)))
         telegram_id = query.from_user.id
         await db.pending_orders.delete_one({"telegram_id": telegram_id})
         context.user_data.clear()
         await start_command(update, context)
     elif query.data == 'continue_order':
         # Return to order confirmation after balance top-up
-        asyncio.create_task(mark_message_as_selected(update, context))
+        asyncio.create_task(safe_background_task(mark_message_as_selected(update, context)))
         telegram_id = query.from_user.id
         
         # Check if user has pending order
@@ -532,7 +532,7 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await safe_telegram_call(query.answer())
     
     # Mark previous message as selected (remove buttons and add "✅ Выбрано")
-    asyncio.create_task(mark_message_as_selected(update, context))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context)))
     
     # Get the state we were in when cancel was pressed
     last_state = context.user_data.get('last_state')
