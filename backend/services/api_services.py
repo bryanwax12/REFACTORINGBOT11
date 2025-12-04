@@ -86,9 +86,18 @@ async def create_oxapay_invoice(amount: float, order_id: str, description: str =
         
         logger.error(f"Oxapay invoice creation failed: {response.text}")
         return {'success': False, 'error': response.text}
-        
+    
+    except httpx.TimeoutException as e:
+        logger.error(f"Oxapay API timeout: {e}", exc_info=True)
+        return {'success': False, 'error': 'Payment service timeout. Please try again.'}
+    except httpx.HTTPStatusError as e:
+        logger.error(f"Oxapay HTTP error {e.response.status_code}: {e}", exc_info=True)
+        return {'success': False, 'error': f'Payment service error: {e.response.status_code}'}
+    except httpx.RequestError as e:
+        logger.error(f"Oxapay request error: {e}", exc_info=True)
+        return {'success': False, 'error': 'Payment service unavailable'}
     except Exception as e:
-        logger.error(f"Oxapay error: {e}")
+        logger.error(f"Unexpected error in Oxapay invoice creation: {e}", exc_info=True)
         return {'success': False, 'error': str(e)}
 
 
