@@ -94,8 +94,11 @@ async def mark_message_as_selected(update: Update, context: ContextTypes.DEFAULT
                 else:
                     # Just remove buttons if checkmark already exists
                     await message.edit_reply_markup(reply_markup=None)
-            except Exception as e:
-                # Silently ignore "Message can't be edited" and similar errors
+            except telegram.error.BadRequest:
+                # Expected: "Message can't be edited" (too old or already deleted)
+                pass
+            except telegram.error.TelegramError:
+                # Other Telegram errors (network issues, etc)
                 pass
             return
         
