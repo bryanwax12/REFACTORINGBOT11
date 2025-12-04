@@ -16,6 +16,7 @@ from utils.handler_decorators import with_user_session, safe_handler
 from telegram.ext import ConversationHandler
 
 
+@safe_handler(fallback_state=ConversationHandler.END)
 async def handle_skip_field(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
