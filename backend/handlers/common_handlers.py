@@ -48,9 +48,24 @@ async def safe_telegram_call(coro, timeout=10, error_message="❌ Превыше
         # Telegram rate limit hit - wait and retry
         logger.warning(f"Telegram rate limit: waiting {e.retry_after}s")
         await asyncio.sleep(e.retry_after)
-        return await asyncio.wait_for(coro, timeout=timeout)
+        try:
+            return await asyncio.wait_for(coro, timeout=timeout)
+        except Exception as retry_error:
+            logger.error(f"Telegram API error after retry: {retry_error}")
+            return None
+    except telegram.error.BadRequest as e:
+        # Common case: message too old to edit, etc
+        logger.debug(f"Telegram bad request (expected): {e}")
+        return None
+    except telegram.error.Forbidden as e:
+        # Bot was blocked by user
+        logger.info(f"Bot blocked by user: {e}")
+        return None
+    except telegram.error.TelegramError as e:
+        logger.error(f"Telegram API error: {e}", exc_info=True)
+        return None
     except Exception as e:
-        logger.error(f"Telegram API error: {e}")
+        logger.error(f"Unexpected error in Telegram call: {e}", exc_info=True)
         return None
 
 
