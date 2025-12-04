@@ -346,8 +346,16 @@ async def validate_address_with_shipstation(name, street1, street2, city, state,
             # If validation API fails, don't block user
             logger.warning(f"Address validation failed: {response.status_code}")
             return True, None
-            
+    
+    except httpx.TimeoutException as e:
+        logger.warning(f"Address validation timeout: {e}")
+        # Don't block user on timeout
+        return True, None
+    except httpx.RequestError as e:
+        logger.warning(f"Address validation request error: {e}")
+        # Don't block user on network errors
+        return True, None
     except Exception as e:
-        logger.error(f"Address validation error: {e}")
-        # Don't block user on API errors
+        logger.error(f"Unexpected error in address validation: {e}", exc_info=True)
+        # Don't block user on unexpected errors
         return True, None
