@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Backend Test Suite for Telegram Shipping Bot - Comprehensive Admin Panel & User Flow Testing
-Tests admin panel functions and main user flow as per review request
+ФИНАЛЬНОЕ E2E ТЕСТИРОВАНИЕ - PRODUCTION READINESS CHECK
+Comprehensive testing suite for Telegram Shipping Bot production deployment
+Based on review request: https://orderbot-upgrade.emergent.host
 """
 
 import requests
@@ -10,23 +11,54 @@ import os
 import re
 import uuid
 import time
+import asyncio
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv('/app/frontend/.env')
-
-# Get backend URL from environment
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://telebot-fixer-1.preview.emergentagent.com')
-API_BASE = f"{BACKEND_URL}/api"
-
-# Load admin API key
 load_dotenv('/app/backend/.env')
-ADMIN_API_KEY = os.environ.get('ADMIN_API_KEY', 'sk_admin_e19063c3f82f447ba4ccf49cd97dd9fd_2024')
 
-print(f"🔧 Test Configuration:")
+# Production Configuration from review request
+BACKEND_URL = "https://orderbot-upgrade.emergent.host"
+API_BASE = f"{BACKEND_URL}/api"
+WEBHOOK_URL = f"{BACKEND_URL}/api/telegram/webhook"
+
+# Production Bot Configuration
+PROD_BOT_TOKEN = "8492458522:AAE3dLsl2blomb5WxP7w4S0bqvrs1M4WSsM"
+ADMIN_API_KEY = "sk_admin_e19063c3f82f447ba4ccf49cd97dd9fd_2024"
+TEST_USER_ID = 7066790254  # Test user with balance from review request
+
+print(f"🚀 PRODUCTION E2E TEST CONFIGURATION:")
 print(f"   Backend URL: {BACKEND_URL}")
-print(f"   API Base: {API_BASE}")
-print(f"   Admin API Key: {ADMIN_API_KEY[:20]}..." if ADMIN_API_KEY else "   ❌ Admin API Key not found")
+print(f"   Webhook URL: {WEBHOOK_URL}")
+print(f"   Production Bot: @whitelabel_shipping_bot")
+print(f"   Test User ID: {TEST_USER_ID}")
+print(f"   Admin API Key: {ADMIN_API_KEY[:20]}...")
+
+# Test data from review request
+TEST_FROM_ADDRESS = {
+    "name": "John Smith",
+    "street1": "123 Main St",
+    "city": "San Francisco", 
+    "state": "CA",
+    "zip": "94102",
+    "phone": "+14155551234"
+}
+
+TEST_TO_ADDRESS = {
+    "name": "Jane Doe",
+    "street1": "456 Oak Ave", 
+    "city": "Los Angeles",
+    "state": "CA", 
+    "zip": "90001",
+    "phone": "+13105555678"
+}
+
+TEST_PARCEL = {
+    "weight": 5,
+    "length": 10,
+    "width": 10,
+    "height": 5
+}
 
 # ==================== БЛОК 1: ФУНКЦИИ АДМИН-ПАНЕЛИ ====================
 
