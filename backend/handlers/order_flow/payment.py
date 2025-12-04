@@ -427,8 +427,9 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if progress_msg:
                 try:
                     await safe_telegram_call(progress_msg.delete())
-                except Exception as e:
-                    logger.debug(f"Failed to delete progress message: {e}")
+                except telegram.error.BadRequest:
+                    # Message already deleted
+                    pass
             
             if label_created:
                 # Only deduct balance if label was created successfully using payment service
