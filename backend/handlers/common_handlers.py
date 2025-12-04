@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 import telegram.error
+import pymongo.errors
 
 # Semaphore to limit concurrent background tasks (max 10)
 _background_task_semaphore = asyncio.Semaphore(10)
