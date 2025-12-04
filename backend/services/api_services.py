@@ -240,8 +240,7 @@ async def get_shipstation_carrier_ids():
                 
                 logger.info(f"✅ Successfully loaded {len(carriers)} ShipStation carriers")
                 
-                # ✅ Cache the result
-                global _carrier_ids_cache, _carrier_ids_cache_time
+                # ✅ Cache the result (global already declared at function start)
                 _carrier_ids_cache = carriers
                 _carrier_ids_cache_time = datetime.now(timezone.utc)
                 logger.debug(f"✅ Cached carrier_ids for {_CARRIER_CACHE_TTL}s")
