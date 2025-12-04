@@ -4,6 +4,7 @@ Payment Service
 """
 import logging
 from typing import Optional, Dict, Any, Tuple
+import pymongo.errors
 
 logger = logging.getLogger(__name__)
 
