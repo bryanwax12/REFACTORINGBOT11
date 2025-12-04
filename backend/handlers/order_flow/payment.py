@@ -472,6 +472,8 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     thank_you_msg = await generate_thank_you_message()
                     await safe_telegram_call(update.effective_message.reply_text(thank_you_msg))
                     logger.info(f"AI thank you message sent to user {telegram_id}")
+                except telegram.error.TelegramError as e:
+                    logger.warning(f"Could not send thank you message: {e}")
                 except Exception as e:
                     logger.error(f"Error generating/sending thank you message: {e}")
                     # Don't fail the whole flow if AI message fails
