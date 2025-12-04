@@ -128,6 +128,9 @@ async def get_performance_stats(
     
     except HTTPException:
         raise
+    except pymongo.errors.PyMongoError as e:
+        logger.error(f"Database error getting performance stats: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Database error")
     except Exception as e:
-        logger.error(f"Error getting performance stats: {e}")
+        logger.error(f"Unexpected error getting performance stats: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
