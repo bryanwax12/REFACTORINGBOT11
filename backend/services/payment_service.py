@@ -337,9 +337,15 @@ async def process_balance_payment(
         
         logger.info(f"✅ Payment processed: order={order_id}, amount=${amount:.2f}, new_balance=${new_balance:.2f}")
         return True, new_balance, None
-        
+    
+    except pymongo.errors.PyMongoError as e:
+        logger.error(f"❌ Database error processing payment: {e}", exc_info=True)
+        return False, None, "Database error"
+    except ValueError as e:
+        logger.error(f"❌ Validation error processing payment: {e}")
+        return False, None, str(e)
     except Exception as e:
-        logger.error(f"❌ Error processing payment: {e}")
+        logger.error(f"❌ Unexpected error processing payment: {e}", exc_info=True)
         return False, None, str(e)
 
 
