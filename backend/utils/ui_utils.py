@@ -186,7 +186,7 @@ def get_main_menu_keyboard(user_balance: float = 0.0) -> InlineKeyboardMarkup:
 
 def get_cancel_keyboard() -> InlineKeyboardMarkup:
     """Simple cancel button keyboard (used in order flow) - OPTIMIZED: uses pre-loaded keyboard"""
-    return get_preloaded_cancel_keyboard()
+    return PRELOADED_CANCEL_KEYBOARD
 
 
 def get_skip_and_cancel_keyboard(skip_callback: str) -> InlineKeyboardMarkup:
@@ -241,9 +241,8 @@ def get_standard_size_and_cancel_keyboard(standard_size_callback: str) -> Inline
 
 
 def get_back_to_menu_keyboard() -> InlineKeyboardMarkup:
-    """Simple back to menu button"""
-    keyboard = [[InlineKeyboardButton(ButtonTexts.BACK_TO_MENU, callback_data=CallbackData.START)]]
-    return InlineKeyboardMarkup(keyboard)
+    """Simple back to menu button - OPTIMIZED: uses pre-loaded keyboard"""
+    return PRELOADED_BACK_TO_MENU_KEYBOARD
 
 
 def get_help_keyboard(admin_telegram_id: Optional[str] = None) -> InlineKeyboardMarkup:
@@ -272,12 +271,8 @@ def get_help_keyboard(admin_telegram_id: Optional[str] = None) -> InlineKeyboard
 
 
 def get_exit_confirmation_keyboard() -> InlineKeyboardMarkup:
-    """Keyboard for confirming exit to main menu (when user has pending order)"""
-    keyboard = [
-        [InlineKeyboardButton(ButtonTexts.YES_TO_MENU, callback_data=CallbackData.CONFIRM_EXIT_TO_MENU)],
-        [InlineKeyboardButton(ButtonTexts.NO_RETURN, callback_data=CallbackData.RETURN_TO_PAYMENT)]
-    ]
-    return InlineKeyboardMarkup(keyboard)
+    """Keyboard for confirming exit to main menu - OPTIMIZED: uses pre-loaded keyboard"""
+    return PRELOADED_EXIT_CONFIRMATION_KEYBOARD
 
 
 def get_payment_success_keyboard(has_pending_order: bool = False, order_amount: float = 0.0) -> InlineKeyboardMarkup:
@@ -302,11 +297,8 @@ def get_payment_success_keyboard(has_pending_order: bool = False, order_amount: 
 
 
 def get_cancel_and_menu_keyboard() -> InlineKeyboardMarkup:
-    """Keyboard with Cancel and Back to Menu (for payment flows)"""
-    keyboard = [
-        [InlineKeyboardButton(ButtonTexts.CANCEL, callback_data=CallbackData.START)],
-        [InlineKeyboardButton(ButtonTexts.BACK_TO_MENU, callback_data=CallbackData.START)]
-    ]
+    """Keyboard with Cancel and Back to Menu - OPTIMIZED: uses pre-loaded keyboard"""
+    return PRELOADED_CANCEL_AND_MENU_KEYBOARD
     return InlineKeyboardMarkup(keyboard)
 
 
