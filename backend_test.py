@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Backend Test Suite for Telegram Shipping Bot
-Tests the backend infrastructure supporting Telegram bot functionality
+Backend Test Suite for Telegram Shipping Bot - Comprehensive Admin Panel & User Flow Testing
+Tests admin panel functions and main user flow as per review request
 """
 
 import requests
@@ -18,6 +18,15 @@ load_dotenv('/app/frontend/.env')
 # Get backend URL from environment
 BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://telebot-fixer-1.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
+
+# Load admin API key
+load_dotenv('/app/backend/.env')
+ADMIN_API_KEY = os.environ.get('ADMIN_API_KEY', 'sk_admin_e19063c3f82f447ba4ccf49cd97dd9fd_2024')
+
+print(f"🔧 Test Configuration:")
+print(f"   Backend URL: {BACKEND_URL}")
+print(f"   API Base: {API_BASE}")
+print(f"   Admin API Key: {ADMIN_API_KEY[:20]}..." if ADMIN_API_KEY else "   ❌ Admin API Key not found")
 
 def test_api_health():
     """Test if the API is running"""
