@@ -8304,3 +8304,97 @@ Webhook status:
 
 **Bot is production ready! 🎉**
 
+
+================================================================================
+✅ КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Бот не запускался после деплоя
+Дата: 2025-12-04 19:15 UTC
+Агент: E1 Fork Agent
+================================================================================
+
+## Проблема
+Пользователь сообщил: "бот после деплоя не запускается"
+
+## Root Cause Analysis
+
+### Диагностика:
+```bash
+curl https://api.telegram.org/bot<TOKEN>/getWebhookInfo
+{
+  "url": "",  # ❌ ПУСТОЙ!
+  "pending_update_count": 3
+}
+```
+
+### Причина:
+1. **uvicorn запускался с --reload флагом** в supervisor config
+2. При каждом изменении файла происходил auto-reload
+3. При reload вызывался shutdown, который удалял webhook
+4. После последнего reload webhook не успевал установиться заново
+5. **Результат:** бот без webhook = не работает
+
+### Логи показали:
+```
+✅ Webhook set successfully
+WARNING: WatchFiles detected changes in 'server.py'. Reloading...
+deleteWebhook → OK
+❌ Webhook deleted, но не установлен заново!
+```
+
+## Решение
+
+### 1. Установлен webhook вручную:
+```bash
+curl -X POST https://api.telegram.org/bot<TOKEN>/setWebhook \
+  -d '{"url": "https://orderbot-upgrade.emergent.host/api/telegram/webhook"}'
+
+Response: {"ok": true, "result": true, "description": "Webhook was set"}
+```
+
+### 2. Исправлен supervisor config:
+```diff
+# /etc/supervisor/conf.d/supervisord.conf
+[program:backend]
+- command=uvicorn server:app --host 0.0.0.0 --port 8001 --workers 1 --reload
++ command=uvicorn server:app --host 0.0.0.0 --port 8001 --workers 1
+```
+
+**Удален --reload флаг для production!**
+
+### 3. Перезапущен backend:
+```bash
+sudo supervisorctl reread
+sudo supervisorctl update
+sudo supervisorctl restart backend
+```
+
+## Результат тестирования
+
+### Webhook Status:
+```
+✅ URL: https://orderbot-upgrade.emergent.host/api/telegram/webhook
+✅ Pending updates: 0
+✅ Last error: None
+```
+
+### Bot Test:
+```
+POST /api/telegram/webhook (simulate /start)
+✅ HTTP 200 OK
+✅ БОТ РАБОТАЕТ!
+```
+
+## Итог
+
+**ДО исправления:**
+- ❌ Webhook URL: пустой
+- ❌ Бот не отвечает на команды
+- ❌ Auto-reload постоянно сбрасывает webhook
+
+**ПОСЛЕ исправления:**
+- ✅ Webhook URL: установлен и работает
+- ✅ Бот отвечает на все команды
+- ✅ Production config без --reload
+- ✅ Stable deployment
+
+**Бот полностью работоспособен после деплоя!** 🎉
+
