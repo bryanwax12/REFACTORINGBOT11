@@ -13,7 +13,7 @@ import pymongo.errors
 logger = logging.getLogger(__name__)
 
 from utils.handler_decorators import with_user_session, safe_handler
-from handlers.common_handlers import check_stale_interaction
+from handlers.common_handlers import check_stale_interaction, safe_background_task
 from server import safe_telegram_call, mark_message_as_selected
 
 
