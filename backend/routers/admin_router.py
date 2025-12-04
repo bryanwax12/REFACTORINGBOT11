@@ -146,12 +146,15 @@ async def get_maintenance_status(authenticated: bool = Depends(verify_admin_key)
     from server import db
     
     try:
-        setting = await db.settings.find_one({"key": "maintenance_mode"})
-        is_enabled = setting.get("value", False) if setting else False
+        # Use bot_settings collection (same as enable/disable endpoints)
+        setting = await db.bot_settings.find_one({"key": "maintenance_mode"})
+        is_enabled = setting.get("enabled", False) if setting else False
+        message = setting.get("message", "") if setting else ""
         
         return {
             "maintenance_mode": is_enabled,
-            "message": "Maintenance mode is enabled" if is_enabled else "Maintenance mode is disabled"
+            "enabled": is_enabled,  # Alias for compatibility
+            "message": message if message else ("Maintenance mode is enabled" if is_enabled else "Maintenance mode is disabled")
         }
     except Exception as e:
         logger.error(f"Error getting maintenance status: {e}")
