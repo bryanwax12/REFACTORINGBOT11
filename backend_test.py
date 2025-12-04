@@ -1830,6 +1830,76 @@ def test_telegram_fast_input_issue():
         print(f"   Traceback: {traceback.format_exc()}")
         return False
 
+def main():
+    """Main test function - runs comprehensive admin panel and user flow tests"""
+    print("=" * 80)
+    print("🚀 КОМПЛЕКСНОЕ ТЕСТИРОВАНИЕ ФУНКЦИЙ АДМИН-ПАНЕЛИ И ОСНОВНОГО USER FLOW")
+    print("=" * 80)
+    print("📋 Контекст: После многочисленных исправлений нужно провести полное регрессионное тестирование")
+    print("🎯 Цель: Проверить все критические функции бота согласно review request")
+    print("=" * 80)
+    
+    # Test results tracking
+    test_results = {}
+    
+    # БЛОК 1: Функции админ-панели
+    print("\n" + "=" * 50)
+    print("📊 БЛОК 1: ФУНКЦИИ АДМИН-ПАНЕЛИ")
+    print("=" * 50)
+    
+    test_results['maintenance_mode'] = test_maintenance_mode()
+    test_results['user_blocking'] = test_user_blocking()
+    test_results['balance_operations'] = test_balance_operations()
+    
+    # БЛОК 2: Основной User Flow
+    print("\n" + "=" * 50)
+    print("📊 БЛОК 2: ОСНОВНОЙ USER FLOW")
+    print("=" * 50)
+    
+    test_results['start_command'] = test_telegram_start_command()
+    test_results['new_order_creation'] = test_new_order_creation()
+    
+    # БЛОК 3: Проверка логов
+    print("\n" + "=" * 50)
+    print("📊 БЛОК 3: ПРОВЕРКА ЛОГОВ НА ОШИБКИ")
+    print("=" * 50)
+    
+    test_results['log_check'] = check_backend_logs_for_errors()
+    
+    # Summary
+    print("\n" + "=" * 80)
+    print("📊 ИТОГОВЫЕ РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ")
+    print("=" * 80)
+    
+    passed_tests = sum(1 for result in test_results.values() if result)
+    total_tests = len(test_results)
+    
+    print(f"\n📋 Детальные результаты:")
+    for test_name, result in test_results.items():
+        status = "✅ PASSED" if result else "❌ FAILED"
+        print(f"   {test_name}: {status}")
+    
+    print(f"\n📊 Общая статистика:")
+    print(f"   Пройдено тестов: {passed_tests}/{total_tests}")
+    print(f"   Процент успеха: {(passed_tests/total_tests)*100:.1f}%")
+    
+    if passed_tests == total_tests:
+        print(f"\n🎉 ВСЕ ТЕСТЫ ПРОЙДЕНЫ УСПЕШНО!")
+        print(f"   ✅ Все API endpoints админ-панели работают без ошибок")
+        print(f"   ✅ Блокировка/разблокировка корректно обновляет ОБА поля")
+        print(f"   ✅ Режим обслуживания корректно включается/выключается")
+        print(f"   ✅ Основной user flow проходит без ошибок")
+        print(f"   ✅ В логах нет критических ошибок")
+    elif passed_tests >= total_tests * 0.8:
+        print(f"\n⚠️ БОЛЬШИНСТВО ТЕСТОВ ПРОЙДЕНО ({passed_tests}/{total_tests})")
+        print(f"   Есть некоторые проблемы, требующие внимания")
+    else:
+        print(f"\n❌ КРИТИЧЕСКИЕ ПРОБЛЕМЫ ОБНАРУЖЕНЫ ({passed_tests}/{total_tests})")
+        print(f"   Требуется немедленное исправление")
+    
+    print("=" * 80)
+    return test_results
+
 def check_backend_logs():
     """Check backend logs for any errors"""
     print("\n🔍 Checking Backend Logs...")
@@ -1852,6 +1922,9 @@ def check_backend_logs():
             
     except Exception as e:
         print(f"❌ Error checking logs: {e}")
+
+if __name__ == "__main__":
+    main()
 
 def test_balance_command_duplication():
     """Test balance command for message duplication - CRITICAL REVIEW REQUEST"""
