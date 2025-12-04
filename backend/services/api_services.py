@@ -169,12 +169,27 @@ async def check_shipstation_balance():
         return {"success": False, "error": str(e)}
 
 
+# ✅ Cache for carrier_ids (TTL: 1 hour)
+_carrier_ids_cache = None
+_carrier_ids_cache_time = None
+_CARRIER_CACHE_TTL = 3600  # 1 hour in seconds
+
 @retry_on_api_error(max_attempts=2, min_wait=1, max_wait=5)
 async def get_shipstation_carrier_ids():
     """
-    Get carrier IDs from ShipStation
+    Get carrier IDs from ShipStation (with 1-hour cache)
     Returns dict mapping carrier names to IDs
     """
+    global _carrier_ids_cache, _carrier_ids_cache_time
+    from datetime import datetime, timezone
+    
+    # Check cache
+    if _carrier_ids_cache and _carrier_ids_cache_time:
+        age = (datetime.now(timezone.utc) - _carrier_ids_cache_time).total_seconds()
+        if age < _CARRIER_CACHE_TTL:
+            logger.debug(f"✅ Using cached carrier_ids (age: {int(age)}s)")
+            return _carrier_ids_cache
+    
     try:
         # Load API key inside function to ensure env vars are available
         api_key = os.environ.get('SHIPSTATION_API_KEY_TEST') or os.environ.get('SHIPSTATION_API_KEY_PROD') or os.environ.get('SHIPSTATION_API_KEY', '')
