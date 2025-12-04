@@ -119,6 +119,11 @@ async def save_template_name(update: Update, context: ContextTypes.DEFAULT_TYPE)
         from server import CONFIRM_DATA
         return CONFIRM_DATA
     
+    # ⚡ Performance: Invalidate template cache
+    if 'cached_templates' in context.user_data:
+        del context.user_data['cached_templates']
+        logger.info("⚡ Template cache invalidated after save")
+    
     keyboard = [
         [InlineKeyboardButton("↩️ Вернуться к заказу", callback_data='continue_order')],
         [InlineKeyboardButton("🏠 Главное меню", callback_data='start')]
