@@ -307,7 +307,6 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     telegram_id = query.from_user.id
     from repositories import get_user_repo
     user_repo = get_user_repo()
-    user = await user_repo.find_by_telegram_id(telegram_id)
     data = context.user_data
     selected_rate = data['selected_rate']
     amount = context.user_data.get('final_amount', selected_rate['amount'])  # Use discounted amount
@@ -327,24 +326,29 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
             service_factory = ServiceFactory(db)
             payment_service = service_factory.get_payment_service()
             
-            if user.get('balance', 0) < amount:
-                await safe_telegram_call(update.effective_message.reply_text(PaymentFlowUI.insufficient_balance_error()))
-                return ConversationHandler.END
-            
-            # NEW LOGIC: Get order_id from context (created when rate was selected)
+            # ✅ OPTIMIZATION: Fetch user and order in parallel
             order_id = context.user_data.get('order_id')
             
-            # FALLBACK: If order_id not in context, try to find most recent pending order
-            if not order_id:
+            if order_id:
+                # Fetch user and order in parallel
+                user, order = await asyncio.gather(
+                    user_repo.find_by_telegram_id(telegram_id),
+                    db.orders.find_one({"order_id": order_id})
+                )
+            else:
+                # Need to find order first
                 logger.warning("⚠️ order_id not found in context, searching in DB...")
-                order = await db.orders.find_one(
-                    {"telegram_id": telegram_id, "payment_status": "pending"},
-                    sort=[("created_at", -1)]
+                user, order = await asyncio.gather(
+                    user_repo.find_by_telegram_id(telegram_id),
+                    db.orders.find_one(
+                        {"telegram_id": telegram_id, "payment_status": "pending"},
+                        sort=[("created_at", -1)]
+                    )
                 )
                 
                 if order:
                     order_id = order.get('order_id')
-                    context.user_data['order_id'] = order_id  # Restore to context
+                    context.user_data['order_id'] = order_id
                     logger.info(f"✅ Restored order_id from DB: {order_id}")
                 else:
                     logger.error("❌ No pending orders found in database!")
@@ -352,9 +356,12 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         "❌ Ошибка: заказ не найден. Пожалуйста, начните заново."
                     ))
                     return ConversationHandler.END
-            else:
-                # Find order in database (need _id for create_and_send_label)
-                order = await db.orders.find_one({"order_id": order_id})
+            
+            if user.get('balance', 0) < amount:
+                await safe_telegram_call(update.effective_message.reply_text(PaymentFlowUI.insufficient_balance_error()))
+                return ConversationHandler.END
+            
+            if not order:
                 
                 if not order:
                     logger.error(f"❌ Order {order_id} not found in database!")
