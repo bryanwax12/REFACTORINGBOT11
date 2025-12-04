@@ -407,8 +407,9 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                             ))
                     except asyncio.CancelledError:
                         pass
-                    except Exception as e:
-                        logger.debug(f"Progress update error: {e}")
+                    except telegram.error.BadRequest:
+                        # Message already edited or deleted
+                        pass
                 
                 progress_task = asyncio.create_task(update_progress())
             
