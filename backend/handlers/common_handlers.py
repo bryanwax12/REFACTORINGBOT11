@@ -398,11 +398,9 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ))
             await start_command(update, context)
     elif query.data == 'new_order':
-        # Import from server (will be moved to order_handlers later)
-        from server import new_order_start
-        # Starting new order - this is intentional, so clear previous data
-        context.user_data.clear()
-        await new_order_start(update, context)
+        # ✅ FIX: Don't handle here - ConversationHandler will handle it (group=0 priority)
+        # This prevents duplicate message sending
+        pass
     elif query.data == 'cancel_order':
         # Import from order_flow.cancellation module
         from handlers.order_flow.cancellation import cancel_order
