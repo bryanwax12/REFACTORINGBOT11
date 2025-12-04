@@ -279,9 +279,18 @@ async def get_shipstation_carrier_ids():
             logger.error(f"   Response headers: {dict(response.headers)}")
             logger.error(f"   Response body: {response.text[:1000]}")
             return {}
-            
+    
+    except httpx.TimeoutException as e:
+        logger.error(f"❌ ShipStation carriers timeout: {e}", exc_info=True)
+        return {}
+    except httpx.HTTPStatusError as e:
+        logger.error(f"❌ ShipStation carriers HTTP error {e.response.status_code}: {e}", exc_info=True)
+        return {}
+    except httpx.RequestError as e:
+        logger.error(f"❌ ShipStation carriers request error: {e}", exc_info=True)
+        return {}
     except Exception as e:
-        logger.error(f"❌ Error getting ShipStation carriers: {e}", exc_info=True)
+        logger.error(f"❌ Unexpected error getting ShipStation carriers: {e}", exc_info=True)
         return {}
 
 
