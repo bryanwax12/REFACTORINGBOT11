@@ -393,7 +393,7 @@ python3 /app/test_bot_flow.py
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "ТЕСТИРОВАНИЕ TELEGRAM БОТА @whitelabel_shipping_bot: Протестировать основной флоу бота - команда /start, нажатие 'Новый заказ', прохождение первых 3 шагов создания заказа (имя отправителя 'Test Name', адрес отправителя '123 Test St', пропуск Address 2). Проверить что бот отвечает на команды, переходы между шагами работают, ForceReply открывает клавиатуру, кнопка 'Пропустить' работает. Production bot: @whitelabel_shipping_bot, Backend: https://telegram-admin-fix-2.emergent.host, Test user ID: 7066790254."
+user_problem_statement: "ТЕСТИРОВАНИЕ ФУНКЦИИ 'МОЙ БАЛАНС' НА ДУБЛИРОВАНИЕ СООБЩЕНИЙ: Пользователь сообщил о проблеме дублирования сообщения при нажатии на кнопку 'Мой баланс'. Нужно проверить, воспроизводится ли эта проблема. Backend Setup: FastAPI сервер REACT_APP_BACKEND_URL=/api (внутренний URL для API), MongoDB через MONGO_URL из .env, Telegram Bot использует python-telegram-bot library. Что нужно протестировать: (1) Симуляция вызова команды /balance, (2) Проверить логи backend на наличие двойного вызова функции my_balance_command и двойной отправки сообщения, (3) Код-ревью файлов /app/backend/handlers/payment_handlers.py (функция my_balance_command) и /app/backend/handlers/common_handlers.py (функция button_callback строки 360-365). Ожидаемое поведение: сообщение с балансом должно отправляться ОДИН раз, в логах должен быть только один вызов my_balance_command."
 
 backend:
   - task: "Telegram Bot Skip Button Cancel Issue - FROM_PHONE to TO_NAME Flow"
