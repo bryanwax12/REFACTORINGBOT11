@@ -64,7 +64,8 @@ async def telegram_webhook(request: Request):
         
         # Get the update data from the request
         update_data = await request.json()
-        logger.debug(f"📦 Update data received: update_id={update_data.get('update_id')}")
+        print(f"📦 UPDATE DATA: {update_data.get('update_id')}")
+        logger.error(f"📦 Update data received: update_id={update_data.get('update_id')}")
         
         # Check if application is initialized
         if not srv.application:
