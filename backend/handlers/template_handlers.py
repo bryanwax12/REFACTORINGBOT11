@@ -184,7 +184,7 @@ async def use_template(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Save UI state ONLY (NOT conversation state - ConversationHandler manages that)
     from server import PARCEL_WEIGHT
     context.user_data['last_bot_message_text'] = weight_prompt
-    logger.info(f"✅ use_template: transitioning to PARCEL_WEIGHT")
+    logger.info("✅ use_template: transitioning to PARCEL_WEIGHT")
     
     # 🚀 PERFORMANCE: Send message in background - don't wait for Telegram response
     async def send_weight_prompt():

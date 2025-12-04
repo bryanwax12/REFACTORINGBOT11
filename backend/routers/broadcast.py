@@ -147,8 +147,8 @@ async def broadcast_message(
                                 {"telegram_id": telegram_id},
                                 {"$set": {"bot_blocked_by_user": True}}
                             )
-                        except:
-                            pass
+                        except Exception:
+                            pass  # Ignore DB update errors during broadcast
                     
                     return False, send_error
                     
