@@ -272,6 +272,7 @@ __all__ = [
     'handle_back_to_rates',
     'process_payment'
 ]
+@safe_handler(fallback_state=ConversationHandler.END)
 async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     
