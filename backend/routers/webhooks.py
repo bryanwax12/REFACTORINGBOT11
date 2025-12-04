@@ -94,10 +94,12 @@ async def telegram_webhook(request: Request):
         
         if update:
             logger.info(f"✅ Processing update {update.update_id}")
-            # Process update SYNCHRONOUSLY
-            await srv.application.process_update(update)
-            logger.info(f"✅ Update {update.update_id} processed successfully")
-            # Return 200 OK with empty body (Telegram recommendation)
+            # Process update ASYNCHRONOUSLY - return 200 immediately
+            # This prevents Telegram timeout and duplicate updates
+            import asyncio
+            asyncio.create_task(srv.application.process_update(update))
+            logger.info(f"✅ Update {update.update_id} queued for processing")
+            # Return 200 OK immediately (Telegram recommendation)
             from fastapi.responses import Response
             return Response(status_code=200)
         else:
