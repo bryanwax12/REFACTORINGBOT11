@@ -201,8 +201,9 @@ async def return_to_order(update: Update, context: ContextTypes.DEFAULT_TYPE):
             {"$unset": {"session_data.state_before_cancel": ""}}
         )
     
-    if not saved_state:
-        logger.warning("⚠️ No saved state found - checking for template editing")
+    # ✅ If state is still None or invalid after validation, try detection
+    if not saved_state or saved_state not in ORDER_FLOW_STATES:
+        logger.warning(f"⚠️ No valid saved state found (state={saved_state}) - checking for template editing")
         
         # Check if editing template - return to first step of editing
         if context.user_data.get('editing_template_from'):
