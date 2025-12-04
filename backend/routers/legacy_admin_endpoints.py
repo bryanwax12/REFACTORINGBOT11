@@ -202,6 +202,10 @@ async def block_user_legacy(
             {"$set": {"blocked": True, "is_blocked": True}}  # Set both for compatibility
         )
         
+        # ✅ Clear cache when blocking user
+        from utils.handler_decorators import clear_user_blocked_cache
+        clear_user_blocked_cache(telegram_id)
+        
         if result.modified_count > 0:
             logger.info(f"💬 [BLOCK_USER] Attempting to send notification, bot_instance={'AVAILABLE' if bot_instance else 'NONE'}")
             if bot_instance:
