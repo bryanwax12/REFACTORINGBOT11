@@ -178,9 +178,15 @@ async def deduct_balance(telegram_id: int, amount: float, db):
             return True
         else:
             return False
-            
+    
+    except pymongo.errors.ConnectionFailure as e:
+        logger.error(f"MongoDB connection failed while deducting balance: {e}", exc_info=True)
+        return False
+    except pymongo.errors.PyMongoError as e:
+        logger.error(f"MongoDB error while deducting balance: {e}", exc_info=True)
+        return False
     except Exception as e:
-        logger.error(f"Error deducting balance: {e}")
+        logger.error(f"Unexpected error deducting balance: {e}", exc_info=True)
         return False
 
 
