@@ -9679,9 +9679,15 @@ if __name__ == "__main__":
     print(f"Backend URL: {BACKEND_URL}")
     print(f"API Base: {API_BASE}")
     
-    # CRITICAL: Run the specific test from review request first
+    # CRITICAL: Run the balance duplication test from review request first
     print("\n" + "="*80)
-    print("🚨 КРИТИЧЕСКОЕ ТЕСТИРОВАНИЕ ИЗ REVIEW REQUEST")
+    print("🚨 КРИТИЧЕСКОЕ ТЕСТИРОВАНИЕ ИЗ REVIEW REQUEST - ДУБЛИРОВАНИЕ БАЛАНСА")
+    print("="*80)
+    balance_duplication_result = test_balance_command_duplication()
+    
+    # CRITICAL: Run the specific test from review request
+    print("\n" + "="*80)
+    print("🚨 ДОПОЛНИТЕЛЬНОЕ ТЕСТИРОВАНИЕ - SKIP BUTTON ISSUE")
     print("="*80)
     skip_button_result = test_telegram_skip_button_cancel_issue()
     
