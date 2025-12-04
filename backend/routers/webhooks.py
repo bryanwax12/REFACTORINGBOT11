@@ -56,7 +56,8 @@ async def oxapay_webhook(request: Request):
 @router.post("/telegram/webhook")
 async def telegram_webhook(request: Request):
     """Handle Telegram webhook updates"""
-    logger.info("📨 Telegram webhook called")
+    logger.error("📨 TELEGRAM WEBHOOK CALLED - THIS SHOULD ALWAYS APPEAR")
+    print("📨 TELEGRAM WEBHOOK CALLED - PRINT VERSION")
     try:
         import server as srv
         from telegram import Update
