@@ -166,22 +166,8 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await send_blocked_message(update)
         return ConversationHandler.END
     
-    # Check if bot is in maintenance mode
-    if await check_maintenance_mode(update):
-        logger.debug(f"🔧 User {telegram_id} blocked by maintenance mode")
-        from utils.ui_utils import MessageTemplates
-        if update.callback_query:
-            await safe_telegram_call(update.callback_query.answer())
-            await update.callback_query.message.reply_text(
-                MessageTemplates.maintenance_mode(),
-                parse_mode='Markdown'
-            )
-        else:
-            await update.message.reply_text(
-                MessageTemplates.maintenance_mode(),
-                parse_mode='Markdown'
-            )
-        return ConversationHandler.END
+    # NOTE: Maintenance mode is already checked by @safe_handler decorator
+    # No need to check again here
     
     # Get user from context (injected by decorator)
     user = context.user_data.get('db_user')
