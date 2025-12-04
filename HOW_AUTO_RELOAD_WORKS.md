@@ -120,7 +120,7 @@ uvicorn server:app --host 0.0.0.0 --port 8001 --workers 1
 ```
 
 **Режим бота:** 🌐 **WEBHOOK** (не polling!)
-- URL: `https://easyshipbot.preview.emergentagent.com/api/telegram/webhook`
+- URL: `https://telebot-fixer-1.preview.emergentagent.com/api/telegram/webhook`
 - При изменениях в коде webhook продолжает работать
 - Telegram отправляет обновления на тот же URL
 - Новый код обрабатывает запросы сразу после рестарта

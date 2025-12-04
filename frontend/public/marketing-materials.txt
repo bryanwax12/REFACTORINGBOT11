@@ -284,8 +284,8 @@ Telegram бот с интеграцией API основных перевозч�
 ═══════════════════════════════════════════════════════════════════════════════
 
 Telegram Bot: @whitelabel_shipping_bot
-Privacy Policy: https://easyshipbot.preview.emergentagent.com/privacy-policy.html
-Admin Panel: https://easyshipbot.preview.emergentagent.com
+Privacy Policy: https://telebot-fixer-1.preview.emergentagent.com/privacy-policy.html
+Admin Panel: https://telebot-fixer-1.preview.emergentagent.com
 
 
 ═══════════════════════════════════════════════════════════════════════════════

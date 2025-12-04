@@ -6,7 +6,7 @@ import httpx
 import asyncio
 
 # Configuration
-BACKEND_URL = "https://easyshipbot.preview.emergentagent.com"
+BACKEND_URL = "https://telebot-fixer-1.preview.emergentagent.com"
 ADMIN_API_KEY = "sk_admin_e19063c3f82f447ba4ccf49cd97dd9fd_2024"
 TEST_USER_TELEGRAM_ID = 5594152712  # Test user from database
 
