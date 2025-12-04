@@ -12,6 +12,14 @@ import telegram.error
 # Semaphore to limit concurrent background tasks (max 10)
 _background_task_semaphore = asyncio.Semaphore(10)
 
+async def safe_background_task(coro):
+    """Execute coroutine with semaphore to limit concurrent tasks"""
+    async with _background_task_semaphore:
+        try:
+            await coro
+        except Exception as e:
+            logger.error(f"Background task error: {e}", exc_info=True)
+
 # Logger
 logger = logging.getLogger(__name__)
 
