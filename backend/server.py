@@ -413,8 +413,12 @@ async def root(request: Request):
 
 @app.get("/health")
 @app.head("/health")
-async def health_check():
+async def health_check(request: Request):
     """Health check endpoint for deployment platform"""
+    # For HEAD requests, just return 200 without body
+    if request.method == "HEAD":
+        return Response(status_code=200, headers={"Content-Type": "application/json"})
+    
     db_status = "not_configured"
     db_error = None
     
@@ -441,9 +445,9 @@ async def health_check():
 
 @app.get("/api/health")
 @app.head("/api/health")
-async def api_health_check():
+async def api_health_check(request: Request):
     """Health check endpoint with /api prefix"""
-    return await health_check()
+    return await health_check(request)
 
 # ==================== DEBUG ENDPOINT (NO AUTH) ====================
 @app.get("/api/debug/config")
