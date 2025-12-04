@@ -7,6 +7,8 @@ import logging
 from datetime import datetime, timezone
 from telegram import Update, ForceReply, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes, ConversationHandler
+import telegram.error
+import pymongo.errors
 
 logger = logging.getLogger(__name__)
 
