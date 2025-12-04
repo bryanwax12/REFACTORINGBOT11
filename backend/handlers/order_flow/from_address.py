@@ -79,7 +79,7 @@ async def order_from_name(update: Update, context: ContextTypes.DEFAULT_TYPE, se
     old_prompt_text = context.user_data.get('last_bot_message_text', '')
     
     # ✅ CRITICAL: Mark previous message with EXPLICIT old text (avoids race condition)
-    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text))
+    asyncio.create_task(safe_background_task(mark_message_as_selected(update, context, prompt_text=old_prompt_text)))
     
     # ✅ 2025: ForceReply + return состояния
     from utils.ui_utils import ask_with_cancel_and_focus, OrderStepMessages, TemplateEditMessages
