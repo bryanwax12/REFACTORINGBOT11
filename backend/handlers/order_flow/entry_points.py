@@ -9,6 +9,8 @@ from telegram.ext import ContextTypes, ConversationHandler
 
 logger = logging.getLogger(__name__)
 
+# ⚡ Performance: Import preloaded keyboards
+from utils.ui_utils import PRELOADED_CANCEL_KEYBOARD
 
 from utils.handler_decorators import with_user_session, safe_handler
 
@@ -116,7 +118,7 @@ async def new_order_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return FROM_NAME  # Waiting for choice
     else:
         # No templates, go straight to new order
-        reply_markup = get_cancel_keyboard()
+        reply_markup = PRELOADED_CANCEL_KEYBOARD  # ⚡ Performance: Use preloaded constant
         
         message_text = OrderFlowMessages.new_order_start()
         
