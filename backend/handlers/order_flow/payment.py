@@ -631,8 +631,15 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
             from server import TOPUP_AMOUNT
             return TOPUP_AMOUNT
     
+    except pymongo.errors.PyMongoError as e:
+        logger.error(f"Database error in payment: {e}", exc_info=True)
+        await safe_telegram_call(update.effective_message.reply_text(f"❌ Ошибка базы данных. Попробуйте позже."))
+        return ConversationHandler.END
+    except telegram.error.TelegramError as e:
+        logger.error(f"Telegram error in payment: {e}", exc_info=True)
+        return ConversationHandler.END
     except Exception as e:
-        logger.error(f"Payment error: {e}")
+        logger.error(f"Unexpected error in payment: {e}", exc_info=True)
         await safe_telegram_call(update.effective_message.reply_text(f"❌ Ошибка при оплате: {str(e)}"))
         return ConversationHandler.END
 
