@@ -4,10 +4,33 @@ Webhooks Router
 """
 from fastapi import APIRouter, Request, BackgroundTasks
 import logging
+from collections import deque
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api", tags=["webhooks"])
+
+# ✅ DUPLICATE PROTECTION: Cache of last 1000 processed update_id
+# Prevents duplicate processing if Telegram resends the same update
+_processed_updates = deque(maxlen=1000)
+
+
+def is_duplicate_update(update_id: int) -> bool:
+    """
+    Check if update_id was already processed
+    
+    Args:
+        update_id: Telegram update ID
+    
+    Returns:
+        bool: True if duplicate, False if new
+    """
+    if update_id in _processed_updates:
+        return True
+    
+    # Add to cache
+    _processed_updates.append(update_id)
+    return False
 
 
 @router.post("/oxapay/webhook")
