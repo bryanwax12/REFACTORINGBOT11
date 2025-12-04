@@ -529,7 +529,8 @@ async def fetch_rates_from_shipstation(
                     error_msg = f"ShipStation API error: {response.status_code} - {response.text}"
                     logger.error(error_msg)
                     return False, None, error_msg
-            except:
+            except (ValueError, KeyError) as parse_error:
+                logger.error(f"Error parsing ShipStation error response: {parse_error}")
                 error_msg = f"ShipStation API error: {response.status_code} - {response.text}"
                 logger.error(error_msg)
                 return False, None, error_msg
