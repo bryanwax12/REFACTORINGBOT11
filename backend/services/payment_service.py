@@ -227,9 +227,15 @@ async def deduct_balance(
         
         logger.info(f"💳 Balance deducted: user={telegram_id}, amount=${amount:.2f}, new_balance=${new_balance:.2f}")
         return True, new_balance, None
-        
+    
+    except pymongo.errors.ConnectionFailure as e:
+        logger.error(f"❌ MongoDB connection error deducting balance: {e}", exc_info=True)
+        return False, 0.0, "Database connection error"
+    except pymongo.errors.PyMongoError as e:
+        logger.error(f"❌ MongoDB error deducting balance: {e}", exc_info=True)
+        return False, 0.0, "Database error"
     except Exception as e:
-        logger.error(f"❌ Error deducting balance: {e}")
+        logger.error(f"❌ Unexpected error deducting balance: {e}", exc_info=True)
         return False, 0.0, str(e)
 
 
