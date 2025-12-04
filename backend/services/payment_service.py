@@ -178,9 +178,15 @@ async def add_balance(
         
         logger.info(f"💰 Balance added: user={telegram_id}, amount=${amount:.2f}, new_balance=${new_balance:.2f}")
         return True, new_balance, None
-        
+    
+    except pymongo.errors.ConnectionFailure as e:
+        logger.error(f"❌ MongoDB connection error adding balance: {e}", exc_info=True)
+        return False, 0.0, "Database connection error"
+    except pymongo.errors.PyMongoError as e:
+        logger.error(f"❌ MongoDB error adding balance: {e}", exc_info=True)
+        return False, 0.0, "Database error"
     except Exception as e:
-        logger.error(f"❌ Error adding balance: {e}")
+        logger.error(f"❌ Unexpected error adding balance: {e}", exc_info=True)
         return False, 0.0, str(e)
 
 
