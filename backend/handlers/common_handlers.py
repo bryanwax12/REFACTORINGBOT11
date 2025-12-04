@@ -231,14 +231,25 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # This happens via the return value ConversationHandler.END at the end of this function
     except Exception as e:
         logger.error(f"Error clearing conversation state: {e}")
-    # ALWAYS get fresh balance from DB (not from cached user)
+    # ⚡ Performance: Preload user data in parallel
     from server import db
     telegram_id = user.get('telegram_id')
-    fresh_user = await db.users.find_one({"telegram_id": telegram_id}, {"_id": 0, "balance": 1, "first_name": 1})
+    
+    # Fetch user data, templates, and settings in parallel
+    user_task = db.users.find_one({"telegram_id": telegram_id}, {"_id": 0, "balance": 1, "first_name": 1, "discount": 1})
+    templates_task = db.templates.find({"telegram_id": telegram_id}, {"_id": 0}).to_list(50)
+    
+    fresh_user, user_templates = await asyncio.gather(user_task, templates_task)
+    
     user_balance = fresh_user.get('balance', 0.0) if fresh_user else 0.0
     first_name = user.get('first_name', 'Пользователь')
     
-    logger.info(f"💰 Fresh balance from DB: ${user_balance:.2f}")
+    # ⚡ Cache templates for future use (avoids DB queries in order flow)
+    context.user_data['cached_templates'] = user_templates
+    context.user_data['cached_balance'] = user_balance
+    context.user_data['cached_discount'] = fresh_user.get('discount', 0) if fresh_user else 0
+    
+    logger.info(f"💰 Fresh balance from DB: ${user_balance:.2f}, Templates cached: {len(user_templates)}")
     
     # Handle both command and callback
     if update.callback_query:
