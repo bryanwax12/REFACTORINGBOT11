@@ -7,6 +7,7 @@ import httpx
 from typing import Optional, Dict, List, Any, Tuple
 from telegram import Update
 from telegram.ext import ContextTypes
+import telegram.error
 from utils.retry_utils import retry_on_api_error
 
 logger = logging.getLogger(__name__)
