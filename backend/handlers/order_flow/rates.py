@@ -359,8 +359,8 @@ async def fetch_shipping_rates(update: Update, context: ContextTypes.DEFAULT_TYP
         # Delete progress message
         try:
             await safe_telegram_call(progress_msg.delete())
-        except Exception:
-            pass
+        except telegram.error.BadRequest:
+            pass  # Already deleted
         
         # Display rates using reusable function
         from repositories import get_user_repo
