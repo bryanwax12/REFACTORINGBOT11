@@ -34,8 +34,11 @@ async def get_dashboard_stats(
     
     except HTTPException:
         raise
+    except pymongo.errors.PyMongoError as e:
+        logger.error(f"Database error getting dashboard stats: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Database error")
     except Exception as e:
-        logger.error(f"Error getting dashboard stats: {e}")
+        logger.error(f"Unexpected error getting dashboard stats: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
