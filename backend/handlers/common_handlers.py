@@ -9,6 +9,9 @@ from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 import telegram.error
 
+# Semaphore to limit concurrent background tasks (max 10)
+_background_task_semaphore = asyncio.Semaphore(10)
+
 # Logger
 logger = logging.getLogger(__name__)
 
