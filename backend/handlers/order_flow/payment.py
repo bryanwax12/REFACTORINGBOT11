@@ -387,7 +387,7 @@ async def process_payment(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     seconds = 0
                     try:
                         while True:
-                            await asyncio.sleep(0.3)
+                            await asyncio.sleep(1.0)  # Sleep 1 second
                             seconds += 1
                             await safe_telegram_call(progress_msg.edit_text(
                                 f"⏳ Создаем shipping label... {seconds} сек",
