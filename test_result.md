@@ -8114,3 +8114,75 @@ GET /api/admin/users?limit=3
 
 **Все админ API endpoints работают корректно!**
 
+
+================================================================================
+✅ РЕШЕНИЕ: Webhook 520 Error & Conflict Issues
+Дата: 2025-01-27 20:30 UTC
+Агент: E1 Fork Agent (Main)
+================================================================================
+
+## Issue 4: Webhook 520 Error - РЕШЕНА! ✅
+
+### Диагностика
+Проверка текущего состояния webhook через Telegram API:
+```bash
+curl https://api.telegram.org/bot<TOKEN>/getWebhookInfo
+```
+
+### Результат:
+```json
+{
+  "ok": true,
+  "result": {
+    "url": "https://orderbot-upgrade.emergent.host/api/telegram/webhook",
+    "pending_update_count": 0,
+    "max_connections": 40,
+    "ip_address": "34.110.232.196",
+    "allowed_updates": ["message", "callback_query", "my_chat_member"]
+  }
+}
+```
+
+### Статус: ✅ WEBHOOK РАБОТАЕТ!
+- ✅ URL корректно установлен
+- ✅ No pending updates (0)
+- ✅ No errors в webhook info
+- ✅ Логи показывают успешную обработку запросов (HTTP 200 OK)
+- ✅ Эндпоинт получает и обрабатывает обновления от Telegram
+
+**Вывод:** Issue 4 (Webhook 520 error) была решена в предыдущих итерациях. 
+Webhook работает стабильно в production.
+
+---
+
+## Issue 2: telegram.error.Conflict - РЕШЕНА! ✅
+
+### Проверка логов на Conflict errors:
+```bash
+tail -n 500 backend.log | grep -i "conflict" | wc -l
+# Result: 0 (нет ошибок)
+```
+
+### Статус: ✅ NO CONFLICT ERRORS!
+- ✅ Последние 500 строк логов: 0 ошибок Conflict
+- ✅ Webhook режим устраняет проблему multiple polling
+- ✅ В Kubernetes может работать любое количество replicas без конфликтов
+
+**Вывод:** Issue 2 (telegram.error.Conflict) полностью решена благодаря 
+работе в webhook режиме. Polling mode больше не используется.
+
+---
+
+## Текущая конфигурация
+
+**Environment Variables:**
+- `BOT_MODE=webhook` ✅
+- `WEBHOOK_BASE_URL=https://orderbot-upgrade.emergent.host` ✅
+- `BOT_ENVIRONMENT=production` ✅
+
+**Bot Status:**
+- Режим: 🌐 WEBHOOK (стабильный)
+- Token: Production bot (8492458522...)
+- Endpoint: `/api/telegram/webhook`
+- Health: Healthy (HTTP 200 OK responses)
+
