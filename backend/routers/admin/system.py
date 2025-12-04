@@ -43,8 +43,14 @@ async def get_maintenance_status(
     
     except HTTPException:
         raise
+    except pymongo.errors.PyMongoError as e:
+        logger.error(f"Database error getting maintenance status: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Database error")
+    except httpx.RequestError as e:
+        logger.error(f"API error getting maintenance status: {e}", exc_info=True)
+        raise HTTPException(status_code=503, detail="External service unavailable")
     except Exception as e:
-        logger.error(f"Error getting maintenance status: {e}")
+        logger.error(f"Unexpected error getting maintenance status: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -81,8 +87,14 @@ async def clear_all_sessions(
     
     except HTTPException:
         raise
+    except pymongo.errors.PyMongoError as e:
+        logger.error(f"Database error clearing sessions: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Database error")
+    except httpx.RequestError as e:
+        logger.error(f"API error clearing sessions: {e}", exc_info=True)
+        raise HTTPException(status_code=503, detail="External service unavailable")
     except Exception as e:
-        logger.error(f"Error clearing sessions: {e}")
+        logger.error(f"Unexpected error clearing sessions: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -106,8 +118,14 @@ async def get_api_mode(
     
     except HTTPException:
         raise
+    except pymongo.errors.PyMongoError as e:
+        logger.error(f"Database error getting API mode: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Database error")
+    except httpx.RequestError as e:
+        logger.error(f"API error getting API mode: {e}", exc_info=True)
+        raise HTTPException(status_code=503, detail="External service unavailable")
     except Exception as e:
-        logger.error(f"Error getting API mode: {e}")
+        logger.error(f"Unexpected error getting API mode: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -138,8 +156,14 @@ async def set_api_mode(
     
     except HTTPException:
         raise
+    except pymongo.errors.PyMongoError as e:
+        logger.error(f"Database error setting API mode: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Database error")
+    except httpx.RequestError as e:
+        logger.error(f"API error setting API mode: {e}", exc_info=True)
+        raise HTTPException(status_code=503, detail="External service unavailable")
     except Exception as e:
-        logger.error(f"Error setting API mode: {e}")
+        logger.error(f"Unexpected error setting API mode: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -169,8 +193,14 @@ async def get_system_logs(
     
     except HTTPException:
         raise
+    except pymongo.errors.PyMongoError as e:
+        logger.error(f"Database error getting logs: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Database error")
+    except httpx.RequestError as e:
+        logger.error(f"API error getting logs: {e}", exc_info=True)
+        raise HTTPException(status_code=503, detail="External service unavailable")
     except Exception as e:
-        logger.error(f"Error getting logs: {e}")
+        logger.error(f"Unexpected error getting logs: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -193,6 +223,12 @@ async def check_shipstation_balance(
     
     except HTTPException:
         raise
+    except pymongo.errors.PyMongoError as e:
+        logger.error(f"Database error checking ShipStation balance: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Database error")
+    except httpx.RequestError as e:
+        logger.error(f"API error checking ShipStation balance: {e}", exc_info=True)
+        raise HTTPException(status_code=503, detail="External service unavailable")
     except Exception as e:
-        logger.error(f"Error checking ShipStation balance: {e}")
+        logger.error(f"Unexpected error checking ShipStation balance: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
